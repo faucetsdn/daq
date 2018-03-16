@@ -1,0 +1,17 @@
+FROM debian:wheezy
+
+ARG faucet_git=https://github.com/faucetsdn/faucet.git
+ARG faucet_branch=master
+
+# Dump all our junks into the root home directory.
+WORKDIR /root
+
+# Basic system install items
+RUN apt-get update
+RUN apt-get install -y git emacs net-tools ethtool
+
+# Copy DAQ source into container.
+COPY . daq
+
+# Import faucet build dependency.
+RUN git clone $faucet_git -b $faucet_branch
