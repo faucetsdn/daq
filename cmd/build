@@ -4,11 +4,15 @@ ROOT=$(dirname $0)/..
 cd $ROOT
 
 local_config=config.local
+build_root=build
 
 if [ -f $local_config ]; then
   echo Reading local configuraiton from $local_config
   source config.local
 fi
+
+rm -rf $build_root
+mkdir -p $build_root
 
 build_args=
 
@@ -20,11 +24,13 @@ if [ -n "$faucet_tag" ]; then
   build_args+=" --build-arg faucet_tag=$faucet_tag"
 fi
 
+
 for file in docker/Dockerfile.*; do
     if [ ${file%~} != ${file} ]; then
         continue
     fi
     module=${file#docker/Dockerfile.}
-    echo Building $file into daq/$module...
-    docker build -t daq/$module $build_args -f $file .
+    logfile=$build_root/docker_build.$module
+    echo Building $file into daq/$module, log to $logfile...
+    docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || (echo Build failed. && false)
 done
