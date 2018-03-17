@@ -1,0 +1,21 @@
+#!/bin/bash -ex
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+INSTDIR=${1:-inst}
+
+CMDIN=$INSTDIR/daq_cmd.in
+CMDOUT=$INSTDIR/daq_cmd.out
+CMDERR=$INSTDIR/daq_cmd.err
+
+rm -f $CMDIN $CMDOUT $CMDERR
+mkfifo $CMDIN 
+touch $CMDOUT $CMDERR
+
+echo Processing commands from $CMDIN to $CMDOUT and $CMDERR
+
+export PS1=
+export TERM=dumb
+
+tail -f $CMDIN < /dev/null | bash --norc -i > $CMDOUT 2> $CMDERR
