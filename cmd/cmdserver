@@ -1,21 +1,20 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
 INSTDIR=${1:-inst}
 
-CMDIN=$INSTDIR/daq_cmd.in
+CMDSOCK=$INSTDIR/daq_cmd.sock
 CMDOUT=$INSTDIR/daq_cmd.out
-CMDERR=$INSTDIR/daq_cmd.err
 
-rm -f $CMDIN $CMDOUT $CMDERR
-mkfifo $CMDIN 
-touch $CMDOUT $CMDERR
+rm -f $CMDSOCK $CMDOUT
 
-echo Processing commands from $CMDIN to $CMDOUT and $CMDERR
+echo Processing commands from $CMDSOCK to $CMDOUT
 
 export PS1=
 export TERM=dumb
 
-tail -f $CMDIN < /dev/null | bash --norc -i > $CMDOUT 2> $CMDERR
+ncat -U -k -l $CMDSOCK < /dev/null | xargs -L 1 bash --norc -c > $CMDOUT 2>&1
+
+echo Done with cmd processor.

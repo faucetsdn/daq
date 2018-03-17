@@ -6,7 +6,7 @@ WORKDIR /root
 # Basic system install items
 RUN apt-get update
 RUN apt-get install -y \
-    sudo realpath git emacs net-tools ethtool \
+    sudo realpath git emacs net-tools ethtool nmap dnsmasq \
     python python-setuptools python-dev build-essential python-pip \
     openvswitch-switch openvswitch-common
 

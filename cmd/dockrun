@@ -6,8 +6,9 @@ INSTDIR=$ROOT/inst
 rm -rf $INSTDIR
 mkdir -p $INSTDIR
 
-$ROOT/cmd/faucet
+$ROOT/cmd/cmdserver $INSTDIR < /dev/null &
 
-$ROOT/cmd/cmdserver $INSTDIR
+CMD_PID=$!
+echo Command server PID $CMD_PID
 
 docker run --privileged -v $INSTDIR:/root/daq/inst -ti daq/runner
