@@ -1,0 +1,5 @@
+FROM alpine:latest
+
+RUN apk --no-cache add dnsmasq bash ethtool
+
+CMD ["dnsmasq", "-k", "--bind-dynamic", "--log-facility=/tmp/dnsmasq.log"]
