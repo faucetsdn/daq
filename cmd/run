@@ -2,7 +2,12 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 
-FAUCET=$ROOT/../faucet
+FAUCET=$(realpath $ROOT/../faucet)
+
+if [ ! -d $FAUCET ]; then
+    echo Faucet directory $FAUCET not found.
+    false
+fi
 
 cd $ROOT
 
