@@ -1,0 +1,22 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+CONTAINER=daq-faucet
+INSTDIR=$ROOT/inst
+FAUCET=faucet/faucet
+FAUCET_PATH=ryu/faucet/
+
+mkdir -p $INSTDIR
+
+if [ ! -f $INSTDIR/faucet.yaml ]; then
+    echo Copying default faucet.yaml file to $INSTDIR...
+    cp $ROOT/default/faucet.yaml $INSTDIR
+fi
+
+if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
+    echo -n "Clensing old container "
+    docker rm -f $CONTAINER
+fi
+
+cid=$(docker run -d --name $CONTAINER -v $INSTDIR:/etc/$FAUCET_PATH -v $INSTDIR:/var/log/$FAUCET_PATH -p 6633:6653 $FAUCET)
+echo Container $CONTAINER started as $cid

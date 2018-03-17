@@ -4,6 +4,9 @@
 # Local config
 config.local
 
+# Runtime files
+inst/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

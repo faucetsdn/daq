@@ -10,9 +10,8 @@ import time
 
 from mininet import log as minilog
 from mininet.net import Mininet
-from mininet.node import Host
+from mininet.node import Host, RemoteController, OVSSwitch
 from mininet.cli import CLI
-from mininet.node import OVSBridge
 
 
 from tests.faucet_mininet_test_topo import FaucetHostCleanup
@@ -42,7 +41,8 @@ def createNetwork():
 
     logging.debug("Adding hosts...")
     logging.debug("Adding switch and controller...")
-    switch = net.addSwitch('s1', cls=OVSBridge)
+    switch = net.addSwitch('s1', cls=OVSSwitch)
+    controller = net.addController( 'c1', controller=RemoteController, ip='127.0.0.1', port=6633 )
 
     h1 = addHost(net, switch, 'h1')
     h2 = addHost(net, switch, 'h2')
@@ -55,6 +55,7 @@ def createNetwork():
     logging.debug("Ping test h2->h1")
     print(h2.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
 
+    logging.debug("Stopping host h2, starting host h3...")
     h3 = addHost(net, switch, 'h3')
     h2.terminate()
     time.sleep(1)
