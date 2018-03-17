@@ -11,4 +11,4 @@ $ROOT/cmd/cmdserver $INSTDIR < /dev/null &
 CMD_PID=$!
 echo Command server PID $CMD_PID
 
-docker run --privileged -v $INSTDIR:/root/daq/inst -ti daq/runner
+docker run --privileged --env DAQ_CONTAINER=daq/runner -v $INSTDIR:/root/daq/inst -ti daq/runner

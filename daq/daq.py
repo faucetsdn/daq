@@ -26,6 +26,14 @@ class DAQHost(FaucetHostCleanup, Host):
     pass
 
 
+def controllerIp(switch):
+    container = os.environ['DAQ_CONTAINER']
+    if not container:
+        return '127.0.0.1'
+    defaultRoute = switch.cmd("ip route | fgrep default | awk '{ print $3 }'").strip()
+    return defaultRoute
+
+
 def addHost(net, switch, name):
     host = net.addHost(name, cls=DAQHost)
     link = net.addLink(host, switch)
@@ -35,20 +43,34 @@ def addHost(net, switch, name):
     return host
 
 
+def daqCmd(switch, cmd):
+    return switch.cmd(cmd)
+
+
 def createNetwork():
+
     logging.debug("Creating miniet...")
     net = Mininet()
 
-    logging.debug("Adding hosts...")
-    logging.debug("Adding switch and controller...")
+    logging.debug("Adding switch...")
     switch = net.addSwitch('s1', cls=OVSSwitch)
-    controller = net.addController( 'c1', controller=RemoteController, ip='127.0.0.1', port=6633 )
 
+    logging.debug("Starting faucet controller...")
+    daqCmd(switch, 'cmd/faucet')
+
+    targetIp = controllerIp(switch)
+    logging.debug("Adding controller at %s" % targetIp)
+    controller = net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
+
+    logging.debug("Adding hosts...")
     h1 = addHost(net, switch, 'h1')
     h2 = addHost(net, switch, 'h2')
-    
+
     logging.debug("Starting mininet...")
     net.start()
+
+    logging.debug("Waiting for system to settle...")
+    time.sleep(2)
 
     logging.debug("Ping test h1->h2")
     print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
