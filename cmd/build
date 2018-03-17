@@ -1,0 +1,22 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+
+local_config=$ROOT/config.local
+
+if [ -f $local_config ]; then
+  echo Reading local configuraiton from $local_config
+  source config.local
+fi
+
+build_args=
+
+if [ -n "$faucet_git" ]; then
+  build_args+=" --build-arg faucet_git=$faucet_git"
+fi
+
+if [ -n "$faucet_tag" ]; then
+  build_args+=" --build-arg faucet_tag=$faucet_tag"
+fi
+
+docker build -t daq/runner $build_args -f $ROOT/docker/Dockerfile.runner .

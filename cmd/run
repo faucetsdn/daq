@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+
+FAUCET=$ROOT/../faucet
+
+cd $ROOT
+
+ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
+$ovsctl status || sudo $ovsctl start
+
+sudo PYTHONPATH=$FAUCET python daq/daq.py

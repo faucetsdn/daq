@@ -1,17 +1,29 @@
-FROM debian:wheezy
-
-ARG faucet_git=https://github.com/faucetsdn/faucet.git
-ARG faucet_branch=master
+FROM debian:stretch
 
 # Dump all our junks into the root home directory.
 WORKDIR /root
 
 # Basic system install items
 RUN apt-get update
-RUN apt-get install -y git emacs net-tools ethtool
+RUN apt-get install -y \
+    sudo realpath git emacs net-tools ethtool \
+    python python-setuptools python-dev build-essential python-pip \
+    openvswitch-switch openvswitch-common
 
-# Copy DAQ source into container.
+# Python extension packages
+RUN pip install --index-url=https://pypi.python.org/simple netifaces
+
+# Install mininet
+RUN git clone git://github.com/mininet/mininet.git
+RUN cd mininet && util/install.sh
+
+# Import faucet build dependency
+ARG faucet_git=https://github.com/faucetsdn/faucet.git
+ARG faucet_tag=master
+RUN git clone $faucet_git -b $faucet_tag
+
+# Copy DAQ source into container
 COPY . daq
 
-# Import faucet build dependency.
-RUN git clone $faucet_git -b $faucet_branch
+# Run the DAQ runner by default.
+CMD daq/cmd/run
