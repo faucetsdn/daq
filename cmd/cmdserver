@@ -5,16 +5,14 @@ cd $ROOT
 
 INSTDIR=${1:-inst}
 
-CMDSOCK=$INSTDIR/daq_cmd.sock
+CMDIN=$INSTDIR/daq_cmd.in
 CMDOUT=$INSTDIR/daq_cmd.out
 
-rm -f $CMDSOCK $CMDOUT
+rm -f $CMDIN $CMDOUT
+touch $CMDIN
 
-echo Processing commands from $CMDSOCK to $CMDOUT
+echo Processing commands from $CMDIN to $CMDOUT
 
-export PS1=
-export TERM=dumb
-
-ncat -U -k -l $CMDSOCK < /dev/null | xargs -L 1 bash --norc -c > $CMDOUT 2>&1
+tail -f $CMDIN < /dev/null | awk '{print "\""$0"\""; fflush() }' | xargs -L 1 bash -c > $CMDOUT 2>&1
 
 echo Done with cmd processor.
