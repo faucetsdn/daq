@@ -14,4 +14,4 @@ cd $ROOT
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-sudo DAQ_CONTAINER=$DAQ_CONTAINER PYTHONPATH=$FAUCET TERM=dumb python daq/daq.py
+sudo env DAQ_CONTAINER=$DAQ_CONTAINER PYTHONPATH=$FAUCET TERM=dumb python daq/daq.py

@@ -80,8 +80,8 @@ def createNetwork():
     h2.terminate()
     time.sleep(1)
 
-    '''logging.debug("Ping test h1->h2 (should fail)")
-    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')'''
+    logging.debug("Ping test h1->h2 (should fail)")
+    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
 
     CLI(net)
 
