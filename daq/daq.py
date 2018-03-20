@@ -8,22 +8,16 @@ import logging
 import os
 import time
 
+from host import DockerHost, DAQHost
+
 from mininet import log as minilog
 from mininet.net import Mininet
-from mininet.node import Host, RemoteController, OVSSwitch
+from mininet.node import RemoteController, OVSSwitch
 from mininet.cli import CLI
 
 
-from tests.faucet_mininet_test_topo import FaucetHostCleanup
-
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-
-class DAQHost(FaucetHostCleanup, Host):
-    """Base Mininet Host class, for Mininet-based tests."""
-
-    pass
 
 
 def controllerIp(switch):
@@ -34,9 +28,9 @@ def controllerIp(switch):
     return defaultRoute
 
 
-def addHost(net, switch, name):
-    host = net.addHost(name, cls=DAQHost)
-    link = net.addLink(host, switch)
+def addHost(net, switch, name, cls=DAQHost):
+    host = net.addHost(name, cls)
+    link = net.addLink(switch, host)
     if net.built:
         host.configDefault()
         switch.attach(link.intf2.name)
@@ -65,6 +59,7 @@ def createNetwork():
     logging.debug("Adding hosts...")
     h1 = addHost(net, switch, 'h1')
     h2 = addHost(net, switch, 'h2')
+    h3 = addHost(net, switch, 'h3', cls=DockerHost)
 
     logging.debug("Starting mininet...")
     net.start()
@@ -76,18 +71,17 @@ def createNetwork():
     print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
     logging.debug("Ping test h2->h1")
     print(h2.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
-
-    logging.debug("Stopping host h2, starting host h3...")
-    h3 = addHost(net, switch, 'h3')
-    h2.terminate()
-    time.sleep(1)
-    
-    logging.debug("Ping test h1->h2 (should fail)")
-    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
     logging.debug("Ping test h1->h3")
     print(h1.cmd('ping -c1', h3.IP(), '> /dev/null || echo ping FAILED'), end='')
     logging.debug("Ping test h3->h1")
     print(h3.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
+
+    logging.debug("Stopping host h2")
+    h2.terminate()
+    time.sleep(1)
+
+    '''logging.debug("Ping test h1->h2 (should fail)")
+    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')'''
 
     CLI(net)
 

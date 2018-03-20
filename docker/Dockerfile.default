@@ -1,0 +1,3 @@
+FROM alpine:latest
+
+copy docker/sbin/. /usr/local/sbin/.

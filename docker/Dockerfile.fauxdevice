@@ -1,0 +1,8 @@
+FROM alpine:latest
+
+RUN apk --no-cache add dhclient net-tools bash ethtool
+
+COPY docker/sbin/. /usr/local/sbin/.
+
+# Never-ending command
+CMD ["tail", "-f", "/dev/null" ]

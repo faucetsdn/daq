@@ -26,7 +26,7 @@ fi
 
 
 for file in docker/Dockerfile.*; do
-    if [ ${file%~} != ${file} ]; then
+    if [ ${file%\~} != ${file} ]; then
         continue
     fi
     module=${file#docker/Dockerfile.}
