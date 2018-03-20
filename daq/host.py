@@ -39,30 +39,36 @@ class DockerHost(Host):
             error( "%s: shell is already running" )
             return
 
-        call(["docker rm -f mininet-"+self.name], shell=True)
-        cmd = [ "docker", "run", "-d", "--privileged", "--net=none", "-h", self.name,
-                "--name=mininet-"+self.name, self.image,'tail','-f','/dev/null']
-        docker_cmd = Popen( cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True )
+        kill_cmd = [ "docker", "rm", "-f", "mininet-" + self.name ]
+        kill_pipe = Popen( kill_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True )
+        kill_pipe.stdin.close()
+        kill_pipe.stdout.readlines()
+
+        run_cmd = [ "docker", "run", "-d", "--privileged", "--net=none", "-h", self.name,
+            "--name=mininet-"+self.name, self.image,'tail','-f','/dev/null']
+        run_pipe = Popen( run_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True )
         self.shell = True
         self.execed = False
         self.lastCmd = None
         self.waiting = False
-        docker_cmd.stdin.close()
 
-        dockerLines = docker_cmd.stdout.readlines()
-        assert len(dockerLines) == 1, "Unexpected docker start lines"
-        self.container = dockerLines[0].strip()
+        run_lines = run_pipe.stdout.readlines()
+        assert len(run_lines) == 1, "Unexpected docker start lines: %s" % run_lines
+        self.container = run_lines[0].strip()
+        run_pipe.stdin.close()
 
-        pid_cmd = ["docker","inspect","--format={{ .State.Pid }}",self.container]
-        inspect_cmd = Popen( pid_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=False )
-        ps_out = inspect_cmd.stdout.readlines()
-        self.pid = int(ps_out[0])
-        inspect_cmd.stdin.close()
+        inspect_cmd = ["docker","inspect","--format={{ .State.Pid }}",self.container]
+        inspect_pipe = Popen( inspect_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=False )
+        inspect_out = inspect_pipe.stdout.readlines()
+        self.pid = int(inspect_out[0])
+        inspect_pipe.stdin.close()
 
 
     def terminate( self ):
         "Sending docker stop"
         if self.shell:
+            os.close(self.master)
+            os.close(self.slave)
             call(["docker stop mininet-"+self.name], shell=True)
         self.cleanup()
 
@@ -72,9 +78,14 @@ class DockerHost(Host):
            args: Popen() args, single list, or string
            kwargs: Popen() keyword args"""
         # Tell mnexec to execute command in our cgroup
-        print 'docker popen args %s' % args
         mncmd = [ 'docker', 'exec', self.container ]
         return Host.popen( self, *args, mncmd=mncmd, **kwargs )
+
+
+    def sendInt(self, intr=None):
+        assert self.shell and self.waiting
+        os.close(self.slave)
+        self.pipe.terminate()
 
 
     def sendCmd( self, *args, **kwargs ):
@@ -103,13 +114,19 @@ class DockerHost(Host):
             assert False,'docker background execution not supported'
 
         # Add sential for end so monitor command knows when it's done.
-        cmd_string = ' '.join(cmd) + '; printf "\\177"'
+        cmd_string = ' '.join(cmd)
+        self.lastCmd = cmd_string
+        cmd_sentinal = cmd_string + '; printf "\\177"'
 
-        docker_cmd = [ "docker", "exec", self.container, "sh", "-c", cmd_string ]
-        self.pipe = Popen( docker_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True )
-        self.stdin = self.pipe.stdin
-        self.stdout = self.pipe.stdout
-        self.pid = self.pipe.pid
+        # Spawn a shell subprocess in a pseudo-tty, to disable buffering
+        # in the subprocess and insulate it from signals (e.g. SIGINT)
+        # received by the parent
+        self.master, self.slave = pty.openpty()
+        docker_cmd = [ "docker", "exec", self.container, "sh", "-c", cmd_sentinal ]
+        self.pipe = Popen( docker_cmd, stdin=self.slave, stdout=self.slave,
+            stderr=self.slave, close_fds=False )
+        self.stdin = os.fdopen(self.master, 'rw')
+        self.stdout = self.stdin
         self.pollOut = select.poll()
         self.pollOut.register( self.stdout )
         # Maintain mapping between file descriptors and nodes
@@ -118,8 +135,7 @@ class DockerHost(Host):
         self.outToNode[ self.stdout.fileno() ] = self
         self.inToNode[ self.stdin.fileno() ] = self
         self.execed = False
-        self.lastCmd = None
-        self.lastPid = None
+        self.lastPid = self.pipe.pid
         self.readbuf = ''
         self.waiting = True
 
