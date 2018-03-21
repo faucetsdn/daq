@@ -1,8 +1,8 @@
-FROM alpine:latest
+FROM debian:stretch
 
-RUN apk --no-cache add dhclient net-tools bash ethtool
+RUN apt-get update
 
-COPY docker/sbin/. /usr/local/sbin/.
+RUN apt-get install -y isc-dhcp-client net-tools bash ethtool
 
 # Never-ending command
 CMD ["tail", "-f", "/dev/null" ]

@@ -1,5 +1,7 @@
-FROM alpine:latest
+FROM debian:stretch
 
-RUN apk --no-cache add dnsmasq bash ethtool
+RUN apt-get update
+
+RUN apt-get install -y dnsmasq ethtool
 
 CMD ["dnsmasq", "-k", "--bind-dynamic", "--log-facility=/tmp/dnsmasq.log"]

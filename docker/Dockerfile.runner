@@ -1,8 +1,5 @@
 FROM debian:stretch
 
-# Dump all our junks into the root home directory.
-WORKDIR /root
-
 # Basic system install items
 RUN apt-get update
 RUN apt-get install -y \
@@ -12,6 +9,9 @@ RUN apt-get install -y \
 
 # Python extension packages
 RUN pip install --index-url=https://pypi.python.org/simple netifaces
+
+# Dump all our junks into the root home directory.
+WORKDIR /root
 
 # Install mininet
 RUN git clone git://github.com/mininet/mininet.git

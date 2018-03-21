@@ -37,10 +37,6 @@ def addHost(net, switch, name, cls=DAQHost):
     return host
 
 
-def daqCmd(switch, cmd):
-    return switch.cmd(cmd)
-
-
 def createNetwork():
 
     logging.debug("Creating miniet...")
@@ -50,7 +46,7 @@ def createNetwork():
     switch = net.addSwitch('s1', cls=OVSSwitch)
 
     logging.debug("Starting faucet controller...")
-    daqCmd(switch, 'cmd/faucet')
+    switch.cmd('cmd/faucet')
 
     targetIp = controllerIp(switch)
     logging.debug("Adding controller at %s" % targetIp)
