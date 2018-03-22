@@ -47,12 +47,12 @@ def createNetwork():
     logging.debug("Adding switch...")
     switch = net.addSwitch('s1', cls=OVSSwitch)
 
-    logging.debug("Starting faucet controller...")
+    logging.debug("Starting faucet container...")
     switch.cmd('cmd/faucet')
 
     targetIp = "127.0.0.1"
     logging.debug("Adding controller at %s" % targetIp)
-    controller = net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
+    c1 = net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
 
     logging.debug("Adding hosts...")
     h1 = addHost(net, switch, 'h1')
@@ -63,7 +63,7 @@ def createNetwork():
     net.start()
 
     logging.debug("Waiting for system to settle...")
-    time.sleep(2)
+    time.sleep(4)
 
     logging.debug("Ping test h1->h2")
     print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
@@ -83,6 +83,8 @@ def createNetwork():
 
     CLI(net)
 
+    logging.debug("Stopping faucet...")
+    switch.cmd('docker kill daq-faucet')
     logging.debug("Stopping mininet...")
     net.stop()
 
