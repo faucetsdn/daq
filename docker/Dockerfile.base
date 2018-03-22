@@ -1,5 +1,8 @@
-# Image name: daq/runner
-
+# Image name: daq/base
+#
+# Base image used for DAQ docker run environment. This image is dynamically patched to
+# daq/runner at build time (cmd/build) to pre-build internal docker images.
+#
 # Need to use ubuntu because mininet is very persnickity about versions.
 FROM daq/aardvark:latest
 

@@ -1,6 +1,11 @@
+# Image name: daq/fauxdevice
+#
+# Faux device for framework development/testing.
+#
+
 FROM daq/aardvark:latest
 
-RUN $AG install isc-dhcp-client net-tools bash ethtool
+RUN $AG install isc-dhcp-client ethtool
 
 # Never-ending command
 CMD ["tail", "-f", "/dev/null" ]

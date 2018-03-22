@@ -1,5 +1,6 @@
-FROM ubuntu:xenial
+# Image name: daq/default
+#
+# Default image used for mininet docker hosts.
+#
 
-RUN apt-get update
-
-RUN apt-get install -y net-tools iproute2 iputils-ping
+FROM daq/aardvark

@@ -30,13 +30,30 @@ class DockerHost(FaucetDockerHost):
     DOCKER_IMAGE="daq/default"
 
 
-def addHost(net, switch, name, cls=DAQHost):
-    host = net.addHost(name, cls)
+class NetworkingServices(FaucetDockerHost):
+    DOCKER_IMAGE="daq/networking"
+        
+
+class FauxDevice(FaucetDockerHost):
+    DOCKER_IMAGE="daq/fauxdevice"
+
+
+def addHost(net, switch, name, cls=DAQHost, ip=None):
+    params = { 'ip': ip } if ip else {}
+    host = net.addHost(name, cls, **params)
     link = net.addLink(switch, host, fast=False)
     if net.built:
         host.configDefault()
         switch.attach(link.intf2.name)
     return host
+
+def stopHost():
+    logging.debug("Stopping host h2")
+    h2.terminate()
+    time.sleep(1)
+
+    logging.debug("Ping test h1->h2 (should fail)")
+    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
 
 
 def createNetwork():
@@ -55,12 +72,15 @@ def createNetwork():
     c1 = net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
 
     logging.debug("Adding hosts...")
-    h1 = addHost(net, switch, 'h1')
-    h2 = addHost(net, switch, 'h2')
-    h3 = addHost(net, switch, 'h3', cls=DockerHost)
+    h1 = addHost(net, switch, 'h1', cls=NetworkingServices)
+    h2 = addHost(net, switch, 'h2', cls=FauxDevice, ip="0.0.0.0")
+    h3 = addHost(net, switch, 'h3')
 
     logging.debug("Starting mininet...")
     net.start()
+
+    h1.activate()
+    h2.activate()
 
     logging.debug("Waiting for system to settle...")
     time.sleep(4)
@@ -73,13 +93,6 @@ def createNetwork():
     print(h1.cmd('ping -c1', h3.IP(), '> /dev/null || echo ping FAILED'), end='')
     logging.debug("Ping test h3->h1")
     print(h3.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
-
-    logging.debug("Stopping host h2")
-    h2.terminate()
-    time.sleep(1)
-
-    logging.debug("Ping test h1->h2 (should fail)")
-    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
 
     CLI(net)
 

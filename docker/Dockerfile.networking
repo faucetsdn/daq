@@ -1,3 +1,8 @@
+# Image name: daq/networking
+#
+# Image used for host networking services (DNS, DHCP, etc...)
+#
+
 FROM daq/aardvark:latest
 
 RUN $AG install dnsmasq ethtool

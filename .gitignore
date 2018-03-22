@@ -1,5 +1,7 @@
-# Editor files
+# Development files
 *~
+.pdbrc
+.pdbrcX
 
 # Local config
 config.local

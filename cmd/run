@@ -15,4 +15,10 @@ docker ps > /dev/null 2>&1 || service docker start
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-sudo env DAQ_CONTAINER=$DAQ_CONTAINER PYTHONPATH=$FAUCET TERM=dumb python daq/daq.py
+runcmd=python
+if [ -f .pdbrc ]; then
+    echo Found .pdbrc file, using pdb...
+    runcmd=pdb
+fi
+
+sudo env DAQ_CONTAINER=$DAQ_CONTAINER PYTHONPATH=$FAUCET TERM=dumb $runcmd daq/daq.py
