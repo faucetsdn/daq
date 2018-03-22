@@ -4,7 +4,7 @@ ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
 FAUCET=faucet/faucet
-FAUCET_PATH=ryu/faucet/
+FAUCET_PATH=faucet/
 
 mkdir -p $INSTDIR
 

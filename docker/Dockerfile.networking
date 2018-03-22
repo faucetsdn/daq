@@ -1,7 +1,5 @@
-FROM debian:stretch
+FROM daq/aardvark:latest
 
-RUN apt-get update
-
-RUN apt-get install -y dnsmasq ethtool
+RUN $AG install dnsmasq ethtool
 
 CMD ["dnsmasq", "-k", "--bind-dynamic", "--log-facility=/tmp/dnsmasq.log"]

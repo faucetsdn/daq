@@ -2,13 +2,16 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
+IMAGE=daq/runner
+
+if [ "$1" == base ]; then
+    IMAGE=daq/base
+    shift
+fi
 
 rm -rf $INSTDIR
 mkdir -p $INSTDIR
 
-$ROOT/cmd/cmdserver $INSTDIR < /dev/null &
+docker rm -f daq-runner > /dev/null 2>&1 || true
 
-CMD_PID=$!
-echo Command server PID $CMD_PID
-
-docker run --privileged --env DAQ_CONTAINER=daq/runner -v $INSTDIR:/root/daq/inst -ti daq/runner
+docker run --privileged --name daq-runner --env DAQ_CONTAINER=daq/runner -v $INSTDIR:/root/daq/inst -ti $IMAGE "$@"

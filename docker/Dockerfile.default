@@ -1,5 +1,5 @@
-FROM debian:stretch
+FROM ubuntu:xenial
 
 RUN apt-get update
 
-RUN apt-get install -y net-tools
+RUN apt-get install -y net-tools iproute2 iputils-ping

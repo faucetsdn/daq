@@ -8,29 +8,31 @@ import logging
 import os
 import time
 
-from host import DockerHost, DAQHost
-
 from mininet import log as minilog
 from mininet.net import Mininet
-from mininet.node import RemoteController, OVSSwitch
+from mininet.node import RemoteController, OVSSwitch, Host
 from mininet.cli import CLI
 
+from tests.faucet_mininet_test_host import FaucetDockerHost
+from tests.faucet_mininet_test_topo import FaucetHostCleanup
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def controllerIp(switch):
-    container = os.environ['DAQ_CONTAINER']
-    if not container:
-        return '127.0.0.1'
-    defaultRoute = switch.cmd("ip route | fgrep default | awk '{ print $3 }'").strip()
-    return defaultRoute
+class DAQHost(FaucetHostCleanup, Host):
+    """Base Mininet Host class, for Mininet-based tests."""
+
+    pass
+
+
+class DockerHost(FaucetDockerHost):
+    DOCKER_IMAGE="daq/default"
 
 
 def addHost(net, switch, name, cls=DAQHost):
     host = net.addHost(name, cls)
-    link = net.addLink(switch, host)
+    link = net.addLink(switch, host, fast=False)
     if net.built:
         host.configDefault()
         switch.attach(link.intf2.name)
@@ -48,7 +50,7 @@ def createNetwork():
     logging.debug("Starting faucet controller...")
     switch.cmd('cmd/faucet')
 
-    targetIp = controllerIp(switch)
+    targetIp = "127.0.0.1"
     logging.debug("Adding controller at %s" % targetIp)
     controller = net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
 
@@ -83,7 +85,6 @@ def createNetwork():
 
     logging.debug("Stopping mininet...")
     net.stop()
-
 
 
 if __name__ == '__main__':

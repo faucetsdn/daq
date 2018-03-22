@@ -1,0 +1,7 @@
+#!/bin/bash -e
+
+docker ps -aq --no-trunc | xargs docker rm || true
+
+docker images -q --filter dangling=true | xargs docker rmi || true
+
+docker container prune

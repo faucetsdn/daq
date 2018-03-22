@@ -1,8 +1,6 @@
-FROM debian:stretch
+FROM daq/aardvark:latest
 
-RUN apt-get update
-
-RUN apt-get install -y isc-dhcp-client net-tools bash ethtool
+RUN $AG install isc-dhcp-client net-tools bash ethtool
 
 # Never-ending command
 CMD ["tail", "-f", "/dev/null" ]

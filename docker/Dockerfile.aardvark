@@ -1,0 +1,18 @@
+# Image name: daq/aardvark
+#
+# Base image called aardvark because the code is lazy and evaluates alphabetically.
+#
+#              _.---._    /\\
+#           ./'       "--`\//
+#         ./              o \
+#        /./\  )______   \__ \
+#       ./  / /\ \   | \ \  \ \
+#          / /  \ \  | |\ \  \7
+#           "     "    "  "
+
+# Need to use ubuntu because mininet is very persnickity about versions.
+FROM ubuntu:xenial
+
+ENV AG="apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
+
+RUN $AG update

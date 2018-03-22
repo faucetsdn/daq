@@ -5,6 +5,7 @@ cd $ROOT
 
 local_config=config.local
 build_root=build
+in_container=$DAQ_CONTAINER
 
 if [ -f $local_config ]; then
   echo Reading local configuraiton from $local_config
@@ -15,6 +16,11 @@ rm -rf $build_root
 mkdir -p $build_root
 
 build_args=
+
+if [ -n "$in_container" ]; then
+  service docker start
+  sleep 2
+fi
 
 if [ -n "$faucet_git" ]; then
   build_args+=" --build-arg faucet_git=$faucet_git"
@@ -30,7 +36,27 @@ for file in docker/Dockerfile.*; do
         continue
     fi
     module=${file#docker/Dockerfile.}
+    if [ $module == base -a -n "$in_container" ]; then
+        echo Skipping base build.
+        continue
+    fi
     logfile=$build_root/docker_build.$module
     echo Building $file into daq/$module, log to $logfile...
-    docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || (echo Build failed. && false)
+    docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || tail $logfile
 done
+
+if [ -z "$in_container" ]; then
+    images=$(docker images | fgrep daq/ | awk '{print $1}')
+    if [ "${images#daq/runner}" != "${images}" ]; then
+        echo Docker image daq/runner up-to-date.
+    else
+        echo Running build inside runner...
+        cmd/dockrun base daq/cmd/build
+        echo Committing daq-runner changes to daq/runner...
+        docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
+    fi
+else
+    service docker stop
+    sleep 1
+    rm -r /var/lib/docker/runtimes
+fi

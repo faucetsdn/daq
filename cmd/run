@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
 
 FAUCET=$(realpath $ROOT/../faucet)
 
@@ -9,7 +10,7 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
-cd $ROOT
+docker ps > /dev/null 2>&1 || service docker start
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
