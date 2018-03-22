@@ -13,7 +13,7 @@ from mininet.net import Mininet
 from mininet.node import RemoteController, OVSSwitch, Host
 from mininet.cli import CLI
 
-from tests.faucet_mininet_test_host import FaucetDockerHost
+from tests.faucet_mininet_test_host import MakeFaucetDockerHost
 from tests.faucet_mininet_test_topo import FaucetHostCleanup
 
 logging.basicConfig(level=logging.DEBUG)
@@ -26,20 +26,9 @@ class DAQHost(FaucetHostCleanup, Host):
     pass
 
 
-class DockerHost(FaucetDockerHost):
-    DOCKER_IMAGE="daq/default"
-
-
-class NetworkingServices(FaucetDockerHost):
-    DOCKER_IMAGE="daq/networking"
-        
-
-class FauxDevice(FaucetDockerHost):
-    DOCKER_IMAGE="daq/fauxdevice"
-
-
 def addHost(net, switch, name, cls=DAQHost, ip=None):
     params = { 'ip': ip } if ip else {}
+    params['tmpdir'] = 'inst/'
     host = net.addHost(name, cls, **params)
     link = net.addLink(switch, host, fast=False)
     if net.built:
@@ -72,9 +61,9 @@ def createNetwork():
     c1 = net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
 
     logging.debug("Adding hosts...")
-    h1 = addHost(net, switch, 'h1', cls=NetworkingServices)
-    h2 = addHost(net, switch, 'h2', cls=FauxDevice, ip="0.0.0.0")
-    h3 = addHost(net, switch, 'h3')
+    h1 = addHost(net, switch, 'h1', cls=MakeFaucetDockerHost('daq/networking'))
+    h2 = addHost(net, switch, 'h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
+    h3 = addHost(net, switch, 'h3', cls=MakeFaucetDockerHost('daq/default'))
 
     logging.debug("Starting mininet...")
     net.start()
