@@ -86,10 +86,8 @@ class DAQRunner():
         self.pingTest(h1, h3)
         self.pingTest(h3, h1)
 
-        if self.pingTest(h2, h1):
-            print "Unexpected success??!?!"
-        else:
-            print "(Expected failure)"
+        assert not self.pingTest(h2, h1), "Unexpected success??!?!"
+        print "(Expected failure)"
 
         logging.debug("Waiting for dhcp...")
         time.sleep(5)
