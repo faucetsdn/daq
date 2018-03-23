@@ -43,6 +43,7 @@ for file in docker/Dockerfile.*; do
     logfile=$build_root/docker_build.$module
     echo Building $file into daq/$module, log to $logfile...
     docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || tail $logfile
+    echo Build complete. >> $logfile
 done
 
 if [ -z "$in_container" ]; then

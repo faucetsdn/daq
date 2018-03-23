@@ -29,8 +29,9 @@ RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubunt
 RUN apt-cache policy docker-ce && $AG update && $AG install docker-ce
 
 # Import faucet build dependency
-ARG faucet_git=https://github.com/faucetsdn/faucet.git
-ARG faucet_tag=master
+# Eventually this should point to the main faucetsdn repo.
+ARG faucet_git=https://github.com/grafnu/faucet.git
+ARG faucet_tag=testlib
 RUN git clone $faucet_git -b $faucet_tag
 
 # Copy DAQ source into container
