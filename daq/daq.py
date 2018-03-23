@@ -78,9 +78,8 @@ class DAQRunner():
             logging.info("PASSED test %s" % image)
 
     def tcpdump_helper(self, tcpdump_host, tcpdump_filter, funcs=None,
-                       vflags='-v', timeout=10, packets=2, root_intf=False,
-                       intf=None):
-        intf_name = (intf if intf else tcpdump_host.intf()).name
+                       vflags='-v', timeout=10, packets=2, root_intf=False):
+        intf_name = tcpdump_host.intf().name
         if root_intf:
             intf_name = intf_name.split('.')[0]
         tcpdump_cmd = faucet_mininet_test_util.timeout_soft_cmd(
@@ -146,7 +145,7 @@ class DAQRunner():
         self.pingTest(h3, h1)
 
         assert not self.pingTest(h2, h1), "Unexpected success??!?!"
-        print "(Expected failure)"
+        logging.debug("Expected failure observed.")
 
         h2.activate()
 
@@ -156,9 +155,9 @@ class DAQRunner():
             if self.faucet_events.is_port_active_event(event) == target_port:
                 break
 
-        logging.debug("Waiting for dhcp response on %s" % h1.switch_link.intf1)
+        logging.debug("Waiting for dhcp response from %s" % h1.name)
         filter="src port 67"
-        dhcp_lines = self.tcpdump_helper(self.switch, filter, intf=h1.switch_link.intf1, vflags='', packets=1, timeout=60)
+        dhcp_lines = self.tcpdump_helper(h1, filter, vflags='', packets=1, timeout=60)
         self.target_host = re.search(self.DHCP_PATTERN, dhcp_lines[0]).group(1)
         logging.debug('Host %s is at %s' % (h2.name, self.target_host))
         h2.setIP(self.target_host)
