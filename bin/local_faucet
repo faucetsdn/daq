@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+
+mkdir -p ${ROOT}/inst
+
+sudo rm -rf /var/log/faucet
+sudo ln -fs ${ROOT}/inst /var/log/faucet
+
+sudo rm -f /etc/faucet/faucet.yaml
+sudo ln -fs ${ROOT}/inst/faucet.yaml /etc/faucet/faucet.yaml
+
+sudo chown $USER -R ${ROOT}/inst
+
+export FAUCET_EVENT_SOCK=$ROOT/inst/faucet_event.sock
+export PYTHONPATH=${ROOT}/../faucet/
+while true; do ryu-manager faucet.faucet; done

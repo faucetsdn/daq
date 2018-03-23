@@ -6,7 +6,7 @@ import time
 class FaucetEventClient():
     """A general client interface to the FAUCET event API"""
 
-    FAUCET_RETRIES=5
+    FAUCET_RETRIES=10
 
     sock = None
     buffer = b''
@@ -35,12 +35,11 @@ class FaucetEventClient():
             else:
                 self.buffer += self.sock.recv(1024)
 
-    def is_port_add_event(self, event):
-        if not 'PORT_CHANGE' in event:
-            return None
-        if event['PORT_CHANGE']['reason'] != "ADD":
-            return None
-        return event['PORT_CHANGE']['port_no']
+    def is_port_active_event(self, event):
+        port_active_event = ('PORT_CHANGE' in event and
+                             event['PORT_CHANGE']['status'] and
+                             event['PORT_CHANGE']['reason'] != 'DELETE')
+        return event['PORT_CHANGE']['port_no'] if port_active_event else None
 
     def close(self):
         self.sock.close()

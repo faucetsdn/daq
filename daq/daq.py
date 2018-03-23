@@ -47,7 +47,10 @@ class DAQRunner():
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
         if self.net.built:
             host.configDefault()
-            self.switch.attach(host.switch_link.intf1.name)
+            intf = host.switch_link.intf1
+            self.switch.attach(intf)
+            # This really should be done in attach, but currently only automatic on switch startup.
+            self.switch.vsctl(self.switch.intfOpts(intf))
         return host
 
     def stopHost(self, host):
@@ -113,7 +116,7 @@ class DAQRunner():
         logging.debug("Adding switch...")
         self.switch = self.net.addSwitch('s1', cls=OVSSwitch)
 
-        logging.debug("Starting faucet container...")
+        logging.debug("Starting faucet...")
         self.switch.cmd('cmd/faucet')
 
         self.faucet_events = FaucetEventClient()
@@ -125,7 +128,6 @@ class DAQRunner():
 
         logging.debug("Adding hosts...")
         h1 = self.addHost('h1', cls=MakeFaucetDockerHost('daq/networking'))
-        h2 = self.addHost('h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
         h3 = self.addHost('h3')
 
         logging.debug("Starting mininet...")
@@ -136,6 +138,9 @@ class DAQRunner():
 
         logging.debug("Waiting for system to settle...")
         time.sleep(3)
+
+        logging.debug("Adding fauxdevice...")
+        h2 = self.addHost('h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
 
         self.pingTest(h1, h3)
         self.pingTest(h3, h1)
@@ -148,12 +153,12 @@ class DAQRunner():
         target_port = self.switch.ports[h2.switch_link.intf1]
         logging.debug("Monitoring faucet event socket for target port add %d..." % target_port)
         for event in self.faucet_events.next_event():
-            if self.faucet_events.is_port_add_event(event) == target_port:
+            if self.faucet_events.is_port_active_event(event) == target_port:
                 break
 
-        logging.debug("Waiting for dhcp...")
+        logging.debug("Waiting for dhcp response on %s" % h1.switch_link.intf1)
         filter="src port 67"
-        dhcp_lines = self.tcpdump_helper(self.switch, filter, intf=h1.switch_link.intf1, vflags='', packets=1)
+        dhcp_lines = self.tcpdump_helper(self.switch, filter, intf=h1.switch_link.intf1, vflags='', packets=1, timeout=60)
         self.target_host = re.search(self.DHCP_PATTERN, dhcp_lines[0]).group(1)
         h2.setIP(self.target_host)
 

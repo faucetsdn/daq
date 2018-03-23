@@ -23,5 +23,12 @@ rm -f $INSTDIR/$FAUCET_SOCK
 
 event_sock=/var/log/$FAUCET_PATH/$FAUCET_SOCK
 
-cid=$(docker run -d --name $CONTAINER --env FAUCET_EVENT_SOCK=$event_sock -v $INSTDIR:/etc/$FAUCET_PATH -v $INSTDIR:/var/log/$FAUCET_PATH -p 6633:6653 $FAUCET)
+docker_envs="\
+        --env FAUCET_EVENT_SOCK=$event_sock"
+
+docker_volumes="\
+        -v $INSTDIR:/etc/$FAUCET_PATH \
+        -v $INSTDIR:/var/log/$FAUCET_PATH"
+
+cid=$(docker run -d --name $CONTAINER $docker_volumes $docker_envs -p 6633:6653 $FAUCET)
 echo Container $CONTAINER started as $cid

@@ -2,6 +2,7 @@ dps:
     switch1:
         dp_id: 1
         name: switch1
+        ofchannel_log: /var/log/faucet/ofchannel.log
         interface_ranges:
             1-48:
                 native_vlan: 100
