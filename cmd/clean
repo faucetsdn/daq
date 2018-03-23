@@ -2,10 +2,11 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 
-rm -rf $ROOT/inst
+sudo rm -rf $ROOT/inst
 
-docker ps -aq --no-trunc | xargs docker rm || true
+docker ps -aq --no-trunc | xargs -r docker rm || true
 
-docker images -q --filter dangling=true | xargs docker rmi || true
+docker images -q --filter dangling=true | xargs -r docker rmi || true
 
-docker container prune
+docker container prune -f
+
