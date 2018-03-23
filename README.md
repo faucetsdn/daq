@@ -22,6 +22,9 @@ The build setup first builds containers for basic execution, then a docker conta
   $ cmd/build
 </pre>
 
+You can also clean all the stuffs using <code>cmd/clean</code>, which is sometimes necessary to gaurintee a clean build.
+Be warned, it also might clean some other images/containers from other projects.
+
 ### Running DAQ
 
 You can run the containerized version using <code>cmd/dockrun</code> to avoid any additional setup.
