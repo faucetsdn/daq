@@ -29,9 +29,12 @@ class DAQHost(FaucetHostCleanup, Host):
 
 
 class DAQRunner():
+
     DHCP_PATTERN = '> ([0-9.]+).68: BOOTP/DHCP, Reply'
+
     net = None
     switch = None
+    target_host = None
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[]):
         tmpdir = 'inst/'
@@ -58,6 +61,16 @@ class DAQRunner():
             print output
         return output.strip() != failure
 
+    def dockerTest(self, image):
+        container_name = image.split('/')[-1]
+        env_vars = [ "TARGET_HOST=" + self.target_host ]
+        host = self.addHost(container_name, cls=MakeFaucetDockerHost(image), env_vars = env_vars)
+        host.activate()
+        error_code = host.check_result()
+        if error_code != 0:
+            logging.info("FAILED test %s with error %s" % (image, error_code))
+        else:
+            logging.info("PASSED test %s" % image)
 
     def tcpdump_helper(self, tcpdump_host, tcpdump_filter, funcs=None,
                        vflags='-v', timeout=10, packets=2, root_intf=False,
@@ -130,24 +143,16 @@ class DAQRunner():
         logging.debug("Waiting for dhcp...")
         filter="src port 67"
         dhcp_lines = self.tcpdump_helper(self.switch, filter, intf=h1.switch_link.intf1, vflags='', packets=1)
-        ip_addr = re.search(self.DHCP_PATTERN, dhcp_lines[0]).group(1)
-        print "h2 ip address is " + ip_addr
-        h2.setIP(ip_addr)
+        self.target_host = re.search(self.DHCP_PATTERN, dhcp_lines[0]).group(1)
+        h2.setIP(self.target_host)
 
         self.pingTest(h2, h1)
         self.pingTest(h1, h2)
 
-        logging.debug("Creating/activating proper test_ping...")
-        env_vars = [ "TARGET_HOST=" + h1.IP() ]
-        h4 = self.addHost('h4', cls=MakeFaucetDockerHost('daq/test_ping'), env_vars = env_vars)
-        h4.activate()
-        assert h4.check_result() == 0, "test_ping to %s" % h1.IP()
-
-        logging.debug("Creating/activating bogus test_ping...")
-        env_vars = [ "TARGET_HOST=1.2.3.4" ]
-        h5 = self.addHost('h5', cls=MakeFaucetDockerHost('daq/test_ping'), env_vars = env_vars)
-        h5.activate()
-        assert h5.check_result() != 0, "test_ping to bogus address"
+        self.dockerTest('daq/test_ping')
+        self.dockerTest('daq/test_nmap')
+        self.dockerTest('daq/test_pass')
+        self.dockerTest('daq/test_fail')
 
         CLI(self.net)
 
