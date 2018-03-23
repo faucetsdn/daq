@@ -7,9 +7,9 @@ test -d $ROOT/daq
 
 sudo rm -rf $ROOT/inst $ROOT/build
 
-docker images | fgrep daq/ | awk '{print $1}' | xargs docker rmi
-
 docker ps -aq --no-trunc | xargs -r docker rm || true
+
+docker images | fgrep daq/ | awk '{print $1}' | xargs docker rmi || true
 
 docker images -q --filter dangling=true | xargs -r docker rmi || true
 
