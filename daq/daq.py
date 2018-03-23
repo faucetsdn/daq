@@ -18,6 +18,8 @@ from tests.faucet_mininet_test_host import MakeFaucetDockerHost
 from tests.faucet_mininet_test_topo import FaucetHostCleanup
 from tests import faucet_mininet_test_util
 
+from faucet_event_client import FaucetEventClient
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -114,6 +116,9 @@ class DAQRunner():
         logging.debug("Starting faucet container...")
         self.switch.cmd('cmd/faucet')
 
+        self.faucet_events = FaucetEventClient()
+        self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
+
         targetIp = "127.0.0.1"
         logging.debug("Adding controller at %s" % targetIp)
         c1 = self.net.addController( 'c1', controller=RemoteController, ip=targetIp, port=6633 )
@@ -139,6 +144,12 @@ class DAQRunner():
         print "(Expected failure)"
 
         h2.activate()
+
+        target_port = self.switch.ports[h2.switch_link.intf1]
+        logging.debug("Monitoring faucet event socket for target port add %d..." % target_port)
+        for event in self.faucet_events.next_event():
+            if self.faucet_events.is_port_add_event(event) == target_port:
+                break
 
         logging.debug("Waiting for dhcp...")
         filter="src port 67"

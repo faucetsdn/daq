@@ -5,6 +5,7 @@ CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
 FAUCET=faucet/faucet
 FAUCET_PATH=faucet/
+FAUCET_SOCK=faucet_event.sock
 
 mkdir -p $INSTDIR
 
@@ -18,7 +19,9 @@ if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; 
     docker rm -f $CONTAINER
 fi
 
-event_sock=/etc/$FAUCET_PATH/faucet_event.sock
+rm -f $INSTDIR/$FAUCET_SOCK
+
+event_sock=/var/log/$FAUCET_PATH/$FAUCET_SOCK
 
 cid=$(docker run -d --name $CONTAINER --env FAUCET_EVENT_SOCK=$event_sock -v $INSTDIR:/etc/$FAUCET_PATH -v $INSTDIR:/var/log/$FAUCET_PATH -p 6633:6653 $FAUCET)
 echo Container $CONTAINER started as $cid

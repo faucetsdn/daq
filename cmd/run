@@ -1,6 +1,10 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
+INSTDIR=$ROOT/inst
+FAUCET_SOCK=faucet_event.sock
+EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
+
 cd $ROOT
 
 FAUCET=$(realpath $ROOT/../faucet)
@@ -10,7 +14,8 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
-mkdir -p $ROOT/inst
+mkdir -p $INSTDIR
+rm -f $EVENT_SOCK
 
 docker ps > /dev/null 2>&1 || service docker start
 
@@ -23,4 +28,5 @@ if [ -f .pdbrc ]; then
     runcmd=pdb
 fi
 
-sudo env DAQ_CONTAINER=$DAQ_CONTAINER PYTHONPATH=$FAUCET TERM=dumb $runcmd daq/daq.py
+
+sudo env DAQ_CONTAINER=$DAQ_CONTAINER FAUCET_EVENT_SOCK=$EVENT_SOCK PYTHONPATH=$FAUCET TERM=dumb $runcmd daq/daq.py
