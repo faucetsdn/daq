@@ -1,9 +1,7 @@
 #!/bin/sh -e
 #
-# DOCKER_IMAGE=daq/default
-#
 
-nmap --open -oG nmap.log $CLIENT_IP
+nmap --open -oG nmap.log $TARGET_HOST
 
 echo
 echo Checking for restricted ports...

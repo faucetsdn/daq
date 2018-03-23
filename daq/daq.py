@@ -24,16 +24,16 @@ class DAQHost(FaucetHostCleanup, Host):
     pass
 
 
-def addHost(net, switch, name, cls=DAQHost, ip=None, volumes=[]):
+def addHost(net, switch, name, cls=DAQHost, ip=None, env_vars=[]):
     tmpdir = 'inst/'
     params = { 'ip': ip } if ip else {}
     params['tmpdir'] = tmpdir
-    params['volumes'] = volumes
+    params['env_vars'] = env_vars
     host = net.addHost(name, cls, **params)
     link = net.addLink(switch, host, fast=False)
     if net.built:
         host.configDefault()
-        switch.attach(link.intf2.name)
+        switch.attach(link.intf1.name)
     return host
 
 
@@ -71,10 +71,7 @@ def createNetwork():
     logging.debug("Adding hosts...")
     h1 = addHost(net, switch, 'h1', cls=MakeFaucetDockerHost('daq/networking'))
     h2 = addHost(net, switch, 'h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
-
-    # No real point to this just yet, except to test volume mappings.
-    volumes = [ ('misc', '/misc') ]
-    h3 = addHost(net, switch, 'h3', cls=MakeFaucetDockerHost('daq/default'), volumes=volumes)
+    h3 = addHost(net, switch, 'h3', cls=MakeFaucetDockerHost('daq/default'))
 
     logging.debug("Starting mininet...")
     net.start()
@@ -98,6 +95,11 @@ def createNetwork():
     time.sleep(5)
 
     pingTest(h2, h1)
+
+    logging.debug("Creating/activating test_ping")
+    env_vars = [ "TARGET_HOST=" + h1.IP() ]
+    h4 = addHost(net, switch, 'h4', cls=MakeFaucetDockerHost('daq/test_ping'), env_vars = env_vars)
+    h4.activate()
 
     CLI(net)
 
