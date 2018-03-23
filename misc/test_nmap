@@ -1,0 +1,24 @@
+#!/bin/sh -e
+#
+# DOCKER_IMAGE=daq/default
+#
+
+nmap --open -oG nmap.log $CLIENT_IP
+
+echo
+echo Checking for restricted ports...
+
+FAILED=no
+for proto in telnet; do
+    result=$(fgrep $proto nmap.log || true)
+    if [ -n "$result" ]; then
+        echo "$result"
+        FAILED=yes
+    fi
+done
+
+if [ $FAILED != no ]; then
+    false
+fi
+
+echo No restricted ports found.

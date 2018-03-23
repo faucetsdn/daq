@@ -1,0 +1,3 @@
+FROM daq/aardvark:latest
+
+CMD ping -n -c 1 $CLIENT_IP

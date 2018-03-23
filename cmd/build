@@ -42,7 +42,12 @@ for file in docker/Dockerfile.*; do
     fi
     logfile=$build_root/docker_build.$module
     echo Building $file into daq/$module, log to $logfile...
-    docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || tail $logfile
+    failed=
+    docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || failed=y
+    if [ -n "$failed" ]; then
+        tail $logfile
+        false
+    fi
     echo Build complete. >> $logfile
 done
 

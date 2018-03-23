@@ -7,6 +7,6 @@ FROM daq/aardvark:latest
 
 RUN $AG install isc-dhcp-client ethtool network-manager
 
-COPY misc/fauxdevice.sh /root
+COPY misc/start_fauxdevice .
 
-CMD ["/root/fauxdevice.sh"]
+CMD ["./start_fauxdevice"]

@@ -73,7 +73,7 @@ def createNetwork():
     h2 = addHost(net, switch, 'h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
 
     # No real point to this just yet, except to test volume mappings.
-    volumes = [ ('build', '/root') ]
+    volumes = [ ('misc', '/misc') ]
     h3 = addHost(net, switch, 'h3', cls=MakeFaucetDockerHost('daq/default'), volumes=volumes)
 
     logging.debug("Starting mininet...")
