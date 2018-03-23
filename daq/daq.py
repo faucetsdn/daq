@@ -160,6 +160,7 @@ class DAQRunner():
         filter="src port 67"
         dhcp_lines = self.tcpdump_helper(self.switch, filter, intf=h1.switch_link.intf1, vflags='', packets=1, timeout=60)
         self.target_host = re.search(self.DHCP_PATTERN, dhcp_lines[0]).group(1)
+        logging.debug('Host %s is at %s' % (h2.name, self.target_host))
         h2.setIP(self.target_host)
 
         self.pingTest(h2, h1)
