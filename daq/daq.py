@@ -2,8 +2,6 @@
 
 """Device Automated Qualification testing framework"""
 
-from __future__ import print_function
-
 import logging
 import os
 import time
@@ -44,8 +42,15 @@ def stopHost():
     h2.terminate()
     time.sleep(1)
 
-    logging.debug("Ping test h1->h2 (should fail)")
-    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
+
+def pingTest(a, b):
+    logging.debug("Ping test %s->%s" % (a.name, b.name))
+    failure="ping FAILED"
+    assert b.IP() != "0.0.0.0", "IP address not assigned, can't ping"
+    output = a.cmd('ping -c1', b.IP(), '> /dev/null 2>&1 || echo ', failure).strip()
+    if output:
+        print output
+    return output.strip() != failure
 
 
 def createNetwork():
@@ -79,25 +84,20 @@ def createNetwork():
     h3.activate()
 
     logging.debug("Waiting for system to settle...")
-    time.sleep(4)
+    time.sleep(3)
 
-    logging.debug("Ping test h1->h2")
-    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
-    logging.debug("Ping test h2->h1")
-    print(h2.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
-    logging.debug("Ping test h1->h3")
-    print(h1.cmd('ping -c1', h3.IP(), '> /dev/null || echo ping FAILED'), end='')
-    logging.debug("Ping test h3->h1")
-    print(h3.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
+    pingTest(h1, h3)
+    pingTest(h3, h1)
+
+    if pingTest(h2, h1):
+        print "Unexpected success??!?!"
+    else:
+        print "(Expected failure)"
 
     logging.debug("Waiting for dhcp...")
-    time.sleep(2)
+    time.sleep(5)
 
-    logging.debug("Ping test h1->h2")
-    print(h1.cmd('ping -c1', h2.IP(), '> /dev/null || echo ping FAILED'), end='')
-    logging.debug("Ping test h2->h1")
-    print(h2.cmd('ping -c1', h1.IP(), '> /dev/null || echo ping FAILED'), end='')
-
+    pingTest(h2, h1)
 
     CLI(net)
 
