@@ -16,20 +16,15 @@ Tested with ```Linux 4.9.0-5-amd64 #1 SMP Debian 4.9.65-3+deb9u2 (2018-01-04) x8
 
 ### Building DAQ
 
-See <code>docker/Dockerfile.runner</code> for all your basic building needs:
+The build setup first builds containers for basic execution, then a docker container for docker-in-docker execution.
 
 <pre>
-  docker build -t daq/runner -f docker/Dockerfile.runner .
+  $ cmd/build
 </pre>
 
-Now you can drop into a daq-compliant shell:
+### Running DAQ
 
-<pre>
-  ~/daq$ docker run -ti daq/runner
-  root@XXXXXXXXX:~# ls
-  daq  faucet
-</pre>
+You can run the containerized version using <code>cmd/dockrun</code> to avoid any additional setup.
 
-(You can also run everything natively if you're on a suitably compatible system and the
-appropriate dependencies are installed.)
-
+For active development, you'll need to install things as indicated in <code>docker/Dockerfile.runner</code>
+and then run using <code>cmd/run</code>.
