@@ -2,11 +2,13 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 
-sudo rm -rf $ROOT/inst
+# Sanity check to make sure this doesn't do something bad.
+test -d $ROOT/daq
+
+sudo rm -rf $ROOT/inst $ROOT/build
 
 docker ps -aq --no-trunc | xargs -r docker rm || true
 
 docker images -q --filter dangling=true | xargs -r docker rmi || true
 
 docker container prune -f
-
