@@ -12,7 +12,7 @@ if [ -f $local_config ]; then
   source config.local
 fi
 
-rm -rf $build_root
+sudo rm -rf $build_root
 mkdir -p $build_root
 
 build_args=

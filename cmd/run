@@ -10,6 +10,8 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
+mkdir -p $ROOT/inst
+
 docker ps > /dev/null 2>&1 || service docker start
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl

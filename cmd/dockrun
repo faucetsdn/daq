@@ -9,7 +9,7 @@ if [ "$1" == base ]; then
     shift
 fi
 
-rm -rf $INSTDIR
+sudo rm -rf $INSTDIR
 mkdir -p $INSTDIR
 
 docker rm -f daq-runner > /dev/null 2>&1 || true

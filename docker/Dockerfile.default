@@ -4,3 +4,5 @@
 #
 
 FROM daq/aardvark
+
+CMD echo hello daq

@@ -10,7 +10,7 @@ mkdir -p $INSTDIR
 
 if [ ! -f $INSTDIR/faucet.yaml ]; then
     echo Copying default faucet.yaml file to $INSTDIR...
-    cp $ROOT/default/faucet.yaml $INSTDIR
+    cp $ROOT/misc/faucet.yaml $INSTDIR
 fi
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then

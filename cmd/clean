@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+ROOT=$(realpath $(dirname $0)/..)
+
+rm -rf $ROOT/inst
+
 docker ps -aq --no-trunc | xargs docker rm || true
 
 docker images -q --filter dangling=true | xargs docker rmi || true
