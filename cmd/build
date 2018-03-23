@@ -6,6 +6,7 @@ cd $ROOT
 local_config=config.local
 build_root=build
 in_container=$DAQ_CONTAINER
+image_file=build/aardvark.image
 
 if [ -f $local_config ]; then
   echo Reading local configuraiton from $local_config
@@ -20,6 +21,7 @@ build_args=
 if [ -n "$in_container" ]; then
   service docker start
   sleep 2
+  docker image load -q -i /$image_file
 fi
 
 if [ -n "$faucet_git" ]; then
@@ -36,9 +38,11 @@ for file in docker/Dockerfile.*; do
         continue
     fi
     module=${file#docker/Dockerfile.}
-    if [ $module == base -a -n "$in_container" ]; then
-        echo Skipping base build.
-        continue
+    if [ -n "$in_container" ]; then
+	if [ $module == base -o $module == aardvark ]; then
+            echo Skipping $module build.
+            continue
+	fi
     fi
     logfile=$build_root/docker_build.$module
     echo Building $file into daq/$module, log to $logfile...
@@ -56,6 +60,8 @@ if [ -z "$in_container" ]; then
     if [ "${images#daq/runner}" != "${images}" ]; then
         echo Docker image daq/runner up-to-date.
     else
+	echo Exporting image to $image_file...
+	docker image save daq/aardvark -o $image_file
         echo Running build inside runner...
         cmd/dockrun base daq/cmd/build
         echo Committing daq-runner changes to daq/runner...
