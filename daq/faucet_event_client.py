@@ -31,7 +31,7 @@ class FaucetEventClient():
             line, remainder = self.buffer.split('\n', 1) if self.buffer else (None, self.buffer)
             self.buffer = remainder
             if line:
-                yield json.loads(line)
+                return json.loads(line)
             else:
                 self.buffer += self.sock.recv(1024)
 
