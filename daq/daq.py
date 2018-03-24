@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import time
+import types
 
 from mininet import log as minilog
 from mininet.net import Mininet
@@ -31,6 +32,12 @@ class DAQHost(FaucetHostCleanup, Host):
     pass
 
 
+
+def stressTest(self, cmd='sleep 1; date', count=1000):
+    for num in range(1,count):
+        print self.cmd(cmd).strip()
+
+
 class DAQRunner():
 
     DHCP_PATTERN = '> ([0-9.]+).68: BOOTP/DHCP, Reply'
@@ -45,6 +52,7 @@ class DAQRunner():
         params['tmpdir'] = tmpdir
         params['env_vars'] = env_vars
         host = self.net.addHost(name, cls, **params)
+        host.stressTest = types.MethodType(stressTest, host)
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
         if self.net.built:
             host.configDefault()
