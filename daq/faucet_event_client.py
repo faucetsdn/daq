@@ -28,7 +28,7 @@ class FaucetEventClient():
 
     def next_event(self):
         while True:
-            line, remainder = self.buffer.split('\n', 1) if self.buffer else (None, self.buffer)
+            line, remainder = self.buffer.split('\n', 1) if '\n' in self.buffer else (None, self.buffer)
             self.buffer = remainder
             if line:
                 return json.loads(line)

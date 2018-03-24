@@ -6,7 +6,6 @@ import logging
 import os
 import re
 import time
-import types
 
 from mininet import log as minilog
 from mininet.net import Mininet
@@ -32,12 +31,6 @@ class DAQHost(FaucetHostCleanup, Host):
     pass
 
 
-
-def stressTest(self, cmd='sleep 1; date', count=1000):
-    for num in range(1,count):
-        print self.cmd(cmd).strip()
-
-
 class DAQRunner():
 
     DHCP_PATTERN = '> ([0-9.]+).68: BOOTP/DHCP, Reply'
@@ -52,7 +45,6 @@ class DAQRunner():
         params['tmpdir'] = tmpdir
         params['env_vars'] = env_vars
         host = self.net.addHost(name, cls, **params)
-        host.stressTest = types.MethodType(stressTest, host)
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
         if self.net.built:
             host.configDefault()
@@ -61,6 +53,18 @@ class DAQRunner():
             # This really should be done in attach, but currently only automatic on switch startup.
             self.switch.vsctl(self.switch.intfOpts(intf))
         return host
+
+    def switchDelIntf(self, switch, intf):
+        del switch.intfs[switch.ports[intf]]
+        del switch.ports[intf]
+        del switch.nameToIntf[intf.name]
+
+    def removeHost(self, host):
+        intf = host.switch_link.intf1
+        self.switch.detach(intf)
+        self.switchDelIntf(self.switch, intf)
+        intf.delete()
+        del self.net.hosts[self.net.hosts.index(host)]
 
     def stopHost(self, host):
         logging.debug("Stopping host " + host.name)
@@ -81,12 +85,12 @@ class DAQRunner():
         host = self.addHost(container_name, cls=MakeFaucetDockerHost(image), env_vars = env_vars)
         host.activate()
         error_code = host.check_result()
+        self.removeHost(host)
         if error_code != 0:
             logging.info("FAILED test %s with error %s" % (image, error_code))
         else:
             logging.info("PASSED test %s" % image)
         return error_code == 0
-
 
     def createNetwork(self):
         logging.debug("Creating miniet...")
@@ -163,10 +167,13 @@ class DAQRunner():
         assert self.pingTest(h2, h1)
         assert self.pingTest(h1, h2)
 
-        self.dockerTest('daq/test_ping')
-        self.dockerTest('daq/test_nmap')
+        assert self.dockerTest('daq/test_ping')
+        assert self.dockerTest('daq/test_nmap')
         assert self.dockerTest('daq/test_pass')
         assert not self.dockerTest('daq/test_fail')
+
+        for num in range(1,100):
+            assert self.dockerTest('daq/test_ping')
 
         CLI(self.net)
 
