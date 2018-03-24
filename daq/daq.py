@@ -62,7 +62,7 @@ class DAQRunner():
         logging.debug("Ping test %s->%s" % (a.name, b.name))
         failure="ping FAILED"
         assert b.IP() != "0.0.0.0", "IP address not assigned, can't ping"
-        output = a.cmd('ping -c1', b.IP(), '> /dev/null 2>&1 || echo ', failure).strip()
+        output = a.cmd('ping -c2', b.IP(), '> /dev/null 2>&1 || echo ', failure).strip()
         if output:
             print output
         return output.strip() != failure
@@ -77,6 +77,8 @@ class DAQRunner():
             logging.info("FAILED test %s with error %s" % (image, error_code))
         else:
             logging.info("PASSED test %s" % image)
+        return error_code == 0
+
 
     def createNetwork(self):
         logging.debug("Creating miniet...")
@@ -88,6 +90,7 @@ class DAQRunner():
         logging.debug("Starting faucet...")
         self.switch.cmd('cmd/faucet')
 
+        logging.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
         self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
 
@@ -111,8 +114,8 @@ class DAQRunner():
         logging.debug("Adding fauxdevice...")
         h2 = self.addHost('h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
 
-        self.pingTest(h1, h3)
-        self.pingTest(h3, h1)
+        assert self.pingTest(h1, h3)
+        assert self.pingTest(h3, h1)
 
         assert not self.pingTest(h2, h1), "Unexpected success??!?!"
         logging.debug("Expected failure observed.")
@@ -149,13 +152,13 @@ class DAQRunner():
             else:
                 assert False, 'Unknown stream %s' % stream
 
-        self.pingTest(h2, h1)
-        self.pingTest(h1, h2)
+        assert self.pingTest(h2, h1)
+        assert self.pingTest(h1, h2)
 
         self.dockerTest('daq/test_ping')
         self.dockerTest('daq/test_nmap')
-        self.dockerTest('daq/test_pass')
-        self.dockerTest('daq/test_fail')
+        assert self.dockerTest('daq/test_pass')
+        assert not self.dockerTest('daq/test_fail')
 
         CLI(self.net)
 
