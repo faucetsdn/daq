@@ -64,6 +64,7 @@ class DAQRunner():
         self.switch.detach(intf)
         self.switchDelIntf(self.switch, intf)
         intf.delete()
+        del self.net.links[self.net.links.index(host.switch_link)]
         del self.net.hosts[self.net.hosts.index(host)]
 
     def stopHost(self, host):

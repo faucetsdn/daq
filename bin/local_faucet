@@ -12,6 +12,12 @@ sudo ln -fs ${ROOT}/inst/faucet.yaml /etc/faucet/faucet.yaml
 
 sudo chown $USER -R ${ROOT}/inst
 
+if [ -f .pdbrc ]; then
+    cmd=ryu-debug
+else
+    cmd=ryu-manager
+fi
+
 export FAUCET_EVENT_SOCK=$ROOT/inst/faucet_event.sock
 export PYTHONPATH=${ROOT}/../faucet/
-while true; do ryu-manager faucet.faucet; done
+while true; do $cmd faucet.faucet; done

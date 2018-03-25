@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
-FAUCET=faucet/faucet
+FAUCET=faucet/faucet:daq
 FAUCET_PATH=faucet/
 FAUCET_SOCK=faucet_event.sock
 
