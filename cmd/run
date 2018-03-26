@@ -28,12 +28,19 @@ docker ps > /dev/null 2>&1 || service docker start
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
+if [ -z "$daq_intf" ]; then
+    echo Setting daq_intf not defined, defaulting to auto-start faux device.
+    daq_intf="faux!"
+fi
+
 if [ "$daq_intf" == "faux!" ]; then
     daq_intf=faux
     echo Implicitly running faux device...
     $ROOT/cmd/faux
     kill_faux=y
 fi
+
+ip addr show $daq_intf
 
 runcmd=python
 if [ -f .pdbrc ]; then
@@ -46,6 +53,7 @@ sudo env \
      MININET_LOGLEVEL=$MININET_LOGLEVEL \
      DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
      DAQ_CONTAINER=$DAQ_CONTAINER \
+     DAQ_INTF=$daq_intf \
      FAUCET_EVENT_SOCK=$EVENT_SOCK \
      PYTHONPATH=$FAUCET \
      TERM=dumb $runcmd daq/daq.py

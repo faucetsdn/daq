@@ -33,7 +33,7 @@ class TcpHelper():
             close_fds=True)
 
     def stream(self):
-        return self.pipe.stdout
+        return self.pipe.stdout if self.pipe else None
 
     def close(self):
         self.pipe.kill()
