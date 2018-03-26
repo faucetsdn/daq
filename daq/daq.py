@@ -11,7 +11,8 @@ import time
 from mininet import log as minilog
 from mininet.log import LEVELS
 from mininet.net import Mininet
-from mininet.node import RemoteController, OVSSwitch, Host
+from mininet.node import RemoteController, OVSSwitch, Host, Link
+from mininet.link import Intf
 from mininet.cli import CLI
 from mininet.util import pmonitor
 
@@ -30,10 +31,18 @@ class DAQHost(FaucetHostCleanup, Host):
 
     pass
 
+class DummyNode():
+    def addIntf(self, node, port=None):
+        pass
+        #print 'add dummy intf %s to port %s' % (node.name, port)
+
+    def cmd(self, cmd, *args, **kwargs):
+        pass
+        #print 'dummy cmd %s/%s/%s' % (cmd, args, kwargs)
 
 class DAQRunner():
 
-    DHCP_PATTERN = '> ([0-9.]+).68: BOOTP/DHCP, Reply'
+    DHCP_PATTERN = 'Your-IP ([0-9.]+)'
 
     net = None
     switch = None
@@ -48,11 +57,13 @@ class DAQRunner():
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
         if self.net.built:
             host.configDefault()
-            intf = host.switch_link.intf1
-            self.switch.attach(intf)
-            # This really should be done in attach, but currently only automatic on switch startup.
-            self.switch.vsctl(self.switch.intfOpts(intf))
+            self.switchAttach(host.switch_link.intf1)
         return host
+
+    def switchAttach(self, intf):
+        self.switch.attach(intf)
+        # This really should be done in attach, but currently only automatic on switch startup.
+        self.switch.vsctl(self.switch.intfOpts(intf))
 
     def switchDelIntf(self, switch, intf):
         del switch.intfs[switch.ports[intf]]
@@ -72,10 +83,12 @@ class DAQRunner():
         host.terminate()
 
     def pingTest(self, a, b):
-        logging.info("Ping test %s->%s" % (a.name, b.name))
+        b_name = b if isinstance(b, str) else b.name
+        b_ip = b if isinstance(b, str) else b.IP()
+        logging.info("Ping test %s->%s" % (a.name, b_name))
         failure="ping FAILED"
-        assert b.IP() != "0.0.0.0", "IP address not assigned, can't ping"
-        output = a.cmd('ping -c2', b.IP(), '> /dev/null 2>&1 || echo ', failure).strip()
+        assert b_ip != "0.0.0.0", "IP address not assigned, can't ping"
+        output = a.cmd('ping -c2', b_ip, '> /dev/null 2>&1 || echo ', failure).strip()
         if output:
             print output
         return output.strip() != failure
@@ -93,6 +106,9 @@ class DAQRunner():
         else:
             logging.info("PASSED test %s" % image)
         return error_code == 0
+
+    def get_device_intf(self):
+        return Intf('faux', node=DummyNode())
 
     def runner(self):
         logging.debug("Creating miniet...")
@@ -128,29 +144,25 @@ class DAQRunner():
         logging.info("Waiting for system to settle...")
         time.sleep(3)
 
-        logging.debug("Adding fauxdevice...")
-        faux = self.addHost('faux', cls=MakeFaucetDockerHost('daq/fauxdevice', prefix='daq'), ip="0.0.0.0")
+        device_intf = self.get_device_intf()
+        self.switch.addIntf(device_intf)
+        logging.debug("Attaching device interface %s..." % device_intf.name)
+        self.switchAttach(device_intf)
 
         try:
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
 
-            assert not self.pingTest(faux, networking), "Unexpected success??!?!"
-            logging.info("Expected failure observed.")
-
             monitor = StreamMonitor(timeout_ms=1000)
 
-            target_port = self.switch.ports[faux.switch_link.intf1]
+            target_port = self.switch.ports[device_intf]
             logging.debug("Monitoring faucet event socket for target port add %d" % target_port)
             monitor.add_stream(self.faucet_events.sock)
 
             logging.info("Monitoring dhcp responses from %s" % networking.name)
             filter="src port 67"
-            dhcp_traffic = TcpHelper(networking, filter, vflags='', packets=1, duration_sec=60)
+            dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None)
             monitor.add_stream(dhcp_traffic.stream())
-
-            logging.debug("Activating target %s" % faux.name)
-            faux.activate()
 
             for stream in monitor.generator():
                 if stream == self.faucet_events.sock:
@@ -164,16 +176,15 @@ class DAQRunner():
                         match = re.search(self.DHCP_PATTERN, dhcp_line)
                         if match:
                             self.target_host = match.group(1)
-                            logging.info('Host %s is at %s' % (faux.name, self.target_host))
-                            faux.setIP(self.target_host)
+                            logging.info('Host %s is at %s' % (device_intf.name, self.target_host))
                             monitor.remove_stream(dhcp_traffic.stream())
+                            dhcp_traffic.close()
                 elif stream == None:
                     logging.debug('Waiting for monitors to clear...')
                 else:
                     assert False, 'Unknown stream %s' % stream
 
-            assert self.pingTest(faux, networking)
-            assert self.pingTest(networking, faux)
+            assert self.pingTest(networking, self.target_host)
 
             assert self.dockerTest('daq/test_pass')
             assert not self.dockerTest('daq/test_fail')

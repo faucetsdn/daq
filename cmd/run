@@ -4,10 +4,16 @@ ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 FAUCET_SOCK=faucet_event.sock
 EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
+LOCAL_CONFIG=system.conf
 
 cd $ROOT
 
 FAUCET=$(realpath $ROOT/../faucet)
+
+if [ -f $LOCAL_CONFIG ]; then
+    echo Loading configuration from $LOCAL_CONFIG
+    source $LOCAL_CONFIG
+fi
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found.
@@ -21,6 +27,12 @@ docker ps > /dev/null 2>&1 || service docker start
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
+
+if [ "$daq_intf" == "faux!" ]; then
+    daq_intf=faux
+    echo Implicitly running faux device...
+    $ROOT/cmd/faux
+fi
 
 runcmd=python
 if [ -f .pdbrc ]; then

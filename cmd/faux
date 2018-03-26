@@ -1,0 +1,34 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+CONTAINER=daq-faux
+INSTDIR=$ROOT/inst
+IMAGE=daq/faux
+FAUX_ARGS="$@"
+
+echo Launching faux $FAUX_ARGS...
+
+mkdir -p $INSTDIR
+
+if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
+    echo -n "Clensing old container "
+    docker rm -f $CONTAINER
+fi
+
+docker_args="\
+        -v $INSTDIR/faux:/tmp \
+        "
+
+cid=$(docker run -d --privileged --name $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
+pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
+
+echo $CONTAINER running in $pid as $cid
+
+echo Removing old interface faux
+sudo ip link del faux || true
+
+echo Adding new interface...
+sudo ip link add faux type veth peer name faux-eth0 netns $pid
+sudo ip link set faux up
+
+echo Done with faux device launch.

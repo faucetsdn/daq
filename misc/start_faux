@@ -1,0 +1,25 @@
+#!/bin/bash
+
+echo Starting faux device at `date` with $*
+
+declare -A options
+for option in $*; do
+    options[$option]=$option
+done
+
+echo $options
+
+while ! ifconfig -a | fgrep -q faux-eth0; do
+    echo Waiting for faux-eth0 to exist...
+    sleep 1
+done
+
+ifconfig -a
+
+echo Running dhclient...
+dhclient
+
+ifconfig -a
+
+echo Blocking for all eternety.
+tail -f /dev/null

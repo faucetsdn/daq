@@ -1,4 +1,4 @@
-# Image name: daq/fauxdevice
+# Image name: daq/faux
 #
 # Faux device for framework development/testing.
 #
@@ -7,6 +7,6 @@ FROM daq/aardvark:latest
 
 RUN $AG install isc-dhcp-client ethtool network-manager
 
-COPY misc/start_fauxdevice .
+COPY misc/start_faux .
 
-CMD ["./start_fauxdevice"]
+ENTRYPOINT ["./start_faux"]

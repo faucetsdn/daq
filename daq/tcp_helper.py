@@ -16,18 +16,28 @@ class TcpHelper():
         self.funcs = funcs
         if root_intf:
             self.intf_name = self.intf_name.split('.')[0]
-        tcpdump_cmd = faucet_mininet_test_util.timeout_soft_cmd(
-            'tcpdump -i %s -e -n -U %s -c %u %s' % (
-                self.intf_name, vflags, packets, tcpdump_filter),
-            duration_sec)
+        count_flags = '-c %u' if packets else ''
+
+        tcpdump_cmd = 'tcpdump -i %s -e -n -U %s %s %s' % (
+                self.intf_name, vflags, count_flags, tcpdump_filter)
+        if duration_sec:
+            pipe_cmd = faucet_mininet_test_util.timeout_soft_cmd(tcpdump_cmd, duration_sec)
+        else:
+            pipe_cmd = tcpdump_cmd
+
         self.pipe = tcpdump_host.popen(
             tcpdump_cmd,
             stdin=faucet_mininet_test_util.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             close_fds=True)
 
     def stream(self):
         return self.pipe.stdout
+
+    def close(self):
+        self.pipe.kill()
+        self.pipe = None
 
     def next_line(self):
         line = self.pipe.stdout.readline()
