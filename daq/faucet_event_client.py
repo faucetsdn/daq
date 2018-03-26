@@ -41,6 +41,10 @@ class FaucetEventClient():
                              event['PORT_CHANGE']['reason'] != 'DELETE')
         return event['PORT_CHANGE']['port_no'] if port_active_event else None
 
+    def is_ports_status_event(self, event):
+        # TODO: Implement this.
+        pass
+
     def close(self):
         self.sock.close()
         self.sock = None

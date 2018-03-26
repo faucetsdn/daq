@@ -15,7 +15,7 @@ FROM ubuntu:xenial
 
 ENV AG="apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
 
-RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump
+RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
 
 # Dump all our junks into the root home directory.
 WORKDIR /root

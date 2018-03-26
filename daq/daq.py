@@ -5,6 +5,7 @@
 import logging
 import os
 import re
+import signal
 import time
 
 from mininet import log as minilog
@@ -85,7 +86,7 @@ class DAQRunner():
         env_vars = [ "TARGET_HOST=" + self.target_host ]
         host = self.addHost(container_name, cls=MakeFaucetDockerHost(image), env_vars = env_vars)
         host.activate()
-        error_code = host.check_result()
+        error_code = host.wait()
         self.removeHost(host)
         if error_code != 0:
             logging.info("FAILED test %s with error %s" % (image, error_code))
@@ -93,7 +94,7 @@ class DAQRunner():
             logging.info("PASSED test %s" % image)
         return error_code == 0
 
-    def createNetwork(self):
+    def runner(self):
         logging.debug("Creating miniet...")
         self.net = Mininet()
 
@@ -101,7 +102,10 @@ class DAQRunner():
         self.switch = self.net.addSwitch('s1', cls=OVSSwitch)
 
         logging.debug("Starting faucet...")
-        self.switch.cmd('cmd/faucet')
+        output = self.switch.cmd('cmd/faucet && echo SUCCESS')
+        if not output.strip().endswith('SUCCESS'):
+            print output
+            assert False, 'Faucet startup failed'
 
         logging.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
@@ -127,54 +131,61 @@ class DAQRunner():
         logging.debug("Adding fauxdevice...")
         h2 = self.addHost('h2', cls=MakeFaucetDockerHost('daq/fauxdevice'), ip="0.0.0.0")
 
-        assert self.pingTest(h1, h3)
-        assert self.pingTest(h3, h1)
+        try:
+            assert self.pingTest(h1, h3)
+            assert self.pingTest(h3, h1)
 
-        assert not self.pingTest(h2, h1), "Unexpected success??!?!"
-        logging.debug("Expected failure observed.")
+            assert not self.pingTest(h2, h1), "Unexpected success??!?!"
+            logging.debug("Expected failure observed.")
 
-        monitor = StreamMonitor(timeout_ms=1000)
+            monitor = StreamMonitor(timeout_ms=1000)
 
-        target_port = self.switch.ports[h2.switch_link.intf1]
-        logging.debug("Monitoring faucet event socket for target port add %d" % target_port)
-        monitor.add_stream(self.faucet_events.sock)
+            target_port = self.switch.ports[h2.switch_link.intf1]
+            logging.debug("Monitoring faucet event socket for target port add %d" % target_port)
+            monitor.add_stream(self.faucet_events.sock)
 
-        logging.debug("Monitoring dhcp responses from %s" % h1.name)
-        filter="src port 67"
-        dhcp_traffic = TcpHelper(h1, filter, vflags='', packets=1, duration_sec=60)
-        monitor.add_stream(dhcp_traffic.stream())
+            logging.debug("Monitoring dhcp responses from %s" % h1.name)
+            filter="src port 67"
+            dhcp_traffic = TcpHelper(h1, filter, vflags='', packets=1, duration_sec=60)
+            monitor.add_stream(dhcp_traffic.stream())
 
-        logging.debug("Activating target %s" % h2.name)
-        h2.activate()
+            logging.debug("Activating target %s" % h2.name)
+            h2.activate()
 
-        for stream in monitor.generator():
-            if stream == self.faucet_events.sock:
-                event = self.faucet_events.next_event()
-                if self.faucet_events.is_port_active_event(event) == target_port:
-                    logging.debug('Switch port %d active' % target_port)
-                    monitor.remove_stream(self.faucet_events.sock)
-            elif stream == dhcp_traffic.stream():
-                dhcp_line = dhcp_traffic.next_line()
-                if dhcp_line:
-                    self.target_host = re.search(self.DHCP_PATTERN, dhcp_line).group(1)
-                    logging.debug('Host %s is at %s' % (h2.name, self.target_host))
-                    h2.setIP(self.target_host)
-                    monitor.remove_stream(dhcp_traffic.stream())
-            elif stream == None:
-                logging.debug('Waiting for monitors to clear...')
-            else:
-                assert False, 'Unknown stream %s' % stream
+            for stream in monitor.generator():
+                if stream == self.faucet_events.sock:
+                    event = self.faucet_events.next_event()
+                    if self.faucet_events.is_port_active_event(event) == target_port:
+                        logging.debug('Switch port %d active' % target_port)
+                        monitor.remove_stream(self.faucet_events.sock)
+                elif stream == dhcp_traffic.stream():
+                    dhcp_line = dhcp_traffic.next_line()
+                    if dhcp_line:
+                        match = re.search(self.DHCP_PATTERN, dhcp_line)
+                        if match:
+                            self.target_host = match.group(1)
+                            logging.debug('Host %s is at %s' % (h2.name, self.target_host))
+                            h2.setIP(self.target_host)
+                            monitor.remove_stream(dhcp_traffic.stream())
+                elif stream == None:
+                    logging.debug('Waiting for monitors to clear...')
+                else:
+                    assert False, 'Unknown stream %s' % stream
 
-        assert self.pingTest(h2, h1)
-        assert self.pingTest(h1, h2)
+            assert self.pingTest(h2, h1)
+            assert self.pingTest(h1, h2)
 
-        assert self.dockerTest('daq/test_ping')
-        assert self.dockerTest('daq/test_nmap')
-        assert self.dockerTest('daq/test_pass')
-        assert not self.dockerTest('daq/test_fail')
-
-        for num in range(1,100):
             assert self.dockerTest('daq/test_ping')
+            #assert self.dockerTest('daq/test_nmap')
+            assert self.dockerTest('daq/test_pass')
+            assert not self.dockerTest('daq/test_fail')
+
+            for num in range(1,100):
+                assert self.dockerTest('daq/test_ping')
+        except Exception as e:
+            print e
+        except KeyboardInterrupt:
+            print 'Interrupted'
 
         CLI(self.net)
 
@@ -183,10 +194,9 @@ class DAQRunner():
         logging.debug("Stopping mininet...")
         self.net.stop()
 
-
 if __name__ == '__main__':
     minilog.setLogLevel('info')
     if os.getuid() == 0:
-        DAQRunner().createNetwork()
+        DAQRunner().runner()
     else:
         logger.debug("You are NOT root")

@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
-FAUCET=faucet/faucet:daq
+IMAGE=daq/faucet
 FAUCET_PATH=faucet/
 FAUCET_SOCK=faucet_event.sock
 
@@ -30,5 +30,5 @@ docker_volumes="\
         -v $INSTDIR:/etc/$FAUCET_PATH \
         -v $INSTDIR:/var/log/$FAUCET_PATH"
 
-cid=$(docker run -d --name $CONTAINER $docker_volumes $docker_envs -p 6633:6653 $FAUCET)
+cid=$(docker run -d --name $CONTAINER $docker_volumes $docker_envs -p 6633:6653 $IMAGE)
 echo Container $CONTAINER started as $cid
