@@ -176,12 +176,13 @@ class DAQRunner():
             assert self.pingTest(h1, h2)
 
             assert self.dockerTest('daq/test_ping')
-            #assert self.dockerTest('daq/test_nmap')
+            assert self.dockerTest('daq/test_nmap')
             assert self.dockerTest('daq/test_pass')
             assert not self.dockerTest('daq/test_fail')
 
             for num in range(1,100):
                 assert self.dockerTest('daq/test_ping')
+
         except Exception as e:
             print e
         except KeyboardInterrupt:
@@ -193,6 +194,7 @@ class DAQRunner():
         self.switch.cmd('docker kill daq-faucet')
         logging.debug("Stopping mininet...")
         self.net.stop()
+
 
 if __name__ == '__main__':
     minilog.setLogLevel('info')
