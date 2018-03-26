@@ -3,7 +3,7 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-local_config=config.local
+local_config=system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 image_file=build/aardvark.image
