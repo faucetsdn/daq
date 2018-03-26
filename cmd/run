@@ -29,4 +29,10 @@ if [ -f .pdbrc ]; then
 fi
 
 
-sudo env DAQ_CONTAINER=$DAQ_CONTAINER FAUCET_EVENT_SOCK=$EVENT_SOCK PYTHONPATH=$FAUCET TERM=dumb $runcmd daq/daq.py
+sudo env \
+     MININET_LOGLEVEL=$MININET_LOGLEVEL \
+     DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
+     DAQ_CONTAINER=$DAQ_CONTAINER \
+     FAUCET_EVENT_SOCK=$EVENT_SOCK \
+     PYTHONPATH=$FAUCET \
+     TERM=dumb $runcmd daq/daq.py
