@@ -189,10 +189,11 @@ class DAQRunner():
             assert self.dockerTest('daq/test_pass')
             assert not self.dockerTest('daq/test_fail')
             assert self.dockerTest('daq/test_ping')
-            assert self.dockerTest('daq/test_nmap')
+
+            self.dockerTest('daq/test_nmap')
 
             for num in range(1,10):
-                assert self.dockerTest('daq/test_ping')
+                self.dockerTest('daq/test_ping')
 
         except Exception as e:
             print e

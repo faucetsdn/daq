@@ -7,8 +7,6 @@ for option in $*; do
     options[$option]=$option
 done
 
-echo $options
-
 while ! ifconfig -a | fgrep -q faux-eth0; do
     echo Waiting for faux-eth0 to exist...
     sleep 1
@@ -16,10 +14,19 @@ done
 
 ifconfig -a
 
-echo Running dhclient...
-dhclient
+if [ -n "${options[dhcp]}" ]; then
+    echo Supressing dhclient.
+else
+    echo Running dhclient...
+    dhclient
+    ifconfig -a
+fi
 
-ifconfig -a
+# Setup dummy telnet listener to trigger port-scan failure
+if [ -n "${options[telnet]}" ]; then
+    echo Enabling mock telnet server...
+    nc -lk -p 23 -e date &
+fi
 
 echo Blocking for all eternety.
 tail -f /dev/null

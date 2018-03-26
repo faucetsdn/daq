@@ -10,7 +10,7 @@ image_file=build/aardvark.image
 
 if [ -f $local_config ]; then
   echo Reading local configuraiton from $local_config
-  source config.local
+  source $local_config
 fi
 
 sudo rm -rf $build_root
@@ -56,6 +56,9 @@ for file in docker/Dockerfile.*; do
 done
 
 if [ -z "$in_container" ]; then
+    echo
+    echo You can stop this now if running direct with cmd/run and not cmd/dockrun.
+    echo
     images=$(docker images | fgrep daq/ | awk '{print $1}')
     if [ "${images#daq/runner}" != "${images}" ]; then
         echo Docker image daq/runner up-to-date.

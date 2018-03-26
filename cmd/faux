@@ -4,7 +4,15 @@ ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=daq-faux
 INSTDIR=$ROOT/inst
 IMAGE=daq/faux
-FAUX_ARGS="$@"
+FAUX_ARGS="$*"
+local_config=system.conf
+
+if [ -f $local_config ]; then
+  echo Reading local configuraiton from $local_config
+  source $local_config
+fi
+
+FAUX_ARGS="$FAUX_ARGS $faux_args"
 
 echo Launching faux $FAUX_ARGS...
 

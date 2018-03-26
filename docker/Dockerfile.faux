@@ -5,7 +5,7 @@
 
 FROM daq/aardvark:latest
 
-RUN $AG install isc-dhcp-client ethtool network-manager
+RUN $AG install isc-dhcp-client ethtool network-manager netcat
 
 COPY misc/start_faux .
 
