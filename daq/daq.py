@@ -9,6 +9,7 @@ import signal
 import time
 
 from mininet import log as minilog
+from mininet.log import LEVELS
 from mininet.net import Mininet
 from mininet.node import RemoteController, OVSSwitch, Host
 from mininet.cli import CLI
@@ -197,18 +198,12 @@ class DAQRunner():
 
 
 def configure_logging():
-    level_map = {
-        'debug': logging.DEBUG,
-        'info': logging.INFO,
-        'warning': logging.WARNING,
-        'warn': logging.WARNING,
-        'error': logging.ERROR
-    }
 
     daq_env = os.getenv('DAQ_LOGLEVEL')
-    logging.basicConfig(level=level_map[daq_env] if daq_env else level_map['info'])
+    logging.basicConfig(level=LEVELS[daq_env] if daq_env else LEVELS['info'])
 
     mini_env = os.getenv('MININET_LOGLEVEL')
+    LOGMSGFORMAT = '%(message)s'
     minilog.setLogLevel(mini_env if mini_env else 'info')
 
 
