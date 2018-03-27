@@ -180,6 +180,7 @@ class DAQRunner():
                 if intf_name == 'faux' or intf_name == 'local':
                     logging.info('Flapping %s device interface.' % intf_name)
                     self.switch.cmd('ifconfig %s down' % intf_name)
+                    time.sleep(0.5)
                     self.switch.cmd('ifconfig %s up' % intf_name)
 
                 target_port = self.switch.ports[device_intf]

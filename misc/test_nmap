@@ -5,14 +5,15 @@ OPEN=/tmp/open.txt
 
 nmap --open -oG $LOG $TARGET_HOST
 
-grep -oh '[0-9]*/open/[^[:space:]]*' $LOG > $OPEN
+nothing=
+grep -oh '[0-9]*/open/[^[:space:]]*' $LOG > $OPEN || nothing=y
 
 echo
 
-if [ $(cat $OPEN | wc -l) -gt 0 ]; then
+if [ -n "$nothing" ]; then
+    echo No open ports found.
+else
     echo Open ports:
     cat $OPEN
     false
-else
-    echo No restricted ports found.
 fi
