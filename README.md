@@ -20,10 +20,15 @@ The build setup first builds containers for basic execution, then a docker conta
 
 <pre>
   $ cmd/build
+  # Get tea since this could take upwards of 15 minutes for a clean build.
 </pre>
 
 You can also clean all the stuffs using <code>cmd/clean</code>, which is sometimes necessary to gaurintee a clean build.
 Be warned, it also might clean some other images/containers from other projects.
+
+### Configuring DAQ
+
+<code>system.conf</code>
 
 ### Running DAQ
 

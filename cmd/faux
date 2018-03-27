@@ -30,10 +30,8 @@ docker_args="\
 cid=$(docker run -d --privileged --name $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
-echo $CONTAINER running in $pid as $cid
-
 echo Removing old interface faux
-sudo ip link del faux || true
+sudo ip link del faux 2>/dev/null || true
 
 echo Adding new interface...
 sudo ip link add faux type veth peer name faux-eth0 netns $pid

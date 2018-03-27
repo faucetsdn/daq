@@ -5,7 +5,7 @@
 
 FROM daq/aardvark:latest
 
-RUN $AG install dnsmasq ethtool
+RUN $AG install dnsmasq ethtool iptables
 
 RUN echo dhcp-range=10.0.0.128,10.0.0.250,120s >> /etc/dnsmasq.conf
 
