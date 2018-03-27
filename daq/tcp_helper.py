@@ -40,15 +40,16 @@ class TcpHelper():
         self.pipe = None
 
     def next_line(self):
-        line = self.pipe.stdout.readline()
-        assert len(line) > 0 or self.tcpdump_started, 'tcpdump did not start: %s' % self.last_line
-        if self.tcpdump_started:
-            return line
-        elif re.search('listening on %s' % self.intf_name, line):
-            self.tcpdump_started = True
-            # when we see tcpdump start, then call provided functions.
-            if self.funcs is not None:
-                for func in self.funcs:
-                    func()
-        else:
-            self.last_line = line
+        while True:
+            line = self.pipe.stdout.readline()
+            assert len(line) > 0 or self.tcpdump_started, 'tcpdump did not start: %s' % self.last_line
+            if self.tcpdump_started:
+                return line
+            elif re.search('listening on %s' % self.intf_name, line):
+                self.tcpdump_started = True
+                # when we see tcpdump start, then call provided functions.
+                if self.funcs is not None:
+                    for func in self.funcs:
+                        func()
+            else:
+                self.last_line = line

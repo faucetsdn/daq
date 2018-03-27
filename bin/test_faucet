@@ -1,10 +1,11 @@
 #!/bin/bash -e
 
+FAUCET_TESTS=
 #FAUCET_TESTS=-n
-FAUCET_TESTS="-n -k FaucetDockerTest"
+#FAUCET_TESTS="-n -k FaucetDockerTest"
 
 ROOT=$(realpath $(dirname $0)/..)
-cd $ROOT/../faucet
+cd $ROOT/../clib
 
 sudo docker build --pull -t faucet/tests -f Dockerfile.tests  .
 

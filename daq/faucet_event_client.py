@@ -1,5 +1,6 @@
 import json
 import os
+import select
 import socket
 import time
 
@@ -9,10 +10,14 @@ class FaucetEventClient():
     FAUCET_RETRIES=10
 
     sock = None
-    buffer = b''
+    buffer = None
+    previous_state = None
 
     def connect(self, sock_path):
         """Make connection to sock to receive events"""
+
+        self.previous_state = {}
+        self.buffer = b''
 
         retries = self.FAUCET_RETRIES
         while not os.path.exists(sock_path):
@@ -26,24 +31,35 @@ class FaucetEventClient():
         except socket.error as err:
             assert False, "Failed to connect because: %s" % err
 
+    def has_data(self):
+        read_socks, write_socks, error_socks = select.select([ self.sock ], [], [], 0)
+        return read_socks
+
+    def has_event(self, blocking=False):
+        while True:
+            if '\n' in self.buffer:
+                return True
+            elif self.has_data() or blocking:
+                self.buffer += self.sock.recv(1024)
+            else:
+                return False
+
     def next_event(self):
         while True:
-            line, remainder = self.buffer.split('\n', 1) if '\n' in self.buffer else (None, self.buffer)
-            self.buffer = remainder
-            if line:
+            if self.has_event(blocking=True):
+                line, remainder = self.buffer.split('\n', 1)
+                self.buffer = remainder
                 return json.loads(line)
-            else:
-                self.buffer += self.sock.recv(1024)
 
-    def is_port_active_event(self, event):
-        port_active_event = ('PORT_CHANGE' in event and
-                             event['PORT_CHANGE']['status'] and
-                             event['PORT_CHANGE']['reason'] != 'DELETE')
-        return event['PORT_CHANGE']['port_no'] if port_active_event else None
-
-    def is_ports_status_event(self, event):
-        # TODO: Implement this.
-        pass
+    def as_port_state(self, event):
+        if not 'PORT_CHANGE' in event:
+            return (None, None)
+        port_no = event['PORT_CHANGE']['port_no']
+        port_active = event['PORT_CHANGE']['status']
+        if port_no in self.previous_state and self.previous_state[port_no] == port_active:
+            return (None, None)
+        self.previous_state[port_no] = port_active
+        return (port_no, port_active)
 
     def close(self):
         self.sock.close()

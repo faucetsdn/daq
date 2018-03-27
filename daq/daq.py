@@ -16,13 +16,11 @@ from mininet.net import Mininet
 from mininet.node import RemoteController, OVSSwitch, Host, Link
 from mininet.link import Intf
 from mininet.cli import CLI
-from mininet.util import pmonitor
 
 from tests.faucet_mininet_test_host import MakeFaucetDockerHost
 from tests.faucet_mininet_test_topo import FaucetHostCleanup
 from tests import faucet_mininet_test_util
 
-from stream_monitor import StreamMonitor
 from tcp_helper import TcpHelper
 from faucet_event_client import FaucetEventClient
 
@@ -152,58 +150,53 @@ class DAQRunner():
         logging.info("Attaching device interface %s..." % device_intf.name)
         self.switchAttach(device_intf)
 
-        try:
-            assert self.pingTest(networking, dummy)
-            assert self.pingTest(dummy, networking)
+        assert self.pingTest(networking, dummy)
+        assert self.pingTest(dummy, networking)
 
-            monitor = StreamMonitor(timeout_ms=1000)
+        while True:
+            try:
+                logging.debug('Flushing event queue')
+                while self.faucet_events.has_event():
+                    self.faucet_events.next_event()
 
-            target_port = self.switch.ports[device_intf]
-            logging.debug("Monitoring faucet event socket for target port add %d" % target_port)
-            monitor.add_stream(self.faucet_events.sock)
+                target_port = self.switch.ports[device_intf]
+                logging.info('Waiting for port-up event on port %d for %s...' %
+                    (target_port, device_intf.name))
+                while True:
+                    (port, active) = self.faucet_events.as_port_state(
+                        self.faucet_events.next_event())
+                    if port == target_port and active:
+                        break
 
-            logging.info("Monitoring dhcp responses from %s" % networking.name)
-            filter="src port 67"
-            dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None)
-            monitor.add_stream(dhcp_traffic.stream())
+                logging.info('Waiting for dhcp reply from %s...' % networking.name)
+                filter="src port 67"
+                dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None)
 
-            for stream in monitor.generator():
-                if stream == None:
-                    logging.debug('Waiting for monitors to clear...')
-                elif stream == self.faucet_events.sock:
-                    event = self.faucet_events.next_event()
-                    if self.faucet_events.is_port_active_event(event) == target_port:
-                        logging.info('Switch port %d active' % target_port)
-                        monitor.remove_stream(self.faucet_events.sock)
-                elif stream == dhcp_traffic.stream():
+                while True:
                     dhcp_line = dhcp_traffic.next_line()
-                    if dhcp_line:
-                        match = re.search(self.DHCP_PATTERN, dhcp_line)
-                        if match:
-                            self.target_host = match.group(1)
-                            logging.info('Host %s is at %s' % (device_intf.name, self.target_host))
-                            monitor.remove_stream(dhcp_traffic.stream())
-                            dhcp_traffic.close()
-                else:
-                    assert False, 'Unknown stream %s' % stream
+                    match = re.search(self.DHCP_PATTERN, dhcp_line)
+                    if match:
+                        self.target_host = match.group(1)
+                        logging.info('Host %s is at %s' % (device_intf.name, self.target_host))
+                        break
+                dhcp_traffic.close()
 
-            assert self.pingTest(networking, self.target_host)
+                logging.info('Running test suite against target...')
 
-            assert self.dockerTest('daq/test_pass')
-            assert not self.dockerTest('daq/test_fail')
-            assert self.dockerTest('daq/test_ping')
+                assert self.pingTest(networking, self.target_host)
 
-            self.dockerTest('daq/test_nmap')
+                assert self.dockerTest('daq/test_pass')
+                assert not self.dockerTest('daq/test_fail')
+                assert self.dockerTest('daq/test_ping')
+                self.dockerTest('daq/test_nmap')
 
-            for num in range(1,10):
-                self.dockerTest('daq/test_ping')
+                logging.info('Done with tests')
 
-        except Exception as e:
-            print e, traceback.print_exc(file=sys.stderr)
-        except KeyboardInterrupt:
-            print 'Interrupted'
-
-        CLI(self.net)
+            except Exception as e:
+                print e, traceback.print_exc(file=sys.stderr)
+            except KeyboardInterrupt:
+                print 'Interrupted'
+                break
 
         logging.debug("Stopping faucet...")
         self.switch.cmd('docker kill daq-faucet')
