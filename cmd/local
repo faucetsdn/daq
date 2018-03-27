@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+echo Cleaning up local link...
+ps ax | fgrep 'dhclient local-daq' | awk '{print $1}' | sudo xargs kill 2> /dev/null || true
+sudo ip link del local-daq || true
+
+if [ "$1" == clean ]; then
+    exit 0
+fi
+
+sudo ip link add local type veth peer name local-daq
+
+sleep 1
+
+sudo dhclient local-daq &
+
+echo Created local link pair local local-daq

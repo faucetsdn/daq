@@ -176,10 +176,11 @@ class DAQRunner():
                 while self.faucet_events.has_event():
                     self.faucet_events.next_event()
 
-                if device_intf.name == 'faux':
-                    logging.info('Flapping faux device interface.')
-                    self.switch.cmd('ifconfig faux down')
-                    self.switch.cmd('ifconfig faux up')
+                intf_name = device_intf.name
+                if intf_name == 'faux' or intf_name == 'local':
+                    logging.info('Flapping %s device interface.' % intf_name)
+                    self.switch.cmd('ifconfig %s down' % intf_name)
+                    self.switch.cmd('ifconfig %s up' % intf_name)
 
                 target_port = self.switch.ports[device_intf]
                 logging.info('Waiting for port-up event on interface %s port %d...' %

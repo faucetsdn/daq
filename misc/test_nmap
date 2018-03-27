@@ -1,22 +1,18 @@
 #!/bin/sh -e
-#
 
-nmap --open -oG nmap.log $TARGET_HOST
+LOG=/tmp/nmap.log
+OPEN=/tmp/open.txt
+
+nmap --open -oG $LOG $TARGET_HOST
+
+grep -oh '[0-9]*/open/[^[:space:]]*' $LOG > $OPEN
 
 echo
-echo Checking for restricted ports...
 
-FAILED=no
-for proto in telnet; do
-    result=$(fgrep $proto nmap.log || true)
-    if [ -n "$result" ]; then
-        echo "$result"
-        FAILED=yes
-    fi
-done
-
-if [ $FAILED != no ]; then
+if [ $(cat $OPEN | wc -l) -gt 0 ]; then
+    echo Open ports:
+    cat $OPEN
     false
+else
+    echo No restricted ports found.
 fi
-
-echo No restricted ports found.
