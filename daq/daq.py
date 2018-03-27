@@ -95,7 +95,7 @@ class DAQRunner():
     def dockerTest(self, image):
         container_name = image.split('/')[-1]
         env_vars = [ "TARGET_HOST=" + self.target_host ]
-        logging.info("Running docker test %s" % image)
+        logging.debug("Running docker test %s" % image)
         cls = MakeFaucetDockerHost(image, prefix='daq')
         host = self.addHost(container_name, cls=cls, env_vars = env_vars)
         host.activate()
@@ -160,8 +160,8 @@ class DAQRunner():
                     self.faucet_events.next_event()
 
                 target_port = self.switch.ports[device_intf]
-                logging.info('Waiting for port-up event on port %d for %s...' %
-                    (target_port, device_intf.name))
+                logging.info('Waiting for port-up event on interface %s port %d...' %
+                    (device_intf.name, target_port))
                 while True:
                     (port, active) = self.faucet_events.as_port_state(
                         self.faucet_events.next_event())

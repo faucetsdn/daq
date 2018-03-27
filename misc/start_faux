@@ -12,14 +12,17 @@ while ! ifconfig -a | fgrep -q faux-eth0; do
     sleep 1
 done
 
-ifconfig -a
+ip addr show faux-eth0
 
-if [ -n "${options[dhcp]}" ]; then
-    echo Supressing dhclient.
-else
-    echo Running dhclient...
-    dhclient
-    ifconfig -a
+echo Running dhclient...
+dhclient
+ip addr show faux-eth0
+
+if [ -n "${options[ndhcp]}" ]; then
+    echo Chaning assigned ip address...
+    ip addr del $(ip addr show faux-eth0 | fgrep inet | awk '{print $2}') dev faux-eth0
+    ip addr add 10.0.0.5/8 dev faux-eth0
+    ip addr show faux-eth0
 fi
 
 # Setup dummy telnet listener to trigger port-scan failure
