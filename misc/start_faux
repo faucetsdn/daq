@@ -25,10 +25,23 @@ if [ -n "${options[ndhcp]}" ]; then
     ip addr show faux-eth0
 fi
 
+# Pick the one not-lo inet v4 address.
+ipline=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
+read -r -a parts <<< "$ipline"
+local_ip=${parts[1]%/*}
+broadcast_ip=${parts[3]}
+
+echo Faux device at $local_ip bcast $broadcast_ip
+
 # Setup dummy telnet listener to trigger port-scan failure
 if [ -n "${options[telnet]}" ]; then
     echo Enabling mock telnet server...
     nc -lk -p 23 -e date &
+fi
+
+if [ -n "${options[bacnet]}" ]; then
+    echo Starting bacnet loop device.
+    java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar com.serotonin.bacnet4j.test.LoopDevice $local_ip $broadcast_ip &
 fi
 
 echo Blocking for all eternety.

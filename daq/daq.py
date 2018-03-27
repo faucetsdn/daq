@@ -43,14 +43,16 @@ class DummyNode():
 class DAQRunner():
 
     DHCP_PATTERN = 'Your-IP ([0-9.]+)'
+    TEST_PREFIX = 'daq/test_'
 
     net = None
     switch = None
     target_host = None
+    run_id = None
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[]):
         params = { 'ip': ip } if ip else {}
-        params['tmpdir'] = 'inst'
+        params['tmpdir'] = os.path.join('inst', 'test-' + self.run_id)
         params['env_vars'] = env_vars
         host = self.net.addHost(name, cls, **params)
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
@@ -92,26 +94,36 @@ class DAQRunner():
             print output
         return output.strip() != failure
 
+    def dockerTestName(self, image):
+        # Names need to be short because they ultimately get used as netif names.
+        assert image.startswith(self.TEST_PREFIX), 'name %s not startswith %s' % (image, self.TEST_PREFIX)
+        return image[len(self.TEST_PREFIX):]
+
     def dockerTest(self, image):
-        container_name = image.split('/')[-1]
         env_vars = [ "TARGET_HOST=" + self.target_host ]
         logging.debug("Running docker test %s" % image)
         cls = MakeFaucetDockerHost(image, prefix='daq')
-        host = self.addHost(container_name, cls=cls, env_vars = env_vars)
+        host = self.addHost(self.dockerTestName(image), cls=cls, env_vars = env_vars)
         host.activate()
         error_code = host.wait()
         self.removeHost(host)
         if error_code != 0:
-            logging.info("FAILED test %s with error %s" % (image, error_code))
+            logging.info("FAILED test %s/%s with error %s" % (host.name, image, error_code))
         else:
-            logging.info("PASSED test %s" % image)
+            logging.info("PASSED test %s/%s" % (host.name, image))
         return error_code == 0
 
     def get_device_intf(self):
         device_intf_name = os.getenv('DAQ_INTF')
         return Intf(device_intf_name, node=DummyNode())
 
+    def getTestRunId(self):
+        return '%06x' % int(time.time())
+
     def runner(self):
+
+        self.run_id = 'init'
+
         logging.debug("Creating miniet...")
         self.net = Mininet()
 
@@ -132,7 +144,7 @@ class DAQRunner():
         logging.debug("Adding controller at %s" % targetIp)
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
 
-        logging.debug("Adding hosts...")
+        logging.debug("Adding networking host...")
         networking = self.addHost('networking', cls=MakeFaucetDockerHost('daq/networking', prefix='daq'))
         dummy = self.addHost('dummy')
 
@@ -155,9 +167,19 @@ class DAQRunner():
 
         while True:
             try:
-                logging.debug('Flushing event queue')
+                self.run_id = self.getTestRunId()
+
+                logging.info('')
+                logging.info('Starting new test run %s' % self.run_id)
+
+                logging.debug('Flushing event queue.')
                 while self.faucet_events.has_event():
                     self.faucet_events.next_event()
+
+                if device_intf.name == 'faux':
+                    logging.info('Flapping faux device interface.')
+                    self.switch.cmd('ifconfig faux down')
+                    self.switch.cmd('ifconfig faux up')
 
                 target_port = self.switch.ports[device_intf]
                 logging.info('Waiting for port-up event on interface %s port %d...' %
@@ -188,6 +210,7 @@ class DAQRunner():
                 assert self.dockerTest('daq/test_pass')
                 assert not self.dockerTest('daq/test_fail')
                 assert self.dockerTest('daq/test_ping')
+                self.dockerTest('daq/test_bacnet')
                 self.dockerTest('daq/test_nmap')
 
                 logging.info('Done with tests')

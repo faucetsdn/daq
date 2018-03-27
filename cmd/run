@@ -48,7 +48,6 @@ if [ -f .pdbrc ]; then
     runcmd=pdb
 fi
 
-
 sudo env \
      MININET_LOGLEVEL=$MININET_LOGLEVEL \
      DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
@@ -56,7 +55,7 @@ sudo env \
      DAQ_INTF=$daq_intf \
      FAUCET_EVENT_SOCK=$EVENT_SOCK \
      PYTHONPATH=$FAUCET \
-     TERM=dumb $runcmd daq/daq.py
+     TERM=dumb $runcmd daq/daq.py "$@"
 
 if [ -n "$kill_faux" ]; then
     echo Cleaning up faux device container...
