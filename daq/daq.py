@@ -134,11 +134,6 @@ class DAQRunner():
         logging.debug("Adding controller at %s" % targetIp)
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
 
-        device_intf = self.get_device_intf()
-        self.switch.addIntf(device_intf)
-        logging.info("Attaching device interface %s..." % device_intf.name)
-        self.switchAttach(device_intf)
-
         logging.debug("Adding hosts...")
         networking = self.addHost('networking', cls=MakeFaucetDockerHost('daq/networking', prefix='daq'))
         dummy = self.addHost('dummy')
@@ -151,6 +146,11 @@ class DAQRunner():
 
         logging.info("Waiting for system to settle...")
         time.sleep(3)
+
+        device_intf = self.get_device_intf()
+        self.switch.addIntf(device_intf)
+        logging.info("Attaching device interface %s..." % device_intf.name)
+        self.switchAttach(device_intf)
 
         try:
             assert self.pingTest(networking, dummy)

@@ -60,5 +60,5 @@ sudo env \
 
 if [ -n "$kill_faux" ]; then
     echo Cleaning up faux device container...
-    docker kill daq-faux
+    docker kill daq-faux > /dev/null
 fi
