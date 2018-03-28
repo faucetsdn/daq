@@ -1,8 +1,16 @@
-FROM daq/aardvark:latest
+FROM daq/aardvark:latest as bacnet_build
 
 RUN $AG install default-jdk git
 
-RUN git clone https://github.com/grafnu/bacnet4j.git && cd bacnet4j && ./gradlew shadow && rm -rf ~/.gradle
+RUN git clone https://github.com/grafnu/bacnet4j.git && cd bacnet4j && ./gradlew shadow
+
+RUN cp bacnet4j/*.jar .
+
+FROM daq/aardvark:latest
+
+RUN $AG install default-jre
+
+COPY --from=bacnet_build /root/*.jar bacnet4j/
 
 COPY misc/bacnet_discover .
 

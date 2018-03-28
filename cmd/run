@@ -53,6 +53,13 @@ if [ "$daq_intf" == "faux!" ]; then
     cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
 fi
 
+if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" -a -n "$daq_intf" ]; then
+    while ! ifconfig -a | fgrep -q $daq_intf; do
+        echo Waiting for interface $daq_intf to appear...
+        sleep 1
+    done
+fi
+
 ip addr show $daq_intf
 
 runcmd=python
