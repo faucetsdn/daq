@@ -13,15 +13,15 @@ if [ -f $local_config ]; then
   source $local_config
 fi
 
-sudo rm -rf $build_root
-mkdir -p $build_root
-
 if [ -n "$in_container" ]; then
     service docker start
-    echo Importing local copy of live docker files.
-    rm -rf docker
-    cp -a /daq/docker .
-    sleep 2
+    sleep 1
+    echo Importing local of daq.
+    ROOT=/root/daq
+    rm -rf $ROOT
+    cp -a /daq $ROOT
+    cd $ROOT
+    rm -rf build inst
 fi
 
 if [ -n "$faucet_git" ]; then
@@ -32,7 +32,10 @@ if [ -n "$faucet_tag" ]; then
   build_args+=" --build-arg faucet_tag=$faucet_tag"
 fi
 
+date > last_build.txt
 declare -A modules
+sudo rm -rf $build_root
+mkdir -p $build_root
 
 for file in docker/Dockerfile.*; do
     if [ ${file%\~} != ${file} ]; then
@@ -65,7 +68,8 @@ if [ -z "$in_container" ]; then
         echo
         if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
             echo Runner build on top of base...
-            cmd/dockrun base daq/cmd/build
+            # Explicilty run in / not /root because of volume mapping.
+            cmd/dockrun base /daq/cmd/build
         else
             echo Runner build inside existing runner...
             cmd/dockrun runner daq/cmd/build
@@ -74,7 +78,9 @@ if [ -z "$in_container" ]; then
         docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
     fi
 else
-    service docker stop
+    docker system prune -f | fgrep reclaimed
     sleep 1
-    rm -r /var/lib/docker/runtimes
+    service docker stop
+    sleep 2
+    rm -fr /var/lib/docker/runtimes
 fi

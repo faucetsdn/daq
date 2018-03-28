@@ -8,14 +8,12 @@ docker_args=
 
 cd $ROOT
 
-if [ "$1" == base ]; then
-    IMAGE=daq/base
-    docker_args+="-v $PWD/docker:/daq/docker/ "
-    shift
-fi
-
-if [ "$1" == runner ]; then
-    docker_args+="-v $PWD/docker:/daq/docker/ "
+if [ "$1" == base -o "$1" == runner ]; then
+    if [ "$1" == base ]; then
+        IMAGE=daq/base
+    fi
+    build=y
+    docker_args+="-v $PWD:/daq/ "
     shift
 fi
 
@@ -33,7 +31,9 @@ rm -f $INSTDIR/system.conf
 test -f $ROOT/system.conf && cp $ROOT/system.conf $INSTDIR/
 
 docker_args+="--env DAQ_CONTAINER=daq/runner "
-docker_args+="-v $INSTDIR:/root/daq/inst "
+if [ -s "$build" ]; then
+    docker_args+="-v $INSTDIR:/root/daq/inst "
+fi
 
 function move_intf {
     sleep 2
@@ -51,7 +51,9 @@ function move_intf {
     fi
 }
 
-# WTF I need to do \r\n is beyond me. But there it is.
-printf "$(move_intf)\r\n" &
+if [ -z "$build" ]; then
+   # WTF I need to do \r\n is beyond me. But there it is.
+   printf "$(move_intf)\r\n" &
+fi
 
 docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"

@@ -1,10 +1,12 @@
 # Development files
+
 *~
 .pdbrc
 .pdbrcX
 
 # Local config
 system.conf
+last_build.txt
 
 # Runtime files
 inst/

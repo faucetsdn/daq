@@ -18,7 +18,7 @@ echo Running dhclient...
 dhclient
 ip addr show faux-eth0
 
-if [ -n "${options[ndhcp]}" ]; then
+if [ -n "${options[xdhcp]}" ]; then
     echo Chaning assigned ip address...
     ip addr del $(ip addr show faux-eth0 | fgrep inet | awk '{print $2}') dev faux-eth0
     ip addr add 10.0.0.5/8 dev faux-eth0
