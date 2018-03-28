@@ -30,6 +30,8 @@ if [ -n "$faucet_tag" ]; then
   build_args+=" --build-arg faucet_tag=$faucet_tag"
 fi
 
+declare -A modules
+
 for file in docker/Dockerfile.*; do
     if [ ${file%\~} != ${file} ]; then
         continue
@@ -48,6 +50,7 @@ for file in docker/Dockerfile.*; do
         false
     fi
     echo Build complete. >> $logfile
+    modules[$module]=$module
 done
 
 if [ -z "$in_container" ]; then
@@ -64,6 +67,13 @@ if [ -z "$in_container" ]; then
         docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
     fi
 else
+    for module in ${modules[@]}; do
+        image=daq/$module
+        echo Flattening $image...
+        docker save $image | docker import - $image > /dev/null
+    done
+    echo Pruning system...
+    docker system prune -f | fgrep reclaimed
     service docker stop
     sleep 1
     rm -r /var/lib/docker/runtimes
