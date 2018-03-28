@@ -6,7 +6,6 @@ IMAGE=daq/runner
 
 if [ "$1" == base ]; then
     IMAGE=daq/base
-    base_flags="-v $ROOT/build:/build"
     shift
 fi
 
@@ -15,4 +14,12 @@ mkdir -p $INSTDIR
 
 docker rm -f daq-runner > /dev/null 2>&1 || true
 
-docker run --privileged --name daq-runner --env DAQ_CONTAINER=daq/runner $base_flags -v $INSTDIR:/root/daq/inst -ti $IMAGE "$@"
+rm -f $INSTDIR/system.conf
+test -f $ROOT/system.conf && cp $ROOT/system.conf $INSTDIR/
+
+docker_args="\
+  --env DAQ_CONTAINER=daq/runner \
+  -v $INSTDIR:/root/daq/inst \
+"
+
+docker run --privileged --name daq-runner $base_flags $docker_args -ti $IMAGE "$@"

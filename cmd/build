@@ -6,7 +6,6 @@ cd $ROOT
 local_config=system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
-image_file=build/aardvark.image
 
 if [ -f $local_config ]; then
   echo Reading local configuraiton from $local_config
@@ -21,7 +20,6 @@ build_args=
 if [ -n "$in_container" ]; then
   service docker start
   sleep 2
-  docker image load -q -i /$image_file
 fi
 
 if [ -n "$faucet_git" ]; then
@@ -32,22 +30,19 @@ if [ -n "$faucet_tag" ]; then
   build_args+=" --build-arg faucet_tag=$faucet_tag"
 fi
 
-
 for file in docker/Dockerfile.*; do
     if [ ${file%\~} != ${file} ]; then
         continue
     fi
     module=${file#docker/Dockerfile.}
-    if [ -n "$in_container" ]; then
-	if [ $module == base -o $module == aardvark ]; then
-            echo Skipping $module build.
-            continue
-	fi
+    if [ $module == base -a -n "$in_container" ]; then
+        continue
     fi
     logfile=$build_root/docker_build.$module
     echo Building $file into daq/$module, log to $logfile...
     failed=
-    docker build -t daq/$module $build_args -f $file . > $logfile 2>&1 || failed=y
+    tag=daq/$module
+    docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
     if [ -n "$failed" ]; then
         tail $logfile
         false
@@ -56,18 +51,16 @@ for file in docker/Dockerfile.*; do
 done
 
 if [ -z "$in_container" ]; then
-    echo
-    echo You can stop this now if running direct with cmd/run and not cmd/dockrun.
-    echo
     images=$(docker images | fgrep daq/ | awk '{print $1}')
     if [ "${images#daq/runner}" != "${images}" ]; then
         echo Docker image daq/runner up-to-date.
     else
-	echo Exporting image to $image_file...
-	docker image save daq/aardvark -o $image_file
+        echo
+        echo You can stop this now if running direct with cmd/run and not cmd/dockrun.
+        echo
         echo Running build inside runner...
         cmd/dockrun base daq/cmd/build
-        echo Committing daq-runner changes to daq/runner...
+        echo Committing runner container image to daq/runner...
         docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
     fi
 else

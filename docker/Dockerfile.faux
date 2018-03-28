@@ -7,7 +7,7 @@ FROM daq/aardvark:latest
 
 RUN $AG install default-jdk git
 
-RUN git clone https://github.com/grafnu/bacnet4j.git && cd bacnet4j && ./gradlew shadow
+RUN git clone https://github.com/grafnu/bacnet4j.git && cd bacnet4j && ./gradlew shadow && rm -rf ~/.gradle
 
 RUN $AG install isc-dhcp-client ethtool network-manager netcat
 
