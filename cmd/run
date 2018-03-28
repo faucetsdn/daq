@@ -53,6 +53,7 @@ if [ "$daq_intf" == "faux!" ]; then
     cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
 fi
 
+# If running inside of a container, wait until the host test interface shows up...
 if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" -a -n "$daq_intf" ]; then
     while ! ifconfig -a | fgrep -q $daq_intf; do
         echo Waiting for interface $daq_intf to appear...

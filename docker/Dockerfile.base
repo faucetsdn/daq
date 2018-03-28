@@ -33,6 +33,3 @@ RUN git clone $faucet_git -b $faucet_tag
 
 # Copy DAQ source into container
 COPY . daq
-
-# Run the DAQ runner by default.
-CMD daq/cmd/run

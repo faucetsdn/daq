@@ -6,6 +6,7 @@ cd $ROOT
 local_config=system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
+build_args=
 
 if [ -f $local_config ]; then
   echo Reading local configuraiton from $local_config
@@ -15,11 +16,12 @@ fi
 sudo rm -rf $build_root
 mkdir -p $build_root
 
-build_args=
-
 if [ -n "$in_container" ]; then
-  service docker start
-  sleep 2
+    service docker start
+    echo Importing local copy of live docker files.
+    rm -rf docker
+    cp -a /daq/docker .
+    sleep 2
 fi
 
 if [ -n "$faucet_git" ]; then
@@ -61,19 +63,17 @@ if [ -z "$in_container" ]; then
         echo
         echo You can stop this now if running direct with cmd/run and not cmd/dockrun.
         echo
-        echo Running build inside runner...
-        cmd/dockrun base daq/cmd/build
+        if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
+            echo Runner build on top of base...
+            cmd/dockrun base daq/cmd/build
+        else
+            echo Runner build inside existing runner...
+            cmd/dockrun runner daq/cmd/build
+        fi
         echo Committing runner container image to daq/runner...
         docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
     fi
 else
-    for module in ${modules[@]}; do
-        image=daq/$module
-        echo Flattening $image...
-        docker save $image | docker import - $image > /dev/null
-    done
-    echo Pruning system...
-    docker system prune -f | fgrep reclaimed
     service docker stop
     sleep 1
     rm -r /var/lib/docker/runtimes

@@ -12,7 +12,9 @@ if [ -f $local_config ]; then
   source $local_config
 fi
 
-FAUX_ARGS="$FAUX_ARGS $faux_args"
+if [ -z "$FAUX_ARGS" ]; then
+    FAUX_ARGS="$faux_args"
+fi
 
 echo Launching faux $FAUX_ARGS...
 

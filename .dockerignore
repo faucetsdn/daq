@@ -1,4 +1,5 @@
 build/
 inst/
+docker/
 .git/
 system.conf

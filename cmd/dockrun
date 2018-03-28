@@ -1,12 +1,27 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-INSTDIR=$ROOT/inst
+INSTDIR=$ROOT/inst/
 IMAGE=daq/runner
+LOCAL_CONFIG=system.conf
+docker_args=
+
+cd $ROOT
 
 if [ "$1" == base ]; then
     IMAGE=daq/base
+    docker_args+="-v $PWD/docker:/daq/docker/ "
     shift
+fi
+
+if [ "$1" == runner ]; then
+    docker_args+="-v $PWD/docker:/daq/docker/ "
+    shift
+fi
+
+if [ -f $LOCAL_CONFIG ]; then
+    echo Loading configuration from $LOCAL_CONFIG
+    source $LOCAL_CONFIG
 fi
 
 sudo rm -rf $INSTDIR
@@ -17,9 +32,26 @@ docker rm -f daq-runner > /dev/null 2>&1 || true
 rm -f $INSTDIR/system.conf
 test -f $ROOT/system.conf && cp $ROOT/system.conf $INSTDIR/
 
-docker_args="\
-  --env DAQ_CONTAINER=daq/runner \
-  -v $INSTDIR:/root/daq/inst \
-"
+docker_args+="--env DAQ_CONTAINER=daq/runner "
+docker_args+="-v $INSTDIR:/root/daq/inst "
 
-docker run --privileged --name daq-runner $base_flags $docker_args -ti $IMAGE "$@"
+function move_intf {
+    sleep 2
+    if [ -n "$daq_intf" ]; then
+        intf=${daq_intf%!}
+        pid=$(docker inspect --format '{{.State.Pid}}' daq-runner)
+        link=$(ip link show $intf 2>/dev/null )
+        if [ "$pid" != 0 -a -n "$link" ]; then
+            echo Moving interface $intf into container pid $pid...
+            sudo ip link set $intf netns $pid
+        else
+            echo Could not find process/intf for daq-runner/$intf, terminating daq-runner.
+            docker kill daq-runner > /dev/null
+        fi
+    fi
+}
+
+# WTF I need to do \r\n is beyond me. But there it is.
+printf "$(move_intf)\r\n" &
+
+docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
