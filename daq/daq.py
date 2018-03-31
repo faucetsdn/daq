@@ -56,10 +56,11 @@ class DAQRunner():
     target_ip = None
     run_id = None
 
-    def addHost(self, name, cls=DAQHost, ip=None, env_vars=[]):
+    def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[]):
         params = { 'ip': ip } if ip else {}
-        params['tmpdir'] = self.tmpdir
+        params['tmpdir'] = os.path.join(self.tmpdir, 'tests')
         params['env_vars'] = env_vars
+        params['vol_maps'] = vol_maps
         host = self.net.addHost(name, cls, **params)
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
         if self.net.built:
@@ -106,13 +107,16 @@ class DAQRunner():
         return image[len(self.TEST_PREFIX):]
 
     def dockerTest(self, image):
-        env_vars = [ "TARGET_IP=" + self.target_ip,
+        test_name = self.dockerTestName(image)
+        env_vars = [ "TARGET_NAME=" + test_name,
+                     "TARGET_IP=" + self.target_ip,
                      "TARGET_MAC=" + self.target_mac,
                      "GATEWAY_IP=" + self.networking.IP(),
                      "GATEWAY_MAC=" + self.networking.MAC()]
+        vol_maps = [ self.scan_base + ":/scans" ]
         logging.debug("Running docker test %s" % image)
         cls = MakeFaucetDockerHost(image, prefix='daq')
-        host = self.addHost(self.dockerTestName(image), cls=cls, env_vars = env_vars)
+        host = self.addHost(test_name, cls=cls, env_vars = env_vars, vol_maps=vol_maps)
         host.activate()
         error_code = host.wait()
         self.removeHost(host)
@@ -128,9 +132,10 @@ class DAQRunner():
 
     def set_run_id(self, run_id):
         self.run_id = run_id
-        self.tmpdir = os.path.join('inst', 'test-' + run_id)
-        if not os.path.exists(self.tmpdir):
-            os.makedirs(self.tmpdir)
+        self.tmpdir = os.path.join('inst', 'run-' + run_id)
+        self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
+        if not os.path.exists(self.scan_base):
+            os.makedirs(self.scan_base)
 
     def make_test_run_id(self):
         return '%06x' % int(time.time())
@@ -196,7 +201,7 @@ class DAQRunner():
                 if intf_name == 'faux' or intf_name == 'local':
                     logging.info('Flapping %s device interface.' % intf_name)
                     self.switch.cmd('ifconfig %s down' % intf_name)
-                    time.sleep(0.5)
+                    time.sleep(1)
                     self.switch.cmd('ifconfig %s up' % intf_name)
 
                 target_port = self.switch.ports[device_intf]
@@ -227,7 +232,7 @@ class DAQRunner():
                 logging.info('Received reply, host %s is at %s/%s' % (intf_name, self.target_mac, self.target_ip))
 
                 logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
-                monitor_file = os.path.join(self.tmpdir, 'monitor.pcap')
+                monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
                 tcp_monitor = TcpHelper(self.switch, '', packets=None, duration_sec = self.MONITOR_SCAN_SEC,
                     pcap_out=monitor_file, intf_name=intf_name)
                 assert tcp_monitor.wait() == 0, 'Failing executing monitor pcap'
@@ -235,6 +240,8 @@ class DAQRunner():
                 logging.info('Running test suite against target...')
 
                 assert self.pingTest(networking, self.target_ip)
+
+                self.dockerTest('daq/test_mudgee')
 
                 assert self.dockerTest('daq/test_pass')
                 assert not self.dockerTest('daq/test_fail')

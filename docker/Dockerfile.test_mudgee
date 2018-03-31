@@ -1,0 +1,9 @@
+FROM daq/aardvark:latest
+
+RUN $AG install default-jdk git
+
+COPY --from=mudgee/daq:latest /root/mudgee/target/mudgee-1.0.0-SNAPSHOT.jar .
+
+COPY misc/test_mudgee .
+
+CMD ./test_mudgee
