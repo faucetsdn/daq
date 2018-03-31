@@ -9,9 +9,10 @@ FROM daq/aardvark:latest
 # Basic system install items
 RUN $AG install \
     software-properties-common apt-transport-https \
-    sudo realpath git emacs net-tools ethtool curl iputils-ping \
+    sudo realpath git emacs ethtool curl \
+    isc-dhcp-client network-manager netcat \
     python python-setuptools python-dev build-essential python-pip \
-    openvswitch-switch openvswitch-common
+    openvswitch-switch openvswitch-common 
 
 # Python extension packages
 RUN pip install --index-url=https://pypi.python.org/simple netifaces

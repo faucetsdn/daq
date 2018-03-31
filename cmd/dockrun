@@ -17,6 +17,12 @@ if [ "$1" == base -o "$1" == runner ]; then
     shift
 fi
 
+if [ "$1" == live ]; then
+    echo Mapping local daq live into runner process.
+    docker_args+="-v $PWD:/root/daq "
+    shift
+fi
+
 if [ -f $LOCAL_CONFIG ]; then
     echo Loading configuration from $LOCAL_CONFIG
     source $LOCAL_CONFIG
@@ -45,7 +51,7 @@ function move_intf {
             echo Moving interface $intf into container pid $pid...
             sudo ip link set $intf netns $pid
         else
-            echo Could not find process/intf for daq-runner/$intf, terminating daq-runner.
+            echo Could not find process/intf $pid/$intf, terminating daq-runner.
             docker kill daq-runner > /dev/null
         fi
     fi

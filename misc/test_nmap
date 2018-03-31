@@ -3,7 +3,7 @@
 LOG=/tmp/nmap.log
 OPEN=/tmp/open.txt
 
-nmap --open -oG $LOG $TARGET_HOST
+nmap --open -oG $LOG $TARGET_IP
 
 nothing=
 grep -oh '[0-9]*/open/[^[:space:]]*' $LOG > $OPEN || nothing=y

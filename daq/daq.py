@@ -42,17 +42,23 @@ class DummyNode():
 
 class DAQRunner():
 
-    DHCP_PATTERN = 'Your-IP ([0-9.]+)'
+    DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
+    DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
+
+    DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
+
     TEST_PREFIX = 'daq/test_'
+
+    MONITOR_SCAN_SEC = 10
 
     net = None
     switch = None
-    target_host = None
+    target_ip = None
     run_id = None
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[]):
         params = { 'ip': ip } if ip else {}
-        params['tmpdir'] = os.path.join('inst', 'test-' + self.run_id)
+        params['tmpdir'] = self.tmpdir
         params['env_vars'] = env_vars
         host = self.net.addHost(name, cls, **params)
         host.switch_link = self.net.addLink(self.switch, host, fast=False)
@@ -100,7 +106,10 @@ class DAQRunner():
         return image[len(self.TEST_PREFIX):]
 
     def dockerTest(self, image):
-        env_vars = [ "TARGET_HOST=" + self.target_host ]
+        env_vars = [ "TARGET_IP=" + self.target_ip,
+                     "TARGET_MAC=" + self.target_mac,
+                     "GATEWAY_IP=" + self.networking.IP(),
+                     "GATEWAY_MAC=" + self.networking.MAC()]
         logging.debug("Running docker test %s" % image)
         cls = MakeFaucetDockerHost(image, prefix='daq')
         host = self.addHost(self.dockerTestName(image), cls=cls, env_vars = env_vars)
@@ -108,27 +117,33 @@ class DAQRunner():
         error_code = host.wait()
         self.removeHost(host)
         if error_code != 0:
-            logging.info("FAILED test %s/%s with error %s" % (host.name, image, error_code))
+            logging.info("FAILED test %s with error %s" % (host.name, error_code))
         else:
-            logging.info("PASSED test %s/%s" % (host.name, image))
+            logging.info("PASSED test %s" % (host.name))
         return error_code == 0
 
     def get_device_intf(self):
         device_intf_name = os.getenv('DAQ_INTF')
         return Intf(device_intf_name, node=DummyNode())
 
-    def getTestRunId(self):
+    def set_run_id(self, run_id):
+        self.run_id = run_id
+        self.tmpdir = os.path.join('inst', 'test-' + run_id)
+        if not os.path.exists(self.tmpdir):
+            os.makedirs(self.tmpdir)
+
+    def make_test_run_id(self):
         return '%06x' % int(time.time())
 
     def runner(self):
 
-        self.run_id = 'init'
+        self.set_run_id('init')
 
         logging.debug("Creating miniet...")
         self.net = Mininet()
 
-        logging.debug("Adding switch...")
-        self.switch = self.net.addSwitch('switch', dpid='1', cls=OVSSwitch)
+        logging.debug("Adding switches...")
+        self.switch = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
 
         logging.info("Starting faucet...")
         output = self.switch.cmd('cmd/faucet && echo SUCCESS')
@@ -145,7 +160,8 @@ class DAQRunner():
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
 
         logging.debug("Adding networking host...")
-        networking = self.addHost('networking', cls=MakeFaucetDockerHost('daq/networking', prefix='daq'))
+        self.networking = self.addHost('networking', cls=MakeFaucetDockerHost('daq/networking', prefix='daq'))
+        networking = self.networking
         dummy = self.addHost('dummy')
 
         logging.info("Starting mininet...")
@@ -162,12 +178,12 @@ class DAQRunner():
         logging.info("Attaching device interface %s..." % device_intf.name)
         self.switchAttach(device_intf)
 
-        assert self.pingTest(networking, dummy)
-        assert self.pingTest(dummy, networking)
+        try:
+            assert self.pingTest(networking, dummy)
+            assert self.pingTest(dummy, networking)
 
-        while True:
-            try:
-                self.run_id = self.getTestRunId()
+            while True:
+                self.set_run_id(self.make_test_run_id())
 
                 logging.info('')
                 logging.info('Starting new test run %s' % self.run_id)
@@ -192,6 +208,7 @@ class DAQRunner():
                     if port == target_port and active:
                         break
 
+                logging.info('Recieved port up event on port %d.' % target_port)
                 logging.info('Waiting for dhcp reply from %s...' % networking.name)
                 filter="src port 67"
                 dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None)
@@ -200,14 +217,24 @@ class DAQRunner():
                     dhcp_line = dhcp_traffic.next_line()
                     match = re.search(self.DHCP_PATTERN, dhcp_line)
                     if match:
-                        self.target_host = match.group(1)
-                        logging.info('Host %s is at %s' % (device_intf.name, self.target_host))
-                        break
+                        self.target_ip = match.group(4)
+                        if self.target_ip:
+                            assert self.target_mac, 'Target MAC not scraped from dhcp response.'
+                            break
+                        else:
+                            self.target_mac = match.group(2)
                 dhcp_traffic.close()
+                logging.info('Received reply, host %s is at %s/%s' % (intf_name, self.target_mac, self.target_ip))
+
+                logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
+                monitor_file = os.path.join(self.tmpdir, 'monitor.pcap')
+                tcp_monitor = TcpHelper(self.switch, '', packets=None, duration_sec = self.MONITOR_SCAN_SEC,
+                    pcap_out=monitor_file, intf_name=intf_name)
+                assert tcp_monitor.wait() == 0, 'Failing executing monitor pcap'
 
                 logging.info('Running test suite against target...')
 
-                assert self.pingTest(networking, self.target_host)
+                assert self.pingTest(networking, self.target_ip)
 
                 assert self.dockerTest('daq/test_pass')
                 assert not self.dockerTest('daq/test_fail')
@@ -217,11 +244,13 @@ class DAQRunner():
 
                 logging.info('Done with tests')
 
-            except Exception as e:
-                print e, traceback.print_exc(file=sys.stderr)
-            except KeyboardInterrupt:
-                print 'Interrupted'
-                break
+        except Exception as e:
+            print e, traceback.print_exc(file=sys.stderr)
+        except KeyboardInterrupt:
+            print 'Interrupted'
+
+        logging.debug('Dropping into interactive command line')
+        CLI(self.net)
 
         logging.debug("Stopping faucet...")
         self.switch.cmd('docker kill daq-faucet')

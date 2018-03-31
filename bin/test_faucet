@@ -9,8 +9,8 @@ cd $ROOT/../clib
 
 sudo docker build --pull -t faucet/tests -f Dockerfile.tests  .
 
-#CMD=
-CMD=bash
+CMD=
+#CMD=bash
 
 echo "docker/runtests.sh && cd tests && ./faucet_mininet_test.py $FAUCET_TESTS"
 

@@ -11,22 +11,24 @@ class TcpHelper():
     funcs = None
 
     def __init__(self, tcpdump_host, tcpdump_filter, funcs=None,
-                 vflags='-v', duration_sec=10, packets=2, root_intf=False):
-        self.intf_name = tcpdump_host.intf().name
+                 vflags='-v', duration_sec=10, packets=2, root_intf=False,
+                 pcap_out=None, intf_name=None):
+        self.intf_name = intf_name if intf_name else tcpdump_host.intf().name
         self.funcs = funcs
         if root_intf:
             self.intf_name = self.intf_name.split('.')[0]
-        count_flags = '-c %u' if packets else ''
 
-        tcpdump_cmd = 'tcpdump -i %s -e -n -U %s %s %s' % (
-                self.intf_name, vflags, count_flags, tcpdump_filter)
+        tcpdump_flags=vflags
+        tcpdump_flags+= ' -c %u' % packets if packets else ''
+        tcpdump_flags+= ' -w %s' % pcap_out if pcap_out else ''
+        tcpdump_cmd = 'tcpdump -i %s %s -e -n -U %s' % (self.intf_name, tcpdump_flags, tcpdump_filter)
         if duration_sec:
             pipe_cmd = faucet_mininet_test_util.timeout_soft_cmd(tcpdump_cmd, duration_sec)
         else:
             pipe_cmd = tcpdump_cmd
 
         self.pipe = tcpdump_host.popen(
-            tcpdump_cmd,
+            pipe_cmd,
             stdin=faucet_mininet_test_util.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -39,6 +41,15 @@ class TcpHelper():
         self.pipe.kill()
         self.pipe = None
 
+    def wait(self):
+        assert self.pipe, 'tcp helper pipe not valid'
+        self.pipe.communicate()
+        result = self.pipe.wait()
+        if result == 124:
+            # Mask result from timeout command.
+            result = 0
+        return result
+
     def next_line(self):
         while True:
             line = self.pipe.stdout.readline()
@@ -47,7 +58,7 @@ class TcpHelper():
                 return line
             elif re.search('listening on %s' % self.intf_name, line):
                 self.tcpdump_started = True
-                # when we see tcpdump start, then call provided functions.
+                # When we see tcpdump start, then call provided functions.
                 if self.funcs is not None:
                     for func in self.funcs:
                         func()
