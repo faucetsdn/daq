@@ -3,17 +3,24 @@ import re
 
 from tests import faucet_mininet_test_util
 
+class NullLogger():
+    def debug(self, *args):
+        pass
+
+
 class TcpHelper():
 
     pipe = None
     tcpdump_started = False
     last_line = None
     funcs = None
+    logger = None
 
     def __init__(self, tcpdump_host, tcpdump_filter, funcs=None,
                  vflags='-v', duration_sec=10, packets=2, root_intf=False,
-                 pcap_out=None, intf_name=None):
+                 pcap_out=None, intf_name=None, logger=NullLogger()):
         self.intf_name = intf_name if intf_name else tcpdump_host.intf().name
+        self.logger = logger
         self.funcs = funcs
         if root_intf:
             self.intf_name = self.intf_name.split('.')[0]
@@ -27,6 +34,7 @@ class TcpHelper():
         else:
             pipe_cmd = tcpdump_cmd
 
+        logger.debug(pipe_cmd)
         self.pipe = tcpdump_host.popen(
             pipe_cmd,
             stdin=faucet_mininet_test_util.DEVNULL,
@@ -42,6 +50,7 @@ class TcpHelper():
         self.pipe = None
 
     def wait(self):
+        self.logger.debug('waiting for command completion')
         assert self.pipe, 'tcp helper pipe not valid'
         self.pipe.communicate()
         result = self.pipe.wait()

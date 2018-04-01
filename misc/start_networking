@@ -1,0 +1,5 @@
+#!/bin/bash
+
+python -m SimpleHTTPServer &
+
+dnsmasq -d --bind-dynamic --log-facility=/tmp/dnsmasq.log

@@ -44,5 +44,9 @@ if [ -n "${options[bacnet]}" ]; then
     java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar com.serotonin.bacnet4j.test.LoopDevice $local_ip $broadcast_ip &
 fi
 
+if [ -n "${options[curl]}" ]; then
+    (while true; do curl -o - http://192.168.84.5:8000; sleep 1; done) &
+fi
+
 echo Blocking for all eternety.
 tail -f /dev/null

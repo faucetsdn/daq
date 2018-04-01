@@ -5,8 +5,10 @@
 
 FROM daq/aardvark:latest
 
-RUN $AG install dnsmasq ethtool iptables
+RUN $AG install dnsmasq ethtool iptables netcat python
 
 RUN echo dhcp-range=10.0.0.128,10.0.0.250,120s >> /etc/dnsmasq.conf
 
-CMD ["dnsmasq", "-d", "--bind-dynamic", "--log-facility=/tmp/dnsmasq.log"]
+COPY misc/start_networking .
+
+ENTRYPOINT ["./start_networking"]

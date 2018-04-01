@@ -16,7 +16,7 @@ FROM daq/aardvark:latest
 # Run this separately so it can be shared with Dockerfile.test_bacnet
 RUN $AG install default-jre
 
-RUN $AG install isc-dhcp-client ethtool network-manager netcat
+RUN $AG install isc-dhcp-client ethtool network-manager netcat curl
 
 COPY --from=bacnet_build /root/*.jar bacnet4j/
 

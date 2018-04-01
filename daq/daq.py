@@ -51,6 +51,8 @@ class DAQRunner():
 
     MONITOR_SCAN_SEC = 10
 
+    TEST_IP_PREFIX = '192.168.84.'
+
     net = None
     switch = None
     target_ip = None
@@ -183,6 +185,10 @@ class DAQRunner():
         logging.info("Attaching device interface %s..." % device_intf.name)
         self.switchAttach(device_intf)
 
+        logging.info('Adding fake external device %s5' % self.TEST_IP_PREFIX)
+        self.networking.cmd('ip addr add %s5 dev %s' % (self.TEST_IP_PREFIX, self.networking.switch_link.intf2))
+        self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
+
         try:
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
@@ -195,28 +201,30 @@ class DAQRunner():
 
                 logging.debug('Flushing event queue.')
                 while self.faucet_events.has_event():
-                    self.faucet_events.next_event()
+                    event = self.faucet_events.next_event()
+                    logging.debug('Faucet event %s' % event)
 
                 intf_name = device_intf.name
                 if intf_name == 'faux' or intf_name == 'local':
                     logging.info('Flapping %s device interface.' % intf_name)
-                    self.switch.cmd('ifconfig %s down' % intf_name)
-                    time.sleep(1)
-                    self.switch.cmd('ifconfig %s up' % intf_name)
+                    self.switch.cmd('ip link set %s down' % intf_name)
+                    time.sleep(0.5)
+                    self.switch.cmd('ip link set %s up' % intf_name)
 
                 target_port = self.switch.ports[device_intf]
                 logging.info('Waiting for port-up event on interface %s port %d...' %
                     (device_intf.name, target_port))
                 while True:
-                    (port, active) = self.faucet_events.as_port_state(
-                        self.faucet_events.next_event())
+                    event = self.faucet_events.next_event()
+                    logging.debug('Faucet event %s' % event)
+                    (port, active) = self.faucet_events.as_port_state(event)
                     if port == target_port and active:
                         break
 
                 logging.info('Recieved port up event on port %d.' % target_port)
                 logging.info('Waiting for dhcp reply from %s...' % networking.name)
                 filter="src port 67"
-                dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None)
+                dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None, logger=logger)
 
                 while True:
                     dhcp_line = dhcp_traffic.next_line()
@@ -234,7 +242,7 @@ class DAQRunner():
                 logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
                 monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
                 tcp_monitor = TcpHelper(self.switch, '', packets=None, duration_sec = self.MONITOR_SCAN_SEC,
-                    pcap_out=monitor_file, intf_name=intf_name)
+                    pcap_out=monitor_file, intf_name=intf_name, logger=logger)
                 assert tcp_monitor.wait() == 0, 'Failing executing monitor pcap'
 
                 logging.info('Running test suite against target...')
@@ -259,6 +267,8 @@ class DAQRunner():
         logging.debug('Dropping into interactive command line')
         CLI(self.net)
 
+        logging.debug('Cleaning up test route...')
+        self.switch.cmd('ip route del %s0/24' % self.TEST_IP_PREFIX)
         logging.debug("Stopping faucet...")
         self.switch.cmd('docker kill daq-faucet')
         logging.debug("Stopping mininet...")
