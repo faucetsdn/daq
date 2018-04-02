@@ -1,6 +1,10 @@
 FROM daq/aardvark:latest
 
-RUN $AG install default-jdk git maven tcpdump
+RUN $AG install default-jre
+
+RUN $AG install default-jdk git
+
+RUN $AG install maven tcpdump
 
 WORKDIR /root/
 
