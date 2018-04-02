@@ -4,7 +4,9 @@ ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
 IMAGE=daq/runner
 LOCAL_CONFIG=system.conf
-docker_args=
+docker_args="\
+  --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
+  --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
 
 cd $ROOT
 
@@ -43,8 +45,8 @@ fi
 
 function move_intf {
     sleep 2
-    if [ -n "$daq_intf" ]; then
-        intf=${daq_intf%!}
+    intf=${daq_intf%!}
+    if [ -n "$daq_intf" -a "$daq_intf" == "$intf" ]; then
         pid=$(docker inspect --format '{{.State.Pid}}' daq-runner)
         link=$(ip link show $intf 2>/dev/null )
         if [ "$pid" != 0 -a -n "$link" ]; then
@@ -58,8 +60,13 @@ function move_intf {
 }
 
 if [ -z "$build" ]; then
-   # WTF I need to do \r\n is beyond me. But there it is.
-   printf "$(move_intf)\r\n" &
+    (
+        move_result="$(move_intf)"
+        # WTF I need to do \r\n is beyond me. But there it is.
+        if [ -n "$move_result" ]; then
+           printf "${move_result}\r\n"
+        fi
+    ) &
 fi
 
 docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
