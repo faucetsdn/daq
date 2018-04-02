@@ -4,13 +4,10 @@
 .pdbrc
 .pdbrcX
 
-# Local config
-system.conf
-last_build.txt
-
 # Runtime files
 inst/
 faucet/
+local/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

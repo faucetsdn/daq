@@ -4,7 +4,8 @@ ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 FAUCET_SOCK=faucet_event.sock
 EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
-LOCAL_CONFIG=system.conf
+SYSTEM_CONF=system.conf
+LOCAL_CONFIG=local/$SYSTEM_CONF
 
 cd $ROOT
 
@@ -13,7 +14,8 @@ FAUCET=$(realpath $ROOT/faucet)
 if [ -n "$DAQ_CONTAINER" ]; then
     echo Replacing $LOCAL_CONFIG with version from $INSTDIR...
     rm -f $LOCAL_CONFIG
-    test -f $INSTDIR/$LOCAL_CONFIG && cp $INSTDIR/$LOCAL_CONFIG .
+    mkdir -p local
+    test -f $INSTDIR/$SYSTEM_CONF && cp $INSTDIR/$LOCAL_CONFIG $LOCAL_CONFIG
 fi
 
 if [ -f $LOCAL_CONFIG ]; then

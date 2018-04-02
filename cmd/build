@@ -3,7 +3,7 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-local_config=system.conf
+local_config=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
@@ -16,23 +16,17 @@ fi
 if [ -n "$in_container" ]; then
     service docker start
     sleep 1
-    echo Importing local of daq.
+    echo Importing current local version of daq...
     ROOT=/root/daq
     rm -rf $ROOT
     cp -a /daq $ROOT
     cd $ROOT
     rm -rf build inst
+    echo Now running in `pwd`
+    mkdir -p build
 fi
 
-if [ -n "$faucet_git" ]; then
-  build_args+=" --build-arg faucet_git=$faucet_git"
-fi
-
-if [ -n "$faucet_tag" ]; then
-  build_args+=" --build-arg faucet_tag=$faucet_tag"
-fi
-
-date > last_build.txt
+date > build/last_build.txt
 declare -A modules
 sudo rm -rf $build_root
 mkdir -p $build_root

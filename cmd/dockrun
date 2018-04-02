@@ -3,7 +3,8 @@
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
 IMAGE=daq/runner
-LOCAL_CONFIG=system.conf
+SYSTEM_CONF=system.conf
+LOCAL_CONFIG=local/$SYSTEM_CONF
 docker_args="\
   --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
   --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
@@ -35,8 +36,8 @@ mkdir -p $INSTDIR
 
 docker rm -f daq-runner > /dev/null 2>&1 || true
 
-rm -f $INSTDIR/system.conf
-test -f $ROOT/system.conf && cp $ROOT/system.conf $INSTDIR/
+rm -f $INSTDIR/$SYSTEM_CONF
+test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
 
 docker_args+=" --env DAQ_CONTAINER=daq/runner"
 if [ -z "$build" ]; then
