@@ -4,7 +4,8 @@ RUN $AG install default-jdk git maven tcpdump
 
 WORKDIR /root/
 
-RUN git clone https://github.com/grafnu/mudgee.git && cd mudgee && mvn clean install
+RUN git clone https://github.com/grafnu/mudgee.git --single-branch --depth 1 \
+  && cd mudgee && mvn clean install
 
 COPY misc/test_mudgee .
 

@@ -18,7 +18,8 @@ RUN $AG install \
 RUN pip install --index-url=https://pypi.python.org/simple netifaces
 
 # Install mininet
-RUN git clone git://github.com/mininet/mininet.git && cd mininet && util/install.sh
+RUN git clone git://github.com/mininet/mininet.git --single-branch --depth 1 \
+  && cd mininet && util/install.sh
 
 # Install docker in docker
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -29,4 +30,4 @@ RUN apt-cache policy docker-ce && $AG update && $AG install docker-ce
 # Eventually this should point to the main faucetsdn repo.
 ARG faucet_git=https://github.com/grafnu/faucet.git
 ARG faucet_tag=testlib
-RUN git clone $faucet_git -b $faucet_tag
+RUN git clone $faucet_git --single-branch --depth 1 -b $faucet_tag

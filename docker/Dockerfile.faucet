@@ -8,7 +8,7 @@ RUN apk add --no-cache git
 # Eventually this should point to the main faucetsdn repo.
 ARG faucet_git=https://github.com/grafnu/faucet.git
 ARG faucet_tag=testlib
-RUN git clone $faucet_git -b $faucet_tag /faucet-src
+RUN git clone $faucet_git --single-branch --depth 1 -b $faucet_tag /faucet-src
 
 RUN /faucet-src/docker/base/install-faucet.sh
 
