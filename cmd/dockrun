@@ -26,7 +26,7 @@ if [ "$1" == live ]; then
 fi
 
 if [ -f $LOCAL_CONFIG ]; then
-    echo Loading configuration from $LOCAL_CONFIG
+    echo Loading dockrun configuration from $LOCAL_CONFIG
     source $LOCAL_CONFIG
 fi
 
@@ -39,7 +39,7 @@ rm -f $INSTDIR/system.conf
 test -f $ROOT/system.conf && cp $ROOT/system.conf $INSTDIR/
 
 docker_args+=" --env DAQ_CONTAINER=daq/runner"
-if [ -s "$build" ]; then
+if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
 fi
 

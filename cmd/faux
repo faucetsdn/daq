@@ -8,7 +8,7 @@ FAUX_ARGS="$*"
 local_config=system.conf
 
 if [ -f $local_config ]; then
-  echo Reading local configuraiton from $local_config
+  echo Loading faux configuraiton from $local_config
   source $local_config
 fi
 

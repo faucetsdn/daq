@@ -25,9 +25,3 @@ RUN git clone git://github.com/mininet/mininet.git --single-branch --depth 1 \
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 RUN apt-cache policy docker-ce && $AG update && $AG install docker-ce
-
-# Import faucet build dependency
-# Eventually this should point to the main faucetsdn repo.
-ARG faucet_git=https://github.com/grafnu/faucet.git
-ARG faucet_tag=testlib
-RUN git clone $faucet_git --single-branch --depth 1 -b $faucet_tag

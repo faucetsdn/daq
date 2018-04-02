@@ -8,7 +8,7 @@ LOCAL_CONFIG=system.conf
 
 cd $ROOT
 
-FAUCET=$(realpath $ROOT/../faucet)
+FAUCET=$(realpath $ROOT/faucet)
 
 if [ -n "$DAQ_CONTAINER" ]; then
     echo Replacing $LOCAL_CONFIG with version from $INSTDIR...
@@ -17,7 +17,7 @@ if [ -n "$DAQ_CONTAINER" ]; then
 fi
 
 if [ -f $LOCAL_CONFIG ]; then
-    echo Loading configuration from $LOCAL_CONFIG
+    echo Loading run configuration from $LOCAL_CONFIG
     source $LOCAL_CONFIG
 fi
 
