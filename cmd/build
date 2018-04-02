@@ -23,13 +23,14 @@ if [ -n "$in_container" ]; then
     cd $ROOT
     rm -rf build inst
     echo Now running in `pwd`
-    mkdir -p build
 fi
 
-date > build/last_build.txt
-declare -A modules
+mkdir -p local
+date > local/last_build.txt
 sudo rm -rf $build_root
 mkdir -p $build_root
+
+declare -A modules
 
 for file in docker/Dockerfile.*; do
     if [ ${file%\~} != ${file} ]; then
