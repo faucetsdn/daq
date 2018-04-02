@@ -15,7 +15,7 @@ if [ -n "$DAQ_CONTAINER" ]; then
     echo Replacing $LOCAL_CONFIG with version from $INSTDIR...
     rm -f $LOCAL_CONFIG
     mkdir -p local
-    test -f $INSTDIR/$SYSTEM_CONF && cp $INSTDIR/$LOCAL_CONFIG $LOCAL_CONFIG
+    test -f $INSTDIR/$SYSTEM_CONF && cp $INSTDIR/$SYSTEM_CONF $LOCAL_CONFIG
 fi
 
 if [ -f $LOCAL_CONFIG ]; then

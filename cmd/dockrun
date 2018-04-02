@@ -70,4 +70,5 @@ if [ -z "$build" ]; then
     ) &
 fi
 
+echo Starting runner "$@"...
 docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
