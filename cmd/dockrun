@@ -13,13 +13,13 @@ if [ "$1" == base -o "$1" == runner ]; then
         IMAGE=daq/base
     fi
     build=y
-    docker_args+="-v $PWD:/daq/ "
+    docker_args+=" -v $PWD:/daq/"
     shift
 fi
 
 if [ "$1" == live ]; then
     echo Mapping local daq live into runner process.
-    docker_args+="-v $PWD:/root/daq "
+    docker_args+=" -v $PWD:/root/daq"
     shift
 fi
 
@@ -36,9 +36,9 @@ docker rm -f daq-runner > /dev/null 2>&1 || true
 rm -f $INSTDIR/system.conf
 test -f $ROOT/system.conf && cp $ROOT/system.conf $INSTDIR/
 
-docker_args+="--env DAQ_CONTAINER=daq/runner "
+docker_args+=" --env DAQ_CONTAINER=daq/runner"
 if [ -s "$build" ]; then
-    docker_args+="-v $INSTDIR:/root/daq/inst "
+    docker_args+=" -v $INSTDIR:/root/daq/inst"
 fi
 
 function move_intf {
