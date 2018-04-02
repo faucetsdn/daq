@@ -1,8 +1,10 @@
 FROM daq/aardvark:latest
 
-RUN $AG install default-jdk git
+RUN $AG install default-jdk git maven tcpdump
 
-COPY --from=mudgee/daq:latest /root/mudgee/target/mudgee-1.0.0-SNAPSHOT.jar .
+WORKDIR /root/
+
+RUN git clone https://github.com/grafnu/mudgee.git && cd mudgee && mvn clean install
 
 COPY misc/test_mudgee .
 

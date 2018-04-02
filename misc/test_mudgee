@@ -19,6 +19,6 @@ EOF
 
 cat mud_config.json
 
-java -jar mudgee-1.0.0-SNAPSHOT.jar mud_config.json
+java -jar mudgee/target/mudgee-1.0.0-SNAPSHOT.jar mud_config.json
 
 cp -a result/mudgee /tmp
