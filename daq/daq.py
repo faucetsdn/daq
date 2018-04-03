@@ -17,9 +17,9 @@ from mininet.node import RemoteController, OVSSwitch, Host, Link
 from mininet.link import Intf
 from mininet.cli import CLI
 
-from tests.faucet_mininet_test_host import MakeFaucetDockerHost
-from tests.faucet_mininet_test_topo import FaucetHostCleanup
-from tests import faucet_mininet_test_util
+from clib.docker_host import MakeDockerHost
+from clib.mininet_test_topo import FaucetHostCleanup
+import clib.mininet_test_util
 
 from tcp_helper import TcpHelper
 from faucet_event_client import FaucetEventClient
@@ -117,7 +117,7 @@ class DAQRunner():
                      "GATEWAY_MAC=" + self.networking.MAC()]
         vol_maps = [ self.scan_base + ":/scans" ]
         logging.debug("Running docker test %s" % image)
-        cls = MakeFaucetDockerHost(image, prefix='daq')
+        cls = MakeDockerHost(image, prefix='daq')
         host = self.addHost(test_name, cls=cls, env_vars = env_vars, vol_maps=vol_maps)
         host.activate()
         error_code = host.wait()
@@ -167,7 +167,7 @@ class DAQRunner():
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
 
         logging.debug("Adding networking host...")
-        self.networking = self.addHost('networking', cls=MakeFaucetDockerHost('daq/networking', prefix='daq'))
+        self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq'))
         networking = self.networking
         dummy = self.addHost('dummy')
 

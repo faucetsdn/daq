@@ -1,7 +1,7 @@
 import subprocess
 import re
 
-from tests import faucet_mininet_test_util
+from clib import mininet_test_util
 
 class NullLogger():
     def debug(self, *args):
@@ -30,14 +30,14 @@ class TcpHelper():
         tcpdump_flags+= ' -w %s' % pcap_out if pcap_out else ''
         tcpdump_cmd = 'tcpdump -i %s %s -e -n -U %s' % (self.intf_name, tcpdump_flags, tcpdump_filter)
         if duration_sec:
-            pipe_cmd = faucet_mininet_test_util.timeout_soft_cmd(tcpdump_cmd, duration_sec)
+            pipe_cmd = mininet_test_util.timeout_soft_cmd(tcpdump_cmd, duration_sec)
         else:
             pipe_cmd = tcpdump_cmd
 
         logger.debug(pipe_cmd)
         self.pipe = tcpdump_host.popen(
             pipe_cmd,
-            stdin=faucet_mininet_test_util.DEVNULL,
+            stdin=mininet_test_util.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             close_fds=True)

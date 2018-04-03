@@ -1,18 +1,17 @@
 #!/bin/bash -e
 
-FAUCET_TESTS=
-#FAUCET_TESTS=-n
+#FAUCET_TESTS=
+FAUCET_TESTS=-n
 #FAUCET_TESTS="-n -k FaucetDockerTest"
 
 ROOT=$(realpath $(dirname $0)/..)
-cd $ROOT/../clib
+cd $ROOT/faucet
 
 sudo docker build --pull -t faucet/tests -f Dockerfile.tests  .
 
-CMD=
-#CMD=bash
+CMD="$@"  # E.g. 'bash' is a good one.
 
 echo "docker/runtests.sh && cd tests && ./faucet_mininet_test.py $FAUCET_TESTS"
 
-docker run -ti -v $PWD:/faucet-src -e FAUCET_TESTS="$FAUCET_TESTS" \
+sudo docker run -ti -v $PWD:/faucet-src -e FAUCET_TESTS="$FAUCET_TESTS" \
        --sysctl net.ipv6.conf.all.disable_ipv6=0 --privileged faucet/tests $CMD
