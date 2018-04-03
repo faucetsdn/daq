@@ -1,0 +1,15 @@
+sudo: required
+dist: trusty
+language: python
+python:
+  - '2.7'
+services:
+  - docker
+addons:
+  apt:
+    packages:
+      - openvswitch-switch
+install:
+  - bin/setup_install
+script:
+  - bin/run_travis_test

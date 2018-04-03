@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+REPO=https://github.com/grafnu/faucet.git
+BRANCH=testing
+TARGET=faucet
+
+cd $ROOT
+
+echo Cloning $REPO branch $BRANCH into $TARGET...
+git clone $REPO $TARGET -b $BRANCH 

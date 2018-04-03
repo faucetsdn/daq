@@ -21,7 +21,7 @@ from clib.docker_host import MakeDockerHost
 from clib.mininet_test_topo import FaucetHostCleanup
 import clib.mininet_test_util
 
-from tcp_helper import TcpHelper
+from clib.tcpdump_helper import TcpdumpHelper
 from faucet_event_client import FaucetEventClient
 
 logger = logging.getLogger(__name__)
@@ -224,7 +224,7 @@ class DAQRunner():
                 logging.info('Recieved port up event on port %d.' % target_port)
                 logging.info('Waiting for dhcp reply from %s...' % networking.name)
                 filter="src port 67"
-                dhcp_traffic = TcpHelper(networking, filter, packets=None, duration_sec=None, logger=logger)
+                dhcp_traffic = TcpdumpHelper(networking, filter, packets=None, timeout=None, logger=logger)
 
                 while True:
                     dhcp_line = dhcp_traffic.next_line()
@@ -241,7 +241,7 @@ class DAQRunner():
 
                 logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
                 monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-                tcp_monitor = TcpHelper(self.switch, '', packets=None, duration_sec = self.MONITOR_SCAN_SEC,
+                tcp_monitor = TcpdumpHelper(self.switch, '', packets=None, timeout=self.MONITOR_SCAN_SEC,
                     pcap_out=monitor_file, intf_name=intf_name, logger=logger)
                 assert tcp_monitor.wait() == 0, 'Failing executing monitor pcap'
 
