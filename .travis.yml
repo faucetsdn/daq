@@ -9,6 +9,9 @@ addons:
   apt:
     packages:
       - openvswitch-switch
+before_install:
+  - echo 'DOCKER_OPTS="-s overlay2"' | sudo tee /etc/default/docker
+  - sudo service docker restart
 install:
   - bin/setup_install
 script:
