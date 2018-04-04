@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+sudo apt-get -y install realpath
+
 ROOT=$(realpath $(dirname $0)/..)
 REPO=https://github.com/grafnu/faucet.git
 BRANCH=testing
