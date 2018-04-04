@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-sudo apt-get -y install realpath
+sudo apt-get -y install realpath mininet
 
 ROOT=$(realpath $(dirname $0)/..)
 REPO=https://github.com/grafnu/faucet.git
@@ -10,8 +10,6 @@ TARGET=faucet
 cd $ROOT
 
 echo Cloning $REPO branch $BRANCH into $TARGET...
-git clone $REPO $TARGET -b $BRANCH 
-
-docker info || true
+git clone $REPO $TARGET -b $BRANCH
 
 cmd/build -s
