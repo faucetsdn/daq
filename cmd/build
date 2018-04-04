@@ -20,6 +20,7 @@ if [ -f $local_config ]; then
 fi
 
 if [ -n "$in_container" ]; then
+    echo 'DOCKER_OPTS="-s overlay2"' > /etc/default/docker
     service docker start
     sleep 1
     echo Importing current local version of daq...
