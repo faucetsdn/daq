@@ -31,6 +31,8 @@ if [ -n "$in_container" ]; then
     echo Now running in `pwd`
 fi
 
+docker info | fgrep Storage
+
 mkdir -p local
 date > local/last_build.txt
 sudo rm -rf $build_root
