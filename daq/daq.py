@@ -143,7 +143,7 @@ class DAQRunner():
         return '%06x' % int(time.time())
 
     def runner(self):
-
+        one_shot = '-s' in sys.argv
         self.set_run_id('init')
 
         logging.debug("Creating miniet...")
@@ -259,13 +259,17 @@ class DAQRunner():
 
                 logging.info('Done with tests')
 
+                if one_shot:
+                    break
+
         except Exception as e:
             print e, traceback.print_exc(file=sys.stderr)
         except KeyboardInterrupt:
             print 'Interrupted'
 
-        logging.debug('Dropping into interactive command line')
-        CLI(self.net)
+        if not one_shot:
+            logging.debug('Dropping into interactive command line')
+            CLI(self.net)
 
         logging.debug('Cleaning up test route...')
         self.switch.cmd('ip route del %s0/24' % self.TEST_IP_PREFIX)

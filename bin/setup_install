@@ -11,3 +11,5 @@ cd $ROOT
 
 echo Cloning $REPO branch $BRANCH into $TARGET...
 git clone $REPO $TARGET -b $BRANCH 
+
+cmd/build
