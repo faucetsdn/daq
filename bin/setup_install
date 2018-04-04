@@ -1,6 +1,15 @@
 #!/bin/bash -e
 
-sudo apt-get -y install realpath mininet
+# Basic system install items
+sudo apt-get -y install \
+    software-properties-common apt-transport-https \
+    sudo realpath git emacs ethtool curl mininet \
+    isc-dhcp-client network-manager netcat \
+    python python-setuptools python-dev build-essential python-pip \
+    openvswitch-switch openvswitch-common
+
+# Python extension packages
+sudo pip install --index-url=https://pypi.python.org/simple netifaces
 
 ROOT=$(realpath $(dirname $0)/..)
 REPO=https://github.com/grafnu/faucet.git
