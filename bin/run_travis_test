@@ -5,10 +5,14 @@ sudo netstat -nlpa | fgrep :6633 || echo No match for :6633
 /etc/init.d/openvswitch-controller stop || true
 sleep 1
 
+echo Monkey
 sudo netstat -nlpa | fgrep :6633 || echo No match for :6633
+echo Elephant
 
 mkdir -p local
 
+echo Installing local/system.conf...
 cp misc/system.conf local/
 
+echo Running DAQ test...
 cmd/run -s
