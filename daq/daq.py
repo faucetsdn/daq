@@ -190,9 +190,10 @@ class DAQRunner():
         self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
-            print self.switch.cmd('iptables -L')
             print self.switch.cmd('docker ps --no-trunc')
             print self.switch.cmd('ovs-vsctl show')
+            print self.switch.cmd('docker exec daq-faucet netstat -nlpa')
+            print self.switch.cmd('cat /var/log/openvswitch/ovs-vswitchd.log')
 
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
