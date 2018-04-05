@@ -28,6 +28,8 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
+(cd $FAUCET; echo faucet commit $(git rev-parse HEAD))
+
 mkdir -p $INSTDIR
 rm -f $EVENT_SOCK
 
