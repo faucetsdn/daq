@@ -178,7 +178,7 @@ class DAQRunner():
         networking.activate()
 
         logging.info("Waiting for system to settle...")
-        time.sleep(10)
+        time.sleep(3)
 
         device_intf = self.get_device_intf()
         self.switch.addIntf(device_intf)
@@ -190,11 +190,6 @@ class DAQRunner():
         self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
-            print self.switch.cmd('docker ps --no-trunc')
-            print self.switch.cmd('ovs-vsctl show')
-            print self.switch.cmd('docker exec daq-faucet netstat -nlpa')
-            print self.switch.cmd('cat /var/log/openvswitch/ovs-vswitchd.log')
-
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
 
