@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 
 class DAQHost(FaucetHostCleanup, Host):
     """Base Mininet Host class, for Mininet-based tests."""
-
     pass
+
 
 class DummyNode():
     def addIntf(self, node, port=None):
