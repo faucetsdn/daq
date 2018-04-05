@@ -190,12 +190,9 @@ class DAQRunner():
         self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
-            print self.switch.cmd('tail inst/faucet.log')
-            print self.switch.cmd('cat inst/faucet.yaml')
-
+            print self.switch.cmd('iptables -L')
+            print self.switch.cmd('docker ps --no-trunc')
             print self.switch.cmd('ovs-vsctl show')
-            print self.switch.cmd('ovs-ofctl show pri')
-            print self.switch.cmd('ovs-ofctl dump-flows pri')
 
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
