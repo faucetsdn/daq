@@ -152,15 +152,11 @@ class DAQRunner():
         logging.debug("Adding switches...")
         self.switch = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
 
-        print self.switch.cmd('netstat -nlpa | fgrep :6633')
-
         logging.info("Starting faucet...")
         output = self.switch.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
             print output
             assert False, 'Faucet startup failed'
-
-        print self.switch.cmd('netstat -nlpa | fgrep :6633')
 
         logging.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
@@ -182,7 +178,7 @@ class DAQRunner():
         networking.activate()
 
         logging.info("Waiting for system to settle...")
-        time.sleep(3)
+        time.sleep(10)
 
         device_intf = self.get_device_intf()
         self.switch.addIntf(device_intf)
