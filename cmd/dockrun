@@ -44,6 +44,9 @@ if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
 fi
 
+mkdir -p $INSTDIR/docker
+docker_args+=" -v $INSTDIR/docker:/var/lib/docker"
+
 function move_intf {
     sleep 2
     intf=${daq_intf%!}

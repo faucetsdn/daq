@@ -1,5 +1,6 @@
 build/
 inst/
 .git/
-system.conf
+local/
+faucet/
 */*.pyc

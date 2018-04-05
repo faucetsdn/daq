@@ -29,7 +29,7 @@ if [ -n "$in_container" ]; then
     rm -rf $ROOT
     cp -a /daq $ROOT
     cd $ROOT
-    rm -rf build inst
+    rm -rf build
     echo Now running in `pwd`
 fi
 
