@@ -11,5 +11,6 @@ addons:
       - openvswitch-switch
 install:
   - bin/setup_install
+  - /etc/init.d/openvswitch-controller stop
 script:
   - bin/run_travis_test

@@ -7,10 +7,10 @@ local_config=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
-skip_inception=
+dind_inception=
 
-if [ "$1" == '-s' ]; then
-    skip_inception=y
+if [ "$1" == '-i' ]; then
+    dind_inception=y
     shift
 fi
 
@@ -63,12 +63,9 @@ if [ -z "$in_container" ]; then
     images=$(docker images | fgrep daq/ | awk '{print $1}')
     if [ "${images#daq/runner}" != "${images}" ]; then
         echo Docker image daq/runner up-to-date.
-    elif [ -n "$skip_inception" ]; then
-        echo Skipping build-in-build inception.
+    elif [ -z "$dind_inception" ]; then
+        echo Skipping docker-in-docker inception.
     else
-        echo
-        echo You can stop this now if running direct with cmd/run and not cmd/dockrun.
-        echo
         if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
             echo Runner build on top of base...
             # Explicilty run in / not /root because of volume mapping.
