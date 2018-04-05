@@ -1,12 +1,23 @@
 #!/bin/bash -e
 
+MININETV="2.2.2"
+
 # Basic system install items
 sudo apt-get -y install \
     software-properties-common apt-transport-https \
-    sudo realpath git emacs ethtool curl mininet \
+    sudo realpath git emacs ethtool curl \
     isc-dhcp-client network-manager netcat \
     python python-setuptools python-dev build-essential python-pip \
     openvswitch-switch openvswitch-common
+
+git clone https://github.com/mininet/mininet -b $MININETV
+(
+    cd mininet
+    for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
+        perl -pi -e "s/${i}//g" util/install.sh ;
+    done
+    util/install.sh -n
+)
 
 echo Checking mininet install...
 fgrep def /usr/lib/python2.7/dist-packages/mininet/node.py
