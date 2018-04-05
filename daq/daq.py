@@ -152,11 +152,15 @@ class DAQRunner():
         logging.debug("Adding switches...")
         self.switch = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
 
+        print self.switch.cmd('netstat -nlpa | fgrep :6633')
+
         logging.info("Starting faucet...")
         output = self.switch.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
             print output
             assert False, 'Faucet startup failed'
+
+        print self.switch.cmd('netstat -nlpa | fgrep :6633')
 
         logging.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
@@ -192,10 +196,7 @@ class DAQRunner():
         try:
             print self.switch.cmd('ovs-vsctl show')
             print self.switch.cmd('tail inst/faucet.log')
-            print networking.cmd('ifconfig -a')
-            print networking.cmd('route -n')
-            print dummy.cmd('ifconfig -a')
-            print dummy.cmd('route -n')
+
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
 
