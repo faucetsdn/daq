@@ -144,6 +144,8 @@ class DAQRunner():
 
     def runner(self):
         one_shot = '-s' in sys.argv
+        failed = False
+
         self.set_run_id('init')
 
         logging.debug("Creating miniet...")
@@ -263,6 +265,7 @@ class DAQRunner():
                     break
 
         except Exception as e:
+            failed = e
             print e, traceback.print_exc(file=sys.stderr)
         except KeyboardInterrupt:
             print 'Interrupted'
@@ -278,6 +281,10 @@ class DAQRunner():
         logging.debug("Stopping mininet...")
         self.net.stop()
         logging.info("Done with runner.")
+
+        if failed:
+            print 'Exiting with error because %s' % failed
+            sys.exit(1)
 
 
 def configure_logging():
