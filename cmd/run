@@ -73,6 +73,8 @@ if [ -f .pdbrc ]; then
     runcmd=pdb
 fi
 
+export PYTHONDONTWRITEBYTECODE=1
+
 sudo env \
      MININET_LOGLEVEL=$MININET_LOGLEVEL \
      DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
