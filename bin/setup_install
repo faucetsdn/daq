@@ -19,9 +19,6 @@ git clone https://github.com/mininet/mininet -b $MININETV
     util/install.sh -n
 )
 
-echo Checking mininet install...
-fgrep def /usr/local/lib/python2.7/dist-packages/mininet/node.py
-
 # Python extension packages
 sudo pip install --index-url=https://pypi.python.org/simple netifaces
 
