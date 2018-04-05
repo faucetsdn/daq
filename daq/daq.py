@@ -34,11 +34,9 @@ class DAQHost(FaucetHostCleanup, Host):
 class DummyNode():
     def addIntf(self, node, port=None):
         pass
-        #print 'add dummy intf %s to port %s' % (node.name, port)
 
     def cmd(self, cmd, *args, **kwargs):
         pass
-        #print 'dummy cmd %s/%s/%s' % (cmd, args, kwargs)
 
 class DAQRunner():
 
@@ -192,6 +190,12 @@ class DAQRunner():
         self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
+            print self.switch.cmd('ovs-vsctl show')
+            print self.switch.cmd('tail inst/faucet.log')
+            print networking.cmd('ifconfig -a')
+            print networking.cmd('route -n')
+            print dummy.cmd('ifconfig -a')
+            print dummy.cmd('route -n')
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
 
@@ -283,7 +287,7 @@ class DAQRunner():
         logging.info("Done with runner.")
 
         if failed:
-            print 'Exiting with error because %s' % failed
+            print 'Exiting with error %s' % failed
             sys.exit(1)
 
 
