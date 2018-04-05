@@ -152,6 +152,9 @@ class DAQRunner():
         logging.debug("Adding switches...")
         self.switch = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
 
+        filter = 'port 6633'
+        faucet_watcher = TcpdumpHelper(self.switch, filter, packets=None, timeout=None, logger=logger)
+
         logging.info("Starting faucet...")
         output = self.switch.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
@@ -190,8 +193,16 @@ class DAQRunner():
         self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
+            print self.switch.cmd('time (echo hello | nc -q 1 127.0.0.1 6633 | od -x)')
             print self.switch.cmd('ovs-vsctl show')
+            print self.switch.cmd('cat /etc/faucet/faucet.yaml')
             print self.switch.cmd('tail inst/faucet.log')
+            print faucet_watcher.next_line()
+            print faucet_watcher.next_line()
+            print faucet_watcher.next_line()
+            print faucet_watcher.next_line()
+            print faucet_watcher.next_line()
+            print faucet_watcher.next_line()
 
             assert self.pingTest(networking, dummy)
             assert self.pingTest(dummy, networking)
