@@ -3,8 +3,8 @@
 MININETV="2.2.2"
 
 sudo apt-get install apt-transport-https
-echo "deb https://packages.wand.net.nz $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/wand.list
-sudo curl https://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
+echo "deb http://packages.wand.net.nz $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/wand.list
+sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
 sudo apt-get update || true
 
 sudo apt-get -y install     openvswitch-switch openvswitch-common
