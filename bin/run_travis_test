@@ -1,5 +1,12 @@
 #!/bin/bash -e
 
+sudo netstat -nlpa | fgrep :6633 || echo No match for :6633
+
+/etc/init.d/openvswitch-controller stop || true
+sleep 1
+
+sudo netstat -nlpa | fgrep :6633 || echo No match for :6633
+
 mkdir -p local
 
 cp misc/system.conf local/

@@ -71,8 +71,6 @@ if [ -f .pdbrc ]; then
     runcmd=pdb
 fi
 
-sudo netstat -nlpa | fgrep :6633 || echo No match for :6633
-
 sudo env \
      MININET_LOGLEVEL=$MININET_LOGLEVEL \
      DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
