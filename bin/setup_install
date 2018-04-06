@@ -36,6 +36,9 @@ TARGET=faucet
 cd $ROOT
 
 echo Cloning $REPO branch $BRANCH into $TARGET...
-git clone $REPO $TARGET -b $BRANCH
+git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH
 
-cmd/build -i
+cmd/build
+
+cmd/inbuild
+

@@ -4,12 +4,20 @@
 # daq/runner at build time (cmd/build) to pre-build internal docker images.
 #
 # Need to use ubuntu because mininet is very persnickity about versions.
-FROM daq/aardvark:latest
+FROM ubuntu:xenial
+
+ENV AG="apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
+
+# Basic things shared with aardvark.
+RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
+
+# Dump all our junks into the root home directory.
+WORKDIR /root
 
 # Basic system install items
 RUN $AG install \
     software-properties-common apt-transport-https \
-    sudo realpath git emacs ethtool curl \
+    sudo realpath git emacs-nox ethtool curl \
     isc-dhcp-client network-manager netcat \
     python python-setuptools python-dev build-essential python-pip \
     openvswitch-switch openvswitch-common 

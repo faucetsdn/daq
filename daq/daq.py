@@ -115,7 +115,7 @@ class DAQRunner():
                      "GATEWAY_MAC=" + self.networking.MAC()]
         vol_maps = [ self.scan_base + ":/scans" ]
         logging.debug("Running docker test %s" % image)
-        cls = MakeDockerHost(image, prefix='daq')
+        cls = MakeDockerHost(image, prefix='daq', startup_timeout_ms=60000)
         host = self.addHost(test_name, cls=cls, env_vars = env_vars, vol_maps=vol_maps)
         host.activate()
         error_code = host.wait()

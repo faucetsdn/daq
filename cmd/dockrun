@@ -2,7 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
-IMAGE=grafnu/runner
+IMAGE=daq/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 docker_args="\
@@ -11,7 +11,7 @@ docker_args="\
 
 cd $ROOT
 
-if [ "$1" == base -o "$1" == runner ]; then
+if [ "$1" == base -o "$1" == rebuild ]; then
     if [ "$1" == base ]; then
         IMAGE=daq/base
     fi

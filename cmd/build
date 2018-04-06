@@ -7,12 +7,6 @@ local_config=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
-dind_inception=
-
-if [ "$1" == '-i' ]; then
-    dind_inception=y
-    shift
-fi
 
 if [ -f $local_config ]; then
   echo Loading build configuraiton from $local_config
@@ -23,7 +17,6 @@ if [ -n "$in_container" ]; then
     echo 'DOCKER_OPTS="-s vfs -D -l debug"' > /etc/default/docker
     service docker start
     sleep 3
-    tail /var/log/docker.log || true
     echo Importing current local version of daq...
     ROOT=/root/daq
     rm -rf $ROOT
@@ -33,14 +26,10 @@ if [ -n "$in_container" ]; then
     echo Now running in `pwd`
 fi
 
-docker info | fgrep Storage
-
 mkdir -p local
 date > local/last_build.txt
 sudo rm -rf $build_root
 mkdir -p $build_root
-
-declare -A modules
 
 for file in docker/Dockerfile.*; do
     if [ ${file%\~} != ${file} ]; then
@@ -60,41 +49,13 @@ for file in docker/Dockerfile.*; do
         false
     fi
     echo Build complete. >> $logfile
-    modules[$module]=$module
 done
 
-if [ -z "$in_container" ]; then
-    file=misc/Dockerfile.base
-    logfile=$build_root/docker_build.base
-    echo Building $file into daq/$module, log to $logfile...
-    failed=
-    docker build -t daq/base $build_args -f $file . > $logfile 2>&1 || failed=y
-    if [ -n "$failed" ]; then
-        tail $logfilr
-        false
-    fi
-
-    images=$(docker images | fgrep daq/ | awk '{print $1}')
-    if [ "${images#daq/runner}" != "${images}" ]; then
-        echo Docker image daq/runner up-to-date.
-    elif [ -z "$dind_inception" ]; then
-        echo Skipping docker-in-docker inception.
-    else
-        if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
-            echo Runner build on top of base...
-            # Explicilty run in / not /root because of volume mapping.
-            cmd/dockrun base /daq/cmd/build
-        else
-            echo Runner build inside existing runner...
-            cmd/dockrun runner daq/cmd/build
-        fi
-        echo Committing runner container image to daq/runner...
-        docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
-    fi
-else
+if [ -n "$in_container" ]; then
     docker system prune -f | fgrep reclaimed
     sleep 1
     service docker stop
     sleep 2
     rm -fr /var/lib/docker/runtimes
+    rm -fr faucet/.git
 fi
