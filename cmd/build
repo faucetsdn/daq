@@ -20,7 +20,7 @@ if [ -f $local_config ]; then
 fi
 
 if [ -n "$in_container" ]; then
-    echo 'DOCKER_OPTS="-s vfs"' > /etc/default/docker
+    echo 'DOCKER_OPTS="-s vfs -D -l debug"' > /etc/default/docker
     service docker start
     sleep 3
     tail /var/log/docker.log || true
