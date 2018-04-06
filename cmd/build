@@ -60,6 +60,16 @@ for file in docker/Dockerfile.*; do
 done
 
 if [ -z "$in_container" ]; then
+    file=misc/Dockerfile.base
+    logfile=$build_root/docker_build.base
+    echo Building $file into daq/$module, log to $logfile...
+    failed=
+    docker build -t daq/base $build_args -f $file . > $logfile 2>&1 || failed=y
+    if [ -n "$failed" ]; then
+        tail $logfilr
+        false
+    fi
+
     images=$(docker images | fgrep daq/ | awk '{print $1}')
     if [ "${images#daq/runner}" != "${images}" ]; then
         echo Docker image daq/runner up-to-date.
