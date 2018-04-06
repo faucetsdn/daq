@@ -2,7 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
-IMAGE=daq/runner
+IMAGE=grafnu/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 docker_args="\
@@ -43,9 +43,6 @@ docker_args+=" --env DAQ_CONTAINER=daq/runner"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
 fi
-
-mkdir -p $INSTDIR/docker
-docker_args+=" -v $INSTDIR/docker:/var/lib/docker"
 
 function move_intf {
     sleep 2
