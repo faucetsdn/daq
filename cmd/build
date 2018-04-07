@@ -8,7 +8,7 @@ build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
 do_images=
-copydirs="bin cmd misc faucet docker"
+copydirs="bin cmd misc faucet docker daq"
 
 if [ "$1" == save ]; then
     do_images=save
