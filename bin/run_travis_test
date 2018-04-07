@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# Include some deets in the log output.
+git log -n 1
+
 # Out with the old, in with the new (use faucet instead).
 sudo /etc/init.d/openvswitch-controller stop || true
 
