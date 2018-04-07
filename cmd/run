@@ -8,6 +8,8 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
 cd $ROOT
+pwd
+ls
 
 FAUCET=$(realpath $ROOT/faucet)
 
@@ -28,7 +30,11 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
-(cd $FAUCET; echo faucet commit $(git rev-parse HEAD))
+git log -n 1 || true
+
+if [ -f $FAUCET/.git ]; then
+    (cd $FAUCET; git log -n 1) || true
+fi
 
 mkdir -p $INSTDIR
 rm -f $EVENT_SOCK
