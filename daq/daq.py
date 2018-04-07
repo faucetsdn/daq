@@ -167,7 +167,7 @@ class DAQRunner():
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
 
         logging.debug("Adding networking host...")
-        self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq'))
+        self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq', startup_timeout_ms=60000))
         networking = self.networking
         dummy = self.addHost('dummy')
 
