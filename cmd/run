@@ -8,8 +8,6 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
 cd $ROOT
-pwd
-ls
 
 FAUCET=$(realpath $ROOT/faucet)
 
@@ -30,11 +28,11 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
-git log -n 1 || true
+echo -n "Last DAQ commit "
+git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 
-if [ -f $FAUCET/.git ]; then
-    (cd $FAUCET; git log -n 1) || true
-fi
+echo -n "Last FAUCET commit "
+(cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
 mkdir -p $INSTDIR
 rm -f $EVENT_SOCK

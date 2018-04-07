@@ -39,9 +39,10 @@ echo Cloning $REPO branch $BRANCH into $TARGET...
 git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH
 
 # Include some deets in the log output.
-git log -n 1
+echo -n "DAQ commit "
+git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 
-#cmd/build
+cmd/build
 
 cmd/inbuild
 
