@@ -3,6 +3,8 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
+cmd/build save
+
 local_config=local/system.conf
 build_root=build
 build_args=
@@ -31,14 +33,14 @@ images=$(docker images | fgrep daq/ | awk '{print $1}')
 if [ "${images#daq/runner}" != "${images}" ]; then
     echo Docker image daq/runner up-to-date.
 else
-    if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
+#    if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
         echo Runner build on top of base...
         # Explicilty run in / not /root because of volume mapping.
-        cmd/dockrun base /daq/cmd/build
-    else
-        echo Runner build inside existing runner...
-        cmd/dockrun rebuild daq/cmd/build
-    fi
+        cmd/dockrun base /daq/cmd/build load
+#    else
+#        echo Runner build inside existing runner...
+#        cmd/dockrun rebuild daq/cmd/build
+#    fi
     echo Committing runner container image to daq/runner...
     docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
 fi

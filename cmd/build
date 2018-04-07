@@ -7,6 +7,16 @@ local_config=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
+do_images=
+copydirs="bin cmd misc faucet docker"
+
+if [ "$1" == save ]; then
+    do_images=save
+    shift
+elif [ "$1" == load ]; then
+    do_images=load
+    shift
+fi
 
 if [ -f $local_config ]; then
   echo Loading build configuraiton from $local_config
@@ -20,9 +30,16 @@ if [ -n "$in_container" ]; then
     echo Importing current local version of daq...
     ROOT=/root/daq
     rm -rf $ROOT
-    cp -a /daq $ROOT
+    mkdir -p $ROOT
+    cd /daq
+    for subdir in $copydirs; do
+        echo Copying subdir $subdir...
+        cp -a $subdir $ROOT/
+    done
     cd $ROOT
-    rm -rf build
+    if [ "$do_images" != load ]; then
+        rm -rf build
+    fi
     echo Now running in `pwd`
 fi
 
@@ -36,22 +53,30 @@ for file in docker/Dockerfile.*; do
         continue
     fi
     module=${file#docker/Dockerfile.}
-    if [ $module == base -a -n "$in_container" ]; then
+    if [ "$module" == base -a -n "$in_container" ]; then
         continue
     fi
     logfile=$build_root/docker_build.$module
-    echo Building $file into daq/$module, log to $logfile...
     failed=
     tag=daq/$module
-    docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
-    if [ -n "$failed" ]; then
-        tail $logfile
-        false
+    if [ "$do_images" == load ]; then
+        docker load -i /daq/$build_root/docker_image.$module
+    else
+        echo Building $file into daq/$module, log to $logfile...
+        docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
+        if [ -n "$failed" ]; then
+            tail $logfile
+            false
+        fi
+        echo Build complete. >> $logfile
+        if [ "$do_images" == save ]; then
+            docker save $tag > $build_root/docker_image.$module
+        fi
     fi
-    echo Build complete. >> $logfile
 done
 
 if [ -n "$in_container" ]; then
+    echo Pruning docker system stuff...
     docker system prune -f | fgrep reclaimed
     sleep 1
     service docker stop
