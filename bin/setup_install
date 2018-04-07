@@ -39,10 +39,8 @@ echo Cloning $REPO branch $BRANCH into $TARGET...
 git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH
 
 # Include some deets in the log output.
-echo Current commit log:
 git log -n 1
 
 #cmd/build
 
 cmd/inbuild
-
