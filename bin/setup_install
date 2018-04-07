@@ -44,3 +44,7 @@ git log -n 1
 #cmd/build
 
 cmd/inbuild
+
+rm -rf build
+df .
+docker images
