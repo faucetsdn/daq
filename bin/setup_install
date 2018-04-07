@@ -38,7 +38,7 @@ cd $ROOT
 echo Cloning $REPO branch $BRANCH into $TARGET...
 git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH
 
-cmd/build
+#cmd/build
 
 cmd/inbuild
 

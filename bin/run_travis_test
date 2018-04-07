@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+# Out with the old, in with the new (use faucet instead).
 sudo /etc/init.d/openvswitch-controller stop || true
 
 mkdir -p local
@@ -8,4 +9,4 @@ echo Installing local/system.conf...
 cp misc/system.conf local/
 
 echo Running DAQ test...
-cmd/run -s
+cmd/dockrun daq/cmd/run -s
