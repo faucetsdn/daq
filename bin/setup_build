@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+echo -n "DAQ commit "
+git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
+
+cmd/build
+
+cmd/inbuild
+
+rm -rf build
+df .
+docker images
