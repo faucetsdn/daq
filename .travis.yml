@@ -11,5 +11,6 @@ addons:
       - openvswitch-switch
 install:
   - bin/setup_install
+  - bin/setup_build
 script:
-  - bin/run_travis_test
+  - bin/test_daq
