@@ -18,12 +18,13 @@ mkdir -p local
 date > local/last_ibuild.txt
 
 file=misc/Dockerfile.base
+target=daq/base
 mkdir -p $build_root
 logfile=$build_root/docker_build.base
-echo Building $file into daq/$module, log to $logfile...
+echo Building $file into $target, log to $logfile...
 
 failed=
-docker build -t daq/base $build_args -f $file . > $logfile 2>&1 || failed=y
+docker build -t $target $build_args -f $file . > $logfile 2>&1 || failed=y
 if [ -n "$failed" ]; then
     tail $logfilr
     false
@@ -33,14 +34,9 @@ images=$(docker images | fgrep daq/ | awk '{print $1}')
 if [ "${images#daq/runner}" != "${images}" ]; then
     echo Docker image daq/runner up-to-date.
 else
-#    if [ "${images#*daq/runner*daq/base}" == "${images}" ]; then
-        echo Runner build on top of base...
-        # Explicilty run in / not /root because of volume mapping.
-        cmd/dockrun base /daq/cmd/build load
-#    else
-#        echo Runner build inside existing runner...
-#        cmd/dockrun rebuild daq/cmd/build
-#    fi
-    echo Committing runner container image to daq/runner...
-    docker commit -c "CMD daq/cmd/run" daq-runner daq/runner > /dev/null
+    echo Runner build on top of base...
+    # Explicilty run in / not /root because of volume mapping.
+    cmd/dockrun base /daq/cmd/build load
+    echo Committing runner container image to daqf/runner...
+    docker commit -c "CMD daq/cmd/run" daq-runner daqf/runner > /dev/null
 fi

@@ -2,7 +2,8 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
-IMAGE=daq/runner
+# Use daqf and not daq for runner since dockerhub requires >= 4 characters.
+IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 docker_args="\
@@ -39,7 +40,7 @@ docker rm -f daq-runner > /dev/null 2>&1 || true
 rm -f $INSTDIR/$SYSTEM_CONF
 test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
 
-docker_args+=" --env DAQ_CONTAINER=daq/runner"
+docker_args+=" --env DAQ_CONTAINER=$IMAGE"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
 fi
