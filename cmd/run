@@ -86,6 +86,7 @@ sudo env \
      DAQ_INTF=$daq_intf \
      FAUCET_EVENT_SOCK=$EVENT_SOCK \
      PYTHONPATH=$FAUCET \
+     DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
      TERM=dumb $runcmd daq/daq.py "$@"
 
 if [ -n "$cleanup" ]; then

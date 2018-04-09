@@ -9,6 +9,8 @@ addons:
   apt:
     packages:
       - openvswitch-switch
+env:
+  - DOCKER_STARTUP_TIMEOUT_MS=60000
 install:
   - bin/setup_install
   - bin/setup_build

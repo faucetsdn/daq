@@ -115,7 +115,7 @@ class DAQRunner():
                      "GATEWAY_MAC=" + self.networking.MAC()]
         vol_maps = [ self.scan_base + ":/scans" ]
         logging.debug("Running docker test %s" % image)
-        cls = MakeDockerHost(image, prefix='daq', startup_timeout_ms=60000)
+        cls = MakeDockerHost(image, prefix='daq')
         host = self.addHost(test_name, cls=cls, env_vars = env_vars, vol_maps=vol_maps)
         host.activate()
         error_code = host.wait()
@@ -167,7 +167,7 @@ class DAQRunner():
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
 
         logging.debug("Adding networking host...")
-        self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq', startup_timeout_ms=60000))
+        self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq'))
         networking = self.networking
         dummy = self.addHost('dummy')
 
