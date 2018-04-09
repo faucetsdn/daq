@@ -30,17 +30,69 @@ if necessary, is download the container image (which can take a bit of time).
   $ cmd/dockrun
 </pre>
 
+<b>TODO:</b> Rename cmd/run to something else, and make cmd/dockrun be cmd/run</b>
+
 If this is successful the output should look something like (after the initial download):
 
-<pre>
-  $ cmd/dockrun
-  ...
-  ...
-  ...
-  ...
+<pre style="margin-left:1em">
+$ cmd/dockrun 
+Configuring apparmor...
+apparmor_parser: Unable to remove "/usr/sbin/tcpdump".  Profile doesn't exist
+Starting runner ...
+Replacing local/system.conf with version from /root/daq/inst...
+Last DAQ commit fatal: Not a git repository (or any of the parent directories): .git
+Last FAUCET commit fatal: Not a git repository (or any of the parent directories): .git
+ * Starting Docker: docker                                                                                                                                                                                               [ OK ] 
+ovsdb-server is not running
+ovs-vswitchd is not running
+ * /etc/openvswitch/conf.db does not exist
+ * Creating empty database /etc/openvswitch/conf.db
+ * Starting ovsdb-server
+ * system ID not configured, please use --system-id
+ * Configuring Open vSwitch system IDs
+ * Starting ovs-vswitchd
+ * Enabling remote OVSDB managers
+Setting daq_intf not defined, defaulting to auto-start faux device.
+Implicitly running faux device...
+Launching faux ...
+Removing old interface faux
+Adding new interface...
+Done with faux device launch.
+3: faux@if2: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state LOWERLAYERDOWN group default qlen 1000
+    link/ether aa:93:b6:aa:1b:ab brd ff:ff:ff:ff:ff:ff link-netnsid 1
+*** Error setting resource limits. Mininet's performance may be affected.
+INFO:root:Starting faucet...
+INFO:root:Starting mininet...
+*** Configuring hosts
+networking dummy 
+*** Starting controller
+controller 
+*** Starting 1 switches
+pri ...
+INFO:root:Waiting for system to settle...
+INFO:root:Attaching device interface faux...
+INFO:root:Adding fake external device 192.168.84.5
+INFO:root:Ping test networking->dummy
+INFO:root:Ping test dummy->networking
+INFO:root:
+INFO:root:Starting new test run 5acbe372
+INFO:root:Flapping faux device interface.
+INFO:root:Waiting for port-up event on interface faux port 3...
+INFO:root:Recieved port up event on port 3.
+INFO:root:Waiting for dhcp reply from networking...
+INFO:root:Received reply, host faux is at a2:6e:bb:3a:cd:aa/10.0.0.227
+INFO:root:Running background monitor scan for 10 seconds...
+INFO:root:Running test suite against target...
+INFO:root:Ping test networking->10.0.0.227
+INFO:root:PASSED test mudgee
+INFO:root:PASSED test pass
+INFO:root:FAILED test fail with error 1
+INFO:root:PASSED test ping
+INFO:root:FAILED test bacnet with error 1
+INFO:root:PASSED test nmap
+INFO:root:Done with tests
+INFO:root:
 </pre>
-
-<b>TODO:</b> Rename cmd/run to something else, and make cmd/dockrun be cmd/run</b>
 
 ### Building DAQ
 

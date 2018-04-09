@@ -6,7 +6,15 @@ INSTDIR=$ROOT/inst/
 IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
-docker_args="\
+DOCKER_STARTUP_TIMEOUT_MS=60000
+docker_args=
+
+if [ -f $LOCAL_CONFIG ]; then
+    echo Loading dockrun configuration from $LOCAL_CONFIG
+    source $LOCAL_CONFIG
+fi
+
+docker_args+="\
   --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
   --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
   --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
@@ -28,15 +36,12 @@ if [ "$1" == live ]; then
     shift
 fi
 
-if [ -f $LOCAL_CONFIG ]; then
-    echo Loading dockrun configuration from $LOCAL_CONFIG
-    source $LOCAL_CONFIG
-fi
-
 sudo rm -rf $INSTDIR
 mkdir -p $INSTDIR
 
 docker rm -f daq-runner > /dev/null 2>&1 || true
+
+docker pull daq/runner
 
 rm -f $INSTDIR/$SYSTEM_CONF
 test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
@@ -61,6 +66,11 @@ function move_intf {
         fi
     fi
 }
+
+# This is necessary to wokr around a problem with docker permissions.
+echo Configuring apparmor...
+sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.tcpdump || true
+hash -r
 
 if [ -z "$build" ]; then
     (
