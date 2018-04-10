@@ -3,10 +3,11 @@
 # Out with the old, in with the new (use faucet instead).
 sudo /etc/init.d/openvswitch-controller stop || true
 
-mkdir -p local
-
-echo Installing local/system.conf...
-cp misc/system.conf local/
+if [ ! -f local/system.conf ]; then
+    echo Installing local/system.conf...
+    mkdir -p local
+    cp misc/system.conf local/
+fi
 
 echo Running DAQ test...
 cmd/run -s
