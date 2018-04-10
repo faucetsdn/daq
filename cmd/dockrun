@@ -41,7 +41,7 @@ mkdir -p $INSTDIR
 
 docker rm -f daq-runner > /dev/null 2>&1 || true
 
-docker pull daq/runner
+docker pull daqf/runner
 
 rm -f $INSTDIR/$SYSTEM_CONF
 test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/

@@ -3,6 +3,7 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
+# Building images w/ save...
 cmd/build save
 
 local_config=local/system.conf
@@ -31,8 +32,8 @@ if [ -n "$failed" ]; then
 fi
 
 images=$(docker images | fgrep daq/ | awk '{print $1}')
-if [ "${images#daq/runner}" != "${images}" ]; then
-    echo Docker image daq/runner up-to-date.
+if [ "${images#daqf/runner}" != "${images}" ]; then
+    echo Docker image daqf/runner up-to-date.
 else
     echo Runner build on top of base...
     # Explicilty run in / not /root because of volume mapping.
