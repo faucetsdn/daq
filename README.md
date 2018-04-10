@@ -27,15 +27,16 @@ Normal execution can be invoked using the containerized build. The first thing t
 if necessary, is download the container image (which can take a bit of time).
 
 <pre>
-  $ cmd/dockrun
+  $ <b>cmd/dockrun</b>
 </pre>
 
 <b>TODO:</b> Rename cmd/run to something else, and make cmd/dockrun be cmd/run</b>
 
+You can also run it with the <code>-s</code> that specifies to run one test and then exit.
 If this is successful the output should look something like (after the initial download):
 
 <pre style="margin-left:1em">
-$ cmd/dockrun 
+$ <b>cmd/dockrun -s</b>
 Configuring apparmor...
 apparmor_parser: Unable to remove "/usr/sbin/tcpdump".  Profile doesn't exist
 Starting runner ...
@@ -91,7 +92,18 @@ INFO:root:PASSED test ping
 INFO:root:FAILED test bacnet with error 1
 INFO:root:PASSED test nmap
 INFO:root:Done with tests
-INFO:root:
+*** Stopping 1 controllers
+controller 
+*** Stopping 2 links
+..
+*** Stopping 1 switches
+pri 
+*** Stopping 2 hosts
+networking dummy 
+*** Done
+INFO:root:Done with runner.
+Killing daq-faux container...
+Done with run.
 </pre>
 
 ### Building DAQ
