@@ -79,6 +79,8 @@ fi
 
 export PYTHONDONTWRITEBYTECODE=1
 
+echo Executing runner "$@"...
+
 sudo env \
      MININET_LOGLEVEL=$MININET_LOGLEVEL \
      DAQ_LOGLEVEL=$DAQ_LOGLEVEL \

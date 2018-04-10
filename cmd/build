@@ -8,10 +8,12 @@ build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
 do_images=
+ext_msg=
 copydirs="bin cmd misc faucet docker daq"
 
 if [ "$1" == save ]; then
     do_images=save
+    ext_msg=/save
     shift
 elif [ "$1" == load ]; then
     do_images=load
@@ -62,7 +64,7 @@ for file in docker/Dockerfile.*; do
     if [ "$do_images" == load ]; then
         docker load -i /daq/$build_root/docker_image.$module
     else
-        echo Building $file into daq/$module, log to $logfile...
+        echo Build$ext_msg $file into daq/$module, log to $logfile...
         docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
         if [ -n "$failed" ]; then
             tail $logfile

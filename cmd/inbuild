@@ -3,7 +3,6 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-# Building images w/ save...
 cmd/build save
 
 local_config=local/system.conf
