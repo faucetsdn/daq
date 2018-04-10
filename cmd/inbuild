@@ -36,8 +36,8 @@ if [ "${images#daqf/runner}" != "${images}" ]; then
     echo Docker image daqf/runner up-to-date.
 else
     echo Runner build on top of base...
-    # Explicilty run in / not /root because of volume mapping.
-    cmd/dockrun base /daq/cmd/build load
+    # Explicilty run in /daq not /root/daq because of volume mapping.
+    cmd/run base /daq/cmd/build load
     echo Committing runner container image to daqf/runner...
-    docker commit -c "CMD daq/cmd/run" daq-runner daqf/runner > /dev/null
+    docker commit -c "ENTRYPOINT /root/daq/cmd/exrun" daq-runner daqf/runner > /dev/null
 fi

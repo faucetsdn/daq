@@ -1,96 +1,91 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-INSTDIR=$ROOT/inst
-FAUCET_SOCK=faucet_event.sock
-EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
+INSTDIR=$ROOT/inst/
+# Use daqf and not daq for runner since dockerhub requires >= 4 characters.
+IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
-
-cd $ROOT
-
-FAUCET=$(realpath $ROOT/faucet)
-
-if [ -n "$DAQ_CONTAINER" ]; then
-    echo Replacing $LOCAL_CONFIG with version from $INSTDIR...
-    rm -f $LOCAL_CONFIG
-    mkdir -p local
-    test -f $INSTDIR/$SYSTEM_CONF && cp $INSTDIR/$SYSTEM_CONF $LOCAL_CONFIG
-fi
+DOCKER_STARTUP_TIMEOUT_MS=60000
+docker_args=
+build=
 
 if [ -f $LOCAL_CONFIG ]; then
-    echo Loading run configuration from $LOCAL_CONFIG
+    echo Loading container run configuration from $LOCAL_CONFIG
     source $LOCAL_CONFIG
 fi
 
-if [ ! -d $FAUCET ]; then
-    echo Faucet directory $FAUCET not found.
-    false
+docker_args+="\
+  --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
+  --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
+  --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
+
+cd $ROOT
+
+if [ "$1" == base -o "$1" == rebuild ]; then
+    if [ "$1" == base ]; then
+        IMAGE=daq/base
+    fi
+    build=y
+    docker_args+=" -v $PWD:/daq/"
+    shift
 fi
 
-echo -n "Last DAQ commit "
-git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
+if [ "$1" == live ]; then
+    echo Mapping local daq live into runner process.
+    docker_args+=" -v $PWD:/root/daq"
+    shift
+fi
 
-echo -n "Last FAUCET commit "
-(cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+if [ "$1" == bash ]; then
+    docker_args=+" --entrypoiint /bin/bash"
+    shift
+fi
 
+sudo rm -rf $INSTDIR
 mkdir -p $INSTDIR
-rm -f $EVENT_SOCK
 
-docker ps > /dev/null 2>&1 || service docker start
+docker rm -f daq-runner > /dev/null 2>&1 || true
 
-ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
-$ovsctl status || sudo $ovsctl start
+rm -f $INSTDIR/$SYSTEM_CONF
+test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
 
-if [ -z "$daq_intf" ]; then
-    echo Setting daq_intf not defined, defaulting to auto-start faux device.
-    daq_intf="faux!"
+docker_args+=" --env DAQ_CONTAINER=$IMAGE"
+if [ -z "$build" ]; then
+    docker_args+=" -v $INSTDIR:/root/daq/inst"
+    docker pull $IMAGE
 fi
 
-if [ "$daq_intf" == "local!" ]; then
-    daq_intf=local
-    echo Implicitly running local device...
-    $ROOT/cmd/local
-    cleanup="$ROOT/cmd/local clean"
+function move_intf {
+    sleep 2
+    intf=${daq_intf%!}
+    if [ -n "$daq_intf" -a "$daq_intf" == "$intf" ]; then
+        pid=$(docker inspect --format '{{.State.Pid}}' daq-runner)
+        link=$(ip link show $intf 2>/dev/null )
+        if [ "$pid" != 0 -a -n "$link" ]; then
+            echo Moving interface $intf into container pid $pid...
+            sudo ip link set $intf netns $pid
+        else
+            echo Could not find process/intf $pid/$intf, terminating daq-runner.
+            docker kill daq-runner > /dev/null
+        fi
+    fi
+}
+
+# This is necessary to wokr around a problem with docker permissions.
+echo Configuring apparmor...
+sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.tcpdump || true
+hash -r
+
+if [ -z "$build" ]; then
+    (
+        move_result="$(move_intf)"
+        # WTF I need to do \r\n is beyond me. But there it is.
+        if [ -n "$move_result" ]; then
+           printf "${move_result}\r\n"
+        fi
+    ) &
 fi
 
-if [ "$daq_intf" == "faux!" ]; then
-    daq_intf=faux
-    echo Implicitly running faux device...
-    $ROOT/cmd/faux
-    cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
-fi
-
-# If running inside of a container, wait until the host test interface shows up...
-if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" -a -n "$daq_intf" ]; then
-    while ! ifconfig -a | fgrep -q $daq_intf; do
-        echo Waiting for interface $daq_intf to appear...
-        sleep 1
-    done
-fi
-
-ip addr show $daq_intf
-
-runcmd=python
-if [ -f .pdbrc ]; then
-    echo Found .pdbrc file, using pdb...
-    runcmd=pdb
-fi
-
-export PYTHONDONTWRITEBYTECODE=1
-
-sudo env \
-     MININET_LOGLEVEL=$MININET_LOGLEVEL \
-     DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
-     DAQ_CONTAINER=$DAQ_CONTAINER \
-     DAQ_INTF=$daq_intf \
-     FAUCET_EVENT_SOCK=$EVENT_SOCK \
-     PYTHONPATH=$FAUCET \
-     DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
-     TERM=dumb $runcmd daq/daq.py "$@"
-
-if [ -n "$cleanup" ]; then
-    sh -c "$cleanup"
-fi
-
-echo Done with run.
+echo Starting runner "$@"...
+docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
