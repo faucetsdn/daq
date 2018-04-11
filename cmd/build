@@ -78,9 +78,6 @@ for file in docker/Dockerfile.*; do
 done
 
 if [ -n "$in_container" ]; then
-    echo Pruning docker system stuff...
-    docker system prune -f | fgrep reclaimed
-    sleep 1
     service docker stop
     sleep 2
     rm -fr /var/lib/docker/runtimes
