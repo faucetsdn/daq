@@ -142,7 +142,6 @@ class DAQRunner():
 
     def runner(self):
         one_shot = '-s' in sys.argv
-        print one_shot, sys.argv
         failed = False
 
         self.set_run_id('init')
