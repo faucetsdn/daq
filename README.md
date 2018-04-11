@@ -27,16 +27,14 @@ Normal execution can be invoked using the containerized build. The first thing t
 if necessary, is download the container image (which can take a bit of time).
 
 <pre>
-  $ <b>cmd/dockrun</b>
+  $ <b>cmd/run</b>
 </pre>
 
-<b>TODO:</b> Rename cmd/run to something else, and make cmd/dockrun be cmd/run</b>
-
 You can also run it with the <code>-s</code> that specifies to run one test and then exit.
-If this is successful the output should look something like (after the initial download):
+If this is successful the output should look something like (not including the initial download):
 
 <pre style="margin-left:1em">
-$ <b>cmd/dockrun -s</b>
+$ <b>cmd/run -s</b>
 Configuring apparmor...
 apparmor_parser: Unable to remove "/usr/sbin/tcpdump".  Profile doesn't exist
 Starting runner ...
@@ -118,13 +116,13 @@ To build containers for basic execution, which can take a long time:
   $ cmd/build
 </pre>
 
-To run the development version, use the simple run command:
+To run the development version, use the simple executor-run command:
 
 <pre>
-  $ cmd/run
+  $ cmd/exrun
 </pre>
 
-Build the runner container, which can take a really long time:
+Build the runner container, which can take a <em>really</em> long time:
 
 <pre>
   $ cmd/inbuild
