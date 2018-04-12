@@ -38,7 +38,7 @@ if [ "$1" == live ]; then
 fi
 
 if [ "$1" == bash ]; then
-    docker_args=+" --entrypoiint /bin/bash"
+    docker_args+=" --entrypoint /bin/bash"
     shift
 fi
 
