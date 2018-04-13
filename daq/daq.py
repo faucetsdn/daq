@@ -62,16 +62,16 @@ class DAQRunner():
         params['env_vars'] = env_vars
         params['vol_maps'] = vol_maps
         host = self.net.addHost(name, cls, **params)
-        host.switch_link = self.net.addLink(self.switch, host, fast=False)
+        host.switch_link = self.net.addLink(self.pri, host, fast=False)
         if self.net.built:
             host.configDefault()
-            self.switchAttach(host.switch_link.intf1)
+            self.switchAttach(self.pri, host.switch_link.intf1)
         return host
 
-    def switchAttach(self, intf):
-        self.switch.attach(intf)
+    def switchAttach(self, switch, intf):
+        switch.attach(intf)
         # This really should be done in attach, but currently only automatic on switch startup.
-        self.switch.vsctl(self.switch.intfOpts(intf))
+        switch.vsctl(switch.intfOpts(intf))
 
     def switchDelIntf(self, switch, intf):
         del switch.intfs[switch.ports[intf]]
@@ -80,8 +80,8 @@ class DAQRunner():
 
     def removeHost(self, host):
         intf = host.switch_link.intf1
-        self.switch.detach(intf)
-        self.switchDelIntf(self.switch, intf)
+        self.pri.detach(intf)
+        self.switchDelIntf(self.pri, intf)
         intf.delete()
         del self.net.links[self.net.links.index(host.switch_link)]
         del self.net.hosts[self.net.hosts.index(host)]
@@ -150,10 +150,11 @@ class DAQRunner():
         self.net = Mininet()
 
         logging.debug("Adding switches...")
-        self.switch = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
+        self.pri = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
+        self.sec = self.net.addSwitch('sec', dpid='2', cls=OVSSwitch)
 
         logging.info("Starting faucet...")
-        output = self.switch.cmd('cmd/faucet && echo SUCCESS')
+        output = self.pri.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
             print output
             assert False, 'Faucet startup failed'
@@ -165,6 +166,10 @@ class DAQRunner():
         targetIp = "127.0.0.1"
         logging.debug("Adding controller at %s" % targetIp)
         controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
+
+        logging.info("Adding internal switch bridge")
+        self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=1, fast=False)
+        print self.switch_link.intf1.name, self.switch_link.intf2.name
 
         logging.debug("Adding networking host...")
         self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq'))
@@ -181,13 +186,13 @@ class DAQRunner():
         time.sleep(3)
 
         device_intf = self.get_device_intf()
-        self.switch.addIntf(device_intf)
         logging.info("Attaching device interface %s..." % device_intf.name)
-        self.switchAttach(device_intf)
+        self.sec.addIntf(device_intf)
+        self.switchAttach(self.sec, device_intf)
 
         logging.info('Adding fake external device %s5' % self.TEST_IP_PREFIX)
         self.networking.cmd('ip addr add %s5 dev %s' % (self.TEST_IP_PREFIX, self.networking.switch_link.intf2))
-        self.switch.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
+        self.pri.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
             assert self.pingTest(networking, dummy)
@@ -207,11 +212,12 @@ class DAQRunner():
                 intf_name = device_intf.name
                 if intf_name == 'faux' or intf_name == 'local':
                     logging.info('Flapping %s device interface.' % intf_name)
-                    self.switch.cmd('ip link set %s down' % intf_name)
+                    self.sec.cmd('ip link set %s down' % intf_name)
                     time.sleep(0.5)
-                    self.switch.cmd('ip link set %s up' % intf_name)
+                    self.sec.cmd('ip link set %s up' % intf_name)
 
-                target_port = self.switch.ports[device_intf]
+                target_port = self.sec.ports[device_intf]
+                # TODO: Figure out how DPID fits in.
                 logging.info('Waiting for port-up event on interface %s port %d...' %
                     (device_intf.name, target_port))
                 while True:
@@ -241,7 +247,7 @@ class DAQRunner():
 
                 logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
                 monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-                tcp_monitor = TcpdumpHelper(self.switch, '', packets=None, timeout=self.MONITOR_SCAN_SEC,
+                tcp_monitor = TcpdumpHelper(self.pri, '', packets=None, timeout=self.MONITOR_SCAN_SEC,
                     pcap_out=monitor_file, intf_name=intf_name, logger=logger)
                 assert tcp_monitor.wait() == 0, 'Failing executing monitor pcap'
 
@@ -273,9 +279,9 @@ class DAQRunner():
             CLI(self.net)
 
         logging.debug('Cleaning up test route...')
-        self.switch.cmd('ip route del %s0/24' % self.TEST_IP_PREFIX)
+        self.pri.cmd('ip route del %s0/24' % self.TEST_IP_PREFIX)
         logging.debug("Stopping faucet...")
-        self.switch.cmd('docker kill daq-faucet')
+        self.pri.cmd('docker kill daq-faucet')
         logging.debug("Stopping mininet...")
         self.net.stop()
         logging.info("Done with runner.")

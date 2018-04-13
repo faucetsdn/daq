@@ -1,8 +1,8 @@
 dps:
-    switch:
+    pri:
         dp_id: 1
-        name: switch
-        #ofchannel_log: /var/log/faucet/of-primary.log
+        name: pri
+        #ofchannel_log: /var/log/faucet/of-pri.log
         interface_ranges:
             1-10:
                 native_vlan: 100
@@ -11,10 +11,10 @@ dps:
             #stack:
              # dp: secondary
               #port: 47
-    secondary:
+    sec:
         dp_id: 2
-        name: secondary
-        #ofchannel_log: /var/log/faucet/of-secondary.log
+        name: sec
+        #ofchannel_log: /var/log/faucet/of-sec.log
         interface_ranges:
             1-10:
                 native_vlan: 100
