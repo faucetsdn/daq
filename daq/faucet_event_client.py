@@ -53,13 +53,15 @@ class FaucetEventClient():
 
     def as_port_state(self, event):
         if not 'PORT_CHANGE' in event:
-            return (None, None)
+            return (None, None, None)
+        dpid = event['dp_id']
         port_no = event['PORT_CHANGE']['port_no']
         port_active = event['PORT_CHANGE']['status']
-        if port_no in self.previous_state and self.previous_state[port_no] == port_active:
-            return (None, None)
-        self.previous_state[port_no] = port_active
-        return (port_no, port_active)
+        state_key = '%s-%d' % (dpid, port_no)
+        if state_key in self.previous_state and self.previous_state[state_key] == port_active:
+            return (None, None, None)
+        self.previous_state[state_key] = port_active
+        return (dpid, port_no, port_active)
 
     def close(self):
         self.sock.close()

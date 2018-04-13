@@ -217,17 +217,17 @@ class DAQRunner():
                     self.sec.cmd('ip link set %s up' % intf_name)
 
                 target_port = self.sec.ports[device_intf]
+                target_dpid = int(self.sec.dpid)
                 # TODO: Figure out how DPID fits in.
-                logging.info('Waiting for port-up event on interface %s port %d...' %
-                    (device_intf.name, target_port))
+                logging.info('Waiting for port-up on dpid %d port %d...' % (target_dpid, target_port))
                 while True:
                     event = self.faucet_events.next_event()
                     logging.debug('Faucet event %s' % event)
-                    (port, active) = self.faucet_events.as_port_state(event)
-                    if port == target_port and active:
+                    (dpid, port, active) = self.faucet_events.as_port_state(event)
+                    if dpid == target_dpid and port == target_port and active:
                         break
 
-                logging.info('Recieved port up event on port %d.' % target_port)
+                logging.info('Recieved port up event.')
                 logging.info('Waiting for dhcp reply from %s...' % networking.name)
                 filter="src port 67"
                 dhcp_traffic = TcpdumpHelper(networking, filter, packets=None, timeout=None, logger=logger)
