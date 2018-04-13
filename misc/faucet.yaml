@@ -6,7 +6,7 @@ dps:
         stack:
           priority: 1
         interface_ranges:
-          1-10:
+          2-10:
             native_vlan: 100
         interfaces:
           1:
@@ -18,13 +18,12 @@ dps:
         name: sec
         #ofchannel_log: /var/log/faucet/of-sec.log
         interface_ranges:
-          1-10:
+          2-10:
             native_vlan: 100
         interfaces:
           1:
             stack:
               dp: pri
               port: 1
-
 vlans:
     100:
