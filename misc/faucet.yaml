@@ -3,21 +3,28 @@ dps:
         dp_id: 1
         name: pri
         #ofchannel_log: /var/log/faucet/of-pri.log
+        stack:
+          priority: 1
         interface_ranges:
-            1-10:
-                native_vlan: 100
-        #interfaces:
-          #47:
-            #stack:
-             # dp: secondary
-              #port: 47
+          1-10:
+            native_vlan: 100
+        interfaces:
+          1:
+            stack:
+              dp: sec
+              port: 1
     sec:
         dp_id: 2
         name: sec
         #ofchannel_log: /var/log/faucet/of-sec.log
         interface_ranges:
-            1-10:
-                native_vlan: 100
+          1-10:
+            native_vlan: 100
+        interfaces:
+          1:
+            stack:
+              dp: pri
+              port: 1
 
 vlans:
     100:
