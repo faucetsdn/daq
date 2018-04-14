@@ -51,6 +51,10 @@ class DAQRunner():
 
     TEST_IP_PREFIX = '192.168.84.'
 
+    NETWORKING_OFFSET = 0
+    DUMMY_OFFSET = 1
+    TEST_OFFSET = 2
+
     net = None
     switch = None
     target_ip = None
@@ -145,6 +149,8 @@ class DAQRunner():
     def runner(self):
         one_shot = '-s' in sys.argv
         failed = False
+        port_set = 2
+        pri_base = port_set * 10
 
         self.set_run_id('init')
 
@@ -175,10 +181,10 @@ class DAQRunner():
         print self.switch_link.intf1.name, self.switch_link.intf2.name
 
         logging.debug("Adding networking host...")
-        self.networking = self.addHost('networking', port=10,
-                                       cls=MakeDockerHost('daq/networking', prefix='daq'))
+        self.networking = self.addHost('networking', port=pri_base + self.NETWORKING_OFFSET,
+                cls=MakeDockerHost('daq/networking', prefix='daq'))
         networking = self.networking
-        dummy = self.addHost('dummy', port=11)
+        dummy = self.addHost('dummy', port=pri_base + self.DUMMY_OFFSET)
 
         logging.info("Starting mininet...")
         self.net.start()
@@ -194,7 +200,7 @@ class DAQRunner():
 
         device_intf = self.get_device_intf()
         logging.info("Attaching device interface %s..." % device_intf.name)
-        self.sec.addIntf(device_intf, port=1)
+        self.sec.addIntf(device_intf, port=port_set)
         self.switchAttach(self.sec, device_intf)
 
         logging.info('Adding fake target at %s5' % self.TEST_IP_PREFIX)
@@ -263,13 +269,14 @@ class DAQRunner():
 
                 logging.info('Running test suite against target...')
 
+                test_port = pri_base + self.TEST_OFFSET
                 assert self.pingTest(networking, self.target_ip)
-                assert self.dockerTest('daq/test_pass', 12)
-                assert not self.dockerTest('daq/test_fail', 12)
-                assert self.dockerTest('daq/test_ping', 12)
-                self.dockerTest('daq/test_bacnet', 12)
-                self.dockerTest('daq/test_nmap', 12)
-                self.dockerTest('daq/test_mudgee', 12)
+                assert self.dockerTest('daq/test_pass', port=test_port)
+                assert not self.dockerTest('daq/test_fail', port=test_port)
+                assert self.dockerTest('daq/test_ping', port=test_port)
+                self.dockerTest('daq/test_bacnet', port=test_port)
+                self.dockerTest('daq/test_nmap', port=test_port)
+                self.dockerTest('daq/test_mudgee', port=test_port)
 
                 logging.info('Done with tests')
 
