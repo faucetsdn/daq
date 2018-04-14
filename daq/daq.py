@@ -136,10 +136,14 @@ class DAQRunner():
         return error_code == 0
 
     def device_intfs(self):
-        device_intf_name = os.getenv('DAQ_INTF')
-        intf = Intf(device_intf_name, node=DummyNode(), port=1)
-        intf.port = 1
-        return [ intf ]
+        intf_names = os.getenv('DAQ_INTF').split(',')
+        intfs=[]
+        for intf_name in intf_names:
+            port_no = len(intfs) + 1
+            intf = Intf(intf_name.strip(), node=DummyNode(), port=port_no)
+            intf.port = port_no
+            intfs.append(intf)
+        return intfs
 
     def set_run_id(self, run_id):
         self.run_id = run_id
@@ -191,7 +195,7 @@ class DAQRunner():
 
         device_intfs = self.device_intfs()
         for device_intf in device_intfs:
-            logging.info("Attaching device interface %s..." % device_intf.name)
+            logging.info("Attaching device interface %s on port %d." % (device_intf.name, device_intf.port))
             self.sec.addIntf(device_intf, port=device_intf.port)
             self.switchAttach(self.sec, device_intf)
 

@@ -61,15 +61,18 @@ if [ "$daq_intf" == "faux!" ]; then
     cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
 fi
 
-# If running inside of a container, wait until the host test interface shows up...
-if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" -a -n "$daq_intf" ]; then
-    while ! ifconfig -a | fgrep -q $daq_intf; do
-        echo Waiting for interface $daq_intf to appear...
-        sleep 1
-    done
-fi
+intfs=$(echo $daq_intf | tr , ' ')
+for intf in $intfs; do
+    ip addr show $intf || true
 
-ip addr show $daq_intf
+    # If running inside of a container, wait until the host test interface shows up...
+    if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
+        while ! ifconfig -a | fgrep -q $intf; do
+            echo Waiting for interface $intf to appear...
+            sleep 1
+        done
+    fi
+done
 
 runcmd=python
 if [ -f .pdbrc ]; then
