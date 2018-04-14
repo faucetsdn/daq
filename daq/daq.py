@@ -46,7 +46,8 @@ class ConnectedHost():
 
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 10
-    TEST_PREFIX = 'daq/test_'
+    IMAGE_PREFIX = 'daq/test_'
+    CONTAINER_PREFIX = 'daq'
 
     DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
@@ -60,7 +61,6 @@ class ConnectedHost():
     target_mac = None
     networking = None
     dummy = None
-    docker_prefix = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -69,21 +69,23 @@ class ConnectedHost():
         self.run_id = '%06x' % int(time.time())
         self.tmpdir = os.path.join('inst', 'run-' + self.run_id)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        self.prefix = 'daq-%d' % self.port_set
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
 
     def setup(self):
         pri_base = self.pri_base
+        networking_name = 'gw-%d' % self.port_set
         networking_port = pri_base + self.NETWORKING_OFFSET
         logging.debug("Adding networking host on port %d" % networking_port)
-        networking = self.runner.addHost('networking', port=networking_port, tmpdir=self.tmpdir,
-                cls=MakeDockerHost('daq/networking', prefix=self.docker_prefix))
+        cls=MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
+        networking = self.runner.addHost(networking_name, port=networking_port,
+                    cls=cls, tmpdir=self.tmpdir)
 
         networking.activate()
 
+        dummy_name = 'dummy-%d' % self.port_set
         dummy_port = pri_base + self.DUMMY_OFFSET
-        dummy = self.runner.addHost('dummy', port=dummy_port)
+        dummy = self.runner.addHost(dummy_name, port=dummy_port)
         self.dummy = dummy
 
         self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
@@ -158,14 +160,15 @@ class ConnectedHost():
 
     def dockerTestName(self, image):
         # Names need to be short because they ultimately get used as netif names.
-        error_msg = 'name %s not startswith %s' % (image, self.TEST_PREFIX)
-        assert image.startswith(self.TEST_PREFIX), error_msg
-        return image[len(self.TEST_PREFIX):]
+        error_msg = 'name %s not startswith %s' % (image, self.IMAGE_PREFIX)
+        assert image.startswith(self.IMAGE_PREFIX), error_msg
+        return image[len(self.IMAGE_PREFIX):]
 
     def dockerTest(self, image):
         port = self.pri_base + self.TEST_OFFSET
         gateway = self.networking
         test_name = self.dockerTestName(image)
+        host_name = '%s-%d' % (test_name, self.port_set)
         env_vars = [ "TARGET_NAME=" + test_name,
                      "TARGET_IP=" + self.target_ip,
                      "TARGET_MAC=" + self.target_mac,
@@ -174,16 +177,16 @@ class ConnectedHost():
         vol_maps = [ self.scan_base + ":/scans" ]
 
         logging.debug("Running docker test %s" % image)
-        cls = MakeDockerHost(image, prefix=self.docker_prefix)
+        cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(test_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
         host.activate()
         error_code = host.wait()
         self.runner.removeHost(host)
         if error_code != 0:
-            logging.info("FAILED test %s with error %s" % (host.name, error_code))
+            logging.info("FAILED test %s with error %s" % (test_name, error_code))
         else:
-            logging.info("PASSED test %s" % (host.name))
+            logging.info("PASSED test %s" % (test_name))
         return error_code == 0
 
 
@@ -283,9 +286,9 @@ class DAQRunner():
         controller = self.net.addController('controller', controller=RemoteController,
                 ip=targetIp, port=6633 )
 
-        logging.info("Adding internal switch bridge")
         self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=47, fast=False)
-        print self.switch_link.intf1.name, self.switch_link.intf2.name
+        logging.info('Added switch link %s <-> %s' %
+                (self.switch_link.intf1.name, self.switch_link.intf2.name))
 
         logging.info("Starting mininet...")
         self.net.start()
@@ -344,7 +347,8 @@ class DAQRunner():
 
         logging.info('Starting new test run %s' % test_set.run_id)
 
-        self.wait_for_port_up(test_set.port_set, intf_name=intf_name)
+        # Nobody seems to do this properly, so don't try for now.
+        #self.wait_for_port_up(test_set.port_set, intf_name=intf_name)
 
         test_set.wait_for_dhcp()
 
