@@ -4,6 +4,7 @@
 
 import logging
 import os
+import random
 import re
 import signal
 import sys
@@ -132,9 +133,11 @@ class DAQRunner():
             logging.info("PASSED test %s" % (host.name))
         return error_code == 0
 
-    def get_device_intf(self):
+    def device_intfs(self):
         device_intf_name = os.getenv('DAQ_INTF')
-        return Intf(device_intf_name, node=DummyNode())
+        intf = Intf(device_intf_name, node=DummyNode(), port=1)
+        intf.port = 1
+        return [ intf ]
 
     def set_run_id(self, run_id):
         self.run_id = run_id
@@ -149,8 +152,6 @@ class DAQRunner():
     def runner(self):
         one_shot = '-s' in sys.argv
         failed = False
-        port_set = 2
-        pri_base = port_set * 10
 
         self.set_run_id('init')
 
@@ -180,37 +181,46 @@ class DAQRunner():
         self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=47, fast=False)
         print self.switch_link.intf1.name, self.switch_link.intf2.name
 
-        logging.debug("Adding networking host...")
-        self.networking = self.addHost('networking', port=pri_base + self.NETWORKING_OFFSET,
-                cls=MakeDockerHost('daq/networking', prefix='daq'))
-        networking = self.networking
-        dummy = self.addHost('dummy', port=pri_base + self.DUMMY_OFFSET)
-
         logging.info("Starting mininet...")
         self.net.start()
-
-        logging.debug("Activating networking...")
-        networking.activate()
 
         logging.info("Waiting for system to settle...")
         time.sleep(3)
 
-        assert self.pingTest(networking, dummy)
-        assert self.pingTest(dummy, networking)
-
-        device_intf = self.get_device_intf()
-        logging.info("Attaching device interface %s..." % device_intf.name)
-        self.sec.addIntf(device_intf, port=port_set)
-        self.switchAttach(self.sec, device_intf)
-
-        logging.info('Adding fake target at %s5' % self.TEST_IP_PREFIX)
-        self.networking.cmd('ip addr add %s5 dev %s' %
-                            (self.TEST_IP_PREFIX, self.networking.switch_link.intf2))
-        self.pri.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
+        device_intfs = self.device_intfs()
+        for device_intf in device_intfs:
+            logging.info("Attaching device interface %s..." % device_intf.name)
+            self.sec.addIntf(device_intf, port=device_intf.port)
+            self.switchAttach(self.sec, device_intf)
 
         try:
             while True:
+                port_set = random.randint(1, 4)
+                pri_base = port_set * 10
+
                 self.set_run_id(self.make_test_run_id())
+
+                print 'Testing port_set %d, run_id %s' % (port_set, self.run_id)
+
+                logging.debug("Adding networking host...")
+                self.networking = self.addHost('networking', port=pri_base + self.NETWORKING_OFFSET,
+                        cls=MakeDockerHost('daq/networking', prefix='daq'))
+                networking = self.networking
+                logging.debug("Activating networking...")
+                networking.activate()
+
+                dummy = self.addHost('dummy', port=pri_base + self.DUMMY_OFFSET)
+
+                fake_target = '%s5' % self.TEST_IP_PREFIX
+                logging.info('Adding fake target at %s' % fake_target)
+                self.networking.cmd('ip addr add %s5 dev %s' %
+                                    (self.TEST_IP_PREFIX, self.networking.switch_link.intf2))
+                #self.pri.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
+                #dummy.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, dummy.switch_link.intf2.name))
+
+                assert self.pingTest(networking, dummy)
+                assert self.pingTest(dummy, networking)
+                #assert self.pingTest(dummy, fake_target)
 
                 logging.info('')
                 logging.info('Starting new test run %s' % self.run_id)
@@ -229,7 +239,6 @@ class DAQRunner():
 
                 target_port = self.sec.ports[device_intf]
                 target_dpid = int(self.sec.dpid)
-                # TODO: Figure out how DPID fits in.
                 logging.info('Waiting for port-up on dpid %d port %d...'
                              % (target_dpid, target_port))
                 while True:
@@ -279,6 +288,8 @@ class DAQRunner():
                 self.dockerTest('daq/test_mudgee', port=test_port)
 
                 logging.info('Done with tests')
+
+                # TODO: Delete any hosts here. Networking, dummy, ???
 
                 if one_shot:
                     break
