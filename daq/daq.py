@@ -174,7 +174,7 @@ class ConnectedHost():
         vol_maps = [ self.scan_base + ":/scans" ]
 
         logging.debug("Running docker test %s" % image)
-        cls = MakeDockerHost(image, prefix=self.docker_prefix')
+        cls = MakeDockerHost(image, prefix=self.docker_prefix)
         host = self.runner.addHost(test_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
         host.activate()
@@ -190,6 +190,7 @@ class ConnectedHost():
 class DAQRunner():
 
     net = None
+    device_intfs = None
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
@@ -226,8 +227,7 @@ class DAQRunner():
         logging.debug("Stopping host " + host.name)
         host.terminate()
 
-
-    def device_intfs(self):
+    def make_device_intfs(self):
         intf_names = os.getenv('DAQ_INTF').split(',')
         intfs=[]
         for intf_name in intf_names:
@@ -260,8 +260,7 @@ class DAQRunner():
 
         logging.info('Recieved port up event.')
 
-    def runner(self):
-        one_shot = '-s' in sys.argv
+    def initialize(self):
         failed = False
 
         logging.debug("Creating miniet...")
@@ -296,37 +295,21 @@ class DAQRunner():
         logging.info("Waiting for system to settle...")
         time.sleep(3)
 
-        device_intfs = self.device_intfs()
-        for device_intf in device_intfs:
-            logging.info("Attaching device interface %s on port %d." % (device_intf.name, device_intf.port))
+        self.device_intfs = self.make_device_intfs()
+        for device_intf in self.device_intfs:
+            logging.info("Attaching device interface %s on port %d." %
+                    (device_intf.name, device_intf.port))
             self.sec.addIntf(device_intf, port=device_intf.port)
             self.switchAttach(self.sec, device_intf)
 
+        logging.debug('Done with initialization')
+
+    def test_loop(self):
+        one_shot = '-s' in sys.argv
+
         try:
             while True:
-                test_set = ConnectedHost(self, random.randint(1, len(device_intfs)))
-                device_intf = device_intfs[test_set.port_set - 1]
-                intf_name = device_intf.name
-
-                logging.info('')
-                logging.info('Testing port_set %d, run_id %s' % (test_set.port_set, test_set.run_id))
-
-                test_set.setup()
-
-                logging.info('Starting new test run %s' % test_set.run_id)
-
-                self.wait_for_port_up(test_set.port_set, intf_name=intf_name)
-
-                test_set.wait_for_dhcp()
-
-                test_set.monitor_scan()
-
-                logging.info('Running test suite against target...')
-
-                test_set.run_tests()
-
-                test_set.cleanup()
-
+                self.test_run()
                 if one_shot:
                     break
 
@@ -350,6 +333,30 @@ class DAQRunner():
             print 'Exiting with error %s' % failed
             sys.exit(1)
 
+    def test_run(self):
+        test_set = ConnectedHost(self, random.randint(1, len(self.device_intfs)))
+        device_intf = self.device_intfs[test_set.port_set - 1]
+        intf_name = device_intf.name
+
+        logging.info('')
+        logging.info('Testing port_set %d, run_id %s' % (test_set.port_set, test_set.run_id))
+
+        test_set.setup()
+
+        logging.info('Starting new test run %s' % test_set.run_id)
+
+        self.wait_for_port_up(test_set.port_set, intf_name=intf_name)
+
+        test_set.wait_for_dhcp()
+
+        test_set.monitor_scan()
+
+        logging.info('Running test suite against target...')
+
+        test_set.run_tests()
+
+        test_set.cleanup()
+
 
 def configure_logging():
 
@@ -364,6 +371,8 @@ def configure_logging():
 if __name__ == '__main__':
     configure_logging()
     if os.getuid() == 0:
-        DAQRunner().runner()
+        runner = DAQRunner()
+        runner.initialize()
+        runner.test_loop()
     else:
-        logger.debug("You are NOT root")
+        logger.debug('Must run DAQ as root.')
