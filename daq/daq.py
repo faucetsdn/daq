@@ -261,8 +261,6 @@ class DAQRunner():
         logging.info('Recieved port up event.')
 
     def initialize(self):
-        failed = False
-
         logging.debug("Creating miniet...")
         self.net = Mininet()
 
@@ -306,6 +304,7 @@ class DAQRunner():
 
     def test_loop(self):
         one_shot = '-s' in sys.argv
+        failed = False
 
         try:
             while True:
