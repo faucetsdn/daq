@@ -1,12 +1,10 @@
+import logging
 import subprocess
 import re
 
 from clib import mininet_test_util
 
-class NullLogger():
-    def debug(self, *args):
-        pass
-
+logger = logging.getLogger(__name__)
 
 class TcpHelper():
 
@@ -14,13 +12,11 @@ class TcpHelper():
     tcpdump_started = False
     last_line = None
     funcs = None
-    logger = None
 
     def __init__(self, tcpdump_host, tcpdump_filter, funcs=None,
                  vflags='-v', duration_sec=10, packets=2, root_intf=False,
-                 pcap_out=None, intf_name=None, logger=NullLogger()):
+                 pcap_out=None, intf_name=None):
         self.intf_name = intf_name if intf_name else tcpdump_host.intf().name
-        self.logger = logger
         self.funcs = funcs
         if root_intf:
             self.intf_name = self.intf_name.split('.')[0]
@@ -50,7 +46,7 @@ class TcpHelper():
         self.pipe = None
 
     def wait(self):
-        self.logger.debug('waiting for command completion')
+        logger.debug('waiting for command completion')
         assert self.pipe, 'tcp helper pipe not valid'
         self.pipe.communicate()
         result = self.pipe.wait()

@@ -56,13 +56,14 @@ class DAQRunner():
     target_ip = None
     run_id = None
 
-    def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[]):
+    def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
+            port=None):
         params = { 'ip': ip } if ip else {}
         params['tmpdir'] = os.path.join(self.tmpdir, 'tests')
         params['env_vars'] = env_vars
         params['vol_maps'] = vol_maps
         host = self.net.addHost(name, cls, **params)
-        host.switch_link = self.net.addLink(self.pri, host, fast=False)
+        host.switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
         if self.net.built:
             host.configDefault()
             self.switchAttach(self.pri, host.switch_link.intf1)
@@ -103,10 +104,11 @@ class DAQRunner():
 
     def dockerTestName(self, image):
         # Names need to be short because they ultimately get used as netif names.
-        assert image.startswith(self.TEST_PREFIX), 'name %s not startswith %s' % (image, self.TEST_PREFIX)
+        error_msg = 'name %s not startswith %s' % (image, self.TEST_PREFIX)
+        assert image.startswith(self.TEST_PREFIX), error_msg
         return image[len(self.TEST_PREFIX):]
 
-    def dockerTest(self, image):
+    def dockerTest(self, image, port=None):
         test_name = self.dockerTestName(image)
         env_vars = [ "TARGET_NAME=" + test_name,
                      "TARGET_IP=" + self.target_ip,
@@ -116,7 +118,7 @@ class DAQRunner():
         vol_maps = [ self.scan_base + ":/scans" ]
         logging.debug("Running docker test %s" % image)
         cls = MakeDockerHost(image, prefix='daq')
-        host = self.addHost(test_name, cls=cls, env_vars = env_vars, vol_maps=vol_maps)
+        host = self.addHost(test_name, port=port, cls=cls, env_vars = env_vars, vol_maps=vol_maps)
         host.activate()
         error_code = host.wait()
         self.removeHost(host)
@@ -165,16 +167,18 @@ class DAQRunner():
 
         targetIp = "127.0.0.1"
         logging.debug("Adding controller at %s" % targetIp)
-        controller = self.net.addController( 'controller', controller=RemoteController, ip=targetIp, port=6633 )
+        controller = self.net.addController('controller', controller=RemoteController,
+                ip=targetIp, port=6633 )
 
         logging.info("Adding internal switch bridge")
-        self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=1, fast=False)
+        self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=47, fast=False)
         print self.switch_link.intf1.name, self.switch_link.intf2.name
 
         logging.debug("Adding networking host...")
-        self.networking = self.addHost('networking', cls=MakeDockerHost('daq/networking', prefix='daq'))
+        self.networking = self.addHost('networking', port=10,
+                                       cls=MakeDockerHost('daq/networking', prefix='daq'))
         networking = self.networking
-        dummy = self.addHost('dummy')
+        dummy = self.addHost('dummy', port=11)
 
         logging.info("Starting mininet...")
         self.net.start()
@@ -185,19 +189,20 @@ class DAQRunner():
         logging.info("Waiting for system to settle...")
         time.sleep(3)
 
+        assert self.pingTest(networking, dummy)
+        assert self.pingTest(dummy, networking)
+
         device_intf = self.get_device_intf()
         logging.info("Attaching device interface %s..." % device_intf.name)
-        self.sec.addIntf(device_intf)
+        self.sec.addIntf(device_intf, port=1)
         self.switchAttach(self.sec, device_intf)
 
-        logging.info('Adding fake external device %s5' % self.TEST_IP_PREFIX)
-        self.networking.cmd('ip addr add %s5 dev %s' % (self.TEST_IP_PREFIX, self.networking.switch_link.intf2))
+        logging.info('Adding fake target at %s5' % self.TEST_IP_PREFIX)
+        self.networking.cmd('ip addr add %s5 dev %s' %
+                            (self.TEST_IP_PREFIX, self.networking.switch_link.intf2))
         self.pri.cmd('ip route replace %s0/24 dev %s' % (self.TEST_IP_PREFIX, device_intf.name))
 
         try:
-            assert self.pingTest(networking, dummy)
-            assert self.pingTest(dummy, networking)
-
             while True:
                 self.set_run_id(self.make_test_run_id())
 
@@ -219,7 +224,8 @@ class DAQRunner():
                 target_port = self.sec.ports[device_intf]
                 target_dpid = int(self.sec.dpid)
                 # TODO: Figure out how DPID fits in.
-                logging.info('Waiting for port-up on dpid %d port %d...' % (target_dpid, target_port))
+                logging.info('Waiting for port-up on dpid %d port %d...'
+                             % (target_dpid, target_port))
                 while True:
                     event = self.faucet_events.next_event()
                     logging.debug('Faucet event %s' % event)
@@ -230,7 +236,8 @@ class DAQRunner():
                 logging.info('Recieved port up event.')
                 logging.info('Waiting for dhcp reply from %s...' % networking.name)
                 filter="src port 67"
-                dhcp_traffic = TcpdumpHelper(networking, filter, packets=None, timeout=None, logger=logger)
+                dhcp_traffic = TcpdumpHelper(networking, filter, packets=None,
+                                             timeout=None, logger=logger)
 
                 while True:
                     dhcp_line = dhcp_traffic.next_line()
@@ -243,25 +250,26 @@ class DAQRunner():
                         else:
                             self.target_mac = match.group(2)
                 dhcp_traffic.close()
-                logging.info('Received reply, host %s is at %s/%s' % (intf_name, self.target_mac, self.target_ip))
+                logging.info('Received reply, host %s is at %s/%s' %
+                             (intf_name, self.target_mac, self.target_ip))
 
-                logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
+                logging.info('Running background monitor scan for %d seconds...'
+                             % self.MONITOR_SCAN_SEC)
                 monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-                tcp_monitor = TcpdumpHelper(self.pri, '', packets=None, timeout=self.MONITOR_SCAN_SEC,
-                    pcap_out=monitor_file, intf_name=intf_name, logger=logger)
+                tcp_monitor = TcpdumpHelper(self.pri, '', packets=None,
+                    timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, intf_name=intf_name,
+                    logger=logger)
                 assert tcp_monitor.wait() == 0, 'Failing executing monitor pcap'
 
                 logging.info('Running test suite against target...')
 
                 assert self.pingTest(networking, self.target_ip)
-
-                self.dockerTest('daq/test_mudgee')
-
-                assert self.dockerTest('daq/test_pass')
-                assert not self.dockerTest('daq/test_fail')
-                assert self.dockerTest('daq/test_ping')
-                self.dockerTest('daq/test_bacnet')
-                self.dockerTest('daq/test_nmap')
+                assert self.dockerTest('daq/test_pass', 12)
+                assert not self.dockerTest('daq/test_fail', 12)
+                assert self.dockerTest('daq/test_ping', 12)
+                self.dockerTest('daq/test_bacnet', 12)
+                self.dockerTest('daq/test_nmap', 12)
+                self.dockerTest('daq/test_mudgee', 12)
 
                 logging.info('Done with tests')
 
