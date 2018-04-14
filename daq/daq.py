@@ -155,6 +155,29 @@ class DAQRunner():
     def make_test_run_id(self):
         return '%06x' % int(time.time())
 
+    def wait_for_port_up(self, port_set, intf_name=None):
+        logging.debug('Flushing event queue.')
+        while self.faucet_events.has_event():
+            event = self.faucet_events.next_event()
+            logging.debug('Faucet event %s' % event)
+
+        if intf_name == 'faux' or intf_name == 'local':
+            logging.info('Flapping device interface %s.' % intf_name)
+            self.sec.cmd('ip link set %s down' % intf_name)
+            time.sleep(0.5)
+            self.sec.cmd('ip link set %s up' % intf_name)
+
+        target_dpid = int(self.sec.dpid)
+        logging.info('Waiting for port-up on dpid %d port %d...' % (target_dpid, port_set))
+        while True:
+            event = self.faucet_events.next_event()
+            logging.debug('Faucet event %s' % event)
+            (dpid, port, active) = self.faucet_events.as_port_state(event)
+            if dpid == target_dpid and port == port_set and active:
+                break
+
+        logging.info('Recieved port up event.')
+
     def runner(self):
         one_shot = '-s' in sys.argv
         failed = False
@@ -201,8 +224,10 @@ class DAQRunner():
 
         try:
             while True:
-                port_set = random.randint(1, 2)
+                port_set = random.randint(1, len(device_intfs))
                 pri_base = port_set * 10
+                device_intf = device_intfs[port_set - 1]
+                intf_name = device_intf.name
                 self.set_run_id(self.make_test_run_id())
                 logging.info('')
                 logging.info('Testing port_set %d, run_id %s' % (port_set, self.run_id))
@@ -228,28 +253,8 @@ class DAQRunner():
 
                 logging.info('Starting new test run %s' % self.run_id)
 
-                logging.debug('Flushing event queue.')
-                while self.faucet_events.has_event():
-                    event = self.faucet_events.next_event()
-                    logging.debug('Faucet event %s' % event)
+                self.wait_for_port_up(port_set, intf_name=intf_name)
 
-                intf_name = device_intf.name
-                if intf_name == 'faux' or intf_name == 'local':
-                    logging.info('Flapping %s device interface.' % intf_name)
-                    self.sec.cmd('ip link set %s down' % intf_name)
-                    time.sleep(0.5)
-                    self.sec.cmd('ip link set %s up' % intf_name)
-
-                target_dpid = int(self.sec.dpid)
-                logging.info('Waiting for port-up on dpid %d port %d...' % (target_dpid, port_set))
-                while True:
-                    event = self.faucet_events.next_event()
-                    logging.debug('Faucet event %s' % event)
-                    (dpid, port, active) = self.faucet_events.as_port_state(event)
-                    if dpid == target_dpid and port == port_set and active:
-                        break
-
-                logging.info('Recieved port up event.')
                 logging.info('Waiting for dhcp reply from %s...' % networking.name)
                 filter="src port 67"
                 dhcp_traffic = TcpdumpHelper(networking, filter, packets=None,
