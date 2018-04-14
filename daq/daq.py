@@ -237,15 +237,13 @@ class DAQRunner():
                     time.sleep(0.5)
                     self.sec.cmd('ip link set %s up' % intf_name)
 
-                target_port = self.sec.ports[device_intf]
                 target_dpid = int(self.sec.dpid)
-                logging.info('Waiting for port-up on dpid %d port %d...'
-                             % (target_dpid, target_port))
+                logging.info('Waiting for port-up on dpid %d port %d...' % (target_dpid, port_set))
                 while True:
                     event = self.faucet_events.next_event()
                     logging.debug('Faucet event %s' % event)
                     (dpid, port, active) = self.faucet_events.as_port_state(event)
-                    if dpid == target_dpid and port == target_port and active:
+                    if dpid == target_dpid and port == port_set and active:
                         break
 
                 logging.info('Recieved port up event.')
