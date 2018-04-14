@@ -271,6 +271,18 @@ class DAQRunner():
         self.pri = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
         self.sec = self.net.addSwitch('sec', dpid='2', cls=OVSSwitch)
 
+        self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=47, fast=False)
+        logging.info('Added switch link %s <-> %s' %
+                (self.switch_link.intf1.name, self.switch_link.intf2.name))
+
+        targetIp = "127.0.0.1"
+        logging.debug("Adding controller at %s" % targetIp)
+        controller = self.net.addController('controller', controller=RemoteController,
+                ip=targetIp, port=6633 )
+
+        logging.info("Starting mininet...")
+        self.net.start()
+
         logging.info("Starting faucet...")
         output = self.pri.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
@@ -280,18 +292,6 @@ class DAQRunner():
         logging.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
         self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
-
-        targetIp = "127.0.0.1"
-        logging.debug("Adding controller at %s" % targetIp)
-        controller = self.net.addController('controller', controller=RemoteController,
-                ip=targetIp, port=6633 )
-
-        self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=47, fast=False)
-        logging.info('Added switch link %s <-> %s' %
-                (self.switch_link.intf1.name, self.switch_link.intf2.name))
-
-        logging.info("Starting mininet...")
-        self.net.start()
 
         logging.info("Waiting for system to settle...")
         time.sleep(3)

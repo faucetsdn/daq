@@ -5,12 +5,28 @@ CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
 IMAGE=daq/faucet
 FAUCET_SOCK=faucet_event.sock
+SYSTEM_CONF=system.conf
+LOCAL_CONFIG=local/$SYSTEM_CONF
+
+cd $ROOT
+
+if [ -f $LOCAL_CONFIG ]; then
+    echo Loading daq run configuration from $LOCAL_CONFIG
+    source $LOCAL_CONFIG
+fi
 
 mkdir -p $INSTDIR
 
-if [ ! -f $INSTDIR/faucet.yaml ]; then
-    echo Copying default faucet.yaml file to $INSTDIR...
-    cp $ROOT/misc/faucet.yaml $INSTDIR
+sudo rm -f $INSTDIR/faucet.yaml
+
+if [ -n "$ext_dpid" ]; then
+    echo Rewriting misc/faucet.yaml with dpid $ext_dpid to $INSTDIR...
+    sed -e "s/dp_id: 2/dp_id: $ext_dpid/" < misc/faucet.yaml > $INSTDIR/faucet.yaml
+    echo Deleting ovs sec switch...
+    sudo ovs-vsctl --if-exists del-br sec
+else
+    echo Copying misc/aucet.yaml file to $INSTDIR...
+    cp misc/faucet.yaml $INSTDIR
 fi
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
