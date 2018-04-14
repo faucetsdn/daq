@@ -137,11 +137,11 @@ class ConnectedHost():
         dhcp_traffic.close()
         logging.info('Received reply, %s is at %s' % (self.target_mac, self.target_ip))
 
-    def monitor_scan(self):
+    def monitor_scan(self, intf):
         logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-        filter = ''
-        tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None,
+        filter = 'vlan %d' % self.pri_base
+        tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf.name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file)
         assert tcp_monitor.wait() == 0, 'Failed executing monitor pcap'
 
@@ -348,7 +348,7 @@ class DAQRunner():
 
         test_set.wait_for_dhcp()
 
-        test_set.monitor_scan()
+        test_set.monitor_scan(self.switch_link.intf1)
 
         logging.info('Running test suite against target...')
 

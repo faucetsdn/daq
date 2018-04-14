@@ -7,13 +7,13 @@ dps:
           priority: 1
         interface_ranges:
           10-19:
-            native_vlan: 100
+            native_vlan: 10
           20-29:
-            native_vlan: 200
+            native_vlan: 20
           30-39:
-            native_vlan: 300
+            native_vlan: 30
           40-49:
-            native_vlan: 400
+            native_vlan: 40
         interfaces:
           1:
             stack:
@@ -25,19 +25,19 @@ dps:
         #ofchannel_log: /var/log/faucet/of-sec.log
         interfaces:
           1:
-            native_vlan: 100
+            native_vlan: 10
           2:
-            native_vlan: 200
+            native_vlan: 20
           3:
-            native_vlan: 300
+            native_vlan: 30
           4:
-            native_vlan: 400
+            native_vlan: 40
           47:
             stack:
               dp: pri
               port: 1
 vlans:
-    100:
-    200:
-    300:
-    400:
+    10:
+    20:
+    30:
+    40:
