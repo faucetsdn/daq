@@ -1,16 +1,25 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-CONTAINER=daq-faux
 INSTDIR=$ROOT/inst
 IMAGE=daq/faux
-FAUX_ARGS="$*"
 local_config=system.conf
+postfix=
+
+# If the first argument is a number, then it's a port designation.
+if [ $# -gt 0 -a $(($1)) -gt 0 ]; then
+    postfix=-$1
+    shift
+fi
+
+FAUX_ARGS="$*"
 
 if [ -f $local_config ]; then
   echo Loading faux configuraiton from $local_config
   source $local_config
 fi
+
+CONTAINER=daq-faux$postfix
 
 if [ -z "$FAUX_ARGS" ]; then
     FAUX_ARGS="$faux_args"
@@ -32,11 +41,12 @@ docker_args="\
 cid=$(docker run -d --privileged --name $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
-echo Removing old interface faux
-sudo ip link del faux 2>/dev/null || true
+intf=faux$postfix
+echo Removing old interface $intf
+sudo ip link del $intf 2>/dev/null || true
 
 echo Adding new interface...
-sudo ip link add faux type veth peer name faux-eth0 netns $pid
-sudo ip link set faux up
+sudo ip link add $intf type veth peer name faux-eth0 netns $pid
+sudo ip link set $intf up
 
 echo Done with faux device launch.
