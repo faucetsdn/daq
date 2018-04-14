@@ -74,7 +74,7 @@ class ConnectedHost():
 
     def setup(self):
         pri_base = self.pri_base
-        networking_name = 'gw-%d' % self.port_set
+        networking_name = 'gw%02d' % self.port_set
         networking_port = pri_base + self.NETWORKING_OFFSET
         logging.debug("Adding networking host on port %d" % networking_port)
         cls=MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
@@ -83,7 +83,7 @@ class ConnectedHost():
 
         networking.activate()
 
-        dummy_name = 'dummy-%d' % self.port_set
+        dummy_name = 'dummy%02d' % self.port_set
         dummy_port = pri_base + self.DUMMY_OFFSET
         dummy = self.runner.addHost(dummy_name, port=dummy_port)
         self.dummy = dummy
@@ -168,8 +168,8 @@ class ConnectedHost():
         port = self.pri_base + self.TEST_OFFSET
         gateway = self.networking
         test_name = self.dockerTestName(image)
-        host_name = '%s-%d' % (test_name, self.port_set)
-        env_vars = [ "TARGET_NAME=" + test_name,
+        host_name = '%s%02d' % (test_name, self.port_set)
+        env_vars = [ "TARGET_NAME=" + host_name,
                      "TARGET_IP=" + self.target_ip,
                      "TARGET_MAC=" + self.target_mac,
                      "GATEWAY_IP=" + gateway.IP(),
@@ -178,7 +178,7 @@ class ConnectedHost():
 
         logging.debug("Running docker test %s" % image)
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
-        host = self.runner.addHost(test_name, port=port, cls=cls, env_vars = env_vars,
+        host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
         host.activate()
         error_code = host.wait()
@@ -345,7 +345,7 @@ class DAQRunner():
 
         test_set.setup()
 
-        logging.info('Starting new test run %s' % test_set.run_id)
+        logging.info('Test results in %s' % test_set.tmpdir)
 
         # Nobody seems to do this properly, so don't try for now.
         #self.wait_for_port_up(test_set.port_set, intf_name=intf_name)
