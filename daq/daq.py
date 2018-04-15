@@ -24,6 +24,7 @@ import clib.mininet_test_util
 
 from clib.tcpdump_helper import TcpdumpHelper
 from faucet_event_client import FaucetEventClient
+from stream_monitor import StreamMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -305,10 +306,17 @@ class DAQRunner():
 
         logging.debug('Done with initialization')
 
-    def test_loop(self):
+    def handle_faucet_event(self):
+        print self.faucet_events.next_event()
+
+    def main_loop(self):
+        monitor = StreamMonitor()
+        monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
+        monitor.event_loop()
+
+    def other_stuff(self):
         one_shot = '-s' in sys.argv
         failed = False
-
         try:
             while True:
                 self.test_run()
@@ -325,6 +333,7 @@ class DAQRunner():
             logging.debug('Dropping into interactive command line')
             CLI(self.net)
 
+        monitor.forget(self.faucet_events.sock)
         logging.debug("Stopping faucet...")
         self.pri.cmd('docker kill daq-faucet')
         logging.debug("Stopping mininet...")
@@ -336,29 +345,29 @@ class DAQRunner():
             sys.exit(1)
 
     def test_run(self):
-        test_set = ConnectedHost(self, random.randint(1, len(self.device_intfs)))
-        device_intf = self.device_intfs[test_set.port_set - 1]
+        target_set = ConnectedHost(self, random.randint(1, len(self.device_intfs)))
+        device_intf = self.device_intfs[target_set.port_set - 1]
         intf_name = device_intf.name
 
         logging.info('')
-        logging.info('Testing port_set %d, run_id %s' % (test_set.port_set, test_set.run_id))
+        logging.info('Testing port_set %d, run_id %s' % (target_set.port_set, target_set.run_id))
 
-        test_set.setup()
+        target_set.setup()
 
-        logging.info('Test results in %s' % test_set.tmpdir)
+        logging.info('Test results in %s' % target_set.tmpdir)
 
         # Nobody seems to do this properly, so don't try for now.
-        #self.wait_for_port_up(test_set.port_set, intf_name=intf_name)
+        #self.wait_for_port_up(target_set.port_set, intf_name=intf_name)
 
-        test_set.wait_for_dhcp()
+        target_set.wait_for_dhcp()
 
-        test_set.monitor_scan(self.switch_link.intf1)
+        target_set.monitor_scan(self.switch_link.intf1)
 
         logging.info('Running test suite against target...')
 
-        test_set.run_tests()
+        target_set.run_tests()
 
-        test_set.cleanup()
+        target_set.cleanup()
 
 
 def configure_logging():
@@ -376,6 +385,6 @@ if __name__ == '__main__':
     if os.getuid() == 0:
         runner = DAQRunner()
         runner.initialize()
-        runner.test_loop()
+        runner.main_loop()
     else:
         logger.debug('Must run DAQ as root.')

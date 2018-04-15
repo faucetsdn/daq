@@ -6,41 +6,45 @@ class StreamMonitor():
        yields: stream object with data, None if timeout
        terminates: when all EOFs received"""
 
-    DEFAULT_TIMEOUT_MS = 10000
+    DEFAULT_TIMEOUT_MS = None
     timeout_ms = None
     poller = None
-    fd_to_stream = None
+    callbacks = None
 
-    def __init__(self, timeout_ms=DEFAULT_TIMEOUT_MS):
+    def __init__(self, timeout_ms=None):
         self.timeout_ms = timeout_ms
         self.poller = poll()
-        self.fd_to_stream = {}
+        self.callbacks = {}
 
-    def get_fd(self, stream):
-        return stream.fileno()
+    def get_fd(self, target):
+        return target.fileno() if 'fileno' in dir(target) else target
 
-    def add_stream(self, stream):
-        fd = self.get_fd(stream)
-        self.fd_to_stream[fd] = stream
-        self.poller.register(fd, POLLIN)
+    def monitor(self, desc, callback):
+        fd = self.get_fd(desc)
+        assert not fd in self.callbacks, 'duplicate descriptor %d' % fd
+        self.callbacks[fd] = callback
+        self.poller.register(fd, POLLIN | POLLHUP)
 
-    def remove_stream(self, stream):
-        fd = self.get_fd(stream)
+    def forget(self, desc):
+        fd = self.get_fd(desc)
+        assert fd in self.callbacks, 'missing descriptor %d' % fd
+        del self.callbacks[fd]
         self.poller.unregister(fd)
-        del self.fd_to_stream[fd]
 
-    def generator(self):
-        while self.fd_to_stream:
+    def trigger_callback(self, fd):
+        self.callbacks[fd]()
+
+    def event_loop(self):
+        while self.callbacks:
             fds = self.poller.poll(self.timeout_ms)
             if fds:
                 for fd, event in fds:
-                    stream = self.fd_to_stream[fd]
                     if event & POLLIN:
-                        yield stream
+                        self.trigger_callback(fd)
                     elif event & POLLHUP:
-                        self.remove_stream(stream)
-                        yield stream
+                        self.forget(fd)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
             else:
-                yield None
+                return True
+        return False
