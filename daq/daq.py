@@ -195,6 +195,10 @@ class DAQRunner():
 
     net = None
     device_intfs = None
+    target_sets = None
+
+    def __init__(self):
+        self.target_sets = {}
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
@@ -241,28 +245,12 @@ class DAQRunner():
             intfs.append(intf)
         return intfs
 
-    def wait_for_port_up(self, port_set, intf_name=None):
-        logging.debug('Flushing event queue.')
-        while self.faucet_events.has_event():
-            event = self.faucet_events.next_event()
-            logging.debug('Faucet event %s' % event)
-
+    def flap_interface_port(self):
         if intf_name == 'faux' or intf_name == 'local':
             logging.info('Flapping device interface %s.' % intf_name)
             self.sec.cmd('ip link set %s down' % intf_name)
             time.sleep(0.5)
             self.sec.cmd('ip link set %s up' % intf_name)
-
-        target_dpid = int(self.sec.dpid)
-        logging.info('Waiting for port-up on dpid %d port %d...' % (target_dpid, port_set))
-        while True:
-            event = self.faucet_events.next_event()
-            logging.debug('Faucet event %s' % event)
-            (dpid, port, active) = self.faucet_events.as_port_state(event)
-            if dpid == target_dpid and port == port_set and active:
-                break
-
-        logging.info('Recieved port up event.')
 
     def initialize(self):
         logging.debug("Creating miniet...")
@@ -319,12 +307,32 @@ class DAQRunner():
             sys.exit(1)
 
     def handle_faucet_event(self):
-        print self.faucet_events.next_event()
+        target_dpid = int(self.sec.dpid)
+        event = self.faucet_events.next_event()
+        logging.debug('Faucet event %s' % event)
+        (dpid, port, active) = self.faucet_events.as_port_state(event)
+        logging.debug('Port state is dpid %s port %s active %s' % (dpid, port, active))
+        if dpid == target_dpid:
+            if active:
+                self.trigger_target_set(port)
+            else:
+                self.cancel_target_set(port)
 
     def main_loop(self):
         self.monitor = StreamMonitor()
         self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
+        logging.info('Entering main event loop.')
         self.monitor.event_loop()
+
+    def trigger_target_set(self, port_set):
+        logging.info('Creating new target port_set %d' % port_set)
+        target_set = ConnectedHost(self, port_set)
+        self.target_sets[port_set] = target_set
+        target_set.setup()
+        logging.info('Ready for port_set %d, results in %s' % (target_set.port_set, target_set.tmpdir))
+
+    def cancel_target_set(self, port_set):
+        logging.info('TODO: cancel target set %d' % port_set)
 
     def other_stuff(self):
         one_shot = '-s' in sys.argv
@@ -346,20 +354,6 @@ class DAQRunner():
             CLI(self.net)
 
     def test_run(self):
-        target_set = ConnectedHost(self, random.randint(1, len(self.device_intfs)))
-        device_intf = self.device_intfs[target_set.port_set - 1]
-        intf_name = device_intf.name
-
-        logging.info('')
-        logging.info('Testing port_set %d, run_id %s' % (target_set.port_set, target_set.run_id))
-
-        target_set.setup()
-
-        logging.info('Test results in %s' % target_set.tmpdir)
-
-        # Nobody seems to do this properly, so don't try for now.
-        #self.wait_for_port_up(target_set.port_set, intf_name=intf_name)
-
         target_set.wait_for_dhcp()
 
         target_set.monitor_scan(self.switch_link.intf1)
