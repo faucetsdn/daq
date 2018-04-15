@@ -306,13 +306,25 @@ class DAQRunner():
 
         logging.debug('Done with initialization')
 
+    def cleanup(self):
+        self.monitor.forget(self.faucet_events.sock)
+        logging.debug("Stopping faucet...")
+        self.pri.cmd('docker kill daq-faucet')
+        logging.debug("Stopping mininet...")
+        self.net.stop()
+        logging.info("Done with runner.")
+
+        if failed:
+            print 'Exiting with error %s' % failed
+            sys.exit(1)
+
     def handle_faucet_event(self):
         print self.faucet_events.next_event()
 
     def main_loop(self):
-        monitor = StreamMonitor()
-        monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
-        monitor.event_loop()
+        self.monitor = StreamMonitor()
+        self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
+        self.monitor.event_loop()
 
     def other_stuff(self):
         one_shot = '-s' in sys.argv
@@ -332,17 +344,6 @@ class DAQRunner():
         if not one_shot:
             logging.debug('Dropping into interactive command line')
             CLI(self.net)
-
-        monitor.forget(self.faucet_events.sock)
-        logging.debug("Stopping faucet...")
-        self.pri.cmd('docker kill daq-faucet')
-        logging.debug("Stopping mininet...")
-        self.net.stop()
-        logging.info("Done with runner.")
-
-        if failed:
-            print 'Exiting with error %s' % failed
-            sys.exit(1)
 
     def test_run(self):
         target_set = ConnectedHost(self, random.randint(1, len(self.device_intfs)))
@@ -386,5 +387,6 @@ if __name__ == '__main__':
         runner = DAQRunner()
         runner.initialize()
         runner.main_loop()
+        runner.cleanup()
     else:
         logger.debug('Must run DAQ as root.')
