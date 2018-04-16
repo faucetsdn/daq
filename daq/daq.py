@@ -54,6 +54,12 @@ class ConnectedHost():
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
 
+    INIT_STATE = 0
+    STARTUP_STATE = 1
+    ACTIVE_STATE = 2
+    DHCP_STATE = 3
+    MONITOR_STATE = 4
+
     runner = None
     port_set = None
     pri_base = None
@@ -62,6 +68,7 @@ class ConnectedHost():
     target_mac = None
     networking = None
     dummy = None
+    state = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -70,35 +77,42 @@ class ConnectedHost():
         self.run_id = '%06x' % int(time.time())
         self.tmpdir = os.path.join('inst', 'run-' + self.run_id)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        # Don't create too fast so id is unique and port down event might happen.
-        time.sleep(1)
+        self.state_transition(self.INIT_STATE)
+        # There is a race condition here with ovs assigning ports, so wait a bit.
+        time.sleep(2)
 
     def setup(self):
-        pri_base = self.pri_base
+        self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
         networking_name = 'gw%02d' % self.port_set
-        networking_port = pri_base + self.NETWORKING_OFFSET
+        networking_port = self.pri_base + self.NETWORKING_OFFSET
         logging.debug("Adding networking host on port %d" % networking_port)
         cls=MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
         self.networking = self.runner.addHost(networking_name, port=networking_port,
                 cls=cls, tmpdir=self.tmpdir)
 
+    def state_transition(self, to, expected=None):
+        assert expected == None or self.state == expected, 'state was %d expected %d' % (self.state, expected)
+        logging.debug('target_set %d, state %s -> %d' % (self.port_set, self.state, to))
+        self.state = to
+
     def cancel(self):
         self.networking.terminate()
 
     def activate(self):
-        print 'mkdir', self.scan_base
+        self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
 
-        self.networking.activate()
+        networking = self.networking
+        networking.activate()
 
         dummy_name = 'dummy%02d' % self.port_set
-        dummy_port = pri_base + self.DUMMY_OFFSET
+        dummy_port = self.pri_base + self.DUMMY_OFFSET
         dummy = self.runner.addHost(dummy_name, port=dummy_port)
         self.dummy = dummy
 
         self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
-        logging.info('Adding fake target at %s' % self.fake_target)
+        logging.debug('Adding fake target at %s' % self.fake_target)
         networking.cmd('ip addr add %s dev %s' %
                 (self.fake_target, networking.switch_link.intf2))
 
@@ -109,12 +123,17 @@ class ConnectedHost():
         assert self.pingTest(dummy, networking)
         assert self.pingTest(dummy, self.fake_target)
         assert self.pingTest(networking, dummy, src_addr=self.fake_target)
-        self.networking = networking
 
     def cleanup(self):
         self.networking.terminate()
         self.runner.removeHost(self.networking)
         self.runner.removeHost(self.dummy)
+
+    def idle_handler(self):
+        if self.state == self.STARTUP_STATE:
+            self.activate()
+        elif self.state == self.ACTIVE_STATE:
+            self.dhcp_wait()
 
     def pingTest(self, a, b, src_addr=None):
         b_name = b if isinstance(b, str) else b.name
@@ -129,24 +148,31 @@ class ConnectedHost():
             print output
         return output.strip() != failure
 
-    def wait_for_dhcp(self):
+    def dhcp_wait(self):
+        self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
         logging.info('Waiting for dhcp reply from %s...' % self.networking.name)
         filter="src port 67"
-        dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,timeout=None)
+        self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None, timeout=None)
+        self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line())
 
-        while True:
-            dhcp_line = dhcp_traffic.next_line()
-            match = re.search(self.DHCP_PATTERN, dhcp_line)
-            if match:
-                self.target_ip = match.group(4)
-                if self.target_ip:
-                    assert self.target_mac, 'Target MAC not scraped from dhcp response.'
-                    break
-                else:
-                    self.target_mac = match.group(2)
+    def dhcp_line(self):
+        dhcp_line = self.dhcp_traffic.next_line()
+        match = re.search(self.DHCP_PATTERN, dhcp_line)
+        if match:
+            self.target_ip = match.group(4)
+            if self.target_ip:
+                assert self.target_mac, 'Target MAC not scraped from dhcp response.'
+                self.dhcp_finalize()
+            else:
+                self.target_mac = match.group(2)
 
-        dhcp_traffic.close()
-        logging.info('Received reply, %s is at %s' % (self.target_mac, self.target_ip))
+    def dhcp_finalize(self):
+        print "finalize %d" % self.port_set
+        self.runner.monitor.forget(self.dhcp_traffic.stream())
+        self.dhcp_traffic.close()
+        logging.info('Received dhcp reply for set %d: %s is at %s' %
+            (self.port_set, self.target_mac, self.target_ip))
+        self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
 
     def monitor_scan(self, intf):
         logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
@@ -327,7 +353,8 @@ class DAQRunner():
                 self.cancel_target_set(port)
 
     def handle_system_idle(self):
-        print 'handle system idle', self.target_sets
+        for target_set in self.target_sets.values():
+            target_set.idle_handler()
 
     def main_loop(self):
         self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
@@ -369,14 +396,8 @@ class DAQRunner():
             CLI(self.net)
 
     def test_run(self):
-        target_set.wait_for_dhcp()
-
         target_set.monitor_scan(self.switch_link.intf1)
-
-        logging.info('Running test suite against target...')
-
         target_set.run_tests()
-
         target_set.cleanup()
 
 
