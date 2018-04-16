@@ -70,8 +70,8 @@ class ConnectedHost():
         self.run_id = '%06x' % int(time.time())
         self.tmpdir = os.path.join('inst', 'run-' + self.run_id)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        if not os.path.exists(self.scan_base):
-            os.makedirs(self.scan_base)
+        # Don't create too fast so id is unique and port down event might happen.
+        time.sleep(1)
 
     def setup(self):
         pri_base = self.pri_base
@@ -79,10 +79,18 @@ class ConnectedHost():
         networking_port = pri_base + self.NETWORKING_OFFSET
         logging.debug("Adding networking host on port %d" % networking_port)
         cls=MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
-        networking = self.runner.addHost(networking_name, port=networking_port,
-                    cls=cls, tmpdir=self.tmpdir)
+        self.networking = self.runner.addHost(networking_name, port=networking_port,
+                cls=cls, tmpdir=self.tmpdir)
 
-        networking.activate()
+    def cancel(self):
+        self.networking.terminate()
+
+    def activate(self):
+        print 'mkdir', self.scan_base
+        if not os.path.exists(self.scan_base):
+            os.makedirs(self.scan_base)
+
+        self.networking.activate()
 
         dummy_name = 'dummy%02d' % self.port_set
         dummy_port = pri_base + self.DUMMY_OFFSET
@@ -318,21 +326,28 @@ class DAQRunner():
             else:
                 self.cancel_target_set(port)
 
+    def handle_system_idle(self):
+        print 'handle system idle', self.target_sets
+
     def main_loop(self):
-        self.monitor = StreamMonitor()
+        self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
         self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
         logging.info('Entering main event loop.')
         self.monitor.event_loop()
 
     def trigger_target_set(self, port_set):
-        logging.info('Creating new target port_set %d' % port_set)
+        assert not port_set in self.target_sets, 'target set %d already exists' % port_set
         target_set = ConnectedHost(self, port_set)
         self.target_sets[port_set] = target_set
         target_set.setup()
-        logging.info('Ready for port_set %d, results in %s' % (target_set.port_set, target_set.tmpdir))
+        logging.debug('Ready for port_set %d' % port_set)
 
     def cancel_target_set(self, port_set):
-        logging.info('TODO: cancel target set %d' % port_set)
+        if port_set in self.target_sets:
+            target_set = self.target_sets[port_set]
+            del self.target_sets[port_set]
+            target_set.cancel()
+            logging.debug('Cancelled port_set %d' % port_set)
 
     def other_stuff(self):
         one_shot = '-s' in sys.argv
@@ -366,7 +381,6 @@ class DAQRunner():
 
 
 def configure_logging():
-
     daq_env = os.getenv('DAQ_LOGLEVEL')
     logging.basicConfig(level=LEVELS[daq_env] if daq_env else LEVELS['info'])
 
@@ -374,6 +388,13 @@ def configure_logging():
     LOGMSGFORMAT = '%(message)s'
     minilog.setLogLevel(mini_env if mini_env else 'info')
 
+def config_parser():
+    #from ConfigParser import ConfigParser
+    #from StringIO import StringIO
+    parser = ConfigParser()
+    with open("foo.conf") as stream:
+        stream = StringIO("[top]\n" + stream.read())  # This line does the trick.
+        parser.readfp(stream)
 
 if __name__ == '__main__':
     configure_logging()

@@ -55,8 +55,9 @@ class FaucetEventClient():
         if not 'PORT_CHANGE' in event:
             return (None, None, None)
         dpid = event['dp_id']
+        reason = event['PORT_CHANGE']['reason']
         port_no = event['PORT_CHANGE']['port_no']
-        port_active = event['PORT_CHANGE']['status']
+        port_active = event['PORT_CHANGE']['status'] and not reason == 'DELETE'
         state_key = '%s-%d' % (dpid, port_no)
         if state_key in self.previous_state and self.previous_state[state_key] == port_active:
             return (None, None, None)

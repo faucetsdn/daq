@@ -10,9 +10,11 @@ class StreamMonitor():
     timeout_ms = None
     poller = None
     callbacks = None
+    idle_handler = None
 
-    def __init__(self, timeout_ms=None):
+    def __init__(self, timeout_ms=None, idle_handler=None):
         self.timeout_ms = timeout_ms
+        self.idle_handler = idle_handler
         self.poller = poll()
         self.callbacks = {}
 
@@ -36,6 +38,12 @@ class StreamMonitor():
 
     def event_loop(self):
         while self.callbacks:
+            fds = self.poller.poll(0)
+            if not fds and self.idle_handler:
+                self.idle_handler()
+                # Check corner case when idle_handler removes all callbacks.
+                if not self.callbacks:
+                    return False
             fds = self.poller.poll(self.timeout_ms)
             if fds:
                 for fd, event in fds:
