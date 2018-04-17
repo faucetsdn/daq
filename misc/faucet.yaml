@@ -18,7 +18,7 @@ dps:
           1:
             stack:
               dp: sec
-              port: 7
+              port: 47
     sec:
         dp_id: 2
         name: sec
@@ -32,7 +32,7 @@ dps:
             native_vlan: 30
           4:
             native_vlan: 40
-          7:
+          47:
             stack:
               dp: pri
               port: 1
