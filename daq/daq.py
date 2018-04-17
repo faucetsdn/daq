@@ -246,6 +246,8 @@ class ConnectedHost():
         error_code = host.wait()
         self.runner.removeHost(host)
         self.log_file.close()
+        if self.test_name == 'fail':
+            error_code = 0 if error_code else 1
         if error_code != 0:
             logging.info("Set %d FAILED test %s with error %s" % (self.port_set, self.test_name, error_code))
             self.failures.append(self.test_name)
@@ -259,9 +261,11 @@ class DAQRunner():
     net = None
     device_intfs = None
     target_sets = None
+    result_sets = None
 
     def __init__(self):
         self.target_sets = {}
+        self.result_sets = {}
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
@@ -358,14 +362,13 @@ class DAQRunner():
         logging.debug('Done with initialization')
 
     def cleanup(self):
-        self.monitor.forget(self.faucet_events.sock)
         logging.debug("Stopping faucet...")
         self.pri.cmd('docker kill daq-faucet')
         logging.debug("Stopping mininet...")
         self.net.stop()
         logging.info("Done with runner.")
 
-        if failed:
+        if self.failed:
             print 'Exiting with error %s' % failed
             sys.exit(1)
 
@@ -386,10 +389,22 @@ class DAQRunner():
             target_set.idle_handler()
 
     def main_loop(self):
-        self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
-        self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
-        logging.info('Entering main event loop.')
-        self.monitor.event_loop()
+        self.one_shot = '-s' in sys.argv
+        self.failed = False
+        try:
+            self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
+            self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
+            logging.info('Entering main event loop.')
+            self.monitor.event_loop()
+        except Exception as e:
+            self.failed = e
+            print e, traceback.print_exc(file=sys.stderr)
+        except KeyboardInterrupt:
+            print 'Interrupted'
+
+        if not self.one_shot:
+            logging.debug('Dropping into interactive command line')
+            CLI(self.net)
 
     def trigger_target_set(self, port_set):
         if port_set > 60:
@@ -401,9 +416,14 @@ class DAQRunner():
         self.target_sets[port_set] = target_set
 
     def target_set_complete(self, target_set):
-        logging.info('Set %d complete, failures: %s' % (target_set.port_set, target_set.failures))
-        del self.target_sets[target_set.port_set]
+        port_set = target_set.port_set
+        failures = target_set.failures
+        logging.info('Set %d complete, failures: %s' % (port_set, failures))
+        del self.target_sets[port_set]
+        self.result_sets[port_set] = failures
         logging.info('Remaining sets: %s' % self.target_sets.keys())
+        if not self.target_sets and self.one_shot:
+            self.monitor.forget(self.faucet_events.sock)
 
     def cancel_target_set(self, port_set):
         if port_set in self.target_sets:
@@ -411,29 +431,6 @@ class DAQRunner():
             del self.target_sets[port_set]
             target_set.cancel()
             logging.debug('Set %d cancelled' % port_set)
-
-    def other_stuff(self):
-        one_shot = '-s' in sys.argv
-        failed = False
-        try:
-            while True:
-                self.test_run()
-                if one_shot:
-                    break
-
-        except Exception as e:
-            failed = e
-            print e, traceback.print_exc(file=sys.stderr)
-        except KeyboardInterrupt:
-            print 'Interrupted'
-
-        if not one_shot:
-            logging.debug('Dropping into interactive command line')
-            CLI(self.net)
-
-    def test_run(self):
-        target_set.cleanup()
-
 
 def configure_logging():
     daq_env = os.getenv('DAQ_LOGLEVEL')
