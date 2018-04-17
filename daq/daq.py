@@ -47,7 +47,7 @@ class ConnectedHost():
 
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 10
-    IMAGE_PREFIX = 'daq/test_'
+    IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
     DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
@@ -59,6 +59,7 @@ class ConnectedHost():
     ACTIVE_STATE = 2
     DHCP_STATE = 3
     MONITOR_STATE = 4
+    TEST_STATE = 5
 
     runner = None
     port_set = None
@@ -69,6 +70,7 @@ class ConnectedHost():
     networking = None
     dummy = None
     state = None
+    failures = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -78,11 +80,12 @@ class ConnectedHost():
         self.tmpdir = os.path.join('inst', 'run-' + self.run_id)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state_transition(self.INIT_STATE)
+        self.failures = []
         # There is a race condition here with ovs assigning ports, so wait a bit.
+        logging.info('Waiting for port %d to settle...' % port_set)
         time.sleep(2)
-
-    def setup(self):
         self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
+        self.remaining_tests = self.make_tests()
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         logging.debug("Adding networking host on port %d" % networking_port)
@@ -90,9 +93,12 @@ class ConnectedHost():
         self.networking = self.runner.addHost(networking_name, port=networking_port,
                 cls=cls, tmpdir=self.tmpdir)
 
+    def make_tests(self):
+        return [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
+
     def state_transition(self, to, expected=None):
         assert expected == None or self.state == expected, 'state was %d expected %d' % (self.state, expected)
-        logging.debug('target_set %d, state %s -> %d' % (self.port_set, self.state, to))
+        logging.debug('Set %d state %s -> %d' % (self.port_set, self.state, to))
         self.state = to
 
     def cancel(self):
@@ -100,6 +106,8 @@ class ConnectedHost():
 
     def activate(self):
         self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
+        logging.info('Set %d activating' % self.port_set)
+
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
 
@@ -125,6 +133,7 @@ class ConnectedHost():
         assert self.pingTest(networking, dummy, src_addr=self.fake_target)
 
     def cleanup(self):
+        logging.info('Set %d cleanup' % self.port_set)
         self.networking.terminate()
         self.runner.removeHost(self.networking)
         self.runner.removeHost(self.dummy)
@@ -139,24 +148,24 @@ class ConnectedHost():
         b_name = b if isinstance(b, str) else b.name
         b_ip = b if isinstance(b, str) else b.IP()
         from_msg = ' from %s' % src_addr if src_addr else ''
-        logging.info("Ping test %s->%s%s" % (a.name, b_name, from_msg))
+        logging.info("Set %d ping test %s->%s%s" % (self.port_set, a.name, b_name, from_msg))
         failure="ping FAILED"
         assert b_ip != "0.0.0.0", "IP address not assigned, can't ping"
         src_opt = '-I %s' % src_addr if src_addr else ''
         output = a.cmd('ping -c2', src_opt, b_ip, '> /dev/null 2>&1 || echo ', failure).strip()
-        if output:
-            print output
         return output.strip() != failure
 
     def dhcp_wait(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
-        logging.info('Waiting for dhcp reply from %s...' % self.networking.name)
+        logging.info('Set %d Waiting for dhcp reply from %s...' % (self.port_set, self.networking.name))
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None, timeout=None)
         self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line())
 
     def dhcp_line(self):
         dhcp_line = self.dhcp_traffic.next_line()
+        if not dhcp_line:
+            return
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
             self.target_ip = match.group(4)
@@ -167,43 +176,53 @@ class ConnectedHost():
                 self.target_mac = match.group(2)
 
     def dhcp_finalize(self):
-        print "finalize %d" % self.port_set
         self.runner.monitor.forget(self.dhcp_traffic.stream())
         self.dhcp_traffic.close()
-        logging.info('Received dhcp reply for set %d: %s is at %s' %
+        logging.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
-        self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
+        self.monitor_scan()
 
-    def monitor_scan(self, intf):
-        logging.info('Running background monitor scan for %d seconds...' % self.MONITOR_SCAN_SEC)
+    def monitor_scan(self):
+        self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
+        logging.info('Set %d background scan for %d seconds...' % (self.port_set, self.MONITOR_SCAN_SEC))
+        intf = self.runner.switch_link.intf1
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         filter = 'vlan %d' % self.pri_base
-        tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf.name,
+        self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf.name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file)
-        assert tcp_monitor.wait() == 0, 'Failed executing monitor pcap'
+        self.runner.monitor.monitor(self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
+                hangup=lambda: self.monitor_complete())
 
-    def run_tests(self):
+    def monitor_complete(self):
+        logging.info('Set %d monitor scan complete' % self.port_set)
+        assert self.tcp_monitor.wait() == 0, 'Failed executing monitor pcap'
+        self.state_transition(self.TEST_STATE, self.MONITOR_STATE)
+        self.ping_tests()
+        self.run_next_test()
+
+    def ping_tests(self):
         assert self.pingTest(self.networking, self.target_ip)
         assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target)
-        assert self.dockerTest('daq/test_pass')
-        assert not self.dockerTest('daq/test_fail')
-        assert self.dockerTest('daq/test_ping')
-        self.dockerTest('daq/test_bacnet')
-        self.dockerTest('daq/test_nmap')
-        self.dockerTest('daq/test_mudgee')
-        logging.info('Done with tests')
 
-    def dockerTestName(self, image):
-        # Names need to be short because they ultimately get used as netif names.
-        error_msg = 'name %s not startswith %s' % (image, self.IMAGE_PREFIX)
-        assert image.startswith(self.IMAGE_PREFIX), error_msg
-        return image[len(self.IMAGE_PREFIX):]
+    def run_next_test(self):
+        if len(self.remaining_tests):
+            self.run_test(self.remaining_tests.pop(0))
+        else:
+            self.cleanup()
+            self.runner.target_set_complete(self)
 
-    def dockerTest(self, image):
+    def run_test(self, test_name):
+        logging.info('Set %d running test %s' % (self.port_set, test_name))
+        host = self.docker_test(test_name)
+        self.running_test = host
+
+    def docker_test(self, test_name):
+        self.test_name = test_name
         port = self.pri_base + self.TEST_OFFSET
         gateway = self.networking
-        test_name = self.dockerTestName(image)
+        image = self.IMAGE_NAME_FORMAT % test_name
         host_name = '%s%02d' % (test_name, self.port_set)
+
         env_vars = [ "TARGET_NAME=" + host_name,
                      "TARGET_IP=" + self.target_ip,
                      "TARGET_MAC=" + self.target_mac,
@@ -215,14 +234,24 @@ class ConnectedHost():
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
-        host.activate()
+        pipe = host.activate(log_name = None)
+        self.log_file = host.open_log()
+        self.runner.monitor.monitor(pipe.stdout, copy_to=self.log_file,
+                    hangup=lambda: self.docker_complete())
+        return host
+
+    def docker_complete(self):
+        host = self.running_test
+        self.running_test = None
         error_code = host.wait()
         self.runner.removeHost(host)
+        self.log_file.close()
         if error_code != 0:
-            logging.info("FAILED test %s with error %s" % (test_name, error_code))
+            logging.info("Set %d FAILED test %s with error %s" % (self.port_set, self.test_name, error_code))
+            self.failures.append(self.test_name)
         else:
-            logging.info("PASSED test %s" % (test_name))
-        return error_code == 0
+            logging.info("Set %d PASSED test %s" % (self.port_set, self.test_name))
+        self.run_next_test()
 
 
 class DAQRunner():
@@ -309,7 +338,7 @@ class DAQRunner():
         logging.info("Starting faucet...")
         output = self.pri.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
-            print output
+            logging.info('Faucet output: %s' % output)
             assert False, 'Faucet startup failed'
 
         logging.debug("Attaching event channel...")
@@ -363,18 +392,25 @@ class DAQRunner():
         self.monitor.event_loop()
 
     def trigger_target_set(self, port_set):
+        if port_set > 60:
+            logging.debug('Ignoring phantom port set %d' % port_set)
+            return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
+        logging.debug('Set %d connecting device' % port_set)
         target_set = ConnectedHost(self, port_set)
         self.target_sets[port_set] = target_set
-        target_set.setup()
-        logging.debug('Ready for port_set %d' % port_set)
+
+    def target_set_complete(self, target_set):
+        logging.info('Set %d complete, failures: %s' % (target_set.port_set, target_set.failures))
+        del self.target_sets[target_set.port_set]
+        logging.info('Remaining sets: %s' % self.target_sets.keys())
 
     def cancel_target_set(self, port_set):
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
             target_set.cancel()
-            logging.debug('Cancelled port_set %d' % port_set)
+            logging.debug('Set %d cancelled' % port_set)
 
     def other_stuff(self):
         one_shot = '-s' in sys.argv
@@ -396,8 +432,6 @@ class DAQRunner():
             CLI(self.net)
 
     def test_run(self):
-        target_set.monitor_scan(self.switch_link.intf1)
-        target_set.run_tests()
         target_set.cleanup()
 
 

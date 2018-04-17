@@ -1,3 +1,7 @@
+import errno
+import fcntl
+import os
+
 from select import poll, POLLIN, POLLHUP
 
 class StreamMonitor():
@@ -21,11 +25,23 @@ class StreamMonitor():
     def get_fd(self, target):
         return target.fileno() if 'fileno' in dir(target) else target
 
-    def monitor(self, desc, callback):
+    def monitor(self, desc, callback=None, hangup=None, copy_to=None):
         fd = self.get_fd(desc)
         assert not fd in self.callbacks, 'duplicate descriptor %d' % fd
-        self.callbacks[fd] = callback
-        self.poller.register(fd, POLLIN | POLLHUP)
+        if copy_to:
+            assert not callback, 'both callback and copy_to set'
+            self.make_nonblock(desc)
+            callback = lambda: self.copy_data(desc, copy_to)
+        self.callbacks[fd] = (callback, hangup)
+        self.poller.register(fd, POLLHUP | POLLIN)
+
+    def copy_data(self, data_source, data_sink):
+        data_sink.write(data_source.read(1024))
+
+    def make_nonblock(self, data_source):
+        fd = self.get_fd(data_source)
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
 
     def forget(self, desc):
         fd = self.get_fd(desc)
@@ -34,7 +50,17 @@ class StreamMonitor():
         self.poller.unregister(fd)
 
     def trigger_callback(self, fd):
-        self.callbacks[fd]()
+        callback = self.callbacks[fd][0]
+        if callback:
+            callback()
+        else:
+            os.read(fd, 1024)
+
+    def trigger_hangup(self, fd):
+        callback = self.callbacks[fd][1]
+        self.forget(fd)
+        if callback:
+            callback()
 
     def event_loop(self):
         while self.callbacks:
@@ -50,7 +76,7 @@ class StreamMonitor():
                     if event & POLLIN:
                         self.trigger_callback(fd)
                     elif event & POLLHUP:
-                        self.forget(fd)
+                        self.trigger_hangup(fd)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
             else:
