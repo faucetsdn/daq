@@ -136,3 +136,28 @@ You can also clean all the stuffs:
 
 ...which is sometimes necessary to gaurintee a clean build.
 Be warned, it also might clean some other images/containers from other projects.
+
+### Hardware Config
+awplus#configure terminal 
+Enter configuration commands, one per line.  End with CNTL/Z.
+awplus(config)#vlan 
+% Incomplete command.
+
+awplus(config)#vlan database 
+awplus(config-vlan)#?
+ commands:
+  do            To run exec commands in config mode
+  exit          End current mode and down to previous mode
+  help          Description of the interactive help system
+  no            Negate a command or set its defaults
+  private-vlan  private-vlan
+  show          Show running system information
+  vlan          Add, delete, or modify values associated with a single VLAN
+
+awplus(config-vlan)#vlan n
+awplus(config-vlan)#vlan 
+awplus(config-vlan)#vlan 
+awplus(config-vlan)#vlan 10
+awplus(config-vlan)#vlan 10 name test
+% A VLAN already exists with the name
+awplus(config-vlan)#vlan 10 name test
