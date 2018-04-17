@@ -159,7 +159,7 @@ class ConnectedHost():
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
         logging.info('Set %d Waiting for dhcp reply from %s...' % (self.port_set, self.networking.name))
         filter="src port 67"
-        self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None, timeout=None)
+        self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None, timeout=None, blocking=False)
         self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line())
 
     def dhcp_line(self):
@@ -189,7 +189,7 @@ class ConnectedHost():
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         filter = 'vlan %d' % self.pri_base
         self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf.name,
-                timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file)
+                timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, blocking=False)
         self.runner.monitor.monitor(self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_complete())
 
