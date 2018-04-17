@@ -19,6 +19,10 @@ EOF
 
 cat mud_config.json
 
+mkdir -p result/
+
 java -jar mudgee/target/mudgee-1.0.0-SNAPSHOT.jar mud_config.json
 
-cp -a result/mudgee /tmp
+cp -a result/ /tmp
+
+fgrep from-device-policy result/mudgee*/mudgee*Mud.json
