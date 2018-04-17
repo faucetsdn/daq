@@ -368,10 +368,6 @@ class DAQRunner():
         self.net.stop()
         logging.info("Done with runner.")
 
-        if self.failed:
-            print 'Exiting with error %s' % failed
-            sys.exit(1)
-
     def handle_faucet_event(self):
         target_dpid = int(self.sec.dpid)
         event = self.faucet_events.next_event()
@@ -390,14 +386,14 @@ class DAQRunner():
 
     def main_loop(self):
         self.one_shot = '-s' in sys.argv
-        self.failed = False
+        self.exception = False
         try:
             self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
             self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
             logging.info('Entering main event loop.')
             self.monitor.event_loop()
         except Exception as e:
-            self.failed = e
+            self.exception = e
             print e, traceback.print_exc(file=sys.stderr)
         except KeyboardInterrupt:
             print 'Interrupted'
@@ -432,6 +428,22 @@ class DAQRunner():
             target_set.cancel()
             logging.debug('Set %d cancelled' % port_set)
 
+    def combine_failures(self):
+        failures=[]
+        for result_set in self.result_sets:
+            for failure in self.result_sets[result_set]:
+                failures.append('%s-%s' % (result_set, failure))
+        return failures
+
+    def finalize(self):
+        failures = self.combine_failures()
+        if failures:
+            logging.info('Test failures: %s' % failures)
+        if self.exception:
+            logging.error('Exiting b/c of exception: %s' % self.exception)
+        if failures or self.exception:
+            sys.exit(1)
+
 def configure_logging():
     daq_env = os.getenv('DAQ_LOGLEVEL')
     logging.basicConfig(level=LEVELS[daq_env] if daq_env else LEVELS['info'])
@@ -455,5 +467,6 @@ if __name__ == '__main__':
         runner.initialize()
         runner.main_loop()
         runner.cleanup()
+        runner.finalize()
     else:
         logger.debug('Must run DAQ as root.')

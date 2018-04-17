@@ -14,6 +14,4 @@ broadcast_ip=${parts[3]}
 
 echo Scanning bacnet $broadcast_ip from $local_ip
 
-java -cp $JAR $CLASS $local_ip $broadcast_ip | fgrep "$TARGET"
-
-
+java -cp $JAR $CLASS $local_ip $broadcast_ip | fgrep -v "$TARGET"
