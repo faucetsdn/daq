@@ -57,12 +57,14 @@ class ConnectedHost():
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
 
+    ERROR_STATE = -1
     INIT_STATE = 0
     STARTUP_STATE = 1
     ACTIVE_STATE = 2
     DHCP_STATE = 3
     MONITOR_STATE = 4
     TEST_STATE = 5
+    DONE_STATE = 6
 
     runner = None
     port_set = None
@@ -85,7 +87,7 @@ class ConnectedHost():
         self.state_transition(self.INIT_STATE)
         self.failures = []
         # There is a race condition here with ovs assigning ports, so wait a bit.
-        logging.info('Waiting for port %d to settle...' % port_set)
+        logging.info('Set %d waiting to settle...' % port_set)
         time.sleep(2)
         self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
         self.remaining_tests = self.make_tests()
@@ -131,16 +133,23 @@ class ConnectedHost():
         # Dummy doesn't use DHCP, so need to set default route manually.
         dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
 
-        assert self.pingTest(networking, dummy)
-        assert self.pingTest(dummy, networking)
-        assert self.pingTest(dummy, self.fake_target)
-        assert self.pingTest(networking, dummy, src_addr=self.fake_target)
+        try:
+            assert self.pingTest(networking, dummy), 'ping failed'
+            assert self.pingTest(dummy, networking), 'ping failed'
+            assert self.pingTest(dummy, self.fake_target), 'ping failed'
+            assert self.pingTest(networking, dummy, src_addr=self.fake_target), 'ping failed'
+        except Exception as e:
+            logging.error('Set %d sanity error: %s' % (self.port_set, e))
+            self.state_transition(self.ERROR_STATE, self.ACTIVE_STATE)
+            self.failures.append('sanity')
+            self.cleanup()
 
     def cleanup(self):
         logging.info('Set %d cleanup' % self.port_set)
         self.networking.terminate()
         self.runner.removeHost(self.networking)
         self.runner.removeHost(self.dummy)
+        self.runner.target_set_complete(self)
 
     def idle_handler(self):
         if self.state == self.STARTUP_STATE:
@@ -215,8 +224,8 @@ class ConnectedHost():
         if len(self.remaining_tests):
             self.run_test(self.remaining_tests.pop(0))
         else:
+            self.state_transition(self.DONE_STATE, self.TEST_STATE)
             self.cleanup()
-            self.runner.target_set_complete(self)
 
     def run_test(self, test_name):
         logging.info('Set %d running test %s' % (self.port_set, test_name))
