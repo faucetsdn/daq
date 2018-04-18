@@ -1,25 +1,35 @@
 #!/bin/bash -e
 
-dpid=0000000000000005
-bridge=ext_ovs
-extif=sec-ext
-intif=pri-eth1
-sec_port=47
+ROOT=$(realpath $(dirname $0)/..)
+ext_ofip=unknown
+ext_ctrl=unknown
+ext_intf=unknown
+ext_addr=unknown
+ext_dpid=unknown
 
-sudo ovs-vsctl --if-exists del-br $bridge
-sudo ovs-vsctl add-br $bridge -- set-controller $bridge tcp:127.0.0.1:6633 -- set bridge $bridge other_config:datapath-id=$dpid
-echo Created bridge $bridge with dpid $dpid
+ext_bridge=ext-ovs
+ext_port=7
+ext_sec=${ext_bridge}-link
 
-sudo ip link del $intif
-sudo ip link add $intif type veth peer name $extif
-sudo ovs-vsctl add-port $bridge $extif -- set interface $extif ofport_request=$sec_port
-sudo ifconfig $intif up
-sudo ifconfig $extif up
-echo Added interface link $intif to $extif
+source $ROOT/local/system.conf
 
-for inum in 1 2 3 4; do
-    iface=faux-$inum
-    sudo ovs-vsctl add-port $bridge $iface -- set interface $iface ofport_request=1
-    sudo ifconfig $iface up
-    echo Added link $iface
+dpid=$(printf %016x $ext_dpid)
+sudo ovs-vsctl --if-exists del-br $ext_bridge -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:6633 \
+     -- set bridge $ext_bridge other_config:datapath-id=$dpid
+echo Created bridge $ext_bridge with dpid $dpid
+
+sudo ip link del $ext_intf || true
+sudo ip link add $ext_intf type veth peer name $ext_sec
+sudo ovs-vsctl add-port $ext_bridge $ext_sec -- set interface $ext_sec ofport_request=$ext_port
+sudo ifconfig $ext_intf up
+sudo ifconfig $ext_sec up
+echo Added interface link $ext_intf to $ext_sec
+
+port=1
+while [ $port -lt $ext_port ]; do
+    iface=faux-$port
+    echo Adding link $iface
+    sudo ovs-vsctl add-port $ext_bridge $iface -- set interface $iface ofport_request=$port
+    sudo ifconfig $iface up || true
+    port=$(($port+1))
 done

@@ -192,7 +192,7 @@ class ConnectedHost():
         self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
         logging.info('Set %d background scan for %d seconds...' %
                      (self.port_set, self.MONITOR_SCAN_SEC))
-        intf_name = self.runner.stack_intf_name
+        intf_name = self.runner.sec_name
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         filter = 'vlan %d' % self.pri_base
         self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf_name,
@@ -274,6 +274,8 @@ class DAQRunner():
     pri = None
     sec = None
     sec_dpid = None
+    sec_port = None
+    sec_name = None
 
     def __init__(self, config):
         self.config = config
@@ -334,20 +336,22 @@ class DAQRunner():
             self.sec.cmd('ip link set %s up' % intf_name)
 
     def create_secondary(self):
+        self.sec_port = int(self.config['ext_port'] if 'ext_port' in self.config else 47)
         if 'ext_dpid' in self.config:
             self.sec_dpid = int(self.config['ext_dpid'], 0)
             logging.info('Configuring external secondary with dpid %s' % self.sec_dpid)
-            self.stack_intf_name = self.config['ext_intf']
+            self.sec_name = self.config['ext_intf']
+            sec_intf = Intf(self.sec_name, node=DummyNode(), port=1)
+            self.pri.addIntf(sec_intf, port=self.sec_port)
         else:
-            ext_port = self.config['ext_port'] if 'ext_port' in self.config else 47
             self.sec_dpid = 2
-            logging.info('Creating ovs secondary with dpid/port %s/%d' % (self.sec_dpid, ext_port))
+            logging.info('Creating ovs secondary with dpid/port %s/%d' % (self.sec_dpid, self.sec_port))
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=OVSSwitch)
 
             link = self.net.addLink(self.pri, self.sec, port1=1,
-                    port2=ext_port, fast=False)
+                    port2=self.sec_port, fast=False)
             logging.info('Added switch link %s <-> %s' % (link.intf1.name, link.intf2.name))
-            self.stack_intf_name = link.intf2.name
+            self.sec_name = link.intf2.name
 
     def initialize(self):
         logging.debug("Creating miniet...")
@@ -431,7 +435,7 @@ class DAQRunner():
             CLI(self.net)
 
     def trigger_target_set(self, port_set):
-        if port_set > 60:
+        if port_set >= self.sec_port:
             logging.debug('Ignoring phantom port set %d' % port_set)
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
