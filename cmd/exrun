@@ -18,10 +18,14 @@ if [ -n "$DAQ_CONTAINER" ]; then
     test -f $INSTDIR/$SYSTEM_CONF && cp $INSTDIR/$SYSTEM_CONF $LOCAL_CONFIG
 fi
 
-if [ -f $LOCAL_CONFIG ]; then
-    echo Loading daq run configuration from $LOCAL_CONFIG
-    source $LOCAL_CONFIG
+if [ ! -f $LOCAL_CONFIG ]; then
+    mkdir -p local
+    echo Copying default $SYSTEM_CONF to $LOCAL_CONFIG
+    cp misc/$SYSTEM_CONF $LOCAL_CONFIG
 fi
+
+echo Loading daq run configuration from $LOCAL_CONFIG
+source $LOCAL_CONFIG
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found.
@@ -42,7 +46,6 @@ if [ -z "$daq_intf" ]; then
 fi
 
 intfs=$(echo $daq_intf | tr , ' ')
-nintf=
 for intf in $intfs; do
     if [ "$intf" == "local!" ]; then
         intf=local
@@ -59,7 +62,6 @@ for intf in $intfs; do
     fi
 
     ip addr show $intf || true
-    nintf+=",$intf"
 
     # If running inside of a container, wait until the host test interface shows up...
     if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
@@ -69,7 +71,6 @@ for intf in $intfs; do
         done
     fi
 done
-daq_intf=${nintf#,}
 
 runcmd=python
 if [ -f .pdbrc ]; then

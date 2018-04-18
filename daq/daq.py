@@ -319,6 +319,7 @@ class DAQRunner():
         intf_names = self.config['daq_intf'].split(',')
         intfs=[]
         for intf_name in intf_names:
+            intf_name = intf_name[0:-1] if intf_name.endswith('!') else intf_name
             port_no = len(intfs) + 1
             intf = Intf(intf_name.strip(), node=DummyNode(), port=port_no)
             intf.port = port_no
@@ -343,11 +344,10 @@ class DAQRunner():
             logging.info('Creating ovs secondary with dpid/port %s/%d' % (self.sec_dpid, ext_port))
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=OVSSwitch)
 
-            switch_link = self.net.addLink(self.pri, self.sec, port1=1,
+            link = self.net.addLink(self.pri, self.sec, port1=1,
                     port2=ext_port, fast=False)
-            logging.info('Added switch link %s <-> %s' %
-                    (self.switch_link.intf1.name, self.switch_link.intf2.name))
-            self.stack_intf_name = self.switch_link.intf2.name
+            logging.info('Added switch link %s <-> %s' % (link.intf1.name, link.intf2.name))
+            self.stack_intf_name = link.intf2.name
 
     def initialize(self):
         logging.debug("Creating miniet...")
