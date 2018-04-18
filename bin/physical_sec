@@ -1,19 +1,17 @@
 #!/bin/bash
 
-control_intf=enxc0c1c07fc669
-internal_intf=pri-eth1
-data_intf=enx00e04c680253
+ROOT=$(realpath $(dirname $0)/..)
 
-dpid=0x1aeb960541
-phy_data_port=7
+ext_ofip=unknown
+ext_ctrl=unknown
+ext_intf=unknown
+ext_addr=unknown
 
-sudo ovs-vsctl --if-exists del-br sec
+source $ROOT/local/system.conf
 
-sudo ip link del $internal_intf || true
+sudo ip addr del $ext_ofip dev $ext_ctrl || true
+sudo ip addr add $ext_ofip dev $ext_ctrl || true
 
-sudo ip addr del 192.0.2.10/24 dev $control_intf || true
-sudo ip addr add 192.0.2.10/24 dev $control_intf || true
+sudo ovs-vsctl add-port pri $ext_intf -- set interface $ext_intf ofport_request=1
 
-sudo ovs-vsctl add-port pri $data_intf -- set interface $data_intf ofport_request=1
-
-ping -c 1 192.0.2.138
+ping -c 1 $ext_addr

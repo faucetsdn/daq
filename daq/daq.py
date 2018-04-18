@@ -100,7 +100,8 @@ class ConnectedHost():
         return [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
 
     def state_transition(self, to, expected=None):
-        assert expected == None or self.state == expected, 'state was %d expected %d' % (self.state, expected)
+        assert expected == None or self.state == expected, ('state was %d expected %d' %
+                                                            (self.state, expected))
         logging.debug('Set %d state %s -> %d' % (self.port_set, self.state, to))
         self.state = to
 
@@ -160,9 +161,11 @@ class ConnectedHost():
 
     def dhcp_wait(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
-        logging.info('Set %d Waiting for dhcp reply from %s...' % (self.port_set, self.networking.name))
+        logging.info('Set %d Waiting for dhcp reply from %s...' %
+                     (self.port_set, self.networking.name))
         filter="src port 67"
-        self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None, timeout=None, blocking=False)
+        self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
+                                          timeout=None, blocking=False)
         self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line())
 
     def dhcp_line(self):
@@ -187,11 +190,12 @@ class ConnectedHost():
 
     def monitor_scan(self):
         self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
-        logging.info('Set %d background scan for %d seconds...' % (self.port_set, self.MONITOR_SCAN_SEC))
-        intf = self.runner.switch_link.intf1
+        logging.info('Set %d background scan for %d seconds...' %
+                     (self.port_set, self.MONITOR_SCAN_SEC))
+        intf_name = self.runner.stack_intf_name
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         filter = 'vlan %d' % self.pri_base
-        self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf.name,
+        self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf_name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, blocking=False)
         self.runner.monitor.monitor(self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_complete())
@@ -252,7 +256,8 @@ class ConnectedHost():
         if self.test_name == 'fail':
             error_code = 0 if error_code else 1
         if error_code != 0:
-            logging.info("Set %d FAILED test %s with error %s" % (self.port_set, self.test_name, error_code))
+            logging.info("Set %d FAILED test %s with error %s" %
+                         (self.port_set, self.test_name, error_code))
             self.failures.append(self.test_name)
         else:
             logging.info("Set %d PASSED test %s" % (self.port_set, self.test_name))
@@ -329,17 +334,20 @@ class DAQRunner():
 
     def create_secondary(self):
         if 'ext_dpid' in self.config:
-            self.sec_dpid = int(self.config['ext_dpid'])
+            self.sec_dpid = int(self.config['ext_dpid'], 0)
             logging.info('Configuring external secondary with dpid %s' % self.sec_dpid)
+            self.stack_intf_name = self.config['ext_intf']
         else:
             ext_port = self.config['ext_port'] if 'ext_port' in self.config else 47
             self.sec_dpid = 2
             logging.info('Creating ovs secondary with dpid/port %s/%d' % (self.sec_dpid, ext_port))
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=OVSSwitch)
 
-            self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=ext_port, fast=False)
+            switch_link = self.net.addLink(self.pri, self.sec, port1=1,
+                    port2=ext_port, fast=False)
             logging.info('Added switch link %s <-> %s' %
                     (self.switch_link.intf1.name, self.switch_link.intf2.name))
+            self.stack_intf_name = self.switch_link.intf2.name
 
     def initialize(self):
         logging.debug("Creating miniet...")
