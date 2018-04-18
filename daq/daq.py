@@ -11,6 +11,9 @@ import sys
 import time
 import traceback
 
+from ConfigParser import ConfigParser
+from StringIO import StringIO
+
 from mininet import log as minilog
 from mininet.log import LEVELS
 from mininet.net import Mininet
@@ -258,12 +261,14 @@ class ConnectedHost():
 
 class DAQRunner():
 
+    config = None
     net = None
     device_intfs = None
     target_sets = None
     result_sets = None
 
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         self.target_sets = {}
         self.result_sets = {}
 
@@ -303,7 +308,7 @@ class DAQRunner():
         host.terminate()
 
     def make_device_intfs(self):
-        intf_names = os.getenv('DAQ_INTF').split(',')
+        intf_names = self.config['daq_intf'].split(',')
         intfs=[]
         for intf_name in intf_names:
             port_no = len(intfs) + 1
@@ -385,7 +390,7 @@ class DAQRunner():
             target_set.idle_handler()
 
     def main_loop(self):
-        self.one_shot = '-s' in sys.argv
+        self.one_shot = 's' in self.config['opts']
         self.exception = False
         try:
             self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
@@ -444,29 +449,46 @@ class DAQRunner():
         if failures or self.exception:
             sys.exit(1)
 
-def configure_logging():
-    daq_env = os.getenv('DAQ_LOGLEVEL')
+def configure_logging(config):
+    daq_env = config['daq_loglevel'] if 'daq_loglevel' in config else None
     logging.basicConfig(level=LEVELS[daq_env] if daq_env else LEVELS['info'])
 
-    mini_env = os.getenv('MININET_LOGLEVEL')
+    mininet_env = config['mininet_loglevel'] if 'mininet_loglevel' in config else None
     LOGMSGFORMAT = '%(message)s'
-    minilog.setLogLevel(mini_env if mini_env else 'info')
+    minilog.setLogLevel(mininet_env if mininet_env else 'info')
 
-def config_parser():
-    #from ConfigParser import ConfigParser
-    #from StringIO import StringIO
+def read_config_into(filename, config):
     parser = ConfigParser()
-    with open("foo.conf") as stream:
-        stream = StringIO("[top]\n" + stream.read())  # This line does the trick.
+    with open(filename) as stream:
+        stream = StringIO("[top]\n" + stream.read())
         parser.readfp(stream)
+    for item in parser.items('top'):
+        config[item[0]] = item[1]
+
+def parse_args(args):
+    config = {}
+    opts = {}
+    config['opts'] = opts
+    first = True
+    for arg in args:
+        if first:
+            first = False
+        elif arg[0] == '-':
+            opts[arg[1:]] = True
+        else:
+            read_config_into(arg, config)
+    return config
+
 
 if __name__ == '__main__':
-    configure_logging()
-    if os.getuid() == 0:
-        runner = DAQRunner()
-        runner.initialize()
-        runner.main_loop()
-        runner.cleanup()
-        runner.finalize()
-    else:
-        logger.debug('Must run DAQ as root.')
+    assert os.getuid() == 0, 'Must run DAQ as root.'
+
+    config = parse_args(sys.argv)
+
+    configure_logging(config)
+
+    runner = DAQRunner(config)
+    runner.initialize()
+    runner.main_loop()
+    runner.cleanup()
+    runner.finalize()

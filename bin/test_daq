@@ -16,7 +16,7 @@ echo -n "Last FAUCET commit "
 (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
 if [ "$MULTI" == y ]; then
-    echo daq_intf='faux-1,faux-2,faux-3' >> local/system.conf
+    echo daq_intf=faux-1,faux-2,faux-3 >> local/system.conf
     cmd/faux 1
     cmd/faux 2
     cmd/faux 3

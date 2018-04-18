@@ -82,14 +82,11 @@ export PYTHONDONTWRITEBYTECODE=1
 echo Executing runner "$@"...
 
 sudo env \
-     MININET_LOGLEVEL=$MININET_LOGLEVEL \
-     DAQ_LOGLEVEL=$DAQ_LOGLEVEL \
      DAQ_CONTAINER=$DAQ_CONTAINER \
-     DAQ_INTF=$daq_intf \
      FAUCET_EVENT_SOCK=$EVENT_SOCK \
      PYTHONPATH=$FAUCET \
      DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
-     TERM=dumb $runcmd daq/daq.py "$@"
+     TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
 
 if [ -n "$cleanup" ]; then
     sh -c "$cleanup"
