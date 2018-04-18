@@ -4,6 +4,7 @@ dpid=0000000000000005
 bridge=ext_ovs
 extif=sec-ext
 intif=pri-eth1
+sec_port=47
 
 sudo ovs-vsctl --if-exists del-br $bridge
 sudo ovs-vsctl add-br $bridge -- set-controller $bridge tcp:127.0.0.1:6633 -- set bridge $bridge other_config:datapath-id=$dpid
@@ -11,7 +12,7 @@ echo Created bridge $bridge with dpid $dpid
 
 sudo ip link del $intif
 sudo ip link add $intif type veth peer name $extif
-sudo ovs-vsctl add-port $bridge $extif -- set interface $extif ofport_request=47
+sudo ovs-vsctl add-port $bridge $extif -- set interface $extif ofport_request=$sec_port
 sudo ifconfig $intif up
 sudo ifconfig $extif up
 echo Added interface link $intif to $extif
@@ -22,4 +23,3 @@ for inum in 1 2 3 4; do
     sudo ifconfig $iface up
     echo Added link $iface
 done
-

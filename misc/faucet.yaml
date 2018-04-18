@@ -18,9 +18,9 @@ dps:
           1:
             stack:
               dp: sec
-              port: 47
+              port: @SEC_PORT@
     sec:
-        dp_id: 2
+        dp_id: @SEC_DPID@
         name: sec
         #ofchannel_log: /var/log/faucet/of-sec.log
         interfaces:
@@ -32,7 +32,7 @@ dps:
             native_vlan: 30
           4:
             native_vlan: 40
-          47:
+          @SEC_PORT@:
             stack:
               dp: pri
               port: 1

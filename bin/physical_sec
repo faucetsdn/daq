@@ -1,18 +1,19 @@
 #!/bin/bash
 
-extif=enxc0c1c07fc669
-intif=pri-eth1
+control_intf=enxc0c1c07fc669
+internal_intf=pri-eth1
+data_intf=enx00e04c680253
+
 dpid=0x1aeb960541
-datif=enx00e04c680253
 phy_data_port=7
 
 sudo ovs-vsctl --if-exists del-br sec
 
-sudo ip link del $intif || true
+sudo ip link del $internal_intf || true
 
-sudo ip addr del 192.0.2.10/24 dev $extif || true
-sudo ip addr add 192.0.2.10/24 dev $extif || true
+sudo ip addr del 192.0.2.10/24 dev $control_intf || true
+sudo ip addr add 192.0.2.10/24 dev $control_intf || true
 
-sudo ovs-vsctl add-port pri $datif -- set interface $datif ofport_request=1
+sudo ovs-vsctl add-port pri $data_intf -- set interface $data_intf ofport_request=1
 
 ping -c 1 192.0.2.138

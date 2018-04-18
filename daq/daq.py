@@ -266,6 +266,9 @@ class DAQRunner():
     device_intfs = None
     target_sets = None
     result_sets = None
+    pri = None
+    sec = None
+    sec_dpid = None
 
     def __init__(self, config):
         self.config = config
@@ -324,17 +327,28 @@ class DAQRunner():
             time.sleep(0.5)
             self.sec.cmd('ip link set %s up' % intf_name)
 
+    def create_secondary(self):
+        if 'ext_dpid' in self.config:
+            self.sec_dpid = int(self.config['ext_dpid'])
+            logging.info('Configuring external secondary with dpid %s' % self.sec_dpid)
+        else:
+            ext_port = self.config['ext_port'] if 'ext_port' in self.config else 47
+            self.sec_dpid = 2
+            logging.info('Creating ovs secondary with dpid/port %s/%d' % (self.sec_dpid, ext_port))
+            self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=OVSSwitch)
+
+            self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=ext_port, fast=False)
+            logging.info('Added switch link %s <-> %s' %
+                    (self.switch_link.intf1.name, self.switch_link.intf2.name))
+
     def initialize(self):
         logging.debug("Creating miniet...")
         self.net = Mininet()
 
         logging.debug("Adding switches...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
-        self.sec = self.net.addSwitch('sec', dpid='2', cls=OVSSwitch)
 
-        self.switch_link = self.net.addLink(self.pri, self.sec, port1=1, port2=47, fast=False)
-        logging.info('Added switch link %s <-> %s' %
-                (self.switch_link.intf1.name, self.switch_link.intf2.name))
+        self.create_secondary()
 
         targetIp = "127.0.0.1"
         logging.debug("Adding controller at %s" % targetIp)
@@ -357,12 +371,13 @@ class DAQRunner():
         logging.info("Waiting for system to settle...")
         time.sleep(3)
 
-        self.device_intfs = self.make_device_intfs()
-        for device_intf in self.device_intfs:
-            logging.info("Attaching device interface %s on port %d." %
-                    (device_intf.name, device_intf.port))
-            self.sec.addIntf(device_intf, port=device_intf.port)
-            self.switchAttach(self.sec, device_intf)
+        if self.sec:
+            self.device_intfs = self.make_device_intfs()
+            for device_intf in self.device_intfs:
+                logging.info("Attaching device interface %s on port %d." %
+                        (device_intf.name, device_intf.port))
+                self.sec.addIntf(device_intf, port=device_intf.port)
+                self.switchAttach(self.sec, device_intf)
 
         logging.debug('Done with initialization')
 
@@ -374,7 +389,7 @@ class DAQRunner():
         logging.info("Done with runner.")
 
     def handle_faucet_event(self):
-        target_dpid = int(self.sec.dpid)
+        target_dpid = int(self.sec_dpid)
         event = self.faucet_events.next_event()
         logging.debug('Faucet event %s' % event)
         (dpid, port, active) = self.faucet_events.as_port_state(event)
