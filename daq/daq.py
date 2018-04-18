@@ -463,6 +463,7 @@ class DAQRunner():
             self.monitor.forget(self.faucet_events.sock)
 
     def cancel_target_set(self, port_set):
+        logging.info('Set %d cancelled' % port_set)
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
