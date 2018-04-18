@@ -14,3 +14,8 @@ install:
   - bin/setup_build
 script:
   - bin/test_daq
+env:
+  matrix:
+    - MULTI=n MODE=in
+    - MULTI=n MODE=ex
+    - MULTI=y MODE=ex

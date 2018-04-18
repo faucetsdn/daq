@@ -9,5 +9,22 @@ if [ ! -f local/system.conf ]; then
     cp misc/system.conf local/
 fi
 
+echo -n "Last DAQ commit "
+git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
+
+echo -n "Last FAUCET commit "
+(cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+
+if [ "$MULTI" == y ]; then
+    echo daq_intf='faux-1,faux-2,faux-3' >> local/system.conf
+    cmd/faux 1
+    cmd/faux 2
+    cmd/faux 3
+fi
+
 echo Running DAQ test...
-cmd/run -s
+if [ "$MODE" == "in" ]; then
+    cmd/run -s
+else
+    cmd/exrun -s
+fi
