@@ -112,7 +112,7 @@ class ConnectedHost():
 
     def activate(self):
         self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
-        logging.info('Set %d activating' % self.port_set)
+        logging.info('Set %d activating.' % self.port_set)
 
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
@@ -170,7 +170,7 @@ class ConnectedHost():
 
     def dhcp_wait(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
-        logging.info('Set %d Waiting for dhcp reply from %s...' %
+        logging.info('Set %d waiting for dhcp reply from %s...' %
                      (self.port_set, self.networking.name))
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
@@ -348,10 +348,10 @@ class DAQRunner():
         self.sec_port = int(self.config['ext_port'] if 'ext_port' in self.config else 47)
         if 'ext_dpid' in self.config:
             self.sec_dpid = int(self.config['ext_dpid'], 0)
-            logging.info('Configuring external secondary with dpid %s' % self.sec_dpid)
             self.sec_name = self.config['ext_intf']
+            logging.info('Configuring external secondary with dpid %s on intf %s' % (self.sec_dpid, self.sec_name))
             sec_intf = Intf(self.sec_name, node=DummyNode(), port=1)
-            self.pri.addIntf(sec_intf, port=self.sec_port)
+            self.pri.addIntf(sec_intf, port=1)
         else:
             self.sec_dpid = 2
             logging.info('Creating ovs secondary with dpid/port %s/%d' % (self.sec_dpid, self.sec_port))
@@ -463,12 +463,11 @@ class DAQRunner():
             self.monitor.forget(self.faucet_events.sock)
 
     def cancel_target_set(self, port_set):
-        logging.info('Set %d cancelled' % port_set)
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
             target_set.cancel()
-            logging.debug('Set %d cancelled' % port_set)
+            logging.info('Set %d cancelled.' % port_set)
 
     def combine_failures(self):
         failures=[]
