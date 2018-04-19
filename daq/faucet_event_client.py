@@ -74,7 +74,7 @@ class FaucetEventClient():
         return None
 
     def as_ports_status(self, event):
-        if not 'PORTS_STATUS' in event:
+        if not event or not 'PORTS_STATUS' in event:
             return (None, None)
         return (event['dp_id'], event['PORTS_STATUS'])
 
@@ -89,7 +89,7 @@ class FaucetEventClient():
         return event
 
     def as_port_state(self, event):
-        if not 'PORT_CHANGE' in event:
+        if not event or not 'PORT_CHANGE' in event:
             return (None, None, None)
         dpid = event['dp_id']
         reason = event['PORT_CHANGE']['reason']
