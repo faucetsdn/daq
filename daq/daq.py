@@ -337,8 +337,10 @@ class DAQRunner():
             intfs.append(intf)
         return intfs
 
-    def auto_start_sets(self):
-        assert False, 'auto_start_sets not implemented'
+    def flush_faucet_events(self):
+        logging.info('Flushing faucet event queue...')
+        while self.faucet_events.next_event():
+            pass
 
     def flap_interface_ports(self):
         if self.device_intfs:
@@ -438,9 +440,6 @@ class DAQRunner():
         self.flap_ports='f' in self.config['opts']
         self.auto_start='a' in self.config['opts']
 
-        if self.auto_start:
-            self.auto_start_sets()
-
         if self.flap_ports:
             self.flap_interface_ports()
 
@@ -448,6 +447,8 @@ class DAQRunner():
         try:
             self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
             self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
+            if not self.auto_start:
+                self.flush_faucet_events()
             logging.info('Entering main event loop.')
             self.monitor.event_loop()
         except Exception as e:
