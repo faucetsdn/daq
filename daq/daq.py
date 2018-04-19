@@ -337,8 +337,16 @@ class DAQRunner():
             intfs.append(intf)
         return intfs
 
-    def flap_interface_port(self):
-        if intf_name == 'faux' or intf_name == 'local':
+    def auto_start_sets(self):
+        assert False, 'auto_start_sets not implemented'
+
+    def flap_interface_ports(self):
+        if self.device_intfs:
+            for device_intf in self.device_intfs:
+                self.flap_interface_port(device_intf.name)
+
+    def flap_interface_port(self, intf_name):
+        if intf_name.startswith('faux') or intf_name == 'local':
             logging.info('Flapping device interface %s.' % intf_name)
             self.sec.cmd('ip link set %s down' % intf_name)
             time.sleep(0.5)
@@ -385,13 +393,6 @@ class DAQRunner():
             logging.info('Faucet output: %s' % output)
             assert False, 'Faucet startup failed'
 
-        logging.debug("Attaching event channel...")
-        self.faucet_events = FaucetEventClient()
-        self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
-
-        logging.info("Waiting for system to settle...")
-        time.sleep(3)
-
         if self.sec:
             self.device_intfs = self.make_device_intfs()
             for device_intf in self.device_intfs:
@@ -399,6 +400,13 @@ class DAQRunner():
                         (device_intf.name, device_intf.port))
                 self.sec.addIntf(device_intf, port=device_intf.port)
                 self.switchAttach(self.sec, device_intf)
+
+        logging.debug("Attaching event channel...")
+        self.faucet_events = FaucetEventClient()
+        self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
+
+        logging.info("Waiting for system to settle...")
+        time.sleep(3)
 
         logging.debug('Done with initialization')
 
@@ -427,6 +435,15 @@ class DAQRunner():
 
     def main_loop(self):
         self.one_shot = 's' in self.config['opts']
+        self.flap_ports='f' in self.config['opts']
+        self.auto_start='a' in self.config['opts']
+
+        if self.auto_start:
+            self.auto_start_sets()
+
+        if self.flap_ports:
+            self.flap_interface_ports()
+
         self.exception = False
         try:
             self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())

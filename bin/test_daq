@@ -15,6 +15,14 @@ git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo -n "Last FAUCET commit "
 (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
+if [ "$SWITCH" == "ext" ]; then
+    echo ext_dpid=0x1aeb960541 >> local/system.conf
+    bin/external_ovs
+    if [ -z "$DEVICES" ]; then
+        DEVICES=1
+    fi
+fi
+
 if [ -n "$DEVICES" ]; then
     count=1
     daq_intf=
@@ -26,14 +34,9 @@ if [ -n "$DEVICES" ]; then
     echo daq_intf=${daq_intf#,} >> local/system.conf
 fi
 
-if [ "$SWITCH" == "ext" ]; then
-    echo ext_dpid=0x1aeb960541 >> local/system.conf
-    bin/external_ovs
-fi
-
 echo Running DAQ test...
 if [ "$MODE" == "in" ]; then
-    cmd/run -s
+    cmd/run -s -f
 else
-    cmd/exrun -s
+    cmd/exrun -s -f
 fi
