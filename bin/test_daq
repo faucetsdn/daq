@@ -15,11 +15,20 @@ git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo -n "Last FAUCET commit "
 (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
-if [ "$MULTI" == y ]; then
-    echo daq_intf=faux-1,faux-2,faux-3 >> local/system.conf
-    cmd/faux 1
-    cmd/faux 2
-    cmd/faux 3
+if [ -n "$DEVICES" ]; then
+    count=1
+    daq_intf=
+    while [ $count -le $DEVICES ]; do
+        daq_intf+=,faux-$count
+        cmd/faux $count
+        count=$(($count+1))
+    done
+    echo daq_intf=${daq_intf#,} >> local/system.conf
+fi
+
+if [ "$SWITCH" == "ext" ]; then
+    echo ext_dpid=0x1aeb960541 >> local/system.conf
+    bin/external_ovs
 fi
 
 echo Running DAQ test...

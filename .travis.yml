@@ -16,6 +16,8 @@ script:
   - bin/test_daq
 env:
   matrix:
-    - MULTI=n MODE=in
-    - MULTI=n MODE=ex
-    - MULTI=y MODE=ex
+    - FOO=bar
+    - MODE=in BUILD=in
+    - MODE=in BUILD=no
+    - DEVICES=3
+    - SWITCH=ext

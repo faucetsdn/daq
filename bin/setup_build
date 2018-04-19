@@ -6,9 +6,9 @@ git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo -n "Last FAUCET commit "
 (cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
-if [ "$MODE" == "in" ]; then
+if [ "$BUILD" == "in" ]; then
     cmd/inbuild
-else
+elif [ "$BUILD" != "no" ]; then
     cmd/build
 fi
 

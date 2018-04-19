@@ -1,19 +1,19 @@
 #!/bin/bash -e
 
-ext_ofip=unknown
-ext_ctrl=unknown
 ext_intf=unknown
-ext_addr=unknown
 ext_dpid=unknown
-
+ext_port=unknown
 ext_bridge=ext-ovs
-ext_port=7
 ext_sec=${ext_bridge}-link
-
 ext_prefix=faux-
 
 ROOT=$(realpath $(dirname $0)/..)
 source $ROOT/local/system.conf
+
+if [ "$ext_intf" == unknown -o "$ext_dpid" == unknown -o "$ext_port" == unknown ]; then
+    echo ext_intf/ext_dipd/ext_port not defined.
+    false
+fi
 
 dpid=$(printf %016x $ext_dpid)
 sudo ovs-vsctl --if-exists del-br $ext_bridge -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:6633 \
