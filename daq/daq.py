@@ -87,7 +87,7 @@ class ConnectedHost():
         self.state_transition(self.INIT_STATE)
         self.failures = []
         # There is a race condition here with ovs assigning ports, so wait a bit.
-        logging.info('Set %d waiting to settle...' % port_set)
+        logging.info('Set %d created.' % port_set)
         time.sleep(2)
         self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
         self.remaining_tests = self.make_tests()
@@ -466,7 +466,6 @@ class DAQRunner():
             logging.debug('Ignoring phantom port set %d' % port_set)
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
-        logging.debug('Set %d connecting device' % port_set)
         target_set = ConnectedHost(self, port_set)
         self.target_sets[port_set] = target_set
 
@@ -477,6 +476,8 @@ class DAQRunner():
         del self.target_sets[port_set]
         self.result_sets[port_set] = failures
         logging.info('Remaining sets: %s' % self.target_sets.keys())
+        if self.auto_start and not self.one_shot:
+            self.trigger_target_set(port_set)
         if not self.target_sets and self.one_shot:
             self.monitor.forget(self.faucet_events.sock)
 
