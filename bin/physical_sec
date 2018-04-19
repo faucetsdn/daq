@@ -1,17 +1,16 @@
-#!/bin/bash
-
-ROOT=$(realpath $(dirname $0)/..)
+#!/bin/bash -e
 
 ext_ofip=unknown
 ext_ctrl=unknown
 ext_intf=unknown
 ext_addr=unknown
 
+ROOT=$(realpath $(dirname $0)/..)
 source $ROOT/local/system.conf
 
 sudo ip addr del $ext_ofip dev $ext_ctrl || true
 sudo ip addr add $ext_ofip dev $ext_ctrl || true
 
-sudo ovs-vsctl add-port pri $ext_intf -- set interface $ext_intf ofport_request=1
+ip addr show $ext_intf
 
 ping -c 1 $ext_addr

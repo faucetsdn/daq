@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-ROOT=$(realpath $(dirname $0)/..)
 ext_ofip=unknown
 ext_ctrl=unknown
 ext_intf=unknown
@@ -11,6 +10,9 @@ ext_bridge=ext-ovs
 ext_port=7
 ext_sec=${ext_bridge}-link
 
+ext_prefix=faux-
+
+ROOT=$(realpath $(dirname $0)/..)
 source $ROOT/local/system.conf
 
 dpid=$(printf %016x $ext_dpid)
@@ -25,11 +27,13 @@ sudo ifconfig $ext_intf up
 sudo ifconfig $ext_sec up
 echo Added interface link $ext_intf to $ext_sec
 
-port=1
-while [ $port -lt $ext_port ]; do
-    iface=faux-$port
-    echo Adding link $iface
-    sudo ovs-vsctl add-port $ext_bridge $iface -- set interface $iface ofport_request=$port
-    sudo ifconfig $iface up || true
-    port=$(($port+1))
-done
+if [ -n "$ext_prefix" ]; then
+    port=1
+    while [ $port -lt $ext_port ]; do
+        iface=$ext_prefix$port
+        echo Adding link $iface
+        sudo ovs-vsctl add-port $ext_bridge $iface -- set interface $iface ofport_request=$port
+        sudo ifconfig $iface up || true
+        port=$(($port+1))
+    done
+fi
