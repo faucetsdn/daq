@@ -45,7 +45,7 @@ fi
 sudo rm -rf $INSTDIR
 mkdir -p $INSTDIR
 
-docker rm -f daq-runner > /dev/null 2>&1 || true
+sudo docker rm -f daq-runner > /dev/null 2>&1 || true
 
 rm -f $INSTDIR/$SYSTEM_CONF
 test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
@@ -53,21 +53,21 @@ test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
 docker_args+=" --env DAQ_CONTAINER=$IMAGE"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
-    docker pull $IMAGE
+    sudo docker pull $IMAGE
 fi
 
 function move_intf {
     sleep 2
     intf=${daq_intf%!}
     if [ -n "$daq_intf" -a "$daq_intf" == "$intf" ]; then
-        pid=$(docker inspect --format '{{.State.Pid}}' daq-runner)
+        pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
         link=$(ip link show $intf 2>/dev/null )
         if [ "$pid" != 0 -a -n "$link" ]; then
             echo Moving interface $intf into container pid $pid...
             sudo ip link set $intf netns $pid
         else
             echo Could not find process/intf $pid/$intf, terminating daq-runner.
-            docker kill daq-runner > /dev/null
+            sudo docker kill daq-runner > /dev/null
         fi
     fi
 }
@@ -88,4 +88,4 @@ if [ -z "$build" ]; then
 fi
 
 echo Starting runner "$@"...
-docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
+sudo docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
