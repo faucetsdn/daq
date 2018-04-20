@@ -1,5 +1,8 @@
 #!/bin/bash -e
-
+#
+# [Open vSwitch Debian Install](http://docs.openvswitch.org/en/latest/intro/install/distributions/#debian) (tested with version 2.6.2).
+# [Docker CE Debian Install](https://docs.docker.com/install/linux/docker-ce/debian/) (tested with version 17.12.0-ce).
+#
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 release=$(lsb_release -cs)
 echo Installing $distrib $release

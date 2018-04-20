@@ -8,11 +8,8 @@ Flexble IoT device qualification framework utilizing the FAUCET SDN controller.
 
 Tested with ```Linux 4.9.0-5-amd64 #1 SMP Debian 4.9.65-3+deb9u2 (2018-01-04) x86_64 GNU/Linux```, YMMV.
 
-* Install [Open vSwitch Debian Install](http://docs.openvswitch.org/en/latest/intro/install/distributions/#debian)
-  (tested with version 2.6.2).
-* Install [Docker CE Debian Install](https://docs.docker.com/install/linux/docker-ce/debian/)
-  (tested with version 17.12.0-ce).
-* Also need to add user to docker group (as described on install docker page).
+You should be able to run <b><code>bin/setup_install</code></b> to setup the basic prerequisites. This
+should install some basic packages, docker, and openvswitch.
 
 ### Configuration
 
