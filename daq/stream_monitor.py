@@ -1,3 +1,4 @@
+import logging
 import errno
 import fcntl
 import os
@@ -70,6 +71,7 @@ class StreamMonitor():
                 # Check corner case when idle_handler removes all callbacks.
                 if not self.callbacks:
                     return False
+            logging.debug('Entering poll loop %s' % self.callbacks.keys())
             fds = self.poller.poll(self.timeout_ms)
             if fds:
                 for fd, event in fds:

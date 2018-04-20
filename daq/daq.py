@@ -379,6 +379,12 @@ class DAQRunner():
         logging.debug("Adding switches...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
 
+        logging.info("Starting faucet...")
+        output = self.pri.cmd('cmd/faucet && echo SUCCESS')
+        if not output.strip().endswith('SUCCESS'):
+            logging.info('Faucet output: %s' % output)
+            assert False, 'Faucet startup failed'
+
         self.create_secondary()
 
         targetIp = "127.0.0.1"
@@ -388,12 +394,6 @@ class DAQRunner():
 
         logging.info("Starting mininet...")
         self.net.start()
-
-        logging.info("Starting faucet...")
-        output = self.pri.cmd('cmd/faucet && echo SUCCESS')
-        if not output.strip().endswith('SUCCESS'):
-            logging.info('Faucet output: %s' % output)
-            assert False, 'Faucet startup failed'
 
         if self.sec:
             self.device_intfs = self.make_device_intfs()
@@ -421,24 +421,27 @@ class DAQRunner():
 
     def handle_faucet_event(self):
         target_dpid = int(self.sec_dpid)
-        event = self.faucet_events.next_event()
-        logging.debug('Faucet event %s' % event)
-        (dpid, port, active) = self.faucet_events.as_port_state(event)
-        logging.debug('Port state is dpid %s port %s active %s' % (dpid, port, active))
-        if dpid == target_dpid:
-            if active:
-                self.trigger_target_set(port)
-            else:
-                self.cancel_target_set(port)
+        while True:
+            event = self.faucet_events.next_event()
+            logging.debug('Faucet event %s' % event)
+            if not event:
+                break
+            (dpid, port, active) = self.faucet_events.as_port_state(event)
+            logging.debug('Port state is dpid %s port %s active %s' % (dpid, port, active))
+            if dpid == target_dpid:
+                if active:
+                    self.trigger_target_set(port)
+                else:
+                    self.cancel_target_set(port)
 
     def handle_system_idle(self):
         for target_set in self.target_sets.values():
             target_set.idle_handler()
 
     def main_loop(self):
-        self.one_shot = 's' in self.config['opts']
-        self.flap_ports='f' in self.config['opts']
-        self.auto_start='a' in self.config['opts']
+        self.one_shot = self.config.get('s')
+        self.flap_ports = self.config.get('f')
+        self.auto_start = self.config.get('a')
 
         if self.flap_ports:
             self.flap_interface_ports()
@@ -505,11 +508,11 @@ class DAQRunner():
             sys.exit(1)
 
 def configure_logging(config):
-    daq_env = config['daq_loglevel'] if 'daq_loglevel' in config else None
-    logging.basicConfig(level=LEVELS[daq_env] if daq_env else LEVELS['info'])
+    daq_env = config.get('daq_loglevel')
+    logging.basicConfig(level=LEVELS.get(daq_env, LEVELS['info']))
 
-    mininet_env = config['mininet_loglevel'] if 'mininet_loglevel' in config else None
     LOGMSGFORMAT = '%(message)s'
+    mininet_env = config.get('mininet_loglevel')
     minilog.setLogLevel(mininet_env if mininet_env else 'info')
 
 def read_config_into(filename, config):
@@ -522,14 +525,15 @@ def read_config_into(filename, config):
 
 def parse_args(args):
     config = {}
-    opts = {}
-    config['opts'] = opts
     first = True
     for arg in args:
         if first:
             first = False
         elif arg[0] == '-':
-            opts[arg[1:]] = True
+            config[arg[1:]] = True
+        elif '=' in arg:
+            parts = arg.split('=', 1)
+            config[parts[0]] = parts[1]
         else:
             read_config_into(arg, config)
     return config
