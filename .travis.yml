@@ -26,4 +26,4 @@ deploy:
   provider: script
   script: bash bin/docker_push
   on:
-    branch: master
+    branch: release
