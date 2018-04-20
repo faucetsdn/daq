@@ -38,6 +38,9 @@ fi
 
 if [ "$BUILD" == in ]; then
     runarg=local
+elif [ "$BUILD" == no -a "$TRAVIS_BRANCH" == release ]; then
+    echo Not running tests because no-build on release branch.
+    exit 0
 fi
 
 echo Running DAQ test...
