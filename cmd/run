@@ -24,8 +24,9 @@ docker_args+="\
 
 cd $ROOT
 
-if [ "$1" == local ]; then
+if [ "$1" == latest ]; then
     pull_docker=n
+    VERSION=latest
     shift
 fi
 

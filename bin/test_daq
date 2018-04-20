@@ -37,7 +37,7 @@ if [ -n "$DEVICES" ]; then
 fi
 
 if [ "$BUILD" == in ]; then
-    runarg=local
+    runarg=latest
 elif [ "$BUILD" == no -a "$TRAVIS_BRANCH" == release ]; then
     echo Not running tests because no-build on release branch.
     exit 0
