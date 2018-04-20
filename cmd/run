@@ -32,6 +32,7 @@ fi
 if [ "$1" == base -o "$1" == rebuild ]; then
     if [ "$1" == base ]; then
         IMAGE=daq/base
+        VERSION=latest
     fi
     build=y
     docker_args+=" -v $PWD:/daq/"
