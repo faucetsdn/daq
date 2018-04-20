@@ -3,7 +3,7 @@ import errno
 import fcntl
 import os
 
-from select import poll, POLLIN, POLLHUP
+from select import poll, POLLIN, POLLHUP, POLLNVAL
 
 class StreamMonitor():
     """Monitor dict of stream objects
@@ -52,16 +52,22 @@ class StreamMonitor():
 
     def trigger_callback(self, fd):
         callback = self.callbacks[fd][0]
-        if callback:
-            callback()
-        else:
-            os.read(fd, 1024)
+        try:
+            if callback:
+                callback()
+            else:
+                os.read(fd, 1024)
+        except Exception as e:
+            logging.error('Error handling callback: %s' % e)
 
     def trigger_hangup(self, fd):
         callback = self.callbacks[fd][1]
         self.forget(fd)
-        if callback:
-            callback()
+        try:
+            if callback:
+                callback()
+        except Exception as e:
+            logging.error('Error handling hangup: %s' % e)
 
     def event_loop(self):
         while self.callbacks:
@@ -77,7 +83,7 @@ class StreamMonitor():
                 for fd, event in fds:
                     if event & POLLIN:
                         self.trigger_callback(fd)
-                    elif event & POLLHUP:
+                    elif event & POLLHUP or event & POLLNVAL:
                         self.trigger_hangup(fd)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)

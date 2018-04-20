@@ -107,9 +107,6 @@ class ConnectedHost():
         logging.debug('Set %d state %s -> %d' % (self.port_set, self.state, to))
         self.state = to
 
-    def cancel(self):
-        self.networking.terminate()
-
     def activate(self):
         self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
         logging.info('Set %d activating.' % self.port_set)
@@ -142,12 +139,16 @@ class ConnectedHost():
             logging.error('Set %d sanity error: %s' % (self.port_set, e))
             self.state_transition(self.ERROR_STATE, self.ACTIVE_STATE)
             self.failures.append('sanity')
-            self.cleanup()
+            self.terminate()
 
-    def cleanup(self):
-        logging.info('Set %d cleanup' % self.port_set)
+    def terminate(self):
+        logging.info('Set %d terminate' % self.port_set)
         self.networking.terminate()
         self.runner.removeHost(self.networking)
+        try:
+            self.dummy.terminate()
+        except Exception as e:
+            logging.error('Set %d terminating dummy: %s' % (self.port_set, e))
         self.runner.removeHost(self.dummy)
         self.runner.target_set_complete(self)
 
@@ -225,7 +226,7 @@ class ConnectedHost():
             self.run_test(self.remaining_tests.pop(0))
         else:
             self.state_transition(self.DONE_STATE, self.TEST_STATE)
-            self.cleanup()
+            self.terminate()
 
     def run_test(self, test_name):
         logging.info('Set %d running test %s' % (self.port_set, test_name))
@@ -259,12 +260,15 @@ class ConnectedHost():
     def docker_complete(self):
         host = self.running_test
         self.running_test = None
-        error_code = host.wait()
-        self.runner.removeHost(host)
-        self.log_file.close()
+        try:
+            error_code = host.wait()
+            self.runner.removeHost(host)
+            self.log_file.close()
+        except Exception as e:
+            error_code = e
         if self.test_name == 'fail':
             error_code = 0 if error_code else 1
-        if error_code != 0:
+        if error_code:
             logging.info("Set %d FAILED test %s with error %s" %
                          (self.port_set, self.test_name, error_code))
             self.failures.append(self.test_name)
@@ -413,10 +417,16 @@ class DAQRunner():
         logging.debug('Done with initialization')
 
     def cleanup(self):
-        logging.debug("Stopping faucet...")
-        self.pri.cmd('docker kill daq-faucet')
-        logging.debug("Stopping mininet...")
-        self.net.stop()
+        try:
+            logging.debug("Stopping faucet...")
+            self.pri.cmd('docker kill daq-faucet')
+        except Exception as e:
+            logging.error('Exception: %s' % e)
+        try:
+            logging.debug("Stopping mininet...")
+            self.net.stop()
+        except Exception as e:
+            logging.error('Exception: %s' % e)
         logging.info("Done with runner.")
 
     def handle_faucet_event(self):
@@ -469,8 +479,11 @@ class DAQRunner():
             logging.debug('Ignoring phantom port set %d' % port_set)
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
-        target_set = ConnectedHost(self, port_set)
-        self.target_sets[port_set] = target_set
+        try:
+            target_set = ConnectedHost(self, port_set)
+            self.target_sets[port_set] = target_set
+        except Exception as e:
+            logging.error('Set %d creation error: %s' % (port_set, e))
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
@@ -488,7 +501,7 @@ class DAQRunner():
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
-            target_set.cancel()
+            target_set.terminate()
             logging.info('Set %d cancelled.' % port_set)
 
     def combine_failures(self):
