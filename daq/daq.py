@@ -114,23 +114,23 @@ class ConnectedHost():
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
 
-        networking = self.networking
-        networking.activate()
+        try:
+            networking = self.networking
+            networking.activate()
 
-        dummy_name = 'dummy%02d' % self.port_set
-        dummy_port = self.pri_base + self.DUMMY_OFFSET
-        dummy = self.runner.addHost(dummy_name, port=dummy_port)
-        self.dummy = dummy
+            dummy_name = 'dummy%02d' % self.port_set
+            dummy_port = self.pri_base + self.DUMMY_OFFSET
+            dummy = self.runner.addHost(dummy_name, port=dummy_port)
+            self.dummy = dummy
 
-        self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
-        logging.debug('Adding fake target at %s' % self.fake_target)
-        networking.cmd('ip addr add %s dev %s' %
+            self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
+            logging.debug('Adding fake target at %s' % self.fake_target)
+            networking.cmd('ip addr add %s dev %s' %
                 (self.fake_target, networking.switch_link.intf2))
 
-        # Dummy doesn't use DHCP, so need to set default route manually.
-        dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
+            # Dummy doesn't use DHCP, so need to set default route manually.
+            dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
 
-        try:
             assert self.pingTest(networking, dummy), 'ping failed'
             assert self.pingTest(dummy, networking), 'ping failed'
             assert self.pingTest(dummy, self.fake_target), 'ping failed'
@@ -143,13 +143,15 @@ class ConnectedHost():
 
     def terminate(self):
         logging.info('Set %d terminate' % self.port_set)
-        self.networking.terminate()
-        self.runner.removeHost(self.networking)
-        try:
-            self.dummy.terminate()
-        except Exception as e:
-            logging.error('Set %d terminating dummy: %s' % (self.port_set, e))
-        self.runner.removeHost(self.dummy)
+        if self.networking:
+            self.networking.terminate()
+            self.runner.removeHost(self.networking)
+        if self.dummy:
+            try:
+                self.dummy.terminate()
+            except Exception as e:
+                logging.error('Set %d terminating dummy: %s' % (self.port_set, e))
+            self.runner.removeHost(self.dummy)
         self.runner.target_set_complete(self)
 
     def idle_handler(self):
