@@ -10,6 +10,7 @@ DOCKER_STARTUP_TIMEOUT_MS=60000
 pull_docker=y
 docker_args=
 build=
+VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 
 if [ -f $LOCAL_CONFIG ]; then
     echo Loading container run configuration from $LOCAL_CONFIG
@@ -55,12 +56,13 @@ sudo docker rm -f daq-runner > /dev/null 2>&1 || true
 
 rm -f $INSTDIR/$SYSTEM_CONF
 test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
+TARGET=$IMAGE:$VERSION
 
 docker_args+=" --env DAQ_CONTAINER=$IMAGE"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
     if [ $pull_docker = y ]; then
-        sudo docker pull $IMAGE
+        sudo docker pull $TARGET
     fi
 fi
 
@@ -95,5 +97,5 @@ if [ -z "$build" ]; then
     ) &
 fi
 
-echo Starting runner "$@"...
-sudo docker run --privileged --name daq-runner $docker_args -ti $IMAGE "$@"
+echo Starting $TARGET "$@"...
+sudo docker run --privileged --name daq-runner $docker_args -ti $TARGET "$@"
