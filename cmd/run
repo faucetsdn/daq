@@ -7,6 +7,7 @@ IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 DOCKER_STARTUP_TIMEOUT_MS=60000
+pull_docker=y
 docker_args=
 build=
 
@@ -21,6 +22,11 @@ docker_args+="\
   --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
 
 cd $ROOT
+
+if [ "$1" == local ]; then
+    pull_docker=n
+    shift
+fi
 
 if [ "$1" == base -o "$1" == rebuild ]; then
     if [ "$1" == base ]; then
@@ -53,7 +59,9 @@ test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
 docker_args+=" --env DAQ_CONTAINER=$IMAGE"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
-    sudo docker pull $IMAGE
+    if [ $pull_docker = y ]; then
+        sudo docker pull $IMAGE
+    fi
 fi
 
 function move_intf {

@@ -1,13 +1,15 @@
 #!/bin/bash -e
 
-# Out with the old, in with the new (use faucet instead).
-sudo /etc/init.d/openvswitch-controller stop || true
+runarg=
 
 if [ ! -f local/system.conf ]; then
     echo Installing local/system.conf...
     mkdir -p local
     cp misc/system.conf local/
 fi
+
+# Out with the old, in with the new (use faucet instead).
+sudo /etc/init.d/openvswitch-controller stop || true
 
 echo -n "Last DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
@@ -34,9 +36,13 @@ if [ -n "$DEVICES" ]; then
     echo daq_intf=${daq_intf#,} >> local/system.conf
 fi
 
+if [ "$BUILD" == in ]; then
+    runarg=local
+fi
+
 echo Running DAQ test...
 if [ "$MODE" == "in" ]; then
-    cmd/run -s -a
+    cmd/run $runarg -s -a
 else
     cmd/exrun -s -a
 fi
