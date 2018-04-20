@@ -18,7 +18,12 @@ script:
 env:
   matrix:
     - FOO=bar
-    - MODE=in BUILD=in
+    - MODE=in BUILD=in PUSH=daqf/runner
     - MODE=in BUILD=no
     - DEVICES=3
     - SWITCH=ext
+deploy:
+  provider: script
+  script: bash bin/docker_push
+  on:
+    branch: master
