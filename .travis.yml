@@ -11,6 +11,7 @@ addons:
       - openvswitch-switch
 install:
   - bin/setup_install
+  - bin/setup_core
   - bin/setup_build
 script:
   - bin/test_daq

@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-MININETV="2.2.2"
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 release=$(lsb_release -cs)
 echo Installing $distrib $release
@@ -22,26 +21,4 @@ sudo apt-get -y install \
     isc-dhcp-client network-manager netcat gnupg2 \
     python python-setuptools python-dev build-essential python-pip \
     openvswitch-switch openvswitch-common docker-ce
-
-git clone https://github.com/mininet/mininet -b $MININETV
-(
-    cd mininet
-    for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
-        perl -pi -e "s/${i}//g" util/install.sh ;
-    done
-    util/install.sh -n
-)
-
-# Python extension packages
-sudo pip install --index-url=https://pypi.python.org/simple netifaces
-
-ROOT=$(realpath $(dirname $0)/..)
-REPO=https://github.com/grafnu/faucet.git
-BRANCH=testing
-TARGET=faucet
-
-cd $ROOT
-
-echo Cloning $REPO branch $BRANCH into $TARGET...
-git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH
 

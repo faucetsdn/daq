@@ -1,0 +1,24 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+REPO=https://github.com/grafnu/faucet.git
+BRANCH=testing
+TARGET=faucet
+MININETV="2.2.2"
+
+cd $ROOT
+
+git clone https://github.com/mininet/mininet -b $MININETV
+(
+    cd mininet
+    for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
+        perl -pi -e "s/${i}//g" util/install.sh ;
+    done
+    util/install.sh -n
+)
+
+# Python extension packages
+sudo pip install --index-url=https://pypi.python.org/simple netifaces
+
+echo Cloning $REPO branch $BRANCH into $TARGET...
+git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH
