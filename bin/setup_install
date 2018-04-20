@@ -1,20 +1,17 @@
 #!/bin/bash -e
 
 MININETV="2.2.2"
+release=$(lsb_release -is)
 
 # Make sure to get a reasonably up-to-date version of OVS.
 sudo apt-get install apt-transport-https
-echo "deb http://packages.wand.net.nz $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/wand.list
+echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources.list.d/wand.list
 sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
 sudo apt-get update
 
-# Debian setup
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-
-# Ubuntu setup
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+echo Release is $release
+curl -fsSL https://download.docker.com/linux/$release/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$release $(lsb_release -cs) stable"
 
 # Basic system install items.
 sudo apt-get update
