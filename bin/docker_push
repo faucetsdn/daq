@@ -1,9 +1,24 @@
 #!/bin/bash -e
 
 if [ -n "$PUSH" ]; then
+    VERSION=$(cat misc/RELEASE_VERSION)
+    TARGET=$PUSH:$VERSION
+
+    found=yes
+    echo Checking for existing image $TARGET...
+    curl --silent -f -lSL https://index.docker.io/v1/repositories/$PUSH/tags/$VERSION > /dev/null 2>&1 || found=no
+    if [ $found == yes ]; then
+        echo Docker image $TARGET already exists.
+        false
+    fi
+
+    echo Tagging build as $TARGET
+    docker tag $PUSH $TARGET
+
     echo Logging into docker as $DOCKER_USERNAME...
     echo "$DOCKER_PASSWORD" | \
         docker login -u "$DOCKER_USERNAME" --password-stdin
-    echo Pushing $PUSH...
-    docker push $PUSH
+
+    echo Pushing $TARGET
+    docker push $TARGET
 fi
