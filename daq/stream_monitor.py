@@ -16,24 +16,27 @@ class StreamMonitor():
     poller = None
     callbacks = None
     idle_handler = None
+    loop_hook = None
 
-    def __init__(self, timeout_ms=None, idle_handler=None):
+    def __init__(self, timeout_ms=None, idle_handler=None, loop_hook=None):
         self.timeout_ms = timeout_ms
         self.idle_handler = idle_handler
+        self.loop_hook = loop_hook
         self.poller = poll()
         self.callbacks = {}
 
     def get_fd(self, target):
         return target.fileno() if 'fileno' in dir(target) else target
 
-    def monitor(self, desc, callback=None, hangup=None, copy_to=None):
+    def monitor(self, desc, callback=None, hangup=None, copy_to=None, error=None):
         fd = self.get_fd(desc)
         assert not fd in self.callbacks, 'duplicate descriptor %d' % fd
         if copy_to:
             assert not callback, 'both callback and copy_to set'
             self.make_nonblock(desc)
             callback = lambda: self.copy_data(desc, copy_to)
-        self.callbacks[fd] = (callback, hangup)
+        logging.debug('Start monitoring fd %d' % fd)
+        self.callbacks[fd] = (callback, hangup, error)
         self.poller.register(fd, POLLHUP | POLLIN)
 
     def copy_data(self, data_source, data_sink):
@@ -47,27 +50,37 @@ class StreamMonitor():
     def forget(self, desc):
         fd = self.get_fd(desc)
         assert fd in self.callbacks, 'missing descriptor %d' % fd
+        logging.debug('Stop monitoring fd %d' % fd)
         del self.callbacks[fd]
         self.poller.unregister(fd)
 
     def trigger_callback(self, fd):
         callback = self.callbacks[fd][0]
+        on_error = self.callbacks[fd][2]
         try:
             if callback:
                 callback()
             else:
                 os.read(fd, 1024)
         except Exception as e:
-            logging.error('Error handling callback: %s' % e)
+            self.forget(fd)
+            self.error_handler(fd, e, on_error)
 
-    def trigger_hangup(self, fd):
+    def trigger_hangup(self, fd, event):
+        logging.debug('Hangup callback %d because %d' % (fd, event))
         callback = self.callbacks[fd][1]
+        on_error = self.callbacks[fd][2]
         self.forget(fd)
         try:
             if callback:
                 callback()
         except Exception as e:
-            logging.error('Error handling hangup: %s' % e)
+            self.error_handler(fd, e, on_error)
+
+    def error_handler(self, fd, e, handler):
+        logging.debug('Error handling %d: %s' % (fd, e))
+        if handler:
+            handler(e)
 
     def event_loop(self):
         while self.callbacks:
@@ -77,6 +90,8 @@ class StreamMonitor():
                 # Check corner case when idle_handler removes all callbacks.
                 if not self.callbacks:
                     return False
+            if self.loop_hook:
+                self.loop_hook()
             logging.debug('Entering poll loop %s' % self.callbacks.keys())
             fds = self.poller.poll(self.timeout_ms)
             if fds:
@@ -84,7 +99,7 @@ class StreamMonitor():
                     if event & POLLIN:
                         self.trigger_callback(fd)
                     elif event & POLLHUP or event & POLLNVAL:
-                        self.trigger_hangup(fd)
+                        self.trigger_hangup(fd, event)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
             else:

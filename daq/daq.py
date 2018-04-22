@@ -64,7 +64,8 @@ class ConnectedHost():
     DHCP_STATE = 3
     MONITOR_STATE = 4
     TEST_STATE = 5
-    DONE_STATE = 6
+    WAITING_STATE = 6
+    DONE_STATE = 7
 
     runner = None
     port_set = None
@@ -144,7 +145,10 @@ class ConnectedHost():
     def terminate(self):
         logging.info('Set %d terminate' % self.port_set)
         if self.networking:
-            self.networking.terminate()
+            try:
+                self.networking.terminate()
+            except Exception as e:
+                logging.error('Set %d terminating networking: %s' % (self.port_set, e))
             self.runner.removeHost(self.networking)
         if self.dummy:
             try:
@@ -178,7 +182,8 @@ class ConnectedHost():
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
                                           timeout=None, blocking=False)
-        self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line())
+        self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line(),
+                    hangup=lambda: self.dhcp_hangup(), error=lambda e: self.monitor_error(e))
 
     def dhcp_line(self):
         dhcp_line = self.dhcp_traffic.next_line()
@@ -200,6 +205,14 @@ class ConnectedHost():
             (self.port_set, self.target_mac, self.target_ip))
         self.monitor_scan()
 
+    def dhcp_hangup(self):
+        logging.info('Set %d dhcp hangup' % self.port_set)
+        self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
+        self.dhcp_wait()
+
+    def monitor_error(self, e):
+        self.runner.target_set_error(self.port_set, e)
+
     def monitor_scan(self):
         self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
         logging.info('Set %d background scan for %d seconds...' %
@@ -210,7 +223,7 @@ class ConnectedHost():
         self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf_name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, blocking=False)
         self.runner.monitor.monitor(self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
-                hangup=lambda: self.monitor_complete())
+                hangup=lambda: self.monitor_complete(), error=lambda e: self.monitor_error(e))
 
     def monitor_complete(self):
         logging.info('Set %d monitor scan complete' % self.port_set)
@@ -220,8 +233,8 @@ class ConnectedHost():
         self.run_next_test()
 
     def ping_tests(self):
-        assert self.pingTest(self.networking, self.target_ip)
-        assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target)
+        assert self.pingTest(self.networking, self.target_ip), 'simple ping failed'
+        assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target), 'target ping failed'
 
     def run_next_test(self):
         if len(self.remaining_tests):
@@ -255,11 +268,13 @@ class ConnectedHost():
             vol_maps=vol_maps, tmpdir=self.tmpdir)
         pipe = host.activate(log_name = None)
         self.log_file = host.open_log()
+        self.state_transition(self.WAITING_STATE, self.TEST_STATE)
         self.runner.monitor.monitor(pipe.stdout, copy_to=self.log_file,
-                    hangup=lambda: self.docker_complete())
+                hangup=lambda: self.docker_complete(), error=lambda e: self.monitor_error(e))
         return host
 
     def docker_complete(self):
+        self.state_transition(self.TEST_STATE, self.WAITING_STATE)
         host = self.running_test
         self.running_test = None
         try:
@@ -450,6 +465,12 @@ class DAQRunner():
         for target_set in self.target_sets.values():
             target_set.idle_handler()
 
+    def loop_hook(self):
+        states = {}
+        for key in self.target_sets.keys():
+            states[key] = self.target_sets[key].state
+        logging.debug('Active target sets/state: %s' % states)
+
     def main_loop(self):
         self.one_shot = self.config.get('s')
         self.flap_ports = self.config.get('f')
@@ -460,15 +481,16 @@ class DAQRunner():
 
         self.exception = False
         try:
-            self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle())
+            self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle(),
+                                         loop_hook=lambda: self.loop_hook())
             self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
             if not self.auto_start:
                 self.flush_faucet_events()
             logging.info('Entering main event loop.')
             self.monitor.event_loop()
         except Exception as e:
+            logging.exception(e)
             self.exception = e
-            print e, traceback.print_exc(file=sys.stderr)
         except KeyboardInterrupt:
             print 'Interrupted'
 
@@ -481,11 +503,21 @@ class DAQRunner():
             logging.debug('Ignoring phantom port set %d' % port_set)
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
+        dummy_set = lambda: None
+        setattr(dummy_set, 'port_set', port_set)
+        setattr(dummy_set, 'failures', ['uncreated'])
         try:
-            target_set = ConnectedHost(self, port_set)
-            self.target_sets[port_set] = target_set
+            self.target_sets[port_set] = dummy_set
+            self.target_sets[port_set] = ConnectedHost(self, port_set)
         except Exception as e:
-            logging.error('Set %d creation error: %s' % (port_set, e))
+            self.target_set_error(port_set, e)
+
+    def target_set_error(self, port_set, e):
+        logging.info('Set %d exception: %s' % (port_set, e))
+        logging.exception(e)
+        target_set = self.target_sets[port_set]
+        target_set.failures.append('exception')
+        target_set_complete(target_set)
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
