@@ -518,7 +518,7 @@ class DAQRunner():
         logging.exception(e)
         target_set = self.target_sets[port_set]
         target_set.failures.append('exception')
-        target_set_complete(target_set)
+        target_set.terminate()
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
