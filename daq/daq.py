@@ -262,7 +262,7 @@ class ConnectedHost():
                      "GATEWAY_MAC=" + gateway.MAC()]
         vol_maps = [ self.scan_base + ":/scans" ]
 
-        logging.debug("Running docker test %s" % image)
+        logging.debug("Set %d running docker test %s" % (self.port_set, image))
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
@@ -283,6 +283,7 @@ class ConnectedHost():
             self.log_file.close()
         except Exception as e:
             error_code = e
+        logging.debug("Set %d docker complete, return=%s" % (self.port_set, error_code))
         if self.test_name == 'fail':
             error_code = 0 if error_code else 1
         if error_code:
