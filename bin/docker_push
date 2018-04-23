@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# Travis CI seems to source thsi script, not using the #! above!
+set -e
+
 if [ -n "$PUSH" ]; then
     VERSION=$(cat misc/RELEASE_VERSION)
     TARGET=$PUSH:$VERSION
@@ -19,8 +22,8 @@ if [ -n "$PUSH" ]; then
     echo Checking for existing image $TARGET...
     curl --silent -f -lSL https://index.docker.io/v1/repositories/$PUSH/tags/$VERSION > /dev/null 2>&1 || found=no
     if [ $found == yes ]; then
-        echo Docker image $TARGET already exists.
-        false
+	echo Docker image $TARGET already exists.
+	false
     fi
 
     echo Tagging build as $TARGET
