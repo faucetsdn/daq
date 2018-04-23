@@ -10,8 +10,8 @@ if [ -n "$PUSH" ]; then
 
     echo Doing push to target $TARGET
 
-    head_hash=$(git rev-parse HEAD)
-    version_hash=$(git rev-parse $RTAG)
+    head_hash=$(git rev-list -n 1 HEAD)
+    version_hash=$(git rev-list -n 1 $RTAG)
 
     if [ $head_hash != $version_hash ]; then
 	echo Release head does not match version tag.
