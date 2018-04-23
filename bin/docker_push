@@ -8,6 +8,8 @@ if [ -n "$PUSH" ]; then
     TARGET=$PUSH:$VERSION
     RTAG=release-$VERSION
 
+    echo Doing push to target $TARGET
+
     head_hash=$(git rev-parse HEAD)
     version_hash=$(git rev-parse $RTAG)
 
