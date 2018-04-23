@@ -22,6 +22,9 @@ env:
     - MODE=in BUILD=no
     - DEVICES=3
     - SWITCH=ext
+branches:
+  except:
+  - /^release-\d+\.\d+(\.\d+)?$/
 deploy:
   provider: script
   script: bash bin/docker_push
