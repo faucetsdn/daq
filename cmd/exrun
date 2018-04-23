@@ -25,6 +25,7 @@ if [ ! -f $LOCAL_CONFIG ]; then
 fi
 
 echo Loading daq run configuration from $LOCAL_CONFIG
+cat $LOCAL_CONFIG
 source $LOCAL_CONFIG
 
 if [ ! -d $FAUCET ]; then

@@ -74,6 +74,12 @@ You can also clean all the stuffs:
 ...which is sometimes necessary to gaurintee a clean build.
 Be warned, it also might clean some other images/containers from other projects.
 
+### External Ethernet Adapter.
+
+To use an external physical ethernet adapter with a real device, rather than the internal faux device,
+simply edit the <code>local/system.conf</code> file to specify the eth interface to use. See the
+documentation in the config file itself for details on the available settings.
+
 ### External and Physical switches.
 
 See the <a href="https://github.com/faucetsdn/faucet/tree/master/docs/vendors">Faucet vendor-specific docs</a>
