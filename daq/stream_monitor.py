@@ -63,15 +63,16 @@ class StreamMonitor():
             else:
                 os.read(fd, 1024)
         except Exception as e:
-            self.forget(fd)
+            if fd in self.callbacks:
+                self.forget(fd)
             self.error_handler(fd, e, on_error)
 
     def trigger_hangup(self, fd, event):
         logging.debug('Hangup callback %d because %d' % (fd, event))
         callback = self.callbacks[fd][1]
         on_error = self.callbacks[fd][2]
-        self.forget(fd)
         try:
+            self.forget(fd)
             if callback:
                 callback()
         except Exception as e:
@@ -85,13 +86,17 @@ class StreamMonitor():
     def event_loop(self):
         while self.callbacks:
             fds = self.poller.poll(0)
-            if not fds and self.idle_handler:
-                self.idle_handler()
-                # Check corner case when idle_handler removes all callbacks.
-                if not self.callbacks:
-                    return False
-            if self.loop_hook:
-                self.loop_hook()
+            try:
+                if not fds and self.idle_handler:
+                    self.idle_handler()
+                    # Check corner case when idle_handler removes all callbacks.
+                    if not self.callbacks:
+                        return False
+                    if self.loop_hook:
+                        self.loop_hook()
+            except Exception as e:
+                logging.error('Exception in callback: %s' % e)
+                logging.exception(e)
             logging.debug('Entering poll loop %s' % self.callbacks.keys())
             fds = self.poller.poll(self.timeout_ms)
             if fds:

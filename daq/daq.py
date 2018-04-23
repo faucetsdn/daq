@@ -504,11 +504,7 @@ class DAQRunner():
             logging.debug('Ignoring phantom port set %d' % port_set)
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
-        dummy_set = lambda: None
-        setattr(dummy_set, 'port_set', port_set)
-        setattr(dummy_set, 'failures', ['uncreated'])
         try:
-            self.target_sets[port_set] = dummy_set
             self.target_sets[port_set] = ConnectedHost(self, port_set)
         except Exception as e:
             self.target_set_error(port_set, e)
@@ -516,15 +512,22 @@ class DAQRunner():
     def target_set_error(self, port_set, e):
         logging.info('Set %d exception: %s' % (port_set, e))
         logging.exception(e)
-        target_set = self.target_sets[port_set]
-        target_set.failures.append('exception')
-        target_set.terminate()
+        if port_set in self.target_sets:
+            target_set = self.target_sets[port_set]
+            target_set.failures.append('exception')
+            target_set.terminate()
+            self.target_set_complete(target_set)
+        else:
+            self.target_set_finalize(self, port_set, [str(e)])
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
         failures = target_set.failures
-        logging.info('Set %d complete, failures: %s' % (port_set, failures))
         del self.target_sets[port_set]
+        self.target_set_finalize(port_set, failures)
+
+    def target_set_finalize(self, port_set, failures):
+        logging.info('Set %d complete, failures: %s' % (port_set, failures))
         self.result_sets[port_set] = failures
         logging.info('Remaining sets: %s' % self.target_sets.keys())
         if self.auto_start and not self.one_shot:
@@ -559,7 +562,6 @@ def configure_logging(config):
     daq_env = config.get('daq_loglevel')
     logging.basicConfig(level=LEVELS.get(daq_env, LEVELS['info']))
 
-    LOGMSGFORMAT = '%(message)s'
     mininet_env = config.get('mininet_loglevel')
     minilog.setLogLevel(mininet_env if mininet_env else 'info')
 
