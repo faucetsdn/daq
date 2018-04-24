@@ -96,8 +96,12 @@ class ConnectedHost():
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         logging.debug("Adding networking host on port %d" % networking_port)
         cls=MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
-        self.networking = self.runner.addHost(networking_name, port=networking_port,
+        try:
+            self.networking = self.runner.addHost(networking_name, port=networking_port,
                 cls=cls, tmpdir=self.tmpdir)
+        except:
+            self.terminate(trigger=False)
+            raise
 
     def make_tests(self):
         return [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
@@ -121,8 +125,8 @@ class ConnectedHost():
 
             dummy_name = 'dummy%02d' % self.port_set
             dummy_port = self.pri_base + self.DUMMY_OFFSET
-            dummy = self.runner.addHost(dummy_name, port=dummy_port)
-            self.dummy = dummy
+            self.dummy = self.runner.addHost(dummy_name, port=dummy_port)
+            dummy = self.dummy
 
             self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
             logging.debug('Adding fake target at %s' % self.fake_target)
@@ -142,21 +146,24 @@ class ConnectedHost():
             self.failures.append('sanity')
             self.terminate()
 
-    def terminate(self):
+    def terminate(self, trigger=True):
         logging.info('Set %d terminate' % self.port_set)
         if self.networking:
             try:
                 self.networking.terminate()
+                self.runner.removeHost(self.networking)
+                self.networking = None
             except Exception as e:
                 logging.error('Set %d terminating networking: %s' % (self.port_set, e))
-            self.runner.removeHost(self.networking)
         if self.dummy:
             try:
                 self.dummy.terminate()
+                self.runner.removeHost(self.dummy)
+                self.dummy = None
             except Exception as e:
                 logging.error('Set %d terminating dummy: %s' % (self.port_set, e))
-            self.runner.removeHost(self.dummy)
-        self.runner.target_set_complete(self)
+        if trigger:
+            self.runner.target_set_complete(self)
 
     def idle_handler(self):
         if self.state == self.STARTUP_STATE:
@@ -320,10 +327,14 @@ class DAQRunner():
         params['env_vars'] = env_vars
         params['vol_maps'] = vol_maps
         host = self.net.addHost(name, cls, **params)
-        host.switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
-        if self.net.built:
-            host.configDefault()
-            self.switchAttach(self.pri, host.switch_link.intf1)
+        try:
+            host.switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
+            if self.net.built:
+                host.configDefault()
+                self.switchAttach(self.pri, host.switch_link.intf1)
+        except:
+            host.terminate()
+            raise
         return host
 
     def switchAttach(self, switch, intf):
