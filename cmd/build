@@ -68,6 +68,7 @@ for file in docker/Dockerfile.*; do
         docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
         if [ -n "$failed" ]; then
             tail $logfile
+            echo Build failed, see $logfile for complete log.
             false
         fi
         echo Build complete. >> $logfile

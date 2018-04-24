@@ -77,6 +77,7 @@ class ConnectedHost():
     dummy = None
     state = None
     failures = None
+    running_test = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
