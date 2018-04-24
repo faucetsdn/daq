@@ -4,9 +4,10 @@
 .pdbrc
 .pdbrcX
 
-# Runtime files
+# Runtime or sub-module files
 inst/
 faucet/
+mininet/
 local/
 
 # Byte-compiled / optimized / DLL files
