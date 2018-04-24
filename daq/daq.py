@@ -490,13 +490,14 @@ class DAQRunner():
             logging.info('Entering main event loop.')
             self.monitor.event_loop()
         except Exception as e:
+            logging.info('Event loop exception: %s' % e)
             logging.exception(e)
             self.exception = e
         except KeyboardInterrupt:
-            print 'Interrupted'
+            logging.info('Keyboard Interrupt')
 
         if not self.one_shot:
-            logging.debug('Dropping into interactive command line')
+            logging.info('Dropping into interactive command line')
             CLI(self.net)
 
     def trigger_target_set(self, port_set):
