@@ -519,7 +519,7 @@ class DAQRunner():
             target_set.terminate()
             self.target_set_complete(target_set)
         else:
-            self.target_set_finalize(self, port_set, [str(e)])
+            self.target_set_finalize(port_set, [str(e)])
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
