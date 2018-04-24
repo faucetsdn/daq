@@ -156,6 +156,7 @@ class ConnectedHost():
                 self.networking = None
             except Exception as e:
                 logging.error('Set %d terminating networking: %s' % (self.port_set, e))
+                logging.exception(e)
         if self.dummy:
             try:
                 self.dummy.terminate()
@@ -163,6 +164,7 @@ class ConnectedHost():
                 self.dummy = None
             except Exception as e:
                 logging.error('Set %d terminating dummy: %s' % (self.port_set, e))
+                logging.exception(e)
         if self.running_test:
             try:
                 self.running_test.terminate()
@@ -170,6 +172,7 @@ class ConnectedHost():
                 self.running_test = None
             except Exception as e:
                 logging.error('Set %d terminating test: %s' % (self.port_set, e))
+                logging.exception(e)
         if trigger:
             self.runner.target_set_complete(self)
 
