@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+
+cd $ROOT
+
+cmd/exrun -a | rotatelogs -e -c local/exrun-%I.log 3600
+
