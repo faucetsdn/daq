@@ -11,6 +11,9 @@ source $ROOT/local/system.conf
 sudo ip addr del $ext_ofip dev $ext_ctrl || true
 sudo ip addr add $ext_ofip dev $ext_ctrl || true
 
+sudo ip link set up dev $ext_ctrl
+sudo ip link set up dev $ext_intf
+
 ip addr show $ext_intf
 
 ping -c 1 $ext_addr
