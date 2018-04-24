@@ -162,6 +162,13 @@ class ConnectedHost():
                 self.dummy = None
             except Exception as e:
                 logging.error('Set %d terminating dummy: %s' % (self.port_set, e))
+        if self.running_test:
+            try:
+                self.running_test.terminate()
+                self.runner.removeHost(self.running_test)
+                self.running_test = None
+            except Exception as e:
+                logging.error('Set %d terminating test: %s' % (self.port_set, e))
         if trigger:
             self.runner.target_set_complete(self)
 
@@ -273,11 +280,15 @@ class ConnectedHost():
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
-        pipe = host.activate(log_name = None)
-        self.log_file = host.open_log()
-        self.state_transition(self.WAITING_STATE, self.TEST_STATE)
-        self.runner.monitor.monitor(pipe.stdout, copy_to=self.log_file,
+        try:
+            pipe = host.activate(log_name = None)
+            self.log_file = host.open_log()
+            self.state_transition(self.WAITING_STATE, self.TEST_STATE)
+            self.runner.monitor.monitor(pipe.stdout, copy_to=self.log_file,
                 hangup=lambda: self.docker_complete(), error=lambda e: self.monitor_error(e))
+        except:
+            host.terminate()
+            raise
         return host
 
     def docker_complete(self):
