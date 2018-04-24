@@ -6,4 +6,8 @@ cd $ROOT
 
 mkdir -p inst
 
-cmd/exrun -a daq_loglevel=debug mininet_loglevel=info 2>&1 | rotatelogs -e -c inst/exrun-%I.log 3600
+args=-a
+#args+=" daq_loglevel=debug"
+#args+=" mininet_loglevel=debug"
+
+cmd/exrun $args 2>&1 | rotatelogs -t -e -c inst/exrun-%I.log 3600
