@@ -177,7 +177,7 @@ class ConnectedHost():
         if self.state == self.STARTUP_STATE:
             self.activate()
         elif self.state == self.ACTIVE_STATE:
-            self.dhcp_wait()
+            self.dhcp_monitor()
 
     def pingTest(self, a, b, src_addr=None):
         b_name = b if isinstance(b, str) else b.name
@@ -190,7 +190,7 @@ class ConnectedHost():
         output = a.cmd('ping -c2', src_opt, b_ip, '> /dev/null 2>&1 || echo ', failure).strip()
         return output.strip() != failure
 
-    def dhcp_wait(self):
+    def dhcp_monitor(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
         logging.info('Set %d waiting for dhcp reply from %s...' %
                      (self.port_set, self.networking.name))
@@ -213,17 +213,23 @@ class ConnectedHost():
             else:
                 self.target_mac = match.group(2)
 
+    def dhcp_cleanup(self):
+        if self.dhcp_traffic:
+            self.runner.monitor.forget(self.dhcp_traffic.stream())
+            self.dhcp_traffic.close()
+            self.dhcp_traffic = None
+
     def dhcp_finalize(self):
-        self.runner.monitor.forget(self.dhcp_traffic.stream())
-        self.dhcp_traffic.close()
+        self.dhcp_cleanup()
         logging.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
         self.monitor_scan()
 
     def dhcp_hangup(self):
         logging.info('Set %d dhcp hangup' % self.port_set)
+        self.dhcp_cleanup()
         self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
-        self.dhcp_wait()
+        self.dhcp_monitor()
 
     def monitor_error(self, e):
         self.runner.target_set_error(self.port_set, e)
@@ -320,6 +326,7 @@ class DAQRunner():
     net = None
     device_intfs = None
     target_sets = None
+    active_ports = None
     result_sets = None
     pri = None
     sec = None
@@ -331,6 +338,7 @@ class DAQRunner():
         self.config = config
         self.target_sets = {}
         self.result_sets = {}
+        self.active_ports = {}
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
@@ -340,6 +348,7 @@ class DAQRunner():
         params['vol_maps'] = vol_maps
         host = self.net.addHost(name, cls, **params)
         try:
+            logging.debug('Created host %s with pid %s/%s' % (name, host.pid, host.shell.pid))
             host.switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
             if self.net.built:
                 host.configDefault()
@@ -481,13 +490,21 @@ class DAQRunner():
             logging.debug('Port state is dpid %s port %s active %s' % (dpid, port, active))
             if dpid == target_dpid:
                 if active:
+                    self.active_ports[port] = True
                     self.trigger_target_set(port)
                 else:
+                    self.active_ports[port] = False
                     self.cancel_target_set(port)
 
     def handle_system_idle(self):
         for target_set in self.target_sets.values():
             target_set.idle_handler()
+        if self.auto_start and not self.one_shot:
+            for port_set in self.active_ports.keys():
+                if self.active_ports[port_set] and not port_set in self.target_sets:
+                    self.trigger_target_set(port_set)
+        if not self.target_sets and self.one_shot:
+            self.monitor.forget(self.faucet_events.sock)
 
     def loop_hook(self):
         states = {}
@@ -529,6 +546,7 @@ class DAQRunner():
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
         try:
+            logging.debug('Trigger target set %d' % port_set)
             self.target_sets[port_set] = ConnectedHost(self, port_set)
         except Exception as e:
             self.target_set_error(port_set, e)
@@ -547,17 +565,14 @@ class DAQRunner():
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
         failures = target_set.failures
-        del self.target_sets[port_set]
+        if port_set in self.target_sets:
+            del self.target_sets[port_set]
         self.target_set_finalize(port_set, failures)
 
     def target_set_finalize(self, port_set, failures):
         logging.info('Set %d complete, failures: %s' % (port_set, failures))
         self.result_sets[port_set] = failures
         logging.info('Remaining sets: %s' % self.target_sets.keys())
-        if self.auto_start and not self.one_shot:
-            self.trigger_target_set(port_set)
-        if not self.target_sets and self.one_shot:
-            self.monitor.forget(self.faucet_events.sock)
 
     def cancel_target_set(self, port_set):
         if port_set in self.target_sets:
