@@ -70,8 +70,10 @@ fi
 
 function move_intf {
     sleep 2
-    intf=${daq_intf%!}
-    if [ -n "$daq_intf" -a "$daq_intf" == "$intf" ]; then
+    base=$1
+    intf=${base%!}
+    echo intf $base
+    if [ -n "$base" -a "$base" == "$intf" ]; then
         pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
         link=$(ip link show $intf 2>/dev/null )
         if [ "$pid" != 0 -a -n "$link" ]; then
@@ -90,12 +92,19 @@ sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.tcpdump || true
 hash -r
 
 if [ -z "$build" ]; then
+    if [ -n "$ext_dpid" ]; then
+	intfs="$ext_intf $ext_ctrl"
+    else
+	intfs=$(echo $daq_intf | tr , ' ')
+    fi
     (
-        move_result="$(move_intf)"
-        # WTF I need to do \r\n is beyond me. But there it is.
-        if [ -n "$move_result" ]; then
-           printf "${move_result}\r\n"
-        fi
+        for intf in $intfs; do
+            move_result="$(move_intf $intf)"
+            # WTF I need to do \r\n is beyond me. But there it is.
+            if [ -n "$move_result" ]; then
+		printf "${move_result}\r\n"
+            fi
+	done
     ) &
 fi
 
