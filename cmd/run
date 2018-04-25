@@ -105,6 +105,10 @@ if [ -z "$build" ]; then
 		printf "${move_result}\r\n"
             fi
 	done
+	if [ -n "$ext_dpid" ]; then
+	    echo Activating physical switch in container...
+	    sudo docker exec daq-runner daq/bin/physical_sec
+	fi
     ) &
 fi
 
