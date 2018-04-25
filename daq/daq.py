@@ -144,6 +144,7 @@ class ConnectedHost():
             assert self.pingTest(networking, dummy, src_addr=self.fake_target), 'ping failed'
         except Exception as e:
             logger.error('Set %d sanity error: %s' % (self.port_set, e))
+            logger.exception(e)
             self.state_transition(self.ERROR_STATE, self.ACTIVE_STATE)
             self.failures.append('sanity')
             self.terminate()
