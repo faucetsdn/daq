@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import re
+import shutil
 import signal
 import sys
 import time
@@ -71,7 +72,6 @@ class ConnectedHost():
     runner = None
     port_set = None
     pri_base = None
-    run_id = None
     target_ip = None
     target_mac = None
     networking = None
@@ -84,8 +84,8 @@ class ConnectedHost():
         self.runner = runner
         self.port_set = port_set
         self.pri_base = port_set * 10
-        self.run_id = '%06x' % int(time.time())
-        self.tmpdir = os.path.join('inst', 'run-' + self.run_id)
+        self.tmpdir = os.path.join('inst', 'run-port-%02d' % self.port_set)
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state_transition(self.INIT_STATE)
         self.failures = []
