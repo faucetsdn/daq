@@ -79,7 +79,7 @@ class ConnectedHost():
     networking = None
     dummy = None
     state = None
-    failures = None
+    results = None
     running_test = None
 
     def __init__(self, runner, port_set):
@@ -90,7 +90,7 @@ class ConnectedHost():
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state_transition(self.INIT_STATE)
-        self.failures = []
+        self.results = []
         # There is a race condition here with ovs assigning ports, so wait a bit.
         logger.info('Set %d created.' % port_set)
         time.sleep(2)
@@ -119,6 +119,7 @@ class ConnectedHost():
     def activate(self):
         self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
         logger.info('Set %d activating.' % self.port_set)
+        self.record_result('startup')
 
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
@@ -148,7 +149,7 @@ class ConnectedHost():
             logger.error('Set %d sanity error: %s' % (self.port_set, e))
             logger.exception(e)
             self.state_transition(self.ERROR_STATE, self.ACTIVE_STATE)
-            self.failures.append('sanity')
+            self.record_result('sanity', exception=e)
             self.terminate()
 
     def terminate(self, trigger=True):
@@ -230,6 +231,7 @@ class ConnectedHost():
         self.dhcp_cleanup()
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
+        self.record_result('dhcp')
         self.monitor_scan()
 
     def dhcp_hangup(self):
@@ -269,6 +271,7 @@ class ConnectedHost():
             self.run_test(self.remaining_tests.pop(0))
         else:
             self.state_transition(self.DONE_STATE, self.TEST_STATE)
+            self.record_result('finish')
             self.terminate()
 
     def run_test(self, test_name):
@@ -318,13 +321,26 @@ class ConnectedHost():
         logger.debug("Set %d docker complete, return=%s" % (self.port_set, error_code))
         if self.test_name == 'fail':
             error_code = 0 if error_code else 1
+        self.record_result(self.test_name, code=error_code)
         if error_code:
             logger.info("Set %d FAILED test %s with error %s" %
                          (self.port_set, self.test_name, error_code))
-            self.failures.append(self.test_name)
         else:
             logger.info("Set %d PASSED test %s" % (self.port_set, self.test_name))
         self.run_next_test()
+
+    def record_result(self, name, exception=None, code=None):
+        result = {
+            'name': name,
+            'mac': self.target_mac,
+            'port': self.port_set
+        }
+        if code:
+            result['code'] = code
+        if exception:
+            result['exception'] = exception
+        self.results.append(result)
+        self.runner.gcp.publish_message('daq_runner', result)
 
 
 class DAQRunner():
@@ -436,7 +452,7 @@ class DAQRunner():
             self.sec_name = link.intf2.name
 
     def initialize(self):
-        self.gcp.publish_message('daq_runner', '{ "text": "hello" }')
+        self.gcp.publish_message('daq_runner', '{ "name": "init" }')
 
         logger.debug("Creating miniet...")
         self.net = Mininet()
@@ -567,7 +583,7 @@ class DAQRunner():
         logger.exception(e)
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
-            target_set.failures.append('exception')
+            target_set.record_result('exception', exception=e)
             target_set.terminate()
             self.target_set_complete(target_set)
         else:
@@ -575,14 +591,14 @@ class DAQRunner():
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
-        failures = target_set.failures
+        results = target_set.results
         if port_set in self.target_sets:
             del self.target_sets[port_set]
-        self.target_set_finalize(port_set, failures)
+        self.target_set_finalize(port_set, results)
 
-    def target_set_finalize(self, port_set, failures):
-        logger.info('Set %d complete, failures: %s' % (port_set, failures))
-        self.result_sets[port_set] = failures
+    def target_set_finalize(self, port_set, results):
+        logger.info('Set %d complete, %d results' % (port_set, len(results)))
+        self.result_sets[port_set] = results
         logger.info('Remaining sets: %s' % self.target_sets.keys())
 
     def cancel_target_set(self, port_set):
@@ -592,17 +608,19 @@ class DAQRunner():
             target_set.terminate()
             logger.info('Set %d cancelled.' % port_set)
 
-    def combine_failures(self):
-        failures=[]
+    def combine_results(self):
+        results=[]
         for result_set in self.result_sets:
-            for failure in self.result_sets[result_set]:
-                failures.append('%s-%s' % (result_set, failure))
-        return failures
+            for result in self.result_sets[result_set]:
+                code = result['code'] if 'code' in result else 0
+                if code:
+                    results.append('%02d:%s:%s' % (result_set, result['name'], code))
+        return results
 
     def finalize(self):
-        failures = self.combine_failures()
+        failures = self.combine_results()
         if failures:
-            logger.info('Test failures: %s' % failures)
+            logger.error('Test failures: %s' % failures)
         if self.exception:
             logger.error('Exiting b/c of exception: %s' % self.exception)
         if failures or self.exception:

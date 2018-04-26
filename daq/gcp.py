@@ -37,6 +37,8 @@ class GcpManager():
         if not self.publisher:
             logger.debug('Ignoring message publish: not configured')
             return
+        if not 'encode' in message:
+            message = json.dumps(message)
         logger.debug('Sending to topic_path %s/%s: %s' % (self.project, topic, message))
         topic_path = self.publisher.topic_path(self.project, topic)
         future = self.publisher.publish(topic_path, message.encode('utf-8'), origin=self.client_name)
