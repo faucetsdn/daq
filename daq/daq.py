@@ -30,6 +30,8 @@ from clib.tcpdump_helper import TcpdumpHelper
 from faucet_event_client import FaucetEventClient
 from stream_monitor import StreamMonitor
 
+from gcp import GcpManager
+
 logger = logging.getLogger('daq')
 altlog = logging.getLogger('mininet')
 
@@ -338,12 +340,14 @@ class DAQRunner():
     sec_dpid = None
     sec_port = None
     sec_name = None
+    gcp = None
 
     def __init__(self, config):
         self.config = config
         self.target_sets = {}
         self.result_sets = {}
         self.active_ports = {}
+        self.gcp = GcpManager(self.config)
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
@@ -432,6 +436,8 @@ class DAQRunner():
             self.sec_name = link.intf2.name
 
     def initialize(self):
+        self.gcp.publish_message('daq_runner', '{ "text": "hello" }')
+
         logger.debug("Creating miniet...")
         self.net = Mininet()
 
