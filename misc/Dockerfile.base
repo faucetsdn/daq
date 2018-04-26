@@ -23,7 +23,8 @@ RUN $AG install \
     openvswitch-switch openvswitch-common 
 
 # Python extension packages
-RUN pip install --index-url=https://pypi.python.org/simple netifaces
+RUN pip install --index-url=https://pypi.python.org/simple \
+    netifaces google-cloud-pubsub==0.32.1
 
 # Install mininet
 RUN git clone git://github.com/mininet/mininet.git --single-branch --depth 1 \
