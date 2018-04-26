@@ -18,7 +18,8 @@ git clone https://github.com/mininet/mininet -b $MININETV
 )
 
 # Python extension packages
-sudo pip install --index-url=https://pypi.python.org/simple netifaces
+sudo pip install --index-url=https://pypi.python.org/simple \
+    netifaces google-cloud-pubsub==0.32.1
 
 echo Cloning $REPO branch $BRANCH into $TARGET...
 git clone $REPO $TARGET --single-branch --depth 1 -b $BRANCH

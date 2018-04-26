@@ -2,10 +2,10 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
-# Use daqf and not daq for runner since dockerhub requires >= 4 characters.
+LOCALDIR=$ROOT/local/
 IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
-LOCAL_CONFIG=local/$SYSTEM_CONF
+LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 DOCKER_STARTUP_TIMEOUT_MS=60000
 pull_docker=y
 docker_args=
@@ -13,7 +13,7 @@ build=
 VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 
 if [ -f $LOCAL_CONFIG ]; then
-    echo Loading container run configuration from $LOCAL_CONFIG
+    echo Loading container configuration from $LOCAL_CONFIG
     source $LOCAL_CONFIG
 fi
 
@@ -55,13 +55,12 @@ mkdir -p $INSTDIR
 
 sudo docker rm -f daq-runner > /dev/null 2>&1 || true
 
-rm -f $INSTDIR/$SYSTEM_CONF
-test -f $LOCAL_CONFIG && cp $LOCAL_CONFIG $INSTDIR/
 TARGET=$IMAGE:$VERSION
 
 docker_args+=" --env DAQ_CONTAINER=$IMAGE"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
+    docker_args+=" -v $LOCALDIR:/root/daq/local"
     if [ $pull_docker = y ]; then
         sudo docker pull $TARGET
     fi
