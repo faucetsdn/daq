@@ -452,7 +452,7 @@ class DAQRunner():
             self.sec_name = link.intf2.name
 
     def initialize(self):
-        self.gcp.publish_message('daq_runner', '{ "name": "init" }')
+        self.gcp.publish_message('daq_runner', { 'name': 'init' })
 
         logger.debug("Creating miniet...")
         self.net = Mininet()
