@@ -3,16 +3,12 @@ const admin = require('firebase-admin');
 
 admin.initializeApp(functions.config().firebase);
 var db = admin.firestore();
-var docRef = db.collection('users').doc('alovelace');
 
-exports.addMessage = functions.https.onRequest((req, res) => {
-  const original = req.query.text;
-
-  docRef.set({
-    original: original
-  }).then(() => {
-    console.log('User insert finished');
-    res.send('User insert finished');
-    return null
-  });
+exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) => {
+  const message = event.json;
+  const origin = event.attributes.origin;
+  const port = 'port-' + message.port;
+  const test = message.name;
+  db.collection('origin').doc(origin).collection('port').doc(port).collection('test').doc(test).set(message);
+  return null;
 });
