@@ -111,4 +111,4 @@ if [ -z "$build" ]; then
 fi
 
 echo Starting $TARGET "$@"...
-sudo docker run --privileged --name daq-runner $docker_args -ti $TARGET "$@"
+sudo docker run --privileged --name daq-runner $docker_args $TARGET "$@"
