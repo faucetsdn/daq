@@ -338,7 +338,7 @@ class ConnectedHost():
         if code:
             result['code'] = code
         if exception:
-            result['exception'] = exception
+            result['exception'] = str(exception)
         self.results.append(result)
         self.runner.gcp.publish_message('daq_runner', result)
 
