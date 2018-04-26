@@ -2,4 +2,5 @@
 
 echo Deploy: firebase deploy --only functions
 echo Pull: gcloud pubsub subscriptions pull --auto-ack daq_monitor
+echo DB: https://firebase.corp.google.com/project/bos-daq-testing/database/firestore/data~2F
 
