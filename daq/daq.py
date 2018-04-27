@@ -81,12 +81,14 @@ class ConnectedHost():
     state = None
     results = None
     running_test = None
+    run_id = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
         self.port_set = port_set
         self.pri_base = port_set * 10
         self.tmpdir = os.path.join('inst', 'run-port-%02d' % self.port_set)
+        self.run_id = '%06x' % int(time.time())
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state_transition(self.INIT_STATE)
@@ -231,7 +233,7 @@ class ConnectedHost():
         self.dhcp_cleanup()
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
-        self.record_result('dhcp')
+        self.record_result('dhcp', mac=self.target_mac, ip=self.target_ip)
         self.monitor_scan()
 
     def dhcp_hangup(self):
@@ -329,16 +331,15 @@ class ConnectedHost():
             logger.info("Set %d PASSED test %s" % (self.port_set, self.test_name))
         self.run_next_test()
 
-    def record_result(self, name, exception=None, code=None):
+    def record_result(self, name, **kwargs):
         result = {
             'name': name,
-            'mac': self.target_mac,
+            'runid': self.run_id,
+            'timetstamp': int(time.time()),
             'port': self.port_set
         }
-        if code:
-            result['code'] = code
-        if exception:
-            result['exception'] = str(exception)
+        for arg in kwargs:
+            result[arg] = str(kwargs[arg])
         self.results.append(result)
         self.runner.gcp.publish_message('daq_runner', result)
 
