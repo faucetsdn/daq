@@ -613,8 +613,8 @@ class DAQRunner():
         results=[]
         for result_set in self.result_sets:
             for result in self.result_sets[result_set]:
-                code = result['code'] if 'code' in result else 0
-                if code:
+                code = int(result['code']) if 'code' in result else 0
+                if code != 0:
                     results.append('%02d:%s:%s' % (result_set, result['name'], code))
         return results
 
