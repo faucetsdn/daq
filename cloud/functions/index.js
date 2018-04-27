@@ -8,8 +8,6 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   const message = event.json;
   const origin = event.attributes.origin;
   const port = 'port-' + message.port;
-  const test = message.name;
-  const timestamp = String(Date.now());
   const timestr = new Date().toTimeString();
   message.updated = timestr;
   port_doc = db
@@ -18,8 +16,8 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   port_doc
     .set({'updated': timestr});
   port_doc
-    .collection('test').doc(test)
-    .collection('time').doc(timestamp)
+    .collection('runid').doc(message.runid)
+    .collection('test').doc(message.name)
     .set(message);
   return null;
 });
