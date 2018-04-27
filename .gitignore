@@ -9,8 +9,8 @@ inst/
 faucet/
 mininet/
 local/
-cloud/functions/node_modules/
-cloud/functions/package-lock.json
+firebase/functions/node_modules/
+firebase/functions/package-lock.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
