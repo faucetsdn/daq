@@ -10,14 +10,15 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   const port = 'port-' + message.port;
   const timestr = new Date().toTimeString();
   message.updated = timestr;
-  port_doc = db
-    .collection('origin').doc(origin)
-    .collection('port').doc(port);
-  port_doc
-    .set({'updated': timestr});
-  port_doc
-    .collection('runid').doc(message.runid)
-    .collection('test').doc(message.name)
-    .set(message);
+
+  const origin_doc = db.collection('origin').doc(origin);
+  origin_doc.set({'updated': timestr});
+  const port_doc = origin_doc.collection('port').doc(port);
+  port_doc.set({'updated': timestr});
+  const run_doc = port_doc.collection('runid').doc(message.runid);
+  run_doc.set({'updated': timestr});
+  const test_doc = run_doc.collection('test').doc(message.name);
+  test_doc.set(message);
+  
   return null;
 });
