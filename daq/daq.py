@@ -335,7 +335,7 @@ class ConnectedHost():
         result = {
             'name': name,
             'runid': self.run_id,
-            'timetstamp': int(time.time()),
+            'timestamp': int(time.time()),
             'port': self.port_set
         }
         for arg in kwargs:

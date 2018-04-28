@@ -13,34 +13,28 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   db.settings(settings);
 
-  function handle_result(origin, port, runid, test, result) {
-    console.log(origin, port, runid, test, result.updated);
+  function watcher_add(ref, collection, handler) {
+    ref.collection(collection).onSnapshot((snapshot) => {
+      delay = 100;
+      snapshot.docChanges.forEach((change) => {
+        if (change.type == 'added') {
+          setTimeout(() => handler(ref.collection(collection).doc(change.doc.id), change.doc.id), delay);
+          delay = delay + 100;
+        }
+      });
+    }, (e) => console.error(e));
   }
 
-  db.collection("origin").get().then((origin_snapshot) => {
-    origin_snapshot.forEach((origin_doc) => {
-      console.log(`${origin_doc.id}`);
-      origin_db = db.collection("origin").doc(origin_doc.id);
-      origin_db.collection("port").get().then((port_snapshot) => {
-        port_snapshot.forEach((port_doc) => {
-          console.log(`${origin_doc.id} ${port_doc.id}`);
-          port_db = origin_db.collection("port").doc(port_doc.id);
-          port_db.collection("runid").get().then((runid_snapshot) => {
-            runid_snapshot.forEach((runid_doc) => {
-              console.log(`${origin_doc.id} ${port_doc.id} ${runid_doc.id}`);
-              runid_db = port_db.collection("runid").doc(runid_doc.id);
-              runid_db.collection("test").get().then((test_snapshot) => {
-                test_snapshot.forEach((test_doc) => {
-                  console.log(`${origin_doc.id} ${port_doc.id} ${runid_doc.id} ${test_doc.id}`);
-                  test_db = runid_db.collection("test").doc(test_doc.id);
-                  test_db.get().then((result) => {
-                    if (result.data()) {
-                      handle_result(origin_doc.id, port_doc.id, runid_doc.id, test_doc.id, result.data())
-                    }
-                  });
-                });
-              });
-            });
+  function handle_result(origin, port, runid, test, result) {
+    console.log(origin, port, runid, test, result);
+  }
+
+  watcher_add(db, "origin", (ref, origin_id) => {
+    watcher_add(ref, "port", (ref, port_id) => {
+      watcher_add(ref, "runid", (ref, runid_id) => {
+        watcher_add(ref, "test", (ref, test_id) => {
+          ref.get().then((result) => {
+            handle_result(origin_id, port_id, runid_id, test_id, result.data());
           });
         });
       });
