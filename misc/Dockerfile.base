@@ -18,7 +18,7 @@ WORKDIR /root
 RUN $AG install \
     software-properties-common apt-transport-https \
     sudo realpath git emacs-nox ethtool curl \
-    isc-dhcp-client network-manager netcat \
+    isc-dhcp-client network-manager netcat lsof \
     python python-setuptools python-dev build-essential python-pip \
     openvswitch-switch openvswitch-common 
 
