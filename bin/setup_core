@@ -2,7 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 REPO=https://github.com/grafnu/faucet.git
-BRANCH=testing
+BRANCH=daq-faucet-0.1
 TARGET=faucet
 MININETV="2.2.2"
 
