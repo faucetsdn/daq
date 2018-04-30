@@ -55,6 +55,7 @@ class ConnectedHost():
 
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 10
+    DHCP_TIMEOUT_SEC = 10
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
@@ -93,7 +94,7 @@ class ConnectedHost():
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state_transition(self.INIT_STATE)
-        self.results = []
+        self.results = {}
         # There is a race condition here with ovs assigning ports, so wait a bit.
         logger.info('Set %d created.' % port_set)
         time.sleep(2)
@@ -210,7 +211,7 @@ class ConnectedHost():
                      (self.port_set, self.networking.name))
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
-                                          timeout=None, blocking=False)
+                    timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
         self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line(),
                     hangup=lambda: self.dhcp_hangup(), error=lambda e: self.monitor_error(e))
 
@@ -242,6 +243,7 @@ class ConnectedHost():
 
     def dhcp_hangup(self):
         logger.info('Set %d dhcp hangup' % self.port_set)
+        self.record_result('dhcp', code=-1)
         self.dhcp_cleanup()
         self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
         self.dhcp_monitor()
@@ -251,7 +253,7 @@ class ConnectedHost():
 
     def monitor_scan(self):
         self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
-        self.record_result('monitor', time=self.MONITOR_SCAN_SEC)
+        self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
         logger.info('Set %d background scan for %d seconds...' %
                      (self.port_set, self.MONITOR_SCAN_SEC))
         intf_name = self.runner.sec_name
@@ -267,12 +269,14 @@ class ConnectedHost():
         assert self.tcp_monitor.wait() == 0, 'Failed executing monitor pcap'
         self.record_result('monitor')
         self.state_transition(self.TEST_STATE, self.MONITOR_STATE)
-        self.ping_tests()
+        self.base_tests()
         self.run_next_test()
 
-    def ping_tests(self):
+    def base_tests(self):
+        self.record_result('base', state='run')
         assert self.pingTest(self.networking, self.target_ip), 'simple ping failed'
         assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target), 'target ping failed'
+        self.record_result('base')
 
     def run_next_test(self):
         if len(self.remaining_tests):
@@ -345,7 +349,7 @@ class ConnectedHost():
         }
         for arg in kwargs:
             result[arg] = str(kwargs[arg])
-        self.results.append(result)
+        self.results[name] = result
         self.runner.gcp.publish_message('daq_runner', result)
 
 
@@ -602,7 +606,7 @@ class DAQRunner():
             target_set.terminate()
             self.target_set_complete(target_set)
         else:
-            self.target_set_finalize(port_set, [str(e)])
+            self.target_set_finalize(port_set, { 'exception': str(e) })
 
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
@@ -624,12 +628,16 @@ class DAQRunner():
             logger.info('Set %d cancelled.' % port_set)
 
     def combine_results(self):
-        results=[]
-        for result_set in self.result_sets:
-            for result in self.result_sets[result_set]:
+        results={}
+        for result_set_key in self.result_sets:
+            result_set = self.result_sets[result_set_key]
+            for result_key in result_set:
+                result = result_set[result_key]
                 code = int(result['code']) if 'code' in result else 0
+                if result['name'] == 'fail':
+                    code = 0 if code != 0 else 1
                 if code != 0:
-                    results.append('%02d:%s:%s' % (result_set, result['name'], code))
+                    results[result_set] = '%02d:%s:%s' % (result_set, result['name'], code)
         return results
 
     def finalize(self):
