@@ -85,14 +85,21 @@ function getQueryParam(field) {
   return string ? string[1] : null;
 }
 
-function statusUpdate(message) {
+function statusUpdate(message, e) {
   console.log(message);
+  if (e) {
+    console.error(e);
+    message = message + ' ' + String(e)
+  }
   document.getElementById('status').innerHTML = message;
 }
 
 function getResultStatus(result) {
   if (result.state) {
     return result.state;
+  }
+  if (result.exception) {
+    return 'fail';
   }
   return Number(result.code) ? 'fail' : 'pass';
 }
@@ -120,6 +127,20 @@ function watcher_add(ref, collection, limit, handler) {
   }, (e) => console.error(e));
 }
 
+function list_origins(db) {
+  const link_group = document.getElementById('origins');
+  db.collection('origin').get().then((snapshot) => {
+    snapshot.forEach((origin) => {
+      origin_id = origin.id;
+      const origin_link = document.createElement('a');
+      origin_link.setAttribute('href', '/?origin=' + origin_id);
+      origin_link.innerHTML = origin_id;
+      link_group.appendChild(origin_link);
+      link_group.appendChild(document.createElement('p'));
+    });
+  }).catch((e) => statusUpdate('origin list error', e));
+}
+
 function setup_triggers() {
   var db = firebase.firestore();
   const settings = {
@@ -130,6 +151,8 @@ function setup_triggers() {
   const origin_id = getQueryParam('origin');
 
   if (origin_id) {
+    ensureGridRow('header');
+    ensureGridColumn('group');
     trigger_origin(db, origin_id);
   } else {
     list_origins(db);
@@ -158,11 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
   try {
     let app = firebase.app();
     statusUpdate('System initialized.');
-    ensureGridRow('header');
-    ensureGridColumn('group');
     setup_triggers();
   } catch (e) {
-    statusUpdate('Loading error: ' + String(e));
-    console.error(e);
+    statusUpdate('Loading error', e)
   }
 });
