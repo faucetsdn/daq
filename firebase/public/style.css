@@ -1,0 +1,21 @@
+#testgrid table {
+    border-spacing: 0;
+}
+
+#testgrid table td {
+    border: 1px solid grey;
+    padding: 4px;
+    background: #DDF;
+}
+
+#testgrid table td.old {
+    opacity: 0.3;
+}
+
+#testgrid table td.pass {
+    background: #DFD;
+}
+
+#testgrid table td.fail {
+    background: #FDD;
+}

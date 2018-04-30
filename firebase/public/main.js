@@ -14,7 +14,7 @@ function ensureGridColumn(label) {
       columnElement.setAttribute('label', label);
     }
   }
-  setGridValue('header', label, label);
+  setGridValue('header', label, undefined, label);
 }
 
 function ensureGridRow(label) {
@@ -31,24 +31,66 @@ function ensureGridRow(label) {
       columnElement.setAttribute('label', column);
     }
   }
-  setGridValue(label, 'group', label);
+  setGridValue(label, 'group', undefined, label);
 }
 
-function setGridValue(row, column, value) {
+function setGridValue(row, column, timestamp, value) {
   const selector = `#testgrid table tr[label=${row}] td[label=${column}]`;
   const targetElement = document.querySelector(selector)
+
   if (targetElement) {
-    targetElement.innerHTML = value;
+    const previous = targetElement.getAttribute('time');
+    if (!previous || timestamp > previous) {
+      if (timestamp) {
+        targetElement.setAttribute('time', timestamp);
+      }
+      targetElement.innerHTML = value;
+    }
+    const rowTime = document
+          .querySelector(`#testgrid table tr[label=${row}]`).getAttribute('time');
+    updateTimeClass(targetElement, rowTime);
   } else {
     console.log('cant find', selector);
+  }
+  return targetElement;
+}
+
+function setRowState(row, timestamp) {
+  const rowElement = document.querySelector(`#testgrid table tr[label=${row}]`);
+  const previous = rowElement.getAttribute('time');
+  if (!previous || timestamp > previous) {
+    rowElement.setAttribute('time', timestamp);
+    const allEntries = rowElement.querySelectorAll('td');
+    allEntries.forEach((entry) => {
+      updateTimeClass(entry, timestamp);
+    });
+  }
+}
+
+function updateTimeClass(entry, target) {
+  const value = entry.getAttribute('time');
+  if (value) {
+    if (value >= target) {
+      entry.classList.remove('old');
+      entry.classList.add('current');
+    } else {
+      entry.classList.add('old');
+      entry.classList.remove('current');
+    }
   }
 }
 
 function handle_result(origin, port, runid, test, result) {
-  console.log(`updating ${port} ${test} = ${result.runid}`);
   ensureGridRow(port);
+  console.log(`updating ${port} ${test} = ${result.runid} with ${result.code}`);
   ensureGridColumn(test);
-  setGridValue(port, test, result.runid);
+  status = Number(result.code) ? 'fail' : 'pass';
+  setRowState(port, result.runid);
+  target = setGridValue(port, test, result.runid, status);
+  if (target) {
+    target.classList.remove(['fail', 'pass'])
+    target.classList.add(status);
+  }
 }
 
 function watcher_add(ref, collection, limit, handler) {
@@ -73,7 +115,7 @@ function setup_triggers() {
   db.settings(settings);
 
   const latest = (ref) => {
-    return ref.orderBy('timestamp', 'desc').limit(1);
+    return ref.orderBy('timestamp', 'desc').limit(3);
   }
   
   watcher_add(db, "origin", undefined, (ref, origin_id) => {
