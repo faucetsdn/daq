@@ -1,16 +1,20 @@
+
 columns = [ ]
 rows = [ ]
 
-timestamp = { }
+function appendTestCell(parent, label) {
+  const columnElement = document.createElement('td');
+  columnElement.setAttribute('label', label);
+  columnElement.classList.add('old');
+  parent.appendChild(columnElement);
+}
 
 function ensureGridColumn(label) {
   if (columns.indexOf(label) < 0) {
     columns.push(label);
     for (row of rows) {
       const testRow = document.querySelector(`#testgrid table tr[label=${row}]`)
-      const columnElement = document.createElement('td');
-      testRow.appendChild(columnElement);
-      columnElement.setAttribute('label', label);
+      appendTestCell(testRow, label);
     }
   }
   setGridValue('header', label, undefined, label);
@@ -24,9 +28,7 @@ function ensureGridRow(label) {
     testTable.appendChild(rowElement)
     rowElement.setAttribute('label', label)
     for (column of columns) {
-      const columnElement = document.createElement('td');
-      rowElement.appendChild(columnElement);
-      columnElement.setAttribute('label', column);
+      appendTestCell(rowElement, column);
     }
   }
   setGridValue(label, 'group', undefined, label);

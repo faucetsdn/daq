@@ -8,8 +8,9 @@
     background: #DDF;
 }
 
-#testgrid table td.old {
-    opacity: 0.3;
+/* Don't apply to first row or column. */
+#testgrid table tr ~ tr td ~ td.old {
+    opacity: 0.4;
 }
 
 #testgrid table td[status=pass] {
@@ -23,3 +24,4 @@
 #testgrid table td[status=run] {
     background: #FDF;
 }
+

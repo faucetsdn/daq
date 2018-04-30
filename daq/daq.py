@@ -54,8 +54,8 @@ class ConnectedHost():
     TEST_OFFSET = 2
 
     TEST_IP_FORMAT = '192.168.84.%d'
-    MONITOR_SCAN_SEC = 10
-    DHCP_TIMEOUT_SEC = 30
+    MONITOR_SCAN_SEC = 20
+    DHCP_TIMEOUT_SEC = 70
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
