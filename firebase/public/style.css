@@ -12,10 +12,14 @@
     opacity: 0.3;
 }
 
-#testgrid table td.pass {
+#testgrid table td[status=pass] {
     background: #DFD;
 }
 
-#testgrid table td.fail {
+#testgrid table td[status=fail] {
     background: #FDD;
+}
+
+#testgrid table td[status=run] {
+    background: #FDF;
 }

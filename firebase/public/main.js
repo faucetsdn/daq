@@ -5,7 +5,6 @@ timestamp = { }
 
 function ensureGridColumn(label) {
   if (columns.indexOf(label) < 0) {
-    console.log('adding table column', label);
     columns.push(label);
     for (row of rows) {
       const testRow = document.querySelector(`#testgrid table tr[label=${row}]`)
@@ -19,7 +18,6 @@ function ensureGridColumn(label) {
 
 function ensureGridRow(label) {
   if (rows.indexOf(label) < 0) {
-    console.log('adding table row', label);
     rows.push(label)
     const testTable = document.querySelector("#testgrid table")
     const rowElement = document.createElement('tr');
@@ -40,17 +38,18 @@ function setGridValue(row, column, timestamp, value) {
 
   if (targetElement) {
     const previous = targetElement.getAttribute('time');
-    if (!previous || timestamp > previous) {
+    if (!previous || timestamp >= previous) {
       if (timestamp) {
         targetElement.setAttribute('time', timestamp);
       }
       targetElement.innerHTML = value;
+      targetElement.setAttribute('status', value);
     }
     const rowTime = document
           .querySelector(`#testgrid table tr[label=${row}]`).getAttribute('time');
     updateTimeClass(targetElement, rowTime);
   } else {
-    console.log('cant find', selector);
+    console.error('cant find', selector);
   }
   return targetElement;
 }
@@ -80,17 +79,31 @@ function updateTimeClass(entry, target) {
   }
 }
 
+function getQueryParam(field) {
+  var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+  var string = reg.exec(window.location.href);
+  return string ? string[1] : null;
+}
+
+function statusUpdate(message) {
+  console.log(message);
+  document.getElementById('status').innerHTML = message;
+}
+
+function getResultStatus(result) {
+  if (result.state) {
+    return result.state;
+  }
+  return Number(result.code) ? 'fail' : 'pass';
+}
+
 function handle_result(origin, port, runid, test, result) {
   ensureGridRow(port);
-  console.log(`updating ${port} ${test} = ${result.runid} with ${result.code}`);
+  const status = getResultStatus(result);
+  statusUpdate(`updating ${port} ${test} = ${result.runid} with ${status}`)
   ensureGridColumn(test);
-  status = Number(result.code) ? 'fail' : 'pass';
   setRowState(port, result.runid);
-  target = setGridValue(port, test, result.runid, status);
-  if (target) {
-    target.classList.remove(['fail', 'pass'])
-    target.classList.add(status);
-  }
+  setGridValue(port, test, result.runid, status);
 }
 
 function watcher_add(ref, collection, limit, handler) {
@@ -114,17 +127,27 @@ function setup_triggers() {
   };
   db.settings(settings);
 
+  const origin_id = getQueryParam('origin');
+
+  if (origin_id) {
+    trigger_origin(db, origin_id);
+  } else {
+    list_origins(db);
+  }
+}
+
+function trigger_origin(db, origin_id) {
   const latest = (ref) => {
     return ref.orderBy('timestamp', 'desc').limit(3);
   }
-  
-  watcher_add(db, "origin", undefined, (ref, origin_id) => {
-    watcher_add(ref, "port", undefined, (ref, port_id) => {
-      watcher_add(ref, "runid", latest, (ref, runid_id) => {
-        watcher_add(ref, "test", undefined, (ref, test_id) => {
-          ref.get().then((result) => {
-            handle_result(origin_id, port_id, runid_id, test_id, result.data());
-          });
+
+  ref = db.collection('origin').doc(origin_id);
+  watcher_add(ref, "port", undefined, (ref, port_id) => {
+    watcher_add(ref, "runid", latest, (ref, runid_id) => {
+      watcher_add(ref, "test", undefined, (ref, test_id) => {
+        ref.onSnapshot((result) => {
+          // TODO: Handle results going away.
+          handle_result(origin_id, port_id, runid_id, test_id, result.data());
         });
       });
     });
@@ -134,12 +157,12 @@ function setup_triggers() {
 document.addEventListener('DOMContentLoaded', function() {
   try {
     let app = firebase.app();
-    document.getElementById('load').innerHTML = 'Firebase loaded';
+    statusUpdate('System initialized.');
     ensureGridRow('header');
     ensureGridColumn('group');
     setup_triggers();
   } catch (e) {
+    statusUpdate('Loading error: ' + String(e));
     console.error(e);
-    document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
   }
 });

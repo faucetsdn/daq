@@ -106,6 +106,7 @@ class ConnectedHost():
         try:
             self.networking = self.runner.addHost(networking_name, port=networking_port,
                 cls=cls, tmpdir=self.tmpdir)
+            self.record_result('startup')
         except:
             self.terminate(trigger=False)
             raise
@@ -122,12 +123,12 @@ class ConnectedHost():
     def activate(self):
         self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
         logger.info('Set %d activating.' % self.port_set)
-        self.record_result('startup')
 
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
 
         try:
+            self.record_result('sanity', state='run');
             networking = self.networking
             networking.activate()
 
@@ -148,11 +149,12 @@ class ConnectedHost():
             assert self.pingTest(dummy, networking), 'ping failed'
             assert self.pingTest(dummy, self.fake_target), 'ping failed'
             assert self.pingTest(networking, dummy, src_addr=self.fake_target), 'ping failed'
+            self.record_result('sanity');
         except Exception as e:
             logger.error('Set %d sanity error: %s' % (self.port_set, e))
             logger.exception(e)
             self.state_transition(self.ERROR_STATE, self.ACTIVE_STATE)
-            self.record_result('sanity', exception=e)
+            self.record_result('sanity', exception=e);
             self.terminate()
 
     def terminate(self, trigger=True):
@@ -203,6 +205,7 @@ class ConnectedHost():
 
     def dhcp_monitor(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
+        self.record_result('dhcp', state='run')
         logger.info('Set %d waiting for dhcp reply from %s...' %
                      (self.port_set, self.networking.name))
         filter="src port 67"
@@ -248,6 +251,7 @@ class ConnectedHost():
 
     def monitor_scan(self):
         self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
+        self.record_result('monitor', time=self.MONITOR_SCAN_SEC)
         logger.info('Set %d background scan for %d seconds...' %
                      (self.port_set, self.MONITOR_SCAN_SEC))
         intf_name = self.runner.sec_name
@@ -261,6 +265,7 @@ class ConnectedHost():
     def monitor_complete(self):
         logger.info('Set %d monitor scan complete' % self.port_set)
         assert self.tcp_monitor.wait() == 0, 'Failed executing monitor pcap'
+        self.record_result('monitor')
         self.state_transition(self.TEST_STATE, self.MONITOR_STATE)
         self.ping_tests()
         self.run_next_test()
@@ -284,6 +289,7 @@ class ConnectedHost():
 
     def docker_test(self, test_name):
         self.test_name = test_name
+        self.record_result(self.test_name, state='run')
         port = self.pri_base + self.TEST_OFFSET
         gateway = self.networking
         image = self.IMAGE_NAME_FORMAT % test_name
@@ -322,8 +328,6 @@ class ConnectedHost():
         except Exception as e:
             error_code = e
         logger.debug("Set %d docker complete, return=%s" % (self.port_set, error_code))
-        if self.test_name == 'fail':
-            error_code = 0 if error_code else 1
         self.record_result(self.test_name, code=error_code)
         if error_code:
             logger.info("Set %d FAILED test %s with error %s" %
