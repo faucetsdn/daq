@@ -18,10 +18,15 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   origin_doc.set({'updated': timestr});
   const port_doc = origin_doc.collection('port').doc(port);
   port_doc.set({'updated': timestr});
-  const run_doc = port_doc.collection('runid').doc(message.runid);
-  run_doc.set({'updated': timestr, 'timestamp': timestamp});
-  const test_doc = run_doc.collection('test').doc(message.name);
-  test_doc.set(message);
+  if (message.runid) {
+    const run_doc = port_doc.collection('runid').doc(message.runid);
+    run_doc.set({'updated': timestr, 'timestamp': timestamp});
+    const test_doc = run_doc.collection('test').doc(message.name);
+    test_doc.set(message);
+  } else {
+    port_doc.set({'updated': timestr, 'message': message})
+  }
+
 
   port_doc.collection('runid').where('timestamp', '<', expired)
     .get().then(function(snapshot) {

@@ -4,6 +4,7 @@
 
 import logging
 import os
+import psutil
 import random
 import re
 import shutil
@@ -452,8 +453,16 @@ class DAQRunner():
             logger.info('Added switch link %s <-> %s' % (link.intf1.name, link.intf2.name))
             self.sec_name = link.intf2.name
 
+    def send_heartbeat(self):
+        self.gcp.publish_message('daq_runner', {
+            'name': 'status',
+            'numports': len(self.active_ports),
+            'fdcount': len(psutil.Process().open_files()),
+            'timestamp': int(time.time()),
+        })
+
     def initialize(self):
-        self.gcp.publish_message('daq_runner', { 'name': 'init' })
+        self.send_heartbeat()
 
         logger.debug("Creating miniet...")
         self.net = Mininet()
@@ -525,6 +534,7 @@ class DAQRunner():
                     self.cancel_target_set(port)
 
     def handle_system_idle(self):
+        self.send_heartbeat()
         for target_set in self.target_sets.values():
             target_set.idle_handler()
         if self.auto_start and not self.one_shot:
