@@ -73,7 +73,7 @@ function setup_triggers() {
   db.settings(settings);
 
   const latest = (ref) => {
-    return ref.orderBy('timestamp', 'desc').limit(2);
+    return ref.orderBy('timestamp', 'desc').limit(1);
   }
   
   watcher_add(db, "origin", undefined, (ref, origin_id) => {

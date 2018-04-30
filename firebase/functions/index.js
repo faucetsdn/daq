@@ -14,29 +14,34 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   const timestamp = Date.now();
   const expired = timestamp - expiry_ms;
 
+  console.log('updating', timestamp, origin, port, message.runid, message.name);
+
   const origin_doc = db.collection('origin').doc(origin);
   origin_doc.set({'updated': timestr});
   const port_doc = origin_doc.collection('port').doc(port);
-  port_doc.set({'updated': timestr});
   if (message.runid) {
+    port_doc.set({'updated': timestr});
     const run_doc = port_doc.collection('runid').doc(message.runid);
     run_doc.set({'updated': timestr, 'timestamp': timestamp});
     const test_doc = run_doc.collection('test').doc(message.name);
     test_doc.set(message);
-  } else {
-    port_doc.set({'updated': timestr, 'message': message})
-  }
 
-
-  port_doc.collection('runid').where('timestamp', '<', expired)
-    .get().then(function(snapshot) {
-      snapshot.forEach(function(old_doc) {
-        const del_doc = port_doc.collection('runid').doc(old_doc.id);
-        del_doc.delete().catch((error) => {
-          console.error('Error deleting doc ', old_doc.id, error);
+    port_doc.collection('runid').where('timestamp', '<', expired)
+      .get().then(function(snapshot) {
+        snapshot.forEach(function(old_doc) {
+          const del_doc = port_doc.collection('runid').doc(old_doc.id);
+          del_doc.delete().catch((error) => {
+            console.error('Error deleting doc ', old_doc.id, error);
+          });
         });
       });
+  } else {
+    port_doc.set({
+      'updated': timestr,
+      'timestamp': timestamp,
+      'message': message
     });
+  }
   
   return null;
 });

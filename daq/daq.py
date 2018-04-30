@@ -580,7 +580,7 @@ class DAQRunner():
 
     def trigger_target_set(self, port_set):
         if port_set >= self.sec_port:
-            logger.debug('Ignoring phantom port set %d' % port_set)
+            logger.debug('Ignoring out-of-range port %d' % port_set)
             return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
         try:
