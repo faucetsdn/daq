@@ -628,7 +628,7 @@ class DAQRunner():
             logger.info('Set %d cancelled.' % port_set)
 
     def combine_results(self):
-        results={}
+        results=[]
         for result_set_key in self.result_sets:
             result_set = self.result_sets[result_set_key]
             for result_key in result_set:
@@ -637,7 +637,7 @@ class DAQRunner():
                 if result['name'] == 'fail':
                     code = 0 if code != 0 else 1
                 if code != 0:
-                    results[result_set] = '%02d:%s:%s' % (result_set, result['name'], code)
+                    results.append('%02d:%s:%s' % (result_set_key, result['name'], code))
         return results
 
     def finalize(self):
