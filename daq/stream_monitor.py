@@ -79,7 +79,7 @@ class StreamMonitor():
             self.error_handler(fd, e, on_error)
 
     def error_handler(self, fd, e, handler):
-        logging.debug('Error handling %d: %s' % (fd, e))
+        logging.error('Error handling %d: %s' % (fd, e))
         if handler:
             handler(e)
 

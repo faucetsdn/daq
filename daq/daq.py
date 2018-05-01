@@ -538,8 +538,11 @@ class DAQRunner():
             logger.debug('Port state is dpid %s port %s active %s' % (dpid, port, active))
             if dpid == target_dpid:
                 if active:
-                    self.active_ports[port] = True
-                    self.trigger_target_set(port)
+                    if port >= self.sec_port:
+                        logger.debug('Ignoring out-of-range port %d' % port)
+                    else:
+                        self.active_ports[port] = True
+                        self.trigger_target_set(port)
                 else:
                     self.active_ports[port] = False
                     self.cancel_target_set(port)
@@ -551,8 +554,6 @@ class DAQRunner():
             for port_set in self.active_ports.keys():
                 if self.active_ports[port_set] and not port_set in self.target_sets:
                     self.trigger_target_set(port_set)
-        if not self.target_sets and self.one_shot:
-            self.monitor.forget(self.faucet_events.sock)
 
     def loop_hook(self):
         states = {}
@@ -589,9 +590,6 @@ class DAQRunner():
             CLI(self.net)
 
     def trigger_target_set(self, port_set):
-        if port_set >= self.sec_port:
-            logger.debug('Ignoring out-of-range port %d' % port_set)
-            return
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
         try:
             logger.debug('Trigger target set %d' % port_set)
@@ -629,6 +627,8 @@ class DAQRunner():
             del self.target_sets[port_set]
             target_set.terminate()
             logger.info('Set %d cancelled.' % port_set)
+            if not self.target_sets and self.one_shot:
+                self.monitor.forget(self.faucet_events.sock)
 
     def combine_results(self):
         results=[]
