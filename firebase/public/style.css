@@ -10,7 +10,7 @@
 
 /* Don't apply to first row or column. */
 #testgrid table tr ~ tr td ~ td.old {
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 #testgrid table td[status=pass] {
@@ -23,4 +23,8 @@
 
 #testgrid table td[status=run] {
     background: #FDF;
+}
+
+#testgrid table tr ~ tr td[label=info] {
+    background: #FFF;
 }

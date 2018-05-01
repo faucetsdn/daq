@@ -240,7 +240,7 @@ class ConnectedHost():
         self.dhcp_cleanup()
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
-        self.record_result('dhcp', mac=self.target_mac, ip=self.target_ip)
+        self.record_result('dhcp', info=self.target_mac, ip=self.target_ip)
         self.monitor_scan()
 
     def dhcp_hangup(self):

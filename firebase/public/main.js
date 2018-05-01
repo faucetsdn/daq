@@ -119,6 +119,10 @@ function handleResult(origin, port, runid, test, result) {
   statusUpdate(`updating ${port} ${test} = ${result.runid} with ${status}`)
   setRowState(port, result.runid);
   setGridValue(port, test, result.runid, status);
+  if (result.info) {
+    ensureGridColumn('info')
+    setGridValue(port, 'info', result.runid, result.info);
+  }
 }
 
 function watcherAdd(ref, collection, limit, handler) {

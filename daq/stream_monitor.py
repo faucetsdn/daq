@@ -68,9 +68,9 @@ class StreamMonitor():
             self.error_handler(fd, e, on_error)
 
     def trigger_hangup(self, fd, event):
-        logging.debug('Hangup callback %d because %d' % (fd, event))
         callback = self.callbacks[fd][1]
         on_error = self.callbacks[fd][2]
+        logging.debug('Hangup callback %d because %d (=> %s)' % (fd, event, callback))
         try:
             self.forget(fd)
             if callback:
@@ -79,7 +79,7 @@ class StreamMonitor():
             self.error_handler(fd, e, on_error)
 
     def error_handler(self, fd, e, handler):
-        logging.error('Error handling %d: %s' % (fd, e))
+        logging.error('Error handling %d: %s (=> %s)' % (fd, e, handler))
         if handler:
             handler(e)
 
