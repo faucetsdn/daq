@@ -1,6 +1,7 @@
 
-columns = [ ]
-rows = [ ]
+columns = [ ];
+rows = [ ];
+last_result_time = Date.now();
 
 function appendTestCell(parent, label) {
   const columnElement = document.createElement('td');
@@ -113,10 +114,11 @@ function getResultStatus(result) {
 }
 
 function handleResult(origin, port, runid, test, result) {
+  last_result_time = Date.now();
   ensureGridRow(port);
   ensureGridColumn(test);
   const status = getResultStatus(result);
-  statusUpdate(`updating ${port} ${test} = ${result.runid} with ${status}`)
+  statusUpdate(`Updating ${port} ${test} run ${result.runid} with '${status}'.`)
   setRowState(port, result.runid);
   setGridValue(port, test, result.runid, status);
   if (result.info) {
@@ -195,11 +197,17 @@ function triggerOrigin(db, origin_id) {
   });
 }
 
+function interval_updater() {
+  time_delta_sec = Math.floor((Date.now() - last_result_time)/1000)
+  document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   try {
     let app = firebase.app();
     statusUpdate('System initialized.');
     setupTriggers();
+    setInterval(interval_updater, 1000);
   } catch (e) {
     statusUpdate('Loading error', e)
   }
