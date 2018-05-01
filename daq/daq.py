@@ -612,8 +612,7 @@ class DAQRunner():
     def target_set_complete(self, target_set):
         port_set = target_set.port_set
         results = target_set.results
-        if port_set in self.target_sets:
-            del self.target_sets[port_set]
+        self.cancel_target_set(port_set)
         self.target_set_finalize(port_set, results)
 
     def target_set_finalize(self, port_set, results):
