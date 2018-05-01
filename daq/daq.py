@@ -290,8 +290,7 @@ class ConnectedHost():
 
     def run_test(self, test_name):
         logger.info('Set %d running test %s' % (self.port_set, test_name))
-        host = self.docker_test(test_name)
-        self.running_test = host
+        self.running_test = self.docker_test(test_name)
 
     def docker_test(self, test_name):
         self.test_name = test_name
@@ -328,6 +327,7 @@ class ConnectedHost():
         host = self.running_test
         self.running_test = None
         try:
+            host.terminate()
             error_code = host.wait()
             self.runner.removeHost(host)
             self.log_file.close()
