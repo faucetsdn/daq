@@ -73,6 +73,10 @@ class ConnectedHost():
     WAITING_STATE = 6
     DONE_STATE = 7
 
+    TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
+    TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'monitor',
+            'base' ] + TEST_LIST + [ 'finish', 'exception' ]
+
     runner = None
     port_set = None
     pri_base = None
@@ -83,6 +87,7 @@ class ConnectedHost():
     state = None
     results = None
     running_test = None
+    remaining_tests = None
     run_id = None
 
     def __init__(self, runner, port_set):
@@ -99,7 +104,7 @@ class ConnectedHost():
         logger.info('Set %d created.' % port_set)
         time.sleep(2)
         self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
-        self.remaining_tests = self.make_tests()
+        self.remaining_tests = list(self.TEST_LIST)
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         logger.debug("Adding networking host on port %d" % networking_port)
@@ -111,9 +116,6 @@ class ConnectedHost():
         except:
             self.terminate(trigger=False)
             raise
-
-    def make_tests(self):
-        return [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
 
     def state_transition(self, to, expected=None):
         assert expected == None or self.state == expected, ('state was %d expected %d' %
@@ -464,7 +466,8 @@ class DAQRunner():
     def send_heartbeat(self):
         self.gcp.publish_message('daq_runner', {
             'name': 'status',
-            'numports': len(self.active_ports),
+            'tests': ConnectedHost.TEST_ORDER,
+            'ports': self.active_ports.keys(),
             'fdcount': len(psutil.Process().open_files()),
             'timestamp': int(time.time()),
         })
@@ -542,7 +545,6 @@ class DAQRunner():
                     self.cancel_target_set(port)
 
     def handle_system_idle(self):
-        self.send_heartbeat()
         for target_set in self.target_sets.values():
             target_set.idle_handler()
         if self.auto_start and not self.one_shot:
@@ -594,6 +596,7 @@ class DAQRunner():
         try:
             logger.debug('Trigger target set %d' % port_set)
             self.target_sets[port_set] = ConnectedHost(self, port_set)
+            self.send_heartbeat()
         except Exception as e:
             self.target_set_error(port_set, e)
 

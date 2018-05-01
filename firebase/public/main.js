@@ -20,6 +20,12 @@ function ensureGridColumn(label) {
   setGridValue('header', label, undefined, label);
 }
 
+function ensureColumns(columns) {
+  for (column of columns) {
+    ensureGridColumn(column);
+  }
+}
+
 function ensureGridRow(label) {
   if (rows.indexOf(label) < 0) {
     rows.push(label)
@@ -106,7 +112,7 @@ function getResultStatus(result) {
   return Number(result.code) ? 'fail' : 'pass';
 }
 
-function handle_result(origin, port, runid, test, result) {
+function handleResult(origin, port, runid, test, result) {
   ensureGridRow(port);
   ensureGridColumn(test);
   const status = getResultStatus(result);
@@ -115,7 +121,7 @@ function handle_result(origin, port, runid, test, result) {
   setGridValue(port, test, result.runid, status);
 }
 
-function watcher_add(ref, collection, limit, handler) {
+function watcherAdd(ref, collection, limit, handler) {
   const base = ref.collection(collection)
   const target = limit ? limit(base) : base;
   target.onSnapshot((snapshot) => {
@@ -129,7 +135,7 @@ function watcher_add(ref, collection, limit, handler) {
   }, (e) => console.error(e));
 }
 
-function list_origins(db) {
+function listOrigins(db) {
   const link_group = document.getElementById('origins');
   db.collection('origin').get().then((snapshot) => {
     snapshot.forEach((origin) => {
@@ -143,7 +149,7 @@ function list_origins(db) {
   }).catch((e) => statusUpdate('origin list error', e));
 }
 
-function setup_triggers() {
+function setupTriggers() {
   var db = firebase.firestore();
   const settings = {
     timestampsInSnapshots: true
@@ -155,27 +161,33 @@ function setup_triggers() {
   if (origin_id) {
     ensureGridRow('header');
     ensureGridColumn('group');
-    trigger_origin(db, origin_id);
+    triggerOrigin(db, origin_id);
   } else {
-    list_origins(db);
+    listOrigins(db);
   }
 }
 
-function trigger_origin(db, origin_id) {
+function triggerOrigin(db, origin_id) {
   const latest = (ref) => {
     return ref.orderBy('timestamp', 'desc').limit(3);
   }
 
   ref = db.collection('origin').doc(origin_id);
-  watcher_add(ref, "port", undefined, (ref, port_id) => {
-    watcher_add(ref, "runid", latest, (ref, runid_id) => {
-      watcher_add(ref, "test", undefined, (ref, test_id) => {
-        ref.onSnapshot((result) => {
-          // TODO: Handle results going away.
-          handle_result(origin_id, port_id, runid_id, test_id, result.data());
+  watcherAdd(ref, "port", undefined, (ref, port_id) => {
+    if (port_id == 'port-undefined') {
+      ref.onSnapshot((result) => {
+        ensureColumns(result.data().message.tests)
+      });
+    } else {
+      watcherAdd(ref, "runid", latest, (ref, runid_id) => {
+        watcherAdd(ref, "test", undefined, (ref, test_id) => {
+          ref.onSnapshot((result) => {
+            // TODO: Handle results going away.
+            handleResult(origin_id, port_id, runid_id, test_id, result.data());
+          });
         });
       });
-    });
+    }
   });
 }
 
@@ -183,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
   try {
     let app = firebase.app();
     statusUpdate('System initialized.');
-    setup_triggers();
+    setupTriggers();
   } catch (e) {
     statusUpdate('Loading error', e)
   }
