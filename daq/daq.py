@@ -75,7 +75,7 @@ class ConnectedHost():
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
     TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'monitor',
-            'base' ] + TEST_LIST + [ 'finish', 'exception' ]
+            'base' ] + TEST_LIST + [ 'finish', 'exception', 'info' ]
 
     runner = None
     port_set = None
