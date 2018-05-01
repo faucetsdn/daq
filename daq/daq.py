@@ -129,7 +129,7 @@ class ConnectedHost():
             os.makedirs(self.scan_base)
 
         try:
-            self.record_result('sanity', state='run');
+            self.record_result('sanity', state='run')
             networking = self.networking
             networking.activate()
 

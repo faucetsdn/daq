@@ -34,21 +34,21 @@ function ensureGridRow(label) {
   setGridValue(label, 'group', undefined, label);
 }
 
-function setGridValue(row, column, timestamp, value) {
+function setGridValue(row, column, runid, value) {
   const selector = `#testgrid table tr[label=${row}] td[label=${column}]`;
   const targetElement = document.querySelector(selector)
 
   if (targetElement) {
-    const previous = targetElement.getAttribute('time');
-    if (!previous || timestamp >= previous) {
-      if (timestamp) {
-        targetElement.setAttribute('time', timestamp);
+    const previous = targetElement.getAttribute('runid');
+    if (!previous || runid >= previous) {
+      if (runid) {
+        targetElement.setAttribute('runid', runid);
       }
       targetElement.innerHTML = value;
       targetElement.setAttribute('status', value);
     }
     const rowTime = document
-          .querySelector(`#testgrid table tr[label=${row}]`).getAttribute('time');
+          .querySelector(`#testgrid table tr[label=${row}]`).getAttribute('runid');
     updateTimeClass(targetElement, rowTime);
   } else {
     console.error('cant find', selector);
@@ -56,20 +56,20 @@ function setGridValue(row, column, timestamp, value) {
   return targetElement;
 }
 
-function setRowState(row, timestamp) {
+function setRowState(row, runid) {
   const rowElement = document.querySelector(`#testgrid table tr[label=${row}]`);
-  const previous = rowElement.getAttribute('time');
-  if (!previous || timestamp > previous) {
-    rowElement.setAttribute('time', timestamp);
+  const previous = rowElement.getAttribute('runid');
+  if (!previous || runid > previous) {
+    rowElement.setAttribute('runid', runid);
     const allEntries = rowElement.querySelectorAll('td');
     allEntries.forEach((entry) => {
-      updateTimeClass(entry, timestamp);
+      updateTimeClass(entry, runid);
     });
   }
 }
 
 function updateTimeClass(entry, target) {
-  const value = entry.getAttribute('time');
+  const value = entry.getAttribute('runid');
   if (value) {
     if (value >= target) {
       entry.classList.remove('old');
@@ -108,9 +108,9 @@ function getResultStatus(result) {
 
 function handle_result(origin, port, runid, test, result) {
   ensureGridRow(port);
+  ensureGridColumn(test);
   const status = getResultStatus(result);
   statusUpdate(`updating ${port} ${test} = ${result.runid} with ${status}`)
-  ensureGridColumn(test);
   setRowState(port, result.runid);
   setGridValue(port, test, result.runid, status);
 }
