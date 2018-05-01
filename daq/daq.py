@@ -161,7 +161,7 @@ class ConnectedHost():
             self.terminate()
 
     def terminate(self, trigger=True):
-        logger.info('Set %d terminate' % self.port_set)
+        logger.info('Set %d terminate, trigger %s' % (self.port_set, trigger))
         if self.networking:
             try:
                 self.networking.terminate()
@@ -605,7 +605,7 @@ class DAQRunner():
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             target_set.record_result('exception', exception=e)
-            target_set.terminate()
+            target_set.terminate(trigger=False)
             self.target_set_complete(target_set)
         else:
             self.target_set_finalize(port_set, { 'exception': str(e) })
@@ -625,7 +625,7 @@ class DAQRunner():
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
-            target_set.terminate()
+            target_set.terminate(trigger=False)
             logger.info('Set %d cancelled.' % port_set)
             if not self.target_sets and self.one_shot:
                 self.monitor.forget(self.faucet_events.sock)
