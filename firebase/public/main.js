@@ -1,7 +1,7 @@
 
 columns = [ ];
 rows = [ ];
-last_result_time = Date.now();
+last_result_time_sec = 0;
 
 function appendTestCell(parent, label) {
   const columnElement = document.createElement('td');
@@ -114,7 +114,9 @@ function getResultStatus(result) {
 }
 
 function handleResult(origin, port, runid, test, result) {
-  last_result_time = Date.now();
+  if (result.timestamp > last_result_time_sec) {
+    last_result_time_sec = result.timestamp
+  }
   ensureGridRow(port);
   ensureGridColumn(test);
   const status = getResultStatus(result);
@@ -198,8 +200,10 @@ function triggerOrigin(db, origin_id) {
 }
 
 function interval_updater() {
-  time_delta_sec = Math.floor((Date.now() - last_result_time)/1000)
-  document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+  if (last_result_time_sec) {
+    time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
+    document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
