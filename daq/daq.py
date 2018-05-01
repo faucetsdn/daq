@@ -230,9 +230,10 @@ class ConnectedHost():
             else:
                 self.target_mac = match.group(2)
 
-    def dhcp_cleanup(self):
+    def dhcp_cleanup(self, forget=True):
         if self.dhcp_traffic:
-            self.runner.monitor.forget(self.dhcp_traffic.stream())
+            if forget:
+                self.runner.monitor.forget(self.dhcp_traffic.stream())
             self.dhcp_traffic.close()
             self.dhcp_traffic = None
 
@@ -246,7 +247,7 @@ class ConnectedHost():
     def dhcp_hangup(self):
         logger.info('Set %d dhcp hangup' % self.port_set)
         self.record_result('dhcp', code=-1)
-        self.dhcp_cleanup()
+        self.dhcp_cleanup(forget=False)
         self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
         self.dhcp_monitor()
 
