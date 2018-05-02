@@ -2,7 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 REPO=https://github.com/grafnu/faucet.git
-COMMIT=1b657833194b2eef2b0a9e39b56158a97d950fdf
+COMMIT=$(cat $ROOT/misc/FAUCET_VERSION)
 TARGET=faucet
 MININETV="2.2.2"
 
