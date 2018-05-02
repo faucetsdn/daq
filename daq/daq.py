@@ -55,7 +55,7 @@ class ConnectedHost():
 
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 20
-    DHCP_TIMEOUT_SEC = 70
+    DHCP_TIMEOUT_SEC = 50
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
@@ -248,8 +248,8 @@ class ConnectedHost():
         logger.info('Set %d dhcp hangup' % self.port_set)
         self.record_result('dhcp', code=-1)
         self.dhcp_cleanup(forget=False)
-        self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
-        self.dhcp_monitor()
+        self.state_transition(self.ERROR_STATE, self.DHCP_STATE)
+        self.terminate()
 
     def monitor_error(self, e):
         self.runner.target_set_error(self.port_set, e)
