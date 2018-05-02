@@ -545,7 +545,8 @@ class DAQRunner():
                         self.active_ports[port] = True
                         self.trigger_target_set(port)
                 else:
-                    self.active_ports[port] = False
+                    if port in self.active_ports:
+                        del self.active_ports[port]
                     self.cancel_target_set(port)
 
     def handle_system_idle(self):
