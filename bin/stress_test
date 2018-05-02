@@ -17,8 +17,15 @@ if [ "$1" == exrun ]; then
     shift
 fi
 
+running=$(docker inspect --format "{{.State.Running}}" daq-runner || true)
+if [ "$running" == true ]; then
+    echo Container daq-runner already active.
+    false
+fi
 
 sudo rm -rf inst
 mkdir -p inst
 
-cmd/$cmd "$@" $args 2>&1 | rotatelogs -t -e -c inst/exrun-%I.log 3600
+echo Logs in $ROOT/inst/exrun-\*.log
+
+nohup cmd/$cmd "$@" $args 2>&1 | rotatelogs -t -c inst/exrun-%I.log 3600 &
