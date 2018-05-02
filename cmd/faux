@@ -12,6 +12,14 @@ if [ $# -gt 0 -a $(($1)) -gt 0 ]; then
     shift
 fi
 
+
+if ifconfig "$1" > /dev/null 2>&1 ; then
+    realintf=$1
+    postfix=-$realintf
+    echo Running using interface $realintf
+    shift
+fi
+
 FAUX_ARGS="$*"
 
 if [ -f $local_config ]; then
@@ -41,12 +49,20 @@ docker_args="\
 cid=$(docker run -d --privileged --name $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
-intf=faux$postfix
-echo Removing old interface $intf
-sudo ip link del $intf 2>/dev/null || true
+if [ -n "$realintf" ]; then
+    echo Moving $realintf into $pid...
+    sudo ip link set $realintf netns $pid
+    docker exec $CONTAINER ip link set $realintf name faux-eth0
+    docker exec $CONTAINER ip link set faux-eth0 up
+    docker exec $CONTAINER ifconfig faux-eth0
+else
+    intf=faux$postfix
+    echo Removing old interface $intf
+    sudo ip link del $intf 2>/dev/null || true
 
-echo Adding new interface...
-sudo ip link add $intf type veth peer name faux-eth0 netns $pid
-sudo ip link set $intf up
+    echo Adding new interface to $pid...
+    sudo ip link add $intf type veth peer name faux-eth0 netns $pid
+    sudo ip link set $intf up
+fi
 
 echo Done with faux device launch.

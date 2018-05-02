@@ -14,6 +14,10 @@ dps:
             native_vlan: 30
           40-49:
             native_vlan: 40
+          50-59:
+            native_vlan: 50
+          60-69:
+            native_vlan: 60
         interfaces:
           1:
             stack:
@@ -32,6 +36,10 @@ dps:
             native_vlan: 30
           4:
             native_vlan: 40
+          5:
+            native_vlan: 50
+          6:
+            native_vlan: 60
           @SEC_PORT@:
             stack:
               dp: pri
@@ -41,3 +49,5 @@ vlans:
     20:
     30:
     40:
+    50:
+    60:
