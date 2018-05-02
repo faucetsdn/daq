@@ -28,3 +28,7 @@
 #testgrid table tr ~ tr td[label=info] {
     background: #FFF;
 }
+
+#testgrid table tr ~ tr td[label=timer] {
+    background: #EEE;
+}

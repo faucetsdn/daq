@@ -2,6 +2,7 @@
 columns = [ ];
 rows = [ ];
 last_result_time_sec = 0;
+port_timestamps = {};
 
 function appendTestCell(parent, label) {
   const columnElement = document.createElement('td');
@@ -25,6 +26,8 @@ function ensureColumns(columns) {
   for (column of columns) {
     ensureGridColumn(column);
   }
+  ensureGridColumn('info');
+  ensureGridColumn('timer');
 }
 
 function ensureGridRow(label) {
@@ -77,14 +80,12 @@ function setRowState(row, runid) {
 
 function updateTimeClass(entry, target) {
   const value = entry.getAttribute('runid');
-  if (value) {
-    if (value >= target) {
-      entry.classList.remove('old');
-      entry.classList.add('current');
-    } else {
-      entry.classList.add('old');
-      entry.classList.remove('current');
-    }
+  if (!value || value >= target) {
+    entry.classList.remove('old');
+    entry.classList.add('current');
+  } else {
+    entry.classList.add('old');
+    entry.classList.remove('current');
   }
 }
 
@@ -115,7 +116,10 @@ function getResultStatus(result) {
 
 function handleResult(origin, port, runid, test, result) {
   if (result.timestamp > last_result_time_sec) {
-    last_result_time_sec = result.timestamp
+    last_result_time_sec = result.timestamp;
+  }
+  if (result.timestamp > (port_timestamps[port] || 0)) {
+    port_timestamps[port] = result.timestamp;
   }
   ensureGridRow(port);
   ensureGridColumn(test);
@@ -124,7 +128,6 @@ function handleResult(origin, port, runid, test, result) {
   setRowState(port, result.runid);
   setGridValue(port, test, result.runid, status);
   if (result.info) {
-    ensureGridColumn('info')
     setGridValue(port, 'info', result.runid, result.info);
   }
 }
@@ -203,6 +206,11 @@ function interval_updater() {
   if (last_result_time_sec) {
     time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
     document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+  }
+  for (port in port_timestamps) {
+    timestamp = port_timestamps[port]
+    time_delta_sec = Math.floor(Date.now()/1000.0 - timestamp)
+    setGridValue(port, 'timer', undefined, `${time_delta_sec} sec`);
   }
 }
 
