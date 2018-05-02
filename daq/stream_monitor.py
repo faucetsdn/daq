@@ -3,7 +3,7 @@ import errno
 import fcntl
 import os
 
-from select import poll, POLLIN, POLLHUP, POLLNVAL
+from select import poll, POLLIN, POLLHUP, POLLNVAL, POLLERR
 
 class StreamMonitor():
     """Monitor dict of stream objects
@@ -101,10 +101,10 @@ class StreamMonitor():
             fds = self.poller.poll(self.timeout_ms)
             if fds:
                 for fd, event in fds:
-                    if event & POLLIN:
-                        self.trigger_callback(fd)
-                    elif event & POLLHUP or event & POLLNVAL:
+                    if event & (POLLHUP | POLLNVAL | POLLERR):
                         self.trigger_hangup(fd, event)
+                    elif event & POLLIN:
+                        self.trigger_callback(fd)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
             else:
