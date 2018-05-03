@@ -40,7 +40,10 @@ class StreamMonitor():
         self.poller.register(fd, POLLHUP | POLLIN)
 
     def copy_data(self, data_source, data_sink):
-        data_sink.write(data_source.read(1024))
+        logging.debug('Copying data from fd %d to fd %d' % (self.get_fd(data_source), self.get_fd(data_sink)))
+        data = data_source.read(1024)
+        data_sink.write(data)
+        logging.debug('Copied %d from fd %d to fd %d' % (len(data), self.get_fd(data_source), self.get_fd(data_sink)))
 
     def make_nonblock(self, data_source):
         fd = self.get_fd(data_source)
