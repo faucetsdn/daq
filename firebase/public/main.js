@@ -2,7 +2,8 @@
 columns = [ ];
 rows = [ ];
 last_result_time_sec = 0;
-port_timestamps = {};
+row_timestamps = {};
+port_row_count = 25;
 
 function appendTestCell(parent, label) {
   const columnElement = document.createElement('td');
@@ -11,15 +12,15 @@ function appendTestCell(parent, label) {
   parent.appendChild(columnElement);
 }
 
-function ensureGridColumn(label) {
+function ensureGridColumn(label, content) {
   if (columns.indexOf(label) < 0) {
     columns.push(label);
     for (row of rows) {
-      const testRow = document.querySelector(`#testgrid table tr[label=${row}]`)
+      const testRow = document.querySelector(`#testgrid table tr[label="${row}"]`)
       appendTestCell(testRow, label);
     }
   }
-  setGridValue('header', label, undefined, label);
+  setGridValue('header', label, undefined, content || label);
 }
 
 function ensureColumns(columns) {
@@ -30,44 +31,73 @@ function ensureColumns(columns) {
   ensureGridColumn('timer');
 }
 
-function ensureGridRow(label) {
+function ensureGridRow(label, content, max_rows) {
+  let added = false;
   if (rows.indexOf(label) < 0) {
     rows.push(label)
     const testTable = document.querySelector("#testgrid table")
+    const tableRows = testTable.querySelectorAll('tr');
+    const existingRows = (tableRows && Array.from(tableRows).slice(1)) || [];
+      
     const rowElement = document.createElement('tr');
-    testTable.appendChild(rowElement)
+    
+    if (max_rows) {
+      for (row of existingRows) {
+        if (label > row.getAttribute('label')) {
+          testTable.insertBefore(rowElement, row);
+          added = true;
+          break;
+        }
+      }
+    }
+
+    if (!added) {
+      testTable.appendChild(rowElement)
+      added = true;
+    }
+
     rowElement.setAttribute('label', label)
     for (column of columns) {
       appendTestCell(rowElement, column);
     }
+
+    if (max_rows && existingRows) {
+      const extraRows = existingRows.slice(max_rows - 1);
+      for (row of extraRows) {
+        row.remove();
+      }
+    }
   }
-  setGridValue(label, 'group', undefined, label);
+  setGridValue(label, 'row', undefined, content || label);
+  return added;
 }
 
 function setGridValue(row, column, runid, value) {
-  const selector = `#testgrid table tr[label=${row}] td[label=${column}]`;
+  const selector = `#testgrid table tr[label="${row}"] td[label="${column}"]`;
   const targetElement = document.querySelector(selector)
-
+  
   if (targetElement) {
     const previous = targetElement.getAttribute('runid');
     if (!previous || runid >= previous) {
       if (runid) {
         targetElement.setAttribute('runid', runid);
       }
-      targetElement.innerHTML = value;
-      targetElement.setAttribute('status', value);
+      if (value) {
+        targetElement.innerHTML = value;
+        targetElement.setAttribute('status', value);
+      }
     }
     const rowTime = document
-          .querySelector(`#testgrid table tr[label=${row}]`).getAttribute('runid');
+          .querySelector(`#testgrid table tr[label="${row}"]`).getAttribute('runid');
     updateTimeClass(targetElement, rowTime);
   } else {
-    console.error('cant find', selector);
+    console.error('Could not find', selector);
   }
   return targetElement;
 }
 
 function setRowState(row, runid) {
-  const rowElement = document.querySelector(`#testgrid table tr[label=${row}]`);
+  const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
   const previous = rowElement.getAttribute('runid');
   if (!previous || runid > previous) {
     rowElement.setAttribute('runid', runid);
@@ -80,7 +110,7 @@ function setRowState(row, runid) {
 
 function updateTimeClass(entry, target) {
   const value = entry.getAttribute('runid');
-  if (!value || value >= target) {
+  if (value && value >= target) {
     entry.classList.remove('old');
     entry.classList.add('current');
   } else {
@@ -114,21 +144,45 @@ function getResultStatus(result) {
   return Number(result.code) ? 'fail' : 'pass';
 }
 
-function handleResult(origin, port, runid, test, result) {
+function handleOriginResult(origin, port, runid, test, result) {
   if (result.timestamp > last_result_time_sec) {
     last_result_time_sec = result.timestamp;
   }
-  if (result.timestamp > (port_timestamps[port] || 0)) {
-    port_timestamps[port] = result.timestamp;
+  if (result.timestamp > (row_timestamps[port] || 0)) {
+    row_timestamps[port] = result.timestamp;
   }
-  ensureGridRow(port);
+  const href =`?origin=${origin}&port=${port}`
+  ensureGridRow(port, `<a href="${href}">${port}</a>`);
   ensureGridColumn(test);
   const status = getResultStatus(result);
-  statusUpdate(`Updating ${port} ${test} run ${result.runid} with '${status}'.`)
-  setRowState(port, result.runid);
-  setGridValue(port, test, result.runid, status);
+  statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
+  setRowState(port, runid);
+  setGridValue(port, test, runid, status);
   if (result.info) {
-    setGridValue(port, 'info', result.runid, result.info);
+    setGridValue(port, 'info', runid, result.info);
+  }
+}
+
+function handlePortResult(origin, port, runid, test, result) {
+  const timestamp = result.timestamp;
+  if (timestamp > last_result_time_sec) {
+    last_result_time_sec = timestamp;
+  }
+  ensureGridRow(runid, runid, port_row_count);
+  ensureGridColumn(test);
+  const status = getResultStatus(result);
+  statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
+  setRowState(runid, runid);
+  setGridValue(runid, test, runid, status);
+  if (result.info) {
+    setGridValue(runid, 'info', runid, result.info);
+  }
+  const element = setGridValue(runid, 'timer', runid);
+  const oldtime = element.getAttribute('timer') || 0;
+  if (timestamp && oldtime < timestamp) {
+    element.setAttribute('timer', timestamp);
+    const timestr = new Date(timestamp * 1000).toLocaleString();
+    setGridValue(runid, 'timer', runid, timestr);
   }
 }
 
@@ -168,10 +222,15 @@ function setupTriggers() {
   db.settings(settings);
 
   const origin_id = getQueryParam('origin');
+  const port_id = getQueryParam('port');
 
-  if (origin_id) {
+  if (port_id) {
     ensureGridRow('header');
-    ensureGridColumn('group');
+    ensureGridColumn('row', port_id);
+    triggerPort(db, origin_id, port_id);
+  } else if (origin_id) {
+    ensureGridRow('header');
+    ensureGridColumn('row', 'port');
     triggerOrigin(db, origin_id);
   } else {
     listOrigins(db);
@@ -184,21 +243,39 @@ function triggerOrigin(db, origin_id) {
   }
 
   ref = db.collection('origin').doc(origin_id);
+  ref.collection('port').doc('port-undefined').onSnapshot((result) => {
+    ensureColumns(result.data().message.tests)
+  });
   watcherAdd(ref, "port", undefined, (ref, port_id) => {
-    if (port_id == 'port-undefined') {
-      ref.onSnapshot((result) => {
-        ensureColumns(result.data().message.tests)
-      });
-    } else {
-      watcherAdd(ref, "runid", latest, (ref, runid_id) => {
-        watcherAdd(ref, "test", undefined, (ref, test_id) => {
-          ref.onSnapshot((result) => {
-            // TODO: Handle results going away.
-            handleResult(origin_id, port_id, runid_id, test_id, result.data());
-          });
+    watcherAdd(ref, "runid", latest, (ref, runid_id) => {
+      watcherAdd(ref, "test", undefined, (ref, test_id) => {
+        ref.onSnapshot((result) => {
+          // TODO: Handle results going away.
+          handleOriginResult(origin_id, port_id, runid_id, test_id, result.data());
         });
       });
-    }
+    });
+  });
+}
+
+function triggerPort(db, origin_id, port_id) {
+  const latest = (ref) => {
+    return ref.orderBy('timestamp', 'desc').limit(port_row_count);
+  }
+
+  ref = db.collection('origin').doc(origin_id).collection('port');
+
+  ref.doc('port-undefined').onSnapshot((result) => {
+    ensureColumns(result.data().message.tests)
+  });
+
+  watcherAdd(ref.doc(port_id), "runid", latest, (ref, runid_id) => {
+    watcherAdd(ref, "test", undefined, (ref, test_id) => {
+      ref.onSnapshot((result) => {
+        // TODO: Handle results going away.
+        handlePortResult(origin_id, port_id, runid_id, test_id, result.data());
+      });
+    });
   });
 }
 
@@ -207,10 +284,12 @@ function interval_updater() {
     time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
     document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
   }
-  for (port in port_timestamps) {
-    timestamp = port_timestamps[port]
+  for (row in row_timestamps) {
+    timestamp = row_timestamps[row]
     time_delta_sec = Math.floor(Date.now()/1000.0 - timestamp)
-    setGridValue(port, 'timer', undefined, `${time_delta_sec} sec`);
+    const selector=`#testgrid table tr[label="${row}"`
+    const runid = document.querySelector(selector).getAttribute('runid');
+    setGridValue(row, 'timer', runid, `${time_delta_sec} sec`);
   }
 }
 
