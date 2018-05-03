@@ -581,11 +581,12 @@ class DAQRunner():
             logger.info('Entering main event loop.')
             self.monitor.event_loop()
         except Exception as e:
-            logger.info('Event loop exception: %s' % e)
+            logger.error('Event loop exception: %s' % e)
             logger.exception(e)
             self.exception = e
-        except KeyboardInterrupt:
-            logger.info('Keyboard Interrupt')
+        except KeyboardInterrupt as e:
+            logger.error('Keyboard Interrupt')
+            logger.exception(e)
 
         if not self.one_shot:
             logger.info('Dropping into interactive command line')
