@@ -234,7 +234,7 @@ class ConnectedHost():
         if self.dhcp_traffic:
             if forget:
                 self.runner.monitor.forget(self.dhcp_traffic.stream())
-            self.dhcp_traffic.close()
+            self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
     def dhcp_finalize(self):
@@ -269,7 +269,7 @@ class ConnectedHost():
 
     def monitor_complete(self):
         logger.info('Set %d monitor scan complete' % self.port_set)
-        assert self.tcp_monitor.wait() == 0, 'Failed executing monitor pcap'
+        assert self.tcp_monitor.terminate() == 0, 'Failed executing monitor pcap'
         self.record_result('monitor')
         self.state_transition(self.TEST_STATE, self.MONITOR_STATE)
         self.base_tests()
