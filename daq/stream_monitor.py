@@ -30,14 +30,15 @@ class StreamMonitor():
 
     def monitor(self, desc, callback=None, hangup=None, copy_to=None, error=None):
         fd = self.get_fd(desc)
-        assert not fd in self.callbacks, 'duplicate descriptor %d' % fd
+        assert not fd in self.callbacks, 'Duplicate descriptor fd %d' % fd
         if copy_to:
-            assert not callback, 'both callback and copy_to set'
+            assert not callback, 'Both callback and copy_to set'
             self.make_nonblock(desc)
             callback = lambda: self.copy_data(desc, copy_to)
         logging.debug('Start monitoring fd %d' % fd)
         self.callbacks[fd] = (callback, hangup, error)
         self.poller.register(fd, POLLHUP | POLLIN)
+        self.log_monitors()
 
     def copy_data(self, data_source, data_sink):
         logging.debug('Copying data from fd %d to fd %d' % (self.get_fd(data_source), self.get_fd(data_sink)))
@@ -52,10 +53,17 @@ class StreamMonitor():
 
     def forget(self, desc):
         fd = self.get_fd(desc)
-        assert fd in self.callbacks, 'missing descriptor %d' % fd
+        assert fd in self.callbacks, 'Missing descriptor fd %d' % fd
         logging.debug('Stop monitoring fd %d' % fd)
         del self.callbacks[fd]
         self.poller.unregister(fd)
+        self.log_monitors()
+
+    def log_monitors(self):
+        log_str = ''
+        for fd in self.callbacks.keys():
+            log_str = log_str + ', fd %d' % fd
+        logging.debug('Monitoring %s' % log_str[2:])
 
     def trigger_callback(self, fd):
         callback = self.callbacks[fd][0]
@@ -75,14 +83,14 @@ class StreamMonitor():
         on_error = self.callbacks[fd][2]
         try:
             self.forget(fd)
-            logging.debug('Hangup callback %d because %d (=> %s)' % (fd, event, callback))
+            logging.debug('Hangup callback fd %d because %d (=> %s)' % (fd, event, callback))
             if callback:
                 callback()
         except Exception as e:
             self.error_handler(fd, e, on_error)
 
     def error_handler(self, fd, e, handler):
-        logging.error('Error handling %d: %s (=> %s)' % (fd, e, handler))
+        logging.error('Error handling fd %d: %s (=> %s)' % (fd, e, handler))
         if handler:
             handler(e)
 
@@ -100,7 +108,7 @@ class StreamMonitor():
             except Exception as e:
                 logging.error('Exception in callback: %s' % e)
                 logging.exception(e)
-            logging.debug('Entering poll loop %s' % self.callbacks.keys())
+            self.log_monitors()
             fds = self.poller.poll(self.timeout_ms)
             if fds:
                 for fd, event in fds:
