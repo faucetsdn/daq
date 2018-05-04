@@ -75,7 +75,7 @@ class ConnectedHost():
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
     TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'monitor',
-            'base' ] + TEST_LIST + [ 'finish', 'exception', 'info' ]
+            'base' ] + TEST_LIST + [ 'finish', 'info', 'timer' ]
 
     runner = None
     port_set = None
@@ -89,6 +89,7 @@ class ConnectedHost():
     running_test = None
     remaining_tests = None
     run_id = None
+    run_state = 'sanity'
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -354,7 +355,7 @@ class ConnectedHost():
             result[arg] = str(kwargs[arg])
         self.results[name] = result
         self.runner.gcp.publish_message('daq_runner', result)
-
+        self.run_state = name
 
 class DAQRunner():
 
@@ -606,7 +607,7 @@ class DAQRunner():
         logger.exception(e)
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
-            target_set.record_result('exception', exception=e)
+            target_set.record_result(target_set.run_state, exception=e)
             target_set.terminate(trigger=False)
             self.target_set_complete(target_set)
         else:
