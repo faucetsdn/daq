@@ -1,3 +1,7 @@
+div {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 #testgrid table {
     border-spacing: 0;
 }
@@ -5,24 +9,24 @@
 #testgrid table td {
     border: 1px solid grey;
     padding: 4px;
-    background: #DDF;
+    background: #DDD;
 }
 
 /* Don't apply to first row or column. */
 #testgrid table tr ~ tr td ~ td.old {
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 #testgrid table tr ~ tr td[status=pass] {
-    background: #DFD;
+    background: #AEA;
 }
 
 #testgrid table tr ~ tr td[status=fail] {
-    background: #FDD;
+    background: #FAA;
 }
 
 #testgrid table tr ~ tr td[status=run] {
-    background: #FCF;
+    background: #EE6;
 }
 
 #testgrid table tr ~ tr td[label=info] {
