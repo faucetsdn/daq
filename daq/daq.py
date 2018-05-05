@@ -101,10 +101,10 @@ class ConnectedHost():
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state_transition(self.INIT_STATE)
         self.results = {}
-        # There is a race condition here with ovs assigning ports, so wait a bit.
+        self.record_result('startup', state='run')
         logger.info('Set %d created.' % port_set)
+        # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
-        self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
         self.remaining_tests = list(self.TEST_LIST)
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
@@ -125,7 +125,7 @@ class ConnectedHost():
         self.state = to
 
     def activate(self):
-        self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
+        self.state_transition(self.STARTUP_STATE, self.INIT_STATE)
         logger.info('Set %d activating.' % self.port_set)
 
         if not os.path.exists(self.scan_base):
@@ -154,10 +154,11 @@ class ConnectedHost():
             assert self.pingTest(dummy, self.fake_target), 'ping failed'
             assert self.pingTest(networking, dummy, src_addr=self.fake_target), 'ping failed'
             self.record_result('sanity');
+            self.state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
         except Exception as e:
             logger.error('Set %d sanity error: %s' % (self.port_set, e))
             logger.exception(e)
-            self.state_transition(self.ERROR_STATE, self.ACTIVE_STATE)
+            self.state_transition(self.ERROR_STATE)
             self.record_result('sanity', exception=e);
             self.terminate()
 
@@ -191,7 +192,7 @@ class ConnectedHost():
             self.runner.target_set_complete(self)
 
     def idle_handler(self):
-        if self.state == self.STARTUP_STATE:
+        if self.state == self.INIT_STATE:
             self.activate()
         elif self.state == self.ACTIVE_STATE:
             self.dhcp_monitor()

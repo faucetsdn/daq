@@ -14,6 +14,7 @@ div {
     border: 1px solid grey;
     padding: 4px;
     background: #DDD;
+    min-width: 2em;
 }
 
 #testgrid table tr ~ tr td ~ td.old {
