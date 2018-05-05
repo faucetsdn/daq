@@ -12,9 +12,14 @@ div {
     background: #DDD;
 }
 
-/* Don't apply to first row or column. */
 #testgrid table tr ~ tr td ~ td.old {
     opacity: 0.5;
+}
+
+#testgrid table tr ~ tr td ~ td.gone {
+    opacity: 0.5;
+    background: #DDD;
+    color: rgba(0,0,0,0);
 }
 
 #testgrid table tr ~ tr td[status=pass] {

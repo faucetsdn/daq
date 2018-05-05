@@ -5,10 +5,12 @@ last_result_time_sec = 0;
 row_timestamps = {};
 port_row_count = 25;
 
-function appendTestCell(parent, label) {
+function appendTestCell(row, column) {
   const columnElement = document.createElement('td');
-  columnElement.setAttribute('label', label);
+  columnElement.setAttribute('label', column);
+  columnElement.setAttribute('row', row);
   columnElement.classList.add('old');
+  const parent = document.querySelector(`#testgrid table tr[label="${row}"]`)
   parent.appendChild(columnElement);
 }
 
@@ -16,8 +18,7 @@ function ensureGridColumn(label, content) {
   if (columns.indexOf(label) < 0) {
     columns.push(label);
     for (row of rows) {
-      const testRow = document.querySelector(`#testgrid table tr[label="${row}"]`)
-      appendTestCell(testRow, label);
+      appendTestCell(row, label);
     }
   }
   setGridValue('header', label, undefined, content || label);
@@ -58,7 +59,7 @@ function ensureGridRow(label, content, max_rows) {
 
     rowElement.setAttribute('label', label)
     for (column of columns) {
-      appendTestCell(rowElement, column);
+      appendTestCell(label, column);
     }
 
     if (max_rows && existingRows) {
@@ -87,35 +88,54 @@ function setGridValue(row, column, runid, value) {
         targetElement.setAttribute('status', value);
       }
     }
-    const rowTime = document
-          .querySelector(`#testgrid table tr[label="${row}"]`).getAttribute('runid');
-    updateTimeClass(targetElement, rowTime);
+    const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`)
+    const rowTime = rowElement.getAttribute('runid');
+    const rowPrev = rowElement.getAttribute('prev');
+    updateTimeClass(targetElement, rowTime, rowPrev);
   } else {
     console.error('Could not find', selector);
   }
   return targetElement;
 }
 
-function setRowState(row, runid) {
+function setRowState(row, new_runid) {
   const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
-  const previous = rowElement.getAttribute('runid');
-  if (!previous || runid > previous) {
-    rowElement.setAttribute('runid', runid);
-    const allEntries = rowElement.querySelectorAll('td');
-    allEntries.forEach((entry) => {
-      updateTimeClass(entry, runid);
-    });
+  let runid = rowElement.getAttribute('runid') || 0;
+  let prev = rowElement.getAttribute('prev') || 0;
+  console.log('rowstate', row, 'mudgee', new_runid, runid, prev);
+  if (runid == new_runid) {
+    return;
+  } else if (!runid || new_runid > runid) {
+    rowElement.setAttribute('prev', runid);
+    rowElement.setAttribute('runid', new_runid);
+    prev = runid
+    runid = new_runid
+  } else if (!prev || new_runid > prev) {
+    rowElement.setAttribute('prev', new_runid);
+    prev = new_runid
+  } else {
+    return;
   }
+  const allEntries = rowElement.querySelectorAll('td');
+  allEntries.forEach((entry) => {
+    updateTimeClass(entry, runid, prev);
+  });
 }
 
-function updateTimeClass(entry, target) {
+function updateTimeClass(entry, target, prev) {
   const value = entry.getAttribute('runid');
-  if (value && value >= target) {
-    entry.classList.remove('old');
+  const row = entry.getAttribute('row');
+  const column = entry.getAttribute('label');
+  console.log('update', row, column, value, target, prev);
+  if (value == target) {
     entry.classList.add('current');
-  } else {
+    entry.classList.remove('old', 'gone');
+  } else if (value == prev) {
     entry.classList.add('old');
-    entry.classList.remove('current');
+    entry.classList.remove('current', 'gone');
+  } else {
+    entry.classList.add('gone');
+    entry.classList.remove('current', 'old');
   }
 }
 
