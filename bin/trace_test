@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+
+cd $ROOT/inst
+
+daq_pid=$(cat daq.pid)
+
+if ! ps -o pid= -p $daq_pid > /dev/null; then
+    echo Process pid $daq_pid not found.
+    false
+fi
+
+echo Tracing pid $daq_pid
+echo Logs in $ROOT/inst/strace-\*.log
+sudo strace -p $daq_pid 3>&2 2>&1 1>&3 | rotatelogs -c strace-%I.log 3600
