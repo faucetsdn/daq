@@ -17,7 +17,7 @@ WORKDIR /root
 # Basic system install items
 RUN $AG install \
     software-properties-common apt-transport-https \
-    sudo realpath git emacs-nox ethtool curl \
+    sudo realpath git emacs-nox ethtool curl apache2-utils \
     isc-dhcp-client network-manager netcat lsof \
     python python-setuptools python-dev build-essential python-pip \
     openvswitch-switch openvswitch-common 
