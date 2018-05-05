@@ -264,7 +264,11 @@ function triggerOrigin(db, origin_id) {
 
   ref = db.collection('origin').doc(origin_id);
   ref.collection('port').doc('port-undefined').onSnapshot((result) => {
-    ensureColumns(result.data().message.tests)
+    const message = result.data().message;
+    ensureColumns(message.tests);
+    document.querySelector('#description').innerHTML = message.description;
+    const version = `DAQ v${message.version}`
+    document.querySelector('#version').innerHTML = version
   });
   watcherAdd(ref, "port", undefined, (ref, port_id) => {
     watcherAdd(ref, "runid", latest, (ref, runid_id) => {

@@ -2,6 +2,10 @@ div {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.daq-text {
+    padding: 5px;
+}
+
 #testgrid table {
     border-spacing: 0;
 }

@@ -371,6 +371,8 @@ class DAQRunner():
     sec_port = None
     sec_name = None
     gcp = None
+    description = None
+    version = None
 
     def __init__(self, config):
         self.config = config
@@ -378,6 +380,9 @@ class DAQRunner():
         self.result_sets = {}
         self.active_ports = {}
         self.gcp = GcpManager(self.config)
+        raw_description = config.get('site_description', '')
+        self.description = raw_description.strip("\"")
+        self.version = os.environ['DAQ_VERSION']
 
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
@@ -470,6 +475,8 @@ class DAQRunner():
             'name': 'status',
             'tests': ConnectedHost.TEST_ORDER,
             'ports': self.active_ports.keys(),
+            'description': self.description,
+            'version': self.version,
             'fdcount': len(psutil.Process().open_files()),
             'timestamp': int(time.time()),
         })

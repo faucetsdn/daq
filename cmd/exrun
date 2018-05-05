@@ -7,6 +7,7 @@ FAUCET_SOCK=faucet_event.sock
 EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
+DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 
 cd $ROOT
 
@@ -19,8 +20,9 @@ if [ ! -f $LOCAL_CONFIG ]; then
 fi
 
 echo Loading daq run configuration from $LOCAL_CONFIG
-cat $LOCAL_CONFIG
 source $LOCAL_CONFIG
+
+set | egrep ^[a-z][a-z_]*=
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found.
@@ -80,6 +82,7 @@ echo Executing runner "$@"...
 sudo env \
      DAQ_CONTAINER=$DAQ_CONTAINER \
      FAUCET_EVENT_SOCK=$EVENT_SOCK \
+     DAQ_VERSION=$DAQ_VERSION \
      PYTHONPATH=$FAUCET \
      DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
      TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
