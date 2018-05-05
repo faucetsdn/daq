@@ -677,6 +677,12 @@ def configure_logging(config):
 
     MininetLogger._log = mininet_alt_logger
 
+def write_pid_file():
+    pid = str(os.getpid())
+    f = open('inst/daq.pid', 'w')
+    f.write(pid)
+    f.close()
+
 def read_config_into(filename, config):
     parser = ConfigParser()
     with open(filename) as stream:
@@ -707,6 +713,8 @@ if __name__ == '__main__':
     config = parse_args(sys.argv)
 
     configure_logging(config)
+
+    write_pid_file()
 
     runner = DAQRunner(config)
     runner.initialize()
