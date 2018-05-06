@@ -113,7 +113,9 @@ class StreamMonitor():
             fds = self.poller.poll(self.timeout_ms)
             if fds:
                 for fd, event in fds:
-                    if event & (POLLHUP | POLLNVAL | POLLERR):
+                    if event & POLLNVAL:
+                        assert False, 'POLLNVAL on fd %d' % fd
+                    elif event & (POLLHUP | POLLERR):
                         self.trigger_hangup(fd, event)
                     elif event & POLLIN:
                         self.trigger_callback(fd)
