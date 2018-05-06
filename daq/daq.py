@@ -246,10 +246,7 @@ class ConnectedHost():
         self.monitor_scan()
 
     def dhcp_hangup(self):
-        try:
-            raise 'dhcp hangup'
-        except Exception as e:
-            self.dhcp_error(e)
+        self.dhcp_error(Exception('dhcp hangup'))
 
     def dhcp_error(self, e):
         logger.error('Set %d dhcp error: %s' % (self.port_set, e))
