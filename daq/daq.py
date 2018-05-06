@@ -760,7 +760,7 @@ def printOpenFiles():
     print "### %d OPEN FILES: [%s]" % (len(openfiles), ", ".join(f.x for f in openfiles))
     print '%d file_references:' % len(file_references)
     for ref in file_references:
-        print sys.getrefcount(ref), ref
+        print 'fd %d #%d %s' % (ref.fileno(), sys.getrefcount(ref), ref)
 
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
