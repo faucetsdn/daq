@@ -70,6 +70,7 @@ class StreamMonitor():
         callback = self.callbacks[fd][0]
         on_error = self.callbacks[fd][2]
         try:
+            logging.debug('Data callback fd %d (=> %s)' % (fd, callback))
             if callback:
                 callback()
             else:
@@ -83,8 +84,8 @@ class StreamMonitor():
         callback = self.callbacks[fd][1]
         on_error = self.callbacks[fd][2]
         try:
-            self.forget(fd)
             logging.debug('Hangup callback fd %d because %d (=> %s)' % (fd, event, callback))
+            self.forget(fd)
             if callback:
                 callback()
         except Exception as e:
