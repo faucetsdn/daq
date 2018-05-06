@@ -28,20 +28,20 @@ class StreamMonitor():
     def get_fd(self, target):
         return target.fileno() if 'fileno' in dir(target) else target
 
-    def monitor(self, desc, callback=None, hangup=None, copy_to=None, error=None):
+    def monitor(self, name, desc, callback=None, hangup=None, copy_to=None, error=None):
         fd = self.get_fd(desc)
         assert not fd in self.callbacks, 'Duplicate descriptor fd %d' % fd
         if copy_to:
             assert not callback, 'Both callback and copy_to set'
             self.make_nonblock(desc)
-            callback = lambda: self.copy_data(desc, copy_to)
-        logging.debug('Start monitoring fd %d' % fd)
-        self.callbacks[fd] = (callback, hangup, error)
+            callback = lambda: self.copy_data(name, desc, copy_to)
+        logging.debug('Start monitoring %s fd %d' % (name, fd))
+        self.callbacks[fd] = (name, callback, hangup, error)
         self.poller.register(fd, POLLHUP | POLLIN)
         self.log_monitors()
 
-    def copy_data(self, data_source, data_sink):
-        logging.debug('Copying data from fd %d to fd %d' % (self.get_fd(data_source), self.get_fd(data_sink)))
+    def copy_data(self, name, data_source, data_sink):
+        logging.debug('Copying data for %s from fd %d to fd %d' % (name, self.get_fd(data_source), self.get_fd(data_sink)))
         data = data_source.read(1024)
         data_sink.write(data)
         logging.debug('Copied %d from fd %d to fd %d' % (len(data), self.get_fd(data_source), self.get_fd(data_sink)))
@@ -63,36 +63,42 @@ class StreamMonitor():
     def log_monitors(self):
         log_str = ''
         for fd in self.callbacks.keys():
-            log_str = log_str + ', fd %d' % fd
+            name = self.callbacks[fd][0]
+            log_str = log_str + ', %s fd %d' % (name, fd)
         logging.debug('Monitoring %s' % log_str[2:])
 
     def trigger_callback(self, fd):
-        callback = self.callbacks[fd][0]
-        on_error = self.callbacks[fd][2]
+        name = self.callbacks[fd][0]
+        callback = self.callbacks[fd][1]
+        on_error = self.callbacks[fd][3]
         try:
-            logging.debug('Data callback fd %d (=> %s)' % (fd, callback))
             if callback:
+                logging.debug('Data callback fd %d (%s)' % (fd, name))
                 callback()
             else:
+                logging.debug('Data flush fd %d (%s)' % (fd, name))
                 os.read(fd, 1024)
         except Exception as e:
             if fd in self.callbacks:
                 self.forget(fd)
-            self.error_handler(fd, e, on_error)
+            self.error_handler(fd, e, name)
 
     def trigger_hangup(self, fd, event):
-        callback = self.callbacks[fd][1]
-        on_error = self.callbacks[fd][2]
+        name = self.callbacks[fd][0]
+        callback = self.callbacks[fd][2]
+        on_error = self.callbacks[fd][3]
         try:
-            logging.debug('Hangup callback fd %d because %d (=> %s)' % (fd, event, callback))
             self.forget(fd)
             if callback:
+                logging.debug('Hangup callback fd %d because %d (%s)' % (fd, event, name))
                 callback()
+            else:
+                logging.debug('No hangup callback fd %d because %d (%s)' % (fd, event, name))
         except Exception as e:
-            self.error_handler(fd, e, on_error)
+            self.error_handler(fd, e, name)
 
-    def error_handler(self, fd, e, handler):
-        logging.error('Error handling fd %d: %s (=> %s)' % (fd, e, handler))
+    def error_handler(self, fd, e, name):
+        logging.error('Error handling %s fd %d: %s' % (name, fd, e))
         if handler:
             handler(e)
 

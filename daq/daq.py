@@ -216,7 +216,7 @@ class ConnectedHost():
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
                     timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
-        self.runner.monitor.monitor(self.dhcp_traffic.stream(), lambda: self.dhcp_line(),
+        self.runner.monitor.monitor(self.networking.name, self.dhcp_traffic.stream(), lambda: self.dhcp_line(),
                     hangup=lambda: self.dhcp_hangup(), error=lambda e: self.monitor_error(e))
 
     def dhcp_line(self):
@@ -254,6 +254,10 @@ class ConnectedHost():
         self.terminate()
 
     def monitor_error(self, e):
+        logger.error('Set %d monitor error: %s' % (self.port_set, e))
+        self.tcp_monitor.terminate()
+        self.tcp_monitor = None
+        self.record_result('monitor', exception=e)
         self.runner.target_set_error(self.port_set, e)
 
     def monitor_scan(self):
@@ -266,12 +270,13 @@ class ConnectedHost():
         filter = 'vlan %d' % self.pri_base
         self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf_name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, blocking=False)
-        self.runner.monitor.monitor(self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
+        self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_complete(), error=lambda e: self.monitor_error(e))
 
     def monitor_complete(self):
         logger.info('Set %d monitor scan complete' % self.port_set)
         assert self.tcp_monitor.terminate() == 0, 'Failed executing monitor pcap'
+        self.tcp_monitor = None
         self.record_result('monitor')
         self.state_transition(self.TEST_STATE, self.MONITOR_STATE)
         self.base_tests()
@@ -285,17 +290,14 @@ class ConnectedHost():
 
     def run_next_test(self):
         if len(self.remaining_tests):
-            self.run_test(self.remaining_tests.pop(0))
+            self.docker_test(self.remaining_tests.pop(0))
         else:
             self.state_transition(self.DONE_STATE, self.TEST_STATE)
             self.record_result('finish')
             self.terminate()
 
-    def run_test(self, test_name):
-        logger.info('Set %d running test %s' % (self.port_set, test_name))
-        self.running_test = self.docker_test(test_name)
-
     def docker_test(self, test_name):
+        logger.info('Set %d running docker test %s' % (self.port_set, test_name))
         self.test_name = test_name
         self.record_result(self.test_name, state='run')
         port = self.pri_base + self.TEST_OFFSET
@@ -314,33 +316,46 @@ class ConnectedHost():
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
+        self.docker_host = host
+
         try:
             pipe = host.activate(log_name = None)
-            self.log_file = host.open_log()
+            self.docker_log = host.open_log()
             self.state_transition(self.WAITING_STATE, self.TEST_STATE)
-            self.runner.monitor.monitor(pipe.stdout, copy_to=self.log_file,
-                hangup=lambda: self.docker_complete(), error=lambda e: self.monitor_error(e))
+            self.runner.monitor.monitor(host_name, pipe.stdout, copy_to=self.docker_log,
+                hangup=lambda: self.docker_complete(), error=lambda e: self.docker_error(e))
         except:
             host.terminate()
             raise
         return host
 
+    def docker_error(self, e):
+        logger.error('Set %d docker error: %s' % e)
+        self.record_result(self.test_name, exception=e)
+        self.docker_finalize()
+        self.runner.target_set_error(self.port_set, e)
+
+    def docker_finalize(self):
+        return_code = self.docker_host.terminate()
+        self.docker_log.close()
+        self.docker_log = None
+        return return_code
+
     def docker_complete(self):
         self.state_transition(self.TEST_STATE, self.WAITING_STATE)
-        host = self.running_test
-        self.running_test = None
         try:
-            host.terminate()
-            error_code = host.wait()
+            error_code = self.docker_finalize()
+            exception = None
             self.runner.removeHost(host)
-            self.log_file.close()
+            self.finalize()
         except Exception as e:
-            error_code = e
-        logger.debug("Set %d docker complete, return=%s" % (self.port_set, error_code))
-        self.record_result(self.test_name, code=error_code)
+            error_code = -1
+            exception = e
+        logger.debug("Set %d docker complete, return=%d (%s)" % (self.port_set, error_code, exception))
+        self.record_result(self.test_name, code=error_code, exception=exception)
         if error_code:
-            logger.info("Set %d FAILED test %s with error %s" %
-                         (self.port_set, self.test_name, error_code))
+            logger.info("Set %d FAILED test %s with error %s: %s" %
+                         (self.port_set, self.test_name, error_code, exception))
         else:
             logger.info("Set %d PASSED test %s" % (self.port_set, self.test_name))
         self.run_next_test()
@@ -584,7 +599,7 @@ class DAQRunner():
         try:
             self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle(),
                                          loop_hook=lambda: self.loop_hook())
-            self.monitor.monitor(self.faucet_events.sock, lambda: self.handle_faucet_event())
+            self.monitor.monitor('faucet', self.faucet_events.sock, lambda: self.handle_faucet_event())
             if not self.auto_start:
                 self.flush_faucet_events()
             logger.info('Entering main event loop.')
