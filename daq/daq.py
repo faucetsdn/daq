@@ -216,7 +216,7 @@ class ConnectedHost():
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
                     timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
         self.runner.monitor.monitor(self.networking.name, self.dhcp_traffic.stream(), lambda: self.dhcp_line(),
-                    hangup=lambda: self.dhcp_hangup(), error=lambda e: self.monitor_error(e))
+                    hangup=lambda: self.dhcp_hangup(), error=lambda e: self.dhcp_error(e))
 
     def dhcp_line(self):
         dhcp_line = self.dhcp_traffic.next_line()
@@ -246,10 +246,14 @@ class ConnectedHost():
         self.monitor_scan()
 
     def dhcp_hangup(self):
-        logger.info('Set %d dhcp hangup' % self.port_set)
-        self.record_result('dhcp', code=-1)
+        self.dhcp_error('hangup')
+
+    def dhcp_error(self, e):
+        logger.error('Set %d dhcp error: %s' % (self.port_set, e))
+        self.record_result('dhcp', exception=e)
         self.dhcp_cleanup(forget=False)
         self.state_transition(self.ERROR_STATE, self.DHCP_STATE)
+        self.runner.target_set_error(self.port_set, e)
         self.terminate()
 
     def monitor_error(self, e):
