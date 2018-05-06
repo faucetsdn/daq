@@ -48,6 +48,7 @@ class StreamMonitor():
 
     def make_nonblock(self, data_source):
         fd = self.get_fd(data_source)
+        logging.debug('Making fd %d non-blocking for copy_to' % fd)
         flags = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
 

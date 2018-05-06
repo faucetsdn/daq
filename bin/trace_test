@@ -1,5 +1,12 @@
 #!/bin/bash -e
 
+running=$(docker inspect --format "{{.State.Running}}" daq-runner 2>/dev/null || true)
+if [ "$running" == true ]; then
+    echo Re-running inside of daq-runner...
+    docker exec daq-runner daq/bin/trace_test "$@"
+    exit $?
+fi
+
 ROOT=$(realpath $(dirname $0)/..)
 
 cd $ROOT/inst
