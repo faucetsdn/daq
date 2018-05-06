@@ -4,7 +4,6 @@
 
 import logging
 import os
-import psutil
 import random
 import re
 import shutil
@@ -69,8 +68,8 @@ class ConnectedHost():
     ACTIVE_STATE = 2
     DHCP_STATE = 3
     MONITOR_STATE = 4
-    TEST_STATE = 5
-    WAITING_STATE = 6
+    READY_STATE = 5
+    TESTING_STATE = 6
     DONE_STATE = 7
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
@@ -278,7 +277,7 @@ class ConnectedHost():
         assert self.tcp_monitor.terminate() == 0, 'Failed executing monitor pcap'
         self.tcp_monitor = None
         self.record_result('monitor')
-        self.state_transition(self.TEST_STATE, self.MONITOR_STATE)
+        self.state_transition(self.READY_STATE, self.MONITOR_STATE)
         self.base_tests()
         self.run_next_test()
 
@@ -292,7 +291,7 @@ class ConnectedHost():
         if len(self.remaining_tests):
             self.docker_test(self.remaining_tests.pop(0))
         else:
-            self.state_transition(self.DONE_STATE, self.TEST_STATE)
+            self.state_transition(self.DONE_STATE, self.READY_STATE)
             self.record_result('finish')
             self.terminate()
 
@@ -316,17 +315,17 @@ class ConnectedHost():
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
-        self.docker_host = host
-
         try:
             pipe = host.activate(log_name = None)
             self.docker_log = host.open_log()
-            self.state_transition(self.WAITING_STATE, self.TEST_STATE)
+            self.state_transition(self.TESTING_STATE, self.READY_STATE)
             self.runner.monitor.monitor(host_name, pipe.stdout, copy_to=self.docker_log,
                 hangup=lambda: self.docker_complete(), error=lambda e: self.docker_error(e))
         except:
             host.terminate()
+            self.runner.removeHost(host)
             raise
+        self.docker_host = host
         return host
 
     def docker_error(self, e):
@@ -336,18 +335,18 @@ class ConnectedHost():
         self.runner.target_set_error(self.port_set, e)
 
     def docker_finalize(self):
+        self.runner.removeHost(self.docker_host)
         return_code = self.docker_host.terminate()
+        self.docker_host = None
         self.docker_log.close()
         self.docker_log = None
         return return_code
 
     def docker_complete(self):
-        self.state_transition(self.TEST_STATE, self.WAITING_STATE)
+        self.state_transition(self.READY_STATE, self.TESTING_STATE)
         try:
             error_code = self.docker_finalize()
             exception = None
-            self.runner.removeHost(host)
-            self.finalize()
         except Exception as e:
             error_code = -1
             exception = e
@@ -493,7 +492,6 @@ class DAQRunner():
             'ports': self.active_ports.keys(),
             'description': self.description,
             'version': self.version,
-            'fdcount': len(psutil.Process().open_files()),
             'timestamp': int(time.time()),
         })
 
