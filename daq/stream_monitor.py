@@ -105,8 +105,8 @@ class StreamMonitor():
                     # Check corner case when idle_handler removes all callbacks.
                     if not self.callbacks:
                         return False
-                    if self.loop_hook:
-                        self.loop_hook()
+                if self.loop_hook:
+                    self.loop_hook()
             except Exception as e:
                 logging.error('Exception in callback: %s' % e)
                 logging.exception(e)
@@ -123,5 +123,6 @@ class StreamMonitor():
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
             else:
+                logging.debug('No monitored fds found')
                 return True
         return False
