@@ -47,9 +47,9 @@ class DummyNode():
     def cmd(self, cmd, *args, **kwargs):
         pass
 
-file_references = set()
-def track_ref(reference):
-    file_references.add(reference)
+file_references = []
+def track_ref(reference, desc):
+    file_references.append((reference.fileno(), reference, desc))
 
 class ConnectedHost():
     NETWORKING_OFFSET = 0
@@ -116,7 +116,7 @@ class ConnectedHost():
         try:
             self.networking = self.runner.addHost(networking_name, port=networking_port,
                 cls=cls, tmpdir=self.tmpdir)
-            track_ref(self.networking.stdin)
+            track_ref(self.networking.stdin, networking_name)
             self.record_result('startup')
         except:
             self.terminate(trigger=False)
@@ -144,7 +144,7 @@ class ConnectedHost():
             dummy_port = self.pri_base + self.DUMMY_OFFSET
             self.dummy = self.runner.addHost(dummy_name, port=dummy_port)
             dummy = self.dummy
-            track_ref(dummy.stdin)
+            track_ref(dummy.stdin, dummy_name)
 
             self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
             logger.debug('Adding fake target at %s' % self.fake_target)
@@ -221,7 +221,7 @@ class ConnectedHost():
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
                     timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
-        track_ref(self.dhcp_traffic.stream())
+        track_ref(self.dhcp_traffic.stream(), self.networking.name)
         self.runner.monitor.monitor(self.networking.name, self.dhcp_traffic.stream(), lambda: self.dhcp_line(),
                     hangup=lambda: self.dhcp_hangup(), error=lambda e: self.dhcp_error(e))
 
@@ -280,7 +280,7 @@ class ConnectedHost():
         filter = 'vlan %d' % self.pri_base
         self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf_name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, blocking=False)
-        track_ref(self.tcp_monitor.stream())
+        track_ref(self.tcp_monitor.stream(), 'tcpdump %d' % self.port_set)
         self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_complete(), error=lambda e: self.monitor_error(e))
 
@@ -327,13 +327,13 @@ class ConnectedHost():
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
-        track_ref(host.stdin)
+        track_ref(host.stdin, host_name)
         try:
             pipe = host.activate(log_name = None)
             self.docker_log = host.open_log()
-            track_ref(self.docker_log)
+            track_ref(self.docker_log, 'log ' + host_name)
             self.state_transition(self.TESTING_STATE, self.READY_STATE)
-            track_ref(pipe.stdout)
+            track_ref(pipe.stdout, 'active ' + host_name)
             self.runner.monitor.monitor(host_name, pipe.stdout, copy_to=self.docker_log,
                 hangup=lambda: self.docker_complete(), error=lambda e: self.docker_error(e))
         except:
@@ -760,7 +760,7 @@ def printOpenFiles():
     print "### %d OPEN FILES: [%s]" % (len(openfiles), ", ".join(f.x for f in openfiles))
     print '%d file_references:' % len(file_references)
     for ref in file_references:
-        print 'fd %d #%d %s' % (ref.fileno(), sys.getrefcount(ref), ref)
+        print 'fd %d #%d %s %s' % (ref[0], sys.getrefcount(ref[1]), ref[2], ref[1])
 
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
