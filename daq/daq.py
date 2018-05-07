@@ -361,7 +361,7 @@ class ConnectedHost():
         return host
 
     def docker_error(self, e):
-        logger.error('Set %d docker error: %s' % e)
+        logger.error('Set %d docker error: %s' % (self.port_set, e))
         self.record_result(self.test_name, exception=e)
         self.docker_finalize()
         self.runner.target_set_error(self.port_set, e)
