@@ -35,6 +35,7 @@ from gcp import GcpManager
 logger = logging.getLogger('daq')
 altlog = logging.getLogger('mininet')
 
+
 class DAQHost(FaucetHostCleanup, Host):
     """Base Mininet Host class, for Mininet-based tests."""
     pass
@@ -47,9 +48,11 @@ class DummyNode():
     def cmd(self, cmd, *args, **kwargs):
         pass
 
+
 file_references = []
 def track_ref(reference, desc):
     file_references.append((reference.fileno(), reference, desc))
+
 
 class ConnectedHost():
     NETWORKING_OFFSET = 0
@@ -758,9 +761,10 @@ __builtin__.open = newopen
 
 def printOpenFiles():
     print "### %d OPEN FILES: [%s]" % (len(openfiles), ", ".join(f.x for f in openfiles))
-    print '%d file_references:' % len(file_references)
-    for ref in file_references:
-        print 'fd %d #%d %s %s' % (ref[0], sys.getrefcount(ref[1]), ref[2], ref[1])
+    print '%d file_references' % len(file_references)
+    with open('file_refs.txt', 'w') as out:
+        for ref in file_references:
+            out.write('fd %d #%d %s %s\n' % (ref[0], sys.getrefcount(ref[1]), ref[2], ref[1]))
 
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
