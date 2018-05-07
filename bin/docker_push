@@ -37,4 +37,5 @@ if [ -n "$PUSH" ]; then
 
     echo Pushing $TARGET
     docker push $TARGET
+    echo Done with push.
 fi
