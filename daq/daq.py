@@ -98,6 +98,8 @@ class ConnectedHost():
     remaining_tests = None
     run_id = None
     run_state = 'sanity'
+    tcp_monitor = None
+    dhcp_traffic = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -174,6 +176,8 @@ class ConnectedHost():
 
     def terminate(self, trigger=True):
         logger.info('Set %d terminate, trigger %s' % (self.port_set, trigger))
+        self.dhcp_cleanup()
+        self.monitor_cleanup()
         if self.networking:
             try:
                 self.networking.terminate()
@@ -271,10 +275,16 @@ class ConnectedHost():
         self.runner.target_set_error(self.port_set, e)
         self.terminate()
 
+    def monitor_cleanup(self, forget=True):
+        if self.tcp_monitor:
+            if forget:
+                self.runner.monitor.forget(self.tcp_monitor.stream())
+            self.tcp_monitor.terminate()
+            self.tcp_monitor = None
+
     def monitor_error(self, e):
         logger.error('Set %d monitor error: %s' % (self.port_set, e))
-        self.tcp_monitor.terminate()
-        self.tcp_monitor = None
+        self.monitor_cleanup(forget=False)
         self.record_result('monitor', exception=e)
         self.runner.target_set_error(self.port_set, e)
 
@@ -294,8 +304,7 @@ class ConnectedHost():
 
     def monitor_complete(self):
         logger.info('Set %d monitor scan complete' % self.port_set)
-        assert self.tcp_monitor.terminate() == 0, 'Failed executing monitor pcap'
-        self.tcp_monitor = None
+        self.monitor_cleanup(forget=False)
         self.record_result('monitor')
         self.state_transition(self.READY_STATE, self.MONITOR_STATE)
         self.base_tests()
@@ -608,6 +617,10 @@ class DAQRunner():
             states[key] = self.target_sets[key].state
         logger.debug('Active target sets/state: %s' % states)
 
+    def terminate(self):
+        for key in self.target_sets.keys():
+            self.target_sets[key].terminate()
+
     def main_loop(self):
         self.one_shot = self.config.get('s')
         self.flap_ports = self.config.get('f')
@@ -636,6 +649,8 @@ class DAQRunner():
         if not self.one_shot:
             logger.info('Dropping into interactive command line')
             CLI(self.net)
+
+        self.terminate()
 
     def trigger_target_set(self, port_set):
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
