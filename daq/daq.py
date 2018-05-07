@@ -49,9 +49,11 @@ class DummyNode():
         pass
 
 
+track_references = False
 file_references = []
 def track_ref(reference, desc):
-    file_references.append((reference.fileno(), reference, desc))
+    if track_references:
+        file_references.append((reference.fileno(), reference, desc))
 
 
 class ConnectedHost():
@@ -256,7 +258,10 @@ class ConnectedHost():
         self.monitor_scan()
 
     def dhcp_hangup(self):
-        self.dhcp_error(Exception('dhcp hangup'))
+        try:
+            raise Exception('dhcp hangup')
+        except Exception as e:
+            self.dhcp_error(e)
 
     def dhcp_error(self, e):
         logger.error('Set %d dhcp error: %s' % (self.port_set, e))
@@ -770,6 +775,7 @@ if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
 
     config = parse_args(sys.argv)
+    track_references = config.get('t')
 
     configure_logging(config)
 
