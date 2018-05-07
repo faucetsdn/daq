@@ -385,7 +385,7 @@ class ConnectedHost():
             'port': self.port_set
         }
         for arg in kwargs:
-            result[arg] = str(kwargs[arg])
+            result[arg] = None if kwargs[arg] == None else str(kwargs[arg])
         self.results[name] = result
         self.runner.gcp.publish_message('daq_runner', result)
         self.run_state = name
