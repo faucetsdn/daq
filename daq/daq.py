@@ -762,7 +762,7 @@ __builtin__.open = newopen
 def printOpenFiles():
     print "### %d OPEN FILES: [%s]" % (len(openfiles), ", ".join(f.x for f in openfiles))
     print '%d file_references' % len(file_references)
-    with open('file_refs.txt', 'w') as out:
+    with open('inst/file_refs.txt', 'w') as out:
         for ref in file_references:
             out.write('fd %d #%d %s %s\n' % (ref[0], sys.getrefcount(ref[1]), ref[2], ref[1]))
 
