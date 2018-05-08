@@ -40,16 +40,16 @@ if [ -n "$DAQ_DEVICES" ]; then
     echo daq_intf=${daq_intf#,} >> local/system.conf
 fi
 
-if [ "$BUILD" == in ]; then
+if [ "$DAQ_BUILD" == in ]; then
     runarg=latest
-elif [ "$BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
+elif [ "$DAQ_BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
     echo Not running tests because no-build on release branch.
     exit 0
 fi
 
 failed=
 echo Running DAQ test...
-if [ "$MODE" == "in" ]; then
+if [ "$DAQ_MODE" == "in" ]; then
     cmd/run $runarg -s || failed=true
 else
     cmd/exrun -s || failed=true
