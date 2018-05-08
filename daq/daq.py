@@ -607,7 +607,7 @@ class DAQRunner():
     def handle_system_idle(self):
         for target_set in self.target_sets.values():
             target_set.idle_handler()
-        if self.auto_start and not self.one_shot:
+        if not self.event_start and not self.one_shot:
             for port_set in self.active_ports.keys():
                 if self.active_ports[port_set] and not port_set in self.target_sets:
                     self.trigger_target_set(port_set)
@@ -625,7 +625,7 @@ class DAQRunner():
     def main_loop(self):
         self.one_shot = self.config.get('s')
         self.flap_ports = self.config.get('f')
-        self.auto_start = self.config.get('a')
+        self.event_start = self.config.get('e')
 
         if self.flap_ports:
             self.flap_interface_ports()
@@ -635,7 +635,7 @@ class DAQRunner():
             self.monitor = StreamMonitor(idle_handler=lambda: self.handle_system_idle(),
                                          loop_hook=lambda: self.loop_hook())
             self.monitor.monitor('faucet', self.faucet_events.sock, lambda: self.handle_faucet_event())
-            if not self.auto_start:
+            if self.event_start:
                 self.flush_faucet_events()
             logger.info('Entering main event loop.')
             self.monitor.event_loop()
