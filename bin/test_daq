@@ -45,7 +45,7 @@ fi
 
 echo Running DAQ test...
 if [ "$MODE" == "in" ]; then
-    cmd/run $runarg -s -a
+    cmd/run $runarg -s
 else
-    cmd/exrun -s -a
+    cmd/exrun -s
 fi

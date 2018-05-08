@@ -4,7 +4,7 @@ ROOT=$(realpath $(dirname $0)/..)
 
 cd $ROOT
 cmd=run
-args=-a
+args=
 version=$(cat misc/RELEASE_VERSION)
 
 if [ "$1" == debug ]; then
