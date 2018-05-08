@@ -20,6 +20,7 @@ env:
     - DAQ_MODE=
     - DAQ_MODE=in DAQ_BUILD=in DAQ_PUSH=daqf/runner
     - DAQ_MODE=in DAQ_BUILD=no
+    - DAQ_FAIL=xdhcp
     - DAQ_DEVICES=3
     - DAQ_SWITCH=ext
 branches:

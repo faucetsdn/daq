@@ -12,7 +12,7 @@ release=$(lsb_release -cs)
 echo Installing $distrib $release
 
 # Make sure to get a reasonably up-to-date version of OVS.
-sudo apt-get install apt-transport-https
+sudo apt-get -y install apt-transport-https software-properties-common
 echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources.list.d/wand.list
 sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
 sudo apt-get update
@@ -22,6 +22,5 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$dis
 
 # Basic system install items.
 sudo apt-get update
-sudo apt-get -y install \
-     apt-transport-https sudo realpath git \
+sudo apt-get -y install sudo realpath git \
      openvswitch-switch openvswitch-common docker-ce

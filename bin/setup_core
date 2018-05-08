@@ -37,7 +37,7 @@ git clone -n $REPO $TARGET
 (cd $TARGET; git checkout $COMMIT)
 
 sudo apt-get -y install \
-    software-properties-common emacs-nox ethtool curl ca-certificates \
+    emacs-nox ethtool curl ca-certificates \
     isc-dhcp-client network-manager netcat gnupg2 \
     python python-setuptools python-dev build-essential python-pip
 

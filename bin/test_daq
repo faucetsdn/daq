@@ -30,7 +30,7 @@ if [ -n "$DAQ_DEVICES" ]; then
     daq_intf=
     while [ $count -le $DAQ_DEVICES ]; do
         daq_intf+=,faux-$count
-        cmd/faux $count
+        cmd/faux $count $DAQ_FAIL
         count=$(($count+1))
     done
     echo daq_intf=${daq_intf#,} >> local/system.conf
@@ -43,9 +43,18 @@ elif [ "$BUILD" == no -a "$TRAVIS_BRANCH" == release ]; then
     exit 0
 fi
 
+failed=
 echo Running DAQ test...
 if [ "$MODE" == "in" ]; then
-    cmd/run $runarg -s
+    cmd/run $runarg -s || failed=true
 else
-    cmd/exrun -s
+    cmd/exrun -s || failed=true
+fi
+
+if [ -n "$DAQ_FAIL" -a -z "$failed" ]; then
+    echo Test did not fail with expected $DAQ_FAIL.
+    false
+elif [ -n "$failed" ]; then
+    echo Test failed.
+    false
 fi
