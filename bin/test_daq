@@ -15,7 +15,7 @@ echo -n "Last DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo
 
-if [ "$DAQ_BUILD" != "no" ]; then
+if [ -d faucet ]; then
     echo -n "Last FAUCET commit "
     (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
     echo

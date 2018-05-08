@@ -699,11 +699,11 @@ class DAQRunner():
             result_set = self.result_sets[result_set_key]
             for result_key in result_set:
                 result = result_set[result_key]
+                exception = 'exception' if 'exception' in result and result['exception'] else None
                 code = int(result['code']) if 'code' in result else 0
-                if result['name'] == 'fail':
-                    code = 0 if code != 0 else 1
-                if code != 0:
-                    results.append('%02d:%s:%s' % (result_set_key, result['name'], code))
+                status = exception if exception else code if result['name'] != 'fail' else not code
+                if status != 0:
+                    results.append('%02d:%s:%s' % (result_set_key, result['name'], status))
         return results
 
     def finalize(self):
@@ -760,28 +760,7 @@ def parse_args(args):
     return config
 
 
-import __builtin__
-openfiles = set()
-oldfile = __builtin__.file
-class newfile(oldfile):
-    def __init__(self, *args):
-        self.x = args[0]
-        print "### OPENING %s ###" % str(self.x)
-        oldfile.__init__(self, *args)
-        openfiles.add(self)
-
-    def close(self):
-        print "### CLOSING %s ###" % str(self.x)
-        oldfile.close(self)
-        openfiles.remove(self)
-oldopen = __builtin__.open
-def newopen(*args):
-    return newfile(*args)
-__builtin__.file = newfile
-__builtin__.open = newopen
-
-def printOpenFiles():
-    print "### %d OPEN FILES: [%s]" % (len(openfiles), ", ".join(f.x for f in openfiles))
+def print_files():
     print '%d file_references' % len(file_references)
     with open('inst/file_refs.txt', 'w') as out:
         for ref in file_references:
@@ -802,5 +781,5 @@ if __name__ == '__main__':
     runner.main_loop()
     runner.cleanup()
     returncode = runner.finalize()
-    printOpenFiles()
+    print_files()
     sys.exit(returncode)
