@@ -24,4 +24,4 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$dis
 sudo apt-get update
 sudo apt-get -y install \
      apt-transport-https sudo realpath git \
-     openvswitch-switch optnvswitch-common docker-ce
+     openvswitch-switch openvswitch-common docker-ce
