@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 runarg=
 
@@ -55,9 +55,11 @@ else
     cmd/exrun -s || failed=true
 fi
 
-if [ -n "$DAQ_FAIL" -a -z "$failed" ]; then
-    echo Test did not fail with expected $DAQ_FAIL.
-    false
+if [ -n "$DAQ_FAIL" ]; then
+    if [ -z "$failed" ]; then
+        echo Test did not fail with expected $DAQ_FAIL.
+        false
+    fi
 elif [ -n "$failed" ]; then
     echo Test failed.
     false
