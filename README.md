@@ -2,14 +2,28 @@
 
 Flexble IoT device qualification framework utilizing the FAUCET SDN controller.
 
-## Build instructions
-
-### Prerequisites
+## Quickstart
 
 Tested with ```Linux 4.9.0-5-amd64 #1 SMP Debian 4.9.65-3+deb9u2 (2018-01-04) x86_64 GNU/Linux```, YMMV.
 
 You should be able to run <b><code>bin/setup_install</code></b> to setup the basic prerequisites. This
-should install some basic packages, docker, and openvswitch.
+should install the minimum set of basic packages, docker, and openvswitch.
+
+## Configuration
+
+## Diagnostics
+
+## Cloud Dashboard
+
+## Hardware Configurations
+
+## Build Setup
+
+You only need to build the system if you are actively doing test development. Otherwise, stick
+with the packaged runner.  In order to build, you'll need to install a bunch of additional
+dependicies and do extra development steps.
+
+### Prerequisites
 
 ### Configuration
 
@@ -40,39 +54,6 @@ For debugging fun, try:
 </pre>
 
 See misc/system.conf for a more detailed overview of options.
-
-### Building DAQ
-
-You shouldn't need to do this unless you're doing active development on DAQ itself. Doing this
-will require installing more prerequisites that aren't indicated above. See
-<code>bin/setup_install</code> or <code>docker/Docker.base</code> for details.
-
-To build containers for basic execution, which can take a long time:
-
-<pre>
-  $ <b>cmd/build</b>
-</pre>
-
-To run the development version, use the simple executor-run command:
-
-<pre>
-  $ <b>cmd/exrun</b>
-</pre>
-
-Build the runner container, which can take a <em>really</em> long time:
-
-<pre>
-  $ <b>cmd/inbuild</b>
-</pre>
-
-You can also clean all the stuffs:
-
-<pre>
-  $ <b>cmd/clean</b>
-</pre>
-
-...which is sometimes necessary to gaurintee a clean build.
-Be warned, it also might clean some other images/containers from other projects.
 
 ### External Ethernet Adapter.
 
