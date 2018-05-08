@@ -17,18 +17,18 @@ git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo -n "Last FAUCET commit "
 (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
-if [ "$SWITCH" == "ext" ]; then
+if [ "$DAQ_SWITCH" == "ext" ]; then
     echo ext_dpid=0x1aeb960541 >> local/system.conf
     bin/external_ovs
-    if [ -z "$DEVICES" ]; then
-        DEVICES=1
+    if [ -z "$DAQ_DEVICES" ]; then
+        DAQ_DEVICES=1
     fi
 fi
 
-if [ -n "$DEVICES" ]; then
+if [ -n "$DAQ_DEVICES" ]; then
     count=1
     daq_intf=
-    while [ $count -le $DEVICES ]; do
+    while [ $count -le $DAQ_DEVICES ]; do
         daq_intf+=,faux-$count
         cmd/faux $count
         count=$(($count+1))

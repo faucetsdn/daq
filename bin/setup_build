@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #
 # Setup the (runtime) system by building DAQ, as necessary.
-# BUILD mode is normally specified by the environment (e.g. travis).
+# DAQ_BUILD mode is normally specified by the environment (e.g. travis).
 # 
 
 echo -n "DAQ commit "
@@ -10,9 +10,9 @@ git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo -n "Last FAUCET commit "
 (cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 
-if [ "$BUILD" == "in" ]; then
+if [ "$DAQ_BUILD" == "in" ]; then
     cmd/inbuild
-elif [ "$BUILD" != "no" ]; then
+elif [ "$DAQ_BUILD" != "no" ]; then
     cmd/build
 fi
 

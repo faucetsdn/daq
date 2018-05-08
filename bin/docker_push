@@ -1,11 +1,11 @@
 #!/bin/bash -e
 
-# Travis CI seems to source thsi script, not using the #! above!
+# Travis CI seems to source this script, not is ignoring the #! above!
 set -e
 
-if [ -n "$PUSH" ]; then
+if [ -n "$DAQ_PUSH" ]; then
     VERSION=$(cat misc/RELEASE_VERSION)
-    TARGET=$PUSH:$VERSION
+    TARGET=$DAQ_PUSH:$VERSION
     RTAG=release-$VERSION
 
     echo Doing push to target $TARGET
@@ -22,14 +22,14 @@ if [ -n "$PUSH" ]; then
 		   
     found=yes
     echo Checking for existing image $TARGET...
-    curl --silent -f -lSL https://index.docker.io/v1/repositories/$PUSH/tags/$VERSION > /dev/null 2>&1 || found=no
+    curl --silent -f -lSL https://index.docker.io/v1/repositories/$DAQ_PUSH/tags/$VERSION > /dev/null 2>&1 || found=no
     if [ $found == yes ]; then
 	echo Docker image $TARGET already exists.
 	false
     fi
 
     echo Tagging build as $TARGET
-    docker tag $PUSH $TARGET
+    docker tag $DAQ_PUSH $TARGET
 
     echo Logging into docker as $DOCKER_USERNAME...
     echo "$DOCKER_PASSWORD" | \
@@ -38,4 +38,6 @@ if [ -n "$PUSH" ]; then
     echo Pushing $TARGET
     docker push $TARGET
     echo Done with push.
+else
+    echo Skipping push because DAQ_PUSH not set.
 fi

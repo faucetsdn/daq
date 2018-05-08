@@ -14,6 +14,11 @@ MININETV="2.2.2"
 
 cd $ROOT
 
+if [ "$DAQ_BUILD" == "no" ]; then
+    echo Skipping core setup because DAQ_BUILD=no
+    exit 0
+fi
+
 git clone https://github.com/mininet/mininet -b $MININETV
 (
     cd mininet

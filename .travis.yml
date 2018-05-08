@@ -17,11 +17,11 @@ script:
   - bin/test_daq
 env:
   matrix:
-    - FOO=bar
-    - MODE=in BUILD=in PUSH=daqf/runner
-    - MODE=in BUILD=no
-    - DEVICES=3
-    - SWITCH=ext
+    - DAQ_MODE=
+    - DAQ_MODE=in DAQ_BUILD=in DAQ_PUSH=daqf/runner
+    - DAQ_MODE=in DAQ_BUILD=no
+    - DAQ_DEVICES=3
+    - DAQ_SWITCH=ext
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/
