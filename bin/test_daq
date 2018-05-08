@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-runarg=
+runarg=-a
 
 if [ ! -f local/system.conf ]; then
     echo Installing local/system.conf...
