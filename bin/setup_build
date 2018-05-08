@@ -1,4 +1,8 @@
 #!/bin/bash -e
+#
+# Setup the (runtime) system by building DAQ, as necessary.
+# BUILD mode is normally specified by the environment (e.g. travis).
+# 
 
 echo -n "DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true

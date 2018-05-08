@@ -1,4 +1,10 @@
 #!/bin/bash -e
+#
+# Setup things for building the core system. Not required for just
+# running a downloaded container.
+#
+# If you just want to get up and goind, see bin/setup_install.
+#
 
 ROOT=$(realpath $(dirname $0)/..)
 REPO=https://github.com/grafnu/faucet.git
@@ -24,3 +30,9 @@ sudo pip install --index-url=https://pypi.python.org/simple \
 echo Cloning $REPO hash $COMMIT into $TARGET...
 git clone -n $REPO $TARGET
 (cd $TARGET; git checkout $COMMIT)
+
+sudo apt-get -y install \
+    software-properties-common emacs-nox ethtool curl ca-certificates \
+    isc-dhcp-client network-manager netcat gnupg2 \
+    python python-setuptools python-dev build-essential python-pip
+

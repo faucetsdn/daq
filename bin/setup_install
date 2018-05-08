@@ -1,8 +1,12 @@
 #!/bin/bash -e
 #
+# Setup the basics for using DAQ. Minimum subset necessary to run anything,
+# since some specific kernel modules are required.
+#
 # [Open vSwitch Debian Install](http://docs.openvswitch.org/en/latest/intro/install/distributions/#debian) (tested with version 2.6.2).
 # [Docker CE Debian Install](https://docs.docker.com/install/linux/docker-ce/debian/) (tested with version 17.12.0-ce).
 #
+
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 release=$(lsb_release -cs)
 echo Installing $distrib $release
@@ -19,9 +23,5 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$dis
 # Basic system install items.
 sudo apt-get update
 sudo apt-get -y install \
-    software-properties-common apt-transport-https \
-    sudo realpath git emacs ethtool curl ca-certificates \
-    isc-dhcp-client network-manager netcat gnupg2 \
-    python python-setuptools python-dev build-essential python-pip \
-    openvswitch-switch openvswitch-common docker-ce
-
+     apt-transport-https sudo realpath git \
+     openvswitch-switch optnvswitch-common docker-ce
