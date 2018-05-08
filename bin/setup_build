@@ -6,9 +6,13 @@
 
 echo -n "DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
+echo
 
-echo -n "Last FAUCET commit "
-(cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+if [ "$DAQ_BUILD" != "no" ]; then
+  echo -n "Last FAUCET commit "
+  (cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+  echo
+fi
 
 if [ "$DAQ_BUILD" == "in" ]; then
     cmd/inbuild
