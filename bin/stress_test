@@ -26,7 +26,7 @@ if [ "$1" == exrun ]; then
     shift
 fi
 
-if [ "$1" != latest ]; then
+if [ $# -gt 0 -a "$1" != latest ]; then
     echo Unknown command line option $1.
     false
 fi
