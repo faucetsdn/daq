@@ -1,1 +1,1 @@
-Instructions for setting up a Firebase dashboard.
+TODO: Instructions for setting up a Firebase dashboard.

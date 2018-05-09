@@ -11,16 +11,20 @@ both `Ubuntu 16.04.4 LTS xenial` and `Debian GNU/Linux 9.4 stretch`, YMMV with o
 Once installed, the basic qualification suite can be run with `cmd/run -s`. (The
 '-s' command line option means 'single' mode, rather than continuous test.) The first
 time this is run it will download the DAQ Docker image, which can take a little while. It should
-approximately look like this [example log output](docs/run_log.md).
+approximately look like this [example log output](docs/run_log.md). This commands runs
+everything inside of one Docker container named `daq-runner`.
 
 ## Configuration
 
-After an initial test-install run, edit `local/system.conf` appropriately.
-If the file does not exist, it will be populated with a default version on system start.
-This is recommened the first time around as it will use the internal _faux_ test device
-to make sure everything works. The various options are documented in the configuration file
-itself. Note that the file folows "assignment" semantics, so the last declaration of a variable
-will be the only one that sticks.
+After an initial test-install run, edit `local/system.conf` to specify the network adapter
+name(s) of the device adapter(s) or external physical switch.
+If the file does not exist, it will be populated with a default version on system start with
+defaults that use the internal _faux_ test client: This is recommened the first time around
+as it will test the install to make sure everything works properly. The various options are
+documented in the configuration file itself. Note that the file folows "assignment" semantics,
+so the last declaration of a variable will be the only one that sticks. (The `local/`
+subdirectory contains all information local to the DAQ install, such as configuration information
+or cloud credentials.)
 
 ## Network Configurations
 
@@ -50,24 +54,32 @@ setting up a continous testing environment. Mainly, it pipes the output into a r
 
 ## Debugging
 
-There are a numbe of command-line options that can be supplied to most DAQ scripts for diagnostics:
+The `inst/` subdirectory is the _instance_ runtime director, and holds all the resulting log files
+and diagnostic information from each run. There's a collection of different files in there that provide
+useful information, depending on the specific problem(s) encountered.
+
+Command-line options that can be supplied to most DAQ scripts for diagnostics:
 * `-s`: Only run tests once, otherwise loop forever.
 * `-e`: Activate tests on device plug-in only, otherwise test any active port.
 * `daq_loglevel=debug`: Add debug info form the DAQ test runner suite.
 * `mininet_loglevel=debug`: Add debug info from the mininet subsystem (verbose!)
 
-Note that the long-form command-line options (e.g. `daq_loglevel`) can be placed in the
-`system.conf` file as well.
+(The long-form command-line options, e.g. `daq_loglevel`, can be placed in the
+`local/system.conf` file as well.)
 
 ## Network Taps
 
 If there are device-level network problems then it is possible to use `tcpdump` or similar
 to example the network traffic. When using the `cmd/run` command, the system runts the
-testing framework in a Docker container named `daq-runner`, and it moves the test
+testing framework in a Docker container named `daq-runner` and it moves the test
 network interface(s) into that container. Any tap command must be also run in the container, so it
 looks something like (substituting, of course, the actual network interface name):
 
 `docker exec daq-runner tcpdump -eni enx9cebe840a74c`
+
+(If you are monitoring a full hardware setup with a physical switch, and not an individual
+device adapter, the packets will be tagged by VLAN that corresponds to the device port on the
+switch itself.)
 
 ## Build Setup
 

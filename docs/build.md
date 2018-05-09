@@ -1,4 +1,4 @@
-### Building DAQ
+# Building DAQ
 
 You shouldn't need to do this unless you're doing active development on DAQ itself. Doing this
 will require installing more prerequisites that aren't indicated above. See
