@@ -367,12 +367,15 @@ class ConnectedHost():
         self.runner.target_set_error(self.port_set, e)
 
     def docker_finalize(self):
-        self.runner.removeHost(self.docker_host)
-        return_code = self.docker_host.terminate()
-        self.docker_host = None
-        self.docker_log.close()
-        self.docker_log = None
-        return return_code
+        if self.docker_host:
+            self.runner.removeHost(self.docker_host)
+            return_code = self.docker_host.terminate()
+            self.docker_host = None
+            self.docker_log.close()
+            self.docker_log = None
+            return return_code
+        else:
+            return None
 
     def docker_complete(self):
         self.state_transition(self.READY_STATE, self.TESTING_STATE)
