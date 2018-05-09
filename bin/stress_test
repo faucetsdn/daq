@@ -1,4 +1,12 @@
 #!/bin/bash -e
+#
+# Run the DAQ testing in a continuous loop, with shunting log output to rotating files.
+#
+# Some common options (ordered):
+#   debug:  Set daq and mininet loglevels to 'debug'
+#   exrun:  Use cmd/exrun instead of cmd/run, for development testing.
+#   latest: Passed to runner, will use latest daq image (not versioned).
+#
 
 ROOT=$(realpath $(dirname $0)/..)
 
@@ -16,6 +24,11 @@ fi
 if [ "$1" == exrun ]; then
     cmd=exrun
     shift
+fi
+
+if [ "$1" != latest ]; then
+    echo Unknown command line option $1.
+    false
 fi
 
 running=$(docker inspect --format "{{.State.Running}}" daq-runner 2>/dev/null || true)
