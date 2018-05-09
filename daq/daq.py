@@ -462,7 +462,7 @@ class DAQRunner():
     def removeHost(self, host):
         index = self.net.hosts.index(host)
         if index:
-            del self.net.hosts[
+            del self.net.hosts[index]
         if host.switch_link:
             intf = host.switch_link.intf1
             self.pri.detach(intf)
