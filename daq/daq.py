@@ -146,6 +146,7 @@ class ConnectedHost():
             self.record_result('sanity', state='run')
             networking = self.networking
             networking.activate()
+            self.startup_scan()
 
             dummy_name = 'dummy%02d' % self.port_set
             dummy_port = self.pri_base + self.DUMMY_OFFSET
@@ -259,6 +260,7 @@ class ConnectedHost():
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
         self.record_result('dhcp', info=self.target_mac, ip=self.target_ip)
+        self.monitor_cleanup()
         self.monitor_scan()
 
     def dhcp_hangup(self):
@@ -277,6 +279,7 @@ class ConnectedHost():
 
     def monitor_cleanup(self, forget=True):
         if self.tcp_monitor:
+            logger.debug('Set %d monitor scan cleanup (forget=%s)' % (self.port_set, forget))
             if forget:
                 self.runner.monitor.forget(self.tcp_monitor.stream())
             self.tcp_monitor.terminate()
@@ -288,6 +291,17 @@ class ConnectedHost():
         self.record_result('monitor', exception=e)
         self.runner.target_set_error(self.port_set, e)
 
+    def startup_scan(self):
+        assert not self.tcp_monitor, 'tcp_monitor already active'
+        logger.debug('Set %d startup pcap start' % self.port_set)
+        filter = ''
+        monitor_file = os.path.join('/tmp','startup.pcap')
+        self.tcp_monitor = TcpdumpHelper(self.networking, filter, packets=None,
+                timeout=None, pcap_out=monitor_file, blocking=False)
+        track_ref(self.tcp_monitor.stream(), 'tcpdump %d' % self.port_set)
+        self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
+                hangup=lambda: self.monitor_error(Exception('startup scan hangup')), error=lambda e: self.monitor_error(e))
+
     def monitor_scan(self):
         self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
         self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
@@ -296,6 +310,7 @@ class ConnectedHost():
         intf_name = self.runner.sec_name
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         filter = 'vlan %d' % self.pri_base
+        assert not self.tcp_monitor, 'tcp_monitor already active'
         self.tcp_monitor = TcpdumpHelper(self.runner.pri, filter, packets=None, intf_name=intf_name,
                 timeout=self.MONITOR_SCAN_SEC, pcap_out=monitor_file, blocking=False)
         track_ref(self.tcp_monitor.stream(), 'tcpdump %d' % self.port_set)
@@ -437,7 +452,7 @@ class DAQRunner():
     def addHost(self, name, cls=DAQHost, ip=None, env_vars=[], vol_maps=[],
                 port=None, tmpdir=None):
         params = { 'ip': ip } if ip else {}
-        params['tmpdir'] = os.path.join(tmpdir, 'tests') if tmpdir else None
+        params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
         params['env_vars'] = env_vars
         params['vol_maps'] = vol_maps
         host = self.net.addHost(name, cls, **params)

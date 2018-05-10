@@ -123,10 +123,10 @@ class StreamMonitor():
                 for fd, event in fds:
                     if event & POLLNVAL:
                         assert False, 'POLLNVAL on fd %d' % fd
-                    elif event & (POLLHUP | POLLERR):
-                        self.trigger_hangup(fd, event)
                     elif event & POLLIN:
                         self.trigger_callback(fd)
+                    elif event & (POLLHUP | POLLERR):
+                        self.trigger_hangup(fd, event)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
             else:

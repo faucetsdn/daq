@@ -69,8 +69,16 @@ Command-line options that can be supplied to most DAQ scripts for diagnostics:
 
 ## Network Taps
 
+The startup (including DHCP negotiation and baseline ping tests) network capture can be found
+in the node-specific directory, and can be parsed using tcpdump with something like:
+
+`tcpdump -en -r inst/run-port-01/nodes/gw01/tmp/startup.pcap ip`
+
+The [example pcap output file](docs/startup_pcap.md) shows what this should look like for a normal run.
+(Replace `01` with the appropraite port set number.)
+
 If there are device-level network problems then it is possible to use `tcpdump` or similar
-to example the network traffic. When using the `cmd/run` command, the system runts the
+to example the network traffic. When using the `cmd/run` command, the system runs the
 testing framework in a Docker container named `daq-runner` and it moves the test
 network interface(s) into that container. Any tap command must be also run in the container, so it
 looks something like (replacing `faux` with the real adapter name):
