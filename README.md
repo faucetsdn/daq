@@ -2,14 +2,21 @@
 
 A flexble IoT Device Automatd Qualification (DAQ) framework utilizing the FAUCET SDN controller.
 
+## System Requirements
+
+* Linux install: DAQ has been tested against both `Ubuntu 16.04.4 LTS xenial` and
+`Debian GNU/Linux 9.4 stretch`, YMMV with other platforms.
+* Dedicated network adapters: At the very minimum one dedicated ethernet adapter is
+required. This could either be a separate built-in NIC, or a USB-Ethernet dongle.
+* (Optional) OpenFlow-compatible hardware switch: See instructions below on setup.
+
 ## Quickstart
 
-Running `bin/setup_install` will setup the basic prerequisites. This
-will install a minimum set of basic packages, docker, and openvswitch. This has been tested on
-both `Ubuntu 16.04.4 LTS xenial` and `Debian GNU/Linux 9.4 stretch`, YMMV with other platforms.
+Running `bin/setup_install` will setup the basic prerequisites. This will install a
+minimum set of basic packages, docker, and openvswitch.
 
 Once installed, the basic qualification suite can be run with `cmd/run -s`. (The
-'-s' command line option means 'single' mode, rather than continuous test.) The first
+'-s' option means 'single' mode, rather than continuous test.) The first
 time this is run it will download the DAQ Docker image, which can take a little while. It should
 approximately look like this [example log output](docs/run_log.md). This commands runs
 everything inside of one Docker container named `daq-runner`.
