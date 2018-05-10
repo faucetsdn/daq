@@ -62,9 +62,15 @@ for intf in $intfs; do
 
     # If running inside of a container, wait until the host test interface shows up...
     if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
+        retry=5
         while ! ifconfig -a | fgrep -q $intf; do
-            echo Waiting for interface $intf to appear...
+            if [ "$retry" == 0 ]; then
+                echo Failed to find interface $intf.
+                false
+            fi
+            echo Waiting for interface $intf to appear retry $retry...
             sleep 1
+            retry=$((retry-1))
         done
     fi
 done

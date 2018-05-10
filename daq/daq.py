@@ -82,8 +82,8 @@ class ConnectedHost():
     DONE_STATE = 7
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
-    TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'monitor',
-            'base' ] + TEST_LIST + [ 'finish', 'info', 'timer' ]
+    TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'base',
+            'monitor' ] + TEST_LIST + [ 'finish', 'info', 'timer' ]
 
     runner = None
     port_set = None
@@ -260,7 +260,9 @@ class ConnectedHost():
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
         self.record_result('dhcp', info=self.target_mac, ip=self.target_ip)
+        self.base_tests()
         self.monitor_cleanup()
+        logger.info('Set %d done with startup monitor.' % self.port_set)
         self.monitor_scan()
 
     def dhcp_hangup(self):
@@ -322,7 +324,6 @@ class ConnectedHost():
         self.monitor_cleanup(forget=False)
         self.record_result('monitor')
         self.state_transition(self.READY_STATE, self.MONITOR_STATE)
-        self.base_tests()
         self.run_next_test()
 
     def base_tests(self):

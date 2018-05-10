@@ -74,11 +74,14 @@ function move_intf {
     if [ -n "$base" -a "$base" == "$intf" ]; then
         pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
         link=$(ip link show $intf 2>/dev/null )
+        success=
         if [ "$pid" != 0 -a -n "$link" ]; then
             echo Moving interface $intf into container pid $pid...
-            sudo ip link set $intf netns $pid
-        else
-            echo Could not find process/intf $pid/$intf, terminating daq-runner.
+            sudo ip link set $intf netns $pid && success=true
+        fi
+
+        if [ -z "$success" ]; then
+            echo Could not move intf to process/intf $pid/$intf, terminating daq-runner.
             sudo docker kill daq-runner > /dev/null
         fi
     fi
