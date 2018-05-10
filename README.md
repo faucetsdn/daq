@@ -73,9 +73,9 @@ If there are device-level network problems then it is possible to use `tcpdump` 
 to example the network traffic. When using the `cmd/run` command, the system runts the
 testing framework in a Docker container named `daq-runner` and it moves the test
 network interface(s) into that container. Any tap command must be also run in the container, so it
-looks something like (substituting, of course, the actual network interface name):
+looks something like (replacing `faux` with the real adapter name):
 
-`docker exec daq-runner tcpdump -eni enx9cebe840a74c`
+`docker exec daq-runner tcpdump -eni faux`
 
 (If you are monitoring a full hardware setup with a physical switch, and not an individual
 device adapter, the packets will be tagged by VLAN that corresponds to the device port on the
