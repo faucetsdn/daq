@@ -119,6 +119,7 @@ class StreamMonitor():
                 logging.exception(e)
             self.log_monitors()
             fds = self.poller.poll(self.timeout_ms)
+            logging.debug('Monitor fds %s' % fds)
             if fds:
                 for fd, event in fds:
                     if event & POLLNVAL:

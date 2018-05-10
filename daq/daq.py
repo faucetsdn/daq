@@ -76,10 +76,11 @@ class ConnectedHost():
     STARTUP_STATE = 1
     ACTIVE_STATE = 2
     DHCP_STATE = 3
-    MONITOR_STATE = 4
-    READY_STATE = 5
-    TESTING_STATE = 6
-    DONE_STATE = 7
+    PREMON_STATE = 4
+    MONITOR_STATE = 5
+    READY_STATE = 6
+    TESTING_STATE = 7
+    DONE_STATE = 8
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
     TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'base',
@@ -211,6 +212,8 @@ class ConnectedHost():
             self.activate()
         elif self.state == self.ACTIVE_STATE:
             self.dhcp_monitor()
+        elif self.state == self.PREMON_STATE:
+            self.monitor_start()
 
     def pingTest(self, a, b, src_addr=None):
         b_name = b if isinstance(b, str) else b.name
@@ -222,6 +225,17 @@ class ConnectedHost():
         src_opt = '-I %s' % src_addr if src_addr else ''
         output = a.cmd('ping -c2', src_opt, b_ip, '> /dev/null 2>&1 || echo ', failure).strip()
         return output.strip() != failure
+
+    def startup_scan(self):
+        assert not self.tcp_monitor, 'tcp_monitor already active'
+        logger.debug('Set %d startup pcap start' % self.port_set)
+        filter = ''
+        monitor_file = os.path.join('/tmp','startup.pcap')
+        self.tcp_monitor = TcpdumpHelper(self.networking, filter, packets=None,
+                timeout=None, pcap_out=monitor_file, blocking=False)
+        track_ref(self.tcp_monitor.stream(), 'tcpdump %d' % self.port_set)
+        self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
+                hangup=lambda: self.monitor_error(Exception('startup scan hangup')), error=lambda e: self.monitor_error(e))
 
     def dhcp_monitor(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
@@ -260,10 +274,7 @@ class ConnectedHost():
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
         self.record_result('dhcp', info=self.target_mac, ip=self.target_ip)
-        self.base_tests()
-        self.monitor_cleanup()
-        logger.info('Set %d done with startup monitor.' % self.port_set)
-        self.monitor_scan()
+        self.state_transition(self.PREMON_STATE, self.DHCP_STATE)
 
     def dhcp_hangup(self):
         try:
@@ -279,6 +290,13 @@ class ConnectedHost():
         self.runner.target_set_error(self.port_set, e)
         self.terminate()
 
+    def monitor_start(self):
+        self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
+        self.base_tests()
+        self.monitor_cleanup()
+        logger.info('Set %d done with startup monitor.' % self.port_set)
+        self.monitor_scan()
+
     def monitor_cleanup(self, forget=True):
         if self.tcp_monitor:
             logger.debug('Set %d monitor scan cleanup (forget=%s)' % (self.port_set, forget))
@@ -293,19 +311,8 @@ class ConnectedHost():
         self.record_result('monitor', exception=e)
         self.runner.target_set_error(self.port_set, e)
 
-    def startup_scan(self):
-        assert not self.tcp_monitor, 'tcp_monitor already active'
-        logger.debug('Set %d startup pcap start' % self.port_set)
-        filter = ''
-        monitor_file = os.path.join('/tmp','startup.pcap')
-        self.tcp_monitor = TcpdumpHelper(self.networking, filter, packets=None,
-                timeout=None, pcap_out=monitor_file, blocking=False)
-        track_ref(self.tcp_monitor.stream(), 'tcpdump %d' % self.port_set)
-        self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
-                hangup=lambda: self.monitor_error(Exception('startup scan hangup')), error=lambda e: self.monitor_error(e))
-
     def monitor_scan(self):
-        self.state_transition(self.MONITOR_STATE, self.DHCP_STATE)
+        self.state_transition(self.MONITOR_STATE, self.PREMON_STATE)
         self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
         logger.info('Set %d background scan for %d seconds...' %
                      (self.port_set, self.MONITOR_SCAN_SEC))
