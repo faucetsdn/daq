@@ -73,8 +73,9 @@ class StreamMonitor():
         on_error = self.callbacks[fd][3]
         try:
             if callback:
-                logging.debug('Data callback fd %d (%s)' % (fd, name))
+                logging.debug('Data callback fd %d (%s) start' % (fd, name))
                 callback()
+                logging.debug('Data callback fd %d (%s) done' % (fd, name))
             else:
                 logging.debug('Data flush fd %d (%s)' % (fd, name))
                 os.read(fd, 1024)
@@ -92,6 +93,7 @@ class StreamMonitor():
             if callback:
                 logging.debug('Hangup callback fd %d because %d (%s)' % (fd, event, name))
                 callback()
+                logging.debug('Hangup callback fd %d done (%s)' % (fd, name))
             else:
                 logging.debug('No hangup callback fd %d because %d (%s)' % (fd, event, name))
         except Exception as e:
@@ -102,6 +104,7 @@ class StreamMonitor():
         logging.error('Error handling %s fd %d%s: %s' % (name, fd, msg, e))
         if handler:
             handler(e)
+            logging.error('Error handling %s fd %d done' % (name, fd))
 
     def event_loop(self):
         while self.callbacks:

@@ -634,7 +634,10 @@ class DAQRunner():
 
     def handle_system_idle(self):
         for target_set in self.target_sets.values():
-            target_set.idle_handler()
+            try:
+                target_set.idle_handler()
+            except Exception as e:
+                self.target_set_error(target_set.port_set, e)
         if not self.event_start and not self.one_shot:
             for port_set in self.active_ports.keys():
                 if self.active_ports[port_set] and not port_set in self.target_sets:
