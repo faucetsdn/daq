@@ -17,6 +17,8 @@ install:
 script:
   - bin/test_daq
 env:
+  global:
+    - DOCKER_STARTUP_TIMEOUT_MS=60000
   matrix:
     - DAQ_MODE=
     - DAQ_MODE=in DAQ_BUILD=in DAQ_PUSH=daqf/runner
