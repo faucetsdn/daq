@@ -63,13 +63,14 @@ class ConnectedHost():
 
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 20
-    DHCP_TIMEOUT_SEC = 70
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
     DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
+    DHCP_RETRIES = 3
+    DHCP_TIMEOUT_SEC = 40
 
     ERROR_STATE = -1
     INIT_STATE = 0
@@ -83,7 +84,7 @@ class ConnectedHost():
     DONE_STATE = 8
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
-    TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'base',
+    TEST_ORDER = [ 'startup', 'sanity', 'dhcp-1', 'dhcp-2', 'dhcp-3', 'base',
             'monitor' ] + TEST_LIST + [ 'finish', 'info', 'timer' ]
 
     runner = None
@@ -101,6 +102,7 @@ class ConnectedHost():
     run_state = 'sanity'
     tcp_monitor = None
     dhcp_traffic = None
+    dhcp_try = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -113,6 +115,7 @@ class ConnectedHost():
         self.state_transition(self.INIT_STATE)
         self.results = {}
         self.record_result('startup', state='run')
+        self.dhcp_try = 1
         logger.info('Set %d created.' % port_set)
         # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
@@ -237,9 +240,12 @@ class ConnectedHost():
         self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_error(Exception('startup scan hangup')), error=lambda e: self.monitor_error(e))
 
+    def dhcp_name(self):
+        return 'dhcp-%d' % self.dhcp_try
+
     def dhcp_monitor(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
-        self.record_result('dhcp', state='run')
+        self.record_result(self.dhcp_name(), state='run')
         logger.info('Set %d waiting for dhcp reply from %s...' %
                      (self.port_set, self.networking.name))
         filter="src port 67"
@@ -257,8 +263,8 @@ class ConnectedHost():
         if match:
             self.target_ip = match.group(4)
             if self.target_ip:
-                assert self.target_mac, 'Target MAC not scraped from dhcp response.'
-                self.dhcp_finalize()
+                assert self.target_mac, 'dhcp IP %d found, but no MAC address' % self.taret_ip
+                self.dhcp_success()
             else:
                 self.target_mac = match.group(2)
 
@@ -269,11 +275,13 @@ class ConnectedHost():
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
-    def dhcp_finalize(self):
+    def dhcp_success(self):
         self.dhcp_cleanup()
         logger.info('Set %d received dhcp reply: %s is at %s' %
             (self.port_set, self.target_mac, self.target_ip))
-        self.record_result('dhcp', info=self.target_mac, ip=self.target_ip)
+        self.record_result(self.dhcp_name(), info=self.target_mac, ip=self.target_ip)
+        while self.dhcp_retry():
+            self.record_result(self.dhcp_name(), state='skip')
         self.state_transition(self.PREMON_STATE, self.DHCP_STATE)
 
     def dhcp_hangup(self):
@@ -282,13 +290,21 @@ class ConnectedHost():
         except Exception as e:
             self.dhcp_error(e)
 
+    def dhcp_retry(self):
+        self.dhcp_try += 1
+        return self.dhcp_try <= self.DHCP_RETRIES
+
     def dhcp_error(self, e):
         logger.error('Set %d dhcp error: %s' % (self.port_set, e))
-        self.record_result('dhcp', exception=e)
+        self.record_result(self.dhcp_name(), exception=e)
         self.dhcp_cleanup(forget=False)
-        self.state_transition(self.ERROR_STATE, self.DHCP_STATE)
-        self.runner.target_set_error(self.port_set, e)
-        self.terminate()
+        if self.dhcp_retry():
+            self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
+            self.dhcp_monitor()
+        else:
+            self.state_transition(self.ERROR_STATE, self.DHCP_STATE)
+            self.runner.target_set_error(self.port_set, e)
+            self.terminate()
 
     def monitor_start(self):
         self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
