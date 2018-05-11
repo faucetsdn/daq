@@ -230,9 +230,9 @@ class ConnectedHost():
         assert not self.tcp_monitor, 'tcp_monitor already active'
         logger.debug('Set %d startup pcap start' % self.port_set)
         filter = ''
-        monitor_file = os.path.join('/tmp','startup.pcap')
+        self.startup_file = os.path.join('/tmp','startup.pcap')
         self.tcp_monitor = TcpdumpHelper(self.networking, filter, packets=None,
-                timeout=None, pcap_out=monitor_file, blocking=False)
+                timeout=None, pcap_out=self.startup_file, blocking=False)
         track_ref(self.tcp_monitor.stream(), 'tcpdump %d' % self.port_set)
         self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_error(Exception('startup scan hangup')), error=lambda e: self.monitor_error(e))
@@ -333,10 +333,20 @@ class ConnectedHost():
         self.state_transition(self.READY_STATE, self.MONITOR_STATE)
         self.run_next_test()
 
+    def dump_startup_monitor(self):
+        self.monitor_cleanup()
+        print self.networking.cmd('tcpdump -en -r %s ip' % self.startup_file)
+
     def base_tests(self):
         self.record_result('base', state='run')
-        assert self.pingTest(self.networking, self.target_ip), 'simple ping failed'
-        assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target), 'target ping failed'
+        if not self.pingTest(self.networking, self.target_ip):
+            logger.debug('Set %d warmup ping failed' % self.port_set)
+        try:
+            assert self.pingTest(self.networking, self.target_ip), 'simple ping failed'
+            assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target), 'target ping failed'
+        except:
+            self.dump_startup_monitor()
+            raise
         self.record_result('base')
 
     def run_next_test(self):
