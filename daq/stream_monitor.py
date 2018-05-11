@@ -17,7 +17,7 @@ class StreamMonitor():
     callbacks = None
     idle_handler = None
     loop_hook = None
-    set_modifed = False
+    dirty = False
 
     def __init__(self, timeout_ms=None, idle_handler=None, loop_hook=None):
         self.timeout_ms = timeout_ms
@@ -39,7 +39,6 @@ class StreamMonitor():
         logging.debug('Monitoring start %s fd %d' % (name, fd))
         self.callbacks[fd] = (name, callback, hangup, error)
         self.poller.register(fd, POLLHUP | POLLIN)
-        self.set_modifed = True
         self.log_monitors()
 
     def copy_data(self, name, data_source, data_sink):
@@ -59,7 +58,7 @@ class StreamMonitor():
         logging.debug('Monitoring stop fd %d' % fd)
         del self.callbacks[fd]
         self.poller.unregister(fd)
-        self.set_modifed = True
+        self.dirty = True
         self.log_monitors()
 
     def log_monitors(self):
@@ -123,7 +122,7 @@ class StreamMonitor():
                 logging.error('Monitoring exception in callback: %s' % e)
                 logging.exception(e)
             self.log_monitors()
-            self.set_modified = False
+            self.dirty = False
             fds = self.poller.poll(self.timeout_ms)
             logging.debug('Monitoring found fds %s' % fds)
             if fds:
@@ -136,7 +135,7 @@ class StreamMonitor():
                         self.trigger_hangup(fd, event)
                     else:
                         assert False, "Unknown event type %d on fd %d" % (event, fd)
-                    if self.set_modified:
+                    if self.dirty:
                         logging.debug('Monitoring set modified, re-issuing poll...')
                         break
             else:
