@@ -246,8 +246,8 @@ class ConnectedHost():
     def dhcp_monitor(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
         self.record_result(self.dhcp_name(), state='run')
-        logger.info('Set %d waiting for dhcp reply from %s...' %
-                     (self.port_set, self.networking.name))
+        logger.info('Set %d waiting for %s reply from %s...' %
+                     (self.port_set, self.dhcp_name(), self.networking.name))
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
                     timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
@@ -277,8 +277,8 @@ class ConnectedHost():
 
     def dhcp_success(self):
         self.dhcp_cleanup()
-        logger.info('Set %d received dhcp reply: %s is at %s' %
-            (self.port_set, self.target_mac, self.target_ip))
+        logger.info('Set %d received %s reply: %s is at %s' %
+            (self.port_set, self.dhcp_name(), self.target_mac, self.target_ip))
         self.record_result(self.dhcp_name(), info=self.target_mac, ip=self.target_ip)
         while self.dhcp_retry():
             self.record_result(self.dhcp_name(), state='skip')
@@ -295,7 +295,7 @@ class ConnectedHost():
         return self.dhcp_try <= self.DHCP_RETRIES
 
     def dhcp_error(self, e):
-        logger.error('Set %d dhcp error: %s' % (self.port_set, e))
+        logger.error('Set %d %s error: %s' % (self.port_set, self.dhcp_name(), e))
         self.record_result(self.dhcp_name(), exception=e)
         self.dhcp_cleanup(forget=False)
         if self.dhcp_retry():
