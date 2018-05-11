@@ -758,9 +758,12 @@ class DAQRunner():
                 result = result_set[result_key]
                 exception = 'exception' if 'exception' in result and result['exception'] else None
                 code = int(result['code']) if 'code' in result else 0
-                status = exception if exception else code if result['name'] != 'fail' else not code
+                name = result['name']
+                if exception and name.startswith('dhcp-') and name[5:] != ConnectedHost.DHCP_RETRIES:
+                    exception = None
+                status = exception if exception else code if name != 'fail' else not code
                 if status != 0:
-                    results.append('%02d:%s:%s' % (result_set_key, result['name'], status))
+                    results.append('%02d:%s:%s' % (result_set_key, name, status))
         return results
 
     def finalize(self):
