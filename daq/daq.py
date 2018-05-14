@@ -3,6 +3,7 @@
 """Device Automated Qualification testing framework"""
 
 import logging
+import math
 import os
 import random
 import re
@@ -69,8 +70,8 @@ class ConnectedHost():
     DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
-    DHCP_RETRIES = 3
-    DHCP_TIMEOUT_SEC = 40
+    DHCP_TIMEOUT_SEC = 120
+    DHCP_THRESHHOLD_SEC = 20
 
     ERROR_STATE = -1
     INIT_STATE = 0
@@ -84,7 +85,7 @@ class ConnectedHost():
     DONE_STATE = 8
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
-    TEST_ORDER = [ 'startup', 'sanity', 'dhcp-1', 'dhcp-2', 'dhcp-3', 'base',
+    TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'base',
             'monitor' ] + TEST_LIST + [ 'finish', 'info', 'timer' ]
 
     runner = None
@@ -94,15 +95,15 @@ class ConnectedHost():
     target_mac = None
     networking = None
     dummy = None
-    state = None
+    state = ERROR_STATE
     results = None
     running_test = None
     remaining_tests = None
     run_id = None
-    run_state = 'sanity'
+    test_name = 'unknown'
+    test_start = None
     tcp_monitor = None
     dhcp_traffic = None
-    dhcp_try = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -240,14 +241,10 @@ class ConnectedHost():
         self.runner.monitor.monitor('tcpdump', self.tcp_monitor.stream(), lambda: self.tcp_monitor.next_line(),
                 hangup=lambda: self.monitor_error(Exception('startup scan hangup')), error=lambda e: self.monitor_error(e))
 
-    def dhcp_name(self):
-        return 'dhcp-%d' % self.dhcp_try
-
     def dhcp_monitor(self):
         self.state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
-        self.record_result(self.dhcp_name(), state='run')
-        logger.info('Set %d waiting for %s reply from %s...' %
-                     (self.port_set, self.dhcp_name(), self.networking.name))
+        self.record_result('dhcp', state='run')
+        logger.info('Set %d waiting for dhcp reply from %s...' % (self.port_set, self.networking.name))
         filter="src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, filter, packets=None,
                     timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
@@ -263,7 +260,7 @@ class ConnectedHost():
         if match:
             self.target_ip = match.group(4)
             if self.target_ip:
-                assert self.target_mac, 'dhcp IP %d found, but no MAC address' % self.taret_ip
+                assert self.target_mac, 'dhcp IP %d found, but no MAC address: %s' % (self.target_ip, dhcp_line)
                 self.dhcp_success()
             else:
                 self.target_mac = match.group(2)
@@ -277,11 +274,12 @@ class ConnectedHost():
 
     def dhcp_success(self):
         self.dhcp_cleanup()
-        logger.info('Set %d received %s reply: %s is at %s' %
-            (self.port_set, self.dhcp_name(), self.target_mac, self.target_ip))
-        self.record_result(self.dhcp_name(), info=self.target_mac, ip=self.target_ip)
-        while self.dhcp_retry():
-            self.record_result(self.dhcp_name(), state='skip')
+        delta = int(time.time()) - self.test_start
+        logger.info('Set %d received dhcp reply after %ds: %s is at %s' %
+            (self.port_set, delta, self.target_mac, self.target_ip))
+        weak_result = delta > self.DHCP_THRESHHOLD_SEC
+        state = 'weak' if weak_result else None
+        self.record_result('dhcp', info=self.target_mac, ip=self.target_ip, state=state)
         self.state_transition(self.PREMON_STATE, self.DHCP_STATE)
 
     def dhcp_hangup(self):
@@ -290,21 +288,13 @@ class ConnectedHost():
         except Exception as e:
             self.dhcp_error(e)
 
-    def dhcp_retry(self):
-        self.dhcp_try += 1
-        return self.dhcp_try <= self.DHCP_RETRIES
-
     def dhcp_error(self, e):
-        logger.error('Set %d %s error: %s' % (self.port_set, self.dhcp_name(), e))
-        self.record_result(self.dhcp_name(), exception=e)
+        logger.error('Set %d dhcp error: %s' % (self.port_set, e))
+        self.record_result('dhcp', exception=e)
         self.dhcp_cleanup(forget=False)
-        if self.dhcp_retry():
-            self.state_transition(self.ACTIVE_STATE, self.DHCP_STATE)
-            self.dhcp_monitor()
-        else:
-            self.state_transition(self.ERROR_STATE, self.DHCP_STATE)
-            self.runner.target_set_error(self.port_set, e)
-            self.terminate()
+        self.state_transition(self.ERROR_STATE, self.DHCP_STATE)
+        self.runner.target_set_error(self.port_set, e)
+        self.terminate()
 
     def monitor_start(self):
         self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
@@ -375,8 +365,7 @@ class ConnectedHost():
 
     def docker_test(self, test_name):
         logger.info('Set %d running docker test %s' % (self.port_set, test_name))
-        self.test_name = test_name
-        self.record_result(self.test_name, state='run')
+        self.record_result(test_name, state='run')
         port = self.pri_base + self.TEST_OFFSET
         gateway = self.networking
         image = self.IMAGE_NAME_FORMAT % test_name
@@ -444,17 +433,22 @@ class ConnectedHost():
         self.run_next_test()
 
     def record_result(self, name, **kwargs):
+        current = int(time.time())
+        if name != self.test_name:
+            logger.debug('Set %d starting test %s at %d' % (self.port_set, self.test_name, current))
+            self.test_name = name
+            self.test_start = current
         result = {
             'name': name,
             'runid': self.run_id,
-            'timestamp': int(time.time()),
+            'started': self.test_start,
+            'timestamp': current,
             'port': self.port_set
         }
         for arg in kwargs:
             result[arg] = None if kwargs[arg] == None else str(kwargs[arg])
         self.results[name] = result
         self.runner.gcp.publish_message('daq_runner', result)
-        self.run_state = name
 
 class DAQRunner():
 
@@ -724,7 +718,7 @@ class DAQRunner():
         logger.exception(e)
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
-            target_set.record_result(target_set.run_state, exception=e)
+            target_set.record_result(target_set.test_name, exception=e)
             target_set.terminate(trigger=False)
             self.target_set_complete(target_set)
         else:
@@ -759,8 +753,6 @@ class DAQRunner():
                 exception = 'exception' if 'exception' in result and result['exception'] else None
                 code = int(result['code']) if 'code' in result else 0
                 name = result['name']
-                if exception and name.startswith('dhcp-') and name[5:] != str(ConnectedHost.DHCP_RETRIES):
-                    exception = None
                 status = exception if exception else code if name != 'fail' else not code
                 if status != 0:
                     results.append('%02d:%s:%s' % (result_set_key, name, status))
