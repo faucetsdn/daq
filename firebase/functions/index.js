@@ -1,10 +1,26 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-const expiry_ms = 1000 * 60 * 60 * 24;
+const EXPIRY_MS = 1000 * 60 * 60 * 24;
 
 admin.initializeApp(functions.config().firebase);
 var db = admin.firestore();
+
+function deleteRun(port, port_doc, runid) {
+  const rundoc = port_doc.collection('runid').doc(runid);
+  rundoc.collection('test').get().then(function(snapshot) {
+    snapshot.forEach(function(run_test) {
+      console.log('Deleting', port, runid, run_test.id);
+      rundoc.collection('test').doc(run_test.id)
+        .delete().catch((error) => {
+          console.error('Error deleting', port, runid, run_test.id, error);
+        });
+    });
+  });
+  rundoc.delete().catch((error) => {
+    console.error('Error deleting', port, runid, error);
+  });
+}
 
 exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) => {
   const message = event.json;
@@ -12,7 +28,7 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   const port = 'port-' + message.port;
   const timestr = new Date().toTimeString();
   const timestamp = Date.now();
-  const expired = timestamp - expiry_ms;
+  const expired = timestamp - EXPIRY_MS;
 
   console.log('updating', timestamp, origin, port, message.runid, message.name);
 
@@ -29,10 +45,7 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
     port_doc.collection('runid').where('timestamp', '<', expired)
       .get().then(function(snapshot) {
         snapshot.forEach(function(old_doc) {
-          const del_doc = port_doc.collection('runid').doc(old_doc.id);
-          del_doc.delete().catch((error) => {
-            console.error('Error deleting doc ', old_doc.id, error);
-          });
+          deleteRun(port, port_doc, old_doc.id)
         });
       });
   } else {
