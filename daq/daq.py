@@ -260,7 +260,7 @@ class ConnectedHost():
         if match:
             self.target_ip = match.group(4)
             if self.target_ip:
-                assert self.target_mac, 'dhcp IP %d found, but no MAC address: %s' % (self.target_ip, dhcp_line)
+                assert self.target_mac, 'dhcp IP %s found, but no MAC address: %s' % (self.target_ip, dhcp_line)
                 self.dhcp_success()
             else:
                 self.target_mac = match.group(2)
