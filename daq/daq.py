@@ -227,8 +227,12 @@ class ConnectedHost():
         failure="ping FAILED"
         assert b_ip != "0.0.0.0", "IP address not assigned, can't ping"
         src_opt = '-I %s' % src_addr if src_addr else ''
-        output = a.cmd('ping -c2', src_opt, b_ip, '> /dev/null 2>&1 || echo ', failure).strip()
-        return output.strip() != failure
+        try:
+            output = a.cmd('ping -c2', src_opt, b_ip, '> /dev/null 2>&1 || echo ', failure).strip()
+            return output.strip() != failure
+        except Exception as e:
+            logger.info('Set %d ping failure: %s' % (self.port_set, e))
+            return False
 
     def startup_scan(self):
         assert not self.tcp_monitor, 'tcp_monitor already active'
@@ -298,11 +302,14 @@ class ConnectedHost():
         self.terminate()
 
     def monitor_start(self):
-        self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
-        self.base_tests()
-        self.monitor_cleanup()
-        logger.info('Set %d done with startup monitor.' % self.port_set)
-        self.monitor_scan()
+        try:
+            self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
+            self.base_tests()
+            self.monitor_cleanup()
+            logger.info('Set %d done with startup monitor.' % self.port_set)
+            self.monitor_scan()
+        except Exception as e:
+            self.monitor_error(e)
 
     def monitor_cleanup(self, forget=True):
         if self.tcp_monitor:
@@ -751,7 +758,7 @@ class DAQRunner():
             result_set = self.result_sets[result_set_key]
             for result_key in result_set:
                 result = result_set[result_key]
-                exception = 'exception' if 'exception' in result and result['exception'] else None
+                exception = 'exception' if 'exception' in result and result['exception'] != None else None
                 code = int(result['code']) if 'code' in result else 0
                 name = result['name']
                 status = exception if exception else code if name != 'fail' else not code
