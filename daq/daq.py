@@ -256,6 +256,7 @@ class ConnectedHost():
         dhcp_line = self.dhcp_traffic.next_line()
         if not dhcp_line:
             return
+        print dhcp_line.strip()
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
             self.target_ip = match.group(4)
