@@ -70,7 +70,7 @@ class ConnectedHost():
     DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
-    DHCP_TIMEOUT_SEC = 120
+    DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 20
 
     ERROR_STATE = -1

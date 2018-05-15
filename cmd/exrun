@@ -58,7 +58,7 @@ for intf in $intfs; do
         cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
     fi
 
-    ip addr show $intf || true
+    ip -br addr show $intf || true
 
     # If running inside of a container, wait until the host test interface shows up...
     if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
