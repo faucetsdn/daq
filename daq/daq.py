@@ -217,7 +217,7 @@ class ConnectedHost():
         elif self.state == self.ACTIVE_STATE:
             self.dhcp_monitor()
         elif self.state == self.PREMON_STATE:
-            self.monitor_start()
+            self.base_start()
 
     def pingTest(self, a, b, src_addr=None):
         b_name = b if isinstance(b, str) else b.name
@@ -301,12 +301,19 @@ class ConnectedHost():
         self.runner.target_set_error(self.port_set, e)
         self.terminate()
 
-    def monitor_start(self):
+    def base_start(self):
         try:
             self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
             self.base_tests()
             self.monitor_cleanup()
-            logger.info('Set %d done with startup monitor.' % self.port_set)
+            logger.info('Set %d done with base.' % self.port_set)
+        except Exception as e:
+            self.monitor_cleanup()
+            self.monitor_error(e)
+        self.monitor_start()
+
+    def monitor_start(self):
+        try:
             self.monitor_scan()
         except Exception as e:
             self.monitor_error(e)
@@ -322,7 +329,7 @@ class ConnectedHost():
     def monitor_error(self, e):
         logger.error('Set %d monitor error: %s' % (self.port_set, e))
         self.monitor_cleanup(forget=False)
-        self.record_result('monitor', exception=e)
+        self.record_result(self.test_name, exception=e)
         self.runner.target_set_error(self.port_set, e)
 
     def monitor_scan(self):
