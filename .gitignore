@@ -9,6 +9,7 @@ inst/
 faucet/
 mininet/
 local/
+firebase/.firebaserc
 firebase/functions/node_modules/
 firebase/functions/package-lock.json
 nohup.out

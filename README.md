@@ -54,10 +54,11 @@ setup documentation](docs/switches.md) for more details.
 ## Testing Dashboard
 
 The (optional) cloud dashboard requires a service-account certification to grant authorization.
-First, obtaining a new certificate for a page on an already existing cloud project: contact the
-project owner to do this.  Alternatively set up a new project by following the
+Contact the project owner to obtain a new certificate for a testing dashboard page on an already
+existing cloud project. Alternatively set up a new project by following the
 [Firebase install instructions](docs/firebase.md). The `bin/stress_test` script is useful for
-setting up a continous testing environment. Mainly, it pipes the output into a rotating set of logfiles.
+setting up a continous testing environment: it runs in the background and pipes the output
+into a rotating set of logfiles.
 
 ## Debugging
 
