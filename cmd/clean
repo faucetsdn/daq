@@ -2,17 +2,14 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 
-# Sanity check to make sure this doesn't do something bad.
-test -d $ROOT/daq
-
-sudo rm -rf $ROOT/inst $ROOT/build
+test -d $ROOT/daq && sudo rm -rf $ROOT/inst $ROOT/build
 
 docker ps -aq --no-trunc | xargs -r docker rm || true
 
-docker rmi daqf/runner || true
+docker images | egrep ^daqf/ | awk '{print $1":"$2}' | xargs docker rmi || true
 
-docker images | fgrep daq/ | awk '{print $1}' | xargs docker rmi || true
+docker images | egrep ^daq/ | awk '{print $1":"$2}' | xargs docker rmi || true
 
 docker images -q --filter dangling=true | xargs -r docker rmi || true
 
-docker container prune -f
+docker system prune -f
