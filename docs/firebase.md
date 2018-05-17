@@ -15,7 +15,8 @@ of test results.
 4. Install the downloaded key into your install.
    * Copy the download JSON key file to the `daq/local/` directory.
    * Edit `daq/local/system.conf` to specify the `gcp_cred` setting to point to the downloaded file
-     (with a path relative to the `daq/` install directory).
+     (with a path relative to the `daq/` install directory), e.g.
+     `gcp_cred=local/bos-daq-testing-de56aa4b1e47.json`.
 5. (Re)Start the DAQ install.
    * There should be something in the top 10-20 startup log lines that look something like:
      <br>`INFO:gcp:Loading gcp credentials from local/bos-daq-testing-de56aa4b1e47.json`
@@ -23,9 +24,5 @@ of test results.
 6. Follow the [Firebase CLI setup instructions](https://firebase.google.com/docs/cli/).
 7. Goto the 'daq/firebase/` directory.
    * Run `firebase use` to set the GCP project to use (as created above).
-   * Run`firebase deploy` to deploy the Cloud Functions and static hosting pages.
-   * Follow the link to the _Hosting URL_ to see the newly installed pages.
-
-
-
-
+   * Run `firebase deploy` to deploy the Cloud Functions and static hosting pages.
+   * Follow the link to the indicated _Hosting URL_ to see the newly installed pages.
