@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 IMAGE=daq/faux
-local_config=system.conf
+local_config=$ROOT/local/system.conf
 postfix=
 
 # If the first argument is a number, then it's a port designation.

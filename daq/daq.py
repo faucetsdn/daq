@@ -78,11 +78,11 @@ class ConnectedHost():
     STARTUP_STATE = 1
     ACTIVE_STATE = 2
     DHCP_STATE = 3
-    PREMON_STATE = 4
-    MONITOR_STATE = 5
-    READY_STATE = 6
-    TESTING_STATE = 7
-    DONE_STATE = 8
+    BASE_STATE = 4
+    MONITOR_STATE = 6
+    READY_STATE = 7
+    TESTING_STATE = 8
+    DONE_STATE = 9
 
     TEST_LIST = [ 'pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee' ]
     TEST_ORDER = [ 'startup', 'sanity', 'dhcp', 'base',
@@ -176,12 +176,12 @@ class ConnectedHost():
         except Exception as e:
             logger.error('Set %d sanity error: %s' % (self.port_set, e))
             logger.exception(e)
-            self.state_transition(self.ERROR_STATE)
             self.record_result('sanity', exception=e);
             self.terminate()
 
     def terminate(self, trigger=True):
         logger.info('Set %d terminate, trigger %s' % (self.port_set, trigger))
+        self.state_transition(self.ERROR_STATE)
         self.dhcp_cleanup()
         self.monitor_cleanup()
         if self.networking:
@@ -216,7 +216,7 @@ class ConnectedHost():
             self.activate()
         elif self.state == self.ACTIVE_STATE:
             self.dhcp_monitor()
-        elif self.state == self.PREMON_STATE:
+        elif self.state == self.BASE_STATE:
             self.base_start()
 
     def pingTest(self, a, b, src_addr=None):
@@ -284,7 +284,7 @@ class ConnectedHost():
         weak_result = delta > self.DHCP_THRESHHOLD_SEC
         state = 'weak' if weak_result else None
         self.record_result('dhcp', info=self.target_mac, ip=self.target_ip, state=state)
-        self.state_transition(self.PREMON_STATE, self.DHCP_STATE)
+        self.state_transition(self.BASE_STATE, self.DHCP_STATE)
 
     def dhcp_hangup(self):
         try:
@@ -302,19 +302,12 @@ class ConnectedHost():
 
     def base_start(self):
         try:
-            self.state_transition(self.PREMON_STATE, self.PREMON_STATE)
             self.base_tests()
             self.monitor_cleanup()
             logger.info('Set %d done with base.' % self.port_set)
-        except Exception as e:
-            self.monitor_cleanup()
-            self.monitor_error(e)
-        self.monitor_start()
-
-    def monitor_start(self):
-        try:
             self.monitor_scan()
         except Exception as e:
+            self.monitor_cleanup()
             self.monitor_error(e)
 
     def monitor_cleanup(self, forget=True):
@@ -332,7 +325,7 @@ class ConnectedHost():
         self.runner.target_set_error(self.port_set, e)
 
     def monitor_scan(self):
-        self.state_transition(self.MONITOR_STATE, self.PREMON_STATE)
+        self.state_transition(self.MONITOR_STATE, self.BASE_STATE)
         self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
         logger.info('Set %d background scan for %d seconds...' %
                      (self.port_set, self.MONITOR_SCAN_SEC))
