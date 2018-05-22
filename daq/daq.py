@@ -346,10 +346,6 @@ class ConnectedHost():
         self.state_transition(self.READY_STATE, self.MONITOR_STATE)
         self.run_next_test()
 
-    def dump_startup_monitor(self):
-        self.monitor_cleanup()
-        print self.networking.cmd('tcpdump -en -r %s ip' % self.startup_file)
-
     def base_tests(self):
         self.record_result('base', state='run')
         if not self.pingTest(self.networking, self.target_ip):
@@ -358,7 +354,7 @@ class ConnectedHost():
             assert self.pingTest(self.networking, self.target_ip), 'simple ping failed'
             assert self.pingTest(self.networking, self.target_ip, src_addr=self.fake_target), 'target ping failed'
         except:
-            self.dump_startup_monitor()
+            self.monitor_cleanup()
             raise
         self.record_result('base')
 
@@ -819,12 +815,6 @@ def parse_args(args):
     return config
 
 
-def print_files():
-    print '%d file_references' % len(file_references)
-    with open('inst/file_refs.txt', 'w') as out:
-        for ref in file_references:
-            out.write('fd %d #%d %s %s\n' % (ref[0], sys.getrefcount(ref[1]), ref[2], ref[1]))
-
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
 
@@ -840,5 +830,4 @@ if __name__ == '__main__':
     runner.main_loop()
     runner.cleanup()
     returncode = runner.finalize()
-    print_files()
     sys.exit(returncode)
