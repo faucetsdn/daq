@@ -102,7 +102,7 @@ class ConnectedHost():
         logger.debug("Adding networking host on port %d" % networking_port)
         cls=MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
         try:
-            self.networking = self.runner.addHost(networking_name, port=networking_port,
+            self.networking = self.runner.add_host(networking_name, port=networking_port,
                 cls=cls, tmpdir=self.tmpdir)
             self.record_result('startup')
         except:
@@ -130,7 +130,7 @@ class ConnectedHost():
 
             dummy_name = 'dummy%02d' % self.port_set
             dummy_port = self.pri_base + self.DUMMY_OFFSET
-            self.dummy = self.runner.addHost(dummy_name, port=dummy_port)
+            self.dummy = self.runner.add_host(dummy_name, port=dummy_port)
             dummy = self.dummy
 
             self.fake_target = self.TEST_IP_FORMAT % random.randint(10,99)
@@ -161,7 +161,7 @@ class ConnectedHost():
         if self.networking:
             try:
                 self.networking.terminate()
-                self.runner.removeHost(self.networking)
+                self.runner.remove_host(self.networking)
                 self.networking = None
             except Exception as e:
                 logger.error('Set %d terminating networking: %s' % (self.port_set, e))
@@ -169,7 +169,7 @@ class ConnectedHost():
         if self.dummy:
             try:
                 self.dummy.terminate()
-                self.runner.removeHost(self.dummy)
+                self.runner.remove_host(self.dummy)
                 self.dummy = None
             except Exception as e:
                 logger.error('Set %d terminating dummy: %s' % (self.port_set, e))
@@ -177,7 +177,7 @@ class ConnectedHost():
         if self.running_test:
             try:
                 self.running_test.terminate()
-                self.runner.removeHost(self.running_test)
+                self.runner.remove_host(self.running_test)
                 self.running_test = None
             except Exception as e:
                 logger.error('Set %d terminating test: %s' % (self.port_set, e))
@@ -354,7 +354,7 @@ class ConnectedHost():
 
         logger.debug("Set %d running docker test %s" % (self.port_set, image))
         cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
-        host = self.runner.addHost(host_name, port=port, cls=cls, env_vars = env_vars,
+        host = self.runner.add_host(host_name, port=port, cls=cls, env_vars = env_vars,
             vol_maps=vol_maps, tmpdir=self.tmpdir)
         try:
             pipe = host.activate(log_name = None)
@@ -364,7 +364,7 @@ class ConnectedHost():
                 hangup=lambda: self.docker_complete(), error=lambda e: self.docker_error(e))
         except:
             host.terminate()
-            self.runner.removeHost(host)
+            self.runner.remove_host(host)
             raise
         self.docker_host = host
         return host
@@ -377,7 +377,7 @@ class ConnectedHost():
 
     def docker_finalize(self):
         if self.docker_host:
-            self.runner.removeHost(self.docker_host)
+            self.runner.remove_host(self.docker_host)
             return_code = self.docker_host.terminate()
             self.docker_host = None
             self.docker_log.close()
