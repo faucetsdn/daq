@@ -11,17 +11,26 @@ echo Saving complete results to $RESULTS
 rm -f $RESULTS
 
 failure=
+results=
 for file in daq/*.py; do
     echo Checking $file >> $RESULTS
-    score=$(pylint --rcfile=$PYLINTRC $file | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
+    score=$(pylint --rcfile=$PYLINTRC $file 2>&1 | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
     echo $file $score
-    if [ -n "$score" -a "${score%%.*}" -lt $MINIMUM_SCORE ]; then
-        failure=true
+    if [ -n "$score" ]; then
+        results=true
+        if [ "${score%%.*}" -lt $MINIMUM_SCORE ]; then
+            failure=true
+        fi
     fi
 done
 
 if [ -n "$failure" ]; then
     echo pylint failed to achieve a minimum score of $MINIMUM_SCORE.
+    false
+fi
+
+if [ -z "$results" ]; then
+    echo No results reported, that ain\'t right.
     false
 fi
 
