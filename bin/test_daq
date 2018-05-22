@@ -64,3 +64,8 @@ elif [ -n "$failed" ]; then
     echo Test failed.
     false
 fi
+
+if [ -z "$DAQ_MODE" ]; then
+    echo Running style checks...
+    bin/check_style
+fi
