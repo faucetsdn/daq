@@ -5,6 +5,8 @@ RESULTS=local/lint_results.txt
 MINIMUM_SCORE=10
 PYLINTRC=$ROOT/.pylintrc
 
+cd $ROOT
+
 echo Saving complete results to $RESULTS
 rm -f $RESULTS
 
