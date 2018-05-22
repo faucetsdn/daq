@@ -1,0 +1,27 @@
+#!/bin/bash -e
+
+RESULTS=local/lint_results.txt
+PYLINT_ARGS="--disable=F0401 --disable=R0201 -f parseable"
+MINIMUM_SCORE=9
+
+echo Saving complete results to $RESULTS
+rm -f $RESULTS
+
+failure=
+for file in daq/*.py; do
+    echo Checking $file >> $RESULTS
+    score=$(pylint $PYLINT_ARGS $file 2>/dev/null | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
+    if [ -n "$score" ]; then
+        echo $score $file
+        if [ "${score%%.*}" -lt $MINIMUM_SCORE ]; then
+            failure=true
+        fi
+    fi
+done
+
+if [ -n "$failure" ]; then
+    echo pylint check failed.
+    false
+fi
+
+echo Success.
