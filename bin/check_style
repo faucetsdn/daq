@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
+ROOT=$(realpath $(dirname $0)/..)
 RESULTS=local/lint_results.txt
-PYLINT_ARGS="--disable=F0401 --disable=R0201 -f parseable"
-MINIMUM_SCORE=9
+MINIMUM_SCORE=10
+PYLINTRC=$ROOT/.pylintrc
 
 echo Saving complete results to $RESULTS
 rm -f $RESULTS
@@ -10,7 +11,7 @@ rm -f $RESULTS
 failure=
 for file in daq/*.py; do
     echo Checking $file >> $RESULTS
-    score=$(pylint $PYLINT_ARGS $file 2>/dev/null | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
+    score=$(pylint --rcfile=$PYLINTRC $file 2>&1 | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
     if [ -n "$score" ]; then
         echo $score $file
         if [ "${score%%.*}" -lt $MINIMUM_SCORE ]; then
@@ -20,7 +21,7 @@ for file in daq/*.py; do
 done
 
 if [ -n "$failure" ]; then
-    echo pylint check failed.
+    echo pylint failed to achieve a minimum score of $MINIMUM_SCORE.
     false
 fi
 
