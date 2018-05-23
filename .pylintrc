@@ -1,4 +1,5 @@
 [MASTER]
 good-names=fd,e
 output-format=parseable
-disable=F0401,R0201,R0902
+disable=F0401,R0201,R0902,W0703
+max-line-length=100

@@ -229,13 +229,11 @@ class DAQRunner():
         try:
             LOGGER.debug("Stopping faucet...")
             self.pri.cmd('docker kill daq-faucet')
-        #pylint: disable-msg=broad-except
         except Exception as e:
             LOGGER.error('Exception: %s', e)
         try:
             LOGGER.debug("Stopping mininet...")
             self.net.stop()
-        #pylint: disable-msg=broad-except
         except Exception as e:
             LOGGER.error('Exception: %s', e)
         LOGGER.info("Done with runner.")
@@ -265,7 +263,6 @@ class DAQRunner():
         for target_set in self.target_sets.values():
             try:
                 target_set.idle_handler()
-            #pylint: disable-msg=broad-except
             except Exception as e:
                 self.target_set_error(target_set.port_set, e)
         if not self.event_start and not self.one_shot:
@@ -301,7 +298,6 @@ class DAQRunner():
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
             self.monitor.event_loop()
-        #pylint: disable-msg=broad-except
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
             LOGGER.exception(e)
@@ -322,7 +318,6 @@ class DAQRunner():
             LOGGER.debug('Trigger target set %d', port_set)
             self.target_sets[port_set] = ConnectedHost(self, port_set)
             self._send_heartbeat()
-        #pylint: disable-msg=broad-except
         except Exception as e:
             self.target_set_error(port_set, e)
 

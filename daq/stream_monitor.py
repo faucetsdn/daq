@@ -87,7 +87,6 @@ class StreamMonitor():
             else:
                 logging.debug('Monitoring flush fd %d (%s)', fd, name)
                 os.read(fd, 1024)
-        #pylint: disable-msg=broad-except
         except Exception as e:
             if fd in self.callbacks:
                 self.forget(fd)
@@ -106,7 +105,6 @@ class StreamMonitor():
                 logging.debug('Monitoring hangup fd %d done (%s)', fd, name)
             else:
                 logging.debug('Monitoring no hangup fd %d because %d (%s)', fd, event, name)
-        #pylint: disable-msg=broad-except
         except Exception as e:
             self.error_handler(fd, e, name, on_error)
 
@@ -141,7 +139,6 @@ class StreamMonitor():
                         return False
                 if self.loop_hook:
                     self.loop_hook()
-            #pylint: disable-msg=broad-except
             except Exception as e:
                 logging.error('Monitoring exception in callback: %s', e)
                 logging.exception(e)
