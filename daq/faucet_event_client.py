@@ -6,7 +6,7 @@ import select
 import socket
 import time
 
-class FaucetEventClient():
+class FaucetEventClient(object):
     """A general client interface to the FAUCET event API"""
 
     FAUCET_RETRIES = 10
@@ -35,8 +35,8 @@ class FaucetEventClient():
 
     def has_data(self):
         """Check to see if the event socket has any data to read"""
-        read_socks, _write_socks, _error_socks = select.select([self.sock], [], [], 0)
-        return read_socks
+        read, dummy_write, dummy_error = select.select([self.sock], [], [], 0)
+        return read
 
     def has_event(self, blocking=False):
         """Check if there are any queued events"""
@@ -82,7 +82,7 @@ class FaucetEventClient():
 
     def as_ports_status(self, event):
         """Convert the event to a port status event, if applicable"""
-        if not event or not 'PORTS_STATUS' in event:
+        if not event or 'PORTS_STATUS' not in event:
             return (None, None)
         return (event['dp_id'], event['PORTS_STATUS'])
 
@@ -99,12 +99,12 @@ class FaucetEventClient():
 
     def as_port_state(self, event):
         """Convert event to a port_state event, if applicable"""
-        if not event or not 'PORT_CHANGE' in event:
+        if not event or 'PORT_CHANGE' not in event:
             return (None, None, None)
         dpid = event['dp_id']
         reason = event['PORT_CHANGE']['reason']
         port_no = int(event['PORT_CHANGE']['port_no'])
-        port_active = event['PORT_CHANGE']['status'] and not reason == 'DELETE'
+        port_active = event['PORT_CHANGE']['status'] and reason != 'DELETE'
         return (dpid, port_no, port_active)
 
     def close(self):

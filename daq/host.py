@@ -13,7 +13,7 @@ from clib.tcpdump_helper import TcpdumpHelper
 
 LOGGER = logging.getLogger('host')
 
-class ConnectedHost():
+class ConnectedHost(object):
     """Class managing a device-under-test"""
 
     NETWORKING_OFFSET = 0

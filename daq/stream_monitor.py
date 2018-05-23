@@ -6,7 +6,7 @@ import os
 
 from select import poll, POLLIN, POLLHUP, POLLNVAL, POLLERR
 
-class StreamMonitor():
+class StreamMonitor(object):
     """Monitor set of stream objects"""
 
     DEFAULT_TIMEOUT_MS = None
@@ -29,10 +29,10 @@ class StreamMonitor():
         return target.fileno() if 'fileno' in dir(target) else target
 
     def monitor(self, name, desc, callback=None, hangup=None, copy_to=None, error=None):
-        #pylint: disable-msg=too-many-arguments
+        #pylint: disable=too-many-arguments
         """Start monitoring a specific descriptor"""
         fd = self.get_fd(desc)
-        assert not fd in self.callbacks, 'Duplicate descriptor fd %d' % fd
+        assert fd not in self.callbacks, 'Duplicate descriptor fd %d' % fd
         if copy_to:
             assert not callback, 'Both callback and copy_to set'
             self.make_nonblock(desc)

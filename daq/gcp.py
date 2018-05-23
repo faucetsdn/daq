@@ -8,7 +8,7 @@ from google.auth._default import _load_credentials_from_file
 
 LOGGER = logging.getLogger('gcp')
 
-class GcpManager():
+class GcpManager(object):
     """Manager class for working with GCP"""
 
     config = None
@@ -18,7 +18,7 @@ class GcpManager():
 
     def __init__(self, config):
         self.config = config
-        if not 'gcp_cred' in config:
+        if 'gcp_cred' not in config:
             LOGGER.info('No gcp_cred credential specified in config')
             return
         cred_file = self.config['gcp_cred']
@@ -35,7 +35,7 @@ class GcpManager():
         project = cred['project_id']
         assert project == self.project, 'inconsistent credential projects'
         client_email = cred['client_email']
-        (client, _other) = client_email.split('@', 2)
+        (client, dummy_other) = client_email.split('@', 2)
         return client
 
     def publish_message(self, topic, message):
@@ -43,7 +43,7 @@ class GcpManager():
         if not self.publisher:
             LOGGER.debug('Ignoring message publish: not configured')
             return
-        if not 'encode' in message:
+        if 'encode' not in message:
             message = json.dumps(message)
         LOGGER.debug('Sending to topic_path %s/%s: %s', self.project, topic, message)
         topic_path = self.publisher.topic_path(self.project, topic)

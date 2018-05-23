@@ -23,13 +23,13 @@ LOGGER = logging.getLogger('runner')
 
 class DAQHost(FaucetHostCleanup, Host):
     """Base Mininet Host class, for Mininet-based tests."""
-    #pylint: disable-msg=too-few-public-methods
+    #pylint: disable=too-few-public-methods
     pass
 
 
-class DummyNode():
+class DummyNode(object):
     """Dummy node used to handle shadow devices"""
-    #pylint: disable-msg=invalid-name
+    #pylint: disable=invalid-name
     def addIntf(self, node, port=None):
         """No-op for adding an interface"""
         pass
@@ -39,7 +39,7 @@ class DummyNode():
         pass
 
 
-class DAQRunner():
+class DAQRunner(object):
     """Main runner class controlling DAQ"""
 
     config = None
@@ -73,7 +73,7 @@ class DAQRunner():
         self.description = raw_description.strip("\"")
         self.version = os.environ['DAQ_VERSION']
 
-    #pylint: disable-msg=too-many-arguments
+    #pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
                  port=None, tmpdir=None):
         """Add a host to the ecosystem"""
@@ -259,7 +259,7 @@ class DAQRunner():
                 self.target_set_error(target_set.port_set, e)
         if not self.event_start and not self.one_shot:
             for port_set in self.active_ports:
-                if self.active_ports[port_set] and not port_set in self.target_sets:
+                if self.active_ports[port_set] and port_set not in self.target_sets:
                     self._trigger_target_set(port_set)
 
     def _loop_hook(self):
@@ -282,7 +282,6 @@ class DAQRunner():
         if self.flap_ports:
             self._flap_interface_ports()
 
-        self.exception = False
         try:
             self.monitor = StreamMonitor(idle_handler=self._handle_system_idle,
                                          loop_hook=self._loop_hook)
@@ -306,7 +305,7 @@ class DAQRunner():
         self._terminate()
 
     def _trigger_target_set(self, port_set):
-        assert not port_set in self.target_sets, 'target set %d already exists' % port_set
+        assert port_set not in self.target_sets, 'target set %d already exists' % port_set
         try:
             LOGGER.debug('Trigger target set %d', port_set)
             self.target_sets[port_set] = ConnectedHost(self, port_set)

@@ -12,7 +12,7 @@ from StringIO import StringIO
 from mininet import log as minilog
 from mininet.log import LEVELS, MininetLogger
 
-from daq.runner import DAQRunner
+from runner import DAQRunner
 
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
