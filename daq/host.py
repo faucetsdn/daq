@@ -244,7 +244,7 @@ class ConnectedHost():
     def dhcp_cleanup(self, forget=True):
         if self.dhcp_traffic:
             if forget:
-                self.runner.monitor.forget(self.dhcp_traffic.stream())
+                self.runner.monitor_forget(self.dhcp_traffic.stream())
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 

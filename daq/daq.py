@@ -30,21 +30,25 @@ ALT_LOG = logging.getLogger('mininet')
 
 
 class DAQHost(FaucetHostCleanup, Host):
-    #pylint: disable-msg=too-few-public-methods
     """Base Mininet Host class, for Mininet-based tests."""
+    #pylint: disable-msg=too-few-public-methods
     pass
 
 
 class DummyNode():
+    """Dummy node used to handle shadow devices"""
     #pylint: disable-msg=invalid-name
     def addIntf(self, node, port=None):
+        """No-op for adding an interface"""
         pass
 
     def cmd(self, cmd, *args, **kwargs):
+        """No-op for running a command"""
         pass
 
 
 class DAQRunner():
+    """Main runner class controlling DAQ"""
 
     config = None
     net = None
@@ -80,6 +84,7 @@ class DAQRunner():
     #pylint: disable-msg=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
                  port=None, tmpdir=None):
+        """Add a host to the ecosystem"""
         params = {'ip': ip_addr} if ip_addr else {}
         params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
         params['env_vars'] = env_vars if env_vars else []
@@ -90,34 +95,35 @@ class DAQRunner():
             host.switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
             if self.net.built:
                 host.configDefault()
-                self.switch_attach(self.pri, host.switch_link.intf1)
+                self._switch_attach(self.pri, host.switch_link.intf1)
         except:
             host.terminate()
             raise
         return host
 
-    def switch_attach(self, switch, intf):
+    def _switch_attach(self, switch, intf):
         switch.attach(intf)
         # This really should be done in attach, but currently only automatic on switch startup.
         switch.vsctl(switch.intfOpts(intf))
 
-    def switch_del_intf(self, switch, intf):
+    def _switch_del_intf(self, switch, intf):
         del switch.intfs[switch.ports[intf]]
         del switch.ports[intf]
         del switch.nameToIntf[intf.name]
 
     def remove_host(self, host):
+        """Remove a host from the ecosystem"""
         index = self.net.hosts.index(host)
         if index:
             del self.net.hosts[index]
         if host.switch_link:
             intf = host.switch_link.intf1
             self.pri.detach(intf)
-            self.switch_del_intf(self.pri, intf)
+            self._switch_del_intf(self.pri, intf)
             intf.delete()
             del self.net.links[self.net.links.index(host.switch_link)]
 
-    def make_device_intfs(self):
+    def _make_device_intfs(self):
         intf_names = self.config['daq_intf'].split(',')
         intfs = []
         for intf_name in intf_names:
@@ -128,24 +134,24 @@ class DAQRunner():
             intfs.append(intf)
         return intfs
 
-    def flush_faucet_events(self):
+    def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
         while self.faucet_events.next_event():
             pass
 
-    def flap_interface_ports(self):
+    def _flap_interface_ports(self):
         if self.device_intfs:
             for device_intf in self.device_intfs:
-                self.flap_interface_port(device_intf.name)
+                self._flap_interface_port(device_intf.name)
 
-    def flap_interface_port(self, intf_name):
+    def _flap_interface_port(self, intf_name):
         if intf_name.startswith('faux') or intf_name == 'local':
             LOGGER.info('Flapping device interface %s.', intf_name)
             self.sec.cmd('ip link set %s down' % intf_name)
             time.sleep(0.5)
             self.sec.cmd('ip link set %s up' % intf_name)
 
-    def create_secondary(self):
+    def _create_secondary(self):
         self.sec_port = int(self.config['ext_port'] if 'ext_port' in self.config else 47)
         if 'ext_dpid' in self.config:
             self.sec_dpid = int(self.config['ext_dpid'], 0)
@@ -165,7 +171,7 @@ class DAQRunner():
             LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
             self.sec_name = link.intf2.name
 
-    def send_heartbeat(self):
+    def _send_heartbeat(self):
         self.gcp.publish_message('daq_runner', {
             'name': 'status',
             'tests': ConnectedHost.TEST_ORDER,
@@ -176,7 +182,8 @@ class DAQRunner():
         })
 
     def initialize(self):
-        self.send_heartbeat()
+        """Initialize DAQ instance"""
+        self._send_heartbeat()
 
         LOGGER.debug("Creating miniet...")
         self.net = Mininet()
@@ -190,7 +197,7 @@ class DAQRunner():
             LOGGER.info('Faucet output: %s', output)
             assert False, 'Faucet startup failed'
 
-        self.create_secondary()
+        self._create_secondary()
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
@@ -201,12 +208,12 @@ class DAQRunner():
         self.net.start()
 
         if self.sec:
-            self.device_intfs = self.make_device_intfs()
+            self.device_intfs = self._make_device_intfs()
             for device_intf in self.device_intfs:
                 LOGGER.info("Attaching device interface %s on port %d.",
                             device_intf.name, device_intf.port)
                 self.sec.addIntf(device_intf, port=device_intf.port)
-                self.switch_attach(self.sec, device_intf)
+                self._switch_attach(self.sec, device_intf)
 
         LOGGER.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
@@ -218,6 +225,7 @@ class DAQRunner():
         LOGGER.debug('Done with initialization')
 
     def cleanup(self):
+        """Cleanup instance"""
         try:
             LOGGER.debug("Stopping faucet...")
             self.pri.cmd('docker kill daq-faucet')
@@ -232,7 +240,7 @@ class DAQRunner():
             LOGGER.error('Exception: %s', e)
         LOGGER.info("Done with runner.")
 
-    def handle_faucet_event(self):
+    def _handle_faucet_event(self):
         target_dpid = int(self.sec_dpid)
         while True:
             event = self.faucet_events.next_event()
@@ -247,13 +255,13 @@ class DAQRunner():
                         LOGGER.debug('Ignoring out-of-range port %d', port)
                     else:
                         self.active_ports[port] = True
-                        self.trigger_target_set(port)
+                        self._trigger_target_set(port)
                 else:
                     if port in self.active_ports:
                         del self.active_ports[port]
-                    self.cancel_target_set(port)
+                    self._cancel_target_set(port)
 
-    def handle_system_idle(self):
+    def _handle_system_idle(self):
         for target_set in self.target_sets.values():
             try:
                 target_set.idle_handler()
@@ -263,33 +271,34 @@ class DAQRunner():
         if not self.event_start and not self.one_shot:
             for port_set in self.active_ports:
                 if self.active_ports[port_set] and not port_set in self.target_sets:
-                    self.trigger_target_set(port_set)
+                    self._trigger_target_set(port_set)
 
-    def loop_hook(self):
+    def _loop_hook(self):
         states = {}
         for key in self.target_sets:
             states[key] = self.target_sets[key].state
         LOGGER.debug('Active target sets/state: %s', states)
 
-    def terminate(self):
+    def _terminate(self):
         for key in self.target_sets:
             self.target_sets[key].terminate()
 
     def main_loop(self):
+        """Run main loop to execute tests"""
         self.one_shot = self.config.get('s')
         self.flap_ports = self.config.get('f')
         self.event_start = self.config.get('e')
 
         if self.flap_ports:
-            self.flap_interface_ports()
+            self._flap_interface_ports()
 
         self.exception = False
         try:
-            self.monitor = StreamMonitor(idle_handler=self.handle_system_idle,
-                                         loop_hook=self.loop_hook)
-            self.monitor.monitor('faucet', self.faucet_events.sock, self.handle_faucet_event)
+            self.monitor = StreamMonitor(idle_handler=self._handle_system_idle,
+                                         loop_hook=self._loop_hook)
+            self.monitor.monitor('faucet', self.faucet_events.sock, self._handle_faucet_event)
             if self.event_start:
-                self.flush_faucet_events()
+                self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
             self.monitor.event_loop()
         #pylint: disable-msg=broad-except
@@ -305,19 +314,20 @@ class DAQRunner():
             LOGGER.info('Dropping into interactive command line')
             CLI(self.net)
 
-        self.terminate()
+        self._terminate()
 
-    def trigger_target_set(self, port_set):
+    def _trigger_target_set(self, port_set):
         assert not port_set in self.target_sets, 'target set %d already exists' % port_set
         try:
             LOGGER.debug('Trigger target set %d', port_set)
             self.target_sets[port_set] = ConnectedHost(self, port_set)
-            self.send_heartbeat()
+            self._send_heartbeat()
         #pylint: disable-msg=broad-except
         except Exception as e:
             self.target_set_error(port_set, e)
 
     def target_set_error(self, port_set, e):
+        """Handle an error in the target port set"""
         LOGGER.info('Set %d exception: %s', port_set, e)
         LOGGER.exception(e)
         if port_set in self.target_sets:
@@ -326,20 +336,21 @@ class DAQRunner():
             target_set.terminate(trigger=False)
             self.target_set_complete(target_set)
         else:
-            self.target_set_finalize(port_set, {'exception': str(e)})
+            self._target_set_finalize(port_set, {'exception': str(e)})
 
     def target_set_complete(self, target_set):
+        """Handle completion of a target_set"""
         port_set = target_set.port_set
         results = target_set.results
-        self.cancel_target_set(port_set)
-        self.target_set_finalize(port_set, results)
+        self._cancel_target_set(port_set)
+        self._target_set_finalize(port_set, results)
 
-    def target_set_finalize(self, port_set, results):
+    def _target_set_finalize(self, port_set, results):
         LOGGER.info('Set %d complete, %d results', port_set, len(results))
         self.result_sets[port_set] = results
         LOGGER.info('Remaining sets: %s', self.target_sets.keys())
 
-    def cancel_target_set(self, port_set):
+    def _cancel_target_set(self, port_set):
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
@@ -348,17 +359,21 @@ class DAQRunner():
             if not self.target_sets and self.one_shot:
                 self.monitor.forget(self.faucet_events.sock)
 
-    def extract_exception(self, result):
+    def monitor_forget(self, stream):
+        """Forget monitoring a stream"""
+        return self.monitor.forget(stream)
+
+    def _extract_exception(self, result):
         key = 'exception'
         return key if key in result and result[key] != None else None
 
-    def combine_results(self):
+    def _combine_results(self):
         results = []
         for result_set_key in self.result_sets:
             result_set = self.result_sets[result_set_key]
             for result_key in result_set:
                 result = result_set[result_key]
-                exception = self.extract_exception(result)
+                exception = self._extract_exception(result)
                 code = int(result['code']) if 'code' in result else 0
                 name = result['name']
                 status = exception if exception else code if name != 'fail' else not code
@@ -367,8 +382,9 @@ class DAQRunner():
         return results
 
     def finalize(self):
+        """Finalize this instance, returning error result code"""
         exception = self.exception
-        failures = self.combine_results()
+        failures = self._combine_results()
         if failures:
             LOGGER.error('Test failures: %s', failures)
         if exception:
@@ -377,13 +393,14 @@ class DAQRunner():
             return 1
         return 0
 
-def stripped_alt_logger(_self, level, msg, *args, **kwargs):
+def _stripped_alt_logger(_self, level, msg, *args, **kwargs):
+    """A logger for messages that strips whitespace"""
     stripped = msg.strip()
     if stripped:
         #pylint: disable-msg=protected-access
         ALT_LOG._log(level, stripped, *args, **kwargs)
 
-def configure_logging(config):
+def _configure_logging(config):
     daq_env = config.get('daq_loglevel')
     logging.basicConfig(level=LEVELS.get(daq_env, LEVELS['info']))
 
@@ -391,14 +408,14 @@ def configure_logging(config):
     minilog.setLogLevel(mininet_env if mininet_env else 'info')
 
     #pylint: disable-msg=protected-access
-    MininetLogger._log = stripped_alt_logger
+    MininetLogger._log = _stripped_alt_logger
 
-def write_pid_file():
+def _write_pid_file():
     file = open('inst/daq.pid', 'w')
     file.write(str(os.getpid()))
     file.close()
 
-def read_config_into(filename, config):
+def _read_config_into(filename, config):
     parser = ConfigParser()
     with open(filename) as stream:
         stream = StringIO("[top]\n" + stream.read())
@@ -406,7 +423,7 @@ def read_config_into(filename, config):
     for item in parser.items('top'):
         config[item[0]] = item[1]
 
-def parse_args(args):
+def _parse_args(args):
     config = {}
     first = True
     for arg in args:
@@ -418,18 +435,18 @@ def parse_args(args):
             parts = arg.split('=', 1)
             config[parts[0]] = parts[1]
         else:
-            read_config_into(arg, config)
+            _read_config_into(arg, config)
     return config
 
 
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
 
-    CONFIG = parse_args(sys.argv)
+    CONFIG = _parse_args(sys.argv)
 
-    configure_logging(CONFIG)
+    _configure_logging(CONFIG)
 
-    write_pid_file()
+    _write_pid_file()
 
     RUNNER = DAQRunner(CONFIG)
     RUNNER.initialize()
