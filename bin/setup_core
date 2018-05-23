@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# Setup things for building the core system. Not required for just
+# Setup things for directly running the core system. Not required for just
 # running a downloaded container.
 #
 # If you just want to get up and goind, see bin/setup_install.
@@ -38,6 +38,6 @@ git clone -n $REPO $TARGET
 
 sudo apt-get -y install \
     ethtool curl ca-certificates \
-    isc-dhcp-client network-manager netcat gnupg2 \
+    isc-dhcp-client network-manager netcat gnupg2 pylint \
     python python-setuptools python-dev build-essential python-pip
 
