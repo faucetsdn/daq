@@ -15,7 +15,7 @@ RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strac
 WORKDIR /root
 
 # Basic system install items
-RUN $AG install \
+RUN $AG update && $AG install \
     software-properties-common apt-transport-https \
     sudo realpath git emacs-nox ethtool curl apache2-utils \
     isc-dhcp-client network-manager netcat lsof pylint \
