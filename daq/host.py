@@ -74,7 +74,7 @@ class ConnectedHost():
         self.run_id = '%06x' % int(time.time())
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        self.state_transition(self.INIT_STATE)
+        self._state_transition(self.INIT_STATE)
         self.results = {}
         self.record_result('startup', state='run')
         self.dhcp_try = 1
@@ -91,7 +91,7 @@ class ConnectedHost():
                                                    cls=cls, tmpdir=self.tmpdir)
             self.record_result('startup')
         except:
-            self.terminate(trigger=False)
+            self._terminate(trigger=False)
             raise
 
     def _state_transition(self, target, expected=None):
@@ -100,7 +100,7 @@ class ConnectedHost():
         LOGGER.debug('Set %d state %s -> %d', self.port_set, self.state, target)
         self.state = target
 
-    def activate(self):
+    def _activate(self):
         self._state_transition(self.STARTUP_STATE, self.INIT_STATE)
         LOGGER.info('Set %d activating.', self.port_set)
 
@@ -111,7 +111,7 @@ class ConnectedHost():
             self.record_result('sanity', state='run')
             networking = self.networking
             networking.activate()
-            self.startup_scan()
+            self._startup_scan()
 
             dummy_name = 'dummy%02d' % self.port_set
             dummy_port = self.pri_base + self.DUMMY_OFFSET
@@ -126,23 +126,23 @@ class ConnectedHost():
             # Dummy doesn't use DHCP, so need to set default route manually.
             dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
 
-            assert self.ping_test(networking, dummy), 'ping failed'
-            assert self.ping_test(dummy, networking), 'ping failed'
-            assert self.ping_test(dummy, self.fake_target), 'ping failed'
-            assert self.ping_test(networking, dummy, src_addr=self.fake_target), 'ping failed'
+            assert self._ping_test(networking, dummy), 'ping failed'
+            assert self._ping_test(dummy, networking), 'ping failed'
+            assert self._ping_test(dummy, self.fake_target), 'ping failed'
+            assert self._ping_test(networking, dummy, src_addr=self.fake_target), 'ping failed'
             self.record_result('sanity')
             self._state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
         except Exception as e:
             LOGGER.error('Set %d sanity error: %s', self.port_set, e)
             LOGGER.exception(e)
             self.record_result('sanity', exception=e)
-            self.terminate()
+            self._terminate()
 
-    def terminate(self, trigger=True):
+    def _terminate(self, trigger=True):
         LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
         self._state_transition(self.ERROR_STATE)
-        self.dhcp_cleanup()
-        self.monitor_cleanup()
+        self._dhcp_cleanup()
+        self._monitor_cleanup()
         if self.networking:
             try:
                 self.networking.terminate()
@@ -171,14 +171,15 @@ class ConnectedHost():
             self.runner.target_set_complete(self)
 
     def idle_handler(self):
+        """Trigger events from idle state"""
         if self.state == self.INIT_STATE:
-            self.activate()
+            self._activate()
         elif self.state == self.ACTIVE_STATE:
-            self.dhcp_monitor()
+            self._dhcp_monitor()
         elif self.state == self.BASE_STATE:
-            self.base_start()
+            self._base_start()
 
-    def ping_test(self, src, dst, src_addr=None):
+    def _ping_test(self, src, dst, src_addr=None):
         src_name = src if isinstance(src, str) else src.name
         src_ip = src if isinstance(src, str) else src.IP()
         from_msg = ' from %s' % src_addr if src_addr else ''
@@ -193,7 +194,7 @@ class ConnectedHost():
             LOGGER.info('Set %d ping failure: %s', self.port_set, e)
             return False
 
-    def startup_scan(self):
+    def _startup_scan(self):
         assert not self.tcp_monitor, 'tcp_monitor already active'
         LOGGER.debug('Set %d startup pcap start', self.port_set)
         startup_file = os.path.join('/tmp', 'startup.pcap')
@@ -202,10 +203,10 @@ class ConnectedHost():
                                          timeout=None, pcap_out=startup_file, blocking=False)
         monitor = self.runner.monitor
         monitor.monitor('tcpdump', self.tcp_monitor.stream(), self.tcp_monitor.next_line,
-                        hangup=lambda: self.monitor_error(Exception('startup scan hangup')),
-                        error=self.monitor_error)
+                        hangup=lambda: self._monitor_error(Exception('startup scan hangup')),
+                        error=self._monitor_error)
 
-    def dhcp_monitor(self):
+    def _dhcp_monitor(self):
         self._state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
         self.record_result('dhcp', state='run')
         LOGGER.info('Set %d waiting for dhcp reply from %s...', self.port_set, self.networking.name)
@@ -213,10 +214,10 @@ class ConnectedHost():
         self.dhcp_traffic = TcpdumpHelper(self.networking, tcp_filter, packets=None,
                                           timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
         monitor = self.runner.monitor
-        monitor.monitor(self.networking.name, self.dhcp_traffic.stream(), self.dhcp_line,
-                        hangup=self.dhcp_hangup, error=self.dhcp_error)
+        monitor.monitor(self.networking.name, self.dhcp_traffic.stream(), self._dhcp_line,
+                        hangup=self._dhcp_hangup, error=self._dhcp_error)
 
-    def dhcp_line(self):
+    def _dhcp_line(self):
         dhcp_line = self.dhcp_traffic.next_line()
         if not dhcp_line:
             return
@@ -226,19 +227,19 @@ class ConnectedHost():
             if self.target_ip:
                 message = 'dhcp IP %s found, but no MAC address: %s' % (self.target_ip, dhcp_line)
                 assert self.target_mac, message
-                self.dhcp_success()
+                self._dhcp_success()
             else:
                 self.target_mac = match.group(2)
 
-    def dhcp_cleanup(self, forget=True):
+    def _dhcp_cleanup(self, forget=True):
         if self.dhcp_traffic:
             if forget:
                 self.runner.monitor_forget(self.dhcp_traffic.stream())
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
-    def dhcp_success(self):
-        self.dhcp_cleanup()
+    def _dhcp_success(self):
+        self._dhcp_cleanup()
         delta = int(time.time()) - self.test_start
         LOGGER.info('Set %d received dhcp reply after %ds: %s is at %s',
                     self.port_set, delta, self.target_mac, self.target_ip)
@@ -247,31 +248,31 @@ class ConnectedHost():
         self.record_result('dhcp', info=self.target_mac, ip=self.target_ip, state=state)
         self._state_transition(self.BASE_STATE, self.DHCP_STATE)
 
-    def dhcp_hangup(self):
+    def _dhcp_hangup(self):
         try:
             raise Exception('dhcp hangup')
         except Exception as e:
-            self.dhcp_error(e)
+            self._dhcp_error(e)
 
-    def dhcp_error(self, e):
+    def _dhcp_error(self, e):
         LOGGER.error('Set %d dhcp error: %s', self.port_set, e)
         self.record_result('dhcp', exception=e)
-        self.dhcp_cleanup(forget=False)
+        self._dhcp_cleanup(forget=False)
         self._state_transition(self.ERROR_STATE, self.DHCP_STATE)
         self.runner.target_set_error(self.port_set, e)
-        self.terminate()
+        self._terminate()
 
-    def base_start(self):
+    def _base_start(self):
         try:
-            self.base_tests()
-            self.monitor_cleanup()
+            self._base_tests()
+            self._monitor_cleanup()
             LOGGER.info('Set %d done with base.', self.port_set)
-            self.monitor_scan()
+            self._monitor_scan()
         except Exception as e:
-            self.monitor_cleanup()
-            self.monitor_error(e)
+            self._monitor_cleanup()
+            self._monitor_error(e)
 
-    def monitor_cleanup(self, forget=True):
+    def _monitor_cleanup(self, forget=True):
         if self.tcp_monitor:
             LOGGER.debug('Set %d monitor scan cleanup (forget=%s)', self.port_set, forget)
             if forget:
@@ -279,13 +280,13 @@ class ConnectedHost():
             self.tcp_monitor.terminate()
             self.tcp_monitor = None
 
-    def monitor_error(self, e):
+    def _monitor_error(self, e):
         LOGGER.error('Set %d monitor error: %s', self.port_set, e)
-        self.monitor_cleanup(forget=False)
+        self._monitor_cleanup(forget=False)
         self.record_result(self.test_name, exception=e)
         self.runner.target_set_error(self.port_set, e)
 
-    def monitor_scan(self):
+    def _monitor_scan(self):
         self._state_transition(self.MONITOR_STATE, self.BASE_STATE)
         self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
         LOGGER.info('Set %d background scan for %d seconds...',
@@ -294,42 +295,43 @@ class ConnectedHost():
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         tcp_filter = 'vlan %d' % self.pri_base
         assert not self.tcp_monitor, 'tcp_monitor already active'
-        self.tcp_monitor = TcpdumpHelper(self.runner.pri, tcp_filter, packets=None, intf_name=intf_name,
+        self.tcp_monitor = TcpdumpHelper(self.runner.pri, tcp_filter, packets=None,
+                                         intf_name=intf_name,
                                          timeout=self.MONITOR_SCAN_SEC,
                                          pcap_out=monitor_file, blocking=False)
         monitor = self.runner.monitor
         monitor.monitor('tcpdump', self.tcp_monitor.stream(), self.tcp_monitor.next_line,
-                        hangup=self.monitor_complete, error=self.monitor_error)
+                        hangup=self._monitor_complete, error=self._monitor_error)
 
-    def monitor_complete(self):
+    def _monitor_complete(self):
         LOGGER.info('Set %d monitor scan complete', self.port_set)
-        self.monitor_cleanup(forget=False)
+        self._monitor_cleanup(forget=False)
         self.record_result('monitor')
         self._state_transition(self.READY_STATE, self.MONITOR_STATE)
-        self.run_next_test()
+        self._run_next_test()
 
-    def base_tests(self):
+    def _base_tests(self):
         self.record_result('base', state='run')
-        if not self.ping_test(self.networking, self.target_ip):
+        if not self._ping_test(self.networking, self.target_ip):
             LOGGER.debug('Set %d warmup ping failed', self.port_set)
         try:
-            assert self.ping_test(self.networking, self.target_ip), 'simple ping failed'
-            assert self.ping_test(self.networking, self.target_ip,
-                                  src_addr=self.fake_target), 'target ping failed'
+            assert self._ping_test(self.networking, self.target_ip), 'simple ping failed'
+            assert self._ping_test(self.networking, self.target_ip,
+                                   src_addr=self.fake_target), 'target ping failed'
         except:
-            self.monitor_cleanup()
+            self._monitor_cleanup()
             raise
         self.record_result('base')
 
-    def run_next_test(self):
+    def _run_next_test(self):
         if self.remaining_tests:
-            self.docker_test(self.remaining_tests.pop(0))
+            self._docker_test(self.remaining_tests.pop(0))
         else:
             self._state_transition(self.DONE_STATE, self.READY_STATE)
             self.record_result('finish')
-            self.terminate()
+            self._terminate()
 
-    def docker_test(self, test_name):
+    def _docker_test(self, test_name):
         LOGGER.info('Set %d running docker test %s', self.port_set, test_name)
         self.record_result(test_name, state='run')
         port = self.pri_base + self.TEST_OFFSET
@@ -353,8 +355,8 @@ class ConnectedHost():
             self.docker_log = host.open_log()
             self._state_transition(self.TESTING_STATE, self.READY_STATE)
             self.runner.monitor.monitor(host_name, pipe.stdout, copy_to=self.docker_log,
-                                        hangup=self.docker_complete,
-                                        error=self.docker_error)
+                                        hangup=self._docker_complete,
+                                        error=self._docker_error)
         except:
             host.terminate()
             self.runner.remove_host(host)
@@ -362,13 +364,13 @@ class ConnectedHost():
         self.docker_host = host
         return host
 
-    def docker_error(self, e):
+    def _docker_error(self, e):
         LOGGER.error('Set %d docker error: %s', self.port_set, e)
         self.record_result(self.test_name, exception=e)
-        self.docker_finalize()
+        self._docker_finalize()
         self.runner.target_set_error(self.port_set, e)
 
-    def docker_finalize(self):
+    def _docker_finalize(self):
         if self.docker_host:
             self.runner.remove_host(self.docker_host)
             return_code = self.docker_host.terminate()
@@ -378,10 +380,10 @@ class ConnectedHost():
             return return_code
         return None
 
-    def docker_complete(self):
+    def _docker_complete(self):
         self._state_transition(self.READY_STATE, self.TESTING_STATE)
         try:
-            error_code = self.docker_finalize()
+            error_code = self._docker_finalize()
             exception = None
         except Exception as e:
             error_code = -1
@@ -393,9 +395,10 @@ class ConnectedHost():
                         self.port_set, self.test_name, error_code, exception)
         else:
             LOGGER.info("Set %d PASSED test %s", self.port_set, self.test_name)
-        self.run_next_test()
+        self._run_next_test()
 
     def record_result(self, name, **kwargs):
+        """Record a named result for this test"""
         current = int(time.time())
         if name != self.test_name:
             LOGGER.debug('Set %d starting test %s at %d', self.port_set, self.test_name, current)
