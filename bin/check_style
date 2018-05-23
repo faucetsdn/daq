@@ -2,7 +2,6 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 RESULTS=local/lint_results.txt
-MINIMUM_SCORE=10
 PYLINTRC=$ROOT/.pylintrc
 
 cd $ROOT
@@ -13,12 +12,11 @@ rm -f $RESULTS
 failure=
 results=
 for file in daq/*.py; do
-    echo Checking $file >> $RESULTS
-    score=$(pylint --rcfile=$PYLINTRC $file | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
-    echo $file $score
+    echo Checking $file... | tee -a $RESULTS
+    score=$(pylint --rcfile=$PYLINTRC $file 2>&1 | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
     if [ -n "$score" ]; then
         results=true
-        if [ "${score%%.*}" -lt $MINIMUM_SCORE ]; then
+        if [ "${score%%.*}" != "10" ]; then
             failure=true
         fi
     fi
@@ -26,6 +24,7 @@ done
 
 if [ -n "$failure" ]; then
     echo pylint failed to achieve a minimum score of $MINIMUM_SCORE.
+    cat $RESULTS
     false
 fi
 
