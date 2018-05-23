@@ -12,16 +12,17 @@ from StringIO import StringIO
 from mininet import log as minilog
 from mininet.log import LEVELS, MininetLogger
 
-from runner import DAQRunner
+from daq.runner import DAQRunner
 
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
-def _stripped_alt_logger(_self, level, msg, *args, **kwargs):
+def _stripped_alt_logger(self, level, msg, *args, **kwargs):
+    #pylint: disable=unused-argument
     """A logger for messages that strips whitespace"""
     stripped = msg.strip()
     if stripped:
-        #pylint: disable-msg=protected-access
+        #pylint: disable=protected-access
         ALT_LOG._log(level, stripped, *args, **kwargs)
 
 def _configure_logging(config):
@@ -31,14 +32,14 @@ def _configure_logging(config):
     mininet_env = config.get('mininet_loglevel')
     minilog.setLogLevel(mininet_env if mininet_env else 'info')
 
-    #pylint: disable-msg=protected-access
+    #pylint: disable=protected-access
     MininetLogger._log = _stripped_alt_logger
 
 def _write_pid_file():
     pid = os.getpid()
     LOGGER.info('DAQ pid is %d', pid)
-    with open('inst/daq.pid', 'w') as file:
-        file.write(str(pid))
+    with open('inst/daq.pid', 'w') as pid_file:
+        pid_file.write(str(pid))
 
 def _read_config_into(filename, config):
     parser = ConfigParser()
@@ -50,11 +51,8 @@ def _read_config_into(filename, config):
 
 def _parse_args(args):
     config = {}
-    first = True
-    for arg in args:
-        if first:
-            first = False
-        elif arg[0] == '-':
+    for arg in args[1:]:
+        if arg[0] == '-':
             config[arg[1:]] = True
         elif '=' in arg:
             parts = arg.split('=', 1)
@@ -76,7 +74,8 @@ if __name__ == '__main__':
     RUNNER.initialize()
     RUNNER.main_loop()
     RUNNER.cleanup()
-    return_code = RUNNER.finalize()
 
-    LOGGER.info('Exiting with return code %s', return_code)
-    sys.exit(return_code)
+    CODE = RUNNER.finalize()
+
+    LOGGER.info('Exiting with return code %s', CODE)
+    sys.exit(CODE)

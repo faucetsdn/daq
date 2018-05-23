@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
@@ -47,7 +47,7 @@ if [ "$1" == live ]; then
 fi
 
 if [ "$1" == bash ]; then
-    docker_args+=" --entrypoint /bin/bash"
+    docker_args+=" -ti --entrypoint /bin/bash"
     shift
 fi
 
@@ -115,3 +115,4 @@ fi
 
 echo Starting $TARGET "$@"...
 sudo docker run --privileged --name daq-runner $docker_args $TARGET "$@"
+echo Done with run $?

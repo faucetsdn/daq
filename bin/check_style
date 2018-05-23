@@ -14,24 +14,15 @@ rm -f $RESULTS
 failure=
 results=
 for file in daq/*.py; do
-    echo Checking $file... | tee -a $RESULTS
-    score=$(pylint --rcfile=$PYLINTRC $file 2>&1 | tee -a $RESULTS | fgrep 'Your code has been' | awk '{print $7}')
-    if [ -n "$score" ]; then
-        results=true
-        if [ "${score%%.*}" != "10" ]; then
-            failure=true
-        fi
-    fi
+    echo Checking file $file... | tee -a $RESULTS
+    pylint --reports=n --rcfile=$PYLINTRC $file >> $RESULTS || true
 done
 
-if [ -n "$failure" ]; then
+messages=$(egrep -v '^Checking file' $RESULTS | wc -l)
+
+if [ $messages -gt 0 ]; then
     echo pylint detected errors:
     cat $RESULTS
-    false
-fi
-
-if [ -z "$results" ]; then
-    echo No results reported, that ain\'t right.
     false
 fi
 
