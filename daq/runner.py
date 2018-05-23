@@ -18,7 +18,7 @@ from host import ConnectedHost
 
 from gcp import GcpManager
 
-LOGGER = logging.getLogger('daq')
+LOGGER = logging.getLogger('runner')
 
 
 class DAQHost(FaucetHostCleanup, Host):
@@ -269,7 +269,8 @@ class DAQRunner():
         LOGGER.debug('Active target sets/state: %s', states)
 
     def _terminate(self):
-        for key in self.target_sets:
+        target_set_keys = self.target_sets.keys()
+        for key in target_set_keys:
             self.target_sets[key].terminate()
 
     def main_loop(self):

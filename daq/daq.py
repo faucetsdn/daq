@@ -14,6 +14,7 @@ from mininet.log import LEVELS, MininetLogger
 
 from runner import DAQRunner
 
+LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
 def _stripped_alt_logger(_self, level, msg, *args, **kwargs):
@@ -34,9 +35,10 @@ def _configure_logging(config):
     MininetLogger._log = _stripped_alt_logger
 
 def _write_pid_file():
-    file = open('inst/daq.pid', 'w')
-    file.write(str(os.getpid()))
-    file.close()
+    pid = os.getpid()
+    LOGGER.info('DAQ pid is %d', pid)
+    with open('inst/daq.pid', 'w') as file:
+        file.write(str(pid))
 
 def _read_config_into(filename, config):
     parser = ConfigParser()
@@ -66,7 +68,6 @@ if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
 
     CONFIG = _parse_args(sys.argv)
-
     _configure_logging(CONFIG)
 
     _write_pid_file()
@@ -75,5 +76,7 @@ if __name__ == '__main__':
     RUNNER.initialize()
     RUNNER.main_loop()
     RUNNER.cleanup()
+    return_code = RUNNER.finalize()
 
-    sys.exit(RUNNER.finalize())
+    LOGGER.info('Exiting with return code %s', return_code)
+    sys.exit(return_code)
