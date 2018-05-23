@@ -140,6 +140,7 @@ class ConnectedHost():
             self.terminate()
 
     def terminate(self, trigger=True):
+        """Terminate this host"""
         LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
         self._state_transition(self.ERROR_STATE)
         self._dhcp_cleanup()

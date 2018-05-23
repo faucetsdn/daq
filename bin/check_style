@@ -6,6 +6,8 @@ PYLINTRC=$ROOT/.pylintrc
 
 cd $ROOT
 
+pylint --version
+
 echo Saving complete results to $RESULTS
 rm -f $RESULTS
 
@@ -23,7 +25,7 @@ for file in daq/*.py; do
 done
 
 if [ -n "$failure" ]; then
-    echo pylint failed to achieve a minimum score of $MINIMUM_SCORE.
+    echo pylint detected errors:
     cat $RESULTS
     false
 fi
