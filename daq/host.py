@@ -91,12 +91,13 @@ class ConnectedHost():
                                                    cls=cls, tmpdir=self.tmpdir)
             self.record_result('startup')
         except:
-            self._terminate(trigger=False)
+            self.terminate(trigger=False)
             raise
 
     def _state_transition(self, target, expected=None):
-        message = 'state was %d expected %d' % (self.state, expected)
-        assert expected is None or self.state == expected, message
+        if expected is not None:
+            message = 'state was %d expected %d' % (self.state, expected)
+            assert self.state == expected, message
         LOGGER.debug('Set %d state %s -> %d', self.port_set, self.state, target)
         self.state = target
 
@@ -136,9 +137,9 @@ class ConnectedHost():
             LOGGER.error('Set %d sanity error: %s', self.port_set, e)
             LOGGER.exception(e)
             self.record_result('sanity', exception=e)
-            self._terminate()
+            self.terminate()
 
-    def _terminate(self, trigger=True):
+    def terminate(self, trigger=True):
         LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
         self._state_transition(self.ERROR_STATE)
         self._dhcp_cleanup()
@@ -180,15 +181,15 @@ class ConnectedHost():
             self._base_start()
 
     def _ping_test(self, src, dst, src_addr=None):
-        src_name = src if isinstance(src, str) else src.name
-        src_ip = src if isinstance(src, str) else src.IP()
+        dst_name = dst if isinstance(dst, str) else dst.name
+        dst_ip = dst if isinstance(dst, str) else dst.IP()
         from_msg = ' from %s' % src_addr if src_addr else ''
-        LOGGER.info("Set %d ping test %s->%s%s", self.port_set, dst.name, src_name, from_msg)
+        LOGGER.info("Set %d ping test %s->%s%s", self.port_set, src.name, dst_name, from_msg)
         failure = "ping FAILED"
-        assert src_ip != "0.0.0.0", "IP address not assigned, can't ping"
-        src_opt = '-I %s' % src_addr if src_addr else ''
+        assert dst_ip != "0.0.0.0", "IP address not assigned, can't ping"
+        ping_opt = '-I %s' % src_addr if src_addr else ''
         try:
-            output = dst.cmd('ping -c2', src_opt, src_ip, '> /dev/null 2>&1 || echo ', failure)
+            output = src.cmd('ping -c2', ping_opt, dst_ip, '> /dev/null 2>&1 || echo ', failure)
             return output.strip() != failure
         except Exception as e:
             LOGGER.info('Set %d ping failure: %s', self.port_set, e)
@@ -260,7 +261,7 @@ class ConnectedHost():
         self._dhcp_cleanup(forget=False)
         self._state_transition(self.ERROR_STATE, self.DHCP_STATE)
         self.runner.target_set_error(self.port_set, e)
-        self._terminate()
+        self.terminate()
 
     def _base_start(self):
         try:
@@ -329,7 +330,7 @@ class ConnectedHost():
         else:
             self._state_transition(self.DONE_STATE, self.READY_STATE)
             self.record_result('finish')
-            self._terminate()
+            self.terminate()
 
     def _docker_test(self, test_name):
         LOGGER.info('Set %d running docker test %s', self.port_set, test_name)
