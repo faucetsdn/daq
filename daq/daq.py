@@ -17,6 +17,8 @@ from runner import DAQRunner
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
+foo = True
+
 def _stripped_alt_logger(self, level, msg, *args, **kwargs):
     #pylint: disable=unused-argument
     """A logger for messages that strips whitespace"""
