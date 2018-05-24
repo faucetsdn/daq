@@ -14,6 +14,11 @@ if [ "$DAQ_BUILD" != "no" ]; then
   echo
 fi
 
+if [ "$DAQ_BUILD" != "no" ]; then
+    echo Running style checks...
+    bin/check_style
+fi
+
 if [ "$DAQ_BUILD" == "in" ]; then
     cmd/inbuild
 elif [ "$DAQ_BUILD" != "no" ]; then

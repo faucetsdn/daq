@@ -29,9 +29,13 @@ virtualenv venv
 
 source venv/bin/activate
 
-# Python extension packages
+# Python extension packages.
 pip install --index-url=https://pypi.python.org/simple \
     netifaces google-cloud-pubsub==0.32.1
+
+# Hack to make pylint happy.
+touch venv/lib/python2.7/site-packages/google/__init__.py
+touch venv/lib/python2.7/site-packages/google/cloud/__init__.py
 
 if [ -d mininet ]; then
     echo mininet already installed, skipping.

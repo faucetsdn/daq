@@ -63,12 +63,14 @@ class DAQRunner(object):
     monitor = None
     one_shot = None
     exception = None
+    switch_links = None
 
     def __init__(self, config):
         self.config = config
         self.target_sets = {}
         self.result_sets = {}
         self.active_ports = {}
+        self.switch_links = {}
         self.gcp = GcpManager(self.config)
         raw_description = config.get('site_description', '')
         self.description = raw_description.strip("\"")
@@ -85,10 +87,11 @@ class DAQRunner(object):
         host = self.net.addHost(name, cls, **params)
         try:
             LOGGER.debug('Created host %s with pid %s/%s', name, host.pid, host.shell.pid)
-            host.switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
+            switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
+            self.switch_links[host] = switch_link
             if self.net.built:
                 host.configDefault()
-                self._switch_attach(self.pri, host.switch_link.intf1)
+                self._switch_attach(self.pri, switch_link.intf1)
         except:
             host.terminate()
             raise
@@ -109,12 +112,14 @@ class DAQRunner(object):
         index = self.net.hosts.index(host)
         if index:
             del self.net.hosts[index]
-        if host.switch_link:
-            intf = host.switch_link.intf1
+        if host in self.switch_links:
+            switch_link = self.switch_links[host]
+            del self.switch_links[host]
+            intf = switch_link.intf1
             self.pri.detach(intf)
             self._switch_del_intf(self.pri, intf)
             intf.delete()
-            del self.net.links[self.net.links.index(host.switch_link)]
+            del self.net.links[self.net.links.index(switch_link)]
 
     def _make_device_intfs(self):
         intf_names = self.config['daq_intf'].split(',')

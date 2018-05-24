@@ -46,6 +46,7 @@ class GcpManager(object):
         if 'encode' not in message:
             message = json.dumps(message)
         LOGGER.debug('Sending to topic_path %s/%s: %s', self.project, topic, message)
+        #pylint: disable=no-member
         topic_path = self.publisher.topic_path(self.project, topic)
         future = self.publisher.publish(topic_path, message.encode('utf-8'),
                                         origin=self.client_name)

@@ -1,12 +1,17 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-RESULTS=local/lint_results.txt
+RESULTS=build/lint_results.txt
 PYLINTRC=$ROOT/.pylintrc
 
 cd $ROOT
+mkdir -p build
 
-pylint --version
+export PYTHONPATH=faucet:mininet:venv/lib/python2.7/site-packages/
+
+source venv/bin/activate
+
+pylint --version >> $RESULTS
 
 echo Saving complete results to $RESULTS
 rm -f $RESULTS
