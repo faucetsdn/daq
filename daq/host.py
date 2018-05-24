@@ -203,10 +203,10 @@ class ConnectedHost(object):
         tcp_filter = ''
         self.tcp_monitor = TcpdumpHelper(self.networking, tcp_filter, packets=None,
                                          timeout=None, pcap_out=startup_file, blocking=False)
-        monitor = self.runner.monitor
-        monitor.monitor('tcpdump', self.tcp_monitor.stream(), self.tcp_monitor.next_line,
-                        hangup=lambda: self._monitor_error(Exception('startup scan hangup')),
-                        error=self._monitor_error)
+        hangup = lambda: self._monitor_error(Exception('startup scan hangup'))
+        self.runner.monitor_stream('tcpdump', self.tcp_monitor.stream(),
+                                   self.tcp_monitor.next_line,
+                                   hangup=hangup, error=self._monitor_error)
 
     def _dhcp_monitor(self):
         self._state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
@@ -215,9 +215,9 @@ class ConnectedHost(object):
         tcp_filter = "src port 67"
         self.dhcp_traffic = TcpdumpHelper(self.networking, tcp_filter, packets=None,
                                           timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
-        monitor = self.runner.monitor
-        monitor.monitor(self.networking.name, self.dhcp_traffic.stream(), self._dhcp_line,
-                        hangup=self._dhcp_hangup, error=self._dhcp_error)
+        self.runner.monitor_stream(self.networking.name, self.dhcp_traffic.stream(),
+                                   self._dhcp_line, hangup=self._dhcp_hangup,
+                                   error=self._dhcp_error)
 
     def _dhcp_line(self):
         dhcp_line = self.dhcp_traffic.next_line()
@@ -278,7 +278,7 @@ class ConnectedHost(object):
         if self.tcp_monitor:
             LOGGER.debug('Set %d monitor scan cleanup (forget=%s)', self.port_set, forget)
             if forget:
-                self.runner.monitor.forget(self.tcp_monitor.stream())
+                self.runner.monitor_forget(self.tcp_monitor.stream())
             self.tcp_monitor.terminate()
             self.tcp_monitor = None
 
@@ -301,9 +301,9 @@ class ConnectedHost(object):
                                          intf_name=intf_name,
                                          timeout=self.MONITOR_SCAN_SEC,
                                          pcap_out=monitor_file, blocking=False)
-        monitor = self.runner.monitor
-        monitor.monitor('tcpdump', self.tcp_monitor.stream(), self.tcp_monitor.next_line,
-                        hangup=self._monitor_complete, error=self._monitor_error)
+        self.runner.monitor_stream('tcpdump', self.tcp_monitor.stream(),
+                                   self.tcp_monitor.next_line, hangup=self._monitor_complete,
+                                   error=self._monitor_error)
 
     def _monitor_complete(self):
         LOGGER.info('Set %d monitor scan complete', self.port_set)
@@ -356,9 +356,9 @@ class ConnectedHost(object):
             pipe = host.activate(log_name=None)
             self.docker_log = host.open_log()
             self._state_transition(self.TESTING_STATE, self.READY_STATE)
-            self.runner.monitor.monitor(host_name, pipe.stdout, copy_to=self.docker_log,
-                                        hangup=self._docker_complete,
-                                        error=self._docker_error)
+            self.runner.monitor_stream(host_name, pipe.stdout, copy_to=self.docker_log,
+                                       hangup=self._docker_complete,
+                                       error=self._docker_error)
         except:
             host.terminate()
             self.runner.remove_host(host)

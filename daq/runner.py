@@ -1,9 +1,8 @@
-"""Device Automated Qualification testing framework"""
+"""Main test runner for DAQ"""
 
 import logging
 import os
 import time
-
 
 from mininet.net import Mininet
 from mininet.node import RemoteController, OVSSwitch, Host
@@ -40,7 +39,9 @@ class DummyNode(object):
 
 
 class DAQRunner(object):
-    """Main runner class controlling DAQ"""
+    """Main runner class controlling DAQ. Primarily mediates between
+    faucet events, connected hosts (to test), and gcp for logging. This
+    class owns the main event loop and shards out work to subclasses."""
 
     config = None
     net = None
@@ -285,7 +286,7 @@ class DAQRunner(object):
         try:
             self.monitor = StreamMonitor(idle_handler=self._handle_system_idle,
                                          loop_hook=self._loop_hook)
-            self.monitor.monitor('faucet', self.faucet_events.sock, self._handle_faucet_event)
+            self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_event)
             if self.event_start:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
@@ -344,7 +345,11 @@ class DAQRunner(object):
             target_set.terminate(trigger=False)
             LOGGER.info('Set %d cancelled.', port_set)
             if not self.target_sets and self.one_shot:
-                self.monitor.forget(self.faucet_events.sock)
+                self.monitor_forget(self.faucet_events.sock)
+
+    def monitor_stream(self, *args, **kwargs):
+        """Monitor a stream"""
+        return self.monitor.monitor(*args, **kwargs)
 
     def monitor_forget(self, stream):
         """Forget monitoring a stream"""

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""Device Automated Qualification testing framework"""
+"""Main entrypoint for DAQ. Handles command line parsing and other
+misc setup tasks."""
 
 import logging
 import os
