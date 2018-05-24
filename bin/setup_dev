@@ -20,9 +20,9 @@ if [ "$DAQ_BUILD" == "no" ]; then
 fi
 
 sudo apt-get -y install \
-    ethtool curl ca-certificates virtualenv \
+    ethtool curl ca-certificates \
     isc-dhcp-client network-manager netcat gnupg2 \
-    python python-pkg-resources pylint \
+    python python-pkg-resources pylint python-virtualenv \
     python-setuptools python-dev build-essential python-pip
 
 virtualenv venv
