@@ -26,6 +26,10 @@ if [ -f $local_config ]; then
 fi
 
 if [ -n "$in_container" ]; then
+    # Run in container for pylint versioning.
+    echo Running style checks...
+    bin/check_style
+
     echo 'DOCKER_OPTS="-s vfs -D -l debug"' > /etc/default/docker
     service docker start
     sleep 3
