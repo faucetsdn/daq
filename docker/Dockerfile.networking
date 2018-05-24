@@ -5,7 +5,7 @@
 
 FROM daq/aardvark:latest
 
-RUN $AG install dnsmasq ethtool iptables netcat python
+RUN $AG update && $AG install dnsmasq ethtool iptables netcat python
 
 RUN echo dhcp-range=10.20.0.0,10.20.255.255,120s >> /etc/dnsmasq.conf
 

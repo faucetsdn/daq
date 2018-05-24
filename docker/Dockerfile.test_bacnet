@@ -1,6 +1,6 @@
 FROM daq/aardvark:latest as bacnet_build
 
-# Do this alone first so it can be re-used for later stages.
+# Do this alone first so it can be re-used by other build files.
 RUN $AG update && $AG install default-jre
 
 RUN $AG update && $AG install default-jdk git
@@ -10,7 +10,7 @@ RUN git clone https://github.com/grafnu/bacnet4j.git --single-branch --depth 1 \
 
 FROM daq/aardvark:latest
 
-RUN $AG install default-jre
+RUN $AG update && $AG install default-jre
 
 COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
 

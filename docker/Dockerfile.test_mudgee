@@ -1,10 +1,11 @@
 FROM daq/aardvark:latest
 
-RUN $AG install default-jre
+# Do this alone first so it can be re-used by other build files.
+RUN $AG update && $AG install default-jre
 
-RUN $AG install default-jdk git
+RUN $AG update && $AG install default-jdk git
 
-RUN $AG install maven tcpdump
+RUN $AG update && $AG install maven tcpdump
 
 WORKDIR /root/
 
