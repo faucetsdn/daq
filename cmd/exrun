@@ -81,14 +81,13 @@ if [ -f .pdbrc ]; then
     runcmd=pdb
 fi
 
-export PYTHONDONTWRITEBYTECODE=1
-
 echo Executing runner "$@"...
 
 sudo env \
      DAQ_CONTAINER=$DAQ_CONTAINER \
      FAUCET_EVENT_SOCK=$EVENT_SOCK \
      DAQ_VERSION=$DAQ_VERSION \
+     PYTHONDONTWRITEBYTECODE=True \
      PYTHONPATH=$FAUCET \
      DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
      TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
