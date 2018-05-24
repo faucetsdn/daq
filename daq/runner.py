@@ -97,6 +97,10 @@ class DAQRunner(object):
             raise
         return host
 
+    def get_host_interface(self, host):
+        """Get the internal link interface for this host"""
+        return self.switch_links[host].intf2
+
     def _switch_attach(self, switch, intf):
         switch.attach(intf)
         # This really should be done in attach, but currently only automatic on switch startup.

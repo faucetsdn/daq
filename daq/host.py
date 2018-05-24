@@ -121,8 +121,8 @@ class ConnectedHost(object):
 
             self.fake_target = self.TEST_IP_FORMAT % random.randint(10, 99)
             LOGGER.debug('Adding fake target at %s', self.fake_target)
-            networking.cmd('ip addr add %s dev %s' %
-                           (self.fake_target, networking.switch_link.intf2))
+            intf = self.runner.get_host_interface(networking)
+            networking.cmd('ip addr add %s dev %s' % (self.fake_target, intf))
 
             # Dummy doesn't use DHCP, so need to set default route manually.
             dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
