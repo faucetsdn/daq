@@ -2,7 +2,7 @@
 
 You shouldn't need to do this unless you're doing active development on DAQ itself. Doing this
 will require installing more prerequisites that aren't indicated above. See
-<code>bin/setup_install</code> or <code>docker/Docker.base</code> for details.
+<code>bin/setup_base</code> or <code>docker/Docker.base</code> for details.
 
 To build containers for basic execution, which can take a long time:
 

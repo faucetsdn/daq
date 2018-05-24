@@ -12,6 +12,7 @@ DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 cd $ROOT
 
 FAUCET=$(realpath $ROOT/faucet)
+MININET=$(realpath $ROOT/mininet)
 
 if [ ! -f $LOCAL_CONFIG ]; then
     mkdir -p $LOCALDIR
@@ -21,6 +22,8 @@ fi
 
 echo Loading daq run configuration from $LOCAL_CONFIG
 source $LOCAL_CONFIG
+
+PYTHONPATH=$FAUCET:$MININET
 
 set | egrep ^[a-z][a-z_]*=
 
@@ -81,16 +84,19 @@ if [ -f .pdbrc ]; then
     runcmd=pdb
 fi
 
-echo Executing runner "$@"...
-
-sudo env \
-     DAQ_CONTAINER=$DAQ_CONTAINER \
-     FAUCET_EVENT_SOCK=$EVENT_SOCK \
-     DAQ_VERSION=$DAQ_VERSION \
-     PYTHONDONTWRITEBYTECODE=True \
-     PYTHONPATH=$FAUCET \
-     DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
-     TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
+echo Executing sudo runner "$@"...
+sudo -s -- <<EOF
+    echo Entering virtual python environment...
+    source venv/bin/activate
+    env \
+        DAQ_CONTAINER=$DAQ_CONTAINER \
+        FAUCET_EVENT_SOCK=$EVENT_SOCK \
+        DAQ_VERSION=$DAQ_VERSION \
+        PYTHONDONTWRITEBYTECODE=True \
+        PYTHONPATH=$PYTHONPATH \
+        DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
+        TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
+EOF
 
 if [ -n "$cleanup" ]; then
     sh -c "$cleanup"
