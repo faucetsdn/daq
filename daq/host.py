@@ -7,10 +7,9 @@ import shutil
 import time
 
 from clib.docker_host import MakeDockerHost
-
 from clib.tcpdump_helper import TcpdumpHelper
-
 from dhcp_monitor import DhcpMonitor
+from docker_test import DockerTest
 
 LOGGER = logging.getLogger('host')
 
@@ -23,8 +22,6 @@ class ConnectedHost(object):
 
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 20
-    IMAGE_NAME_FORMAT = 'daq/test_%s'
-    CONTAINER_PREFIX = 'daq'
 
     ERROR_STATE = -1
     INIT_STATE = 0
@@ -54,9 +51,7 @@ class ConnectedHost(object):
     test_name = 'unknown'
     test_start = None
     tcp_monitor = None
-    docker_log = None
     fake_target = None
-    docker_host = None
     dhcp_monitor = None
     target_ip = None
     target_mac = None
@@ -79,7 +74,7 @@ class ConnectedHost(object):
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         LOGGER.debug("Adding networking host on port %d", networking_port)
-        cls = MakeDockerHost('daq/networking', prefix=self.CONTAINER_PREFIX)
+        cls = MakeDockerHost('daq/networking', prefix='daq')
         try:
             self.networking = self.runner.add_host(networking_name, port=networking_port,
                                                    cls=cls, tmpdir=self.tmpdir)
@@ -289,69 +284,26 @@ class ConnectedHost(object):
             self.terminate()
 
     def _docker_test(self, test_name):
-        LOGGER.info('Set %d running docker test %s', self.port_set, test_name)
+        self._state_transition(self.TESTING_STATE, self.READY_STATE)
         self.record_result(test_name, state='run')
         port = self.pri_base + self.TEST_OFFSET
-        gateway = self.networking
-        image = self.IMAGE_NAME_FORMAT % test_name
-        host_name = '%s%02d' % (test_name, self.port_set)
+        params = {
+            'target_ip': self.target_ip,
+            'target_mac': self.target_mac,
+            'gateway_ip': self.networking.IP(),
+            'gateway_mac': self.networking.MAC(),
+            'scan_base': self.scan_base
+        }
+        docker_test = DockerTest(self.runner, self, test_name)
+        docker_test.start(port, params, self.docker_callback)
 
-        env_vars = ["TARGET_NAME=" + host_name,
-                    "TARGET_IP=" + self.target_ip,
-                    "TARGET_MAC=" + self.target_mac,
-                    "GATEWAY_IP=" + gateway.IP(),
-                    "GATEWAY_MAC=" + gateway.MAC()]
-        vol_maps = [self.scan_base + ":/scans"]
-
-        LOGGER.debug("Set %d running docker test %s", self.port_set, image)
-        cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
-        host = self.runner.add_host(host_name, port=port, cls=cls, env_vars=env_vars,
-                                    vol_maps=vol_maps, tmpdir=self.tmpdir)
-        try:
-            pipe = host.activate(log_name=None)
-            self.docker_log = host.open_log()
-            self._state_transition(self.TESTING_STATE, self.READY_STATE)
-            self.runner.monitor_stream(host_name, pipe.stdout, copy_to=self.docker_log,
-                                       hangup=self._docker_complete,
-                                       error=self._docker_error)
-        except:
-            host.terminate()
-            self.runner.remove_host(host)
-            raise
-        self.docker_host = host
-        return host
-
-    def _docker_error(self, e):
-        LOGGER.error('Set %d docker error: %s', self.port_set, e)
-        self.record_result(self.test_name, exception=e)
-        self._docker_finalize()
-        self.runner.target_set_error(self.port_set, e)
-
-    def _docker_finalize(self):
-        if self.docker_host:
-            self.runner.remove_host(self.docker_host)
-            return_code = self.docker_host.terminate()
-            self.docker_host = None
-            self.docker_log.close()
-            self.docker_log = None
-            return return_code
-        return None
-
-    def _docker_complete(self):
+    def docker_callback(self, return_code=None, exception=None):
+        """Handle a completed/excepted docker test"""
+        self.record_result(self.test_name, exception=exception)
+        if exception:
+            self.runner.target_set_error(self.port_set, exception)
+        self.record_result(self.test_name, code=return_code, exception=exception)
         self._state_transition(self.READY_STATE, self.TESTING_STATE)
-        try:
-            error_code = self._docker_finalize()
-            exception = None
-        except Exception as e:
-            error_code = -1
-            exception = e
-        LOGGER.debug("Set %d docker complete, return=%d (%s)", self.port_set, error_code, exception)
-        self.record_result(self.test_name, code=error_code, exception=exception)
-        if error_code:
-            LOGGER.info("Set %d FAILED test %s with error %s: %s",
-                        self.port_set, self.test_name, error_code, exception)
-        else:
-            LOGGER.info("Set %d PASSED test %s", self.port_set, self.test_name)
         self._run_next_test()
 
     def record_result(self, name, **kwargs):
