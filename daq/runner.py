@@ -236,7 +236,8 @@ class DAQRunner(object):
             for result_key in result_set:
                 result = result_set[result_key]
                 exception = self._extract_exception(result)
-                code = int(result['code']) if 'code' in result else 0
+                code_string = str(result['code']) if 'code' in result else None
+                code = int(code_string) if code_string else 0
                 name = result['name']
                 status = exception if exception else code if name != 'fail' else not code
                 if status != 0:
