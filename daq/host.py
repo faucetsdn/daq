@@ -3,13 +3,14 @@
 import logging
 import os
 import random
-import re
 import shutil
 import time
 
 from clib.docker_host import MakeDockerHost
 
 from clib.tcpdump_helper import TcpdumpHelper
+
+from dhcp_monitor import DhcpMonitor
 
 LOGGER = logging.getLogger('host')
 
@@ -24,12 +25,6 @@ class ConnectedHost(object):
     MONITOR_SCAN_SEC = 20
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
-
-    DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
-    DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
-    DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
-    DHCP_TIMEOUT_SEC = 240
-    DHCP_THRESHHOLD_SEC = 20
 
     ERROR_STATE = -1
     INIT_STATE = 0
@@ -49,8 +44,6 @@ class ConnectedHost(object):
     runner = None
     port_set = None
     pri_base = None
-    target_ip = None
-    target_mac = None
     networking = None
     dummy = None
     state = ERROR_STATE
@@ -61,10 +54,12 @@ class ConnectedHost(object):
     test_name = 'unknown'
     test_start = None
     tcp_monitor = None
-    dhcp_traffic = None
     docker_log = None
     fake_target = None
     docker_host = None
+    dhcp_monitor = None
+    target_ip = None
+    target_mac = None
 
     def __init__(self, runner, port_set):
         self.runner = runner
@@ -77,7 +72,6 @@ class ConnectedHost(object):
         self._state_transition(self.INIT_STATE)
         self.results = {}
         self.record_result('startup', state='run')
-        self.dhcp_try = 1
         LOGGER.info('Set %d created.', port_set)
         # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
@@ -127,6 +121,9 @@ class ConnectedHost(object):
             # Dummy doesn't use DHCP, so need to set default route manually.
             dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
 
+            self.dhcp_monitor = DhcpMonitor(self.runner, self.port_set,
+                                            networking, self.dhcp_callback)
+
             assert self._ping_test(networking, dummy), 'ping failed'
             assert self._ping_test(dummy, networking), 'ping failed'
             assert self._ping_test(dummy, self.fake_target), 'ping failed'
@@ -143,7 +140,7 @@ class ConnectedHost(object):
         """Terminate this host"""
         LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
         self._state_transition(self.ERROR_STATE)
-        self._dhcp_cleanup()
+        self.dhcp_monitor.cleanup()
         self._monitor_cleanup()
         if self.networking:
             try:
@@ -177,9 +174,23 @@ class ConnectedHost(object):
         if self.state == self.INIT_STATE:
             self._activate()
         elif self.state == self.ACTIVE_STATE:
-            self._dhcp_monitor()
+            self._state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
+            self.record_result('dhcp', state='run')
+            self.dhcp_monitor.start()
         elif self.state == self.BASE_STATE:
             self._base_start()
+
+    def dhcp_callback(self, state, target_mac=None, target_ip=None, exception=None):
+        """Handle completion of DHCP subtask"""
+        self.record_result('dhcp', info=target_mac, ip=target_ip, state=state, exception=exception)
+        self.target_mac = target_mac
+        self.target_ip = target_ip
+        if exception:
+            self._state_transition(self.ERROR_STATE, self.DHCP_STATE)
+            self.runner.target_set_error(self.port_set, exception)
+            self.terminate()
+        else:
+            self._state_transition(self.BASE_STATE, self.DHCP_STATE)
 
     def _ping_test(self, src, dst, src_addr=None):
         dst_name = dst if isinstance(dst, str) else dst.name
@@ -207,62 +218,6 @@ class ConnectedHost(object):
         self.runner.monitor_stream('tcpdump', self.tcp_monitor.stream(),
                                    self.tcp_monitor.next_line,
                                    hangup=hangup, error=self._monitor_error)
-
-    def _dhcp_monitor(self):
-        self._state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
-        self.record_result('dhcp', state='run')
-        LOGGER.info('Set %d waiting for dhcp reply from %s...', self.port_set, self.networking.name)
-        tcp_filter = "src port 67"
-        self.dhcp_traffic = TcpdumpHelper(self.networking, tcp_filter, packets=None,
-                                          timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
-        self.runner.monitor_stream(self.networking.name, self.dhcp_traffic.stream(),
-                                   self._dhcp_line, hangup=self._dhcp_hangup,
-                                   error=self._dhcp_error)
-
-    def _dhcp_line(self):
-        dhcp_line = self.dhcp_traffic.next_line()
-        if not dhcp_line:
-            return
-        match = re.search(self.DHCP_PATTERN, dhcp_line)
-        if match:
-            self.target_ip = match.group(4)
-            if self.target_ip:
-                message = 'dhcp IP %s found, but no MAC address: %s' % (self.target_ip, dhcp_line)
-                assert self.target_mac, message
-                self._dhcp_success()
-            else:
-                self.target_mac = match.group(2)
-
-    def _dhcp_cleanup(self, forget=True):
-        if self.dhcp_traffic:
-            if forget:
-                self.runner.monitor_forget(self.dhcp_traffic.stream())
-            self.dhcp_traffic.terminate()
-            self.dhcp_traffic = None
-
-    def _dhcp_success(self):
-        self._dhcp_cleanup()
-        delta = int(time.time()) - self.test_start
-        LOGGER.info('Set %d received dhcp reply after %ds: %s is at %s',
-                    self.port_set, delta, self.target_mac, self.target_ip)
-        weak_result = delta > self.DHCP_THRESHHOLD_SEC
-        state = 'weak' if weak_result else None
-        self.record_result('dhcp', info=self.target_mac, ip=self.target_ip, state=state)
-        self._state_transition(self.BASE_STATE, self.DHCP_STATE)
-
-    def _dhcp_hangup(self):
-        try:
-            raise Exception('dhcp hangup')
-        except Exception as e:
-            self._dhcp_error(e)
-
-    def _dhcp_error(self, e):
-        LOGGER.error('Set %d dhcp error: %s', self.port_set, e)
-        self.record_result('dhcp', exception=e)
-        self._dhcp_cleanup(forget=False)
-        self._state_transition(self.ERROR_STATE, self.DHCP_STATE)
-        self.runner.target_set_error(self.port_set, e)
-        self.terminate()
 
     def _base_start(self):
         try:
