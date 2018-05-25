@@ -135,7 +135,8 @@ class ConnectedHost(object):
         """Terminate this host"""
         LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
         self._state_transition(self.ERROR_STATE)
-        self.dhcp_monitor.cleanup()
+        if self.dhcp_monitor:
+            self.dhcp_monitor.cleanup()
         self._monitor_cleanup()
         if self.networking:
             try:
@@ -243,11 +244,12 @@ class ConnectedHost(object):
         self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
         LOGGER.info('Set %d background scan for %d seconds...',
                     self.port_set, self.MONITOR_SCAN_SEC)
-        intf_name = self.runner.sec_name
+        network = self.runner.network
+        intf_name = network.sec_name
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         tcp_filter = 'vlan %d' % self.pri_base
         assert not self.tcp_monitor, 'tcp_monitor already active'
-        self.tcp_monitor = TcpdumpHelper(self.runner.pri, tcp_filter, packets=None,
+        self.tcp_monitor = TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                          intf_name=intf_name,
                                          timeout=self.MONITOR_SCAN_SEC,
                                          pcap_out=monitor_file, blocking=False)

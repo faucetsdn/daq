@@ -4,39 +4,13 @@ import logging
 import os
 import time
 
-from mininet.net import Mininet
-from mininet.node import RemoteController, OVSSwitch, Host
-from mininet.link import Intf
-from mininet.cli import CLI
-
-from clib.mininet_test_topo import FaucetHostCleanup
-
 from faucet_event_client import FaucetEventClient
 from stream_monitor import StreamMonitor
 from host import ConnectedHost
-
+from network import TestNetwork
 from gcp import GcpManager
 
 LOGGER = logging.getLogger('runner')
-
-
-class DAQHost(FaucetHostCleanup, Host):
-    """Base Mininet Host class, for Mininet-based tests."""
-    #pylint: disable=too-few-public-methods
-    pass
-
-
-class DummyNode(object):
-    """Dummy node used to handle shadow devices"""
-    #pylint: disable=invalid-name
-    def addIntf(self, node, port=None):
-        """No-op for adding an interface"""
-        pass
-
-    def cmd(self, cmd, *args, **kwargs):
-        """No-op for running a command"""
-        pass
-
 
 class DAQRunner(object):
     """Main runner class controlling DAQ. Primarily mediates between
@@ -44,16 +18,9 @@ class DAQRunner(object):
     class owns the main event loop and shards out work to subclasses."""
 
     config = None
-    net = None
-    device_intfs = None
     target_sets = None
     active_ports = None
     result_sets = None
-    pri = None
-    sec = None
-    sec_dpid = None
-    sec_port = None
-    sec_name = None
     gcp = None
     description = None
     version = None
@@ -63,115 +30,23 @@ class DAQRunner(object):
     monitor = None
     one_shot = None
     exception = None
-    switch_links = None
+    network = None
 
     def __init__(self, config):
         self.config = config
         self.target_sets = {}
         self.result_sets = {}
         self.active_ports = {}
-        self.switch_links = {}
         self.gcp = GcpManager(self.config)
         raw_description = config.get('site_description', '')
         self.description = raw_description.strip("\"")
         self.version = os.environ['DAQ_VERSION']
-
-    #pylint: disable=too-many-arguments
-    def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
-                 port=None, tmpdir=None):
-        """Add a host to the ecosystem"""
-        params = {'ip': ip_addr} if ip_addr else {}
-        params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
-        params['env_vars'] = env_vars if env_vars else []
-        params['vol_maps'] = vol_maps if vol_maps else []
-        host = self.net.addHost(name, cls, **params)
-        try:
-            LOGGER.debug('Created host %s with pid %s/%s', name, host.pid, host.shell.pid)
-            switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
-            self.switch_links[host] = switch_link
-            if self.net.built:
-                host.configDefault()
-                self._switch_attach(self.pri, switch_link.intf1)
-        except:
-            host.terminate()
-            raise
-        return host
-
-    def get_host_interface(self, host):
-        """Get the internal link interface for this host"""
-        return self.switch_links[host].intf2
-
-    def _switch_attach(self, switch, intf):
-        switch.attach(intf)
-        # This really should be done in attach, but currently only automatic on switch startup.
-        switch.vsctl(switch.intfOpts(intf))
-
-    def _switch_del_intf(self, switch, intf):
-        del switch.intfs[switch.ports[intf]]
-        del switch.ports[intf]
-        del switch.nameToIntf[intf.name]
-
-    def remove_host(self, host):
-        """Remove a host from the ecosystem"""
-        index = self.net.hosts.index(host)
-        if index:
-            del self.net.hosts[index]
-        if host in self.switch_links:
-            switch_link = self.switch_links[host]
-            del self.switch_links[host]
-            intf = switch_link.intf1
-            self.pri.detach(intf)
-            self._switch_del_intf(self.pri, intf)
-            intf.delete()
-            del self.net.links[self.net.links.index(switch_link)]
-
-    def _make_device_intfs(self):
-        intf_names = self.config['daq_intf'].split(',')
-        intfs = []
-        for intf_name in intf_names:
-            intf_name = intf_name[0:-1] if intf_name.endswith('!') else intf_name
-            port_no = len(intfs) + 1
-            intf = Intf(intf_name.strip(), node=DummyNode(), port=port_no)
-            intf.port = port_no
-            intfs.append(intf)
-        return intfs
+        self.network = TestNetwork(config)
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
         while self.faucet_events.next_event():
             pass
-
-    def _flap_interface_ports(self):
-        if self.device_intfs:
-            for device_intf in self.device_intfs:
-                self._flap_interface_port(device_intf.name)
-
-    def _flap_interface_port(self, intf_name):
-        if intf_name.startswith('faux') or intf_name == 'local':
-            LOGGER.info('Flapping device interface %s.', intf_name)
-            self.sec.cmd('ip link set %s down' % intf_name)
-            time.sleep(0.5)
-            self.sec.cmd('ip link set %s up' % intf_name)
-
-    def _create_secondary(self):
-        self.sec_port = int(self.config['ext_port'] if 'ext_port' in self.config else 47)
-        if 'ext_dpid' in self.config:
-            self.sec_dpid = int(self.config['ext_dpid'], 0)
-            self.sec_name = self.config['ext_intf']
-            LOGGER.info('Configuring external secondary with dpid %s on intf %s',
-                        self.sec_dpid, self.sec_name)
-            sec_intf = Intf(self.sec_name, node=DummyNode(), port=1)
-            self.pri.addIntf(sec_intf, port=1)
-        else:
-            self.sec_dpid = 2
-            LOGGER.info('Creating ovs secondary with dpid/port %s/%d',
-                        self.sec_dpid, self.sec_port)
-            self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=OVSSwitch)
-
-            link = self.net.addLink(self.pri, self.sec, port1=1,
-                                    port2=self.sec_port, fast=False)
-            LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
-            self.sec_name = link.intf2.name
 
     def _send_heartbeat(self):
         self.gcp.publish_message('daq_runner', {
@@ -187,35 +62,13 @@ class DAQRunner(object):
         """Initialize DAQ instance"""
         self._send_heartbeat()
 
-        LOGGER.debug("Creating miniet...")
-        self.net = Mininet()
-
-        LOGGER.debug("Adding switches...")
-        self.pri = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
+        self.network.initialize()
 
         LOGGER.info("Starting faucet...")
-        output = self.pri.cmd('cmd/faucet && echo SUCCESS')
+        output = self.network.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
             LOGGER.info('Faucet output: %s', output)
             assert False, 'Faucet startup failed'
-
-        self._create_secondary()
-
-        target_ip = "127.0.0.1"
-        LOGGER.debug("Adding controller at %s", target_ip)
-        self.net.addController('controller', controller=RemoteController,
-                               ip=target_ip, port=6633)
-
-        LOGGER.info("Starting mininet...")
-        self.net.start()
-
-        if self.sec:
-            self.device_intfs = self._make_device_intfs()
-            for device_intf in self.device_intfs:
-                LOGGER.info("Attaching device interface %s on port %d.",
-                            device_intf.name, device_intf.port)
-                self.sec.addIntf(device_intf, port=device_intf.port)
-                self._switch_attach(self.sec, device_intf)
 
         LOGGER.debug("Attaching event channel...")
         self.faucet_events = FaucetEventClient()
@@ -230,18 +83,29 @@ class DAQRunner(object):
         """Cleanup instance"""
         try:
             LOGGER.debug("Stopping faucet...")
-            self.pri.cmd('docker kill daq-faucet')
+            self.network.cmd('docker kill daq-faucet')
         except Exception as e:
             LOGGER.error('Exception: %s', e)
         try:
-            LOGGER.debug("Stopping mininet...")
-            self.net.stop()
+            LOGGER.debug("Stopping network...")
+            self.network.stop()
         except Exception as e:
             LOGGER.error('Exception: %s', e)
         LOGGER.info("Done with runner.")
 
+    def add_host(self, *args, **kwargs):
+        """Add a host with the given parameters"""
+        return self.network.add_host(*args, **kwargs)
+
+    def remove_host(self, host):
+        """Remove the given host"""
+        return self.network.remove_host(host)
+
+    def get_host_interface(self, host):
+        """Get the internal interface for the host"""
+        return self.network.get_host_interface(host)
+
     def _handle_faucet_event(self):
-        target_dpid = int(self.sec_dpid)
         while True:
             event = self.faucet_events.next_event()
             LOGGER.debug('Faucet event %s', event)
@@ -249,13 +113,10 @@ class DAQRunner(object):
                 break
             (dpid, port, active) = self.faucet_events.as_port_state(event)
             LOGGER.debug('Port state is dpid %s port %s active %s', dpid, port, active)
-            if dpid == target_dpid:
+            if self.network.is_device_port(dpid, port):
                 if active:
-                    if port >= self.sec_port:
-                        LOGGER.debug('Ignoring out-of-range port %d', port)
-                    else:
-                        self.active_ports[port] = True
-                        self._trigger_target_set(port)
+                    self.active_ports[port] = True
+                    self._trigger_target_set(port)
                 else:
                     if port in self.active_ports:
                         del self.active_ports[port]
@@ -290,7 +151,7 @@ class DAQRunner(object):
         self.event_start = self.config.get('e')
 
         if self.flap_ports:
-            self._flap_interface_ports()
+            self.network.flap_interface_ports()
 
         try:
             self.monitor = StreamMonitor(idle_handler=self._handle_system_idle,
@@ -310,7 +171,7 @@ class DAQRunner(object):
 
         if not self.one_shot and not self.exception:
             LOGGER.info('Dropping into interactive command line')
-            CLI(self.net)
+            self.network.cli()
 
         self._terminate()
 
