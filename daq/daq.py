@@ -52,7 +52,6 @@ def _read_config_into(filename, config):
 
 def _parse_args(args):
     config = {}
-    print args
     for arg in args[1:]:
         if arg:
             if arg[0] == '-':
