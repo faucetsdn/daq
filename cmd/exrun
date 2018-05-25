@@ -86,8 +86,10 @@ fi
 
 echo Executing sudo runner "$@"...
 sudo -s -- <<EOF
-    echo Entering virtual python environment...
-    source venv/bin/activate
+    if [ -d venv ]; then
+        echo Entering virtual python environment...
+        source venv/bin/activate
+    fi
     env \
         DAQ_CONTAINER=$DAQ_CONTAINER \
         FAUCET_EVENT_SOCK=$EVENT_SOCK \

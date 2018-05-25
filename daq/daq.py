@@ -52,14 +52,16 @@ def _read_config_into(filename, config):
 
 def _parse_args(args):
     config = {}
+    print args
     for arg in args[1:]:
-        if arg[0] == '-':
-            config[arg[1:]] = True
-        elif '=' in arg:
-            parts = arg.split('=', 1)
-            config[parts[0]] = parts[1]
-        else:
-            _read_config_into(arg, config)
+        if arg:
+            if arg[0] == '-':
+                config[arg[1:]] = True
+            elif '=' in arg:
+                parts = arg.split('=', 1)
+                config[parts[0]] = parts[1]
+            else:
+                _read_config_into(arg, config)
     return config
 
 
