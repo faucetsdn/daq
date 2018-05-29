@@ -13,7 +13,9 @@
 # Need to use ubuntu because mininet is very persnickity about versions.
 FROM ubuntu:xenial
 
-ENV AG="apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
+COPY bin/retry_cmd /bin/
+
+ENV AG="retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
 
 RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
 
