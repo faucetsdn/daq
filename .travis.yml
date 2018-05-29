@@ -11,9 +11,11 @@ addons:
     packages:
       - openvswitch-switch
 install:
+  - set -e
   - bin/setup_base
   - bin/setup_dev
 script:
+  - set -e
   - bin/build_daq
   - bin/test_daq
 env:
