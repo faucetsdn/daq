@@ -17,7 +17,7 @@ fi
 if [ "$DAQ_BUILD" == "in" ]; then
     cmd/inbuild
 elif [ "$DAQ_BUILD" != "no" ]; then
-    cmd/build
+    cmd/build inline
 fi
 
 # Show the results.

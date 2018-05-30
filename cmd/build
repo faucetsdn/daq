@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# Set this so docker build will fail even though piped through tee.
+set -o pipefail
+
 ROOT=$(dirname $0)/..
 cd $ROOT
 
@@ -9,6 +12,7 @@ in_container=$DAQ_CONTAINER
 build_args=
 do_images=
 ext_msg=
+inline=
 copydirs="bin cmd misc faucet docker daq"
 
 if [ "$1" == save ]; then
@@ -17,6 +21,11 @@ if [ "$1" == save ]; then
     shift
 elif [ "$1" == load ]; then
     do_images=load
+    shift
+fi
+
+if [ "$1" == inline ]; then
+    inline=y
     shift
 fi
 
@@ -69,7 +78,11 @@ for file in docker/Dockerfile.*; do
         docker load -i /daq/$build_root/docker_image.$module
     else
         echo Build$ext_msg $file into daq/$module, log to $logfile...
-        docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
+        if [ -n "$inline" ]; then
+            docker build -t $tag $build_args -f $file . 2>&1 | tee $logfile || failed=y
+        else
+            docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
+        fi
         if [ -n "$failed" ]; then
             tail $logfile
             echo Build failed, see $logfile for complete log.
