@@ -113,8 +113,12 @@ class StreamMonitor(object):
         msg = '' if handler else ' (no handler)'
         logging.error('Monitoring error handling %s fd %d%s: %s', name, fd, msg, e)
         if handler:
-            handler(e)
-            logging.error('Monitoring error handling %s fd %d done', name, fd)
+            try:
+                handler(e)
+            except Exception as handler_exception:
+                logging.error('Monitoring exception %s fd %d done: %s', name, fd, handler_exception)
+                logging.exception(handler_exception)
+
 
     def process_poll_result(self, event, fd):
         """Process an individual poll result"""
