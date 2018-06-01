@@ -1,0 +1,61 @@
+#!/bin/bash -e
+#
+# Setup things for directly running the core system. Not required for just
+# running a downloaded container.
+#
+# If you just want to get up and go, see bin/setup_base.
+#
+
+ROOT=$(realpath $(dirname $0)/..)
+FAUCET=https://github.com/faucetsdn/faucet.git
+FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION)
+MININET=https://github.com/mininet/mininet
+MININETV=2.2.2
+
+cd $ROOT
+
+if [ "$DAQ_BUILD" == "no" ]; then
+    echo Skipping core setup because DAQ_BUILD=no
+    exit 0
+fi
+
+sudo apt-get -y install \
+    ethtool curl ca-certificates \
+    isc-dhcp-client network-manager netcat gnupg2 \
+    python python-pkg-resources pylint python-virtualenv \
+    python-setuptools python-dev build-essential python-pip
+
+virtualenv venv
+
+source venv/bin/activate
+
+# Python extension packages.
+pip install --index-url=https://pypi.python.org/simple \
+    netifaces google-cloud-pubsub==0.32.1
+
+# Hack to make pylint happy.
+touch venv/lib/python2.7/site-packages/google/__init__.py
+touch venv/lib/python2.7/site-packages/google/cloud/__init__.py
+
+if [ -d mininet ]; then
+    echo mininet already installed, skipping.
+else
+    echo Cloning $MININET $MININETV...
+    git clone $MININET -b $MININETV
+    (
+        cd mininet
+        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
+            perl -pi -e "s/${i}//g" util/install.sh ;
+        done
+        util/install.sh -n
+    )
+fi
+
+if [ -d faucet ]; then
+    echo faucet already installed, skipping.
+else
+    echo Cloning $FAUCET $FAUCETV...
+    git clone -n $FAUCET faucet
+    (cd faucet; git checkout $FAUCETV)
+fi
+

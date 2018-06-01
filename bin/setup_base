@@ -1,0 +1,28 @@
+#!/bin/bash -e
+#
+# Setup the basics for using DAQ. Minimum subset necessary to run anything,
+# since some specific kernel modules are required.
+#
+# [Open vSwitch Debian Install](http://docs.openvswitch.org/en/latest/intro/install/distributions/#debian) (tested with version 2.6.2).
+# [Docker CE Debian Install](https://docs.docker.com/install/linux/docker-ce/debian/) (tested with version 17.12.0-ce).
+#
+
+retry=bin/retry_cmd
+
+distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+release=$(lsb_release -cs)
+echo Installing $distrib $release
+
+# Make sure to get a reasonably up-to-date version of OVS.
+sudo apt-get -y install apt-transport-https software-properties-common
+echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources.list.d/wand.list
+$retry sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
+$retry sudo apt-get update
+
+$retry curl -fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable"
+
+# Basic system install items.
+$retry sudo apt-get update
+$retry sudo apt-get -y install sudo realpath git \
+     openvswitch-switch openvswitch-common docker-ce

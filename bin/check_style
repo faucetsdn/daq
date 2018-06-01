@@ -1,0 +1,34 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+RESULTS=build/lint_results.txt
+PYLINTRC=$ROOT/.pylintrc
+
+cd $ROOT
+mkdir -p build
+
+export PYTHONPATH=faucet:mininet:venv/lib/python2.7/site-packages/
+
+source venv/bin/activate
+
+pylint --version >> $RESULTS
+
+echo Saving complete results to $RESULTS
+rm -f $RESULTS
+
+failure=
+results=
+for file in daq/*.py; do
+    echo Checking file $file... | tee -a $RESULTS
+    pylint --reports=n --rcfile=$PYLINTRC $file >> $RESULTS || true
+done
+
+messages=$(egrep -v '^Checking file' $RESULTS | wc -l)
+
+if [ $messages -gt 0 ]; then
+    echo pylint detected errors:
+    cat $RESULTS
+    false
+fi
+
+echo Success.
