@@ -102,6 +102,9 @@ sudo -s -- <<EOF
         PYTHONPATH=$PYTHONPATH \
         DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
         TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
+    if [ -n "$DAQ_CODECOV" ]; then
+        codecov
+    fi
 EOF
 
 if [ -n "$cleanup" ]; then
