@@ -90,6 +90,7 @@ fi
 
 echo Executing sudo $runcmd "$@"...
 sudo -s -- <<EOF
+    set -e
     if [ -d venv ]; then
         echo Entering virtual python environment...
         source venv/bin/activate
