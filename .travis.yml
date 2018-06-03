@@ -22,7 +22,7 @@ env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   matrix:
-    - DAQ_MODE=
+    - DAQ_CODECOV=y
     - DAQ_MODE=in DAQ_BUILD=in DAQ_PUSH=daqf/runner
     - DAQ_MODE=in DAQ_BUILD=no
     - DAQ_DEVICES=1 DAQ_FAIL=xdhcp

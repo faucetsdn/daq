@@ -55,6 +55,10 @@ else
     cmd/exrun -s || failed=true
 fi
 
+if [ -n "$DAQ_CODECOV" ]; then
+    codecov
+fi
+
 if [ -n "$DAQ_FAIL" ]; then
     if [ -z "$failed" ]; then
         echo Test did not fail with expected $DAQ_FAIL.
