@@ -149,6 +149,7 @@ class DAQRunner(object):
         self.one_shot = self.config.get('s')
         self.flap_ports = self.config.get('f')
         self.event_start = self.config.get('e')
+        use_console = self.config.get('c')
 
         if self.flap_ports:
             self.network.flap_interface_ports()
@@ -169,7 +170,8 @@ class DAQRunner(object):
             LOGGER.error('Keyboard Interrupt')
             LOGGER.exception(e)
 
-        if not self.one_shot and not self.exception:
+        keyboard_console = not self.one_shot and not self.exception
+        if use_console or keyboard_console:
             LOGGER.info('Dropping into interactive command line')
             self.network.cli()
 
