@@ -80,21 +80,20 @@ class ConnectedHost(object):
         try:
             self.networking = self.runner.add_host(networking_name, port=networking_port,
                                                    cls=cls, tmpdir=self.tmpdir)
-            self._write_config(self.networking.tmpdir)
+            self._create_config(self.networking.tmpdir)
             self.record_result('startup')
         except:
             self.terminate(trigger=False)
             raise
 
-    def _write_config(self, parent_dir):
-        config_data = self.config.get('iotc_config')
-        if config_data:
+    def _create_config(self, parent_dir):
+        config_path = self.config.get('config_path')
+        if config_path:
             target_dir = os.path.join(parent_dir, 'tmp', 'public')
             os.makedirs(target_dir)
-            config_file = os.path.join(target_dir, 'iotc_config.txt')
-            LOGGER.info('Writing config file %s with %s', config_file, config_data)
-            with open(config_file, 'w') as config:
-                config.write(config_data + '\n')
+            target_path = os.path.join(target_dir, 'config.json')
+            shutil.copyfile(config_path, target_path)
+            LOGGER.info('Copied config file %s to %s', config_path, target_path)
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
