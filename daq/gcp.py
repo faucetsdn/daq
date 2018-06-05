@@ -31,12 +31,13 @@ class GcpManager(object):
         LOGGER.info('Initialized gcp publisher client %s:%s', self.project, self.client_name)
 
     def subscribe(self, topic, callback):
+        """Subscript to a given topic"""
         if not self.subber:
             LOGGER.debug('Ignoring subscription %s becase not configured', topic)
             return
         full_topic = '%s-%s' % (topic, self.client_name)
         subscription_path = self.subber.subscription_path(self.project, full_topic)
-        auto_callback=lambda message: self._message_callback(topic, message, callback)
+        auto_callback = lambda message: self._message_callback(topic, message, callback)
         self.subber.subscribe(subscription_path, callback=auto_callback)
         LOGGER.info('Subscribed to %s', subscription_path)
 
@@ -66,5 +67,5 @@ class GcpManager(object):
         #pylint: disable=no-member
         topic_path = self.pubber.topic_path(self.project, topic)
         future = self.pubber.publish(topic_path, message.encode('utf-8'),
-                                        origin=self.client_name)
+                                     origin=self.client_name)
         LOGGER.debug('Publish future result %s', future.result())
