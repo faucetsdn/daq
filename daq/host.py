@@ -93,8 +93,8 @@ class ConnectedHost(object):
             os.makedirs(target_dir)
             config_file = os.path.join(target_dir, 'iotc_config.txt')
             LOGGER.info('Writing config file %s with %s', config_file, config_data)
-            with open(config_file, 'w') as file:
-                file.write(config_data + '\n')
+            with open(config_file, 'w') as config:
+                config.write(config_data + '\n')
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
