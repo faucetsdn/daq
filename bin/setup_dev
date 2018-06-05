@@ -8,7 +8,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 FAUCET=https://github.com/faucetsdn/faucet.git
-FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION)
+FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
 MININETV=2.2.2
 
@@ -19,8 +19,14 @@ if [ "$DAQ_BUILD" == "no" ]; then
     exit 0
 fi
 
+which sudo || apt-get -y install sudo
+
+sudo apt-get update
+
 sudo apt-get -y install \
-    ethtool curl ca-certificates \
+    software-properties-common apt-transport-https \
+    realpath git emacs-nox ethtool curl apache2-utils \
+    ca-certificates lsof pylint \
     isc-dhcp-client network-manager netcat gnupg2 \
     python python-pkg-resources pylint python-virtualenv \
     python-setuptools python-dev build-essential python-pip
@@ -41,7 +47,7 @@ if [ -d mininet ]; then
     echo mininet already installed, skipping.
 else
     echo Cloning $MININET $MININETV...
-    git clone $MININET -b $MININETV
+    git clone $MININET -b $MININETV --single-branch --depth 1
     (
         cd mininet
         for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
@@ -53,6 +59,8 @@ fi
 
 if [ -d faucet ]; then
     echo faucet already installed, skipping.
+elif [ -z "$FAUCETV" ]; then
+    echo No faucet version found, skipping.
 else
     echo Cloning $FAUCET $FAUCETV...
     git clone -n $FAUCET faucet

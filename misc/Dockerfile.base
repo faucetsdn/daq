@@ -14,21 +14,9 @@ RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strac
 # Dump all our junks into the root home directory.
 WORKDIR /root
 
-# Basic system install items
-RUN $AG update && $AG install \
-    software-properties-common apt-transport-https \
-    sudo realpath git emacs-nox ethtool curl apache2-utils \
-    isc-dhcp-client network-manager netcat lsof pylint \
-    python python-setuptools python-dev build-essential python-pip \
-    openvswitch-switch openvswitch-common 
+COPY bin/setup_dev bin/setup_dev
 
-# Python extension packages
-RUN pip install --index-url=https://pypi.python.org/simple \
-    netifaces google-cloud-pubsub==0.32.1
-
-# Install mininet
-RUN git clone git://github.com/mininet/mininet.git --single-branch --depth 1 \
-  && cd mininet && util/install.sh
+RUN bin/setup_dev
 
 # Install docker in docker
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -

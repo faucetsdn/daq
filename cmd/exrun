@@ -11,6 +11,11 @@ DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 
 cd $ROOT
 
+if [ `whoami` != root ]; then
+    echo Must run as root, try sudo!
+    false
+fi
+
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
 
