@@ -38,6 +38,7 @@ class DAQRunner(object):
         self.result_sets = {}
         self.active_ports = {}
         self.gcp = GcpManager(self.config)
+        self.gcp.subscribe('port_control', self._port_control)
         raw_description = config.get('site_description', '')
         self.description = raw_description.strip("\"")
         self.version = os.environ['DAQ_VERSION']
@@ -57,6 +58,9 @@ class DAQRunner(object):
             'version': self.version,
             'timestamp': int(time.time()),
         })
+
+    def _port_control(self, message):
+        LOGGER.info('port_control %s', message)
 
     def initialize(self):
         """Initialize DAQ instance"""
