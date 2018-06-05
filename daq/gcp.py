@@ -4,7 +4,6 @@ import json
 import logging
 
 import firebase_admin
-from firebase_admin import credentials
 from firebase_admin import firestore
 
 from google.cloud import pubsub_v1
