@@ -13,7 +13,9 @@ class GcpManager(object):
 
     config = None
     project = None
-    client = None
+    client_name = None
+    pubber = None
+    subber = None
 
     def __init__(self, config):
         self.config = config
