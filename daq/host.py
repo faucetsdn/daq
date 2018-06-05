@@ -42,6 +42,7 @@ class ConnectedHost(object):
     port_set = None
     pri_base = None
     networking = None
+    config = None
     dummy = None
     state = ERROR_STATE
     results = None
@@ -56,8 +57,9 @@ class ConnectedHost(object):
     target_ip = None
     target_mac = None
 
-    def __init__(self, runner, port_set):
+    def __init__(self, runner, port_set, config):
         self.runner = runner
+        self.config = config
         self.port_set = port_set
         self.pri_base = port_set * 10
         self.tmpdir = os.path.join('inst', 'run-port-%02d' % self.port_set)
@@ -78,10 +80,21 @@ class ConnectedHost(object):
         try:
             self.networking = self.runner.add_host(networking_name, port=networking_port,
                                                    cls=cls, tmpdir=self.tmpdir)
+            self._write_config(self.networking.tmpdir)
             self.record_result('startup')
         except:
             self.terminate(trigger=False)
             raise
+
+    def _write_config(self, parent_dir):
+        config_data = self.config.get('iotc_config')
+        if config_data:
+            target_dir = os.path.join(parent_dir, 'tmp', 'public')
+            os.makedirs(target_dir)
+            config_file = os.path.join(target_dir, 'iotc_config.txt')
+            LOGGER.info('Writing config file %s with %s', config_file, config_data)
+            with open(config_file, 'w') as file:
+                file.write(config_data + '\n')
 
     def _state_transition(self, target, expected=None):
         if expected is not None:

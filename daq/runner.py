@@ -38,7 +38,6 @@ class DAQRunner(object):
         self.result_sets = {}
         self.active_ports = {}
         self.gcp = GcpManager(self.config)
-        self.gcp.subscribe('port_control', self._port_control)
         raw_description = config.get('site_description', '')
         self.description = raw_description.strip("\"")
         self.version = os.environ['DAQ_VERSION']
@@ -185,7 +184,7 @@ class DAQRunner(object):
         assert port_set not in self.target_sets, 'target set %d already exists' % port_set
         try:
             LOGGER.debug('Trigger target set %d', port_set)
-            self.target_sets[port_set] = ConnectedHost(self, port_set)
+            self.target_sets[port_set] = ConnectedHost(self, port_set, self.config)
             self._send_heartbeat()
         except Exception as e:
             self.target_set_error(port_set, e)

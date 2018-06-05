@@ -1,5 +1,7 @@
 #!/bin/bash
 
-python -m SimpleHTTPServer &
+mkdir -p /tmp/public
+
+(cd /tmp/public; python -m SimpleHTTPServer &)
 
 dnsmasq -d --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp
