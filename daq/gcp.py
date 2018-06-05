@@ -36,6 +36,7 @@ class GcpManager(object):
             LOGGER.debug('Ignoring subscription %s becase not configured', topic)
             return
         full_topic = '%s-%s' % (topic, self.client_name)
+        # pylint: disable=no-member
         subscription_path = self.subber.subscription_path(self.project, full_topic)
         auto_callback = lambda message: self._message_callback(topic, message, callback)
         self.subber.subscribe(subscription_path, callback=auto_callback)
