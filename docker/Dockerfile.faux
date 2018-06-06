@@ -10,8 +10,8 @@ RUN $AG update && $AG install default-jre
 
 RUN $AG update && $AG install default-jdk git
 
-RUN retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch --depth 1 \
-  && cd bacnet4j && retry_cmd ./gradlew shadow
+RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch --depth 1 \
+  && cd bacnet4j && bin/retry_cmd ./gradlew shadow
 
 FROM daq/aardvark:latest
 
