@@ -28,7 +28,7 @@ fi
 echo Loading daq run configuration from $LOCAL_CONFIG
 source $LOCAL_CONFIG
 
-PYTHONPATH=$FAUCET:$MININET
+export PYTHONPATH=$FAUCET:$MININET
 
 set | egrep ^[a-z][a-z_]*=
 
