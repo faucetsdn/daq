@@ -16,7 +16,7 @@ cmd/build save
 
 local_config=local/system.conf
 build_root=build
-build_args=
+build_args="--env DAQ_CONTAINER=base"
 
 if [ -f $local_config ]; then
   echo Loading build configuraiton from $local_config

@@ -39,6 +39,7 @@ $AG install \
     python python-pkg-resources pylint \
     python-setuptools python-dev build-essential python-pip
 
+echo Running in container $DAQ_CONTAINER
 if [ -z "$DAQ_CONTAINER" ]; then
     # Can't use virtualenv inside of containers because of absolute paths.
     $AG install virtualenv || $AG install python-virtualenv
