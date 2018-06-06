@@ -16,11 +16,8 @@ RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strac
 # Dump all our junks into the root home directory.
 WORKDIR /root
 
-COPY bin/setup_dev bin/setup_dev
+COPY bin/setup_base bin/
+RUN bin/setup_base
 
+COPY bin/setup_dev bin/
 RUN bin/setup_dev
-
-# Install docker in docker
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt-cache policy docker-ce && $AG update && $AG install docker-ce
