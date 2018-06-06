@@ -32,10 +32,10 @@ $AG update
 $AG install emacs-nox || $AG install emacs24-nox
 
 $AG install \
-    software-properties-common apt-transport-https \
+    software-properties-common apt-transport-https iproute2 \
     realpath git ethtool curl apache2-utils iputils-ping \
     ca-certificates lsof pylint sudo net-tools tcpdump \
-    isc-dhcp-client network-manager netcat gnupg2 \
+    isc-dhcp-client network-manager netcat gnupg2 strace \
     python python-pkg-resources pylint \
     python-setuptools python-dev build-essential python-pip
 
