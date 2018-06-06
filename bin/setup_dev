@@ -12,6 +12,12 @@ FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
 MININETV=2.2.2
 
+if [ -z "$AG" ]; then
+    AG="sudo apt-get -qqy --no-install-recommends"
+fi
+
+echo AG is $AG
+
 cd $ROOT
 
 if [ "$DAQ_BUILD" == "no" ]; then
@@ -19,14 +25,12 @@ if [ "$DAQ_BUILD" == "no" ]; then
     exit 0
 fi
 
-which sudo || apt-get -y install sudo
+$AG update
 
-sudo apt-get update
-
-sudo apt-get -y install \
+$AG install \
     software-properties-common apt-transport-https \
     realpath git emacs-nox ethtool curl apache2-utils \
-    ca-certificates lsof pylint \
+    ca-certificates lsof pylint sudo \
     isc-dhcp-client network-manager netcat gnupg2 \
     python python-pkg-resources pylint python-virtualenv \
     python-setuptools python-dev build-essential python-pip
