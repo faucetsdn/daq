@@ -41,6 +41,7 @@ mkdir -p $INSTDIR
 rm -f $FAUCET_EVENT_SOCK
 
 docker ps > /dev/null 2>&1 || service docker start
+sleep 1
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
