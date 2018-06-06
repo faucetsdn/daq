@@ -6,15 +6,15 @@
 # Need to use ubuntu because mininet is very persnickity about versions.
 FROM ubuntu:xenial
 
-COPY bin/retry_cmd /bin/
+# Dump all our junks into the root home directory.
+WORKDIR /root
 
-ENV AG="retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
+COPY bin/retry_cmd bin/
+
+ENV AG="bin/retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
 
 # Basic things shared with aardvark.
 RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
-
-# Dump all our junks into the root home directory.
-WORKDIR /root
 
 COPY bin/setup_base bin/
 RUN bin/setup_base

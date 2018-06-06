@@ -13,14 +13,14 @@ fi
 
 echo AG is $AG
 
-retry=bin/retry_cmd
+$AG update
+$AG install lsb-release realpath git curl sudo apt-transport-https software-properties-common
 
+retry=bin/retry_cmd
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 release=$(lsb_release -cs)
-echo Installing $distrib $release
 
-$AG update
-$AG install realpath git sudo apt-transport-https software-properties-common
+echo Installing for $distrib $release
 
 # Make sure to get a reasonably up-to-date version of OVS.
 echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources.list.d/wand.list
