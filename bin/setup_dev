@@ -31,11 +31,6 @@ $AG update
 # Ubuntu Trusty (used by Travis CI) has some different package names!
 $AG install emacs-nox || $AG install emacs24-nox
 
-if [ "$DAQ_BUILD" != "in" ]; then
-    # Can't use virtualenv inside of containers because paths are wonky.
-    $AG install virtualenv || $AG install python-virtualenv
-fi
-
 $AG install \
     software-properties-common apt-transport-https \
     realpath git ethtool curl apache2-utils \
@@ -44,7 +39,9 @@ $AG install \
     python python-pkg-resources pylint \
     python-setuptools python-dev build-essential python-pip
 
-if [ "$DAQ_BUILD" != "in" ]; then
+if [ -z "$DAQ_CONTAINER" ]; then
+    # Can't use virtualenv inside of containers because of absolute paths.
+    $AG install virtualenv || $AG install python-virtualenv
     pip install virtualenv
     virtualenv venv
     source venv/bin/activate
