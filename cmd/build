@@ -1,0 +1,103 @@
+#!/bin/bash -e
+
+# Set this so docker build will fail even though piped through tee.
+set -o pipefail
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+local_config=local/system.conf
+build_root=build
+in_container=$DAQ_CONTAINER
+build_args=
+do_images=
+ext_msg=
+inline=
+copydirs="bin cmd misc faucet docker daq"
+
+if [ "$1" == save ]; then
+    do_images=save
+    ext_msg=/save
+    shift
+elif [ "$1" == load ]; then
+    do_images=load
+    shift
+fi
+
+if [ "$1" == inline ]; then
+    inline=y
+    shift
+fi
+
+if [ -f $local_config ]; then
+  echo Loading build configuraiton from $local_config
+  source $local_config
+fi
+
+if [ -n "$in_container" ]; then
+    # Run in container for pylint versioning.
+    echo Running style checks...
+    bin/check_style
+
+    echo 'DOCKER_OPTS="-s vfs -D -l debug"' > /etc/default/docker
+    service docker start
+    sleep 3
+    echo Importing current local version of daq...
+    ROOT=/root/daq
+    rm -rf $ROOT
+    mkdir -p $ROOT
+    cd /daq
+    for subdir in $copydirs; do
+        echo Copying subdir $subdir...
+        cp -a $subdir $ROOT/
+    done
+    cd $ROOT
+    if [ "$do_images" != load ]; then
+        rm -rf build
+    fi
+    echo Now running in `pwd`
+fi
+
+mkdir -p local
+date > local/last_build.txt
+sudo rm -rf $build_root
+mkdir -p $build_root
+
+for file in docker/Dockerfile.*; do
+    if [ ${file%\~} != ${file} ]; then
+        continue
+    fi
+    module=${file#docker/Dockerfile.}
+    if [ "$module" == base -a -n "$in_container" ]; then
+        continue
+    fi
+    logfile=$build_root/docker_build.$module
+    failed=
+    tag=daq/$module
+    if [ "$do_images" == load ]; then
+        docker load -i /daq/$build_root/docker_image.$module
+    else
+        echo Build$ext_msg $file into daq/$module, log to $logfile...
+        if [ -n "$inline" ]; then
+            docker build -t $tag $build_args -f $file . 2>&1 | tee $logfile || failed=y
+        else
+            docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
+        fi
+        if [ -n "$failed" ]; then
+            tail $logfile
+            echo Build failed, see $logfile for complete log.
+            false
+        fi
+        echo Build complete. >> $logfile
+        if [ "$do_images" == save ]; then
+            docker save $tag > $build_root/docker_image.$module
+        fi
+    fi
+done
+
+if [ -n "$in_container" ]; then
+    service docker stop
+    sleep 2
+    rm -fr /var/lib/docker/runtimes
+    rm -fr faucet/.git
+fi

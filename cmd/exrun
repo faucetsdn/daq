@@ -1,0 +1,115 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+INSTDIR=$ROOT/inst
+LOCALDIR=$ROOT/local
+FAUCET_SOCK=faucet_event.sock
+EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
+SYSTEM_CONF=system.conf
+LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
+DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
+
+cd $ROOT
+
+FAUCET=$(realpath $ROOT/faucet)
+MININET=$(realpath $ROOT/mininet)
+
+if [ ! -f $LOCAL_CONFIG ]; then
+    mkdir -p $LOCALDIR
+    echo Copying default $SYSTEM_CONF to $LOCAL_CONFIG
+    cp misc/$SYSTEM_CONF $LOCAL_CONFIG
+fi
+
+echo Loading daq run configuration from $LOCAL_CONFIG
+source $LOCAL_CONFIG
+
+PYTHONPATH=$FAUCET:$MININET
+
+set | egrep ^[a-z][a-z_]*=
+
+if [ ! -d $FAUCET ]; then
+    echo Faucet directory $FAUCET not found.
+    false
+fi
+
+mkdir -p $INSTDIR
+rm -f $EVENT_SOCK
+
+docker ps > /dev/null 2>&1 || service docker start
+
+ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
+$ovsctl status || sudo $ovsctl start
+
+if [ -z "$daq_intf" ]; then
+    echo Setting daq_intf not defined, defaulting to auto-start faux device.
+    daq_intf="faux!"
+fi
+
+intfs=$(echo $daq_intf | tr , ' ')
+for intf in $intfs; do
+    if [ "$intf" == "local!" ]; then
+        intf=local
+        echo Implicitly running local device...
+        $ROOT/cmd/local
+        cleanup="$ROOT/cmd/local clean"
+    fi
+
+    if [ "$intf" == "faux!" ]; then
+        intf=faux
+        echo Implicitly running faux device...
+        $ROOT/cmd/faux
+        cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
+    fi
+
+    ip -br addr show $intf || true
+
+    # If running inside of a container, wait until the host test interface shows up...
+    if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
+        retry=5
+        while ! ifconfig -a | fgrep -q $intf; do
+            if [ "$retry" == 0 ]; then
+                echo Failed to find interface $intf.
+                false
+            fi
+            echo Waiting for interface $intf to appear retry $retry...
+            sleep 1
+            retry=$((retry-1))
+        done
+    fi
+done
+
+if [ -f .pdbrc ]; then
+    echo Found .pdbrc file, using pdb...
+    runcmd=pdb
+elif [ -n "$DAQ_CODECOV" ]; then
+    echo Running with coverage analysis...
+    runcmd="coverage run"
+else
+    runcmd=python
+fi
+
+echo Executing sudo $runcmd "$@"...
+sudo -s -- <<EOF
+    set -e
+    if [ -d venv ]; then
+        echo Entering virtual python environment...
+        source venv/bin/activate
+    fi
+    env \
+        DAQ_CONTAINER=$DAQ_CONTAINER \
+        FAUCET_EVENT_SOCK=$EVENT_SOCK \
+        DAQ_VERSION=$DAQ_VERSION \
+        PYTHONDONTWRITEBYTECODE=True \
+        PYTHONPATH=$PYTHONPATH \
+        DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
+        TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
+    if [ -n "$DAQ_CODECOV" ]; then
+        codecov
+    fi
+EOF
+
+if [ -n "$cleanup" ]; then
+    sh -c "$cleanup"
+fi
+
+echo Done with run.

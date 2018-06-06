@@ -1,0 +1,33 @@
+sudo: required
+dist: trusty
+language: python
+python:
+  - "2.7"
+services:
+  - docker
+addons:
+  apt:
+    update: true
+    packages:
+      - openvswitch-switch
+install:
+  - set -e
+  - bin/setup_base
+  - bin/setup_dev
+script:
+  - set -e
+  - bin/build_daq
+  - bin/test_daq
+env:
+  global:
+    - DOCKER_STARTUP_TIMEOUT_MS=60000
+  matrix:
+    - DAQ_CODECOV=y
+branches:
+  except:
+  - /^release-\d+\.\d+(\.\d+)?$/
+deploy:
+  provider: script
+  script: bash bin/docker_push
+  on:
+    branch: release
