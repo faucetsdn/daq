@@ -13,7 +13,7 @@ build_args=
 do_images=
 ext_msg=
 inline=
-copydirs="bin cmd misc faucet docker daq"
+copydirs="bin cmd misc faucet docker daq venv"
 
 if [ "$1" == save ]; then
     do_images=save
