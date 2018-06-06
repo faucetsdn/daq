@@ -30,7 +30,7 @@ $AG update
 $AG install \
     software-properties-common apt-transport-https \
     realpath git emacs-nox ethtool curl apache2-utils \
-    ca-certificates lsof pylint sudo \
+    ca-certificates lsof pylint sudo virtualenv \
     isc-dhcp-client network-manager netcat gnupg2 \
     python python-pkg-resources pylint python-virtualenv \
     python-setuptools python-dev build-essential python-pip
