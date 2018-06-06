@@ -30,7 +30,11 @@ $AG update
 
 # Ubuntu Trusty (used by Travis CI) has some different package names!
 $AG install emacs-nox || $AG install emacs24-nox
-$AG install virtualenv || $AG install python-virtualenv
+
+if [ "$DAQ_BUILD" != "in" ]; then
+    # Can't use virtualenv inside of containers because paths are wonky.
+    $AG install virtualenv || $AG install python-virtualenv
+fi
 
 $AG install \
     software-properties-common apt-transport-https \
@@ -40,19 +44,21 @@ $AG install \
     python python-pkg-resources pylint \
     python-setuptools python-dev build-essential python-pip
 
-pip install virtualenv
-
-virtualenv venv
-
-source venv/bin/activate
+if [ "$DAQ_BUILD" != "in" ]; then
+    pip install virtualenv
+    virtualenv venv
+    source venv/bin/activate
+fi
 
 # Python extension packages.
 pip install --index-url=https://pypi.python.org/simple \
     netifaces codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
 
 # Hack to make pylint happy.
-touch venv/lib/python2.7/site-packages/google/__init__.py
-touch venv/lib/python2.7/site-packages/google/cloud/__init__.py
+if [ -d venv ]; then
+    touch venv/lib/python2.7/site-packages/google/__init__.py
+    touch venv/lib/python2.7/site-packages/google/cloud/__init__.py
+fi
 
 if [ -d mininet ]; then
     echo mininet already installed, skipping.
