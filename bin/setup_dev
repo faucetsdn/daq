@@ -19,6 +19,7 @@ fi
 echo AG is $AG
 
 cd $ROOT
+echo Setup root is $PWD
 
 if [ "$DAQ_BUILD" == "no" ]; then
     echo Skipping core setup because DAQ_BUILD=no

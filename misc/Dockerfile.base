@@ -7,14 +7,10 @@
 FROM ubuntu:xenial
 
 # Dump all our junks into the root home directory.
-WORKDIR /root
+WORKDIR /root/daq
 
 COPY bin/retry_cmd bin/
-
 ENV AG="bin/retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
-
-# Basic things shared with aardvark.
-RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
 
 COPY bin/setup_base bin/
 RUN bin/setup_base
