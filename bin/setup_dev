@@ -35,14 +35,15 @@ $AG install \
     python python-pkg-resources pylint python-virtualenv \
     python-setuptools python-dev build-essential python-pip
 
+pip install virtualenv
+
 virtualenv venv
 
 source venv/bin/activate
 
 # Python extension packages.
 pip install --index-url=https://pypi.python.org/simple \
-    netifaces virtualenv codecov \
-    firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+    netifaces codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
 
 # Hack to make pylint happy.
 touch venv/lib/python2.7/site-packages/google/__init__.py
