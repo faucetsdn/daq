@@ -6,7 +6,7 @@
 # If you just want to get up and go, see bin/setup_base.
 #
 
-ROOT=$(realpath $(dirname $0)/..)
+ROOT=$(dirname $0)/..
 FAUCET=https://github.com/faucetsdn/faucet.git
 FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
@@ -27,12 +27,16 @@ fi
 
 $AG update
 
+# Ubuntu Trusty (used by Travis CI) has some different package names!
+$AG install emacs-nox || $AG install emacs24-nox
+$AG install virtualenv || $AG install python-virtualenv
+
 $AG install \
     software-properties-common apt-transport-https \
-    realpath git emacs-nox ethtool curl apache2-utils \
-    ca-certificates lsof pylint sudo virtualenv \
+    realpath git ethtool curl apache2-utils \
+    ca-certificates lsof pylint sudo \
     isc-dhcp-client network-manager netcat gnupg2 \
-    python python-pkg-resources pylint python-virtualenv \
+    python python-pkg-resources pylint \
     python-setuptools python-dev build-essential python-pip
 
 pip install virtualenv
