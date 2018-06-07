@@ -234,6 +234,30 @@ function listOrigins(db) {
   }).catch((e) => statusUpdate('origin list error', e));
 }
 
+function listRegistries(db) {
+  db.collection('registry').get().then((snapshot) => {
+    snapshot.forEach((registry) => {
+      listDevices(db, registry.id);
+    });
+  }).catch((e) => statusUpdate('registry list error', e));
+}
+
+function listDevices(db, registryId) {
+  const link_group = document.getElementById('devices');
+  db
+    .collection('registry').doc(registryId)
+    .collection('device').get().then((snapshot) => {
+      snapshot.forEach((device) => {
+        const deviceId = device.id;
+        const origin_link = document.createElement('a');
+        origin_link.setAttribute('href', `/?registry=${registryId}&device=${deviceId}`);
+        origin_link.innerHTML = `${registryId}/${deviceId}`
+        link_group.appendChild(origin_link);
+        link_group.appendChild(document.createElement('p'));
+      });
+    }).catch((e) => statusUpdate('registry list error', e));
+}
+
 function setupTriggers() {
   var db = firebase.firestore();
   const settings = {
@@ -243,6 +267,8 @@ function setupTriggers() {
 
   const origin_id = getQueryParam('origin');
   const port_id = getQueryParam('port');
+  const registry_id = getQueryParam('registry');
+  const device_id = getQueryParam('device');
 
   if (port_id) {
     ensureGridRow('header');
@@ -252,8 +278,11 @@ function setupTriggers() {
     ensureGridRow('header');
     ensureGridColumn('row', 'port');
     triggerOrigin(db, origin_id);
+  } else if (registry_id && device_id) {
+    triggerDevice(db, registry_id, device_id);
   } else {
     listOrigins(db);
+    listRegistries(db);
   }
 }
 
@@ -301,6 +330,19 @@ function triggerPort(db, origin_id, port_id) {
       });
     });
   });
+}
+
+function triggerDevice(db, registry_id, device_id) {
+  db
+    .collection('registry').doc(registry_id)
+    .collection('device').doc(device_id)
+    .collection('telemetry').doc('latest')
+    .onSnapshot((snapshot) => {
+      const hue = Math.floor(snapshot.data().random * 360);
+      const hsl = `hsl(${hue}, 80%, 50%)`;
+      console.log(hsl)
+      document.body.style.backgroundColor = hsl;
+    });
 }
 
 function interval_updater() {
