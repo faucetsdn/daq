@@ -4,12 +4,17 @@ ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 LOCALDIR=$ROOT/local
 FAUCET_SOCK=faucet_event.sock
-EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
+export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
-DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
+export DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 
 cd $ROOT
+
+if [ `whoami` != root ]; then
+    echo Must run as root, try sudo!
+    false
+fi
 
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
@@ -23,7 +28,7 @@ fi
 echo Loading daq run configuration from $LOCAL_CONFIG
 source $LOCAL_CONFIG
 
-PYTHONPATH=$FAUCET:$MININET
+export PYTHONPATH=$FAUCET:$MININET
 
 set | egrep ^[a-z][a-z_]*=
 
@@ -33,9 +38,10 @@ if [ ! -d $FAUCET ]; then
 fi
 
 mkdir -p $INSTDIR
-rm -f $EVENT_SOCK
+rm -f $FAUCET_EVENT_SOCK
 
 docker ps > /dev/null 2>&1 || service docker start
+sleep 1
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
@@ -88,25 +94,22 @@ else
     runcmd=python
 fi
 
-echo Executing sudo $runcmd "$@"...
-sudo -s -- <<EOF
-    set -e
-    if [ -d venv ]; then
-        echo Entering virtual python environment...
-        source venv/bin/activate
-    fi
-    env \
-        DAQ_CONTAINER=$DAQ_CONTAINER \
-        FAUCET_EVENT_SOCK=$EVENT_SOCK \
-        DAQ_VERSION=$DAQ_VERSION \
-        PYTHONDONTWRITEBYTECODE=True \
-        PYTHONPATH=$PYTHONPATH \
-        DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
-        TERM=dumb $runcmd daq/daq.py $LOCAL_CONFIG "$@"
-    if [ -n "$DAQ_CODECOV" ]; then
-        codecov
-    fi
-EOF
+if [ -d venv ]; then
+    echo Entering virtual python environment...
+    source venv/bin/activate
+fi
+
+echo Using python exe `which python`
+echo Executing $runcmd $@...
+
+export PYTHONDONTWRITEBYTECODE=True
+export TERM=dumb
+
+$runcmd daq/daq.py $LOCAL_CONFIG $@
+
+if [ -n "$DAQ_CODECOV" ]; then
+    codecov
+fi
 
 if [ -n "$cleanup" ]; then
     sh -c "$cleanup"
