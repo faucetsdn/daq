@@ -333,11 +333,13 @@ function triggerPort(db, origin_id, port_id) {
 }
 
 function triggerDevice(db, registry_id, device_id) {
+  statusUpdate('Setup device trigger ' + device_id);
   db
     .collection('registry').doc(registry_id)
     .collection('device').doc(device_id)
     .collection('telemetry').doc('latest')
     .onSnapshot((snapshot) => {
+      statusUpdate('');
       const hue = Math.floor(snapshot.data().random * 360);
       const hsl = `hsl(${hue}, 80%, 50%)`;
       console.log(hsl)
