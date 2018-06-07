@@ -14,7 +14,7 @@ required. This could either be a separate built-in NIC, or a USB-Ethernet dongle
 
 ## Quickstart
 
-Running `bin/setup_install` will setup the basic prerequisites. This will install a
+Running `bin/setup_base` will setup the basic prerequisites. This will install a
 minimum set of basic packages, docker, and openvswitch.
 
 Once installed, the basic qualification suite can be run with `cmd/run -s`. (The
