@@ -59,16 +59,23 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   return null;
 });
 
-exports.device_telemetry = functions.pubsub.topic('telemetry').onPublish((event) => {
-  const deviceId = event.attributes.deviceId;
-  const msg = event.data;
+function get_device_doc(registryId, deviceId) {
+  const timestr = new Date().toTimeString();
+  const reg = db.collection('registry').doc(registryId);
+  reg.set({'updated': timestr});
+  const dev = reg.collection('device').doc(deviceId);
+  dev.set({'updated': timestr});
+  return dev;
+}
 
-  const msgString = Buffer.from(msg, 'base64').toString();
+exports.device_telemetry = functions.pubsub.topic('telemetry').onPublish((event) => {
+  const registryId = event.attributes.deviceRegistryId;
+  const deviceId = event.attributes.deviceId;
+  const base64 = event.data;
+  const msgString = Buffer.from(base64, 'base64').toString();
   const msgObject = JSON.parse(msgString);
 
-  const device_doc = db
-        .collection('device').doc(deviceId)
-        .collection('telemetry').doc('latest');
+  device_doc = get_device_doc(registryId, deviceId).collection('telemetry').doc('latest');
 
   console.log(deviceId, msgObject);
   msgObject.data.forEach((data) => {
@@ -79,15 +86,13 @@ exports.device_telemetry = functions.pubsub.topic('telemetry').onPublish((event)
 });
 
 exports.device_state = functions.pubsub.topic('device_state').onPublish((event) => {
+  const registryId = event.attributes.deviceRegistryId;
   const deviceId = event.attributes.deviceId;
-  const msg = event.data;
-
-  const msgString = Buffer.from(msg, 'base64').toString();
+  const base64 = event.data;
+  const msgString = Buffer.from(base64, 'base64').toString();
   const msgObject = JSON.parse(msgString);
 
-  const device_doc = db
-        .collection('device').doc(deviceId)
-        .collection('state').doc('latest');
+  device_doc = get_device_doc(registryId, deviceId).collection('state').doc('latest');
 
   console.log(deviceId, msgObject);
   device_doc.set(msgObject);
