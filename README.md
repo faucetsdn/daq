@@ -1,6 +1,8 @@
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
 A flexble IoT Device Automatd Qualification (DAQ) framework utilizing the FAUCET SDN controller.
+Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
+list for ongoing discussion about using DAQ for device testing.
 
 ## System Requirements
 
