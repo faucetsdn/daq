@@ -58,3 +58,39 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
   
   return null;
 });
+
+exports.device_telemetry = functions.pubsub.topic('telemetry').onPublish((event) => {
+  const deviceId = event.attributes.deviceId;
+  const msg = event.data;
+
+  const msgString = Buffer.from(msg, 'base64').toString();
+  const msgObject = JSON.parse(msgString);
+
+  const device_doc = db
+        .collection('device').doc(deviceId)
+        .collection('telemetry').doc('latest');
+
+  console.log(deviceId, msgObject);
+  msgObject.data.forEach((data) => {
+    device_doc.set(data);
+  });
+
+  return null;
+});
+
+exports.device_state = functions.pubsub.topic('device_state').onPublish((event) => {
+  const deviceId = event.attributes.deviceId;
+  const msg = event.data;
+
+  const msgString = Buffer.from(msg, 'base64').toString();
+  const msgObject = JSON.parse(msgString);
+
+  const device_doc = db
+        .collection('device').doc(deviceId)
+        .collection('state').doc('latest');
+
+  console.log(deviceId, msgObject);
+  device_doc.set(msgObject);
+
+  return null;
+});
