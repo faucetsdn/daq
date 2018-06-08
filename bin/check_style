@@ -9,7 +9,9 @@ mkdir -p build
 
 export PYTHONPATH=faucet:mininet:venv/lib/python2.7/site-packages/
 
-source venv/bin/activate
+if [ -d venv ]; then
+    source venv/bin/activate
+fi
 
 pylint --version >> $RESULTS
 

@@ -23,6 +23,7 @@ env:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   matrix:
     - DAQ_CODECOV=y
+    - DAQ_MODE=in DAQ_BUILD=no
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/

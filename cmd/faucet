@@ -1,0 +1,47 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+CONTAINER=daq-faucet
+INSTDIR=$ROOT/inst
+IMAGE=daq/faucet
+FAUCET_SOCK=faucet_event.sock
+SYSTEM_CONF=system.conf
+LOCAL_CONFIG=local/$SYSTEM_CONF
+
+ext_port=47
+ext_dpid=2
+
+cd $ROOT
+
+if [ -f $LOCAL_CONFIG ]; then
+    echo Loading daq run configuration from $LOCAL_CONFIG
+    source $LOCAL_CONFIG
+fi
+
+mkdir -p $INSTDIR
+
+sudo rm -f $INSTDIR/faucet.yaml
+
+echo Rewriting misc/faucet.yaml with dpid $ext_dpid and port $ext_port to $INSTDIR...
+sed -e "s/@SEC_DPID@/$ext_dpid/" \
+    -e "s/@SEC_PORT@/$ext_port/" \
+    < misc/faucet.yaml > $INSTDIR/faucet.yaml
+
+if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
+    echo -n "Clensing old container "
+    docker rm -f $CONTAINER
+fi
+
+rm -f $INSTDIR/$FAUCET_SOCK
+
+event_sock=/var/log/faucet/$FAUCET_SOCK
+
+docker_envs="\
+        --env FAUCET_EVENT_SOCK=$event_sock"
+
+docker_volumes="\
+        -v $INSTDIR:/etc/faucet \
+        -v $INSTDIR:/var/log/faucet"
+
+cid=$(docker run -d --name $CONTAINER $docker_volumes $docker_envs -p 6633:6653 $IMAGE)
+echo Container $CONTAINER started as $cid

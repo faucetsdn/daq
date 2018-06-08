@@ -1,6 +1,8 @@
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
 A flexble IoT Device Automatd Qualification (DAQ) framework utilizing the FAUCET SDN controller.
+Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
+list for ongoing discussion about using DAQ for device testing.
 
 ## System Requirements
 
@@ -12,7 +14,7 @@ required. This could either be a separate built-in NIC, or a USB-Ethernet dongle
 
 ## Quickstart
 
-Running `bin/setup_install` will setup the basic prerequisites. This will install a
+Running `bin/setup_base` will setup the basic prerequisites. This will install a
 minimum set of basic packages, docker, and openvswitch.
 
 Once installed, the basic qualification suite can be run with `cmd/run -s`. (The

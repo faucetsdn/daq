@@ -1,0 +1,19 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+IFCONF=/etc/network/interfaces.d/local-daq.conf
+
+echo Cleaning up local link...
+sudo ip link del local-daq 2>/dev/null || true
+
+if [ "$1" == clean ]; then
+    sudo rm -f $IFCONF
+    exit 0
+fi
+
+echo Instaling network local-daq.conf config file.
+sudo cp $ROOT/misc/local-daq.conf $IFCONF
+
+sudo ip link add local type veth peer name local-daq
+
+echo Created local link pair local local-daq

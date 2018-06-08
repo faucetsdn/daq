@@ -1,0 +1,50 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+target_version=$(cat misc/FAUCET_VERSION)
+local_version=$(cd faucet; git rev-list -n 1 HEAD)
+
+echo Local faucet commit $local_version
+if [ "$target_version" != "$local_version" ]; then
+    echo Version mismatch with misc/FAUCET_VERSION $target_version
+    false
+fi
+
+cmd/build save
+
+local_config=local/system.conf
+build_root=build
+build_args=
+
+if [ -f $local_config ]; then
+  echo Loading build configuraiton from $local_config
+  source $local_config
+fi
+
+mkdir -p local
+date > local/last_ibuild.txt
+
+file=misc/Dockerfile.base
+target=daq/base
+mkdir -p $build_root
+logfile=$build_root/docker_build.base
+echo Building $file into $target, log to $logfile...
+
+failed=
+docker build -t $target $build_args -f $file . > $logfile 2>&1 || failed=y
+if [ -n "$failed" ]; then
+    tail $logfilr
+    false
+fi
+
+images=$(docker images | fgrep daq/ | awk '{print $1}')
+
+echo Runner build on top of base...
+
+# Explicilty run in /daq not /root/daq because of volume mapping.
+cmd/run base /daq/cmd/build load
+
+echo Committing runner container image to daqf/runner...
+docker commit -c 'ENTRYPOINT ["/root/daq/cmd/exrun"]' daq-runner daqf/runner > /dev/null

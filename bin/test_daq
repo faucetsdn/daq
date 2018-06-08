@@ -52,7 +52,7 @@ echo Running DAQ test...
 if [ "$DAQ_MODE" == "in" ]; then
     cmd/run $runarg -s || failed=true
 else
-    cmd/exrun -s || failed=true
+    sudo cmd/exrun -s || failed=true
 fi
 
 if [ -n "$DAQ_FAIL" ]; then
