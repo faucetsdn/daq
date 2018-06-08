@@ -10,6 +10,10 @@ div {
     border-spacing: 0;
 }
 
+#testgrid table tr.timeout {
+    display: none;
+}
+
 #testgrid table td {
     border: 1px solid grey;
     padding: 4px;

@@ -1,9 +1,11 @@
 
-columns = [ ];
-rows = [ ];
+PORT_ROW_COUNT = 25;
+ROW_TIMEOUT_SEC = 500
+
+display_columns = [ ];
+display_rows = [ ];
 last_result_time_sec = 0;
 row_timestamps = {};
-port_row_count = 25;
 
 function appendTestCell(row, column) {
   const columnElement = document.createElement('td');
@@ -15,9 +17,9 @@ function appendTestCell(row, column) {
 }
 
 function ensureGridColumn(label, content) {
-  if (columns.indexOf(label) < 0) {
-    columns.push(label);
-    for (row of rows) {
+  if (display_columns.indexOf(label) < 0) {
+    display_columns.push(label);
+    for (row of display_rows) {
       appendTestCell(row, label);
     }
   }
@@ -34,8 +36,8 @@ function ensureColumns(columns) {
 
 function ensureGridRow(label, content, max_rows) {
   let added = false;
-  if (rows.indexOf(label) < 0) {
-    rows.push(label)
+  if (display_rows.indexOf(label) < 0) {
+    display_rows.push(label)
     const testTable = document.querySelector("#testgrid table")
     const tableRows = testTable.querySelectorAll('tr');
     const existingRows = (tableRows && Array.from(tableRows).slice(1)) || [];
@@ -58,7 +60,7 @@ function ensureGridRow(label, content, max_rows) {
     }
 
     rowElement.setAttribute('label', label)
-    for (column of columns) {
+    for (column of display_columns) {
       appendTestCell(label, column);
     }
 
@@ -96,6 +98,11 @@ function setGridValue(row, column, runid, value) {
     console.error('Could not find', selector);
   }
   return targetElement;
+}
+
+function setRowClass(row, timeout) {
+  const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
+  rowElement.classList.toggle('timeout', timeout);
 }
 
 function setRowState(row, new_runid) {
@@ -188,7 +195,7 @@ function handlePortResult(origin, port, runid, test, result) {
   if (timestamp > last_result_time_sec) {
     last_result_time_sec = timestamp;
   }
-  ensureGridRow(runid, runid, port_row_count);
+  ensureGridRow(runid, runid, PORT_ROW_COUNT);
   ensureGridColumn(test);
   const status = getResultStatus(result);
   statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
@@ -313,7 +320,7 @@ function triggerOrigin(db, origin_id) {
 
 function triggerPort(db, origin_id, port_id) {
   const latest = (ref) => {
-    return ref.orderBy('timestamp', 'desc').limit(port_row_count);
+    return ref.orderBy('timestamp', 'desc').limit(PORT_ROW_COUNT);
   }
 
   ref = db.collection('origin').doc(origin_id).collection('port');
@@ -349,15 +356,16 @@ function triggerDevice(db, registry_id, device_id) {
 
 function interval_updater() {
   if (last_result_time_sec) {
-    time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
+    const time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
     document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
   }
   for (row in row_timestamps) {
     timestamp = row_timestamps[row]
-    time_delta_sec = Math.floor(Date.now()/1000.0 - timestamp)
+    const time_delta_sec = Math.floor(Date.now()/1000.0 - timestamp)
     const selector=`#testgrid table tr[label="${row}"`
     const runid = document.querySelector(selector).getAttribute('runid');
     setGridValue(row, 'timer', runid, `${time_delta_sec} sec`);
+    setRowClass(row, time_delta_sec > ROW_TIMEOUT_SEC);
   }
 }
 
