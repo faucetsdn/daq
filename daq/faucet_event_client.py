@@ -11,9 +11,10 @@ class FaucetEventClient(object):
 
     FAUCET_RETRIES = 10
 
-    sock = None
-    buffer = None
-    previous_state = None
+    def __init__(self):
+        self.sock = None
+        self.buffer = None
+        self.previous_state = None
 
     def connect(self, sock_path):
         """Make connection to sock to receive events"""
