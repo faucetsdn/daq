@@ -1,30 +1,22 @@
 """Utility class to monitor a bunch of input streams and trigger events"""
 
-import logging
 import fcntl
+import logging
 import os
-
-from select import poll, POLLIN, POLLHUP, POLLNVAL, POLLERR
+import select
 
 LOGGER = logging.getLogger('stream')
 
 class StreamMonitor(object):
     """Monitor set of stream objects"""
 
-    DEFAULT_TIMEOUT_MS = None
-    timeout_ms = None
-    poller = None
-    callbacks = None
-    idle_handler = None
-    loop_hook = None
-    dirty = False
-
     def __init__(self, timeout_ms=None, idle_handler=None, loop_hook=None):
         self.timeout_ms = timeout_ms
         self.idle_handler = idle_handler
         self.loop_hook = loop_hook
-        self.poller = poll()
+        self.poller = select.poll()
         self.callbacks = {}
+        self.dirty = False
 
     def get_fd(self, target):
         """Return the fd from a stream object, or fd directly"""
@@ -41,7 +33,7 @@ class StreamMonitor(object):
             callback = lambda: self.copy_data(name, desc, copy_to)
         LOGGER.debug('Monitoring start %s fd %d', name, fd)
         self.callbacks[fd] = (name, callback, hangup, error)
-        self.poller.register(fd, POLLHUP | POLLIN)
+        self.poller.register(fd, select.POLLHUP | select.POLLIN)
         self.log_monitors()
 
     def copy_data(self, name, data_source, data_sink):
@@ -124,11 +116,11 @@ class StreamMonitor(object):
 
     def process_poll_result(self, event, fd):
         """Process an individual poll result"""
-        if event & POLLNVAL:
+        if event & select.POLLNVAL:
             assert False, 'POLLNVAL on fd %d' % fd
-        elif event & POLLIN:
+        elif event & select.POLLIN:
             self.trigger_callback(fd)
-        elif event & (POLLHUP | POLLERR):
+        elif event & (select.POLLHUP | select.POLLERR):
             self.trigger_hangup(fd, event)
         else:
             assert False, "Unknown event type %d on fd %d" % (event, fd)
