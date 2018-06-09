@@ -6,7 +6,7 @@ import random
 import shutil
 import time
 
-from clib.docker_host import MakeDockerHost
+from clib import docker_host
 from clib.tcpdump_helper import TcpdumpHelper
 from dhcp_monitor import DhcpMonitor
 from docker_test import DockerTest
@@ -76,7 +76,7 @@ class ConnectedHost(object):
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         LOGGER.debug("Adding networking host on port %d", networking_port)
-        cls = MakeDockerHost('daq/networking', prefix='daq', network='bridge')
+        cls = docker_host.make_docker_host('daq/networking', prefix='daq', network='bridge')
         try:
             self.networking = self.runner.add_host(networking_name, port=networking_port,
                                                    cls=cls, tmpdir=self.tmpdir)

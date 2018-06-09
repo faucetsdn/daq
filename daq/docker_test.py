@@ -2,7 +2,7 @@
 
 import logging
 
-from clib.docker_host import MakeDockerHost
+from clib import docker_host
 
 LOGGER = logging.getLogger('docker')
 
@@ -42,7 +42,7 @@ class DockerTest(object):
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Set %d running docker test %s", self.port_set, image)
-        cls = MakeDockerHost(image, prefix=self.CONTAINER_PREFIX)
+        cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                     vol_maps=vol_maps, tmpdir=self.tmpdir)
         self.docker_host = host
