@@ -76,7 +76,7 @@ class ConnectedHost(object):
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         LOGGER.debug("Adding networking host on port %d", networking_port)
-        cls = MakeDockerHost('daq/networking', prefix='daq')
+        cls = MakeDockerHost('daq/networking', prefix='daq', network='bridge')
         try:
             self.networking = self.runner.add_host(networking_name, port=networking_port,
                                                    cls=cls, tmpdir=self.tmpdir)
