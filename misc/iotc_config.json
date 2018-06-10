@@ -1,0 +1,7 @@
+{
+  "project_id": "bos-daq-testing",
+  "cloud_region": "us-central1",
+  "registry_id": "sensor_hub",
+  "device_id": "llama_1",
+  "key_algorithm": "RSA"
+}
