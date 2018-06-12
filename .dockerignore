@@ -1,0 +1,5 @@
+build/
+inst/
+.git/
+local/
+*/*.pyc

@@ -7,7 +7,7 @@
 #
 
 ROOT=$(dirname $0)/..
-FAUCET=https://github.com/faucetsdn/faucet.git
+FAUCET=https://github.com/grafnu/faucet.git
 FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
 MININETV=2.2.2
@@ -50,7 +50,7 @@ fi
 
 # Python extension packages.
 pip install --index-url=https://pypi.python.org/simple \
-    netifaces grip codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+    netifaces codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
 
 # Hack to make pylint happy.
 if [ -d venv ]; then

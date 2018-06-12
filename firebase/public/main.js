@@ -1,0 +1,385 @@
+/**
+ * Simple file to handle test results events from DAQ.
+ * Uses firebase for data management, and renders straight to HTML.
+ */
+
+PORT_ROW_COUNT = 25;
+ROW_TIMEOUT_SEC = 500
+
+display_columns = [ ];
+display_rows = [ ];
+last_result_time_sec = 0;
+row_timestamps = {};
+
+function appendTestCell(row, column) {
+  const columnElement = document.createElement('td');
+  columnElement.setAttribute('label', column);
+  columnElement.setAttribute('row', row);
+  columnElement.classList.add('old');
+  const parent = document.querySelector(`#testgrid table tr[label="${row}"]`)
+  parent.appendChild(columnElement);
+}
+
+function ensureGridColumn(label, content) {
+  if (display_columns.indexOf(label) < 0) {
+    display_columns.push(label);
+    for (row of display_rows) {
+      appendTestCell(row, label);
+    }
+  }
+  setGridValue('header', label, undefined, content || label);
+}
+
+function ensureColumns(columns) {
+  for (column of columns) {
+    ensureGridColumn(column);
+  }
+  ensureGridColumn('info');
+  ensureGridColumn('timer');
+}
+
+function ensureGridRow(label, content, max_rows) {
+  let added = false;
+  if (display_rows.indexOf(label) < 0) {
+    display_rows.push(label)
+    const testTable = document.querySelector("#testgrid table")
+    const tableRows = testTable.querySelectorAll('tr');
+    const existingRows = (tableRows && Array.from(tableRows).slice(1)) || [];
+
+    const rowElement = document.createElement('tr');
+
+    if (max_rows) {
+      for (row of existingRows) {
+        if (label > row.getAttribute('label')) {
+          testTable.insertBefore(rowElement, row);
+          added = true;
+          break;
+        }
+      }
+    }
+
+    if (!added) {
+      testTable.appendChild(rowElement)
+      added = true;
+    }
+
+    rowElement.setAttribute('label', label)
+    for (column of display_columns) {
+      appendTestCell(label, column);
+    }
+
+    if (max_rows && existingRows) {
+      const extraRows = existingRows.slice(max_rows - 1);
+      for (row of extraRows) {
+        row.remove();
+      }
+    }
+  }
+  setGridValue(label, 'row', undefined, content || label);
+  return added;
+}
+
+function setGridValue(row, column, runid, value) {
+  const selector = `#testgrid table tr[label="${row}"] td[label="${column}"]`;
+  const targetElement = document.querySelector(selector)
+
+  if (targetElement) {
+    const previous = targetElement.getAttribute('runid');
+    if (!previous || runid >= previous) {
+      if (runid) {
+        targetElement.setAttribute('runid', runid);
+      }
+      if (value) {
+        targetElement.innerHTML = value;
+        targetElement.setAttribute('status', value);
+      }
+    }
+    const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`)
+    const rowTime = rowElement.getAttribute('runid');
+    const rowPrev = rowElement.getAttribute('prev');
+    updateTimeClass(targetElement, rowTime, rowPrev);
+  } else {
+    console.error('Could not find', selector);
+  }
+  return targetElement;
+}
+
+function setRowClass(row, timeout) {
+  const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
+  rowElement.classList.toggle('timeout', timeout);
+}
+
+function setRowState(row, new_runid) {
+  const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
+  let runid = rowElement.getAttribute('runid') || 0;
+  let prev = rowElement.getAttribute('prev') || 0;
+  console.log('rowstate', row, 'mudgee', new_runid, runid, prev);
+  if (runid == new_runid) {
+    return;
+  } else if (!runid || new_runid > runid) {
+    rowElement.setAttribute('prev', runid);
+    rowElement.setAttribute('runid', new_runid);
+    prev = runid
+    runid = new_runid
+  } else if (!prev || new_runid > prev) {
+    rowElement.setAttribute('prev', new_runid);
+    prev = new_runid
+  } else {
+    return;
+  }
+  const allEntries = rowElement.querySelectorAll('td');
+  allEntries.forEach((entry) => {
+    updateTimeClass(entry, runid, prev);
+  });
+}
+
+function updateTimeClass(entry, target, prev) {
+  const value = entry.getAttribute('runid');
+  const row = entry.getAttribute('row');
+  const column = entry.getAttribute('label');
+  console.log('update', row, column, value, target, prev);
+  if (value == target) {
+    entry.classList.add('current');
+    entry.classList.remove('old', 'gone');
+  } else if (value == prev) {
+    entry.classList.add('old');
+    entry.classList.remove('current', 'gone');
+  } else {
+    entry.classList.add('gone');
+    entry.classList.remove('current', 'old');
+  }
+}
+
+function getQueryParam(field) {
+  var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+  var string = reg.exec(window.location.href);
+  return string ? string[1] : null;
+}
+
+function statusUpdate(message, e) {
+  console.log(message);
+  if (e) {
+    console.error(e);
+    message = message + ' ' + String(e)
+  }
+  document.getElementById('status').innerHTML = message;
+}
+
+function getResultStatus(result) {
+  if (result.state) {
+    return result.state;
+  }
+  if (result.exception) {
+    return 'fail';
+  }
+  return Number(result.code) ? 'fail' : 'pass';
+}
+
+function handleOriginResult(origin, port, runid, test, result) {
+  if (result.timestamp > last_result_time_sec) {
+    last_result_time_sec = result.timestamp;
+  }
+  if (result.timestamp > (row_timestamps[port] || 0)) {
+    row_timestamps[port] = result.timestamp;
+  }
+  const href =`?origin=${origin}&port=${port}`
+  ensureGridRow(port, `<a href="${href}">${port}</a>`);
+  ensureGridColumn(test);
+  const status = getResultStatus(result);
+  statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
+  setRowState(port, runid);
+  setGridValue(port, test, runid, status);
+  if (result.info) {
+    setGridValue(port, 'info', runid, result.info);
+  }
+}
+
+function handlePortResult(origin, port, runid, test, result) {
+  const timestamp = result.timestamp;
+  if (timestamp > last_result_time_sec) {
+    last_result_time_sec = timestamp;
+  }
+  ensureGridRow(runid, runid, PORT_ROW_COUNT);
+  ensureGridColumn(test);
+  const status = getResultStatus(result);
+  statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
+  setRowState(runid, runid);
+  setGridValue(runid, test, runid, status);
+  if (result.info) {
+    setGridValue(runid, 'info', runid, result.info);
+  }
+  const element = setGridValue(runid, 'timer', runid);
+  const oldtime = element.getAttribute('timer') || 0;
+  if (timestamp && oldtime < timestamp) {
+    element.setAttribute('timer', timestamp);
+    const timestr = new Date(timestamp * 1000).toLocaleString();
+    setGridValue(runid, 'timer', runid, timestr);
+  }
+}
+
+function watcherAdd(ref, collection, limit, handler) {
+  const base = ref.collection(collection)
+  const target = limit ? limit(base) : base;
+  target.onSnapshot((snapshot) => {
+    delay = 100;
+    snapshot.docChanges.forEach((change) => {
+      if (change.type == 'added') {
+        setTimeout(() => handler(ref.collection(collection).doc(change.doc.id), change.doc.id), delay);
+        delay = delay + 100;
+      }
+    });
+  }, (e) => console.error(e));
+}
+
+function listOrigins(db) {
+  const link_group = document.getElementById('origins');
+  db.collection('origin').get().then((snapshot) => {
+    snapshot.forEach((origin) => {
+      origin_id = origin.id;
+      const origin_link = document.createElement('a');
+      origin_link.setAttribute('href', '/?origin=' + origin_id);
+      origin_link.innerHTML = origin_id;
+      link_group.appendChild(origin_link);
+      link_group.appendChild(document.createElement('p'));
+    });
+  }).catch((e) => statusUpdate('origin list error', e));
+}
+
+function listRegistries(db) {
+  db.collection('registry').get().then((snapshot) => {
+    snapshot.forEach((registry) => {
+      listDevices(db, registry.id);
+    });
+  }).catch((e) => statusUpdate('registry list error', e));
+}
+
+function listDevices(db, registryId) {
+  const link_group = document.getElementById('devices');
+  db
+    .collection('registry').doc(registryId)
+    .collection('device').get().then((snapshot) => {
+      snapshot.forEach((device) => {
+        const deviceId = device.id;
+        const origin_link = document.createElement('a');
+        origin_link.setAttribute('href', `/?registry=${registryId}&device=${deviceId}`);
+        origin_link.innerHTML = `${registryId}/${deviceId}`
+        link_group.appendChild(origin_link);
+        link_group.appendChild(document.createElement('p'));
+      });
+    }).catch((e) => statusUpdate('registry list error', e));
+}
+
+function setupTriggers() {
+  var db = firebase.firestore();
+  const settings = {
+    timestampsInSnapshots: true
+  };
+  db.settings(settings);
+
+  const origin_id = getQueryParam('origin');
+  const port_id = getQueryParam('port');
+  const registry_id = getQueryParam('registry');
+  const device_id = getQueryParam('device');
+
+  if (port_id) {
+    ensureGridRow('header');
+    ensureGridColumn('row', port_id);
+    triggerPort(db, origin_id, port_id);
+  } else if (origin_id) {
+    ensureGridRow('header');
+    ensureGridColumn('row', 'port');
+    triggerOrigin(db, origin_id);
+  } else if (registry_id && device_id) {
+    triggerDevice(db, registry_id, device_id);
+  } else {
+    listOrigins(db);
+    listRegistries(db);
+  }
+}
+
+function triggerOrigin(db, origin_id) {
+  const latest = (ref) => {
+    return ref.orderBy('timestamp', 'desc').limit(3);
+  }
+
+  ref = db.collection('origin').doc(origin_id);
+  ref.collection('port').doc('port-undefined').onSnapshot((result) => {
+    const message = result.data().message;
+    ensureColumns(message.tests);
+    document.querySelector('#description').innerHTML = message.description;
+    const version = `DAQ v${message.version}`
+    document.querySelector('#version').innerHTML = version
+  });
+  watcherAdd(ref, "port", undefined, (ref, port_id) => {
+    watcherAdd(ref, "runid", latest, (ref, runid_id) => {
+      watcherAdd(ref, "test", undefined, (ref, test_id) => {
+        ref.onSnapshot((result) => {
+          // TODO: Handle results going away.
+          handleOriginResult(origin_id, port_id, runid_id, test_id, result.data());
+        });
+      });
+    });
+  });
+}
+
+function triggerPort(db, origin_id, port_id) {
+  const latest = (ref) => {
+    return ref.orderBy('timestamp', 'desc').limit(PORT_ROW_COUNT);
+  }
+
+  ref = db.collection('origin').doc(origin_id).collection('port');
+
+  ref.doc('port-undefined').onSnapshot((result) => {
+    ensureColumns(result.data().message.tests)
+  });
+
+  watcherAdd(ref.doc(port_id), "runid", latest, (ref, runid_id) => {
+    watcherAdd(ref, "test", undefined, (ref, test_id) => {
+      ref.onSnapshot((result) => {
+        // TODO: Handle results going away.
+        handlePortResult(origin_id, port_id, runid_id, test_id, result.data());
+      });
+    });
+  });
+}
+
+function triggerDevice(db, registry_id, device_id) {
+  statusUpdate('Setup device trigger ' + device_id);
+  db
+    .collection('registry').doc(registry_id)
+    .collection('device').doc(device_id)
+    .collection('telemetry').doc('latest')
+    .onSnapshot((snapshot) => {
+      statusUpdate('');
+      const hue = Math.floor(snapshot.data().random * 360);
+      const hsl = `hsl(${hue}, 80%, 50%)`;
+      console.log(hsl)
+      document.body.style.backgroundColor = hsl;
+    });
+}
+
+function interval_updater() {
+  if (last_result_time_sec) {
+    const time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
+    document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+  }
+  for (row in row_timestamps) {
+    timestamp = row_timestamps[row]
+    const time_delta_sec = Math.floor(Date.now()/1000.0 - timestamp)
+    const selector=`#testgrid table tr[label="${row}"`
+    const runid = document.querySelector(selector).getAttribute('runid');
+    setGridValue(row, 'timer', runid, `${time_delta_sec} sec`);
+    setRowClass(row, time_delta_sec > ROW_TIMEOUT_SEC);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    let app = firebase.app();
+    statusUpdate('System initialized.');
+    setupTriggers();
+    setInterval(interval_updater, 1000);
+  } catch (e) {
+    statusUpdate('Loading error', e)
+  }
+});
