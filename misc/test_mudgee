@@ -1,0 +1,28 @@
+#!/bin/bash -e
+
+cat > mud_config.json <<EOF
+{
+    "defaultGatewayConfig": {
+        "macAddress" : "$GATEWAY_MAC",
+        "ipAddress": "$GATEWAY_IP",
+        "ipv6Address": "$GATEWAY_IP6"
+    },
+
+    "deviceConfig":{
+        "device":"$TARGET_MAC",
+        "deviceName": "$TARGET_NAME"
+    },
+
+    "pcapLocation": "/scans/monitor.pcap"
+}
+EOF
+
+cat mud_config.json
+
+mkdir -p result/
+
+java -jar mudgee/target/mudgee-1.0.0-SNAPSHOT.jar mud_config.json
+
+cp -a result/ /tmp
+
+fgrep from-device-policy result/mudgee*/mudgee*Mud.json

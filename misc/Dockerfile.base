@@ -6,31 +6,14 @@
 # Need to use ubuntu because mininet is very persnickity about versions.
 FROM ubuntu:xenial
 
-ENV AG="apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
-
-# Basic things shared with aardvark.
-RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
-
 # Dump all our junks into the root home directory.
-WORKDIR /root
+WORKDIR /root/daq
 
-# Basic system install items
-RUN $AG update && $AG install \
-    software-properties-common apt-transport-https \
-    sudo realpath git emacs-nox ethtool curl apache2-utils \
-    isc-dhcp-client network-manager netcat lsof pylint \
-    python python-setuptools python-dev build-essential python-pip \
-    openvswitch-switch openvswitch-common 
+COPY bin/retry_cmd bin/
+ENV AG="bin/retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
 
-# Python extension packages
-RUN pip install --index-url=https://pypi.python.org/simple \
-    netifaces google-cloud-pubsub==0.32.1
+COPY bin/setup_base bin/
+RUN bin/setup_base
 
-# Install mininet
-RUN git clone git://github.com/mininet/mininet.git --single-branch --depth 1 \
-  && cd mininet && util/install.sh
-
-# Install docker in docker
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt-cache policy docker-ce && $AG update && $AG install docker-ce
+COPY bin/setup_dev bin/
+RUN DAQ_CONTAINER=build bin/setup_dev
