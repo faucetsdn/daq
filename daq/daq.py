@@ -11,9 +11,6 @@ from ConfigParser import ConfigParser
 from StringIO import StringIO
 
 from mininet import log as minilog
-from mininet.log import LEVELS, MininetLogger
-
-from runner import DAQRunner
 
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
@@ -28,13 +25,13 @@ def _stripped_alt_logger(self, level, msg, *args, **kwargs):
 
 def _configure_logging(config):
     daq_env = config.get('daq_loglevel')
-    logging.basicConfig(level=LEVELS.get(daq_env, LEVELS['info']))
+    logging.basicConfig(level=minilog.LEVELS.get(daq_env, minilog.LEVELS['info']))
 
     mininet_env = config.get('mininet_loglevel')
     minilog.setLogLevel(mininet_env if mininet_env else 'info')
 
     #pylint: disable=protected-access
-    MininetLogger._log = _stripped_alt_logger
+    minilog.MininetLogger._log = _stripped_alt_logger
 
 def _write_pid_file():
     pid = os.getpid()
