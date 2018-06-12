@@ -1,0 +1,7 @@
+FROM daq/aardvark:latest
+
+RUN $AG update && $AG install nmap
+
+COPY misc/test_nmap .
+
+CMD ./test_nmap
