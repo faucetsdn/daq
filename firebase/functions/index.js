@@ -1,3 +1,7 @@
+/**
+ * Simple function to ingest test results event from DAQ.
+ */
+
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
@@ -55,7 +59,7 @@ exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) =
       'message': message
     });
   }
-  
+
   return null;
 });
 
