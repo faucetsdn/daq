@@ -1,3 +1,7 @@
+/**
+ * Simple file to handle test results events from DAQ.
+ * Uses firebase for data management, and renders straight to HTML.
+ */
 
 PORT_ROW_COUNT = 25;
 ROW_TIMEOUT_SEC = 500
@@ -41,9 +45,9 @@ function ensureGridRow(label, content, max_rows) {
     const testTable = document.querySelector("#testgrid table")
     const tableRows = testTable.querySelectorAll('tr');
     const existingRows = (tableRows && Array.from(tableRows).slice(1)) || [];
-      
+
     const rowElement = document.createElement('tr');
-    
+
     if (max_rows) {
       for (row of existingRows) {
         if (label > row.getAttribute('label')) {
@@ -78,7 +82,7 @@ function ensureGridRow(label, content, max_rows) {
 function setGridValue(row, column, runid, value) {
   const selector = `#testgrid table tr[label="${row}"] td[label="${column}"]`;
   const targetElement = document.querySelector(selector)
-  
+
   if (targetElement) {
     const previous = targetElement.getAttribute('runid');
     if (!previous || runid >= previous) {
