@@ -11,6 +11,7 @@ from ConfigParser import ConfigParser
 from StringIO import StringIO
 
 from mininet import log as minilog
+from runner import DAQRunner
 
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
