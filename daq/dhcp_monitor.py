@@ -4,7 +4,7 @@ import logging
 import re
 import time
 
-from clib.tcpdump_helper import TcpdumpHelper
+from clib import tcpdump_helper
 
 LOGGER = logging.getLogger('dhcp')
 
@@ -17,28 +17,28 @@ class DhcpMonitor(object):
     DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 20
 
-    target_ip = None
-    target_mac = None
-    dhcp_traffic = None
-    runner = None
-    port_set = None
-    intf_name = None
-    callback = None
-    test_start = None
-
     def __init__(self, runner, port_set, container, callback):
         self.runner = runner
         self.port_set = port_set
         self.callback = callback
         self.networking = container
+        self.target_ip = None
+        self.target_mac = None
+        self.dhcp_traffic = None
+        self.runner = None
+        self.port_set = None
+        self.intf_name = None
+        self.callback = None
+        self.test_start = None
 
     def start(self):
         """Start monitoring DHCP"""
         LOGGER.info('Set %d waiting for dhcp reply from %s...', self.port_set, self.networking.name)
         self.test_start = int(time.time())
         tcp_filter = "src port 67"
-        self.dhcp_traffic = TcpdumpHelper(self.networking, tcp_filter, packets=None,
-                                          timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
+        helper = tcpdump_helper.TcpdumpHelper(self.networking, tcp_filter, packets=None,
+                                              timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
+        self.dhcp_traffic = helper
         self.runner.monitor_stream(self.networking.name, self.dhcp_traffic.stream(),
                                    self._dhcp_line, hangup=self._dhcp_hangup,
                                    error=self._dhcp_error)
@@ -75,10 +75,7 @@ class DhcpMonitor(object):
         self.callback(state, target_mac=self.target_mac, target_ip=self.target_ip)
 
     def _dhcp_hangup(self):
-        try:
-            raise Exception('dhcp hangup')
-        except Exception as e:
-            self._dhcp_error(e)
+        self._dhcp_error(Exception('dhcp hangup'))
 
     def _dhcp_error(self, e):
         LOGGER.error('Set %d dhcp error: %s', self.port_set, e)

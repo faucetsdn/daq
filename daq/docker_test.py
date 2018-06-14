@@ -8,17 +8,9 @@ LOGGER = logging.getLogger('docker')
 
 class DockerTest(object):
     """Class for running docker tests"""
+
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
-
-    port_set = None
-    test_name = None
-    host_name = None
-    runner = None
-    tmpdir = None
-    docker_log = None
-    docker_host = None
-    callback = None
 
     def __init__(self, runner, parent, test_name):
         self.port_set = parent.port_set
@@ -26,6 +18,9 @@ class DockerTest(object):
         self.test_name = test_name
         self.runner = runner
         self.host_name = '%s%02d' % (test_name, self.port_set)
+        self.docker_log = None
+        self.docker_host = None
+        self.callback = None
 
     def start(self, port, params, callback):
         """Start the docker test"""

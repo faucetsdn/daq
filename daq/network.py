@@ -5,23 +5,19 @@ import os
 import time
 
 import mininet
-from mininet.net import Mininet
-from mininet.node import RemoteController, OVSSwitch, Host
-from mininet.link import Intf
-
-from clib.mininet_test_topo import FaucetHostCleanup
+import clib
 
 LOGGER = logging.getLogger('network')
 
-class DAQHost(FaucetHostCleanup, Host):
+class DAQHost(clib.mininet_test_topo.FaucetHostCleanup, mininet.node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
-    #pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods
     pass
 
 
 class DummyNode(object):
     """Dummy node used to handle shadow devices"""
-    #pylint: disable=invalid-name
+    # pylint: disable=invalid-name
     def addIntf(self, node, port=None):
         """No-op for adding an interface"""
         pass
@@ -34,21 +30,20 @@ class DummyNode(object):
 class TestNetwork(object):
     """Test network manager"""
 
-    config = None
-    net = None
-    pri = None
-    sec = None
-    sec_dpid = None
-    sec_port = None
-    sec_name = None
-    switch_links = None
-    device_intfs = None
+    OVS_CLS = mininet.node.OVSSwitch
 
     def __init__(self, config):
         self.config = config
+        self.net = None
+        self.pri = None
+        self.sec = None
+        self.sec_dpid = None
+        self.sec_port = None
+        self.sec_name = None
         self.switch_links = {}
+        self.device_intfs = None
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
                  port=None, tmpdir=None):
         """Add a host to the ecosystem"""
@@ -103,7 +98,7 @@ class TestNetwork(object):
         for intf_name in intf_names:
             intf_name = intf_name[0:-1] if intf_name.endswith('!') else intf_name
             port_no = len(intfs) + 1
-            intf = Intf(intf_name.strip(), node=DummyNode(), port=port_no)
+            intf = mininet.link.Intf(intf_name.strip(), node=DummyNode(), port=port_no)
             intf.port = port_no
             intfs.append(intf)
         return intfs
@@ -128,13 +123,13 @@ class TestNetwork(object):
             self.sec_name = self.config['ext_intf']
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.sec_name)
-            sec_intf = Intf(self.sec_name, node=DummyNode(), port=1)
+            sec_intf = mininet.link.Intf(self.sec_name, node=DummyNode(), port=1)
             self.pri.addIntf(sec_intf, port=1)
         else:
             self.sec_dpid = 2
             LOGGER.info('Creating ovs secondary with dpid/port %s/%d',
                         self.sec_dpid, self.sec_port)
-            self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=OVSSwitch)
+            self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=self.OVS_CLS)
 
             link = self.net.addLink(self.pri, self.sec, port1=1,
                                     port2=self.sec_port, fast=False)
@@ -152,6 +147,7 @@ class TestNetwork(object):
 
     def cli(self):
         """Drop into the mininet CLI"""
+        # pylint: disable=no-member
         mininet.cli.CLI(self.net)
 
     def stop(self):
@@ -162,15 +158,16 @@ class TestNetwork(object):
         """Initialize network"""
 
         LOGGER.debug("Creating miniet...")
-        self.net = Mininet()
+        self.net = mininet.net.Mininet()
 
         LOGGER.debug("Adding switches...")
-        self.pri = self.net.addSwitch('pri', dpid='1', cls=OVSSwitch)
+        self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
         self._create_secondary()
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
-        self.net.addController('controller', controller=RemoteController,
+        controller = mininet.node.RemoteController
+        self.net.addController('controller', controller=controller,
                                ip=target_ip, port=6633)
 
         LOGGER.info("Starting mininet...")

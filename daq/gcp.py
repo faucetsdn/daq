@@ -4,54 +4,43 @@ import json
 import logging
 
 import firebase_admin
-from firebase_admin import firestore
 
 from google.cloud import pubsub_v1
-from google.auth._default import _load_credentials_from_file
+from google.auth import _default as google_auth
 
 LOGGER = logging.getLogger('gcp')
 
 class GcpManager(object):
     """Manager class for working with GCP"""
 
-    config = None
-    project = None
-    client_name = None
-    pubber = None
-    firestore = None
-    credentials = None
-    cred_file = None
-
     def __init__(self, config):
         self.config = config
         if 'gcp_cred' not in config:
             LOGGER.info('No gcp_cred credential specified in config')
             return
-        self.cred_file = self.config['gcp_cred']
-        LOGGER.info('Loading gcp credentials from %s', self.cred_file)
-        (self.credentials, self.project) = _load_credentials_from_file(self.cred_file)
-        self.client_name = self._parse_creds()
-        self._initialize_pubsub()
-        self._initialize_firestore()
-
-    def _initialize_pubsub(self):
+        cred_file = self.config['gcp_cred']
+        LOGGER.info('Loading gcp credentials from %s', cred_file)
+        # Normal execution assumes default credentials. pylint: disable=protected-access
+        (self.credentials, self.project) = google_auth._load_credentials_from_file(cred_file)
+        self.client_name = self._parse_creds(cred_file)
         self.pubber = pubsub_v1.PublisherClient(credentials=self.credentials)
         LOGGER.info('Initialized gcp pub/sub %s:%s', self.project, self.client_name)
+        self.firestore = self._initialize_firestore(cred_file)
 
-    def _initialize_firestore(self):
-        cred = firebase_admin.credentials.Certificate(self.cred_file)
+    def _initialize_firestore(self, cred_file):
+        cred = firebase_admin.credentials.Certificate(cred_file)
         firebase_admin.initialize_app(cred)
-        self.firestore = firestore.client()
         LOGGER.info('Initialized gcp firestore %s:%s', self.project, self.client_name)
+        return firebase_admin.firestore.client()
 
     def _message_callback(self, topic, message, callback):
         LOGGER.info('Received topic %s message: %s', topic, message)
         callback(message)
         message.ack()
 
-    def _parse_creds(self):
+    def _parse_creds(self, cred_file):
         """Parse JSON credential file"""
-        with open(self.cred_file) as data_file:
+        with open(cred_file) as data_file:
             cred = json.load(data_file)
         project = cred['project_id']
         assert project == self.project, 'inconsistent credential projects'
