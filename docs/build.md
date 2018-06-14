@@ -2,7 +2,10 @@
 
 You shouldn't need to do this unless you're doing active development on DAQ itself. Doing this
 will require installing more prerequisites that aren't indicated above. See
-<code>bin/setup_base</code> or <code>docker/Docker.base</code> for details.
+<code>bin/setup_dev</code> or <code>docker/Docker.base</code> for details on what is installed.
+In addition to standard packages, this will also install specific versions of <code>mininet</code>
+and <code>FAUCET</code> that are "tied" to this specific build (but, you will have to manually
+update them in the fugure).
 
 To build containers for basic execution, which can take a long time:
 
