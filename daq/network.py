@@ -4,7 +4,7 @@ import logging
 import os
 import time
 
-from mininet.cli import CLI
+import mininet
 from mininet.net import Mininet
 from mininet.node import RemoteController, OVSSwitch, Host
 from mininet.link import Intf
@@ -152,7 +152,7 @@ class TestNetwork(object):
 
     def cli(self):
         """Drop into the mininet CLI"""
-        CLI(self.net)
+        mininet.cli.CLI(self.net)
 
     def stop(self):
         """Stop network"""
