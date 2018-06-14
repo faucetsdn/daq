@@ -17,6 +17,7 @@ class GcpManager(object):
         self.config = config
         if 'gcp_cred' not in config:
             LOGGER.info('No gcp_cred credential specified in config')
+            self.pubber = None
             return
         cred_file = self.config['gcp_cred']
         LOGGER.info('Loading gcp credentials from %s', cred_file)
