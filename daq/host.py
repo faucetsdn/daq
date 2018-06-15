@@ -68,6 +68,7 @@ class ConnectedHost(object):
         self.record_result('startup', state='run')
 
     def initialize(self):
+        """Fully initialize a new host set"""
         LOGGER.info('Set %d initializing...', self.port_set)
         # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
