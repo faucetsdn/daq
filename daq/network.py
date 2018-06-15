@@ -4,12 +4,15 @@ import logging
 import os
 import time
 
-import mininet
-import clib
+from mininet import node as mininet_node
+from mininet import net as mininet_net
+from mininet import link as mininet_link
+from mininet import cli as mininet_cli
+from clib import mininet_test_topo
 
 LOGGER = logging.getLogger('network')
 
-class DAQHost(clib.mininet_test_topo.FaucetHostCleanup, mininet.node.Host):
+class DAQHost(mininet_test_topo.FaucetHostCleanup, mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
     # pylint: disable=too-few-public-methods
     pass
@@ -30,7 +33,7 @@ class DummyNode(object):
 class TestNetwork(object):
     """Test network manager"""
 
-    OVS_CLS = mininet.node.OVSSwitch
+    OVS_CLS = mininet_node.OVSSwitch
 
     def __init__(self, config):
         self.config = config
@@ -98,7 +101,7 @@ class TestNetwork(object):
         for intf_name in intf_names:
             intf_name = intf_name[0:-1] if intf_name.endswith('!') else intf_name
             port_no = len(intfs) + 1
-            intf = mininet.link.Intf(intf_name.strip(), node=DummyNode(), port=port_no)
+            intf = mininet_link.Intf(intf_name.strip(), node=DummyNode(), port=port_no)
             intf.port = port_no
             intfs.append(intf)
         return intfs
@@ -123,7 +126,7 @@ class TestNetwork(object):
             self.sec_name = self.config['ext_intf']
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.sec_name)
-            sec_intf = mininet.link.Intf(self.sec_name, node=DummyNode(), port=1)
+            sec_intf = mininet_link.Intf(self.sec_name, node=DummyNode(), port=1)
             self.pri.addIntf(sec_intf, port=1)
         else:
             self.sec_dpid = 2
@@ -147,8 +150,7 @@ class TestNetwork(object):
 
     def cli(self):
         """Drop into the mininet CLI"""
-        # pylint: disable=no-member
-        mininet.cli.CLI(self.net)
+        mininet_cli.CLI(self.net)
 
     def stop(self):
         """Stop network"""
@@ -158,7 +160,7 @@ class TestNetwork(object):
         """Initialize network"""
 
         LOGGER.debug("Creating miniet...")
-        self.net = mininet.net.Mininet()
+        self.net = mininet_net.Mininet()
 
         LOGGER.debug("Adding switches...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
@@ -166,7 +168,7 @@ class TestNetwork(object):
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
-        controller = mininet.node.RemoteController
+        controller = mininet_node.RemoteController
         self.net.addController('controller', controller=controller,
                                ip=target_ip, port=6633)
 
