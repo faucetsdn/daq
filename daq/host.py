@@ -13,6 +13,21 @@ from docker_test import DockerTest
 
 LOGGER = logging.getLogger('host')
 
+
+class _STATE(object):
+    """Host state enum for testing cycle"""
+    ERROR = 'Error condition'
+    INIT = 'Initizalization'
+    STARTUP = 'Startup sequence'
+    ACTIVE = 'Active device'
+    DHCP = 'DHCP scan'
+    BASE = 'Baseline tests'
+    MONITOR = 'Network monitor'
+    READY = 'Ready for next'
+    TESTING = 'Active test'
+    DONE = 'Done with sequence'
+
+
 class ConnectedHost(object):
     """Class managing a device-under-test"""
 
@@ -23,28 +38,12 @@ class ConnectedHost(object):
     TEST_IP_FORMAT = '192.168.84.%d'
     MONITOR_SCAN_SEC = 20
 
-    ERROR_STATE = -1
-    INIT_STATE = 0
-    STARTUP_STATE = 1
-    ACTIVE_STATE = 2
-    DHCP_STATE = 3
-    BASE_STATE = 4
-    MONITOR_STATE = 6
-    READY_STATE = 7
-    TESTING_STATE = 8
-    DONE_STATE = 9
-
     TEST_LIST = ['pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee']
     TEST_ORDER = ['startup', 'sanity', 'dhcp', 'base',
                   'monitor'] + TEST_LIST + ['finish', 'info', 'timer']
 
-    runner = None
-    port_set = None
-    pri_base = None
-    networking = None
-    config = None
     dummy = None
-    state = ERROR_STATE
+    state = _STATE.ERROR
     results = None
     running_test = None
     remaining_tests = None
@@ -66,7 +65,7 @@ class ConnectedHost(object):
         self.run_id = '%06x' % int(time.time())
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        self._state_transition(self.INIT_STATE)
+        self._state_transition(_STATE.INIT)
         self.results = {}
         self.record_result('startup', state='run')
         LOGGER.info('Set %d created.', port_set)
@@ -97,13 +96,13 @@ class ConnectedHost(object):
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
-            message = 'state was %d expected %d' % (self.state, expected)
+            message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
-        LOGGER.debug('Set %d state %s -> %d', self.port_set, self.state, target)
+        LOGGER.debug('Set %d state %s -> %s', self.port_set, self.state, target)
         self.state = target
 
     def _activate(self):
-        self._state_transition(self.STARTUP_STATE, self.INIT_STATE)
+        self._state_transition(_STATE.STARTUP, _STATE.INIT)
         LOGGER.info('Set %d activating.', self.port_set)
 
         if not os.path.exists(self.scan_base):
@@ -136,7 +135,7 @@ class ConnectedHost(object):
             assert self._ping_test(dummy, self.fake_target), 'ping failed'
             assert self._ping_test(networking, dummy, src_addr=self.fake_target), 'ping failed'
             self.record_result('sanity')
-            self._state_transition(self.ACTIVE_STATE, self.STARTUP_STATE)
+            self._state_transition(_STATE.ACTIVE, _STATE.STARTUP)
         except Exception as e:
             LOGGER.error('Set %d sanity error: %s', self.port_set, e)
             LOGGER.exception(e)
@@ -146,7 +145,7 @@ class ConnectedHost(object):
     def terminate(self, trigger=True):
         """Terminate this host"""
         LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
-        self._state_transition(self.ERROR_STATE)
+        self._state_transition(_STATE.ERROR)
         if self.dhcp_monitor:
             self.dhcp_monitor.cleanup()
         self._monitor_cleanup()
@@ -179,13 +178,13 @@ class ConnectedHost(object):
 
     def idle_handler(self):
         """Trigger events from idle state"""
-        if self.state == self.INIT_STATE:
+        if self.state == _STATE.INIT:
             self._activate()
-        elif self.state == self.ACTIVE_STATE:
-            self._state_transition(self.DHCP_STATE, self.ACTIVE_STATE)
+        elif self.state == _STATE.ACTIVE:
+            self._state_transition(_STATE.DHCP, _STATE.ACTIVE)
             self.record_result('dhcp', state='run')
             self.dhcp_monitor.start()
-        elif self.state == self.BASE_STATE:
+        elif self.state == _STATE.BASE:
             self._base_start()
 
     def dhcp_callback(self, state, target_mac=None, target_ip=None, exception=None):
@@ -194,11 +193,11 @@ class ConnectedHost(object):
         self.target_mac = target_mac
         self.target_ip = target_ip
         if exception:
-            self._state_transition(self.ERROR_STATE, self.DHCP_STATE)
+            self._state_transition(_STATE.ERROR, _STATE.DHCP)
             self.runner.target_set_error(self.port_set, exception)
             self.terminate()
         else:
-            self._state_transition(self.BASE_STATE, self.DHCP_STATE)
+            self._state_transition(_STATE.BASE, _STATE.DHCP)
 
     def _ping_test(self, src, dst, src_addr=None):
         dst_name = dst if isinstance(dst, str) else dst.name
@@ -252,7 +251,7 @@ class ConnectedHost(object):
         self.runner.target_set_error(self.port_set, e)
 
     def _monitor_scan(self):
-        self._state_transition(self.MONITOR_STATE, self.BASE_STATE)
+        self._state_transition(_STATE.MONITOR, _STATE.BASE)
         self.record_result('monitor', time=self.MONITOR_SCAN_SEC, state='run')
         LOGGER.info('Set %d background scan for %d seconds...',
                     self.port_set, self.MONITOR_SCAN_SEC)
@@ -273,7 +272,7 @@ class ConnectedHost(object):
         LOGGER.info('Set %d monitor scan complete', self.port_set)
         self._monitor_cleanup(forget=False)
         self.record_result('monitor')
-        self._state_transition(self.READY_STATE, self.MONITOR_STATE)
+        self._state_transition(_STATE.READY, _STATE.MONITOR)
         self._run_next_test()
 
     def _base_tests(self):
@@ -293,12 +292,12 @@ class ConnectedHost(object):
         if self.remaining_tests:
             self._docker_test(self.remaining_tests.pop(0))
         else:
-            self._state_transition(self.DONE_STATE, self.READY_STATE)
+            self._state_transition(_STATE.DONE, _STATE.READY)
             self.record_result('finish')
             self.terminate()
 
     def _docker_test(self, test_name):
-        self._state_transition(self.TESTING_STATE, self.READY_STATE)
+        self._state_transition(_STATE.TESTING, _STATE.READY)
         self.record_result(test_name, state='run')
         port = self.pri_base + self.TEST_OFFSET
         params = {
@@ -317,7 +316,7 @@ class ConnectedHost(object):
         if exception:
             self.runner.target_set_error(self.port_set, exception)
         self.record_result(self.test_name, code=return_code, exception=exception)
-        self._state_transition(self.READY_STATE, self.TESTING_STATE)
+        self._state_transition(_STATE.READY, _STATE.TESTING)
         self._run_next_test()
 
     def record_result(self, name, **kwargs):

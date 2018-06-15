@@ -4,6 +4,8 @@ import json
 import logging
 
 import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
 from google.cloud import pubsub_v1
 from google.auth import _default as google_auth
@@ -29,10 +31,10 @@ class GcpManager(object):
         self.firestore = self._initialize_firestore(cred_file)
 
     def _initialize_firestore(self, cred_file):
-        cred = firebase_admin.credentials.Certificate(cred_file)
+        cred = credentials.Certificate(cred_file)
         firebase_admin.initialize_app(cred)
         LOGGER.info('Initialized gcp firestore %s:%s', self.project, self.client_name)
-        return firebase_admin.firestore.client()
+        return firestore.client()
 
     def _message_callback(self, topic, message, callback):
         LOGGER.info('Received topic %s message: %s', topic, message)
