@@ -185,6 +185,7 @@ class DAQRunner(object):
         try:
             LOGGER.debug('Trigger target set %d', port_set)
             self.target_sets[port_set] = ConnectedHost(self, port_set, self.config)
+            self.target_sets[port_set].initialize()
             self._send_heartbeat()
         except Exception as e:
             self.target_set_error(port_set, e)

@@ -7,9 +7,10 @@ import shutil
 import time
 
 from clib import docker_host
-from clib.tcpdump_helper import TcpdumpHelper
-from dhcp_monitor import DhcpMonitor
-from docker_test import DockerTest
+from clib import tcpdump_helper
+
+import dhcp_monitor
+import docker_test
 
 LOGGER = logging.getLogger('host')
 
@@ -42,20 +43,6 @@ class ConnectedHost(object):
     TEST_ORDER = ['startup', 'sanity', 'dhcp', 'base',
                   'monitor'] + TEST_LIST + ['finish', 'info', 'timer']
 
-    dummy = None
-    state = _STATE.ERROR
-    results = None
-    running_test = None
-    remaining_tests = None
-    run_id = None
-    test_name = 'unknown'
-    test_start = None
-    tcp_monitor = None
-    fake_target = None
-    dhcp_monitor = None
-    target_ip = None
-    target_mac = None
-
     def __init__(self, runner, port_set, config):
         self.runner = runner
         self.config = config
@@ -63,15 +50,28 @@ class ConnectedHost(object):
         self.pri_base = port_set * 10
         self.tmpdir = os.path.join('inst', 'run-port-%02d' % self.port_set)
         self.run_id = '%06x' % int(time.time())
-        shutil.rmtree(self.tmpdir, ignore_errors=True)
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
+        self.state = None
         self._state_transition(_STATE.INIT)
         self.results = {}
+        self.dummy = None
+        self.running_test = None
+        self.remaining_tests = list(self.TEST_LIST)
+        self.test_name = None
+        self.test_start = None
+        self.tcp_monitor = None
+        self.fake_target = None
+        self.dhcp_monitor = None
+        self.target_ip = None
+        self.target_mac = None
+        self.networking = None
         self.record_result('startup', state='run')
-        LOGGER.info('Set %d created.', port_set)
+
+    def initialize(self):
+        LOGGER.info('Set %d initializing...', self.port_set)
         # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
-        self.remaining_tests = list(self.TEST_LIST)
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
         networking_name = 'gw%02d' % self.port_set
         networking_port = self.pri_base + self.NETWORKING_OFFSET
         LOGGER.debug("Adding networking host on port %d", networking_port)
@@ -92,7 +92,7 @@ class ConnectedHost(object):
             os.makedirs(target_dir)
             target_path = os.path.join(target_dir, 'config.json')
             shutil.copyfile(config_path, target_path)
-            LOGGER.info('Copied config file %s to %s', config_path, target_path)
+            LOGGER.info('Copied config file to %s', target_path)
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
@@ -127,8 +127,8 @@ class ConnectedHost(object):
             # Dummy doesn't use DHCP, so need to set default route manually.
             dummy.cmd('route add -net 0.0.0.0 gw %s' % networking.IP())
 
-            self.dhcp_monitor = DhcpMonitor(self.runner, self.port_set,
-                                            networking, self.dhcp_callback)
+            self.dhcp_monitor = dhcp_monitor.DhcpMonitor(self.runner, self.port_set,
+                                                         networking, self.dhcp_callback)
 
             assert self._ping_test(networking, dummy), 'ping failed'
             assert self._ping_test(dummy, networking), 'ping failed'
@@ -219,8 +219,9 @@ class ConnectedHost(object):
         LOGGER.debug('Set %d startup pcap start', self.port_set)
         startup_file = os.path.join('/tmp', 'startup.pcap')
         tcp_filter = ''
-        self.tcp_monitor = TcpdumpHelper(self.networking, tcp_filter, packets=None,
-                                         timeout=None, pcap_out=startup_file, blocking=False)
+        helper = tcpdump_helper.TcpdumpHelper(self.networking, tcp_filter, packets=None,
+                                              timeout=None, pcap_out=startup_file, blocking=False)
+        self.tcp_monitor = helper
         hangup = lambda: self._monitor_error(Exception('startup scan hangup'))
         self.runner.monitor_stream('tcpdump', self.tcp_monitor.stream(),
                                    self.tcp_monitor.next_line,
@@ -260,10 +261,11 @@ class ConnectedHost(object):
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         tcp_filter = 'vlan %d' % self.pri_base
         assert not self.tcp_monitor, 'tcp_monitor already active'
-        self.tcp_monitor = TcpdumpHelper(network.pri, tcp_filter, packets=None,
-                                         intf_name=intf_name,
-                                         timeout=self.MONITOR_SCAN_SEC,
-                                         pcap_out=monitor_file, blocking=False)
+        helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
+                                              intf_name=intf_name,
+                                              timeout=self.MONITOR_SCAN_SEC,
+                                              pcap_out=monitor_file, blocking=False)
+        self.tcp_monitor = helper
         self.runner.monitor_stream('tcpdump', self.tcp_monitor.stream(),
                                    self.tcp_monitor.next_line, hangup=self._monitor_complete,
                                    error=self._monitor_error)
@@ -307,8 +309,8 @@ class ConnectedHost(object):
             'gateway_mac': self.networking.MAC(),
             'scan_base': self.scan_base
         }
-        docker_test = DockerTest(self.runner, self, test_name)
-        docker_test.start(port, params, self.docker_callback)
+        test = docker_test.DockerTest(self.runner, self, test_name)
+        test.start(port, params, self.docker_callback)
 
     def docker_callback(self, return_code=None, exception=None):
         """Handle a completed/excepted docker test"""
