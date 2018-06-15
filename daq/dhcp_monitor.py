@@ -25,10 +25,7 @@ class DhcpMonitor(object):
         self.target_ip = None
         self.target_mac = None
         self.dhcp_traffic = None
-        self.runner = None
-        self.port_set = None
         self.intf_name = None
-        self.callback = None
         self.test_start = None
 
     def start(self):
