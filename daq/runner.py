@@ -4,11 +4,11 @@ import logging
 import os
 import time
 
-from faucet_event_client import FaucetEventClient
-from stream_monitor import StreamMonitor
-from host import ConnectedHost
-from network import TestNetwork
-from gcp import GcpManager
+import faucet_event_client
+import gcp
+import host as connected_host
+import network
+import stream_monitor
 
 LOGGER = logging.getLogger('runner')
 
@@ -17,32 +17,22 @@ class DAQRunner(object):
     faucet events, connected hosts (to test), and gcp for logging. This
     class owns the main event loop and shards out work to subclasses."""
 
-    config = None
-    target_sets = None
-    active_ports = None
-    result_sets = None
-    gcp = None
-    description = None
-    version = None
-    faucet_events = None
-    flap_ports = None
-    event_start = None
-    monitor = None
-    one_shot = None
-    exception = None
-    network = None
-
     def __init__(self, config):
         self.config = config
         self.target_sets = {}
         self.result_sets = {}
         self.active_ports = {}
-        self.gcp = GcpManager(self.config)
-        raw_description = config.get('site_description', '')
-        self.description = raw_description.strip("\"")
+        self.gcp = gcp.GcpManager(self.config)
+        self.description = config.get('site_description', '').strip("\"")
         self.version = os.environ['DAQ_VERSION']
-        self.network = TestNetwork(config)
+        self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
+        self.faucet_events = None
+        self.one_shot = config.get('s')
+        self.flap_ports = config.get('f')
+        self.event_start = config.get('e')
+        self.stream_monitor = None
+        self.exception = None
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
@@ -52,7 +42,7 @@ class DAQRunner(object):
     def _send_heartbeat(self):
         self.gcp.publish_message('daq_runner', {
             'name': 'status',
-            'tests': ConnectedHost.TEST_ORDER,
+            'tests': connected_host.ConnectedHost.TEST_ORDER,
             'ports': self.active_ports.keys(),
             'description': self.description,
             'version': self.version,
@@ -75,7 +65,7 @@ class DAQRunner(object):
             assert False, 'Faucet startup failed'
 
         LOGGER.debug("Attaching event channel...")
-        self.faucet_events = FaucetEventClient()
+        self.faucet_events = faucet_event_client.FaucetEventClient()
         self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
 
         LOGGER.info("Waiting for system to settle...")
@@ -150,22 +140,20 @@ class DAQRunner(object):
 
     def main_loop(self):
         """Run main loop to execute tests"""
-        self.one_shot = self.config.get('s')
-        self.flap_ports = self.config.get('f')
-        self.event_start = self.config.get('e')
         use_console = self.config.get('c')
 
         if self.flap_ports:
             self.network.flap_interface_ports()
 
         try:
-            self.monitor = StreamMonitor(idle_handler=self._handle_system_idle,
-                                         loop_hook=self._loop_hook)
+            monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
+                                                   loop_hook=self._loop_hook)
+            self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_event)
             if self.event_start:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
-            self.monitor.event_loop()
+            self.stream_monitor.event_loop()
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
             LOGGER.exception(e)
@@ -185,7 +173,7 @@ class DAQRunner(object):
         assert port_set not in self.target_sets, 'target set %d already exists' % port_set
         try:
             LOGGER.debug('Trigger target set %d', port_set)
-            self.target_sets[port_set] = ConnectedHost(self, port_set, self.config)
+            self.target_sets[port_set] = connected_host.ConnectedHost(self, port_set, self.config)
             self.target_sets[port_set].initialize()
             self._send_heartbeat()
         except Exception as e:
@@ -226,11 +214,11 @@ class DAQRunner(object):
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""
-        return self.monitor.monitor(*args, **kwargs)
+        return self.stream_monitor.monitor(*args, **kwargs)
 
     def monitor_forget(self, stream):
         """Forget monitoring a stream"""
-        return self.monitor.forget(stream)
+        return self.stream_monitor.forget(stream)
 
     def _extract_exception(self, result):
         key = 'exception'
