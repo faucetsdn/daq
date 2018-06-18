@@ -11,7 +11,8 @@ from ConfigParser import ConfigParser
 from StringIO import StringIO
 
 from mininet import log as minilog
-from runner import DAQRunner
+
+import runner
 
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
@@ -61,21 +62,23 @@ def _parse_args(args):
                 _read_config_into(arg, config)
     return config
 
-
-if __name__ == '__main__':
-    assert os.getuid() == 0, 'Must run DAQ as root.'
-
-    CONFIG = _parse_args(sys.argv)
-    _configure_logging(CONFIG)
+def _execute():
+    config = _parse_args(sys.argv)
+    _configure_logging(config)
 
     _write_pid_file()
 
-    RUNNER = DAQRunner(CONFIG)
-    RUNNER.initialize()
-    RUNNER.main_loop()
-    RUNNER.cleanup()
+    daq_runner = runner.DAQRunner(config)
+    daq_runner.initialize()
+    daq_runner.main_loop()
+    daq_runner.cleanup()
 
-    CODE = RUNNER.finalize()
+    result = daq_runner.finalize()
+    LOGGER.info('DAQ runner returned %d', result)
 
-    LOGGER.info('Exiting with return code %s', CODE)
-    sys.exit(CODE)
+    return result
+
+
+if __name__ == '__main__':
+    assert os.getuid() == 0, 'Must run DAQ as root.'
+    sys.exit(_execute())
