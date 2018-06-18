@@ -1,4 +1,4 @@
-include:
+include-optional:
   - port_set_01_acl.yaml
 dps:
     pri:
@@ -57,6 +57,6 @@ vlans:
 acls:
   port_set_01_acl:
     - rule:
-        description: Default deny rule
+        description: No device acl rule
         actions:
-          allow: 0
+          allow: 1
