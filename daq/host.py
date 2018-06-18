@@ -5,6 +5,7 @@ import os
 import random
 import shutil
 import time
+import traceback
 
 from clib import docker_host
 from clib import tcpdump_helper
@@ -143,9 +144,12 @@ class ConnectedHost(object):
             self.record_result('sanity', exception=e)
             self.terminate()
 
-    def terminate(self, trigger=True):
+    def terminate(self, trigger=True, removed=False):
         """Terminate this host"""
-        LOGGER.info('Set %d terminate, trigger %s', self.port_set, trigger)
+        LOGGER.info('Set %d terminate, trigger %s, removed %s', self.port_set, trigger, removed)
+        if not removed and self.config.get('result_linger', False):
+            LOGGER.error('Unexpected terminate with linger')
+            traceback.print_stack()
         self._state_transition(_STATE.ERROR)
         if self.dhcp_monitor:
             self.dhcp_monitor.cleanup()
@@ -250,6 +254,7 @@ class ConnectedHost(object):
         LOGGER.error('Set %d monitor error: %s', self.port_set, e)
         self._monitor_cleanup(forget=False)
         self.record_result(self.test_name, exception=e)
+        self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.port_set, e)
 
     def _monitor_scan(self):
@@ -311,16 +316,17 @@ class ConnectedHost(object):
             'scan_base': self.scan_base
         }
         test = docker_test.DockerTest(self.runner, self, test_name)
-        test.start(port, params, self.docker_callback)
+        test.start(port, params, self._docker_callback)
 
-    def docker_callback(self, return_code=None, exception=None):
-        """Handle a completed/excepted docker test"""
+    def _docker_callback(self, return_code=None, exception=None):
         self.record_result(self.test_name, exception=exception)
-        if exception:
-            self.runner.target_set_error(self.port_set, exception)
         self.record_result(self.test_name, code=return_code, exception=exception)
-        self._state_transition(_STATE.READY, _STATE.TESTING)
-        self._run_next_test()
+        if exception:
+            self._state_transition(_STATE.ERROR)
+            self.runner.target_set_error(self.port_set, exception)
+        else:
+            self._state_transition(_STATE.READY, _STATE.TESTING)
+            self._run_next_test()
 
     def record_result(self, name, **kwargs):
         """Record a named result for this test"""

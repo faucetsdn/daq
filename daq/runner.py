@@ -42,6 +42,7 @@ class DAQRunner(object):
         self.description = raw_description.strip("\"")
         self.version = os.environ['DAQ_VERSION']
         self.network = TestNetwork(config)
+        self.result_linger = config.get('result_linger', False)
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
@@ -123,7 +124,7 @@ class DAQRunner(object):
                 else:
                     if port in self.active_ports:
                         del self.active_ports[port]
-                    self._cancel_target_set(port)
+                    self._cancel_target_set(port, removed=True)
 
     def _handle_system_idle(self):
         for target_set in self.target_sets.values():
@@ -193,11 +194,9 @@ class DAQRunner(object):
     def target_set_error(self, port_set, e):
         """Handle an error in the target port set"""
         LOGGER.info('Set %d exception: %s', port_set, e)
-        LOGGER.exception(e)
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             target_set.record_result(target_set.test_name, exception=e)
-            target_set.terminate(trigger=False)
             self.target_set_complete(target_set)
         else:
             self._target_set_finalize(port_set, {'exception': str(e)})
@@ -205,21 +204,23 @@ class DAQRunner(object):
     def target_set_complete(self, target_set):
         """Handle completion of a target_set"""
         port_set = target_set.port_set
-        results = target_set.results
-        self._cancel_target_set(port_set)
-        self._target_set_finalize(port_set, results)
+        self._target_set_finalize(port_set, target_set.results)
+        if self.result_linger:
+            LOGGER.info('Set %d linger', port_set)
+        else:
+            self._cancel_target_set(port_set)
 
     def _target_set_finalize(self, port_set, results):
         LOGGER.info('Set %d complete, %d results', port_set, len(results))
         self.result_sets[port_set] = results
         LOGGER.info('Remaining sets: %s', self.target_sets.keys())
 
-    def _cancel_target_set(self, port_set):
+    def _cancel_target_set(self, port_set, removed=False):
         if port_set in self.target_sets:
             target_set = self.target_sets[port_set]
             del self.target_sets[port_set]
-            target_set.terminate(trigger=False)
-            LOGGER.info('Set %d cancelled.', port_set)
+            target_set.terminate(trigger=False, removed=removed)
+            LOGGER.info('Set %d cancelled (removed %s).', port_set, removed)
             if not self.target_sets and self.one_shot:
                 self.monitor_forget(self.faucet_events.sock)
 
