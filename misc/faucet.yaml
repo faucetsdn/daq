@@ -1,5 +1,5 @@
 include-optional:
-  - port_set_01_acl.yaml
+  - port_acls/dp_sec_port_1_acl.yaml
 dps:
     pri:
         dp_id: 1
@@ -32,7 +32,7 @@ dps:
         interfaces:
           1:
             native_vlan: 10
-            acl_in: port_set_01_acl
+            acl_in: dp_sec_port_1_acl
           2:
             native_vlan: 20
           3:
@@ -55,7 +55,7 @@ vlans:
     50:
     60:
 acls:
-  port_set_01_acl:
+  dp_sec_port_1_acl:
     - rule:
         description: No device acl rule
         actions:
