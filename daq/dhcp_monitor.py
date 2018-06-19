@@ -13,7 +13,8 @@ class DhcpMonitor(object):
 
     DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
-    DHCP_PATTERN = '(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN)
+    DHCP_TYPE_PATTERN = 'DHCP-Message Option 53, length 1: ([a-zA-Z]+)'
+    DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN, DHCP_TYPE_PATTERN)
     DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 20
 
@@ -46,13 +47,14 @@ class DhcpMonitor(object):
             return
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
-            self.target_ip = match.group(4)
-            if self.target_ip:
-                message = 'dhcp IP %s found, but no MAC address: %s' % (self.target_ip, dhcp_line)
-                assert self.target_mac, message
-                self._dhcp_success()
-            else:
+            if match.group(2):
                 self.target_mac = match.group(2)
+            if match.group(4):
+                self.target_ip = match.group(4)
+            if match.group(6) == "ACK":
+                message = 'dhcp incomplete: MAC %s, IP: %s' % (self.target_mac, self.target_ip)
+                assert self.target_mac and self.target_ip, message
+                self._dhcp_success()
 
     def cleanup(self, forget=True):
         """Cleanup any ongoing dhcp activity"""
