@@ -104,6 +104,7 @@ class ConnectedHost(object):
         self.state = target
 
     def is_active(self):
+        """Return True if this host is still under active test."""
         LOGGER.debug('Set %d is_active check state %s', self.port_set, self.state)
         return self.state != _STATE.ERROR and self.state != _STATE.DONE
 
