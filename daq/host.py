@@ -83,9 +83,9 @@ class ConnectedHost(object):
                                                    cls=cls, tmpdir=self.tmpdir)
             self._create_config(self.networking.tmpdir)
             self.record_result('startup')
-        except:
-            self.terminate(trigger=False)
-            raise
+        except Exception as e:
+            self._state_transition(_STATE.ERROR)
+            self.record_result('startup', exception=e)
 
     def _create_config(self, parent_dir):
         config_path = self.config.get('config_path')
@@ -102,6 +102,10 @@ class ConnectedHost(object):
             assert self.state == expected, message
         LOGGER.debug('Set %d state %s -> %s', self.port_set, self.state, target)
         self.state = target
+
+    def is_active(self):
+        LOGGER.debug('Set %d is_active check state %s', self.port_set, self.state)
+        return self.state != _STATE.ERROR and self.state != _STATE.DONE
 
     def _activate(self):
         self._state_transition(_STATE.STARTUP, _STATE.INIT)
@@ -142,7 +146,7 @@ class ConnectedHost(object):
             LOGGER.error('Set %d sanity error: %s', self.port_set, e)
             LOGGER.exception(e)
             self.record_result('sanity', exception=e)
-            self.terminate()
+            self._state_transition(_STATE.ERROR)
 
     def terminate(self, trigger=True, removed=False):
         """Terminate this host"""
@@ -200,7 +204,6 @@ class ConnectedHost(object):
         if exception:
             self._state_transition(_STATE.ERROR, _STATE.DHCP)
             self.runner.target_set_error(self.port_set, exception)
-            self.terminate()
         else:
             self._state_transition(_STATE.BASE, _STATE.DHCP)
 
@@ -300,9 +303,9 @@ class ConnectedHost(object):
         if self.remaining_tests:
             self._docker_test(self.remaining_tests.pop(0))
         else:
+            LOGGER.info('Set %d no more tests remaining', self.port_set)
             self._state_transition(_STATE.DONE, _STATE.READY)
             self.record_result('finish')
-            self.terminate()
 
     def _docker_test(self, test_name):
         self._state_transition(_STATE.TESTING, _STATE.READY)

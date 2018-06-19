@@ -119,7 +119,10 @@ class DAQRunner(object):
     def _handle_system_idle(self):
         for target_set in self.target_sets.values():
             try:
-                target_set.idle_handler()
+                if target_set.is_active():
+                    target_set.idle_handler()
+                elif not self.result_linger:
+                    target_set.terminate()
             except Exception as e:
                 self.target_set_error(target_set.port_set, e)
         if not self.event_start and not self.one_shot:
