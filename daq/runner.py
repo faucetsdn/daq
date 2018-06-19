@@ -30,7 +30,7 @@ class DAQRunner(object):
         self.faucet_events = None
         self.one_shot = config.get('s')
         self.flap_ports = config.get('f')
-        self.event_start = config.get('e')
+        self.event_trigger = config.get('e')
         self.stream_monitor = None
         self.exception = None
 
@@ -117,18 +117,24 @@ class DAQRunner(object):
                     self._cancel_target_set(port, removed=True)
 
     def _handle_system_idle(self):
+        all_idle = True
         for target_set in self.target_sets.values():
             try:
                 if target_set.is_active():
+                    all_idle = False
                     target_set.idle_handler()
                 elif not self.result_linger:
                     target_set.terminate()
             except Exception as e:
                 self.target_set_error(target_set.port_set, e)
-        if not self.event_start and not self.one_shot:
+        if not self.event_trigger and not self.one_shot:
             for port_set in self.active_ports:
                 if self.active_ports[port_set] and port_set not in self.target_sets:
                     self._trigger_target_set(port_set)
+                    all_idle = False
+        if all_idle:
+            LOGGER.info('No active target_sets, waiting for trigger event...')
+
 
     def _loop_hook(self):
         states = {}
@@ -153,7 +159,7 @@ class DAQRunner(object):
                                                    loop_hook=self._loop_hook)
             self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_event)
-            if self.event_start:
+            if self.event_trigger:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
             self.stream_monitor.event_loop()
