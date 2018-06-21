@@ -23,11 +23,10 @@ results=
 count=0
 for file in daq/*.py; do
     echo Checking file $file... | tee -a $RESULTS
-    pylint --reports=n --rcfile=$PYLINTRC $file >> $RESULTS || true
-    count=$((count+1))
+    pylint --rcfile=$PYLINTRC $file >> $RESULTS && count=$((count+1)) || true
 done
 
-results=$(egrep "Your code has been rated" $RESULTS)
+results=$(egrep "Your code has been rated" $RESULTS || true)
 numresults=$(echo "$results" | wc -l)
 errors=$(echo "$results" | egrep -v "10.00/10" | wc -l)
 
