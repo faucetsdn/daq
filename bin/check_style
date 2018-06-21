@@ -20,14 +20,18 @@ rm -f $RESULTS
 
 failure=
 results=
+count=0
 for file in daq/*.py; do
     echo Checking file $file... | tee -a $RESULTS
     pylint --reports=n --rcfile=$PYLINTRC $file >> $RESULTS || true
+    count=$((count+1))
 done
 
-messages=$(egrep -v '^Checking file' $RESULTS | wc -l)
+results=$(egrep "Your code has been rated" $RESULTS)
+numresults=$(echo "$results" | wc -l)
+errors=$(echo "$results" | egrep -v "10.00/10" | wc -l)
 
-if [ $messages -gt 0 ]; then
+if [ $errors -ne 0 -o $numresults -ne $count ]; then
     echo pylint detected errors:
     cat $RESULTS
     false
