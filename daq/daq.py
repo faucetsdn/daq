@@ -17,6 +17,15 @@ import runner
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
+FLAG_MAP = {
+    's': 'single_shot',
+    'e': 'event_trigger',
+    'f': 'flap_ports',
+    'l': 'result_linger',
+    'd': 'debug_mode',
+    'c': 'use_console'
+}
+
 def _stripped_alt_logger(self, level, msg, *args, **kwargs):
     #pylint: disable=unused-argument
     """A logger for messages that strips whitespace"""
@@ -26,7 +35,8 @@ def _stripped_alt_logger(self, level, msg, *args, **kwargs):
         ALT_LOG._log(level, stripped, *args, **kwargs)
 
 def _configure_logging(config):
-    daq_env = config.get('daq_loglevel')
+    log_def = 'debug' if config.get('debug_mode') else 'info'
+    daq_env = config.get('daq_loglevel', log_def)
     logging.basicConfig(level=minilog.LEVELS.get(daq_env, minilog.LEVELS['info']))
 
     mininet_env = config.get('mininet_loglevel')
@@ -54,7 +64,10 @@ def _parse_args(args):
     for arg in args[1:]:
         if arg:
             if arg[0] == '-':
-                config[arg[1:]] = True
+                if arg[1:] in FLAG_MAP:
+                    config[FLAG_MAP[arg[1:]]] = True
+                else:
+                    raise Exception('Unknown command line arg %s' % arg)
             elif '=' in arg:
                 parts = arg.split('=', 1)
                 config[parts[0]] = parts[1]

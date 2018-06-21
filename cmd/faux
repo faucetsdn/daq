@@ -5,10 +5,13 @@ INSTDIR=$ROOT/inst
 IMAGE=daq/faux
 local_config=$ROOT/local/system.conf
 postfix=
+intf_mac=9a:02:57:1e:8f:00
 
 # If the first argument is a number, then it's a port designation.
 if [ $# -gt 0 -a $(($1)) -gt 0 ]; then
-    postfix=-$1
+    port_num=$1
+    postfix=-$port_num
+    intf_mac=9a:02:57:1e:8f:0$port_num
     shift
 fi
 
@@ -61,7 +64,7 @@ else
     sudo ip link del $intf 2>/dev/null || true
 
     echo Adding new interface to $pid...
-    sudo ip link add $intf type veth peer name faux-eth0 netns $pid
+    sudo ip link add $intf type veth peer name faux-eth0 addr $intf_mac netns $pid
     sudo ip link set $intf up
 fi
 

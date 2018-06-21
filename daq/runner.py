@@ -28,9 +28,9 @@ class DAQRunner(object):
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
         self.faucet_events = None
-        self.one_shot = config.get('s')
-        self.flap_ports = config.get('f')
-        self.event_start = config.get('e')
+        self.single_shot = config.get('single_shot')
+        self.flap_ports = config.get('flap_ports')
+        self.event_trigger = config.get('event_trigger')
         self.stream_monitor = None
         self.exception = None
 
@@ -117,15 +117,24 @@ class DAQRunner(object):
                     self._cancel_target_set(port, removed=True)
 
     def _handle_system_idle(self):
+        all_idle = True
         for target_set in self.target_sets.values():
             try:
-                target_set.idle_handler()
+                if target_set.is_active():
+                    all_idle = False
+                    target_set.idle_handler()
+                elif not self.result_linger:
+                    target_set.terminate()
             except Exception as e:
                 self.target_set_error(target_set.port_set, e)
-        if not self.event_start and not self.one_shot:
+        if not self.event_trigger and not self.single_shot:
             for port_set in self.active_ports:
                 if self.active_ports[port_set] and port_set not in self.target_sets:
                     self._trigger_target_set(port_set)
+                    all_idle = False
+        if all_idle:
+            LOGGER.info('No active target_sets, waiting for trigger event...')
+
 
     def _loop_hook(self):
         states = {}
@@ -140,7 +149,7 @@ class DAQRunner(object):
 
     def main_loop(self):
         """Run main loop to execute tests"""
-        use_console = self.config.get('c')
+        use_console = self.config.get('use_console')
 
         if self.flap_ports:
             self.network.flap_interface_ports()
@@ -150,7 +159,7 @@ class DAQRunner(object):
                                                    loop_hook=self._loop_hook)
             self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_event)
-            if self.event_start:
+            if self.event_trigger:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
             self.stream_monitor.event_loop()
@@ -162,7 +171,7 @@ class DAQRunner(object):
             LOGGER.error('Keyboard Interrupt')
             LOGGER.exception(e)
 
-        keyboard_console = not self.one_shot and not self.exception
+        keyboard_console = not self.single_shot and not self.exception
         if use_console or keyboard_console:
             LOGGER.info('Dropping into interactive command line')
             self.network.cli()
@@ -209,7 +218,7 @@ class DAQRunner(object):
             del self.target_sets[port_set]
             target_set.terminate(trigger=False, removed=removed)
             LOGGER.info('Set %d cancelled (removed %s).', port_set, removed)
-            if not self.target_sets and self.one_shot:
+            if not self.target_sets and self.single_shot:
                 self.monitor_forget(self.faucet_events.sock)
 
     def monitor_stream(self, *args, **kwargs):
