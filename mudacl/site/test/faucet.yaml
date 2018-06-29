@@ -1,0 +1,71 @@
+include:
+  - port_acls/dp_sec_port_1_acl.yaml
+dps:
+  pri:
+    dp_id: 1
+    name: pri
+    #ofchannel_log: /var/log/faucet/of-pri.log
+    stack:
+      priority: 1
+    interface_ranges:
+      10-19:
+        native_vlan: 10
+      20-29:
+        native_vlan: 20
+      30-39:
+        native_vlan: 30
+      40-49:
+        native_vlan: 40
+      50-59:
+        native_vlan: 50
+      60-69:
+        native_vlan: 60
+    interfaces:
+      1:
+        stack:
+          dp: sec
+          port: 7
+  sec:
+    dp_id: 2
+    name: sec
+    #ofchannel_log: /var/log/faucet/of-sec.log
+    interfaces:
+      1:
+        native_vlan: 10
+        acl_in: dp_sec_port_1_acl
+      2:
+        native_vlan: 20
+        acl_in: dp_sec_port_2_acl
+      3:
+        native_vlan: 30
+        acl_in: dp_sec_port_3_acl
+      4:
+        native_vlan: 40
+      5:
+        native_vlan: 50
+      6:
+        native_vlan: 60
+      7:
+        stack:
+          dp: pri
+          port: 1
+vlans:
+  10:
+    description: "vlan for port 1 device"
+  20:
+    description: "vlan for port 2 device"
+  30:
+    description: "vlan for port 3 device"
+  40:
+    description: "vlan for port 4 device"
+  50:
+    description: "vlan for port 5 device"
+  60:
+    description: "vlan for port 6 device"
+
+acls:
+  dp_sec_port_1_acl:
+  - rule:
+      description: Default deny rule
+      actions:
+        allow: 0

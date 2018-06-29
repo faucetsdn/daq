@@ -1,0 +1,16 @@
+{
+  "macAddrs": {
+    "9a:02:57:1e:8f:00": {
+      "dpName": "sec",
+      "portNum": 1
+    },
+    "9a:02:57:1e:8f:01": {
+      "dpName": "sec",
+      "portNum": 1
+    },
+    "9a:02:57:1e:8f:02": {
+      "dpName": "sec",
+      "portNum": 2
+    }
+  }
+}
