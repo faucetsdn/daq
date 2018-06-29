@@ -1,8 +1,8 @@
-package com.google.bos.orchestrator.mudacl;
+package com.google.daq.orchestrator.mudacl;
 
-import com.google.bos.orchestrator.mudacl.DeviceTopology.Placement;
-import com.google.bos.orchestrator.mudacl.SwitchTopology.Acl;
-import com.google.bos.orchestrator.mudacl.SwitchTopology.Rule;
+import com.google.daq.orchestrator.mudacl.DeviceTopology.Placement;
+import com.google.daq.orchestrator.mudacl.SwitchTopology.Acl;
+import com.google.daq.orchestrator.mudacl.SwitchTopology.Rule;
 
 public final class AclHelper {
 

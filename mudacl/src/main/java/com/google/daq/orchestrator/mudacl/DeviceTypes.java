@@ -1,6 +1,6 @@
-package com.google.bos.orchestrator.mudacl;
+package com.google.daq.orchestrator.mudacl;
 
-import com.google.bos.orchestrator.mudacl.DeviceTopology.MacIdentifier;
+import com.google.daq.orchestrator.mudacl.DeviceTopology.MacIdentifier;
 import java.util.Map;
 import java.util.TreeMap;
 
