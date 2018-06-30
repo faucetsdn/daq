@@ -1,6 +1,6 @@
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
-A flexble IoT Device Automatd Qualification (DAQ) framework utilizing the FAUCET SDN controller.
+A flexible IoT Device Automated Qualification (DAQ) framework utilizing the FAUCET SDN controller.
 More details about goals and objectives can be found in the IEEE Computer article
 [Taming the IoT: Operationalized Testing to Secure Connected Devices](https://www.computer.org/csdl/mags/co/2018/06/mco2018060090-abs.html).
 Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
@@ -30,16 +30,16 @@ everything inside of one Docker container named `daq-runner`.
 After an initial test-install run, edit `local/system.conf` to specify the network adapter
 name(s) of the device adapter(s) or external physical switch.
 If the file does not exist, it will be populated with a default version on system start with
-defaults that use the internal _faux_ test client: This is recommened the first time around
+defaults that use the internal _faux_ test client: This is recommended the first time around
 as it will test the install to make sure everything works properly. The various options are
-documented in the configuration file itself. Note that the file folows "assignment" semantics,
+documented in the configuration file itself. Note that the file follows "assignment" semantics,
 so the last declaration of a variable will be the only one that sticks. (The `local/`
 subdirectory contains all information local to the DAQ install, such as configuration information
 or cloud credentials.)
 
 ## Network Configurations
 
-There are three variants of network configuraiton available to test devices. The recommended
+There are three variants of network configuration available to test devices. The recommended
 course is to start with the simplest (software emulation), and progress forward as required by
 the specific project. Details on required configuration options are in the config file.
 
@@ -52,7 +52,7 @@ ethernet connections. There is no particular limit on the number of devices that
 this way except for the limitations of the host's USB subsystem.
 
 3. _Network Switch_: Use an external OpenFlow network switch. To do this, there'll need to be
-a supported network swtich setup as described in the FAUCET documentation. See the [switch
+a supported network switch setup as described in the FAUCET documentation. See the [switch
 setup documentation](docs/switches.md) for more details.
 
 ## Testing Dashboard
@@ -61,7 +61,7 @@ The (optional) cloud dashboard requires a service-account certification to grant
 Contact the project owner to obtain a new certificate for a testing dashboard page on an already
 existing cloud project. Alternatively set up a new project by following the
 [Firebase install instructions](docs/firebase.md). The `bin/stress_test` script is useful for
-setting up a continous testing environment: it runs in the background and pipes the output
+setting up a continuous testing environment: it runs in the background and pipes the output
 into a rotating set of logfiles.
 
 ## Debugging
@@ -87,7 +87,7 @@ in the node-specific directory, and can be parsed using tcpdump with something l
 `tcpdump -en -r inst/run-port-01/nodes/gw01/tmp/startup.pcap ip`
 
 The [example pcap output file](docs/startup_pcap.md) shows what this should look like for a normal run.
-(Replace `01` with the appropraite port set number.)
+(Replace `01` with the appropriate port set number.)
 
 If there are device-level network problems then it is possible to use `tcpdump` or similar
 to example the network traffic. When using the `cmd/run` command, the system runs the
@@ -104,5 +104,5 @@ switch itself.)
 ## Build Setup
 
 Building is only required for active test development. Otherwise, stick
-with the packaged runner.  There are a bunch of additional dependicies and extra development steps.
+with the packaged runner.  There are a bunch of additional dependenicies and extra development steps.
 See the [build documentation](docs/build.md) for more details on how to build the development system.
