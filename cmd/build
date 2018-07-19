@@ -34,6 +34,15 @@ if [ -f $local_config ]; then
   source $local_config
 fi
 
+target_version=$(cat misc/FAUCET_VERSION)
+local_version=$(cd faucet; git rev-list -n 1 HEAD)
+
+if [ "$target_version" != "$local_version" ]; then
+    echo Local faucet commit is at: $local_version
+    echo Mismatch with misc/FAUCET_VERSION: $target_version
+    false
+fi
+
 if [ -n "$in_container" ]; then
     # Run in container for pylint versioning.
     echo Running style checks...

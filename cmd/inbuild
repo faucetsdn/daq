@@ -3,15 +3,6 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-target_version=$(cat misc/FAUCET_VERSION)
-local_version=$(cd faucet; git rev-list -n 1 HEAD)
-
-echo Local faucet commit $local_version
-if [ "$target_version" != "$local_version" ]; then
-    echo Version mismatch with misc/FAUCET_VERSION $target_version
-    false
-fi
-
 cmd/build save
 
 local_config=local/system.conf
