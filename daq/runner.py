@@ -114,7 +114,10 @@ class DAQRunner(object):
                 else:
                     if port in self.active_ports:
                         del self.active_ports[port]
-                    self._cancel_target_set(port, removed=True)
+                    if self.result_linger:
+                        LOGGER.info('Set %d disconnect linger', port)
+                    else:
+                        self._cancel_target_set(port, removed=True)
 
     def _handle_system_idle(self):
         all_idle = True
