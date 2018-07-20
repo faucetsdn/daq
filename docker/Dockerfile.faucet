@@ -1,6 +1,6 @@
 ## Image name: daq/faucet
 
-FROM faucet/faucet-python3
+FROM faucet/python3
 
 COPY faucet/ /faucet-src
 
