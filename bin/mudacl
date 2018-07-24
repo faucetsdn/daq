@@ -1,0 +1,21 @@
+#!/bin/bash -e
+#
+# Simple helper script to run the prototype MUD ACL generator.
+#
+
+ROOT=$(dirname $0)/..
+
+cd $ROOT
+
+touch inst/ || sudo chown $USER inst
+
+if [ ! -f local/devices.json ]; then
+    cp mudacl/site/test/devices.json local/devices.json
+    cp mudacl/site/test/types.json local/types.json
+fi
+
+if [ ! -d inst/port_acls ]; then
+    mkdir inst/port_acls
+fi
+
+mudacl/bin/run.sh

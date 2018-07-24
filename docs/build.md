@@ -19,7 +19,7 @@ To run the development version, use the simple executor-run command:
   $ <b>cmd/exrun</b>
 </pre>
 
-Build the runner container, which can take a <em>really</em> long time:
+If needed, build the runner container, which can take a <em>really</em> long time:
 
 <pre>
   $ <b>cmd/inbuild</b>
@@ -33,4 +33,3 @@ You can also clean all the stuffs:
 
 ...which is sometimes necessary to gaurintee a clean build.
 Be warned, it also might clean some other images/containers from other projects.
-
