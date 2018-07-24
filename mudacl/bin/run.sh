@@ -1,26 +1,27 @@
 #!/bin/bash -e
 
-CONFIG_ROOT=site/test
-SWITCH_TOPOLOGY=$CONFIG_ROOT/faucet.yaml
-DEVICE_TOPOLOGY=$CONFIG_ROOT/devices.json
-DEVICE_TYPES=$CONFIG_ROOT/types.json
-MUD_DIR=$CONFIG_ROOT/mud_files/
-OUTPUT_DIR=$CONFIG_ROOT/port_acls/
+ROOT=$(dirname $0)/..
 
-if [ ! -f gradlew ]; then
-    echo Please run in the daq/mudacl directory.
-    false
-fi
+# Runtime switch configuration.
+SWITCH_TOPOLOGY=inst/faucet.yaml
 
-./gradlew shadow
+# Set of available mud files.
+MUD_DIR=mud_files/
+
+# Device topology specific to local setup.
+DEVICE_TOPOLOGY=local/devices.json
+
+# Device type mapping, specific to local setup.
+DEVICE_TYPES=local/types.json
+
+# Output directory for runtime ACLs.
+OUTPUT_DIR=inst/port_acls/
+
+(cd $ROOT; ./gradlew shadow)
 
 echo
-echo Execution mudacl generator on $CONFIG_ROOT...
+echo Executing mudacl generator...
 
-java -jar build/libs/mudacl-1.0-SNAPSHOT-all.jar $SWITCH_TOPOLOGY $DEVICE_TOPOLOGY $DEVICE_TYPES $MUD_DIR $OUTPUT_DIR
+java -jar $ROOT/build/libs/mudacl-1.0-SNAPSHOT-all.jar $SWITCH_TOPOLOGY $DEVICE_TOPOLOGY $DEVICE_TYPES $MUD_DIR $OUTPUT_DIR
 
-echo Success!
-
-
-
-
+ls -l $OUTPUT_DIR

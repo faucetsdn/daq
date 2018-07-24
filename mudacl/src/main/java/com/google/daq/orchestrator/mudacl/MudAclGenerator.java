@@ -39,7 +39,9 @@ public class MudAclGenerator {
       generator.setDeviceTopology(OBJECT_MAPPER.readValue(new File(argv[1]), DeviceTopology.class));
       generator.setDeviceTypes(OBJECT_MAPPER.readValue(new File(argv[2]), DeviceTypes.class));
       generator.setAclProvider(new MudConverter(new File(argv[3])));
-      writePortAcls(new File(argv[4]), generator.makePortAclMap());
+      File outputDir = new File(argv[4]);
+      System.out.println("Writing output files to " + outputDir.getAbsolutePath());
+      writePortAcls(outputDir, generator.makePortAclMap());
     } catch (ExpectedException e) {
       System.err.println(e.toString());
     } catch (Exception e) {

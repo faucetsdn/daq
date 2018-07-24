@@ -1,5 +1,6 @@
 include-optional:
   - port_acls/dp_sec_port_1_acl.yaml
+  - port_acls/dp_sec_port_2_acl.yaml
 dps:
     pri:
         dp_id: 1
@@ -35,6 +36,7 @@ dps:
             acl_in: dp_sec_port_1_acl
           2:
             native_vlan: 20
+            acl_in: dp_sec_port_2_acl
           3:
             native_vlan: 30
           4:
@@ -49,14 +51,25 @@ dps:
               port: 1
 vlans:
     10:
+      description: default vlan
     20:
+      description: default vlan
     30:
+      description: default vlan
     40:
+      description: default vlan
     50:
+      description: default vlan
     60:
+      description: default vlan
 acls:
   dp_sec_port_1_acl:
     - rule:
-        description: No device acl rule
+        description: Default port 1 acl.
+        actions:
+          allow: 1
+  dp_sec_port_2_acl:
+    - rule:
+        description: Default port 2 acl.
         actions:
           allow: 1

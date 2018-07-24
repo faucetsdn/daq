@@ -1,5 +1,6 @@
 package com.google.daq.orchestrator.mudacl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ public class SwitchTopology {
   public Map<String, DataPlane> dps = new TreeMap<>();
   public Map<String, VLan> vlans = new TreeMap<>();
   public Map<String, Acl> acls = new TreeMap<>();
+  @JsonProperty("include-optional")
   public List<String> include;
 
   static class DataPlane {
