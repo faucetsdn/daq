@@ -1,3 +1,5 @@
+include:
+  - dp_pri_port_acls.yaml
 include-optional:
   - port_acls/dp_sec_port_1_acl.yaml
   - port_acls/dp_sec_port_2_acl.yaml
@@ -9,20 +11,12 @@ dps:
         stack:
           priority: 1
         interface_ranges:
-          10-19:
+          10-69:
+            acl_in: dp_pri_portset_acl
             native_vlan: 10
-          20-29:
-            native_vlan: 20
-          30-39:
-            native_vlan: 30
-          40-49:
-            native_vlan: 40
-          50-59:
-            native_vlan: 50
-          60-69:
-            native_vlan: 60
         interfaces:
           1:
+            acl_in: dp_pri_incoming_acl
             stack:
               dp: sec
               port: @SEC_PORT@
@@ -35,32 +29,22 @@ dps:
             native_vlan: 10
             acl_in: dp_sec_port_1_acl
           2:
-            native_vlan: 20
+            native_vlan: 10
             acl_in: dp_sec_port_2_acl
           3:
-            native_vlan: 30
+            native_vlan: 10
           4:
-            native_vlan: 40
+            native_vlan: 10
           5:
-            native_vlan: 50
+            native_vlan: 10
           6:
-            native_vlan: 60
+            native_vlan: 10
           @SEC_PORT@:
             stack:
               dp: pri
               port: 1
 vlans:
     10:
-      description: default vlan
-    20:
-      description: default vlan
-    30:
-      description: default vlan
-    40:
-      description: default vlan
-    50:
-      description: default vlan
-    60:
       description: default vlan
 acls:
   dp_sec_port_1_acl:

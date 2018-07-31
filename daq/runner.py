@@ -58,12 +58,6 @@ class DAQRunner(object):
 
         self.network.initialize()
 
-        LOGGER.info("Starting faucet...")
-        output = self.network.cmd('cmd/faucet && echo SUCCESS')
-        if not output.strip().endswith('SUCCESS'):
-            LOGGER.info('Faucet output: %s', output)
-            assert False, 'Faucet startup failed'
-
         LOGGER.debug("Attaching event channel...")
         self.faucet_events = faucet_event_client.FaucetEventClient()
         self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
@@ -75,11 +69,6 @@ class DAQRunner(object):
 
     def cleanup(self):
         """Cleanup instance"""
-        try:
-            LOGGER.debug("Stopping faucet...")
-            self.network.cmd('docker kill daq-faucet')
-        except Exception as e:
-            LOGGER.error('Exception: %s', e)
         try:
             LOGGER.debug("Stopping network...")
             self.network.stop()
@@ -106,18 +95,33 @@ class DAQRunner(object):
             if not event:
                 break
             (dpid, port, active) = self.faucet_events.as_port_state(event)
-            LOGGER.debug('Port state is dpid %s port %s active %s', dpid, port, active)
-            if self.network.is_device_port(dpid, port):
-                if active:
-                    self.active_ports[port] = True
-                    self._trigger_target_set(port)
+            if dpid and port:
+                self._handle_port_state(dpid, port, active)
+            (dpid, port, target_mac) = self.faucet_events.as_port_learn(event)
+            if dpid and port:
+                self._handle_port_learn(dpid, port, target_mac)
+
+    def _handle_port_state(self, dpid, port, active):
+        LOGGER.debug('Port dpid %s port %s is active %s', dpid, port, active)
+        if self.network.is_device_port(dpid, port):
+            if active:
+                self.active_ports[port] = True
+                self._trigger_target_set(port)
+            else:
+                if port in self.active_ports:
+                    self.network.direct_port_traffic(self.active_ports[port], None)
+                    del self.active_ports[port]
+                if self.result_linger:
+                    LOGGER.info('Set %d disconnect linger', port)
                 else:
-                    if port in self.active_ports:
-                        del self.active_ports[port]
-                    if self.result_linger:
-                        LOGGER.info('Set %d disconnect linger', port)
-                    else:
-                        self._cancel_target_set(port, removed=True)
+                    self._cancel_target_set(port, removed=True)
+
+    def _handle_port_learn(self, dpid, port, target_mac):
+        LOGGER.debug('Port dpid %s port %s is mac %s', dpid, port, target_mac)
+        if self.network.is_device_port(dpid, port):
+            self.active_ports[port] = target_mac
+            self.network.direct_port_traffic(target_mac, port)
+            self._trigger_target_set(port)
 
     def _handle_system_idle(self):
         all_idle = True
@@ -132,11 +136,11 @@ class DAQRunner(object):
                 self.target_set_error(target_set.port_set, e)
         if not self.event_trigger and not self.single_shot:
             for port_set in self.active_ports:
-                if self.active_ports[port_set] and port_set not in self.target_sets:
+                if self.active_ports[port_set]:
                     self._trigger_target_set(port_set)
                     all_idle = False
         if all_idle:
-            LOGGER.info('No active target_sets, waiting for trigger event...')
+            LOGGER.info('No active device ports, waiting for trigger event...')
 
 
     def _loop_hook(self):
@@ -182,12 +186,24 @@ class DAQRunner(object):
         self._terminate()
 
     def _trigger_target_set(self, port_set):
-        assert port_set not in self.target_sets, 'target set %d already exists' % port_set
+        assert port_set in self.active_ports, 'Port set %d not active' % port_set
+
+        if port_set in self.target_sets:
+            LOGGER.debug('Target set %d already active, ignoring.', port_set)
+            return False
+
+        target_mac = self.active_ports[port_set]
+        if target_mac is True:
+            LOGGER.debug('Target set %d triggered but not learned', port_set)
+            return False
+
         try:
-            LOGGER.debug('Trigger target set %d', port_set)
-            self.target_sets[port_set] = connected_host.ConnectedHost(self, port_set, self.config)
-            self.target_sets[port_set].initialize()
+            LOGGER.info('Trigger target set %d mac %s', port_set, target_mac)
+            new_host = connected_host.ConnectedHost(self, port_set, target_mac, self.config)
+            new_host.initialize()
+            self.target_sets[port_set] = new_host
             self._send_heartbeat()
+            return True
         except Exception as e:
             self.target_set_error(port_set, e)
 

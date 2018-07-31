@@ -59,10 +59,10 @@ class FaucetEventClient(object):
             self.previous_state[state_key] = active
             return event
 
-        (dpid, states) = self.as_ports_status(event)
+        (dpid, status) = self.as_ports_status(event)
         if dpid:
-            for port in states:
-                self.prepend_event(self.make_port_state(dpid, port, states[port]))
+            for port in status:
+                self.prepend_event(self.make_port_state(dpid, port, status[port]))
             return None
         return event
 
@@ -82,16 +82,16 @@ class FaucetEventClient(object):
         return None
 
     def as_ports_status(self, event):
-        """Convert the event to a port status event, if applicable"""
+        """Convert the event to port status info, if applicable"""
         if not event or 'PORTS_STATUS' not in event:
             return (None, None)
         return (event['dp_id'], event['PORTS_STATUS'])
 
-    def make_port_state(self, dpid, port, state):
+    def make_port_state(self, dpid, port, status):
         """Make a synthetic port state event"""
         port_change = {}
         port_change['port_no'] = port
-        port_change['status'] = state
+        port_change['status'] = status
         port_change['reason'] = 'MODIFY'
         event = {}
         event['dp_id'] = dpid
@@ -99,7 +99,7 @@ class FaucetEventClient(object):
         return event
 
     def as_port_state(self, event):
-        """Convert event to a port_state event, if applicable"""
+        """Convert event to a port state info, if applicable"""
         if not event or 'PORT_CHANGE' not in event:
             return (None, None, None)
         dpid = event['dp_id']
@@ -107,6 +107,15 @@ class FaucetEventClient(object):
         port_no = int(event['PORT_CHANGE']['port_no'])
         port_active = event['PORT_CHANGE']['status'] and reason != 'DELETE'
         return (dpid, port_no, port_active)
+
+    def as_port_learn(self, event):
+        """Convert to port learning info, if applicable"""
+        if not event or 'L2_LEARN' not in event:
+            return (None, None, None)
+        dpid = event['dp_id']
+        port_no = int(event['L2_LEARN']['port_no'])
+        eth_src = event['L2_LEARN']['eth_src']
+        return (dpid, port_no, eth_src)
 
     def close(self):
         """Close the faucet event socket"""

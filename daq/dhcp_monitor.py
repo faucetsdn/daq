@@ -11,10 +11,9 @@ LOGGER = logging.getLogger('dhcp')
 class DhcpMonitor(object):
     """Class to handle DHCP monitoring"""
 
-    DHCP_MAC_PATTERN = '> ([0-9a-f:]+), ethertype IPv4'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_TYPE_PATTERN = 'DHCP-Message Option 53, length 1: ([a-zA-Z]+)'
-    DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_MAC_PATTERN, DHCP_IP_PATTERN, DHCP_TYPE_PATTERN)
+    DHCP_PATTERN = '(%s)|(%s)' % (DHCP_IP_PATTERN, DHCP_TYPE_PATTERN)
     DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 20
 
@@ -24,7 +23,6 @@ class DhcpMonitor(object):
         self.callback = callback
         self.networking = container
         self.target_ip = None
-        self.target_mac = None
         self.dhcp_traffic = None
         self.intf_name = None
         self.test_start = None
@@ -49,12 +47,9 @@ class DhcpMonitor(object):
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
             if match.group(2):
-                self.target_mac = match.group(2)
-            if match.group(4):
-                self.target_ip = match.group(4)
-            if match.group(6) == "ACK":
-                message = 'dhcp incomplete: MAC %s, IP: %s' % (self.target_mac, self.target_ip)
-                assert self.target_mac and self.target_ip, message
+                self.target_ip = match.group(2)
+            if match.group(4) == "ACK":
+                assert self.target_ip, 'dhcp ACK missing ip address'
                 self._dhcp_success()
 
     def cleanup(self, forget=True):
@@ -68,11 +63,11 @@ class DhcpMonitor(object):
     def _dhcp_success(self):
         self.cleanup()
         delta = int(time.time()) - self.test_start
-        LOGGER.info('Set %d received dhcp reply after %ds: %s is at %s',
-                    self.port_set, delta, self.target_mac, self.target_ip)
+        LOGGER.info('Set %d received dhcp reply after %ds: %s',
+                    self.port_set, delta, self.target_ip)
         weak_result = delta > self.DHCP_THRESHHOLD_SEC
         state = 'weak' if weak_result else None
-        self.callback(state, target_mac=self.target_mac, target_ip=self.target_ip)
+        self.callback(state, target_ip=self.target_ip)
 
     def _dhcp_hangup(self):
         self._dhcp_error(Exception('dhcp hangup'))

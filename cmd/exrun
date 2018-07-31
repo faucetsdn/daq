@@ -3,11 +3,13 @@
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 LOCALDIR=$ROOT/local
+FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
+cleanup="echo cleanup"
 
 cd $ROOT
 
@@ -38,7 +40,7 @@ if [ ! -d $FAUCET ]; then
 fi
 
 mkdir -p $INSTDIR
-rm -f $FAUCET_EVENT_SOCK
+rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG
 
 docker ps > /dev/null 2>&1 || service docker start
 sleep 1
@@ -57,17 +59,20 @@ for intf in $intfs; do
         intf=local
         echo Implicitly running local device...
         $ROOT/cmd/local
-        cleanup="$ROOT/cmd/local clean"
+        cleanup+=";$ROOT/cmd/local clean"
     fi
 
-    if [ "$intf" == "faux!" ]; then
-        intf=faux
-        echo Implicitly running faux device...
-        $ROOT/cmd/faux
-        cleanup="echo Killing daq-faux container...; docker kill daq-faux > /dev/null"
+    fbase=${intf%!}
+    fnum=${fbase#faux}
+    if [ "${fbase}" != "${intf}" -a "${fbase}" != "${fnum}" ]; then
+        intf=$fbase
+        echo Implicitly running faux device $intf...
+        $ROOT/cmd/faux ${fnum#-}
+        container=daq-$intf
+        cleanup+=";echo Killing container $container...; docker kill $container > /dev/null"
     fi
 
-    ip -br addr show $intf || true
+    echo $(ip addr show $intf)
 
     # If running inside of a container, wait until the host test interface shows up...
     if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
