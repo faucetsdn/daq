@@ -5,6 +5,9 @@ import java.util.TreeMap;
 
 public class DeviceTopology {
 
+  private static final String DP_PORT_FORMAT = "dp_%s_port_%d";
+  private static final String TEMPLATE_FORMAT = "template_%s";
+
   public Map<MacIdentifier, Placement> macAddrs = new TreeMap<>();
 
   static class MacIdentifier extends StringId {
@@ -22,7 +25,13 @@ public class DeviceTopology {
     public Integer portNum;
 
     public String toString() {
-      return String.format("dp_%s_port_%d", dpName, portNum);
+      return isTemplate()
+          ? String.format(TEMPLATE_FORMAT, dpName)
+          : String.format(DP_PORT_FORMAT, dpName, portNum);
+    }
+
+    boolean isTemplate() {
+      return portNum == null;
     }
   }
 }

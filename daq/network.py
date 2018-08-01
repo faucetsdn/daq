@@ -35,19 +35,37 @@ class TestNetwork(object):
     """Test network manager"""
 
     DP_ACL_FILE_FORMAT = "inst/dp_%s_port_acls.yaml"
+    PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
+    PORT_ACL_FILE_FORMAT = "inst/port_acls/dp_%s_port_%d_acl.yaml"
+    TEMPLATE_FILE_FORMAT = "inst/acl_templates/template_%s_acl.yaml"
+    RULES_KEY_FORMAT = "@acl:template_%s_acl"
+    DEVICE_TYPES_FILE = "inst/device_types.json"
     OVS_CLS = mininet_node.OVSSwitch
+
+    MAC_PLACEHOLDER = "@src_mac:"
+    DNS_PLACEHOLDER = "@dns:"
 
     def __init__(self, config):
         self.config = config
         self.net = None
         self.pri = None
         self.sec = None
+        self.sec_name = 'sec'
         self.sec_dpid = None
         self.sec_port = None
         self.ext_intf_name = None
         self.switch_links = {}
         self.device_intfs = None
-        self.mac_map = {}
+        self._mac_map = {}
+        self._device_types = self._load_file(self.DEVICE_TYPES_FILE)
+
+    def _load_file(self, filename):
+        if not os.path.isfile(filename):
+            LOGGER.debug("File %s does not exist, skipping.", filename)
+            return None
+        LOGGER.debug("Loading file %s", filename)
+        with open(filename) as stream:
+            return yaml.safe_load(stream)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -185,7 +203,7 @@ class TestNetwork(object):
                 self.sec.addIntf(device_intf, port=device_intf.port)
                 self._switch_attach(self.sec, device_intf)
 
-        self._generate_mac_map()
+        self._generate_acls()
 
         LOGGER.info("Starting faucet...")
         output = self.pri.cmd('cmd/faucet && echo SUCCESS')
@@ -196,39 +214,43 @@ class TestNetwork(object):
     def direct_port_traffic(self, target_mac, port_no):
         """Direct traffic from a given mac to specified port set"""
         if port_no is None:
-            del self.mac_map[target_mac]
+            del self._mac_map[target_mac]
         else:
-            self.mac_map[target_mac] = port_no
-        self._generate_mac_map()
+            self._mac_map[target_mac] = port_no
+        self._generate_acls(port=port_no)
 
-    def _generate_mac_map(self):
+    def _generate_acls(self, port=None):
+        self._generate_pri_acls()
+        self._generate_port_acls(port=port)
+
+    def _generate_pri_acls(self):
         switch_name = self.pri.name
 
         incoming_acl = []
         portset_acl = []
 
-        for target_mac in self.mac_map:
-            port_set = self.mac_map[target_mac]
+        for target_mac in self._mac_map:
+            port_set = self._mac_map[target_mac]
             ports = range(port_set * 10, port_set*10+4)
-            self._add_acl_rule(incoming_acl, src_mac=target_mac, in_vlan=10, ports=ports)
-            self._add_acl_rule(portset_acl, dst_mac=target_mac, out_vlan=10, port=1)
+            self._add_acl_pri_rule(incoming_acl, src_mac=target_mac, in_vlan=10, ports=ports)
+            self._add_acl_pri_rule(portset_acl, dst_mac=target_mac, out_vlan=10, port=1)
 
-        self._add_acl_rule(portset_acl, allow=1)
+        self._add_acl_pri_rule(portset_acl, allow=1)
 
         acls = {}
         acls["dp_%s_incoming_acl" % switch_name] = incoming_acl
         acls["dp_%s_portset_acl" % switch_name] = portset_acl
 
-        mac_map = {}
-        mac_map["acls"] = acls
+        pri_acls = {}
+        pri_acls["acls"] = acls
 
         filename = self.DP_ACL_FILE_FORMAT % switch_name
-        LOGGER.debug("Writing updated mac map to %s", filename)
+        LOGGER.debug("Writing updated pri acls to %s", filename)
         with open(filename, "w+") as output_stream:
-            yaml.safe_dump(mac_map, stream=output_stream)
+            yaml.safe_dump(pri_acls, stream=output_stream)
 
-    def _add_acl_rule(self, acl, src_mac=None, dst_mac=None, in_vlan=None, out_vlan=None,
-                      port=None, ports=None, allow=None):
+    def _add_acl_pri_rule(self, acl, src_mac=None, dst_mac=None, in_vlan=None, out_vlan=None,
+                          port=None, ports=None, allow=None):
         output = {}
         if port:
             output["port"] = port
@@ -258,3 +280,62 @@ class TestNetwork(object):
         rule["rule"] = subrule
 
         acl.append(rule)
+
+    def _generate_port_acls(self, port=None):
+        if port:
+            self._generate_port_acl(port=port)
+        else:
+            for port in range(0, self.sec_port):
+                self._generate_port_acl(port=port)
+
+    def _generate_port_acl(self, port=None):
+        has_mapping = False
+        rules = []
+        if self._device_types:
+            for target_mac in self._mac_map:
+                if self._mac_map[target_mac] == port:
+                    self._add_acl_port_rules(rules, target_mac=target_mac)
+                    has_mapping = True
+
+        filename = self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
+        if has_mapping:
+            self._append_acl_template(rules, 'baseline')
+            LOGGER.debug("Writing port acl file %s", filename)
+            self._write_port_acl(port, rules, filename)
+        elif os.path.isfile(filename):
+            LOGGER.debug("Removing unused port acl file %s", filename)
+            os.remove(filename)
+
+    def _write_port_acl(self, port, rules, filename):
+        acl_name = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
+        acls = {}
+        acls[acl_name] = rules
+        port_acl = {}
+        port_acl['acls'] = acls
+        with open(filename, "w+") as output_stream:
+            yaml.safe_dump(port_acl, stream=output_stream)
+
+    def _add_acl_port_rules(self, rules, target_mac):
+        mac_map = self._device_types['macAddrs']
+        device_type = mac_map[target_mac]['type'] if target_mac in mac_map else 'default'
+        LOGGER.info("Processing acl template for %s/%s", target_mac, device_type)
+        self._append_acl_template(rules, device_type, target_mac)
+
+    def _append_acl_template(self, rules, template, target_mac=None):
+        filename = self.TEMPLATE_FILE_FORMAT % template
+        template_key = self.RULES_KEY_FORMAT % template
+        template_acl = self._load_file(filename)
+        for acl in template_acl['acls'][template_key]:
+            new_rule = acl['rule']
+            self._resolve_template_field(new_rule, 'dl_src', target_mac=target_mac)
+            self._resolve_template_field(new_rule, 'nw_dst')
+            rules.append(acl)
+
+    def _resolve_template_field(self, rule, field, target_mac=None):
+        if field not in rule:
+            return
+        placeholder = rule[field]
+        if placeholder.startswith(self.MAC_PLACEHOLDER):
+            rule[field] = target_mac
+        elif placeholder.startswith(self.DNS_PLACEHOLDER):
+            del rule[field]

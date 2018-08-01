@@ -1,5 +1,6 @@
-include:
+include-optional:
   - port_acls/dp_sec_port_1_acl.yaml
+  - port_acls/dp_sec_port_2_acl.yaml
 dps:
   pri:
     dp_id: 1
@@ -38,7 +39,6 @@ dps:
         acl_in: dp_sec_port_2_acl
       3:
         native_vlan: 30
-        acl_in: dp_sec_port_3_acl
       4:
         native_vlan: 40
       5:
@@ -65,6 +65,11 @@ vlans:
 
 acls:
   dp_sec_port_1_acl:
+  - rule:
+      description: Default deny rule
+      actions:
+        allow: 0
+  dp_sec_port_2_acl:
   - rule:
       description: Default deny rule
       actions:

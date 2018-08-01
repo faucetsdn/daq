@@ -12,7 +12,7 @@ public final class AclHelper {
   public static final int IP_PROTO_TCP = 6;
   public static final int IP_PROTO_UDP = 17;
 
-  public static void finalizeAcl(Acl acl) {
+  public static void addBaselineRules(Acl acl) {
     acl.add(makeIcmpRule());
     acl.add(makeArpRule());
     acl.add(makeDhcpRule());

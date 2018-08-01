@@ -15,6 +15,7 @@ public class SwitchTopology {
   public Map<String, VLan> vlans = new TreeMap<>();
   public Map<String, Acl> acls = new TreeMap<>();
   @JsonProperty("include-optional")
+  public List<String> includeOptional;
   public List<String> include;
 
   static class DataPlane {
