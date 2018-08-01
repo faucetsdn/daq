@@ -3,6 +3,7 @@
 import logging
 import os
 import time
+import yaml
 
 from mininet import node as mininet_node
 from mininet import net as mininet_net
@@ -33,6 +34,7 @@ class DummyNode(object):
 class TestNetwork(object):
     """Test network manager"""
 
+    DP_ACL_FILE_FORMAT = "inst/dp_%s_port_acls.yaml"
     OVS_CLS = mininet_node.OVSSwitch
 
     def __init__(self, config):
@@ -42,9 +44,10 @@ class TestNetwork(object):
         self.sec = None
         self.sec_dpid = None
         self.sec_port = None
-        self.sec_name = None
+        self.ext_intf_name = None
         self.switch_links = {}
         self.device_intfs = None
+        self.mac_map = {}
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -123,11 +126,12 @@ class TestNetwork(object):
         self.sec_port = int(self.config['ext_port'] if 'ext_port' in self.config else 47)
         if 'ext_dpid' in self.config:
             self.sec_dpid = int(self.config['ext_dpid'], 0)
-            self.sec_name = self.config['ext_intf']
+            ext_name = self.config['ext_intf']
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
-                        self.sec_dpid, self.sec_name)
-            sec_intf = mininet_link.Intf(self.sec_name, node=DummyNode(), port=1)
+                        self.sec_dpid, ext_name)
+            sec_intf = mininet_link.Intf(ext_name, node=DummyNode(), port=1)
             self.pri.addIntf(sec_intf, port=1)
+            self.ext_intf_name = ext_name
         else:
             self.sec_dpid = 2
             LOGGER.info('Creating ovs secondary with dpid/port %s/%d',
@@ -137,16 +141,12 @@ class TestNetwork(object):
             link = self.net.addLink(self.pri, self.sec, port1=1,
                                     port2=self.sec_port, fast=False)
             LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
-            self.sec_name = link.intf2.name
+            self.ext_intf_name = link.intf1.name
 
     def is_device_port(self, dpid, port):
         """Check if the dpid/port combo is for a valid device"""
         target_dpid = int(self.sec_dpid)
         return dpid == target_dpid and port < self.sec_port
-
-    def cmd(self, cmd):
-        """Execute the command in the base context"""
-        return self.pri.cmd(cmd)
 
     def cli(self):
         """Drop into the mininet CLI"""
@@ -154,6 +154,8 @@ class TestNetwork(object):
 
     def stop(self):
         """Stop network"""
+        LOGGER.debug("Stopping faucet...")
+        self.pri.cmd('docker kill daq-faucet')
         self.net.stop()
 
     def initialize(self):
@@ -182,3 +184,77 @@ class TestNetwork(object):
                             device_intf.name, device_intf.port)
                 self.sec.addIntf(device_intf, port=device_intf.port)
                 self._switch_attach(self.sec, device_intf)
+
+        self._generate_mac_map()
+
+        LOGGER.info("Starting faucet...")
+        output = self.pri.cmd('cmd/faucet && echo SUCCESS')
+        if not output.strip().endswith('SUCCESS'):
+            LOGGER.info('Faucet output: %s', output)
+            assert False, 'Faucet startup failed'
+
+    def direct_port_traffic(self, target_mac, port_no):
+        """Direct traffic from a given mac to specified port set"""
+        if port_no is None:
+            del self.mac_map[target_mac]
+        else:
+            self.mac_map[target_mac] = port_no
+        self._generate_mac_map()
+
+    def _generate_mac_map(self):
+        switch_name = self.pri.name
+
+        incoming_acl = []
+        portset_acl = []
+
+        for target_mac in self.mac_map:
+            port_set = self.mac_map[target_mac]
+            ports = range(port_set * 10, port_set*10+4)
+            self._add_acl_rule(incoming_acl, src_mac=target_mac, in_vlan=10, ports=ports)
+            self._add_acl_rule(portset_acl, dst_mac=target_mac, out_vlan=10, port=1)
+
+        self._add_acl_rule(portset_acl, allow=1)
+
+        acls = {}
+        acls["dp_%s_incoming_acl" % switch_name] = incoming_acl
+        acls["dp_%s_portset_acl" % switch_name] = portset_acl
+
+        mac_map = {}
+        mac_map["acls"] = acls
+
+        filename = self.DP_ACL_FILE_FORMAT % switch_name
+        LOGGER.debug("Writing updated mac map to %s", filename)
+        with open(filename, "w+") as output_stream:
+            yaml.safe_dump(mac_map, stream=output_stream)
+
+    def _add_acl_rule(self, acl, src_mac=None, dst_mac=None, in_vlan=None, out_vlan=None,
+                      port=None, ports=None, allow=None):
+        output = {}
+        if port:
+            output["port"] = port
+        if ports:
+            output["ports"] = ports
+        if in_vlan:
+            output["pop_vlans"] = True
+        if out_vlan:
+            output["vlan_vid"] = out_vlan
+
+        actions = {}
+        if output:
+            actions["output"] = output
+        if allow:
+            actions["allow"] = allow
+
+        subrule = {}
+        if src_mac:
+            subrule["dl_src"] = src_mac
+        if dst_mac:
+            subrule["dl_dst"] = dst_mac
+        if in_vlan:
+            subrule["vlan_vid"] = in_vlan
+        subrule["actions"] = actions
+
+        rule = {}
+        rule["rule"] = subrule
+
+        acl.append(rule)

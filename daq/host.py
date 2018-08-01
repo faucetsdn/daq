@@ -44,11 +44,12 @@ class ConnectedHost(object):
     TEST_ORDER = ['startup', 'sanity', 'dhcp', 'base',
                   'monitor'] + TEST_LIST + ['finish', 'info', 'timer']
 
-    def __init__(self, runner, port_set, config):
+    def __init__(self, runner, port_set, target_mac, config):
         self.runner = runner
         self.config = config
         self.port_set = port_set
         self.pri_base = port_set * 10
+        self.target_mac = target_mac
         self.tmpdir = os.path.join('inst', 'run-port-%02d' % self.port_set)
         self.run_id = '%06x' % int(time.time())
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
@@ -64,7 +65,6 @@ class ConnectedHost(object):
         self.fake_target = None
         self.dhcp_monitor = None
         self.target_ip = None
-        self.target_mac = None
         self.networking = None
         self.record_result('startup', state='run')
 
@@ -110,7 +110,7 @@ class ConnectedHost(object):
 
     def _activate(self):
         self._state_transition(_STATE.STARTUP, _STATE.INIT)
-        LOGGER.info('Set %d activating.', self.port_set)
+        LOGGER.info('Set %d activating as %s', self.port_set, self.target_mac)
 
         if not os.path.exists(self.scan_base):
             os.makedirs(self.scan_base)
@@ -197,10 +197,9 @@ class ConnectedHost(object):
         elif self.state == _STATE.BASE:
             self._base_start()
 
-    def dhcp_callback(self, state, target_mac=None, target_ip=None, exception=None):
+    def dhcp_callback(self, state, target_ip=None, exception=None):
         """Handle completion of DHCP subtask"""
-        self.record_result('dhcp', info=target_mac, ip=target_ip, state=state, exception=exception)
-        self.target_mac = target_mac
+        self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
         self.target_ip = target_ip
         if exception:
             self._state_transition(_STATE.ERROR, _STATE.DHCP)
@@ -267,12 +266,11 @@ class ConnectedHost(object):
         LOGGER.info('Set %d background scan for %d seconds...',
                     self.port_set, self.MONITOR_SCAN_SEC)
         network = self.runner.network
-        intf_name = network.sec_name
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-        tcp_filter = 'vlan %d' % self.pri_base
+        tcp_filter = 'ether host %s' % self.target_mac
         assert not self.tcp_monitor, 'tcp_monitor already active'
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
-                                              intf_name=intf_name,
+                                              intf_name=network.ext_intf_name,
                                               timeout=self.MONITOR_SCAN_SEC,
                                               pcap_out=monitor_file, blocking=False)
         self.tcp_monitor = helper

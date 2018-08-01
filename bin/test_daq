@@ -57,7 +57,7 @@ fi
 
 if [ -n "$DAQ_FAIL" ]; then
     if [ -z "$failed" ]; then
-        echo Test did not fail with expected $DAQ_FAIL.
+        echo Test did not fail as expected with $DAQ_FAIL.
         false
     fi
 elif [ -n "$failed" ]; then
