@@ -5,17 +5,21 @@
 
 ROOT=$(dirname $0)/..
 
+DEVICE_TYPES_FILE=device_types.json
+
 cd $ROOT
 
+test -d inst/ || mkdir inst
 touch inst/ || sudo chown $USER inst
 
-if [ ! -f local/devices.json ]; then
-    cp mudacl/site/test/devices.json local/devices.json
-    cp mudacl/site/test/types.json local/types.json
-fi
+test -f local/$DEVICE_TYPES_FILE || cp misc/$DEVICE_TYPES_FILE local/
+cp -f local/$DEVICE_TYPES_FILE inst/$DEVICE_TYPES_FILE
 
-if [ ! -d inst/port_acls ]; then
-    mkdir inst/port_acls
-fi
+rm -rf inst/acl_templates
+mkdir inst/acl_templates
+rm -rf inst/port_acls
+mkdir inst/port_acls
 
 mudacl/bin/run.sh
+
+ls -l inst/acl_templates inst/port_acls inst/$DEVICE_TYPES_FILE

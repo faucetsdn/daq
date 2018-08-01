@@ -17,13 +17,20 @@ import com.google.daq.orchestrator.mudacl.SwitchTopology.Rule;
 import java.io.File;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MudConverter implements AclProvider {
 
   private static final String MUD_FILE_FORMAT = "%s.json";
-  private static final String TCP_FROM_DEVICE = "from-device";
+  private static final String FROM_DEVICE_POLICY = "from-device";
+  private static final String TO_DEVICE_POLICY = "to-device";
   private static final String PORT_MATCH_OPERATOR = "eq";
   private static final String EDGE_DEVICE_DESCRIPTION_FORMAT = "MUD %s %s";
+  private static final String JSON_SUFFIX = ".json";
+  private static final String DNS_TEMPLATE_FORMAT = "@dns:%s";
+  private static final String MUD_FILE_SUFFIX = ".json";
 
   private final File rootPath;
 
@@ -38,16 +45,36 @@ public class MudConverter implements AclProvider {
   }
 
   @Override
-  public Acl makeEdgeAcl(MacIdentifier mac, DeviceClassifier device) {
-    Acl acl = device == null ? makeUnknownEdgeAcl(mac) : makeFromEdgeAcl(device);
+  public List<String> targetTypes() {
+    return Arrays.stream(rootPath.listFiles())
+        .filter(this::isMudFile)
+        .map(this::getTargetType)
+        .collect(Collectors.toList());
+  }
+
+  private boolean isMudFile(File file) {
+    return file.getName().endsWith(MUD_FILE_SUFFIX);
+  }
+
+  private String getTargetType(File mudFile) {
+    String filename = mudFile.getName();
+    if (!filename.endsWith(JSON_SUFFIX)) {
+      throw new IllegalArgumentException("Unexpected filename suffix on " + mudFile.getAbsolutePath());
+    }
+    return filename.substring(0, filename.length() - JSON_SUFFIX.length());
+  }
+
+  @Override
+  public Acl makeEdgeAcl(MacIdentifier srcDev, DeviceClassifier device) {
+    Acl acl = device == null ? makeUnknownEdgeAcl(srcDev) : makeFromEdgeAcl(device);
     for (Ace ace : acl) {
-      ace.rule.dl_src = mac.toString();
+      ace.rule.dl_src = srcDev.toString();
     }
     return acl;
   }
 
   private Acl makeFromEdgeAcl(DeviceClassifier device) {
-    Acl acl = makeFromAcl(getMudSpec(device));
+    Acl acl = makeFromAcl(getMudSpec(device), device.isTemplate);
     for (Ace ace : acl) {
       ace.rule.description = String.format(
           EDGE_DEVICE_DESCRIPTION_FORMAT, device.type, ace.rule.description);
@@ -55,22 +82,24 @@ public class MudConverter implements AclProvider {
     return acl;
   }
 
-  private Acl makeFromAcl(MudSpec mudSpec) {
-    return expandAcl(mudSpec.mudDescriptor.fromDevicePolicy, mudSpec.accessLists);
+  private Acl makeFromAcl(MudSpec mudSpec, boolean isTemplate) {
+    return expandAcl(mudSpec.mudDescriptor.fromDevicePolicy, mudSpec.accessLists, isTemplate);
   }
 
-  private Acl expandAcl(DevicePolicy devicePolicy, AccessLists accessLists) {
+  private Acl expandAcl(DevicePolicy devicePolicy, AccessLists accessLists, boolean isTemplate) {
     Acl acl = new Acl();
-    for (PolicySpec policySpec : devicePolicy.accessLists.accessList) {
-      AclSpec aclSpec = getAclSpec(accessLists, policySpec);
-      for (AclAce aclAce : aclSpec.aces.ace) {
-        acl.add(makeAclRule(aclAce));
+    if (devicePolicy != null) {
+      for (PolicySpec policySpec : devicePolicy.accessLists.accessList) {
+        AclSpec aclSpec = getAclSpec(accessLists, policySpec);
+        for (AclAce aclAce : aclSpec.aces.ace) {
+          acl.add(makeAclRule(aclAce, isTemplate));
+        }
       }
     }
     return acl;
   }
 
-  private Rule makeAclRule(AclAce aclAce) {
+  private Rule makeAclRule(AclAce aclAce, boolean isTemplate) {
     boolean accept = aclAce.actions.forwarding.equals("accept");
     if (!accept && !aclAce.actions.forwarding.equals("drop")) {
       throw new IllegalArgumentException(
@@ -88,8 +117,15 @@ public class MudConverter implements AclProvider {
       throw new IllegalArgumentException("IP protocol not supported " + protocol);
     }
     rule.nw_proto = protocol;
-    rule.nw_dst = resolveIpv4Dst(matches.ipv4.dnsDst);
+    // TODO: Make this a template.
+    String dnsDst = matches.ipv4.dnsDst;
+    rule.nw_dst = dnsDst == null
+        ? null
+        : isTemplate
+            ? String.format(DNS_TEMPLATE_FORMAT, dnsDst)
+            : resolveIpv4Dst(dnsDst);
     rule.tcp_dst = resolveTcpDst(matches.tcp);
+    rule.tcp_src = resolveTcpSrc(matches.tcp);
     rule.udp_src = matches.udp == null ? null : resolveUdpPort(matches.udp.sourcePort);
     rule.udp_dst = matches.udp == null ? null : resolveUdpPort(matches.udp.destinationPort);
     return rule;
@@ -106,13 +142,17 @@ public class MudConverter implements AclProvider {
   }
 
   private Integer resolveTcpDst(TpSpec tcp) {
-    if (tcp == null) {
+    if (tcp == null || !FROM_DEVICE_POLICY.equals(tcp.direction)) {
       return null;
     }
-    if (!TCP_FROM_DEVICE.equals(tcp.direction)) {
-      throw new IllegalArgumentException("Unknown tcp direction " + tcp.direction);
-    }
     return tcp.destinationPort.port;
+  }
+
+  private Integer resolveTcpSrc(TpSpec tcp) {
+    if (tcp == null || !TO_DEVICE_POLICY.equals(tcp.direction)) {
+      return null;
+    }
+    return tcp.sourcePort.port;
   }
 
   private String resolveIpv4Dst(String dnsDst) {

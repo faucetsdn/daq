@@ -1,0 +1,91 @@
+
+{
+  "ietf-mud:mud": {
+    "mud-version": 1,
+    "mud-url": "https://example.com/telnet-server",
+    "last-update": "2018-07-31T21:41:19+02:00",
+    "cache-validity": 48,
+    "is-supported": true,
+    "systeminfo": "Test telnet server",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "mud-92939-v4fr"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "mud-92939-v4to"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:access-lists": {
+    "acl": [
+      {
+        "name": "mud-92939-v4to",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "ent0-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "http://telnet-host.com"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 23
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "mud-92939-v4fr",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "ent0-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "http://telnet-host.com"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 23
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

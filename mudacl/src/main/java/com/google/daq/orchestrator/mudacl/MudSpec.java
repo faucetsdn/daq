@@ -72,9 +72,15 @@ public class MudSpec {
   }
 
   static class Matches {
+    @JsonProperty("ietf-mud:mud")
+    public MudMatch mudMatch;
     public NwSpec ipv4;
     public TpSpec tcp;
     public TpSpec udp;
+  }
+
+  static class MudMatch {
+    public String controller;
   }
 
   static class NwSpec {

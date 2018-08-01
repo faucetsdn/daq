@@ -21,6 +21,10 @@ if [ -d faucet ]; then
     echo
 fi
 
+if [ -n "$DAQ_MUD" ]; then
+    bin/mudacl
+fi
+
 if [ "$DAQ_SWITCH" == "ext" ]; then
     echo ext_dpid=0x1aeb960541 >> local/system.conf
     bin/external_ovs
@@ -29,12 +33,13 @@ if [ "$DAQ_SWITCH" == "ext" ]; then
     fi
 fi
 
+fail_mode=${DAQ_FAIL#!}
 if [ -n "$DAQ_DEVICES" ]; then
     count=1
     daq_intf=
     while [ $count -le $DAQ_DEVICES ]; do
         daq_intf+=,faux-$count
-        cmd/faux $count $DAQ_FAIL
+        cmd/faux $count $fail_mode
         count=$(($count+1))
     done
     echo daq_intf=${daq_intf#,} >> local/system.conf
@@ -55,7 +60,7 @@ else
     sudo cmd/exrun -s || failed=true
 fi
 
-if [ -n "$DAQ_FAIL" ]; then
+if [ -n "$DAQ_FAIL" -a "$DAQ_FAIL" == "$fail_mode" ]; then
     if [ -z "$failed" ]; then
         echo Test did not fail as expected with $DAQ_FAIL.
         false
