@@ -19,13 +19,17 @@ dps:
         #ofchannel_log: /var/log/faucet/of-sec.log
         interfaces:
           1:
-            name: faux
+            name: faux-1
             native_vlan: 10
-            description: DAQ autostart cmd/faux $DAQ_FAUX_OPTS
+            description: DAQ autostart cmd/faux 1
           2:
+            name: faux-2
             native_vlan: 10
+            description: DAQ autostart cmd/faux 2
           3:
+            name: faux-3
             native_vlan: 10
+            description: DAQ autostart cmd/faux 3
           4:
             native_vlan: 10
           5:

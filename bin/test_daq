@@ -25,24 +25,8 @@ if [ -n "$DAQ_MUD" ]; then
     bin/mudacl
 fi
 
-if [ "$DAQ_SWITCH" == "ext" ]; then
-    echo ext_dpid=0x1aeb960541 >> local/system.conf
-    bin/external_ovs
-    if [ -z "$DAQ_DEVICES" ]; then
-        DAQ_DEVICES=1
-    fi
-fi
-
-fail_mode=${DAQ_FAIL#!}
-if [ -n "$DAQ_DEVICES" ]; then
-    count=1
-    daq_intf=
-    while [ $count -le $DAQ_DEVICES ]; do
-        daq_intf+=,faux-$count
-        cmd/faux $count $fail_mode
-        count=$(($count+1))
-    done
-    echo daq_intf=${daq_intf#,} >> local/system.conf
+if [ -n "$DAQ_CONF" ]; then
+    echo network_config=$DAQ_CONF >> local/system.conf
 fi
 
 if [ "$DAQ_BUILD" == in ]; then
@@ -52,20 +36,34 @@ elif [ "$DAQ_BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
     exit 0
 fi
 
-failed=
+fail_mode=${DAQ_FAIL#!}
+failed=0
 echo Running DAQ test...
 if [ "$DAQ_MODE" == "in" ]; then
-    cmd/run $runarg -s || failed=true
+    cmd/run $runarg -s || failed=$?
 else
-    sudo cmd/exrun -s || failed=true
+    sudo DAQ_FAUX_OPTS=$fail_mode cmd/exrun -s || failed=$?
 fi
 
-if [ -n "$DAQ_FAIL" -a "$DAQ_FAIL" == "$fail_mode" ]; then
-    if [ -z "$failed" ]; then
+echo Finished run with exit code $failed.
+
+if [ -n "$DAQ_FAIL" ]; then
+    if [ "$fail_mode" == "$DAQ_FAIL" -a "$failed" == 0 ]; then
         echo Test did not fail as expected with $DAQ_FAIL.
         false
+    else
+        echo Succeeding through expected failure.
     fi
-elif [ -n "$failed" ]; then
+elif [ "$failed" != 0 ]; then
     echo Test failed.
     false
+fi
+
+if [ -n "$DAQ_VERIFY" ]; then
+    result=$(cat $DAQ_VERIFY)
+    echo Result in $DAQ_VERIFY is $result.
+    if [ "$result" != 0 ]; then
+        echo Test verification result is not 0.
+        false
+    fi
 fi

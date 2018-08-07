@@ -1,39 +1,48 @@
 #!/bin/bash -e
 
-ext_intf=unknown
-ext_dpid=unknown
-ext_port=unknown
-ext_bridge=ext-ovs
-ext_sec=${ext_bridge}-link
-ext_prefix=faux-
-
-ROOT=$(realpath $(dirname $0)/..)
-source $ROOT/local/system.conf
-
-if [ "$ext_intf" == unknown -o "$ext_dpid" == unknown -o "$ext_port" == unknown ]; then
-    echo ext_intf/ext_dipd/ext_port not defined.
+if [ $# != 1 ]; then
+    echo Usage: $0 [dpid]
     false
 fi
+ext_dpid=$1
+shift
+
+ext_bridge=ext-ovs
+ext_pri=${ext_bridge}-pri
+ext_sec=${ext_bridge}-sec
+
+ROOT=$(realpath $(dirname $0)/..)
+echo ext_intf=$ext_pri >> $ROOT/local/system.conf
+source $ROOT/local/system.conf
+
+echo ext_dpid is $ext_dpid
 
 dpid=$(printf %016x $ext_dpid)
 sudo ovs-vsctl --if-exists del-br $ext_bridge -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:6633 \
      -- set bridge $ext_bridge other_config:datapath-id=$dpid
 echo Created bridge $ext_bridge with dpid $dpid
 
-sudo ip link del $ext_intf || true
-sudo ip link add $ext_intf type veth peer name $ext_sec
-sudo ovs-vsctl add-port $ext_bridge $ext_sec -- set interface $ext_sec ofport_request=$ext_port
-sudo ifconfig $ext_intf up
+sudo ip link del $ext_pri || true
+sudo ip link del $ext_sec || true
+sudo ip link add $ext_pri type veth peer name $ext_sec
+sudo ifconfig $ext_pri up
 sudo ifconfig $ext_sec up
-echo Added interface link $ext_intf to $ext_sec
+echo Added interface link $ext_pri to $ext_sec
 
-if [ -n "$ext_prefix" ]; then
-    port=1
-    while [ $port -lt $ext_port ]; do
-        iface=$ext_prefix$port
-        echo Adding link $iface
-        sudo ovs-vsctl add-port $ext_bridge $iface -- set interface $iface ofport_request=$port
-        sudo ifconfig $iface up || true
-        port=$(($port+1))
-    done
-fi
+echo DAQ autoclean ovs-vsctl del-br $ext_bridge
+echo DAQ autoclean ip link del $ext_pri
+
+function addport {
+    shift # description
+    shift # DAQ
+    shift # addport
+    link=$1
+    port=$2
+    echo Adding link $link as port $port
+    sudo ovs-vsctl add-port $ext_bridge $link -- set interface $link ofport_request=$port
+    sudo ifconfig $link up || true
+}
+
+fgrep 'description: DAQ addport' $network_config | while read line; do
+    addport $line
+done

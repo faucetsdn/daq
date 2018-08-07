@@ -8,9 +8,6 @@ FAUCET_SOCK=faucet_event.sock
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
-ext_port=47
-ext_dpid=2
-
 cd $ROOT
 
 if [ -f $LOCAL_CONFIG ]; then
@@ -19,13 +16,6 @@ if [ -f $LOCAL_CONFIG ]; then
 fi
 
 mkdir -p $INSTDIR
-
-sudo rm -f $INSTDIR/faucet.yaml
-
-echo Rewriting misc/faucet.yaml with dpid $ext_dpid and port $ext_port to $INSTDIR...
-sed -e "s/@SEC_DPID@/$ext_dpid/" \
-    -e "s/@SEC_PORT@/$ext_port/" \
-    < misc/faucet.yaml > $INSTDIR/faucet.yaml
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
     echo -n "Clensing old container "

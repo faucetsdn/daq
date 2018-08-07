@@ -20,7 +20,6 @@ ALT_LOG = logging.getLogger('mininet')
 FLAG_MAP = {
     's': 'single_shot',
     'e': 'event_trigger',
-    'f': 'flap_ports',
     'l': 'result_linger',
     'd': 'debug_mode',
     'c': 'use_console'

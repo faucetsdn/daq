@@ -27,6 +27,8 @@ public class MudAclGenerator {
   private static final String SRC_MAC_TEMPLATE_FORMAT = SRC_MAC_TEMPLATE_PREFIX + "%s";
   private static final String ACL_TEMPLATE_FORMAT = "@acl:%s";
   private static final String BASELINE_KEYWORD = "baseline";
+  private static final String RAW_ACL_KEYWORD = "raw";
+  private static final int SYSTEM_ERROR_RETURN = -1;
 
   private DeviceTopology deviceTopology;
   private SwitchTopology switchTopology;
@@ -35,16 +37,16 @@ public class MudAclGenerator {
 
   public static void main(String[] argv) {
     try {
-      if (argv.length != 3 && argv.length != 6) {
+      if (argv.length != 2 && argv.length != 6) {
         System.err
             .println("Usage: [switch_topology] [mud_dir] [template_dir] ([device_types] [device_topology] [output_dir])");
         throw new ExpectedException(new IllegalArgumentException("Incorrect arg count"));
       }
       MudAclGenerator generator = new MudAclGenerator();
-      generator.setSwitchTopology(OBJECT_MAPPER.readValue(new File(argv[0]), SwitchTopology.class));
-      generator.setAclProvider(new MudConverter(new File(argv[1])));
-      writePortAcls(new File(argv[2]), generator.makePortAclMap());
-      if (argv.length > 3) {
+      generator.setAclProvider(new MudConverter(new File(argv[0])));
+      writePortAcls(new File(argv[1]), generator.makePortAclMap());
+      if (argv.length > 2) {
+        generator.setSwitchTopology(OBJECT_MAPPER.readValue(new File(argv[2]), SwitchTopology.class));
         generator.setDeviceTypes(OBJECT_MAPPER.readValue(new File(argv[3]), DeviceTypes.class));
         generator
             .setDeviceTopology(OBJECT_MAPPER.readValue(new File(argv[4]), DeviceTopology.class));
@@ -52,8 +54,10 @@ public class MudAclGenerator {
       }
     } catch (ExpectedException e) {
       System.err.println(e.toString());
+      System.exit(SYSTEM_ERROR_RETURN);
     } catch (Exception e) {
       e.printStackTrace();
+      System.exit(SYSTEM_ERROR_RETURN);
     }
   }
 
@@ -106,17 +110,33 @@ public class MudAclGenerator {
       portAcl.acl.addAll(aclProvider.makeEdgeAcl(targetSrc, classifier));
     }
     if (isTemplate()) {
-      Placement placement = new Placement();
-      placement.dpName = BASELINE_KEYWORD;
-      String aclName = placement.toString();
-      PortAcl portAcl = portAclMap.computeIfAbsent(aclName, (baseName) -> new PortAcl(placement, new Acl()));
-      AclHelper.addBaselineRules(portAcl.acl);
+      addTemplateEntries(portAclMap);
     } else {
       for (PortAcl portAcl : portAclMap.values()) {
         AclHelper.addBaselineRules(portAcl.acl);
       }
     }
     return portAclMap;
+  }
+
+  private void addTemplateEntries(Map<String, PortAcl> portAclMap) {
+    {
+      Placement placement = new Placement();
+      placement.dpName = RAW_ACL_KEYWORD;
+      String aclName = placement.toString();
+      PortAcl portAcl = portAclMap
+          .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement, new Acl()));
+      AclHelper.addRawRules(portAcl.acl);
+    }
+
+    {
+      Placement placement = new Placement();
+      placement.dpName = BASELINE_KEYWORD;
+      String aclName = placement.toString();
+      PortAcl portAcl = portAclMap
+          .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement, new Acl()));
+      AclHelper.addBaselineRules(portAcl.acl);
+    }
   }
 
   private DeviceClassifier getDeviceClassifier(MacIdentifier targetSrc) {

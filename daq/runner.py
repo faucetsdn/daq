@@ -29,7 +29,6 @@ class DAQRunner(object):
         self.result_linger = config.get('result_linger', False)
         self.faucet_events = None
         self.single_shot = config.get('single_shot')
-        self.flap_ports = config.get('flap_ports')
         self.event_trigger = config.get('event_trigger')
         self.stream_monitor = None
         self.exception = None
@@ -157,9 +156,6 @@ class DAQRunner(object):
     def main_loop(self):
         """Run main loop to execute tests"""
         use_console = self.config.get('use_console')
-
-        if self.flap_ports:
-            self.network.flap_interface_ports()
 
         try:
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
