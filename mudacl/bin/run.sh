@@ -2,9 +2,6 @@
 
 ROOT=$(dirname $0)/..
 
-# Runtime switch configuration.
-SWITCH_TOPOLOGY=inst/faucet.yaml
-
 # Set of available mud files.
 MUD_DIR=mud_files/
 
@@ -16,4 +13,4 @@ TEMPLATE_DIR=inst/acl_templates
 echo
 echo Executing mudacl generator...
 
-java -jar $ROOT/build/libs/mudacl-1.0-SNAPSHOT-all.jar $SWITCH_TOPOLOGY $MUD_DIR $TEMPLATE_DIR
+java -jar $ROOT/build/libs/mudacl-1.0-SNAPSHOT-all.jar $MUD_DIR $TEMPLATE_DIR

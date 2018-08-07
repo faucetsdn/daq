@@ -18,6 +18,10 @@ public final class AclHelper {
     acl.add(makeDhcpRule());
   }
 
+  public static void addRawRules(Acl acl) {
+    acl.add(new Rule("All Allow", true));
+  }
+
   private static Rule makeArpRule() {
     Rule rule = new Rule("ARP Allow", true);
     rule.dl_type = DL_TYPE_ARP;
