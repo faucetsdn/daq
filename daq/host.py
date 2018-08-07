@@ -61,6 +61,7 @@ class ConnectedHost(object):
         self.remaining_tests = list(self.TEST_LIST)
         self.test_name = None
         self.test_start = None
+        self.test_host = None
         self.tcp_monitor = None
         self.fake_target = None
         self.dhcp_monitor = None
@@ -317,12 +318,16 @@ class ConnectedHost(object):
             'gateway_mac': self.networking.MAC(),
             'scan_base': self.scan_base
         }
-        test = docker_test.DockerTest(self.runner, self, test_name)
-        test.start(port, params, self._docker_callback)
+        self.test_host = docker_test.DockerTest(self.runner, self, test_name)
+        self.test_host.start(port, params, self._docker_callback)
 
     def _docker_callback(self, return_code=None, exception=None):
-        self.record_result(self.test_name, exception=exception)
         self.record_result(self.test_name, code=return_code, exception=exception)
+        result_path = os.path.join(self.tmpdir, 'nodes',
+                                   self.test_host.host_name, 'return_code.txt')
+        with open(result_path, 'a') as output_stream:
+            output_stream.write(str(return_code))
+        self.test_host = None
         if exception:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.port_set, exception)

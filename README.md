@@ -6,6 +6,11 @@ More details about goals and objectives can be found in the IEEE Computer articl
 Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
 list for ongoing discussion about using DAQ for device testing.
 
+The goal is to provide an IoT testing framework with three main objectives:
+* Test enterprise IoT devices for compliance to established network & security standards.
+* Use TDD methodologies to push IoT specifications out to device developers.
+* Dynamically manage network infrastructure to appropriately restrict communication patterns.
+
 ## System Requirements
 
 * Linux install: DAQ has been tested against both `Ubuntu 16.04.4 LTS xenial` and
@@ -41,7 +46,11 @@ or cloud credentials.)
 
 There are three variants of network configuration available to test devices. The recommended
 course is to start with the simplest (software emulation), and progress forward as required by
-the specific project. Details on required configuration options are in the config file.
+the specific project. Details on required configuration options are in the config file. The
+operational network configuration is supplied by a [FAUCET config file](docs/faucet.md) that
+determines the network topology. This defaults to the contents of `misc/faucet.yaml`,
+but can be overridden (see the `network_config` entry in the `system.conf` file) to provide
+other behaviors (e.g. `misc/faucet_multi.yaml`).
 
 1. _Software Emulation_: This uses a built-in 'faux' device to test the DAQ suite itself. It is
 important to make sure this works properly to verify the basic install is sound. This
@@ -54,6 +63,10 @@ this way except for the limitations of the host's USB subsystem.
 3. _Network Switch_: Use an external OpenFlow network switch. To do this, there'll need to be
 a supported network switch setup as described in the FAUCET documentation. See the [switch
 setup documentation](docs/switches.md) for more details.
+
+4. _Network Topology_: Use a complete setup of multiple exteral network switches, sufficient to
+operate a scalable (1000s) device ecosystem. This setup will require extensive network configuration
+and phsical cabling to work.
 
 ## Testing Dashboard
 

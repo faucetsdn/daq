@@ -1,15 +1,18 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
+MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
 LOCALDIR=$ROOT/local
+FAUCET_CONF=faucet.yaml
 FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
-export DAQ_VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
+export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
+network_config=$MISCDIR/$FAUCET_CONF
 
 cd $ROOT
 
@@ -32,6 +35,7 @@ source $LOCAL_CONFIG
 
 export PYTHONPATH=$FAUCET:$MININET
 
+# Dump configuration settings for debugging.
 set | egrep ^[a-z][a-z_]*=
 
 if [ ! -d $FAUCET ]; then
@@ -48,45 +52,29 @@ sleep 1
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-if [ -z "$daq_intf" ]; then
-    echo Setting daq_intf not defined, defaulting to auto-start faux device.
-    daq_intf="faux!"
+if [ -n "$daq_intf" ]; then
+    echo daq_intf is deprecated, please use a local/faucet.yaml
+    false
 fi
 
-intfs=$(echo $daq_intf | tr , ' ')
-for intf in $intfs; do
-    if [ "$intf" == "local!" ]; then
-        intf=local
-        echo Implicitly running local device...
-        $ROOT/cmd/local
-        cleanup+=";$ROOT/cmd/local clean"
-    fi
+cleanup_file=`tempfile`
+function autostart {
+    shift  # description
+    shift  # DAQ
+    shift  # autostart
+    tmp=`tempfile`
+    eval $@ | tee $tmp
+    grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file
+}
 
-    fbase=${intf%!}
-    fnum=${fbase#faux}
-    if [ "${fbase}" != "${intf}" -a "${fbase}" != "${fnum}" ]; then
-        intf=$fbase
-        echo Implicitly running faux device $intf...
-        $ROOT/cmd/faux ${fnum#-}
-        container=daq-$intf
-        cleanup+=";echo Killing container $container...; docker kill $container > /dev/null"
-    fi
+function DAQ {
+    shift # autoclean
+    echo Cleanup $@
+    $@
+}
 
-    echo $(ip addr show $intf)
-
-    # If running inside of a container, wait until the host test interface shows up...
-    if [ -n "$DAQ_CONTAINER" -a -z "$cleanup" ]; then
-        retry=5
-        while ! ifconfig -a | fgrep -q $intf; do
-            if [ "$retry" == 0 ]; then
-                echo Failed to find interface $intf.
-                false
-            fi
-            echo Waiting for interface $intf to appear retry $retry...
-            sleep 1
-            retry=$((retry-1))
-        done
-    fi
+fgrep 'description: DAQ autostart ' $network_config | while read line; do
+    autostart $line
 done
 
 if [ -f .pdbrc ]; then
@@ -110,14 +98,17 @@ echo Executing $runcmd $@...
 export PYTHONDONTWRITEBYTECODE=True
 export TERM=dumb
 
-$runcmd daq/daq.py $LOCAL_CONFIG $@
+exit_code=0
+$runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?
 
 if [ -n "$DAQ_CODECOV" ]; then
     codecov
 fi
 
-if [ -n "$cleanup" ]; then
-    sh -c "$cleanup"
+if [ -f "$cleanup_file" ]; then
+    source $cleanup_file
 fi
 
-echo Done with run.
+echo Done with run, exit $exit_code
+
+exit $exit_code
