@@ -13,30 +13,32 @@ class DhcpMonitor(object):
 
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_TYPE_PATTERN = 'DHCP-Message Option 53, length 1: ([a-zA-Z]+)'
-    DHCP_PATTERN = '(%s)|(%s)' % (DHCP_IP_PATTERN, DHCP_TYPE_PATTERN)
+    DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-z0-9:]+)'
+    DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_IP_PATTERN, DHCP_TYPE_PATTERN, DHCP_MAC_PATTERN)
     DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 20
 
-    def __init__(self, runner, port_set, container, callback):
+    def __init__(self, runner, host, callback):
         self.runner = runner
-        self.port_set = port_set
         self.callback = callback
-        self.networking = container
-        self.target_ip = None
+        self.host = host
+        self.name = host.name
         self.dhcp_traffic = None
         self.intf_name = None
-        self.test_start = None
+        self.scan_start = None
+        self.target_ip = None
+        self.target_mac = None
 
     def start(self):
         """Start monitoring DHCP"""
-        LOGGER.info('Set %d waiting for dhcp reply from %s...', self.port_set, self.networking.name)
-        self.test_start = int(time.time())
+        LOGGER.info('DHCP monitor %s waiting for replies...', self.name,)
+        self.scan_start = int(time.time())
         # Because there's buffering somewhere, can't reliably filter out DHCP with "src port 67"
         tcp_filter = ""
-        helper = tcpdump_helper.TcpdumpHelper(self.networking, tcp_filter, packets=None,
+        helper = tcpdump_helper.TcpdumpHelper(self.host, tcp_filter, packets=None,
                                               timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
         self.dhcp_traffic = helper
-        self.runner.monitor_stream(self.networking.name, self.dhcp_traffic.stream(),
+        self.runner.monitor_stream(self.name, self.dhcp_traffic.stream(),
                                    self._dhcp_line, hangup=self._dhcp_hangup,
                                    error=self._dhcp_error)
 
@@ -49,8 +51,9 @@ class DhcpMonitor(object):
             if match.group(2):
                 self.target_ip = match.group(2)
             if match.group(4) == "ACK":
-                assert self.target_ip, 'dhcp ACK missing ip address'
                 self._dhcp_success()
+            if match.group(6):
+                self.target_mac = match.group(6)
 
     def cleanup(self, forget=True):
         """Cleanup any ongoing dhcp activity"""
@@ -61,18 +64,22 @@ class DhcpMonitor(object):
             self.dhcp_traffic = None
 
     def _dhcp_success(self):
-        self.cleanup()
-        delta = int(time.time()) - self.test_start
-        LOGGER.info('Set %d received dhcp reply after %ds: %s',
-                    self.port_set, delta, self.target_ip)
+        assert self.target_ip, 'dhcp ACK missing ip address'
+        assert self.target_mac, 'dhcp ACK missing mac address'
+        delta = int(time.time()) - self.scan_start
+        LOGGER.info('DHCP monitor %s received reply after %ds: %s/%s',
+                    self.name, delta, self.target_ip, self.target_mac)
         weak_result = delta > self.DHCP_THRESHHOLD_SEC
         state = 'weak' if weak_result else None
-        self.callback(state, target_ip=self.target_ip)
+        self.callback(state, target_ip=self.target_ip, target_mac=self.target_mac)
+        self.target_ip = None
+        self.target_mac = None
+        self.scan_start = int(time.time())
 
     def _dhcp_hangup(self):
         self._dhcp_error(Exception('dhcp hangup'))
 
     def _dhcp_error(self, e):
-        LOGGER.error('Set %d dhcp error: %s', self.port_set, e)
+        LOGGER.error('DHCP monitor %s error: %s', self.name, e)
         self.cleanup(forget=False)
         self.callback('error', exception=e)

@@ -5,15 +5,15 @@
 
 ROOT=$(dirname $0)/..
 
-DEVICE_TYPES_FILE=device_types.json
+DEVICE_SPECS_FILE=device_specs.json
 
 cd $ROOT
 
 test -d inst/ || mkdir inst
 touch inst/ || sudo chown $USER inst
 
-test -f local/$DEVICE_TYPES_FILE || cp misc/$DEVICE_TYPES_FILE local/
-cp -f local/$DEVICE_TYPES_FILE inst/$DEVICE_TYPES_FILE
+test -f local/$DEVICE_SPECS_FILE || cp misc/$DEVICE_SPECS_FILE local/
+cp -f local/$DEVICE_SPECS_FILE inst/$DEVICE_SPECS_FILE
 
 rm -rf inst/acl_templates
 mkdir inst/acl_templates
@@ -22,4 +22,4 @@ mkdir inst/port_acls
 
 mudacl/bin/run.sh
 
-ls -l inst/acl_templates inst/port_acls inst/$DEVICE_TYPES_FILE
+ls -l inst/acl_templates inst/port_acls inst/$DEVICE_SPECS_FILE
