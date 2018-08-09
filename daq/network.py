@@ -35,6 +35,7 @@ class TestNetwork(object):
     """Test network manager"""
 
     OVS_CLS = mininet_node.OVSSwitch
+    MAX_INTERNAL_DPID = 100
 
     def __init__(self, config):
         self.config = config
@@ -43,7 +44,7 @@ class TestNetwork(object):
         self.sec = None
         self.sec_dpid = None
         self.sec_port = None
-        self.ext_intf_name = None
+        self.ext_intf = None
         self.switch_links = {}
         self.topology = None
 
@@ -99,11 +100,11 @@ class TestNetwork(object):
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
-        if 'ext_intf' in self.config:
-            self.ext_intf_name = self.config['ext_intf']
+        self.ext_intf = self.topology.get_sec_intf()
+        if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
-                        self.sec_dpid, self.ext_intf_name)
-            sec_intf = mininet_link.Intf(self.ext_intf_name, node=DummyNode(), port=1)
+                        self.sec_dpid, self.ext_intf)
+            sec_intf = mininet_link.Intf(self.ext_intf, node=DummyNode(), port=1)
             self.pri.addIntf(sec_intf, port=1)
         else:
             LOGGER.info('Creating ovs sec with dpid/port %s/%d', self.sec_dpid, self.sec_port)
@@ -112,8 +113,11 @@ class TestNetwork(object):
             link = self.net.addLink(self.pri, self.sec, port1=1,
                                     port2=self.sec_port, fast=False)
             LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
-            self.ext_intf_name = link.intf1.name
+            self.ext_intf = link.intf1.name
             self._attach_sec_device_links()
+
+    def _is_dpid_external(self, dpid):
+        return int(dpid) > self.MAX_INTERNAL_DPID
 
     def _attach_sec_device_links(self):
         topology_intfs = self.topology.get_device_intfs()
@@ -168,3 +172,7 @@ class TestNetwork(object):
     def direct_port_traffic(self, target_mac, port_no):
         """Direct traffic for a given mac to target port"""
         self.topology.direct_port_traffic(target_mac, port_no)
+
+    def device_group_for(self, target_mac):
+        """Find the target device group for the given address"""
+        return self.topology.device_group_for(target_mac)

@@ -13,18 +13,18 @@ class DockerTest(object):
     CONTAINER_PREFIX = 'daq'
 
     def __init__(self, runner, parent, test_name):
-        self.port_set = parent.port_set
+        self.target_port = parent.target_port
         self.tmpdir = parent.tmpdir
         self.test_name = test_name
         self.runner = runner
-        self.host_name = '%s%02d' % (test_name, self.port_set)
+        self.host_name = '%s%02d' % (test_name, self.target_port)
         self.docker_log = None
         self.docker_host = None
         self.callback = None
 
     def start(self, port, params, callback):
         """Start the docker test"""
-        LOGGER.info('Set %d running test %s', self.port_set, self.test_name)
+        LOGGER.info('Target port %d running test %s', self.target_port, self.test_name)
 
         self.callback = callback
 
@@ -36,7 +36,7 @@ class DockerTest(object):
         vol_maps = [params['scan_base'] + ":/scans"]
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
-        LOGGER.debug("Set %d running docker test %s", self.port_set, image)
+        LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                     vol_maps=vol_maps, tmpdir=self.tmpdir)
@@ -54,7 +54,7 @@ class DockerTest(object):
             raise
 
     def _docker_error(self, e):
-        LOGGER.error('Set %d docker error: %s', self.port_set, e)
+        LOGGER.error('Target port %d docker error: %s', self.target_port, e)
         self._docker_finalize()
         self.callback(exception=e)
 
@@ -75,11 +75,11 @@ class DockerTest(object):
         except Exception as e:
             return_code = -1
             exception = e
-        LOGGER.debug("Set %d docker complete, return=%d (%s)",
-                     self.port_set, return_code, exception)
+        LOGGER.debug("Target port %d docker complete, return=%d (%s)",
+                     self.target_port, return_code, exception)
         if return_code:
-            LOGGER.info("Set %d FAILED test %s with error %s: %s",
-                        self.port_set, self.test_name, return_code, exception)
+            LOGGER.info("Target port %d FAILED test %s with error %s: %s",
+                        self.target_port, self.test_name, return_code, exception)
         else:
-            LOGGER.info("Set %d PASSED test %s", self.port_set, self.test_name)
+            LOGGER.info("Target port %d PASSED test %s", self.target_port, self.test_name)
         self.callback(return_code=return_code, exception=exception)

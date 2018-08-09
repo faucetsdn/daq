@@ -19,7 +19,7 @@ class FaucetTopology(object):
     PORT_ACL_FILE_FORMAT = "port_acls/dp_%s_port_%d_acl.yaml"
     TEMPLATE_FILE_FORMAT = "inst/acl_templates/template_%s_acl.yaml"
     RULES_KEY_FORMAT = "@acl:template_%s_acl"
-    DEVICE_TYPES_FILE = "inst/device_types.json"
+    DEVICE_SPECS_FILE = "inst/device_specs.json"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
 
@@ -29,7 +29,7 @@ class FaucetTopology(object):
         self.pri = pri
         self.sec_port = 7
         self.sec_name = 'sec'
-        self._device_types = self._load_file(self.DEVICE_TYPES_FILE)
+        self._device_specs = self._load_file(self.DEVICE_SPECS_FILE)
         self.topology = self._load_base_network_topology()
         assert self.topology, 'Could not find network config file'
 
@@ -59,6 +59,10 @@ class FaucetTopology(object):
         LOGGER.debug("Loading file %s", filename)
         with open(filename) as stream:
             return yaml.safe_load(stream)
+
+    def get_sec_intf(self):
+        """Return the external interface for seconday"""
+        return self.topology['dps']['pri']['interfaces'][1].get('name')
 
     def get_sec_dpid(self):
         """Return the secondary dpid"""
@@ -95,10 +99,13 @@ class FaucetTopology(object):
 
     def direct_port_traffic(self, target_mac, port_no):
         """Direct traffic from a given mac to specified port set"""
-        if port_no is None:
+        if port_no is None and target_mac in self._mac_map:
             del self._mac_map[target_mac]
-        else:
+        elif port_no is not None and target_mac not in self._mac_map:
             self._mac_map[target_mac] = port_no
+        else:
+            LOGGER.debug('Ignoring no-change in port status %s/%s', target_mac, port_no)
+            return
         self.generate_acls(port=port_no)
 
     def _ensure_entry(self, root, key, value):
@@ -228,7 +235,7 @@ class FaucetTopology(object):
     def _generate_port_acl(self, port=None):
         has_mapping = False
         rules = []
-        if self._device_types:
+        if self._device_specs:
             for target_mac in self._mac_map:
                 if self._mac_map[target_mac] == port:
                     self._add_acl_port_rules(rules, target_mac=target_mac)
@@ -253,10 +260,27 @@ class FaucetTopology(object):
             yaml.safe_dump(port_acl, stream=output_stream)
 
     def _add_acl_port_rules(self, rules, target_mac):
-        mac_map = self._device_types['macAddrs']
-        device_type = mac_map[target_mac]['type'] if target_mac in mac_map else 'default'
+        mac_map = self._device_specs['macAddrs']
+        if target_mac not in mac_map:
+            LOGGER.info("No device spec found for %s", target_mac)
+            device_type = 'default'
+        else:
+            device_info = mac_map[target_mac]
+            device_type = device_info['type'] if 'type' in device_info else 'default'
         LOGGER.info("Processing acl template for %s/%s", target_mac, device_type)
         self._append_acl_template(rules, device_type, target_mac)
+
+    def _sanitize_mac(self, mac_addr):
+        return mac_addr.replace(':', '')
+
+    def device_group_for(self, target_mac):
+        """Find the target device group for the given address"""
+        if not self._device_specs:
+            return self._sanitize_mac(target_mac)
+        mac_map = self._device_specs['macAddrs']
+        if target_mac in mac_map and 'group' in mac_map[target_mac]:
+            return mac_map[target_mac]['group']
+        return self._sanitize_mac(target_mac)
 
     def _append_acl_template(self, rules, template, target_mac=None):
         filename = self.TEMPLATE_FILE_FORMAT % template

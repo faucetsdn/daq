@@ -12,7 +12,6 @@ ext_pri=${ext_bridge}-pri
 ext_sec=${ext_bridge}-sec
 
 ROOT=$(realpath $(dirname $0)/..)
-echo ext_intf=$ext_pri >> $ROOT/local/system.conf
 source $ROOT/local/system.conf
 
 echo ext_dpid is $ext_dpid
@@ -32,10 +31,10 @@ echo Added interface link $ext_pri to $ext_sec
 echo DAQ autoclean ovs-vsctl del-br $ext_bridge
 echo DAQ autoclean ip link del $ext_pri
 
-function addport {
-    shift # description
+function external {
+    shift # description:
     shift # DAQ
-    shift # addport
+    shift # external
     link=$1
     port=$2
     echo Adding link $link as port $port
@@ -43,6 +42,6 @@ function addport {
     sudo ifconfig $link up || true
 }
 
-fgrep 'description: DAQ addport' $network_config | while read line; do
-    addport $line
+fgrep 'description: DAQ external ' $network_config | while read line; do
+    external $line
 done

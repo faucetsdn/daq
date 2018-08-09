@@ -54,7 +54,7 @@ class StreamMonitor(object):
         """Stop monitoring the given descriptor"""
         fd = self.get_fd(desc)
         assert fd in self.callbacks, 'Missing descriptor fd %d' % fd
-        LOGGER.debug('Monitoring stop fd %d', fd)
+        LOGGER.debug('Monitoring forget fd %d', fd)
         del self.callbacks[fd]
         self.poller.unregister(fd)
         self.dirty = True

@@ -2,8 +2,11 @@
 
 ext_ofip=unknown
 ext_ctrl=unknown
-ext_intf=unknown
 ext_addr=unknown
+ext_intf=unknown
+
+echo This is currently broken -- needs to be updated to properly pull info from faucet.yaml
+false
 
 ROOT=$(realpath $(dirname $0)/..)
 source $ROOT/local/system.conf
