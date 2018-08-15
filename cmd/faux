@@ -49,7 +49,7 @@ docker_args="\
         -v $INSTDIR/faux:/tmp \
         "
 
-cid=$(docker run -d --privileged --name $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
+cid=$(docker run -d --privileged --name $CONTAINER --hostname $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
 echo DAQ autoclean docker kill $CONTAINER

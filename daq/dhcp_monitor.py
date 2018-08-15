@@ -18,20 +18,25 @@ class DhcpMonitor(object):
     DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 20
 
-    def __init__(self, runner, host, callback):
+    def __init__(self, runner, host, callback, log_file=None):
         self.runner = runner
         self.callback = callback
         self.host = host
         self.name = host.name
+        self.log_file = log_file
         self.dhcp_traffic = None
         self.intf_name = None
         self.scan_start = None
         self.target_ip = None
         self.target_mac = None
+        self.dhcp_log = None
 
     def start(self):
         """Start monitoring DHCP"""
         LOGGER.info('DHCP monitor %s waiting for replies...', self.name,)
+        if self.log_file:
+            LOGGER.debug('Logging results to %s', self.log_file)
+            self.dhcp_log = open(self.log_file, "w")
         self.scan_start = int(time.time())
         # Because there's buffering somewhere, can't reliably filter out DHCP with "src port 67"
         tcp_filter = ""
@@ -46,6 +51,8 @@ class DhcpMonitor(object):
         dhcp_line = self.dhcp_traffic.next_line()
         if not dhcp_line:
             return
+        if self.dhcp_log:
+            self.dhcp_log.write(dhcp_line)
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
             if match.group(2):
@@ -57,6 +64,9 @@ class DhcpMonitor(object):
 
     def cleanup(self, forget=True):
         """Cleanup any ongoing dhcp activity"""
+        if self.dhcp_log:
+            self.dhcp_log.close()
+            self.dhcp_log = None
         if self.dhcp_traffic:
             if forget:
                 self.runner.monitor_forget(self.dhcp_traffic.stream())
@@ -81,5 +91,7 @@ class DhcpMonitor(object):
 
     def _dhcp_error(self, e):
         LOGGER.error('DHCP monitor %s error: %s', self.name, e)
+        if self.dhcp_log:
+            self.dhcp_log.write('Monitor error %s' % e)
         self.cleanup(forget=False)
         self.callback('error', exception=e)

@@ -15,7 +15,8 @@ class Gateway(object):
 
     HOST_OFFSET = 0
     DUMMY_OFFSET = 1
-    TEST_OFFSET = 2
+    TEST_OFFSET_START = 2
+    TEST_OFFSET_LIMIT = 10
     SET_SPACING = 10
 
     TEST_IP_FORMAT = '192.168.84.%d'
@@ -31,11 +32,14 @@ class Gateway(object):
         self.host = None
         self.dummy = None
         self.tmpdir = None
+        self.targets = {}
+        self.test_ports = {}
 
     def initialize(self):
         """Initialize the gateway host"""
         host_name = 'gw%02d' % self.port_set
         host_port = self._switch_port(self.HOST_OFFSET)
+        LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
         cls = docker_host.make_docker_host('daq/networking', prefix='daq', network='bridge')
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
@@ -56,7 +60,9 @@ class Gateway(object):
         # Dummy doesn't use DHCP, so need to set default route manually.
         dummy.cmd('route add -net 0.0.0.0 gw %s' % host.IP())
 
-        self.dhcp_monitor = dhcp_monitor.DhcpMonitor(self.runner, host, self._dhcp_callback)
+        log_file = os.path.join(self.tmpdir, 'dhcp_monitor.txt')
+        self.dhcp_monitor = dhcp_monitor.DhcpMonitor(self.runner, host,
+                                                     self._dhcp_callback, log_file)
         self.dhcp_monitor.start()
 
         assert self._ping_test(host, dummy), 'ping failed'
@@ -66,9 +72,24 @@ class Gateway(object):
 
         self.host = host
 
-    def get_test_port(self):
+    def allocate_test_port(self):
         """Get the test port to use for this gateway setup"""
-        return self._switch_port(self.TEST_OFFSET)
+        test_port = self._switch_port(self.TEST_OFFSET_START)
+        while test_port in self.test_ports:
+            test_port = test_port + 1
+        limit_port = self._switch_port(self.TEST_OFFSET_LIMIT)
+        assert test_port < limit_port, 'no test ports available'
+        self.test_ports[test_port] = True
+        return test_port
+
+    def release_test_port(self, test_port):
+        """Release the given port from the gateway"""
+        assert test_port in self.test_ports, 'test port not allocated'
+        del self.test_ports[test_port]
+
+    def get_port_range(self):
+        """Get the port range utilized by this gateway group"""
+        return (self._switch_port(0), self._switch_port(self.SET_SPACING))
 
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
@@ -84,8 +105,23 @@ class Gateway(object):
         os.makedirs(tmpdir)
         return tmpdir
 
+    def attach_target(self, target_port, target):
+        """Attach the given target to this gateway"""
+        assert target_port not in self.targets, 'target already attached to gw'
+        LOGGER.info('Attaching target %d to gateway group %s', target_port, self.name)
+        self.targets[target_port] = target
+
+    def detach_target(self, target_port):
+        """Detach the given target from this gateway"""
+        assert target_port in self.targets, 'target not attached to gw'
+        LOGGER.info('Detach target %d from gateway group %s', target_port, self.name)
+        del self.targets[target_port]
+        return bool(self.targets)
+
     def terminate(self):
         """Terminate this instance"""
+        assert not self.targets, 'gw %s has targets %s' % (self.name, self.targets)
+        LOGGER.info('Terminating gateway %s', self.name)
         if self.dhcp_monitor:
             self.dhcp_monitor.cleanup()
         if self.host:

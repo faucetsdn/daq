@@ -30,7 +30,7 @@ if [ -n "$DAQ_CONF" ]; then
 fi
 
 if [ "$DAQ_BUILD" == in ]; then
-    runarg=latest
+    runarg="latest reuse"
 elif [ "$DAQ_BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
     echo Not running tests because no-build on release branch.
     exit 0
@@ -42,7 +42,7 @@ echo Running DAQ test...
 if [ "$DAQ_MODE" == "in" ]; then
     cmd/run $runarg -s || failed=$?
 else
-    sudo DAQ_FAUX_OPTS=$fail_mode cmd/exrun -s || failed=$?
+    DAQ_FAUX_OPTS=$fail_mode cmd/exrun -s || failed=$?
 fi
 
 echo Finished run with exit code $failed.

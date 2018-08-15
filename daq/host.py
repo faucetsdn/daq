@@ -52,6 +52,7 @@ class ConnectedHost(object):
         self.test_name = None
         self.test_start = None
         self.test_host = None
+        self.test_port = None
         self.tcp_monitor = None
         self.target_ip = None
         self.record_result('startup', state='run')
@@ -62,7 +63,10 @@ class ConnectedHost(object):
         # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
         shutil.rmtree(self.tmpdir, ignore_errors=True)
+        os.makedirs(self.scan_base)
         self.record_result('startup')
+        self.record_result('sanity', state='run')
+        self._startup_scan()
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
@@ -79,11 +83,6 @@ class ConnectedHost(object):
     def _activate(self):
         LOGGER.info('Target port %d activating as %s', self.target_port, self.target_mac)
 
-        if not os.path.exists(self.scan_base):
-            os.makedirs(self.scan_base)
-
-        self.record_result('sanity', state='run')
-        self._startup_scan()
         self._state_transition(_STATE.ACTIVE, _STATE.INIT)
         self.record_result('sanity')
         self.record_result('dhcp', state='run')
@@ -132,9 +131,10 @@ class ConnectedHost(object):
     def _startup_scan(self):
         assert not self.tcp_monitor, 'tcp_monitor already active'
         LOGGER.debug('Target port %d startup pcap start', self.target_port)
-        startup_file = os.path.join('/tmp', 'startup.pcap')
-        tcp_filter = ''
-        helper = tcpdump_helper.TcpdumpHelper(self.gateway, tcp_filter, packets=None,
+        network = self.runner.network
+        startup_file = os.path.join(self.scan_base, 'startup.pcap')
+        tcp_filter = 'ether host %s' % self.target_mac
+        helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               timeout=None, pcap_out=startup_file, blocking=False)
         self.tcp_monitor = helper
         hangup = lambda: self._monitor_error(Exception('startup scan hangup'))
@@ -225,16 +225,20 @@ class ConnectedHost(object):
             'scan_base': self.scan_base
         }
         self.test_host = docker_test.DockerTest(self.runner, self, test_name)
-        test_port = self.runner.get_test_port(self.target_port)
-        self.test_host.start(test_port, params, self._docker_callback)
+        self.test_port = self.runner.allocate_test_port(self.target_port)
+        self.test_host.start(self.test_port, params, self._docker_callback)
 
     def _docker_callback(self, return_code=None, exception=None):
         self.record_result(self.test_name, code=return_code, exception=exception)
         result_path = os.path.join(self.tmpdir, 'nodes',
                                    self.test_host.host_name, 'return_code.txt')
-        with open(result_path, 'a') as output_stream:
-            output_stream.write(str(return_code))
+        try:
+            with open(result_path, 'a') as output_stream:
+                output_stream.write(str(return_code))
+        except Exception as e:
+            LOGGER.error('While writing result code: %s', e)
         self.test_host = None
+        self.runner.release_test_port(self.target_port, self.test_port)
         if exception:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, exception)

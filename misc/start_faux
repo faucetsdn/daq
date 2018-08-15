@@ -7,6 +7,12 @@ for option in $*; do
     options[$option]=$option
 done
 
+# Disable docker's built-in resolv mechanism and install standard resolvconf.
+# Can't do this at runtime since it requires permissions that aren't availble
+# at build time.
+umount /etc/resolv.conf
+dpkg -i resolvconf_*.deb
+
 while ! ifconfig -a | fgrep -q faux-eth0; do
     echo Waiting for faux-eth0 to exist...
     sleep 1
@@ -45,7 +51,7 @@ if [ -n "${options[bacnet]}" ]; then
 fi
 
 if [ -n "${options[curl]}" ]; then
-    (while true; do curl -o - http://192.168.84.5:8000; sleep 1; done) &
+    (while true; do curl -o - http://google.com; sleep 1; done) &
 fi
 
 echo Blocking for all eternety.

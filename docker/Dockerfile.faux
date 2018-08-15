@@ -18,7 +18,10 @@ FROM daq/aardvark:latest
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install default-jre
 
-RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl
+RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl ifupdown
+
+# Prefetch resolvconf to dynamically install at runtime in start_faux.
+RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
 
 COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
 

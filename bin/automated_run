@@ -4,16 +4,17 @@
 #
 # Some common options (ordered):
 #   debug:  Set daq and mininet loglevels to 'debug'
-#   exrun:  Use cmd/exrun instead of cmd/run, for development testing.
+#   image:  Use cmd/run instead of cmd/exrun.
 #   latest: Passed to runner, will use latest daq image (not versioned).
 #
 
 ROOT=$(realpath $(dirname $0)/..)
 
 cd $ROOT
-cmd=run
+cmd=exrun
 args=
 version=$(cat misc/RELEASE_VERSION)
+PIDFILE=inst/daq.pid
 
 if [ "$1" == debug ]; then
     args+=" daq_loglevel=debug"
@@ -21,8 +22,8 @@ if [ "$1" == debug ]; then
     shift
 fi
 
-if [ "$1" == exrun ]; then
-    cmd=exrun
+if [ "$1" == image ]; then
+    cmd=run
     shift
 fi
 
@@ -39,9 +40,24 @@ fi
 
 running=$(docker inspect --format "{{.State.Running}}" daq-runner 2>/dev/null || true)
 if [ "$running" == true ]; then
-    echo Container daq-runner already active, kill with 'docker kill daq-runner'.
+    echo Container daq-runner already active, is DAQ already running?
     false
 fi
+
+running=$(docker inspect --format "{{.State.Running}}" daq-faucet 2>/dev/null || true)
+if [ "$running" == true ]; then
+    echo Container daq-faucet already active, is DAQ already running?
+    false
+fi
+
+if [ -f $PIDFILE ]; then
+    pid=$(< $PIDFILE)
+    if [ -d /proc/$pid ]; then
+        echo Process $pid from $PIDFILE still running.
+        false
+    fi
+fi
+
 
 sudo rm -rf inst
 mkdir -p inst

@@ -25,7 +25,7 @@ dps:
           2:
             name: faux-2
             native_vlan: 10
-            description: DAQ autostart cmd/faux 2
+            description: DAQ autostart cmd/faux 2 curl
           3:
             name: faux-3
             native_vlan: 10

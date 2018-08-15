@@ -114,19 +114,18 @@ class DAQRunner(object):
                 self.active_ports[port] = True
                 self._trigger_target_set(port)
             else:
-                if port in self.active_ports:
-                    self.network.direct_port_traffic(self.active_ports[port], None)
-                    del self.active_ports[port]
                 if self.result_linger:
                     LOGGER.info('Target port %d disconnect linger', port)
                 else:
                     self._cancel_target_set(port, removed=True)
+                if port in self.active_ports:
+                    self.network.direct_port_traffic(self.active_ports[port], None)
+                    del self.active_ports[port]
 
     def _handle_port_learn(self, dpid, port, target_mac):
         LOGGER.debug('Port dpid %s port %s is mac %s', dpid, port, target_mac)
         if self.network.is_device_port(dpid, port):
             self.active_ports[port] = target_mac
-            self.network.direct_port_traffic(target_mac, port)
             self._trigger_target_set(port)
 
     def _handle_system_idle(self):
@@ -136,8 +135,8 @@ class DAQRunner(object):
                 if target_set.is_active():
                     all_idle = False
                     target_set.idle_handler()
-                elif not self.result_linger:
-                    target_set.terminate()
+                else:
+                    self.target_set_complete(target_set)
             except Exception as e:
                 self.target_set_error(target_set.target_port, e)
         if not self.event_trigger and not self.single_shot:
@@ -146,7 +145,7 @@ class DAQRunner(object):
                     self._trigger_target_set(target_port)
                     all_idle = False
         if all_idle:
-            LOGGER.info('No active device ports, waiting for trigger event...')
+            LOGGER.debug('No active device ports, waiting for trigger event...')
 
     def _loop_hook(self):
         states = {}
@@ -200,15 +199,17 @@ class DAQRunner(object):
             return False
 
         try:
-            LOGGER.info('Trigger target port %d mac %s', target_port, target_mac)
             group_name = self.network.device_group_for(target_mac)
             gateway = self._activate_device_group(group_name, target_port)
             target = {
                 'port': target_port,
                 'group': group_name,
                 'fake': gateway.fake_target,
+                'range': gateway.get_port_range(),
                 'mac': target_mac
             }
+            gateway.attach_target(target_port, target)
+
             new_host = connected_host.ConnectedHost(self, gateway.host, target, self.config)
             self.mac_targets[target_mac] = new_host
             self.port_targets[target_port] = new_host
@@ -216,19 +217,27 @@ class DAQRunner(object):
 
             new_host.initialize()
 
+            self.network.direct_port_traffic(target_mac, target)
+
             self._send_heartbeat()
             return True
         except Exception as e:
             self.target_set_error(target_port, e)
 
-    def get_test_port(self, target_port):
+    def allocate_test_port(self, target_port):
         """Get the test port for the given target_port"""
         gateway = self.port_gateways[target_port]
-        return gateway.get_test_port()
+        return gateway.allocate_test_port()
+
+    def release_test_port(self, target_port, test_port):
+        """Release the given test port"""
+        gateway = self.port_gateways[target_port]
+        return gateway.release_test_port(test_port)
 
     def _activate_device_group(self, group_name, target_port):
         if group_name in self._device_groups:
-            return self._device_groups[group_name]
+            existing = self._device_groups[group_name]
+            return existing
         set_num = self._find_gateway_set(target_port)
         self._gateway_sets[set_num] = group_name
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
@@ -275,8 +284,7 @@ class DAQRunner(object):
 
     def target_set_error(self, target_port, e):
         """Handle an error in the target port set"""
-        LOGGER.info('Target port %d exception: %s', target_port, e)
-        LOGGER.exception(e)
+        LOGGER.warn('Target port %d exception: %s', target_port, e)
         if target_port in self.port_targets:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)
@@ -307,11 +315,20 @@ class DAQRunner(object):
             target_mac = self.active_ports[target_port]
             del self.mac_targets[target_mac]
             target_host.terminate(trigger=False, removed=removed)
-            target_gateway.terminate()
+            self._detach_gateway(target_port, target_mac, target_gateway)
             LOGGER.info('Target port %d cancelled %s (removed %s).',
                         target_port, target_mac, removed)
             if not self.port_targets and self.single_shot:
                 self.monitor_forget(self.faucet_events.sock)
+
+    def _detach_gateway(self, target_port, target_mac, target_gateway):
+        if not target_gateway.detach_target(target_port):
+            LOGGER.info('Retiring target gateway %s, %s, %s',
+                        target_port, target_mac, target_gateway.name)
+            group_name = self.network.device_group_for(target_mac)
+            del self._device_groups[group_name]
+            del self._gateway_sets[target_gateway.port_set]
+            target_gateway.terminate()
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""

@@ -14,6 +14,7 @@ do_images=
 ext_msg=
 inline=
 copydirs="bin cmd misc faucet mininet docker daq"
+load_mark=/root/load_complete
 
 if [ "$1" == save ]; then
     do_images=save
@@ -22,6 +23,10 @@ if [ "$1" == save ]; then
 elif [ "$1" == load ]; then
     do_images=load
     shift
+    if [ -f $load_mark ]; then
+        echo Images already loaded, blocking indefinitely.
+        tail -f /dev/null
+    fi
 fi
 
 if [ "$1" == inline ]; then
@@ -109,4 +114,8 @@ if [ -n "$in_container" ]; then
     sleep 2
     rm -fr /var/lib/docker/runtimes
     rm -fr faucet/.git
+fi
+
+if [ "$do_images" == load ]; then
+    touch $load_mark
 fi

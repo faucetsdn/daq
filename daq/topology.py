@@ -97,14 +97,15 @@ class FaucetTopology(object):
         self._add_acl_includes()
         self._write_network_topology()
 
-    def direct_port_traffic(self, target_mac, port_no):
+    def direct_port_traffic(self, target_mac, target):
         """Direct traffic from a given mac to specified port set"""
-        if port_no is None and target_mac in self._mac_map:
+        port_no = target['port'] if target else None
+        if target is None and target_mac in self._mac_map:
             del self._mac_map[target_mac]
-        elif port_no is not None and target_mac not in self._mac_map:
-            self._mac_map[target_mac] = port_no
+        elif target is not None and target_mac not in self._mac_map:
+            self._mac_map[target_mac] = target
         else:
-            LOGGER.debug('Ignoring no-change in port status %s/%s', target_mac, port_no)
+            LOGGER.debug('Ignoring no-change in port status for %s on %d', target_mac, port_no)
             return
         self.generate_acls(port=port_no)
 
@@ -173,8 +174,8 @@ class FaucetTopology(object):
         portset_acl = []
 
         for target_mac in self._mac_map:
-            port_set = self._mac_map[target_mac]
-            ports = range(port_set * 10, port_set*10+4)
+            target = self._mac_map[target_mac]
+            ports = range(target['range'][0], target['range'][1])
             self._add_acl_pri_rule(incoming_acl, dl_src=target_mac, in_vlan=10, ports=ports)
             self._add_acl_pri_rule(portset_acl, dl_dst=target_mac, out_vlan=10, port=1)
 
@@ -237,7 +238,7 @@ class FaucetTopology(object):
         rules = []
         if self._device_specs:
             for target_mac in self._mac_map:
-                if self._mac_map[target_mac] == port:
+                if self._mac_map[target_mac]['port'] == port:
                     self._add_acl_port_rules(rules, target_mac=target_mac)
                     has_mapping = True
 

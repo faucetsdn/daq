@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Travis CI seems to source this script, not is ignoring the #! above!
+# Travis CI seems to source this script, so it is ignoring the #! above!
 set -e
 
 if [ -n "$DAQ_PUSH" ]; then

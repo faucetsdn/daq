@@ -112,6 +112,9 @@ class StreamMonitor(object):
             except Exception as handler_exception:
                 LOGGER.error('Monitoring exception %s fd %d done: %s', name, fd, handler_exception)
                 LOGGER.exception(handler_exception)
+        else:
+            LOGGER.exception(e)
+
 
 
     def process_poll_result(self, event, fd):
