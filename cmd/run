@@ -10,6 +10,7 @@ DOCKER_STARTUP_TIMEOUT_MS=60000
 pull_docker=y
 docker_args=
 build=
+reuse=
 VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 
 if [ -f $LOCAL_CONFIG ]; then
@@ -27,6 +28,11 @@ cd $ROOT
 if [ "$1" == latest ]; then
     pull_docker=n
     VERSION=latest
+    shift
+fi
+
+if [ "$1" == reuse ]; then
+    reuse=y
     shift
 fi
 
@@ -53,7 +59,9 @@ fi
 
 mkdir -p $INSTDIR
 
-sudo docker rm -f daq-runner > /dev/null 2>&1 || true
+if [ -z "$reuse" ]; then
+   sudo docker rm -f daq-runner > /dev/null 2>&1 || true
+fi
 
 TARGET=$IMAGE:$VERSION
 
@@ -87,7 +95,7 @@ function move_intf {
     fi
 }
 
-# This is necessary to wokr around a problem with docker permissions.
+# This is necessary to work around a problem with docker permissions.
 echo Configuring apparmor...
 sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.tcpdump || true
 hash -r
@@ -112,6 +120,15 @@ if [ -z "$build" ]; then
 	fi
     ) &
 fi
+
+if [ -n "$reuse" ]; then
+    echo Running in already existing daq-runner container...
+    docker restart daq-runner
+    docker exec daq-runner sh -c "/daq/cmd/exrun $@"
+    exit 0
+fi
+
+docker image inspect $TARGET > /dev/null
 
 echo Starting $TARGET "$@"...
 sudo docker run --privileged --name daq-runner $docker_args $TARGET "$@"

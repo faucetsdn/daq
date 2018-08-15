@@ -75,6 +75,7 @@ class DockerTest(object):
         except Exception as e:
             return_code = -1
             exception = e
+            LOGGER.exception(e)
         LOGGER.debug("Target port %d docker complete, return=%d (%s)",
                      self.target_port, return_code, exception)
         if return_code:
