@@ -14,7 +14,12 @@ ext_sec=${ext_bridge}-sec
 ROOT=$(realpath $(dirname $0)/..)
 source $ROOT/local/system.conf
 
+if [ -n "$DAQ_CONF" ]; then
+    network_config=$DAQ_CONF
+fi
+
 echo ext_dpid is $ext_dpid
+echo network_config is $network_config
 
 dpid=$(printf %016x $ext_dpid)
 sudo ovs-vsctl --if-exists del-br $ext_bridge -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:6633 \

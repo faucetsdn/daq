@@ -65,10 +65,13 @@ class Gateway(object):
                                                      self._dhcp_callback, log_file)
         self.dhcp_monitor.start()
 
-        assert self._ping_test(host, dummy), 'ping failed'
-        assert self._ping_test(dummy, host), 'ping failed'
-        assert self._ping_test(dummy, self.fake_target), 'ping failed'
-        assert self._ping_test(host, dummy, src_addr=self.fake_target), 'ping failed'
+        if not self._ping_test(host, dummy):
+            LOGGER.debug('Gateway %s warmup ping failed', host_name)
+
+        assert self._ping_test(host, dummy), 'dummy ping failed'
+        assert self._ping_test(dummy, host), 'host ping failed'
+        assert self._ping_test(dummy, self.fake_target), 'fake ping failed'
+        assert self._ping_test(host, dummy, src_addr=self.fake_target), 'reverse ping failed'
 
         self.host = host
 
@@ -95,8 +98,12 @@ class Gateway(object):
         return self.port_set * self.SET_SPACING + offset
 
     def _dhcp_callback(self, state, target_ip=None, target_mac=None, exception=None):
-        self.runner.dhcp_notify(state, target_ip=target_ip,
-                                target_mac=target_mac, exception=exception)
+        target = {
+            'ip': target_ip,
+            'mac': target_mac
+        }
+        self.runner.dhcp_notify(state, target=target,
+                                gateway_set=self.port_set, exception=exception)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)
@@ -117,6 +124,10 @@ class Gateway(object):
         LOGGER.info('Detach target %d from gateway group %s', target_port, self.name)
         del self.targets[target_port]
         return bool(self.targets)
+
+    def get_targets(self):
+        """Return the host targets associated with this gateway"""
+        return self.targets.values()
 
     def terminate(self):
         """Terminate this instance"""

@@ -5,4 +5,6 @@
 	* Pull network topology from faucet.yaml file.
 * 0.8.1
 	* Refactor gateway component out from individual device tests.
-	* Move more configuration to faucet.yaml file.
+	* Move more configuration to faucet.yaml files.
+	* Enable device groups.
+	* Clean up testing infrastructure.

@@ -179,6 +179,7 @@ class FaucetTopology(object):
             self._add_acl_pri_rule(incoming_acl, dl_src=target_mac, in_vlan=10, ports=ports)
             self._add_acl_pri_rule(portset_acl, dl_dst=target_mac, out_vlan=10, port=1)
 
+        self._add_acl_pri_rule(incoming_acl, allow=0)
         self._add_acl_pri_rule(portset_acl, allow=1)
 
         acls = {}

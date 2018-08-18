@@ -5,6 +5,7 @@ misc setup tasks."""
 
 import logging
 import os
+import signal
 import sys
 
 from ConfigParser import ConfigParser
@@ -17,12 +18,15 @@ import runner
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
+_PID_FILE = 'inst/daq.pid'
+
 FLAG_MAP = {
-    's': 'single_shot',
-    'e': 'event_trigger',
-    'l': 'result_linger',
+    'c': 'use_console',
     'd': 'debug_mode',
-    'c': 'use_console'
+    'e': 'event_trigger',
+    'f': 'fail_mode',
+    'l': 'result_linger',
+    's': 'single_shot'
 }
 
 def _stripped_alt_logger(self, level, msg, *args, **kwargs):
@@ -46,8 +50,8 @@ def _configure_logging(config):
 
 def _write_pid_file():
     pid = os.getpid()
-    LOGGER.info('DAQ pid is %d', pid)
-    with open('inst/daq.pid', 'w') as pid_file:
+    LOGGER.info('pid is %d', pid)
+    with open(_PID_FILE, 'w') as pid_file:
         pid_file.write(str(pid))
 
 def _read_config_into(filename, config):
@@ -62,6 +66,7 @@ def _parse_args(args):
     config = {}
     for arg in args[1:]:
         if arg:
+            print 'processing arg: %s' % arg
             if arg[0] == '-':
                 if arg[1:] in FLAG_MAP:
                     config[FLAG_MAP[arg[1:]]] = True
@@ -77,8 +82,12 @@ def _parse_args(args):
 def _execute():
     config = _parse_args(sys.argv)
     _configure_logging(config)
+    LOGGER.info('configuration map: %s', config)
 
     _write_pid_file()
+
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
 
     daq_runner = runner.DAQRunner(config)
     daq_runner.initialize()
@@ -87,6 +96,8 @@ def _execute():
 
     result = daq_runner.finalize()
     LOGGER.info('DAQ runner returned %d', result)
+
+    os.remove(_PID_FILE)
 
     return result
 

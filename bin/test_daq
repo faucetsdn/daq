@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-runarg=
+runargs=
 
 if [ ! -f local/system.conf ]; then
     echo Installing local/system.conf...
@@ -25,24 +25,38 @@ if [ -n "$DAQ_MUD" ]; then
     bin/mudacl
 fi
 
-if [ -n "$DAQ_CONF" ]; then
-    echo network_config=$DAQ_CONF >> local/system.conf
-fi
-
 if [ "$DAQ_BUILD" == in ]; then
-    runarg="latest reuse"
+    if [ -n "$runargs" ]; then
+        echo Error -- build args must be first.
+        false
+    fi
+    runargs+=" latest reuse"
 elif [ "$DAQ_BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
     echo Not running tests because no-build on release branch.
     exit 0
+fi
+
+if [ -n "$DAQ_CONF" ]; then
+    runargs+=" network_config=$DAQ_CONF"
+fi
+
+if [ -n "$DAQ_RUNS" ]; then
+    runargs+=" -f run_limit=$DAQ_RUNS"
+else
+    runargs+=" -s"
+fi
+
+if [ -n "$DAQ_LOG" ]; then
+    runargs+=" daq_loglevel=$DAQ_LOG"
 fi
 
 fail_mode=${DAQ_FAIL#!}
 failed=0
 echo Running DAQ test...
 if [ "$DAQ_MODE" == "in" ]; then
-    cmd/run $runarg -s || failed=$?
+    cmd/run $runargs || failed=$?
 else
-    DAQ_FAUX_OPTS=$fail_mode cmd/exrun -s || failed=$?
+    DAQ_FAUX_OPTS=$fail_mode cmd/exrun $runargs || failed=$?
 fi
 
 echo Finished run with exit code $failed.

@@ -38,18 +38,6 @@ if [ $# -gt 0 ]; then
     false
 fi
 
-running=$(docker inspect --format "{{.State.Running}}" daq-runner 2>/dev/null || true)
-if [ "$running" == true ]; then
-    echo Container daq-runner already active, is DAQ already running?
-    false
-fi
-
-running=$(docker inspect --format "{{.State.Running}}" daq-faucet 2>/dev/null || true)
-if [ "$running" == true ]; then
-    echo Container daq-faucet already active, is DAQ already running?
-    false
-fi
-
 if [ -f $PIDFILE ]; then
     pid=$(< $PIDFILE)
     if [ -d /proc/$pid ]; then
@@ -58,6 +46,12 @@ if [ -f $PIDFILE ]; then
     fi
 fi
 
+found=n
+docker ps | fgrep daq- && found=y || true
+if [ "$found" = y ]; then
+    echo Lingering docker containers found.
+    false
+fi
 
 sudo rm -rf inst
 mkdir -p inst

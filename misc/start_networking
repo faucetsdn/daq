@@ -1,15 +1,20 @@
 #!/bin/bash -e
 
-mkdir -p /tmp/public
-
-(cd /tmp/public; python -m SimpleHTTPServer &)
-
 LOCAL_IF=$HOSTNAME-eth0
 EXT_IF=eth0
 
+# Enable a web-server for configuration access.
+mkdir -p /tmp/public
+(cd /tmp/public; python -m SimpleHTTPServer &)
+
+# Enable NAT to the outside world, through the docker bridge.
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -o $EXT_IF -j MASQUERADE
 iptables -A FORWARD -i $EXT_IF -o $LOCAL_IF -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i $LOCAL_IF -o $EXT_IF -j ACCEPT
+
+# Pick a random DHCP range to force clients to pick a new address.
+subnet=$((RANDOM % 99 + 1))
+echo dhcp-range=10.20.$subnet.1,10.20.$subnet.254,120s >> /etc/dnsmasq.conf
 
 dnsmasq -d --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp
