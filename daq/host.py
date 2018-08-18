@@ -85,6 +85,7 @@ class ConnectedHost(object):
 
         self._state_transition(_STATE.ACTIVE, _STATE.INIT)
         self.record_result('sanity')
+        self._push_record('info', state=self.target_mac)
         self.record_result('dhcp', state='run')
 
     def terminate(self, trigger=True, removed=False):
@@ -117,8 +118,9 @@ class ConnectedHost(object):
         """Handle completion of DHCP subtask"""
         if self.state != _STATE.ACTIVE:
             return
-        self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
         self.target_ip = target_ip
+        self._push_record('info', state='%s/%s' % (self.target_mac, target_ip))
+        self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
         if exception:
             self._state_transition(_STATE.ERROR, _STATE.ACTIVE)
             self.runner.target_set_error(self.target_port, exception)
@@ -201,7 +203,8 @@ class ConnectedHost(object):
             assert self._ping_test(self.gateway, self.target_ip), 'simple ping failed'
             assert self._ping_test(self.gateway, self.target_ip,
                                    src_addr=self.fake_target), 'target ping failed'
-        except:
+        except Exception as e:
+            self.record_result('base', exception=e)
             self._monitor_cleanup()
             raise
         self.record_result('base')
@@ -229,6 +232,8 @@ class ConnectedHost(object):
         self.test_host.start(self.test_port, params, self._docker_callback)
 
     def _docker_callback(self, return_code=None, exception=None):
+        LOGGER.debug('docker_callback %s/%s was %s with %s',
+                     self.test_name, bool(self.test_host), return_code, exception)
         self.record_result(self.test_name, code=return_code, exception=exception)
         result_path = os.path.join(self.tmpdir, 'nodes',
                                    self.test_host.host_name, 'return_code.txt')
@@ -254,6 +259,11 @@ class ConnectedHost(object):
                          self.target_port, self.test_name, current)
             self.test_name = name
             self.test_start = current
+        self._push_record(name, current, **kwargs)
+
+    def _push_record(self, name, current=None, **kwargs):
+        if not current:
+            current = int(time.time())
         result = {
             'name': name,
             'runid': self.run_id,

@@ -16,7 +16,7 @@ class DhcpMonitor(object):
     DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-z0-9:]+)'
     DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_IP_PATTERN, DHCP_TYPE_PATTERN, DHCP_MAC_PATTERN)
     DHCP_TIMEOUT_SEC = 240
-    DHCP_THRESHHOLD_SEC = 20
+    DHCP_THRESHHOLD_SEC = 120
 
     def __init__(self, runner, host, callback, log_file=None):
         self.runner = runner
@@ -92,6 +92,6 @@ class DhcpMonitor(object):
     def _dhcp_error(self, e):
         LOGGER.error('DHCP monitor %s error: %s', self.name, e)
         if self.dhcp_log:
-            self.dhcp_log.write('Monitor error %s' % e)
+            self.dhcp_log.write('Monitor error %s\n' % e)
         self.cleanup(forget=False)
         self.callback('error', exception=e)

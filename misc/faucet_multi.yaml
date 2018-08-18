@@ -29,7 +29,7 @@ dps:
           3:
             name: faux-3
             native_vlan: 10
-            description: DAQ autostart cmd/faux 3
+            description: DAQ autostart cmd/faux 3 $DAQ_FAUX_OPTS
           4:
             native_vlan: 10
           5:

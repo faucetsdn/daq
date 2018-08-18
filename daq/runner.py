@@ -12,6 +12,7 @@ import network
 import stream_monitor
 
 LOGGER = logging.getLogger('runner')
+RESULT_LOG_FILE = 'inst/result.log'
 
 class DAQRunner(object):
     """Main runner class controlling DAQ. Primarily mediates between
@@ -37,13 +38,21 @@ class DAQRunner(object):
         self.faucet_events = None
         self.single_shot = config.get('single_shot')
         self.event_trigger = config.get('event_trigger')
+        self.fail_mode = config.get('fail_mode')
+        self.run_tests = True
         self.stream_monitor = None
         self.exception = None
+        self.run_count = 0
+        self.run_limit = int(config.get('run_limit', 0))
+        self.result_log = self._open_result_log()
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
         while self.faucet_events.next_event():
             pass
+
+    def _open_result_log(self):
+        return open(RESULT_LOG_FILE, 'w')
 
     def _send_heartbeat(self):
         self.gcp.publish_message('daq_runner', {
@@ -80,6 +89,9 @@ class DAQRunner(object):
             self.network.stop()
         except Exception as e:
             LOGGER.error('Exception: %s', e)
+        if self.result_log:
+            self.result_log.close()
+            self.result_log = None
         LOGGER.info("Done with runner.")
 
     def add_host(self, *args, **kwargs):
@@ -114,10 +126,8 @@ class DAQRunner(object):
                 self.active_ports[port] = True
                 self._trigger_target_set(port)
             else:
-                if self.result_linger:
-                    LOGGER.info('Target port %d disconnect linger', port)
-                else:
-                    self._cancel_target_set(port, removed=True)
+                if port in self.port_targets:
+                    self.target_set_complete(self.port_targets[port])
                 if port in self.active_ports:
                     self.network.direct_port_traffic(self.active_ports[port], None)
                     del self.active_ports[port]
@@ -139,11 +149,15 @@ class DAQRunner(object):
                     self.target_set_complete(target_set)
             except Exception as e:
                 self.target_set_error(target_set.target_port, e)
-        if not self.event_trigger and not self.single_shot:
+        if not self.event_trigger and self.run_tests:
             for target_port in self.active_ports:
                 if self.active_ports[target_port]:
                     self._trigger_target_set(target_port)
                     all_idle = False
+        if not self.port_targets and not self.run_tests:
+            LOGGER.info('No active ports remaining: ending test run.')
+            self.monitor_forget(self.faucet_events.sock)
+            all_idle = False
         if all_idle:
             LOGGER.debug('No active device ports, waiting for trigger event...')
 
@@ -160,7 +174,6 @@ class DAQRunner(object):
 
     def main_loop(self):
         """Run main loop to execute tests"""
-        use_console = self.config.get('use_console')
 
         try:
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
@@ -179,8 +192,7 @@ class DAQRunner(object):
             LOGGER.error('Keyboard Interrupt')
             LOGGER.exception(e)
 
-        keyboard_console = not self.single_shot and not self.exception
-        if use_console or keyboard_console:
+        if self.config.get('use_console'):
             LOGGER.info('Dropping into interactive command line')
             self.network.cli()
 
@@ -209,11 +221,16 @@ class DAQRunner(object):
                 'mac': target_mac
             }
             gateway.attach_target(target_port, target)
+        except Exception as e:
+            LOGGER.error('Target port %d gateway error %s', target_port, str(e))
+            return False
 
+        try:
             new_host = connected_host.ConnectedHost(self, gateway.host, target, self.config)
             self.mac_targets[target_mac] = new_host
             self.port_targets[target_port] = new_host
             self.port_gateways[target_port] = gateway
+            LOGGER.info('Target port %d registered %s', target_port, target_mac)
 
             new_host.initialize()
 
@@ -239,24 +256,35 @@ class DAQRunner(object):
             existing = self._device_groups[group_name]
             return existing
         set_num = self._find_gateway_set(target_port)
-        self._gateway_sets[set_num] = group_name
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     group_name, set_num)
         gateway = gateway_manager.Gateway(self, group_name, set_num, self.network)
         gateway.initialize()
+        self._gateway_sets[set_num] = group_name
         self._device_groups[group_name] = gateway
         return gateway
 
-    def dhcp_notify(self, state, target_ip=None, target_mac=None, exception=None):
+    def dhcp_notify(self, state, target=None, exception=None, gateway_set=None):
         """Handle a DHCP notificaiton"""
         if exception:
-            LOGGER.error('DHCP exception: %s', exception)
+            LOGGER.error('DHCP exception set %s: %s', gateway_set, exception)
             LOGGER.exception(exception)
+            self._terminate_gateway_set(gateway_set)
             return
+        target_mac = target['mac']
+        target_ip = target['ip']
         LOGGER.info('DHCP notify %s/%s', target_ip, target_mac)
         if target_mac in self.mac_targets:
             target_host = self.mac_targets[target_mac]
             target_host.dhcp_result(state, target_ip=target_ip, exception=exception)
+
+    def _terminate_gateway_set(self, gateway_set):
+        group_name = self._gateway_sets[gateway_set]
+        gateway = self._device_groups[group_name]
+        ports = [target['port'] for target in gateway.get_targets()]
+        LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
+        for target_port in ports:
+            self.target_set_complete(self.port_targets[target_port])
 
     def _find_gateway_set(self, target_port):
         if target_port not in self._gateway_sets:
@@ -284,13 +312,14 @@ class DAQRunner(object):
 
     def target_set_error(self, target_port, e):
         """Handle an error in the target port set"""
-        LOGGER.warn('Target port %d exception: %s', target_port, e)
-        if target_port in self.port_targets:
+        active = target_port in self.port_targets
+        LOGGER.warn('Target port %d (%s) exception: %s', target_port, active, e)
+        if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)
             self.target_set_complete(target_set)
         else:
-            self._target_set_finalize(target_port, {'exception': str(e)})
+            self._target_set_finalize(target_port, {'exception': {'exception': str(e)}})
 
     def target_set_complete(self, target_set):
         """Handle completion of a target_set"""
@@ -301,10 +330,15 @@ class DAQRunner(object):
         else:
             self._cancel_target_set(target_port)
 
-    def _target_set_finalize(self, target_port, results):
-        LOGGER.info('Target port %d complete, %d results', target_port, len(results))
-        self.result_sets[target_port] = results
-        LOGGER.info('Remaining sets: %s', self.port_targets.keys())
+    def _target_set_finalize(self, target_port, result_set):
+        results = self._combine_result_set(target_port, result_set)
+        LOGGER.info('Target port %d complete: %s', target_port, results)
+        if self.result_log:
+            self.result_log.write('%02d: %s\n' % (target_port, results))
+            self.result_log.flush()
+        if results and self.fail_mode:
+            self.run_tests = False
+        self.result_sets[target_port] = result_set
 
     def _cancel_target_set(self, target_port, removed=False):
         if target_port in self.port_targets:
@@ -316,15 +350,21 @@ class DAQRunner(object):
             del self.mac_targets[target_mac]
             target_host.terminate(trigger=False, removed=removed)
             self._detach_gateway(target_port, target_mac, target_gateway)
-            LOGGER.info('Target port %d cancelled %s (removed %s).',
-                        target_port, target_mac, removed)
-            if not self.port_targets and self.single_shot:
-                self.monitor_forget(self.faucet_events.sock)
+            self.run_count += 1
+            LOGGER.info('Target port %d canceled %s (#%d/%s).',
+                        target_port, target_mac, self.run_count, self.run_limit)
+            if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
+                LOGGER.warn('Run limit reached.')
+                self.run_tests = False
+            if self.single_shot and self.run_tests:
+                LOGGER.warn('Test done in single shot mode.')
+                self.run_tests = False
+        LOGGER.info('Remaining target sets: %s', self.port_targets.keys())
 
     def _detach_gateway(self, target_port, target_mac, target_gateway):
         if not target_gateway.detach_target(target_port):
-            LOGGER.info('Retiring target gateway %s, %s, %s',
-                        target_port, target_mac, target_gateway.name)
+            LOGGER.info('Retiring target gateway %s, %s, %s, %s',
+                        target_port, target_mac, target_gateway.name, target_gateway.port_set)
             group_name = self.network.device_group_for(target_mac)
             del self._device_groups[group_name]
             del self._gateway_sets[target_gateway.port_set]
@@ -346,15 +386,20 @@ class DAQRunner(object):
         results = []
         for result_set_key in self.result_sets:
             result_set = self.result_sets[result_set_key]
-            for result_key in result_set:
-                result = result_set[result_key]
-                exception = self._extract_exception(result)
-                code_string = result['code'] if 'code' in result else None
-                code = int(code_string) if code_string else 0
-                name = result['name']
-                status = exception if exception else code if name != 'fail' else not code
-                if status != 0:
-                    results.append('%02d:%s:%s' % (result_set_key, name, status))
+            results.extend(self._combine_result_set(result_set_key, result_set))
+        return results
+
+    def _combine_result_set(self, set_key, result_sets):
+        results = []
+        for result_set_key in result_sets:
+            result = result_sets[result_set_key]
+            exception = self._extract_exception(result)
+            code_string = result['code'] if 'code' in result else None
+            code = int(code_string) if code_string else 0
+            name = result['name'] if 'name' in result else result_set_key
+            status = exception if exception else code if name != 'fail' else not code
+            if status != 0:
+                results.append('%02d:%s:%s' % (set_key, name, status))
         return results
 
     def finalize(self):

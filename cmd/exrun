@@ -35,6 +35,15 @@ echo Release version $DAQ_VERSION
 echo Loading daq run configuration from $LOCAL_CONFIG
 source $LOCAL_CONFIG
 
+for cmdarg in "$@"; do
+    value=${cmdarg#network_config=}
+    if [ "$value" != "$cmdarg" ]; then
+        echo Command line network_config to $value
+        network_config=$value
+    fi
+done
+cmdarg=
+
 export PYTHONPATH=$FAUCET:$MININET
 
 # Dump configuration settings for debugging.
