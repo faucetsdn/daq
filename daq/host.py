@@ -230,11 +230,11 @@ class ConnectedHost(object):
         self.test_host.start(self.test_port, params, self._docker_callback)
 
     def _docker_callback(self, return_code=None, exception=None):
-        LOGGER.debug('docker_callback %s/%s was %s with %s',
-                     self.test_name, bool(self.test_host), return_code, exception)
+        host_name = self.test_host.host_name if self.test_host else 'unknown'
+        LOGGER.info('docker_callback %s/%s was %s with %s',
+                     self.test_name, host_name, return_code, exception)
         self.record_result(self.test_name, code=return_code, exception=exception)
-        result_path = os.path.join(self.tmpdir, 'nodes',
-                                   self.test_host.host_name, 'return_code.txt')
+        result_path = os.path.join(self.tmpdir, 'nodes', host_name, 'return_code.txt')
         try:
             with open(result_path, 'a') as output_stream:
                 output_stream.write(str(return_code))
