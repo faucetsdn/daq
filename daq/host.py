@@ -22,6 +22,7 @@ class _STATE(object):
     READY = 'Ready for next'
     TESTING = 'Active test'
     DONE = 'Done with sequence'
+    TERM = 'Host terminated'
 
 
 class ConnectedHost(object):
@@ -88,13 +89,10 @@ class ConnectedHost(object):
         self._push_record('info', state=self.target_mac)
         self.record_result('dhcp', state='run')
 
-    def terminate(self, trigger=True, removed=False):
+    def terminate(self, trigger=True):
         """Terminate this host"""
-        LOGGER.info('Target port %d terminate, trigger %s, removed %s',
-                    self.target_port, trigger, removed)
-        if not removed and self.config.get('result_linger', False):
-            LOGGER.error('Unexpected terminate with linger')
-        self._state_transition(_STATE.ERROR)
+        LOGGER.info('Target port %d terminate, trigger %s', self.target_port, trigger)
+        self._state_transition(_STATE.TERM)
         self._monitor_cleanup()
         if self.running_test:
             try:

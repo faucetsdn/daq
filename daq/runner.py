@@ -124,7 +124,6 @@ class DAQRunner(object):
         if self.network.is_device_port(dpid, port):
             if active:
                 self.active_ports[port] = True
-                self._trigger_target_set(port)
             else:
                 if port in self.port_targets:
                     self.target_set_complete(self.port_targets[port])
@@ -136,7 +135,7 @@ class DAQRunner(object):
         LOGGER.debug('Port dpid %s port %s is mac %s', dpid, port, target_mac)
         if self.network.is_device_port(dpid, port):
             self.active_ports[port] = target_mac
-            self._trigger_target_set(port)
+            self._target_set_trigger(port)
 
     def _handle_system_idle(self):
         all_idle = True
@@ -149,14 +148,17 @@ class DAQRunner(object):
                     self.target_set_complete(target_set)
             except Exception as e:
                 self.target_set_error(target_set.target_port, e)
-        if not self.event_trigger and self.run_tests:
+        if not self.event_trigger:
             for target_port in self.active_ports:
-                if self.active_ports[target_port]:
-                    self._trigger_target_set(target_port)
+                if self.active_ports[target_port] is not True:
+                    self._target_set_trigger(target_port)
                     all_idle = False
         if not self.port_targets and not self.run_tests:
-            LOGGER.info('No active ports remaining: ending test run.')
-            self.monitor_forget(self.faucet_events.sock)
+            if self.faucet_events:
+                LOGGER.warn('No active ports remaining: ending test run.')
+                self.monitor_forget(self.faucet_events.sock)
+                self.faucet_events.disconnect()
+                self.faucet_events = None
             all_idle = False
         if all_idle:
             LOGGER.debug('No active device ports, waiting for trigger event...')
@@ -198,16 +200,18 @@ class DAQRunner(object):
 
         self._terminate()
 
-    def _trigger_target_set(self, target_port):
+    def _target_set_trigger(self, target_port):
         assert target_port in self.active_ports, 'Target port %d not active' % target_port
 
+        target_mac = self.active_ports[target_port]
+        assert target_mac is not True, 'Target port %d triggered but not learned' % target_port
+
         if target_port in self.port_targets:
-            LOGGER.debug('Target port %d already active, ignoring.', target_port)
+            LOGGER.debug('Target port %d already active', target_port)
             return False
 
-        target_mac = self.active_ports[target_port]
-        if target_mac is True:
-            LOGGER.debug('Target port %d triggered but not learned', target_port)
+        if not self.run_tests:
+            LOGGER.debug('Target port %d trigger ignored', target_port)
             return False
 
         try:
@@ -325,10 +329,7 @@ class DAQRunner(object):
         """Handle completion of a target_set"""
         target_port = target_set.target_port
         self._target_set_finalize(target_port, target_set.results)
-        if self.result_linger:
-            LOGGER.info('Target port %d linger', target_port)
-        else:
-            self._cancel_target_set(target_port)
+        self._target_set_cancel(target_port)
 
     def _target_set_finalize(self, target_port, result_set):
         results = self._combine_result_set(target_port, result_set)
@@ -337,10 +338,11 @@ class DAQRunner(object):
             self.result_log.write('%02d: %s\n' % (target_port, results))
             self.result_log.flush()
         if results and self.fail_mode:
+            LOGGER.warn('Suppressing further tests due to failure.')
             self.run_tests = False
         self.result_sets[target_port] = result_set
 
-    def _cancel_target_set(self, target_port, removed=False):
+    def _target_set_cancel(self, target_port):
         if target_port in self.port_targets:
             target_host = self.port_targets[target_port]
             del self.port_targets[target_port]
@@ -348,16 +350,21 @@ class DAQRunner(object):
             del self.port_gateways[target_port]
             target_mac = self.active_ports[target_port]
             del self.mac_targets[target_mac]
-            target_host.terminate(trigger=False, removed=removed)
-            self._detach_gateway(target_port, target_mac, target_gateway)
             self.run_count += 1
-            LOGGER.info('Target port %d canceled %s (#%d/%s).',
+            LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
+            results = self._combine_result_set(target_port, self.result_sets[target_port])
+            if results and self.result_linger:
+                LOGGER.warn('Target port %d result_linger: %s', target_port, results)
+                self.active_ports[target_port] = True
+            else:
+                target_host.terminate(trigger=False)
+                self._detach_gateway(target_port, target_mac, target_gateway)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
-                LOGGER.warn('Run limit reached.')
+                LOGGER.warn('Suppressing future tests because run limit reached.')
                 self.run_tests = False
             if self.single_shot and self.run_tests:
-                LOGGER.warn('Test done in single shot mode.')
+                LOGGER.warn('Suppressing future tests because test done in single shot.')
                 self.run_tests = False
         LOGGER.info('Remaining target sets: %s', self.port_targets.keys())
 

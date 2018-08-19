@@ -34,6 +34,11 @@ class FaucetEventClient(object):
         except socket.error as err:
             assert False, "Failed to connect because: %s" % err
 
+    def disconnect(self):
+        """Disconnect this event socket"""
+        self.sock.close()
+        self.sock = None
+
     def has_data(self):
         """Check to see if the event socket has any data to read"""
         read, dummy_write, dummy_error = select.select([self.sock], [], [], 0)
