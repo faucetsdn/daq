@@ -1,3 +1,6 @@
+# Network configuation file for working with an external
+# physical switch. Also see ext_ entries in the system.conf
+# file.
 dps:
     pri:
         dp_id: 1
@@ -9,32 +12,28 @@ dps:
             native_vlan: 10
         interfaces:
           1:
+            name: enx00e04c680175
             stack:
               dp: sec
-              port: 47
+              port: 7
     sec:
-        dp_id: 2
+        dp_id: 0x1aeb960541
         name: sec
+        description: DAQ autostart bin/physical_sec
         interfaces:
           1:
-            name: faux-1
             native_vlan: 10
-            description: DAQ autostart cmd/faux 1
           2:
-            name: faux-2
             native_vlan: 10
-            description: DAQ autostart cmd/faux 2 curl
           3:
-            name: faux-3
             native_vlan: 10
-            description: DAQ autostart cmd/faux 3 $DAQ_FAUX_OPTS
           4:
             native_vlan: 10
           5:
             native_vlan: 10
           6:
             native_vlan: 10
-          47:
+          7:
             stack:
               dp: pri
               port: 1

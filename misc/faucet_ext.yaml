@@ -1,8 +1,10 @@
+# Network topology configuration file for testing with an
+# "external" OVS switch running on the host. This is primarily
+# intended for integration testing.
 dps:
     pri:
         dp_id: 1
         name: pri
-        #ofchannel_log: /var/log/faucet/of-pri.log
         stack:
           priority: 1
         interface_ranges:
@@ -18,7 +20,6 @@ dps:
         dp_id: 0x123456789
         name: sec
         description: DAQ autostart bin/external_ovs 0x123456789
-        #ofchannel_log: /var/log/faucet/of-sec.log
         interfaces:
           1:
             native_vlan: 10

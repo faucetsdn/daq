@@ -128,7 +128,8 @@ class DAQRunner(object):
                 if port in self.port_targets:
                     self.target_set_complete(self.port_targets[port])
                 if port in self.active_ports:
-                    self.network.direct_port_traffic(self.active_ports[port], None)
+                    if self.active_ports[port] is not True:
+                        self.network.direct_port_traffic(self.active_ports[port], None)
                     del self.active_ports[port]
 
     def _handle_port_learn(self, dpid, port, target_mac):

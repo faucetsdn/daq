@@ -2,7 +2,6 @@ dps:
     pri:
         dp_id: 1
         name: pri
-        #ofchannel_log: /var/log/faucet/of-pri.log
         stack:
           priority: 1
         interface_ranges:
@@ -16,7 +15,6 @@ dps:
     sec:
         dp_id: 2
         name: sec
-        #ofchannel_log: /var/log/faucet/of-sec.log
         interfaces:
           1:
             name: faux
