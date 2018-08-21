@@ -1,22 +1,33 @@
 #!/bin/bash -e
 
-ext_ofip=unknown
-ext_ctrl=unknown
-ext_addr=unknown
-ext_intf=unknown
-
-echo This is currently broken -- needs to be updated to properly pull info from faucet.yaml
-false
-
 ROOT=$(realpath $(dirname $0)/..)
 source $ROOT/local/system.conf
 
-sudo ip addr del $ext_ofip dev $ext_ctrl || true
-sudo ip addr add $ext_ofip dev $ext_ctrl || true
+if [ -z "$ext_ctrl" ]; then
+    echo ext_ctrl not defined for physical_sec.
+    false
+fi
+
+if [ -z "$ext_ofip" ]; then
+    echo ext_ofip not defined for physical_sec.
+    false
+fi
+
+if [ -z "$ext_addr" ]; then
+    echo ext_addr not defined for physical_sec.
+    false
+fi
+
+echo Configuring control interface $ext_ctrl at $ext_ofip
+
+sudo ip addr flush dev $ext_ctrl
+sudo ip addr add $ext_ofip dev $ext_ctrl
 
 sudo ip link set up dev $ext_ctrl
-sudo ip link set up dev $ext_intf
 
-ip addr show $ext_intf
-
+echo Checking external connection to $ext_addr
 ping -c 1 $ext_addr
+
+echo
+echo DAQ autoclean ip link set down dev $ext_ctrl
+echo Done with physical switch configuration.
