@@ -66,7 +66,9 @@ configuration for an external physical switch. Key points:
     * Interface `name` for the `pri` switch staking port.
     * 'dp_id` value for the `sec` switch.
     * `description: DAQ autostart` clause for `sec` switch to auto-configure the external interface.
-3. System configuration for controller communication, in the `local/system.conf` file:
+3. System configuration for controller communication, in the `local/system.conf` file.
+See `misc/system.conf.example_phy` for an example of what this looks like.
     * `ext_ctrl` value for the interface of the control plane network.
     * `ext_ofip` value for the ip address (and subnet) to use on the control interface.
     * `ext_addr` value for the ip address of the switch (used to verify the connection).
+    * 'network_config' entry to point to the appropriate faucet config file.

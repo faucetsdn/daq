@@ -1,6 +1,9 @@
 # Network configuation file for working with an external
-# physical switch. Also see ext_ entries in the system.conf
-# file.
+# physical switch. Important values are the name of the
+# 'pri' switch stacking interface, 'dp_id' of the 'sec'
+# switch, and the 'DAQ autostart' clause.
+# Also see the required 'ext_' entries in system.conf.
+#
 dps:
     pri:
         dp_id: 1

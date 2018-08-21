@@ -228,13 +228,13 @@ class ConnectedHost(object):
         self.test_host = docker_test.DockerTest(self.runner, self, test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         host_name = self.test_host.host_name if self.test_host else 'unknown'
-        LOGGER.info('test_host start %s/%s', self.test_name, host_name)
+        LOGGER.debug('test_host start %s/%s', self.test_name, host_name)
         self.test_host.start(self.test_port, params, self._docker_callback)
 
     def _docker_callback(self, return_code=None, exception=None):
         host_name = self.test_host.host_name if self.test_host else 'unknown'
-        LOGGER.info('test_host callback %s/%s was %s with %s',
-                    self.test_name, host_name, return_code, exception)
+        LOGGER.debug('test_host callback %s/%s was %s with %s',
+                     self.test_name, host_name, return_code, exception)
         self.record_result(self.test_name, code=return_code, exception=exception)
         result_path = os.path.join(self.tmpdir, 'nodes', host_name, 'return_code.txt')
         try:

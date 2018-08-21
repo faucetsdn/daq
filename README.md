@@ -42,34 +42,13 @@ so the last declaration of a variable will be the only one that sticks. (The `lo
 subdirectory contains all information local to the DAQ install, such as configuration information
 or cloud credentials.)
 
-## System Setups
+## Network Topologies
 
-There are several level of typical system setups that are used for different testing purposes.
-The recommended
-course is to start with the simplest (software emulation) and progress forward as required by
-the specific project. Details on required configuration options are in the config file. The
-operational network configuration is supplied by a [FAUCET config file](docs/faucet.md) that
-determines the network topology. This defaults to the contents of `misc/faucet.yaml`,
-but can be overridden (see the `network_config` entry in the `system.conf` file) to provide
-other behaviors (e.g. `misc/faucet_multi.yaml`).
-
-1. _Emulation_: This uses a built-in 'faux' device to test the DAQ suite itself. It is
-important to make sure this works properly to verify the basic install is sound. This
-is most useful for basic system sanity checks and system development.
-
-2. _Adapter_: This uses one or more physical USB interfaces to allow external
-ethernet connections. There is no particular limit on the number of devices that can be connected
-this way except for the limitations of the host's USB subsystem.
-
-3. _Test Lab_: Use one external OpenFlow network switch detailed in the
-[test lab setup](docs/test_lab.md) documentation. This is primarily designed for testing small
-sets of devices (~10) or specific hardware features (such as PoE).
-
-4. _Tiered_: Use a complete setup of multiple exteral network switches, sufficient for testing 100s
-of devices. This setup will require extensive network configuration and phsical cabling to work.
-
-5. _Production_: A full 'production' setup is a multi-tiered setup with full redundancy. Intended for
-production-class setups that support 1000's of devices.
+There are several level of network topologies that are used for different testing purposes
+(detailed in the [Network Topologies](docs/topologies.md) subsection), covering the range from
+single-device testing through to a production-class environment.
+The recommended course is to start with the simplest (software emulation) and progress
+forward as required for a specific project.
 
 ## Testing Dashboard
 

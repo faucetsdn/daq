@@ -24,7 +24,7 @@ class DockerTest(object):
 
     def start(self, port, params, callback):
         """Start the docker test"""
-        LOGGER.info('Target port %d running test %s', self.target_port, self.test_name)
+        LOGGER.debug('Target port %d running test %s', self.target_port, self.test_name)
 
         self.callback = callback
 
