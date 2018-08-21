@@ -8,3 +8,6 @@
 	* Move more configuration to faucet.yaml files.
 	* Enable device groups.
 	* Clean up testing infrastructure.
+* 0.8.2
+	* Adding docs for test lab setup.
+	* Improvements to docker test stability.

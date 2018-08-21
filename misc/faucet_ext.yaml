@@ -1,6 +1,8 @@
 # Network topology configuration file for testing with an
-# "external" OVS switch running on the host. This is primarily
+# "external" OVS switch running on the host (switch that is
+# not configured by DAQ directly). This is primarily
 # intended for integration testing.
+#
 dps:
     pri:
         dp_id: 1

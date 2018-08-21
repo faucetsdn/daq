@@ -1,3 +1,9 @@
+# Simple test network config for a single device autostarted
+# on the 'faux' interface. To test with a real single device
+# on a physical adapter (e.g. USB), replace the 'name: faux'
+# entry with the name of the physical eth interface
+# (e.g. 'eth0'), and remove the 'DAQ autostart' clause.
+#
 dps:
     pri:
         dp_id: 1

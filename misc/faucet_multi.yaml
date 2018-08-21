@@ -1,3 +1,8 @@
+# Network configuration file for a multi-host faux test.
+# Useed by CI infrastructure to test multiple devices at once.
+# The interface 'name' is attached to the OS interface name,
+# and then the faux devices are started appropriately.
+#
 dps:
     pri:
         dp_id: 1
