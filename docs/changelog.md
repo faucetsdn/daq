@@ -11,3 +11,4 @@
 * 0.8.2
 	* Adding docs for test lab setup.
 	* Improvements to docker test stability.
+	* Purge old docker containers after new image download.

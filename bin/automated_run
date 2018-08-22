@@ -1,6 +1,7 @@
 #!/bin/bash -e
 #
-# Run the DAQ testing in a continuous loop, with shunting log output to rotating files.
+# Run the DAQ testing in a continuous loop,
+# with shunting log output to rotating files.
 #
 # Some common options (ordered):
 #   debug:  Set daq and mininet loglevels to 'debug'
@@ -11,24 +12,37 @@
 ROOT=$(realpath $(dirname $0)/..)
 
 cd $ROOT
-cmd=exrun
-args=
+auto_run=cmd/run
+auto_args=
+auto_log=inst/exrun-
+
 version=$(cat misc/RELEASE_VERSION)
 PIDFILE=inst/daq.pid
+SYSCONF=local/system.conf
+
+if [ -f $SYSCONF ]; then
+    echo Loading config from $SYSCONF
+    source $SYSCONF
+fi
 
 if [ "$1" == debug ]; then
-    args+=" daq_loglevel=debug"
-    args+=" mininet_loglevel=debug"
+    auto_args+=" daq_loglevel=debug"
+    auto_args+=" mininet_loglevel=debug"
     shift
 fi
 
 if [ "$1" == image ]; then
-    cmd=run
+    auto_cmd=cmd/run
+    shift
+fi
+
+if [ "$1" == local ]; then
+    auto_cmd=cmd/exrun
     shift
 fi
 
 if [ "$1" == latest ]; then
-    args="latest $args"
+    auto_args="latest $auto_args"
     version=latest
     shift
 fi
@@ -57,7 +71,8 @@ sudo rm -rf inst
 mkdir -p inst
 
 echo Running version $version
-echo Running cmd/$cmd $args
-echo Logs in $ROOT/inst/exrun-\*.log
+echo Running $auto_run $auto_args
+echo Logs in $ROOT/${auto_log}\*.log
 
-nohup cmd/$cmd "$@" $args 2>&1 | rotatelogs -t -c inst/exrun-%I.log 3600 &
+nohup $auto_run "$@" $auto_args 2>&1 | \
+    rotatelogs -t -c ${auto_log}%I.log 3600 &

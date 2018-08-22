@@ -3,6 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
 LOCALDIR=$ROOT/local/
+MISCDIR=$ROOT/misc/
 IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
@@ -42,6 +43,7 @@ if [ "$1" == base -o "$1" == rebuild ]; then
         VERSION=latest
     fi
     build=y
+    pull_docker=n
     docker_args+=" -v $PWD:/daq/"
     shift
 fi
@@ -69,9 +71,17 @@ docker_args+=" --env DAQ_CONTAINER=$IMAGE"
 if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
     docker_args+=" -v $LOCALDIR:/root/daq/local"
-    if [ $pull_docker = y ]; then
-        sudo docker pull $TARGET
-    fi
+    docker_args+=" -v $MISCDIR:/root/daq/misc"
+fi
+
+if [ "$pull_docker" == y ]; then
+    sudo docker pull $TARGET
+    docker images --format '{{.Repository}} {{.Tag}} {{.ID}}' | while read repo tag id; do
+        if [ $repo == $IMAGE -a $tag != $VERSION ]; then
+            echo Purging previously downloaded image $repo:$tag
+            docker rmi $id
+        fi
+    done
 fi
 
 function move_intf {
