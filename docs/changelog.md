@@ -12,3 +12,4 @@
 	* Update to use python3 (may require bin/clean for local setups).
 	* Adding docs for test lab setup.
 	* Improvements to docker test stability.
+	* Purge old docker containers after new image download.
