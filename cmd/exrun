@@ -95,7 +95,7 @@ elif [ -n "$DAQ_CODECOV" ]; then
     echo Running with coverage analysis...
     runcmd="coverage run"
 else
-    runcmd=python
+    runcmd=python3
 fi
 
 if [ -d venv ]; then
@@ -103,8 +103,8 @@ if [ -d venv ]; then
     source venv/bin/activate
 fi
 
-echo Using python exe `which python`
-echo Executing $runcmd $@...
+echo Using python3 at `which python3`
+echo Executing: $runcmd daq/daq.py $LOCAL_CONFIG $@
 
 export PYTHONDONTWRITEBYTECODE=True
 export TERM=dumb

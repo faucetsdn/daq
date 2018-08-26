@@ -7,13 +7,13 @@ PYLINTRC=$ROOT/.pylintrc
 cd $ROOT
 mkdir -p build
 
-export PYTHONPATH=faucet:mininet:venv/lib/python2.7/site-packages/
+export PYTHONPATH=faucet:mininet:venv/lib/python3.5/site-packages/
 
 if [ -d venv ]; then
     source venv/bin/activate
 fi
 
-pylint --version >> $RESULTS
+pylint --version
 
 echo Saving complete results to $RESULTS
 rm -f $RESULTS

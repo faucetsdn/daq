@@ -19,7 +19,7 @@ class DAQHost(mininet_test_topo.FaucetHostCleanup, mininet_node.Host):
     pass
 
 
-class DummyNode(object):
+class DummyNode():
     """Dummy node used to handle shadow devices"""
     # pylint: disable=invalid-name
     def addIntf(self, node, port=None):
@@ -31,7 +31,7 @@ class DummyNode(object):
         pass
 
 
-class TestNetwork(object):
+class TestNetwork():
     """Test network manager"""
 
     OVS_CLS = mininet_node.OVSSwitch

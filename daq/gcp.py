@@ -12,7 +12,7 @@ from google.auth import _default as google_auth
 
 LOGGER = logging.getLogger('gcp')
 
-class GcpManager(object):
+class GcpManager():
     """Manager class for working with GCP"""
 
     def __init__(self, config):

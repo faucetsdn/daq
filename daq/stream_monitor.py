@@ -7,7 +7,7 @@ import select
 
 LOGGER = logging.getLogger('stream')
 
-class StreamMonitor(object):
+class StreamMonitor():
     """Monitor set of stream objects"""
 
     def __init__(self, timeout_ms=None, idle_handler=None, loop_hook=None):
@@ -41,7 +41,7 @@ class StreamMonitor(object):
         LOGGER.debug('Monitoring copying data for %s from fd %d to fd %d',
                      name, self.get_fd(data_source), self.get_fd(data_sink))
         data = data_source.read(1024)
-        data_sink.write(data)
+        data_sink.write(data.decode('utf-8'))
 
     def make_nonblock(self, data_source):
         """Make the given source non-blocking"""

@@ -8,7 +8,7 @@ from clib import tcpdump_helper
 
 LOGGER = logging.getLogger('dhcp')
 
-class DhcpMonitor(object):
+class DhcpMonitor():
     """Class to handle DHCP monitoring"""
 
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'

@@ -12,7 +12,7 @@ import docker_test
 LOGGER = logging.getLogger('host')
 
 
-class _STATE(object):
+class _STATE():
     """Host state enum for testing cycle"""
     ERROR = 'Error condition'
     INIT = 'Initizalization'
@@ -25,7 +25,7 @@ class _STATE(object):
     TERM = 'Host terminated'
 
 
-class ConnectedHost(object):
+class ConnectedHost():
     """Class managing a device-under-test"""
 
     MONITOR_SCAN_SEC = 20

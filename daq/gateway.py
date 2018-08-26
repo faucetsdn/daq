@@ -10,7 +10,7 @@ import dhcp_monitor
 
 LOGGER = logging.getLogger('gateway')
 
-class Gateway(object):
+class Gateway():
     """Gateway collection class for managing testing services"""
 
     HOST_OFFSET = 0

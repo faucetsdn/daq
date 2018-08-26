@@ -6,7 +6,7 @@ import yaml
 
 LOGGER = logging.getLogger('topology')
 
-class FaucetTopology(object):
+class FaucetTopology():
     """Topology manager specific to FAUCET configs"""
 
     DEFAULT_NETWORK_FILE = "misc/faucet.yaml"
@@ -175,7 +175,7 @@ class FaucetTopology(object):
 
         for target_mac in self._mac_map:
             target = self._mac_map[target_mac]
-            ports = range(target['range'][0], target['range'][1])
+            ports = list(range(target['range'][0], target['range'][1]))
             self._add_acl_pri_rule(incoming_acl, dl_src=target_mac, in_vlan=10, ports=ports)
             self._add_acl_pri_rule(portset_acl, dl_dst=target_mac, out_vlan=10, port=1)
 

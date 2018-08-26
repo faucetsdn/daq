@@ -1,15 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Main entrypoint for DAQ. Handles command line parsing and other
 misc setup tasks."""
 
+import configparser
+import io
 import logging
 import os
 import signal
 import sys
-
-from ConfigParser import ConfigParser
-from StringIO import StringIO
 
 from mininet import log as minilog
 
@@ -55,10 +54,10 @@ def _write_pid_file():
         pid_file.write(str(pid))
 
 def _read_config_into(filename, config):
-    parser = ConfigParser()
+    parser = configparser.ConfigParser()
     with open(filename) as stream:
-        stream = StringIO("[top]\n" + stream.read())
-        parser.readfp(stream)
+        stream = io.StringIO("[top]\n" + stream.read())
+        parser.read_file(stream)
     for item in parser.items('top'):
         config[item[0]] = item[1]
 
@@ -66,7 +65,7 @@ def _parse_args(args):
     config = {}
     for arg in args[1:]:
         if arg:
-            print 'processing arg: %s' % arg
+            print('processing arg: %s' % arg)
             if arg[0] == '-':
                 if arg[1:] in FLAG_MAP:
                     config[FLAG_MAP[arg[1:]]] = True

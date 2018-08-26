@@ -6,7 +6,7 @@ from clib import docker_host
 
 LOGGER = logging.getLogger('docker')
 
-class DockerTest(object):
+class DockerTest():
     """Class for running docker tests"""
 
     IMAGE_NAME_FORMAT = 'daq/test_%s'
@@ -56,7 +56,7 @@ class DockerTest(object):
     def _docker_error(self, e):
         LOGGER.error('Target port %d docker error: %s', self.target_port, e)
         if self._docker_finalize() is None:
-            LOGGER.warn('Target port %d docker already terminated.', self.target_port)
+            LOGGER.warning('Target port %d docker already terminated.', self.target_port)
         else:
             self.callback(exception=e)
 

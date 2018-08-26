@@ -14,7 +14,7 @@ import stream_monitor
 LOGGER = logging.getLogger('runner')
 RESULT_LOG_FILE = 'inst/result.log'
 
-class DAQRunner(object):
+class DAQRunner():
     """Main runner class controlling DAQ. Primarily mediates between
     faucet events, connected hosts (to test), and gcp for logging. This
     class owns the main event loop and shards out work to subclasses."""
@@ -140,7 +140,8 @@ class DAQRunner(object):
 
     def _handle_system_idle(self):
         all_idle = True
-        for target_set in self.port_targets.values():
+        # Iterate over copy of list to prevent fail-on-modification.
+        for target_set in list(self.port_targets.values()):
             try:
                 if target_set.is_active():
                     all_idle = False
@@ -156,7 +157,7 @@ class DAQRunner(object):
                     all_idle = False
         if not self.port_targets and not self.run_tests:
             if self.faucet_events:
-                LOGGER.warn('No active ports remaining: ending test run.')
+                LOGGER.warning('No active ports remaining: ending test run.')
                 self.monitor_forget(self.faucet_events.sock)
                 self.faucet_events.disconnect()
                 self.faucet_events = None
@@ -318,7 +319,8 @@ class DAQRunner(object):
     def target_set_error(self, target_port, e):
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
-        LOGGER.warn('Target port %d (%s) exception: %s', target_port, active, e)
+        LOGGER.warning('Target port %d (%s) exception: %s', target_port, active, e)
+        LOGGER.exception(e)
         if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)
@@ -339,7 +341,7 @@ class DAQRunner(object):
             self.result_log.write('%02d: %s\n' % (target_port, results))
             self.result_log.flush()
         if results and self.fail_mode:
-            LOGGER.warn('Suppressing further tests due to failure.')
+            LOGGER.warning('Suppressing further tests due to failure.')
             self.run_tests = False
         self.result_sets[target_port] = result_set
 
@@ -356,16 +358,16 @@ class DAQRunner(object):
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
             if results and self.result_linger:
-                LOGGER.warn('Target port %d result_linger: %s', target_port, results)
+                LOGGER.warning('Target port %d result_linger: %s', target_port, results)
                 self.active_ports[target_port] = True
             else:
                 target_host.terminate(trigger=False)
                 self._detach_gateway(target_port, target_mac, target_gateway)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
-                LOGGER.warn('Suppressing future tests because run limit reached.')
+                LOGGER.warning('Suppressing future tests because run limit reached.')
                 self.run_tests = False
             if self.single_shot and self.run_tests:
-                LOGGER.warn('Suppressing future tests because test done in single shot.')
+                LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self.run_tests = False
         LOGGER.info('Remaining target sets: %s', self.port_targets.keys())
 
@@ -388,7 +390,7 @@ class DAQRunner(object):
 
     def _extract_exception(self, result):
         key = 'exception'
-        return key if key in result and result[key] != None else None
+        return key if key in result and result[key] is not None else None
 
     def _combine_results(self):
         results = []

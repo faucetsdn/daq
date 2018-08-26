@@ -6,7 +6,7 @@ import select
 import socket
 import time
 
-class FaucetEventClient(object):
+class FaucetEventClient():
     """A general client interface to the FAUCET event API"""
 
     FAUCET_RETRIES = 10
@@ -20,7 +20,7 @@ class FaucetEventClient(object):
         """Make connection to sock to receive events"""
 
         self.previous_state = {}
-        self.buffer = b''
+        self.buffer = ''
 
         retries = self.FAUCET_RETRIES
         while not os.path.exists(sock_path):
@@ -49,8 +49,8 @@ class FaucetEventClient(object):
         while True:
             if '\n' in self.buffer:
                 return True
-            elif blocking or self.has_data():
-                self.buffer += self.sock.recv(1024)
+            if blocking or self.has_data():
+                self.buffer += self.sock.recv(1024).decode('utf-8')
             else:
                 return False
 

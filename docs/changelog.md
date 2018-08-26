@@ -8,6 +8,7 @@
 	* Move more configuration to faucet.yaml files.
 	* Enable device groups.
 	* Clean up testing infrastructure.
-* 0.8.2
+* 0.9.0
+	* Update to use python3 (may require bin/clean for local setups).
 	* Adding docs for test lab setup.
 	* Improvements to docker test stability.

@@ -10,13 +10,18 @@ ROOT=$(dirname $0)/..
 FAUCET=https://github.com/faucetsdn/faucet.git
 FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
-MININETV=2.2.2
+MININETV=2.3.0d3
 
 if [ -z "$AG" ]; then
     AG="sudo apt-get -qqy --no-install-recommends"
 fi
 
+if [ -z "$PIP" ]; then
+    PIP="python3 -m pip"
+fi
+
 echo AG is $AG
+echo PIP is $PIP
 
 cd $ROOT
 echo Setup root is $PWD
@@ -26,40 +31,49 @@ if [ "$DAQ_BUILD" == "no" ]; then
     exit 0
 fi
 
+echo $AG update
 $AG update
 
-# Ubuntu Trusty (used by Travis CI) has some different package names!
-$AG install emacs-nox || $AG install emacs24-nox
+echo $AG install
+$AG install lsb-release
+release=$(lsb_release -cs)
+echo Release version $release
 
 $AG install \
     software-properties-common apt-transport-https iproute2 \
-    realpath git ethtool curl apache2-utils iputils-ping \
-    ca-certificates lsof pylint sudo net-tools tcpdump \
+    realpath git ethtool curl apache2-utils iputils-ping lsof \
+    ca-certificates sudo net-tools tcpdump build-essential \
     isc-dhcp-client network-manager netcat gnupg2 strace \
-    python python-pkg-resources pylint \
-    python-setuptools python-dev build-essential python-pip
+    python3 python3-pkg-resources python3-setuptools python3-dev python3-pip
+
+# Ubuntu Trusty (used by Travis CI) has some different package names!
+if [ "$release" == "trusty" ]; then
+    $AG install emacs24-nox
+    $PIP install virtualenv
+    python3 -m virtualenv venv
+else
+    $AG install emacs-nox python3-venv
+    python3 -m venv venv
+fi
 
 echo Running in container $DAQ_CONTAINER
+# Can't use venv inside of containers because of absolute paths.
 if [ -z "$DAQ_CONTAINER" ]; then
-    # Can't use virtualenv inside of containers because of absolute paths.
-    $AG install virtualenv || $AG install python-virtualenv
-    pip install virtualenv
-    virtualenv venv
     source venv/bin/activate
 fi
 
-# Python extension packages.
-pip install --index-url=https://pypi.python.org/simple \
+echo Installing python dependencies...
+$PIP install --index-url=https://pypi.python.org/simple pylint \
     netifaces pyyaml codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
 
-# Hack to make pylint happy.
-if [ -d venv ]; then
-    touch venv/lib/python2.7/site-packages/google/__init__.py
-    touch venv/lib/python2.7/site-packages/google/cloud/__init__.py
-fi
-
 if [ -d mininet ]; then
-    echo mininet already installed, skipping.
+    echo Checking mininet version matches $MININETV...
+    targetrev=$(cd mininet; git rev-parse $MININETV)
+    instrev=$(cd mininet; git rev-parse HEAD)
+    if [ "$targetrev" != "$instrev" ]; then
+        echo Target mininet version $MININETV does not match installed version.
+        false
+    fi
 else
     echo Cloning $MININET $MININETV...
     git clone $MININET -b $MININETV --single-branch --depth 1
