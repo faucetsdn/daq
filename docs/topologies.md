@@ -2,7 +2,7 @@
 
 ## General Setup
 
-The operational network configuration is supplied by a [FAUCET config file](docs/faucet.md)
+The operational network configuration is supplied by a [FAUCET config file](faucet.md)
 (as indicated by the `network_config` configuration option in `system.conf`).
 The general mechanism for setting up a particular topology is:
 1. Copy `misc/system.conf` and `misc/faucet.yaml` to the `local/` subdirectory (creating if needed).
