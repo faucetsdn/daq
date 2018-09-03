@@ -1,0 +1,10 @@
+{
+  "macAddrs": {
+    "9a:02:57:1e:8f:01": {
+      "type": "lightbulb"
+    },
+    "9a:02:57:1e:8f:02": {
+      "type": "telnet"
+    }
+  }
+}

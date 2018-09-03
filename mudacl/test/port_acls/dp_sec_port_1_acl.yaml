@@ -1,0 +1,66 @@
+---
+acls:
+  dp_sec_port_1_acl:
+  - rule:
+      description: "MUD lightbulb mqtt-frdev"
+      dl_type: "0x0800"
+      dl_src: "9a:02:57:1e:8f:01"
+      nw_proto: 6
+      nw_dst: "69.172.200.235"
+      tcp_dst: 443
+      actions:
+        allow: 1
+  - rule:
+      description: "MUD lightbulb ssh-frdev"
+      dl_type: "0x0800"
+      dl_src: "9a:02:57:1e:8f:01"
+      nw_proto: 6
+      nw_dst: "69.172.200.235"
+      tcp_src: 23
+      actions:
+        allow: 1
+  - rule:
+      description: "MUD lightbulb bacnet"
+      dl_type: "0x0800"
+      dl_src: "9a:02:57:1e:8f:01"
+      nw_proto: 17
+      nw_dst: "@ctrl:bacnet"
+      udp_src: 47808
+      udp_dst: 47808
+      actions:
+        allow: 1
+  - rule:
+      description: "ICMP Allow"
+      dl_type: "0x0800"
+      nw_proto: 1
+      actions:
+        allow: 1
+  - rule:
+      description: "ARP Allow"
+      dl_type: "0x0806"
+      actions:
+        allow: 1
+  - rule:
+      description: "DHCP Allow"
+      dl_type: "0x0800"
+      nw_proto: 17
+      udp_src: 68
+      udp_dst: 67
+      actions:
+        allow: 1
+  - rule:
+      description: "DNS Allow"
+      dl_type: "0x0800"
+      nw_proto: 17
+      udp_dst: 53
+      actions:
+        allow: 1
+  - rule:
+      description: "DHCP Broadcast"
+      dl_type: "0x0800"
+      dl_dst: "ff:ff:ff:ff:ff:ff"
+      nw_proto: 17
+      udp_src: 68
+      udp_dst: 67
+      actions:
+        allow: 1

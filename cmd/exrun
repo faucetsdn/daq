@@ -84,7 +84,7 @@ function DAQ {
     $@
 }
 
-fgrep 'description: DAQ autostart ' $network_config | while read line; do
+grep -e '^\s*description: DAQ autostart\s' $network_config | while read line; do
     autostart $line
 done
 

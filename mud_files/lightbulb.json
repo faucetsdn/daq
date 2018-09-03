@@ -11,6 +11,9 @@
         "access-list": [
           {
             "name": "mud-76100-fr"
+          },
+          {
+            "name": "bacnet"
           }
         ]
       }
@@ -20,6 +23,9 @@
         "access-list": [
           {
             "name": "mud-76100-to"
+          },
+          {
+            "name": "bacnet"
           }
         ]
       }
@@ -33,7 +39,7 @@
         "aces": {
           "ace": [
             {
-              "name": "cl0-todev",
+              "name": "mqtt-todev",
               "matches": {
                 "ipv4": {
                   "ietf-acldns:src-dnsname": "test.com",
@@ -50,6 +56,25 @@
               "actions": {
                 "forwarding": "accept"
               }
+            },
+            {
+              "name": "ssh-todev",
+              "matches": {
+                "ipv4": {
+                  "ietf-acldns:src-dnsname": "test.com",
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 23
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
             }
           ]
         }
@@ -60,7 +85,7 @@
         "aces": {
           "ace": [
             {
-              "name": "cl0-frdev",
+              "name": "mqtt-frdev",
               "matches": {
                 "ipv4": {
                   "ietf-acldns:dst-dnsname": "test.com",
@@ -79,8 +104,38 @@
               }
             },
             {
-              "name": "bacnet-from",
+              "name": "ssh-frdev",
               "matches": {
+                "ipv4": {
+                  "ietf-acldns:dst-dnsname": "test.com",
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 23
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "bacnet",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "bacnet",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "bacnet"
+                },
                 "ipv4": {
                   "protocol": 17
                 },

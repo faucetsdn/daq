@@ -75,7 +75,7 @@ if [ -n "$in_container" ]; then
 fi
 
 mkdir -p local
-date > local/last_build.txt
+sudo date > local/last_build.txt
 sudo rm -rf $build_root
 mkdir -p $build_root
 

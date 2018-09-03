@@ -73,8 +73,9 @@ public class MudSpec {
 
   static class Matches {
     @JsonProperty("ietf-mud:mud")
-    public MudMatch mudMatch;
+    public MudMatch mud;
     public NwSpec ipv4;
+    public NwSpec ipv6;
     public TpSpec tcp;
     public TpSpec udp;
   }
@@ -93,7 +94,7 @@ public class MudSpec {
 
   static class TpSpec {
     @JsonProperty("ietf-mud:direction-initiated")
-    public String direction;
+    public String directionInitiated;
 
     @JsonProperty("source-port")
     public PortSpec sourcePort;
@@ -105,6 +106,12 @@ public class MudSpec {
   static class PortSpec {
     public String operator;
     public Integer port;
+
+    @JsonProperty("lower-port")
+    public Integer lowerPort;
+
+    @JsonProperty("upper-port")
+    public Integer upperPort;
   }
 
   static class Actions {

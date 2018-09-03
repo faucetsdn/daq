@@ -16,10 +16,11 @@ class _STATE():
     """Host state enum for testing cycle"""
     ERROR = 'Error condition'
     INIT = 'Initizalization'
+    READY = 'Ready but not active'
     ACTIVE = 'Activated device'
     BASE = 'Baseline tests'
     MONITOR = 'Network monitor'
-    READY = 'Ready for next'
+    NEXT = 'Ready for next'
     TESTING = 'Active test'
     DONE = 'Done with sequence'
     TERM = 'Host terminated'
@@ -45,7 +46,8 @@ class ConnectedHost():
         self.run_id = '%06x' % int(time.time())
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
         self.state = None
-        self._state_transition(_STATE.INIT)
+        self.no_test = config.get('no_test', False)
+        self._state_transition(_STATE.READY if self.no_test else _STATE.INIT)
         self.results = {}
         self.dummy = None
         self.running_test = None
@@ -65,9 +67,12 @@ class ConnectedHost():
         time.sleep(2)
         shutil.rmtree(self.tmpdir, ignore_errors=True)
         os.makedirs(self.scan_base)
-        self.record_result('startup')
-        self.record_result('sanity', state='run')
-        self._startup_scan()
+        if self.no_test:
+            self.record_result('ready')
+        else:
+            self.record_result('startup')
+            self.record_result('sanity', state='run')
+            self._startup_scan()
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
@@ -190,7 +195,7 @@ class ConnectedHost():
         LOGGER.info('Target port %d monitor scan complete', self.target_port)
         self._monitor_cleanup(forget=False)
         self.record_result('monitor')
-        self._state_transition(_STATE.READY, _STATE.MONITOR)
+        self._state_transition(_STATE.NEXT, _STATE.MONITOR)
         self._run_next_test()
 
     def _base_tests(self):
@@ -212,11 +217,11 @@ class ConnectedHost():
             self._docker_test(self.remaining_tests.pop(0))
         else:
             LOGGER.info('Target port %d no more tests remaining', self.target_port)
-            self._state_transition(_STATE.DONE, _STATE.READY)
+            self._state_transition(_STATE.DONE, _STATE.NEXT)
             self.record_result('finish')
 
     def _docker_test(self, test_name):
-        self._state_transition(_STATE.TESTING, _STATE.READY)
+        self._state_transition(_STATE.TESTING, _STATE.NEXT)
         self.record_result(test_name, state='run')
         params = {
             'target_ip': self.target_ip,
@@ -248,7 +253,7 @@ class ConnectedHost():
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, exception)
         else:
-            self._state_transition(_STATE.READY, _STATE.TESTING)
+            self._state_transition(_STATE.NEXT, _STATE.TESTING)
             self._run_next_test()
 
     def record_result(self, name, **kwargs):

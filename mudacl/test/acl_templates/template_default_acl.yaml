@@ -1,0 +1,4 @@
+---
+acls:
+  '@from:template_default_acl': []
+  '@to:template_default_acl': []

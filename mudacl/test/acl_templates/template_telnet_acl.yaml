@@ -1,0 +1,22 @@
+---
+acls:
+  '@from:template_telnet_acl':
+  - rule:
+      description: "MUD telnet ent0-frdev"
+      dl_type: "0x0800"
+      dl_src: "@mac:telnet"
+      nw_proto: 6
+      nw_dst: "@ctrl:remote-host"
+      tcp_src: 23
+      actions:
+        allow: 1
+  '@to:template_telnet_acl':
+  - rule:
+      description: "MUD telnet ent0-todev"
+      dl_type: "0x0800"
+      dl_dst: "@mac:telnet"
+      nw_proto: 6
+      nw_src: "@ctrl:remote-host"
+      tcp_dst: 23
+      actions:
+        allow: 1

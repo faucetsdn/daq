@@ -1,0 +1,47 @@
+---
+acls:
+  dp_sec_port_2_acl:
+  - rule:
+      description: "MUD telnet ent0-frdev"
+      dl_type: "0x0800"
+      dl_src: "9a:02:57:1e:8f:02"
+      nw_proto: 6
+      nw_dst: "@ctrl:remote-host"
+      tcp_src: 23
+      actions:
+        allow: 1
+  - rule:
+      description: "ICMP Allow"
+      dl_type: "0x0800"
+      nw_proto: 1
+      actions:
+        allow: 1
+  - rule:
+      description: "ARP Allow"
+      dl_type: "0x0806"
+      actions:
+        allow: 1
+  - rule:
+      description: "DHCP Allow"
+      dl_type: "0x0800"
+      nw_proto: 17
+      udp_src: 68
+      udp_dst: 67
+      actions:
+        allow: 1
+  - rule:
+      description: "DNS Allow"
+      dl_type: "0x0800"
+      nw_proto: 17
+      udp_dst: 53
+      actions:
+        allow: 1
+  - rule:
+      description: "DHCP Broadcast"
+      dl_type: "0x0800"
+      dl_dst: "ff:ff:ff:ff:ff:ff"
+      nw_proto: 17
+      udp_src: 68
+      udp_dst: 67
+      actions:
+        allow: 1

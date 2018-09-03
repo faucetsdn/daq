@@ -3,11 +3,26 @@
 # Simple helper script to run the prototype MUD ACL generator.
 #
 
+SYSCONF=local/system.conf
 ROOT=$(dirname $0)/..
+
+mud_files=mud_files/
+acl_templates=inst/acl_templates
 
 DEVICE_SPECS_FILE=device_specs.json
 
 cd $ROOT
+
+echo Running regression test.
+mkdir -p build/acl_templates/
+mudacl/bin/run.sh $mud_files build/acl_templates/
+diff -r build/acl_templates/ mudacl/test/acl_templates/
+echo Regression passed.
+
+if [ -f $SYSCONF ]; then
+    echo Loading configuration from $SYSCONF...
+    source $SYSCONF
+fi
 
 test -d inst/ || mkdir inst
 touch inst/ || sudo chown $USER inst
@@ -20,6 +35,6 @@ mkdir inst/acl_templates
 rm -rf inst/port_acls
 mkdir inst/port_acls
 
-mudacl/bin/run.sh
+mudacl/bin/run.sh $mud_files $acl_templates
 
 ls -l inst/acl_templates inst/port_acls inst/$DEVICE_SPECS_FILE

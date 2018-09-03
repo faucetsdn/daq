@@ -1,4 +1,4 @@
-## MUD ACL generator prototype
+## MUD ACL Generator Prototype
 
 The MUD ACL generator prototoype combines
 [IETF MUD files](https://datatracker.ietf.org/doc/draft-ietf-opsawg-mud/)
@@ -9,10 +9,10 @@ development mode (see [build documentation](build.md)). Everything here is subje
 Initially, this only provides a limited subset of
 policy enforcement; additional restrictions will manifest as the system improves.
 
-The basic combinator application (invoked with `bin/mudacl`) combines the system configuration
-(`inst/faucet.yaml`) with a set of pre-defined MUD files (`mud_files/`). The script will output
-compiled results into the `inst/acl_templates/` directory (and also does some other basic
-system setup tasks).
+The basic combinator application (invoked with `bin/mudacl`) processes the set of MUD files
+contained in the directory specified by the `mud_files` config parameter (defaults to `mud_files/`)
+and generates a set of ACL templates in `inst/acl_templates`. To work with a custom set of MUD files,
+edit `local/system.conf` and specify a different `mud_files` source directory, e.g. `local/test_devices/`.
 
 If there is a device type configuration file (`inst/device_types.json`), the runtime system
 will monitor for referenced devices and apply the resolved ACL files appropriately.

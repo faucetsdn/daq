@@ -36,9 +36,9 @@ class DAQRunner():
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
         self.faucet_events = None
-        self.single_shot = config.get('single_shot')
-        self.event_trigger = config.get('event_trigger')
-        self.fail_mode = config.get('fail_mode')
+        self.single_shot = config.get('single_shot', False)
+        self.event_trigger = config.get('event_trigger', False)
+        self.fail_mode = config.get('fail_mode', False)
         self.run_tests = True
         self.stream_monitor = None
         self.exception = None
@@ -231,7 +231,9 @@ class DAQRunner():
             LOGGER.error('Target port %d gateway error %s', target_port, str(e))
             return False
 
+
         try:
+            self.run_count += 1
             new_host = connected_host.ConnectedHost(self, gateway.host, target, self.config)
             self.mac_targets[target_mac] = new_host
             self.port_targets[target_port] = new_host
@@ -353,7 +355,6 @@ class DAQRunner():
             del self.port_gateways[target_port]
             target_mac = self.active_ports[target_port]
             del self.mac_targets[target_mac]
-            self.run_count += 1
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
@@ -369,7 +370,7 @@ class DAQRunner():
             if self.single_shot and self.run_tests:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self.run_tests = False
-        LOGGER.info('Remaining target sets: %s', self.port_targets.keys())
+        LOGGER.info('Remaining target sets: %s', list(self.port_targets.keys()))
 
     def _detach_gateway(self, target_port, target_mac, target_gateway):
         if not target_gateway.detach_target(target_port):

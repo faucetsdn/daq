@@ -7,7 +7,7 @@
 #
 
 ROOT=$(dirname $0)/..
-FAUCET=https://github.com/faucetsdn/faucet.git
+FAUCET=https://github.com/grafnu/faucet.git
 FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
 MININETV=2.3.0d3
@@ -76,9 +76,10 @@ if [ -d mininet ]; then
     fi
 else
     echo Cloning $MININET $MININETV...
-    git clone $MININET -b $MININETV --single-branch --depth 1
+    git clone $MININET
     (
         cd mininet
+        git reset --hard $MININETV
         for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
@@ -93,6 +94,5 @@ elif [ -z "$FAUCETV" ]; then
 else
     echo Cloning $FAUCET $FAUCETV...
     git clone -n $FAUCET faucet
-    (cd faucet; git checkout $FAUCETV)
+    (cd faucet; git checkout -b daq-local; git reset --hard $FAUCETV)
 fi
-

@@ -15,7 +15,6 @@ class DhcpMonitor():
     DHCP_TYPE_PATTERN = 'DHCP-Message Option 53, length 1: ([a-zA-Z]+)'
     DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-z0-9:]+)'
     DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_IP_PATTERN, DHCP_TYPE_PATTERN, DHCP_MAC_PATTERN)
-    DHCP_TIMEOUT_SEC = 240
     DHCP_THRESHHOLD_SEC = 120
 
     def __init__(self, runner, host, callback, log_file=None):
@@ -41,7 +40,7 @@ class DhcpMonitor():
         # Because there's buffering somewhere, can't reliably filter out DHCP with "src port 67"
         tcp_filter = ""
         helper = tcpdump_helper.TcpdumpHelper(self.host, tcp_filter, packets=None,
-                                              timeout=self.DHCP_TIMEOUT_SEC, blocking=False)
+                                              timeout=None, blocking=False)
         self.dhcp_traffic = helper
         self.runner.monitor_stream(self.name, self.dhcp_traffic.stream(),
                                    self._dhcp_line, hangup=self._dhcp_hangup,

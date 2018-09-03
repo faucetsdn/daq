@@ -7,28 +7,41 @@ import com.google.daq.orchestrator.mudacl.AclHelper.PortAcl;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.MacIdentifier;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.Placement;
 import com.google.daq.orchestrator.mudacl.DeviceTypes.DeviceClassifier;
+import com.google.daq.orchestrator.mudacl.SwitchTopology.Ace;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Acl;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Interface;
+import com.google.daq.orchestrator.mudacl.SwitchTopology.Rule;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 
 public class MudAclGenerator {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory())
+  private static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory())
+      .setSerializationInclusion(Include.NON_NULL);
+  private static final ObjectMapper JSON_MAPPER = new ObjectMapper()
       .setSerializationInclusion(Include.NON_NULL);
 
   private static final String ACL_NAME_FORMAT = "%s_acl";
   private static final String ACL_FILE_FORMAT = "%s.yaml";
-  private static final String SRC_MAC_TEMPLATE_PREFIX = "@src_mac:";
-  private static final String SRC_MAC_TEMPLATE_FORMAT = SRC_MAC_TEMPLATE_PREFIX + "%s";
-  private static final String ACL_TEMPLATE_FORMAT = "@acl:%s";
+  private static final String MAC_TEMPLATE_PREFIX = "@mac:";
+  private static final String MAC_TEMPLATE_FORMAT = MAC_TEMPLATE_PREFIX + "%s";
+  private static final String FROM_TEMPLATE_FORMAT = "@from:%s";
+  private static final String TO_TEMPLATE_FORMAT = "@to:%s";
   private static final String BASELINE_KEYWORD = "baseline";
   private static final String RAW_ACL_KEYWORD = "raw";
   private static final int SYSTEM_ERROR_RETURN = -1;
+  private static final byte[] NEWLINE_BYTES = "\n".getBytes();
+  private static final File ERROR_RESULT_FILE = new File("build/mud_errors.json");
+  private static final String UPSTREAM_ACL_FORMAT = "dp_%s_upstream";
 
   private DeviceTopology deviceTopology;
   private SwitchTopology switchTopology;
@@ -44,12 +57,12 @@ public class MudAclGenerator {
       }
       MudAclGenerator generator = new MudAclGenerator();
       generator.setAclProvider(new MudConverter(new File(argv[0])));
-      writePortAcls(new File(argv[1]), generator.makePortAclMap());
+      writePortAcls(new File(argv[1]), prettyErrors(generator::makePortAclMap));
       if (argv.length > 2) {
-        generator.setSwitchTopology(OBJECT_MAPPER.readValue(new File(argv[2]), SwitchTopology.class));
-        generator.setDeviceTypes(OBJECT_MAPPER.readValue(new File(argv[3]), DeviceTypes.class));
+        generator.setSwitchTopology(YAML_MAPPER.readValue(new File(argv[2]), SwitchTopology.class));
+        generator.setDeviceTypes(YAML_MAPPER.readValue(new File(argv[3]), DeviceTypes.class));
         generator
-            .setDeviceTopology(OBJECT_MAPPER.readValue(new File(argv[4]), DeviceTopology.class));
+            .setDeviceTopology(YAML_MAPPER.readValue(new File(argv[4]), DeviceTopology.class));
         writePortAcls(new File(argv[5]), generator.makePortAclMap());
       }
     } catch (ExpectedException e) {
@@ -61,9 +74,66 @@ public class MudAclGenerator {
     }
   }
 
+  private static <T> T prettyErrors(Callable<T> input) {
+    try {
+      return input.call();
+    } catch (Exception e) {
+      try {
+        ErrorTree errorTree = formatError(e, "", "  ", System.err);
+        System.err.println("Writing errors to " + ERROR_RESULT_FILE.getAbsolutePath());
+        JSON_MAPPER.writeValue(ERROR_RESULT_FILE, errorTree);
+      } catch (Exception e2) {
+        throw new RuntimeException("While pretty-printing errors", e2);
+      }
+      throw new ExpectedException(e);
+    }
+  }
+
+  private static ErrorTree formatError(Throwable e, final String prefix,
+      final String indent, OutputStream outputStream) {
+    final ErrorTree errorTree = new ErrorTree();
+    try {
+      errorTree.message = e.getMessage();
+      outputStream.write(prefix.getBytes());
+      outputStream.write(errorTree.message.getBytes());
+      outputStream.write(NEWLINE_BYTES);
+    } catch (IOException ioe) {
+      throw new ExpectedException(ioe);
+    }
+    final String newPrefix = prefix + indent;
+    if (e instanceof ExceptionMap) {
+      ((ExceptionMap) e).forEach(
+          (key, sub) -> errorTree.causes.put(key, formatError(sub, newPrefix, indent, outputStream)));
+    } else if (e.getCause() != null) {
+      errorTree.cause = formatError(e.getCause(), newPrefix, indent, outputStream);
+    }
+    if (errorTree.causes.isEmpty()) {
+      errorTree.causes = null;
+    }
+    return errorTree;
+  }
+
+  static class ErrorTree {
+    public String message;
+    public ErrorTree cause;
+    public Map<String, ErrorTree> causes = new TreeMap<>();
+  }
+
   static class ExpectedException extends RuntimeException {
     ExpectedException(Exception e) {
       super(e);
+    }
+  }
+
+  static class ExceptionMap extends RuntimeException {
+    final Map<String, Exception> exceptions;
+    ExceptionMap(String description, Map<String, Exception> exceptions) {
+      super(description);
+      this.exceptions = exceptions;
+    }
+
+    public void forEach(BiConsumer<String, Exception> consumer) {
+      exceptions.forEach(consumer);
     }
   }
 
@@ -73,80 +143,131 @@ public class MudAclGenerator {
           new FileNotFoundException("Missing output directory " + outputDir.getAbsolutePath()));
     }
     System.out.println("Writing output files to " + outputDir.getAbsolutePath());
-    for (Entry<String, PortAcl> entry: portAclMap.entrySet()) {
-      try {
-        Placement placement = entry.getValue().placement;
-        String aclName = makeAclName(placement);
+    Map<String, Acl> upstreamAcls = new HashMap<>();
+    try {
+      for (Entry<String, PortAcl> entry: portAclMap.entrySet()) {
+        PortAcl portAcl = entry.getValue();
+        Placement placement = portAcl.placement;
+        String aclName = makeAclName(placement.edgeName());
         File outFile = new File(outputDir, String.format(ACL_FILE_FORMAT, aclName));
-        OBJECT_MAPPER.writeValue(outFile, makeAclInclude(aclName, entry.getValue().acl, placement.isTemplate()));
-      } catch (Exception e) {
-        throw new ExpectedException(e);
+        YAML_MAPPER.writeValue(outFile, makeAclInclude(aclName, portAcl));
+        if (!placement.isTemplate()) {
+          upstreamAcls.computeIfAbsent(placement.dpName, key -> new Acl()).addAll(portAcl.upstreamAcl);
+        }
       }
+      for (String dpName : upstreamAcls.keySet()) {
+        String aclName = String.format(UPSTREAM_ACL_FORMAT, dpName);
+        File outFile = new File(outputDir, String.format(ACL_FILE_FORMAT, aclName));
+        YAML_MAPPER.writeValue(outFile, makeUpstreamInclude(aclName, upstreamAcls.get(dpName)));
+      }
+    } catch (Exception e) {
+      throw new ExpectedException(e);
     }
   }
 
-  private static String makeAclName(Placement placement) {
-    return String.format(ACL_NAME_FORMAT, placement.toString());
+  private static String makeAclName(String root) {
+    return String.format(ACL_NAME_FORMAT, root);
   }
 
-  private static SwitchTopology makeAclInclude(String aclName, Acl value, boolean isTemplate) {
+  private static SwitchTopology makeUpstreamInclude(String aclName, Acl aces) {
     SwitchTopology topology = new SwitchTopology();
     topology.dps = null;
     topology.vlans = null;
-    String aclKeyValue = isTemplate ? String.format(ACL_TEMPLATE_FORMAT, aclName) : aclName;
-    topology.acls.put(aclKeyValue, value);
+    topology.acls.put(aclName, aces);
+    return topology;
+  }
+
+  private static SwitchTopology makeAclInclude(String aclName, PortAcl portAcl) {
+    SwitchTopology topology = new SwitchTopology();
+    topology.dps = null;
+    topology.vlans = null;
+    boolean isTemplate = portAcl.placement.isTemplate();
+    String fromKeyValue = isTemplate ? String.format(FROM_TEMPLATE_FORMAT, aclName) : aclName;
+    topology.acls.put(fromKeyValue, portAcl.edgeAcl);
+    if (isTemplate) {
+      topology.acls.put(String.format(TO_TEMPLATE_FORMAT, aclName), portAcl.upstreamAcl);
+    }
     return topology;
   }
 
   private Map<String,PortAcl> makePortAclMap() {
     Map<String, PortAcl> portAclMap = new TreeMap<>();
     Map<MacIdentifier, Placement> targetMap = getDeviceTargetMap();
+    Map<String, Exception> errors = new TreeMap<>();
     for (Entry<MacIdentifier, Placement> target : targetMap.entrySet()) {
-      Placement placement = validatePlacement(target.getValue());
-      String aclName = placement.toString();
-      PortAcl portAcl = portAclMap.computeIfAbsent(aclName, (baseName) -> new PortAcl(placement, new Acl()));
       MacIdentifier targetSrc = target.getKey();
       DeviceClassifier classifier = getDeviceClassifier(targetSrc);
-      portAcl.acl.addAll(aclProvider.makeEdgeAcl(targetSrc, classifier));
+      try {
+        Placement placement = validatePlacement(target.getValue());
+        String aclName = placement.edgeName();
+        PortAcl portAcl = portAclMap
+            .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement));
+        portAcl.edgeAcl.addAll(aclSanity(aclProvider.makeEdgeAcl(classifier, targetSrc), true));
+        portAcl.upstreamAcl.addAll(aclSanity(aclProvider.makeUpstreamAcl(classifier, targetSrc), false));
+      } catch (Exception e) {
+        errors.put(classifier.type, e);
+      }
+    }
+    if (!errors.isEmpty()) {
+      String description = errors.size() + " type errors";
+      throw new ExceptionMap(description, errors);
     }
     if (isTemplate()) {
       addTemplateEntries(portAclMap);
     } else {
       for (PortAcl portAcl : portAclMap.values()) {
-        AclHelper.addBaselineRules(portAcl.acl);
+        AclHelper.addBaselineRules(portAcl.edgeAcl);
       }
     }
     return portAclMap;
+  }
+
+  private Collection<Ace> aclSanity(Acl aces, boolean isEdge) {
+    for (Ace ace : aces) {
+      Rule rule = ace.rule;
+      boolean validDstPort = (rule.nw_proto == AclHelper.IP_PROTO_TCP ? rule.tcp_dst : rule.udp_dst) != null;
+      boolean validDstAddr = rule.nw_dst != null;
+      boolean validSrcPort = (rule.nw_proto == AclHelper.IP_PROTO_TCP ? rule.tcp_src : rule.udp_src) != null;
+      boolean validSrcAddr = rule.nw_src != null;
+      boolean validPort = validDstPort || validSrcPort;
+      if (!isEdge || validDstPort || validDstAddr) {
+        continue;
+      }
+      throw new RuntimeException("Cowardly refusing to create wildcarded ACL " + rule.description);
+    }
+    return aces;
   }
 
   private void addTemplateEntries(Map<String, PortAcl> portAclMap) {
     {
       Placement placement = new Placement();
       placement.dpName = RAW_ACL_KEYWORD;
-      String aclName = placement.toString();
+      String aclName = placement.edgeName();
       PortAcl portAcl = portAclMap
-          .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement, new Acl()));
-      AclHelper.addRawRules(portAcl.acl);
+          .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement));
+      AclHelper.addRawRules(portAcl.edgeAcl);
     }
 
     {
       Placement placement = new Placement();
       placement.dpName = BASELINE_KEYWORD;
-      String aclName = placement.toString();
+      String aclName = placement.edgeName();
       PortAcl portAcl = portAclMap
-          .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement, new Acl()));
-      AclHelper.addBaselineRules(portAcl.acl);
+          .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement));
+      AclHelper.addBaselineRules(portAcl.edgeAcl);
     }
   }
 
   private DeviceClassifier getDeviceClassifier(MacIdentifier targetSrc) {
     String targetSrcStr = targetSrc.toString();
-    if (targetSrcStr.startsWith(SRC_MAC_TEMPLATE_PREFIX)) {
-      String templateName = targetSrcStr.substring(SRC_MAC_TEMPLATE_PREFIX.length(),
+    if (targetSrcStr.startsWith(MAC_TEMPLATE_PREFIX)) {
+      String templateName = targetSrcStr.substring(MAC_TEMPLATE_PREFIX.length(),
           targetSrcStr.length());
       return DeviceTypes.templateClassifier(templateName);
     } else {
-      return deviceTypes.macAddrs.get(targetSrc);
+      DeviceClassifier defaultClassifier = DeviceTypes.templateClassifier("default");
+      Map<MacIdentifier, DeviceClassifier> macAddrs = deviceTypes.macAddrs;
+      return macAddrs.containsKey(targetSrc) ? macAddrs.get(targetSrc) : defaultClassifier;
     }
   }
 
@@ -161,7 +282,7 @@ public class MudAclGenerator {
   private Map<MacIdentifier,Placement> makeTemplateDeviceTargetMap() {
     Map<MacIdentifier, Placement> templateMap = new HashMap<>();
     for (String targetType : aclProvider.targetTypes()) {
-      String templateMac = String.format(SRC_MAC_TEMPLATE_FORMAT, targetType);
+      String templateMac = String.format(MAC_TEMPLATE_FORMAT, targetType);
       Placement templatePlacement = new Placement();
       templatePlacement.dpName = targetType;
       templateMap.put(new MacIdentifier(templateMac), templatePlacement);
@@ -181,7 +302,7 @@ public class MudAclGenerator {
     if (port == null) {
       throw new IllegalArgumentException("Invalid port for " + value);
     }
-    if (!makeAclName(value).equals(port.acl_in)) {
+    if (!makeAclName(value.edgeName()).equals(port.acl_in)) {
       throw new IllegalArgumentException("Bad acl_in " + port.acl_in + " for " + value);
     }
     return value;

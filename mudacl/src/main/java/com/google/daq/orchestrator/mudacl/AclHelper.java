@@ -67,11 +67,13 @@ final class AclHelper {
 
   static class PortAcl {
     final Placement placement;
-    final Acl acl;
+    final Acl edgeAcl;
+    final Acl upstreamAcl;
 
-    PortAcl(Placement placement, Acl acl) {
+    PortAcl(Placement placement) {
       this.placement = placement;
-      this.acl = acl;
+      this.edgeAcl = new Acl();
+      this.upstreamAcl = new Acl();
     }
   }
 }

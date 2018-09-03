@@ -1,0 +1,13 @@
+---
+acls:
+  '@from:template_raw_acl':
+  - rule:
+      description: "DHCP Broadcast"
+      dl_type: "0x0800"
+      dl_dst: "ff:ff:ff:ff:ff:ff"
+      nw_proto: 17
+      udp_src: 68
+      udp_dst: 67
+      actions:
+        allow: 1
+  '@to:template_raw_acl': []

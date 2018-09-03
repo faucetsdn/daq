@@ -37,7 +37,7 @@
               "name": "ent0-todev",
               "matches": {
                 "ietf-mud:mud": {
-                  "controller": "http://telnet-host.com"
+                  "controller": "remote-host"
                 },
                 "ipv4": {
                   "protocol": 6
@@ -66,7 +66,7 @@
               "name": "ent0-frdev",
               "matches": {
                 "ietf-mud:mud": {
-                  "controller": "http://telnet-host.com"
+                  "controller": "remote-host"
                 },
                 "ipv4": {
                   "protocol": 6

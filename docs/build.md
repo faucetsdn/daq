@@ -1,35 +1,20 @@
 # Building DAQ
 
-You shouldn't need to do this unless you're doing active development on DAQ itself. Doing this
-will require installing more prerequisites that aren't indicated above. See
-<code>bin/setup_dev</code> or <code>docker/Docker.base</code> for details on what is installed.
-In addition to standard packages, this will also install specific versions of <code>mininet</code>
-and <code>FAUCET</code> that are "tied" to this specific build (but, you will have to manually
-update them in the fugure).
+Building DAQ is only required if you are doing active development on DAQ itself (or using head-of
+branch features); it will require installing more prerequisites that aren't indicated above.
+In addition to some standard packages, it requires specific versions of <code>mininet</code>
+and <code>FAUCET</code> that are tied to this specific build (but, you will have to manually
+update them in the future).
 
-To build containers for basic execution, which can take a long time:
+<code>$ <b>bin/setup_dev</b></code> # Setup of basic dev environment dependencies.
 
-<pre>
-  $ <b>cmd/build</b>
-</pre>
+<code>$ <b>cmd/build</b></code> # Build internal docker images.
 
-To run the development version, use the simple executor-run command:
+<code>$ <b>cmd/exrun</b></code> # Run development version rather than <code>cmd/run</code>
 
-<pre>
-  $ <b>cmd/exrun</b>
-</pre>
+<code>$ <b>cmd/clean</b></code> # Clean up basic docker images.
 
-If needed, build the runner container, which can take a <em>really</em> long time:
+<code>$ <b>bin/clean_dev</b></code> # Clean up development installs.
 
-<pre>
-  $ <b>cmd/inbuild</b>
-</pre>
-
-You can also clean all the stuffs:
-
-<pre>
-  $ <b>cmd/clean</b>
-</pre>
-
-...which is sometimes necessary to gaurintee a clean build.
-Be warned, it also might clean some other images/containers from other projects.
+Sadly, there's no "easy" way to know when you need to run what when, since they simply address
+different dependencies.

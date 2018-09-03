@@ -11,14 +11,15 @@ class FaucetTopology():
 
     DEFAULT_NETWORK_FILE = "misc/faucet.yaml"
     OUTPUT_NETWORK_FILE = "inst/faucet.yaml"
-    MAC_PLACEHOLDER = "@src_mac:"
+    MAC_PLACEHOLDER = "@mac:"
     DNS_PLACEHOLDER = "@dns:"
+    CONT_PLACEHOLDER = "@ctrl:"
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
     INST_FILE_PREFIX = "inst/"
     DP_ACL_FILE_FORMAT = "dp_%s_port_acls.yaml"
     PORT_ACL_FILE_FORMAT = "port_acls/dp_%s_port_%d_acl.yaml"
     TEMPLATE_FILE_FORMAT = "inst/acl_templates/template_%s_acl.yaml"
-    RULES_KEY_FORMAT = "@acl:template_%s_acl"
+    FROM_ACL_KEY_FORMAT = "@from:template_%s_acl"
     DEVICE_SPECS_FILE = "inst/device_specs.json"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
@@ -289,7 +290,7 @@ class FaucetTopology():
         template_acl = self._load_file(filename)
         if not template_acl:
             return False
-        template_key = self.RULES_KEY_FORMAT % template
+        template_key = self.FROM_ACL_KEY_FORMAT % template
         for acl in template_acl['acls'][template_key]:
             new_rule = acl['rule']
             self._resolve_template_field(new_rule, 'dl_src', target_mac=target_mac)
@@ -304,4 +305,6 @@ class FaucetTopology():
         if placeholder.startswith(self.MAC_PLACEHOLDER):
             rule[field] = target_mac
         elif placeholder.startswith(self.DNS_PLACEHOLDER):
+            del rule[field]
+        elif placeholder.startswith(self.CONT_PLACEHOLDER):
             del rule[field]

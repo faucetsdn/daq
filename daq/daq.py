@@ -25,6 +25,7 @@ FLAG_MAP = {
     'e': 'event_trigger',
     'f': 'fail_mode',
     'l': 'result_linger',
+    'n': 'no_test',
     's': 'single_shot'
 }
 

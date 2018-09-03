@@ -1,16 +1,18 @@
 #!/bin/bash -e
 
-ROOT=$(dirname $0)/..
+MUDACL=$(dirname $0)/..
 
-# Set of available mud files.
-MUD_DIR=mud_files/
+if [ $# != 2 ]; then
+    echo Usage: $0 [mud files directory] [acl template directory]
+    false
+fi
 
-# Output directory for runtime ACLs.
-TEMPLATE_DIR=inst/acl_templates
+mud_files=$1
+acl_templates=$2
 
-(cd $ROOT; ./gradlew shadow)
+(cd $MUDACL; ./gradlew shadow)
 
 echo
-echo Executing mudacl generator...
+echo Executing mudacl generator on $mud_files...
 
-java -jar $ROOT/build/libs/mudacl-1.0-SNAPSHOT-all.jar $MUD_DIR $TEMPLATE_DIR
+java -jar $MUDACL/build/libs/mudacl-1.0-SNAPSHOT-all.jar $mud_files $acl_templates
