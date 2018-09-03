@@ -24,7 +24,7 @@ this way except for the limitations of the host's USB subsystem. See the notes a
 the `misc/faucet.yaml` file for instructions on how to configure this setup.
 
 3. _Test Lab_: Use one external OpenFlow network switch detailed in the
-[test lab setup](docs/test_lab.md) documentation. This is primarily designed for testing small
+[test lab setup](test_lab.md) documentation. This is primarily designed for testing small
 sets of devices (~10) or specific hardware features (such as PoE).
 
 4. _Tiered_: Use a complete setup of multiple exteral network switches, sufficient for testing 100s
