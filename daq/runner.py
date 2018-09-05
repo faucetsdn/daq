@@ -58,7 +58,7 @@ class DAQRunner():
         self.gcp.publish_message('daq_runner', {
             'name': 'status',
             'tests': connected_host.ConnectedHost.TEST_ORDER,
-            'ports': self.active_ports.keys(),
+            'ports': list(self.active_ports.keys()),
             'description': self.description,
             'version': self.version,
             'timestamp': int(time.time()),

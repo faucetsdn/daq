@@ -63,6 +63,7 @@ if [ -z "$DAQ_CONTAINER" ]; then
 fi
 
 echo Installing python dependencies...
+$PIP install wheel
 $PIP install --index-url=https://pypi.python.org/simple pylint \
     netifaces pyyaml codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
 
