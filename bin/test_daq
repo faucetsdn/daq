@@ -25,6 +25,11 @@ if [ -n "$DAQ_MUD" ]; then
     bin/mudacl
 fi
 
+if [ -n "$DAQ_VALIDATE" ]; then
+    # Hack to work-around situations where output is not fully consumed.
+    validator/bin/test.sh || (sleep 10; false)
+fi
+
 if [ "$DAQ_BUILD" == in ]; then
     if [ -n "$runargs" ]; then
         echo Error -- build args must be first.
