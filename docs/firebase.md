@@ -3,16 +3,18 @@
 DAQ uses a simple Firebase-hosted web page to provide a dynamic dashboard
 of test results.
 
+0. There should be a GCP project that can be used to host everything.
 1. Goto the [Firebase Console](https://console.firebase.google.com/) and add a new project.
-2. Navigate to the Google Cloud Platform (GCP) service accounts page:
-   * From the service menu (gear icon), select the _Users and permissions_ option.
-   * Select the _SERVICE ACCOUNTS_ tab.
-   * Follow _Manage all service accounts_ link.
-3. From the IAM & admin page, create a new service account.
+   * Add the hosting GCP project to link it to this Firebase setup.
+2. Navigate to the
+[Google Cloud Platform (GCP) service accounts page]
+(https://console.cloud.google.com/iam-admin/serviceaccounts?project=atmosphere-gcp-dev)
+   * This is <em>not</em> from the Firebase page: it has to be from the base GCP page.
+   * Create a new service account.
    * Use a semi-meaningful name descriptive of the install, like 'daq-testing-lab'.
    * Add the _Pub/Sub Publisher_ role.
    * Furnish a new private key.
-4. Install the downloaded key into your install.
+4. Install the downloaded key into the DAQ install.
    * Copy the download JSON key file to the `daq/local/` directory.
    * Edit `daq/local/system.conf` to specify the `gcp_cred` setting to point to the downloaded file
      (with a path relative to the `daq/` install directory), e.g.

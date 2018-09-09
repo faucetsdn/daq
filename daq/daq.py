@@ -24,6 +24,7 @@ FLAG_MAP = {
     'd': 'debug_mode',
     'e': 'event_trigger',
     'f': 'fail_mode',
+    'h': 'show_help',
     'l': 'result_linger',
     'n': 'no_test',
     's': 'single_shot'
@@ -79,10 +80,20 @@ def _parse_args(args):
                 _read_config_into(arg, config)
     return config
 
+def _show_help():
+    print("Common run options:")
+    for option in FLAG_MAP:
+        print("  -%s: %s" % (option, FLAG_MAP[option]))
+    print("See system.conf for a detailed accounting of potential options.")
+
 def _execute():
     config = _parse_args(sys.argv)
     _configure_logging(config)
     LOGGER.info('configuration map: %s', config)
+
+    if 'show_help' in config:
+        _show_help()
+        return 0
 
     _write_pid_file()
 

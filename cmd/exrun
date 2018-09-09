@@ -13,6 +13,7 @@ LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
 network_config=$MISCDIR/$FAUCET_CONF
+skip_autostart=
 
 cd $ROOT
 
@@ -34,6 +35,10 @@ fi
 echo Release version $DAQ_VERSION
 echo Loading daq run configuration from $LOCAL_CONFIG
 source $LOCAL_CONFIG
+
+if [ "$1" == "-h" ]; then
+    skip_autostart=y
+fi
 
 for cmdarg in "$@"; do
     value=${cmdarg#network_config=}
@@ -84,9 +89,11 @@ function DAQ {
     $@
 }
 
-grep -e '^\s*description: DAQ autostart\s' $network_config | while read line; do
-    autostart $line
-done
+if [ -z "$skip_autostart" ]; then
+    grep -e '^\s*description: DAQ autostart\s' $network_config | while read line; do
+        autostart $line
+    done
+fi
 
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
