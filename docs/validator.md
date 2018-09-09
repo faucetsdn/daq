@@ -1,4 +1,4 @@
-# Validator Setip
+# Validator Setup
 
 The `validator` is a sub-component of DAQ that can be used to validate JSON files or stream against a schema
 defined by the standard [JSON Schema](https://json-schema.org/) format. There's a couple of different
