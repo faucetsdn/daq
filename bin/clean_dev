@@ -5,7 +5,7 @@ ROOT=$(dirname $0)/..
 for target in venv faucet mininet build inst; do
     dir=$ROOT/$target
     echo Cleaning $dir
-    rm -rf $dir || echo Clean failed, sudo clean!
+    rm -rf $dir || echo Clean failed, retrying with sudo...
     if [ -d $dir ]; then
         sudo rm -rf $dir
     fi

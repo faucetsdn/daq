@@ -79,6 +79,7 @@ function autostart {
     shift  # DAQ
     shift  # autostart
     tmp=`tempfile`
+    echo DAQ autostart $@
     eval $@ | tee $tmp
     grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file
 }

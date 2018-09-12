@@ -9,15 +9,13 @@ from mininet import node as mininet_node
 from mininet import net as mininet_net
 from mininet import link as mininet_link
 from mininet import cli as mininet_cli
-from clib import mininet_test_topo
 
 LOGGER = logging.getLogger('network')
 
-class DAQHost(mininet_test_topo.FaucetHostCleanup, mininet_node.Host):
+class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
     # pylint: disable=too-few-public-methods
     pass
-
 
 class DummyNode():
     """Dummy node used to handle shadow devices"""
