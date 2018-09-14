@@ -16,4 +16,4 @@ Useful long-form arguments (see `system.conf` file for a list of others):
 * `mininet_loglevel`: Set log-level for underlying mininet commands.
 * `run_limit`: Set number of test runs to do before exit.
 
-e.g.: `cmd/exrun daq_loglevel=debug run_limit=10`
+e.g.: `cmd/run daq_loglevel=debug run_limit=10`

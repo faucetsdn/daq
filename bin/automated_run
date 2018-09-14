@@ -5,8 +5,6 @@
 #
 # Some common options (ordered):
 #   debug:  Set daq and mininet loglevels to 'debug'
-#   image:  Use cmd/run instead of cmd/exrun.
-#   latest: Passed to runner, will use latest daq image (not versioned).
 #
 
 ROOT=$(realpath $(dirname $0)/..)
@@ -14,9 +12,8 @@ ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 auto_run=cmd/run
 auto_args=
-auto_log=inst/exrun-
+auto_log=inst/runlog-
 
-version=$(cat misc/RELEASE_VERSION)
 PIDFILE=inst/daq.pid
 SYSCONF=local/system.conf
 
@@ -28,22 +25,6 @@ fi
 if [ "$1" == debug ]; then
     auto_args+=" daq_loglevel=debug"
     auto_args+=" mininet_loglevel=debug"
-    shift
-fi
-
-if [ "$1" == image ]; then
-    auto_cmd=cmd/run
-    shift
-fi
-
-if [ "$1" == local ]; then
-    auto_cmd=cmd/exrun
-    shift
-fi
-
-if [ "$1" == latest ]; then
-    auto_args="latest $auto_args"
-    version=latest
     shift
 fi
 
@@ -70,7 +51,6 @@ fi
 sudo rm -rf inst
 mkdir -p inst
 
-echo Running version $version
 echo Running $auto_run $auto_args
 echo Logs in $ROOT/${auto_log}\*.log
 

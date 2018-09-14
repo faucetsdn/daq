@@ -33,7 +33,7 @@ allow telnet.
 ---
 > #faux_args="telnet"
 <b>~/daq$</b> sudo rm -rf inst/port_acls inst/device_types.json
-<b>~/daq$</b> sudo cmd/exrun -s > daq_open.log 2>&1
+<b>~/daq$</b> sudo cmd/run -s > daq_open.log 2>&1
 <b>~/daq$</b> fgrep template daq_open.log
 <b>~/daq$</b> cat inst/run-port-01/nodes/nmap01/tmp/open.txt
 23/open/tcp//telnet///
@@ -57,7 +57,7 @@ inst/port_acls:
 total 0
 <b>~/daq$</b> ls -l inst/device_types.json
 -rw-r--r-- 1 username primarygroup 140 Jul 31 15:38 inst/device_types.json
-<b>~/daq$</b> sudo cmd/exrun -s > daq_mud.log 2>&1
+<b>~/daq$</b> sudo cmd/run -s > daq_mud.log 2>&1
 <b>~/daq$</b> fgrep template daq_mud.log
 INFO:network:Processing acl template for 9a:02:57:1e:8f:01/lightbulb
 <b>~/daq$</b> cat inst/run-port-01/nodes/nmap01/tmp/open.txt
