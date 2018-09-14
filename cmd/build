@@ -35,7 +35,7 @@ if [ "$1" == inline ]; then
 fi
 
 if [ -f $local_config ]; then
-  echo Loading build configuraiton from $local_config
+  echo Loading build configuration from $local_config
   source $local_config
 fi
 
