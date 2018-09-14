@@ -26,7 +26,7 @@ fi
 FAUX_ARGS="$*"
 
 if [ -f $local_config ]; then
-  echo Loading faux configuraiton from $local_config
+  echo Loading faux configuration from $local_config
   source $local_config
 fi
 
