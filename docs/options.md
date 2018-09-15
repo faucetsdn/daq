@@ -32,7 +32,7 @@ into a switch port or adapter. This is the default <em>background</em> run
 state for continuous testing.
 
 `cmd/run -s`: Run tests <em>once</em> for each device, and then terminate when
-there are no more active tests. This represents an <em>imparitive</em> mode
+there are no more active tests. This represents an <em>imperative</em> mode
 when the goal is to "test this device right now."
 
 `cmd/run -n`: Activate a device so that it is on the network, but do not

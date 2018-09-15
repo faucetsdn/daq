@@ -47,7 +47,7 @@ or cloud credentials.)
 
 After a test run, the system creates a <em>test report document</em> in a file that is named
 something like `inst/report_<em>mac-address</em>.txt`. This file contains a complete summary
-of all the test results most germain to qualifying a device (but is not in iteself comprehensive).
+of all the test results most germane to qualifying a device (but is not in iteself comprehensive).
 
 ## Network Topologies
 
