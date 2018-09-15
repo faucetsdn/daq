@@ -30,4 +30,4 @@ $retry curl -fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key 
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable"
 
 $AG update
-$AG install openvswitch-switch openvswitch-common docker-ce
+$AG install openvswitch-switch openvswitch-common docker-ce openjdk-8-jdk
