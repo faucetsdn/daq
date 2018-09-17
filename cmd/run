@@ -1,145 +1,40 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-INSTDIR=$ROOT/inst/
-LOCALDIR=$ROOT/local/
-MISCDIR=$ROOT/misc/
-IMAGE=daqf/runner
-SYSTEM_CONF=system.conf
-LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
-DOCKER_STARTUP_TIMEOUT_MS=60000
-pull_docker=y
-docker_args=
-build=
-reuse=
-VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
-
-if [ -f $LOCAL_CONFIG ]; then
-    echo Loading container configuration from $LOCAL_CONFIG
-    source $LOCAL_CONFIG
-fi
-
-docker_args+="\
-  --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
-  --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
-  --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
+LOCAL_SYSTEM=local/system.conf
 
 cd $ROOT
 
-if [ "$1" == latest ]; then
-    pull_docker=n
-    VERSION=latest
+run_mode=$(cat misc/RELEASE_VERSION)
+run_args=
+
+if [ -f "$LOCAL_SYSTEM" ]; then
+    echo Loading config from $LOCAL_SYSTEM
+    source $LOCAL_SYSTEM
+else
+    echo No $LOCAL_SYSTEM found, using defaults.
+fi
+
+if [ "$1" == "local" ]; then
+    run_mode=local
     shift
 fi
 
-if [ "$1" == reuse ]; then
-    reuse=y
+if [ "$1" == "latest" ]; then
+    run_mode=latest
+    run_args=latest
     shift
 fi
 
-if [ "$1" == base -o "$1" == rebuild ]; then
-    if [ "$1" == base ]; then
-        IMAGE=daq/base
-        VERSION=latest
-    fi
-    build=y
-    pull_docker=n
-    docker_args+=" -v $PWD:/daq/"
-    shift
+if [ -z "$run_mode" ]; then
+    echo run_mode not defined.
+    false
 fi
 
-if [ "$1" == live ]; then
-    echo Mapping local daq live into runner process.
-    docker_args+=" -v $PWD:/root/daq"
-    shift
+echo run_mode is $run_mode
+
+if [ "$run_mode" == local ]; then
+    cmd/exrun $run_args "$@"
+else
+    cmd/inrun $run_args "$@"
 fi
-
-if [ "$1" == bash ]; then
-    docker_args+=" -ti --entrypoint /bin/bash"
-    shift
-fi
-
-mkdir -p $INSTDIR
-
-if [ -z "$reuse" ]; then
-   sudo docker rm -f daq-runner > /dev/null 2>&1 || true
-fi
-
-TARGET=$IMAGE:$VERSION
-
-docker_args+=" --env DAQ_CONTAINER=$IMAGE"
-if [ -z "$build" ]; then
-    docker_args+=" -v $INSTDIR:/root/daq/inst"
-    docker_args+=" -v $LOCALDIR:/root/daq/local"
-    docker_args+=" -v $MISCDIR:/root/daq/misc"
-fi
-
-if [ "$pull_docker" == y ]; then
-    sudo docker pull $TARGET
-    docker images --format '{{.Repository}} {{.Tag}} {{.ID}}' | while read repo tag id; do
-        if [ $repo == $IMAGE -a $tag != $VERSION ]; then
-            echo Purging previously downloaded image $repo:$tag
-            docker rmi $id
-        fi
-    done
-fi
-
-function move_intf {
-    sleep 2
-    base=$1
-    intf=${base%!}
-    echo intf $base
-    if [ -n "$base" -a "$base" == "$intf" ]; then
-        pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
-        link=$(ip link show $intf 2>/dev/null )
-        success=
-        if [ "$pid" != 0 -a -n "$link" ]; then
-            echo Moving interface $intf into container pid $pid...
-            sudo ip link set $intf netns $pid && success=true
-        fi
-
-        if [ -z "$success" ]; then
-            echo Could not move intf to process/intf $pid/$intf, terminating daq-runner.
-            sudo docker kill daq-runner > /dev/null
-        fi
-    fi
-}
-
-# This is necessary to work around a problem with docker permissions.
-echo Configuring apparmor...
-sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.tcpdump || true
-hash -r
-
-if [ -z "$build" ]; then
-    if [ -n "$ext_dpid" ]; then
-	intfs="$ext_intf $ext_ctrl"
-    else
-	intfs=$(echo $daq_intf | tr , ' ')
-    fi
-    (
-        for intf in $intfs; do
-            move_result="$(move_intf $intf)"
-            # WTF I need to do \r\n is beyond me. But there it is.
-            if [ -n "$move_result" ]; then
-		printf "${move_result}\r\n"
-            fi
-	done
-	if [ -n "$ext_dpid" ]; then
-	    echo Activating physical switch in container...
-	    sudo docker exec daq-runner bin/physical_sec
-	fi
-    ) &
-fi
-
-if [ -n "$reuse" ]; then
-    echo Running in already existing daq-runner container...
-    docker restart daq-runner
-    docker exec daq-runner sh -c "/daq/cmd/exrun $@"
-    exit 0
-fi
-
-docker image inspect $TARGET > /dev/null
-
-echo Starting $TARGET "$@"...
-sudo docker run --privileged --name daq-runner $docker_args $TARGET "$@"
-echo Done with run $?

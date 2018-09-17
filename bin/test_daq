@@ -61,7 +61,7 @@ echo Running DAQ test...
 if [ "$DAQ_MODE" == "in" ]; then
     cmd/run $runargs || failed=$?
 else
-    DAQ_FAUX_OPTS=$fail_mode cmd/exrun $runargs || failed=$?
+    DAQ_FAUX_OPTS=$fail_mode cmd/run local $runargs || failed=$?
 fi
 
 echo Finished run with exit code $failed.

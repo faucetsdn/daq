@@ -15,3 +15,6 @@
 	* Purge old docker containers after new image download.
 	* MUD file generator error message improvements.
 	* Add -n (no_test) mode to just put devices on network.
+	* Make cmd/run behavior configurable (in- or ex- to container).
+	* Preliminary schema validation capability.
+

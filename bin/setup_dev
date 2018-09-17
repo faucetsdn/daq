@@ -37,7 +37,7 @@ $AG update
 echo $AG install
 $AG install lsb-release
 release=$(lsb_release -cs)
-echo Release version $release
+echo LSB release version $release
 
 $AG install \
     software-properties-common apt-transport-https iproute2 \
