@@ -17,4 +17,6 @@
 	* Add -n (no_test) mode to just put devices on network.
 	* Make cmd/run behavior configurable (in- or ex- to container).
 	* Preliminary schema validation capability.
+* 0.8.3
+	* Upload test report to a cloud storage bucket included in web page.
 

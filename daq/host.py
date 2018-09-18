@@ -32,7 +32,7 @@ class ConnectedHost():
     MONITOR_SCAN_SEC = 20
     REPORT_FORMAT = "report_%s.txt"
     TMPDIR_BASE = "inst"
-    REPORT_HEADER = "#############"
+    REPORT_PREFIX = "\n#############"
 
     TEST_LIST = ['pass', 'fail', 'ping', 'bacnet', 'nmap', 'mudgee']
     TEST_ORDER = ['startup', 'sanity', 'dhcp', 'base',
@@ -62,7 +62,9 @@ class ConnectedHost():
         self.tcp_monitor = None
         self.target_ip = None
         self.record_result('startup', state='run')
-        self.report_file = self._initialize_report()
+        self._report_path = None
+        self._report_file = None
+        self._initialize_report()
 
     def _initialize_tempdir(self):
         tmpdir = os.path.join(self.TMPDIR_BASE, 'run-port-%02d' % self.target_port)
@@ -228,20 +230,26 @@ class ConnectedHost():
         else:
             LOGGER.info('Target port %d no more tests remaining', self.target_port)
             self._state_transition(_STATE.DONE, _STATE.NEXT)
-            self.record_result('finish')
             self._finalize_report()
+            self.record_result('finish', report=self._report_path)
 
     def _initialize_report(self):
         report_path = os.path.join(self.TMPDIR_BASE,
                                    self.REPORT_FORMAT % self.target_mac.replace(':', ''))
         LOGGER.info('Creating report as %s', report_path)
-        report = open(report_path, "w")
-        report.write('DAQ scan report for device %s\n' % self.target_mac)
-        return report
+        self._report_path = report_path
+        self._report_file = open(report_path, "w")
+        self._report_file.write('DAQ scan report for device %s\n' % self.target_mac)
+
+    def _report_write(self, msg):
+        self._report_file.write('%s %s\n' % (self.REPORT_PREFIX, msg))
 
     def _finalize_report(self):
-        self.report_file.write('%s Report complete.\n' % self.REPORT_HEADER)
-        self.report_file.close()
+        LOGGER.info('Finalizing report %s', self._report_path)
+        self._report_write('Report complete.')
+        self._report_file.close()
+        self._report_file = None
+        self.runner.gcp.upload_report(self._report_path)
 
     def _docker_test(self, test_name):
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
@@ -272,9 +280,9 @@ class ConnectedHost():
             LOGGER.error('While writing result code: %s', e)
         report_path = os.path.join(self.tmpdir, 'nodes', host_name, 'tmp', 'report.txt')
         if os.path.isfile(report_path):
-            self.report_file.write('%s Report for test %s\n' % (self.REPORT_HEADER, self.test_name))
+            self._report_write('Report for test %s' % self.test_name)
             with open(report_path, 'r') as report_stream:
-                shutil.copyfileobj(report_stream, self.report_file)
+                shutil.copyfileobj(report_stream, self._report_file)
         self.test_host = None
         self.runner.release_test_port(self.target_port, self.test_port)
         if exception:

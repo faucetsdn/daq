@@ -12,7 +12,7 @@ of test results.
    * This is <em>not</em> from the Firebase page: it has to be from the base GCP page.
    * Create a new service account.
    * Use a semi-meaningful name descriptive of the install, like 'daq-testing-lab'.
-   * Add the _Pub/Sub Publisher_ role.
+   * Add the _Pub/Sub Publisher_ and _Storage Admin_ roles.
    * Furnish a new private key.
 4. Install the downloaded key into the DAQ install.
    * Copy the download JSON key file to the `daq/local/` directory.

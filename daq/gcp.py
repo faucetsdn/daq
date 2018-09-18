@@ -8,12 +8,15 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 from google.cloud import pubsub_v1
+from google.cloud import storage
 from google.auth import _default as google_auth
 
 LOGGER = logging.getLogger('gcp')
 
 class GcpManager():
     """Manager class for working with GCP"""
+
+    REPORT_BUCKET_FORMAT = '%s.appspot.com'
 
     def __init__(self, config):
         self.config = config
@@ -24,16 +27,19 @@ class GcpManager():
         cred_file = self.config['gcp_cred']
         LOGGER.info('Loading gcp credentials from %s', cred_file)
         # Normal execution assumes default credentials. pylint: disable=protected-access
-        (self.credentials, self.project) = google_auth._load_credentials_from_file(cred_file)
-        self.client_name = self._parse_creds(cred_file)
-        self.pubber = pubsub_v1.PublisherClient(credentials=self.credentials)
-        LOGGER.info('Initialized gcp pub/sub %s:%s', self.project, self.client_name)
+        (self._credentials, self._project) = google_auth._load_credentials_from_file(cred_file)
+        self._client_name = self._parse_creds(cred_file)
+        self.pubber = pubsub_v1.PublisherClient(credentials=self._credentials)
+        LOGGER.info('Initialized gcp pub/sub %s:%s', self._project, self._client_name)
         self.firestore = self._initialize_firestore(cred_file)
+        self._storage_client = storage.Client(project=self._project, credentials=self._credentials)
+        self._report_bucket_name = self.REPORT_BUCKET_FORMAT % self._project
+        self._ensure_report_bucket()
 
     def _initialize_firestore(self, cred_file):
         cred = credentials.Certificate(cred_file)
         firebase_admin.initialize_app(cred)
-        LOGGER.info('Initialized gcp firestore %s:%s', self.project, self.client_name)
+        LOGGER.info('Initialized gcp firestore %s:%s', self._project, self._client_name)
         return firestore.client()
 
     def _message_callback(self, topic, message, callback):
@@ -46,7 +52,7 @@ class GcpManager():
         with open(cred_file) as data_file:
             cred = json.load(data_file)
         project = cred['project_id']
-        assert project == self.project, 'inconsistent credential projects'
+        assert project == self._project, 'inconsistent credential projects'
         client_email = cred['client_email']
         (client, dummy_other) = client_email.split('@', 2)
         return client
@@ -58,9 +64,23 @@ class GcpManager():
             return
         if 'encode' not in message:
             message = json.dumps(message)
-        LOGGER.debug('Sending to topic_path %s/%s: %s', self.project, topic, message)
+        LOGGER.debug('Sending to topic_path %s/%s: %s', self._project, topic, message)
         #pylint: disable=no-member
-        topic_path = self.pubber.topic_path(self.project, topic)
+        topic_path = self.pubber.topic_path(self._project, topic)
         future = self.pubber.publish(topic_path, message.encode('utf-8'),
-                                     origin=self.client_name)
+                                     projectId=self._project, origin=self._client_name)
         LOGGER.debug('Publish future result %s', future.result())
+
+    def _ensure_report_bucket(self):
+        bucket_name = self._report_bucket_name
+        if self._storage_client.lookup_bucket(bucket_name):
+            LOGGER.info('Storage bucket %s already exists', bucket_name)
+        else:
+            LOGGER.info('Creating storage bucket %s', bucket_name)
+            self._storage_client.create_bucket(bucket_name)
+
+    def upload_report(self, report_file_name):
+        """Uploads a report to a storage bucket."""
+        bucket = self._storage_client.get_bucket(self._report_bucket_name)
+        blob = bucket.blob(report_file_name)
+        blob.upload_from_filename(report_file_name)

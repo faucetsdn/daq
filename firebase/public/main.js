@@ -3,13 +3,14 @@
  * Uses firebase for data management, and renders straight to HTML.
  */
 
-PORT_ROW_COUNT = 25;
-ROW_TIMEOUT_SEC = 500
+const PORT_ROW_COUNT = 25;
+const ROW_TIMEOUT_SEC = 500
 
-display_columns = [ ];
-display_rows = [ ];
-last_result_time_sec = 0;
-row_timestamps = {};
+const display_columns = [ ];
+const display_rows = [ ];
+const row_timestamps = {};
+
+let last_result_time_sec = 0;
 
 function appendTestCell(row, column) {
   const columnElement = document.createElement('td');
@@ -36,6 +37,7 @@ function ensureColumns(columns) {
   }
   ensureGridColumn('info');
   ensureGridColumn('timer');
+  ensureGridColumn('report');
 }
 
 function ensureGridRow(label, content, max_rows) {
@@ -192,6 +194,18 @@ function handleOriginResult(origin, port, runid, test, result) {
   if (result.info) {
     setGridValue(port, 'info', runid, result.info);
   }
+  if (result.report) {
+    addReportBucket(origin, port, runid, result.report);
+  }
+}
+
+function addReportBucket(origin, row, runid, reportName) {
+  const storage = firebase.app().storage();
+  storage.ref().child(reportName).getDownloadURL().then((url) => {
+    setGridValue(row, 'report', runid, `<a href="${url}">${reportName}</a>`);
+  }).catch((e) => {
+    console.error(e);
+  });
 }
 
 function handlePortResult(origin, port, runid, test, result) {
@@ -214,6 +228,9 @@ function handlePortResult(origin, port, runid, test, result) {
     element.setAttribute('timer', timestamp);
     const timestr = new Date(timestamp * 1000).toLocaleString();
     setGridValue(runid, 'timer', runid, timestr);
+  }
+  if (result.report) {
+    addReportBucket(origin, runid, runid, result.report);
   }
 }
 
@@ -375,7 +392,6 @@ function interval_updater() {
 
 document.addEventListener('DOMContentLoaded', function() {
   try {
-    let app = firebase.app();
     statusUpdate('System initialized.');
     setupTriggers();
     setInterval(interval_updater, 1000);
