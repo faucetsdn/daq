@@ -56,7 +56,7 @@ class DockerTest():
     def _docker_error(self, e):
         LOGGER.error('Target port %d docker error: %s', self.target_port, e)
         if self._docker_finalize() is None:
-            LOGGER.warning('Target port %d docker already terminated.', self.target_port)
+            raise Exception('Target port %d docker already terminated.' % self.target_port)
         else:
             self.callback(exception=e)
 
