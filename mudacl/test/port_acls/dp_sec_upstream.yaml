@@ -2,25 +2,25 @@
 acls:
   dp_sec_upstream:
   - rule:
-      description: "MUD lightbulb mqtt-todev"
+      description: "type lightbulb rule mqtt-todev"
       dl_type: "0x0800"
       dl_dst: "9a:02:57:1e:8f:01"
       nw_proto: 6
-      nw_src: "69.172.200.235"
+      nw_src: "127.0.1.1"
       tcp_src: 443
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb ssh-todev"
+      description: "type lightbulb rule ssh-todev"
       dl_type: "0x0800"
       dl_dst: "9a:02:57:1e:8f:01"
       nw_proto: 6
-      nw_src: "69.172.200.235"
+      nw_src: "127.0.1.1"
       tcp_dst: 23
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb bacnet"
+      description: "type lightbulb rule bacnet"
       dl_type: "0x0800"
       dl_dst: "9a:02:57:1e:8f:01"
       nw_proto: 17
@@ -30,7 +30,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD telnet ent0-todev"
+      description: "type telnet rule ent0-todev"
       dl_type: "0x0800"
       dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 6

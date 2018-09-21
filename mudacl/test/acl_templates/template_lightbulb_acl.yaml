@@ -2,25 +2,25 @@
 acls:
   '@from:template_lightbulb_acl':
   - rule:
-      description: "MUD lightbulb mqtt-frdev"
+      description: "type lightbulb rule mqtt-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:lightbulb"
       nw_proto: 6
-      nw_dst: "@dns:test.com"
+      nw_dst: "@dns:unit.test.address"
       tcp_dst: 443
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb ssh-frdev"
+      description: "type lightbulb rule ssh-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:lightbulb"
       nw_proto: 6
-      nw_dst: "@dns:test.com"
+      nw_dst: "@dns:unit.test.address"
       tcp_src: 23
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb bacnet"
+      description: "type lightbulb rule bacnet"
       dl_type: "0x0800"
       dl_src: "@mac:lightbulb"
       nw_proto: 17
@@ -31,25 +31,25 @@ acls:
         allow: 1
   '@to:template_lightbulb_acl':
   - rule:
-      description: "MUD lightbulb mqtt-todev"
+      description: "type lightbulb rule mqtt-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:lightbulb"
       nw_proto: 6
-      nw_src: "@dns:test.com"
+      nw_src: "@dns:unit.test.address"
       tcp_src: 443
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb ssh-todev"
+      description: "type lightbulb rule ssh-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:lightbulb"
       nw_proto: 6
-      nw_src: "@dns:test.com"
+      nw_src: "@dns:unit.test.address"
       tcp_dst: 23
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb bacnet"
+      description: "type lightbulb rule bacnet"
       dl_type: "0x0800"
       dl_dst: "@mac:lightbulb"
       nw_proto: 17

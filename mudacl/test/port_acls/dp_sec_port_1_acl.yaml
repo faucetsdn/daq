@@ -2,25 +2,25 @@
 acls:
   dp_sec_port_1_acl:
   - rule:
-      description: "MUD lightbulb mqtt-frdev"
+      description: "type lightbulb rule mqtt-frdev"
       dl_type: "0x0800"
       dl_src: "9a:02:57:1e:8f:01"
       nw_proto: 6
-      nw_dst: "69.172.200.235"
+      nw_dst: "127.0.1.1"
       tcp_dst: 443
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb ssh-frdev"
+      description: "type lightbulb rule ssh-frdev"
       dl_type: "0x0800"
       dl_src: "9a:02:57:1e:8f:01"
       nw_proto: 6
-      nw_dst: "69.172.200.235"
+      nw_dst: "127.0.1.1"
       tcp_src: 23
       actions:
         allow: 1
   - rule:
-      description: "MUD lightbulb bacnet"
+      description: "type lightbulb rule bacnet"
       dl_type: "0x0800"
       dl_src: "9a:02:57:1e:8f:01"
       nw_proto: 17

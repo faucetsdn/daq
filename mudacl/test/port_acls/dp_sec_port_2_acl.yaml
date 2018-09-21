@@ -2,7 +2,7 @@
 acls:
   dp_sec_port_2_acl:
   - rule:
-      description: "MUD telnet ent0-frdev"
+      description: "type telnet rule ent0-frdev"
       dl_type: "0x0800"
       dl_src: "9a:02:57:1e:8f:02"
       nw_proto: 6

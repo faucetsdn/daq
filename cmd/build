@@ -74,10 +74,9 @@ if [ -n "$in_container" ]; then
     echo Now running in `pwd`
 fi
 
-mkdir -p local
-sudo date > local/last_build.txt
 sudo rm -rf $build_root
 mkdir -p $build_root
+sudo date > build/last_build.txt
 
 for file in docker/Dockerfile.*; do
     if [ ${file%\~} != ${file} ]; then
