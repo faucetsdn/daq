@@ -63,7 +63,7 @@ public class MudAclGenerator {
         generator.setDeviceTypes(YAML_MAPPER.readValue(new File(argv[3]), DeviceTypes.class));
         generator
             .setDeviceTopology(YAML_MAPPER.readValue(new File(argv[4]), DeviceTopology.class));
-        writePortAcls(new File(argv[5]), generator.makePortAclMap());
+        writePortAcls(new File(argv[5]), prettyErrors(generator::makePortAclMap));
       }
     } catch (ExpectedException e) {
       System.err.println(e.toString());
@@ -225,17 +225,46 @@ public class MudAclGenerator {
   private Collection<Ace> aclSanity(Acl aces, boolean isEdge) {
     for (Ace ace : aces) {
       Rule rule = ace.rule;
-      boolean validDstPort = (rule.nw_proto == AclHelper.IP_PROTO_TCP ? rule.tcp_dst : rule.udp_dst) != null;
-      boolean validDstAddr = rule.nw_dst != null;
-      boolean validSrcPort = (rule.nw_proto == AclHelper.IP_PROTO_TCP ? rule.tcp_src : rule.udp_src) != null;
-      boolean validSrcAddr = rule.nw_src != null;
-      boolean validPort = validDstPort || validSrcPort;
-      if (!isEdge || validDstPort || validDstAddr) {
-        continue;
+      try {
+        checkWhitelistedRules(rule);
+        checkWildcardedAcls(isEdge, rule);
+      } catch (Exception e) {
+        throw new RuntimeException("While processing " + rule.description, e);
       }
-      throw new RuntimeException("Cowardly refusing to create wildcarded ACL " + rule.description);
     }
     return aces;
+  }
+
+  private void checkWhitelistedRules(Rule rule) {
+    if (AclHelper.UDP_NTP_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_NTP_PORT.equals(rule.udp_dst)) {
+      throw new IllegalArgumentException("Should not include NTP ports in ACLs");
+    }
+    if (AclHelper.UDP_DNS_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_DNS_PORT.equals(rule.udp_dst) ||
+        AclHelper.TCP_DNS_PORT.equals(rule.tcp_src) ||
+        AclHelper.TCP_DNS_PORT.equals(rule.tcp_dst)) {
+      throw new IllegalArgumentException("Should not include DNS ports in ACLs");
+    }
+    if (AclHelper.UDP_DHCP_CLIENT_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_DHCP_CLIENT_PORT.equals(rule.udp_dst) ||
+        AclHelper.UDP_DHCP_SERVER_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_DHCP_SERVER_PORT.equals(rule.udp_dst)) {
+      throw new IllegalArgumentException("Should not include DHCP ports in ACLs");
+    }
+  }
+
+  private void checkWildcardedAcls(boolean isEdge, Rule rule) {
+    boolean validDstPort = (AclHelper.NW_PROTO_TCP.equals(rule.nw_proto) ? rule.tcp_dst : rule.udp_dst) != null;
+    boolean validDstAddr = rule.nw_dst != null;
+    boolean validSrcPort = (AclHelper.NW_PROTO_TCP.equals(rule.nw_proto) ? rule.tcp_src : rule.udp_src) != null;
+    boolean validSrcAddr = rule.nw_src != null;
+    if (isEdge && !validDstPort && !validDstAddr) {
+      throw new RuntimeException("Cowardly refusing to create wildcarded edge ACL " + rule.description);
+    }
+    if (!isEdge && !validSrcPort && !validSrcAddr) {
+      throw new RuntimeException("Cowardly refusing to create wildcarded upstream ACL " + rule.description);
+    }
   }
 
   private void addTemplateEntries(Map<String, PortAcl> portAclMap) {

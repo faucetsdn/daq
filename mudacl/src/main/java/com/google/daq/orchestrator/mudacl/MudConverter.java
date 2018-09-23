@@ -30,12 +30,14 @@ public class MudConverter implements AclProvider {
   private static final String FROM_DEVICE_POLICY = "from-device";
   private static final String TO_DEVICE_POLICY = "to-device";
   private static final String PORT_MATCH_EQ_OPERATOR = "eq";
-  private static final String EDGE_DEVICE_DESCRIPTION_FORMAT = "MUD %s %s";
+  private static final String EDGE_DEVICE_DESCRIPTION_FORMAT = "type %s rule %s";
   private static final String JSON_SUFFIX = ".json";
   private static final String DNS_TEMPLATE_FORMAT = "@dns:%s";
   private static final String CONTROLLER_TEMPLATE_FORMAT = "@ctrl:%s";
   private static final String MUD_FILE_SUFFIX = ".json";
   private static final String ACL_TYPE_ERROR_FORMAT = "type was %s, expected ipv4-acl-type";
+  private static final String TEST_DNS_NAME = "unit.test.address";
+  private static final String TEST_IP_ADDRESS = "127.0.1.1";
 
   private final File rootPath;
 
@@ -169,7 +171,7 @@ public class MudConverter implements AclProvider {
     }
     rule.dl_type = AclHelper.DL_TYPE_IPv4;
     Integer protocol = matches.ipv4.protocol;
-    if (protocol != AclHelper.IP_PROTO_TCP && protocol != AclHelper.IP_PROTO_UDP) {
+    if (protocol != AclHelper.NW_PROTO_TCP && protocol != AclHelper.NW_PROTO_UDP) {
       throw new IllegalArgumentException("IP protocol not supported: " + protocol);
     }
     return protocol;
@@ -180,13 +182,10 @@ public class MudConverter implements AclProvider {
     rule.nw_proto = protocol;
     rule.nw_dst = resolveNwAddr(matches, false, isTemplate, isEdge);
     rule.nw_src = resolveNwAddr(matches, true, isTemplate, isEdge);
-    if (rule.nw_dst == null && rule.nw_src == null) {
-      throw new IllegalArgumentException("No nw src/dst address");
-    }
   }
 
   private void resolveUdp(Rule rule, Matches matches, Integer protocol) {
-    if (protocol != AclHelper.IP_PROTO_UDP) {
+    if (protocol != AclHelper.NW_PROTO_UDP) {
       return;
     }
     if (matches.tcp != null) {
@@ -203,7 +202,7 @@ public class MudConverter implements AclProvider {
   }
 
   private void resolveTcp(Rule rule, Matches matches, Integer protocol, boolean isEdge) {
-    if (protocol != AclHelper.IP_PROTO_TCP) {
+    if (protocol != AclHelper.NW_PROTO_TCP) {
       return;
     }
     if (matches.udp != null) {
@@ -282,6 +281,9 @@ public class MudConverter implements AclProvider {
     try {
       if (dnsDst == null) {
         return null;
+      }
+      if (TEST_DNS_NAME.equals(dnsDst)) {
+        return TEST_IP_ADDRESS;
       }
       return Inet4Address.getByName(dnsDst).getHostAddress();
     } catch (UnknownHostException e) {

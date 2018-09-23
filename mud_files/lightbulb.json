@@ -42,7 +42,7 @@
               "name": "mqtt-todev",
               "matches": {
                 "ipv4": {
-                  "ietf-acldns:src-dnsname": "test.com",
+                  "ietf-acldns:src-dnsname": "unit.test.address",
                   "protocol": 6
                 },
                 "tcp": {
@@ -61,7 +61,7 @@
               "name": "ssh-todev",
               "matches": {
                 "ipv4": {
-                  "ietf-acldns:src-dnsname": "test.com",
+                  "ietf-acldns:src-dnsname": "unit.test.address",
                   "protocol": 6
                 },
                 "tcp": {
@@ -88,7 +88,7 @@
               "name": "mqtt-frdev",
               "matches": {
                 "ipv4": {
-                  "ietf-acldns:dst-dnsname": "test.com",
+                  "ietf-acldns:dst-dnsname": "unit.test.address",
                   "protocol": 6
                 },
                 "tcp": {
@@ -107,7 +107,7 @@
               "name": "ssh-frdev",
               "matches": {
                 "ipv4": {
-                  "ietf-acldns:dst-dnsname": "test.com",
+                  "ietf-acldns:dst-dnsname": "unit.test.address",
                   "protocol": 6
                 },
                 "tcp": {

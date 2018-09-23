@@ -2,7 +2,7 @@
 acls:
   '@from:template_telnet_acl':
   - rule:
-      description: "MUD telnet ent0-frdev"
+      description: "type telnet rule ent0-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:telnet"
       nw_proto: 6
@@ -12,7 +12,7 @@ acls:
         allow: 1
   '@to:template_telnet_acl':
   - rule:
-      description: "MUD telnet ent0-todev"
+      description: "type telnet rule ent0-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:telnet"
       nw_proto: 6
