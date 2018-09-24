@@ -68,7 +68,7 @@ BUILD SUCCESSFUL in 0s
 
 Executing validator schemas/telemetry.json pubsub:telmetry...
 Connecting to pubsub topic telmetry
-Results will be uploaded to https://firebase.corp.google.com/project/gcp-account/database/firestore/data~2Fvalidations~2Ftelmetry~2Fdevices
+Results will be uploaded to https://console.cloud.google.com/firestore/data/registries/primary/devices/device_one/validations/target?project=daq-project
 Entering pubsub message loop on projects/gcp-account/subscriptions/daq-validator
 Error validating /home/user/daq/validator/out/message_TCE01$2d04$20NW$20Controls.json: DeviceId TCE01$2d04$20NW$20Controls must match pattern [a-zA-Z]+[a-zA-Z0-9_]+[a-zA-Z0-9]+
 Error validating /home/user/daq/validator/out/message_TCE01$2d04$20NW$20Controls.json: DeviceId TCE01$2d04$20NW$20Controls must match pattern [a-zA-Z]+[a-zA-Z0-9_]+[a-zA-Z0-9]+

@@ -24,7 +24,7 @@ public class FirestoreDataSink {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL);
   private static final String CREDENTIAL_ERROR_FORMAT = "Credential file %s defined by %s not found.";
-  private static final String VIEW_URL_FORMAT = "https://console.firebase.google.com/project/%s/database/firestore/data~2Fvalidations~2F%s~2Fdevices";
+  private static final String VIEW_URL_FORMAT = "https://console.cloud.google.com/firestore/project/%s/database/firestore/data~2Fvalidations~2F%s~2Fdevices";
 
   private final Firestore db;
   private final String topicName;

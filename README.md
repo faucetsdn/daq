@@ -57,13 +57,13 @@ single-device testing through to a production-class environment.
 The recommended course is to start with the simplest (software emulation) and progress
 forward as required for a specific project.
 
-## Testing Dashboard
+## Qualification Dashboard
 
 The (optional) cloud dashboard requires a service-account certification to grant authorization.
-Contact the project owner to obtain a new certificate for a testing dashboard page on an already
+Contact the project owner to obtain a new certificate for a dashboard page on an already
 existing cloud project. Alternatively set up a new project by following the
 [Firebase install instructions](docs/firebase.md). The `bin/stress_test` script is useful for
-setting up a continuous testing environment: it runs in the background and pipes the output
+setting up a continuous qualification environment: it runs in the background and pipes the output
 into a rotating set of logfiles.
 
 ## Debugging
@@ -93,7 +93,7 @@ The [example pcap output file](docs/startup_pcap.md) shows what this should look
 
 If there are device-level network problems then it is possible to use `tcpdump` or similar
 to example the network traffic. When using the `cmd/run` command, the system runs the
-testing framework in a Docker container named `daq-runner` and it moves the test
+framework in a Docker container named `daq-runner` and it moves the test
 network interface(s) into that container. Any tap command must be also run in the container, so it
 looks something like (replacing `faux` with the real adapter name):
 
@@ -105,6 +105,6 @@ switch itself.)
 
 ## Build Setup
 
-Building is only required for active test development. Otherwise, stick
+'Building' DAQ is only required for active framework development. Otherwise, stick
 with the packaged runner.  There are a bunch of additional dependenicies and extra development steps.
 See the [build documentation](docs/build.md) for more details on how to build the development system.
