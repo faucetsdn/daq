@@ -1,0 +1,340 @@
+{
+  "ietf-mud:mud": {
+    "mud-version": 1,
+    "mud-url": "https://digital-building.org/mud/controller",
+    "last-update": "2018-09-23T20:43:36+02:00",
+    "cache-validity": 48,
+    "is-supported": true,
+    "systeminfo": "Generic BACnet controller",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "mud-58064-v4fr"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "mud-58064-v4to"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name": "mud-58064-v4to",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "http-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "from-device",
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 80
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 80
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "https-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "from-device",
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 443
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 443
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "radiusauth-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 1812
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 1812
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "radiusacc-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 1813
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 1813
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "radiusproxy-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 1814
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 1814
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "bacnet-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "mud-58064-v4fr",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "http-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 80
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 80
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "https-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 443
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 443
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "radiusauth-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 1812
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 1812
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "radiusacc-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 1813
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 1813
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "radiusproxy-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 1814
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 1814
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "bacnet-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

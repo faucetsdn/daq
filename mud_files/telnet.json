@@ -26,7 +26,7 @@
       }
     }
   },
-  "ietf-access-control-list:access-lists": {
+  "ietf-access-control-list:acls": {
     "acl": [
       {
         "name": "mud-92939-v4to",
