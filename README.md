@@ -78,7 +78,7 @@ Command-line options that can be supplied to most DAQ scripts for diagnostics:
 * `daq_loglevel=debug`: Add debug info form the DAQ test runner suite.
 * `mininet_loglevel=debug`: Add debug info from the mininet subsystem (verbose!)
 
-See the [options documentation](options.md) file for a more complete
+See the [options documentation](docs/options.md) file for a more complete
 description of all the configuration options.
 
 ## Network Taps
