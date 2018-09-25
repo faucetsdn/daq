@@ -4,6 +4,15 @@
 # DAQ_BUILD mode is normally specified by the environment (e.g. travis).
 # 
 
+function delay_finish {
+    # Travis doesn't always wait for buffer to flush on exit, so give some time.
+    sleep 10
+}
+
+if [ -n "$TRAVIS" ]; then
+    trap delay_finish EXIT
+fi
+
 echo -n "DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo

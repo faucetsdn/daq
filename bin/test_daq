@@ -1,5 +1,14 @@
 #!/bin/bash -e
 
+function delay_finish {
+    # Travis doesn't always wait for buffer to flush on exit, so give some time.
+    sleep 10
+}
+
+if [ -n "$TRAVIS" ]; then
+    trap delay_finish EXIT
+fi
+
 runargs=
 
 if [ ! -f local/system.conf ]; then
