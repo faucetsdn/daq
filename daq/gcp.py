@@ -88,3 +88,4 @@ class GcpManager():
         bucket = self._storage.get_bucket(self._report_bucket_name)
         blob = bucket.blob(report_file_name)
         blob.upload_from_filename(report_file_name)
+        LOGGER.info('Uploaded test report to %s', report_file_name)
