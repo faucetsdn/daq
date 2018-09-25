@@ -2,7 +2,7 @@
 acls:
   '@from:template_controller_acl':
   - rule:
-      description: "MUD controller http-frdev"
+      description: "type controller rule http-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:controller"
       nw_proto: 6
@@ -12,7 +12,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller https-frdev"
+      description: "type controller rule https-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:controller"
       nw_proto: 6
@@ -22,7 +22,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller radiusauth-frdev"
+      description: "type controller rule radiusauth-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:controller"
       nw_proto: 17
@@ -32,7 +32,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller radiusacc-frdev"
+      description: "type controller rule radiusacc-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:controller"
       nw_proto: 17
@@ -42,7 +42,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller radiusproxy-frdev"
+      description: "type controller rule radiusproxy-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:controller"
       nw_proto: 17
@@ -52,7 +52,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller bacnet-frdev"
+      description: "type controller rule bacnet-frdev"
       dl_type: "0x0800"
       dl_src: "@mac:controller"
       nw_proto: 17
@@ -63,7 +63,7 @@ acls:
         allow: 1
   '@to:template_controller_acl':
   - rule:
-      description: "MUD controller http-todev"
+      description: "type controller rule http-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:controller"
       nw_proto: 6
@@ -73,7 +73,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller https-todev"
+      description: "type controller rule https-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:controller"
       nw_proto: 6
@@ -83,7 +83,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller radiusauth-todev"
+      description: "type controller rule radiusauth-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:controller"
       nw_proto: 17
@@ -93,7 +93,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller radiusacc-todev"
+      description: "type controller rule radiusacc-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:controller"
       nw_proto: 17
@@ -103,7 +103,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller radiusproxy-todev"
+      description: "type controller rule radiusproxy-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:controller"
       nw_proto: 17
@@ -113,7 +113,7 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "MUD controller bacnet-todev"
+      description: "type controller rule bacnet-todev"
       dl_type: "0x0800"
       dl_dst: "@mac:controller"
       nw_proto: 17
