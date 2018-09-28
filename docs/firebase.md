@@ -12,18 +12,18 @@ of test results.
 [Google Cloud Platform (GCP) service accounts page]
 (https://console.cloud.google.com/iam-admin/serviceaccounts?project=daq-project)
    * This is <em>not</em> from the Firebase page: it has to be from the base GCP page.
-   * Create a new service account using a semi-meaningful descriptive name like 'daq-testing-lab'.
+   * Create a new service account with a semi-meaningful name like 'daq-testlab'.
    * Add the _Pub/Sub Publisher_ and _Storage Admin_ roles.
    * Furnish a new private key.
 4. Install the downloaded key into the DAQ install.
    * Copy the download JSON key file to the `daq/local/` directory.
    * Edit `daq/local/system.conf` to specify the `gcp_cred` setting to point to the downloaded file
      (with a path relative to the `daq/` install directory), e.g.
-     `gcp_cred=local/daq-project-de56aa4b1e47.json`.
+     `gcp_cred=local/daq-testlab-de56aa4b1e47.json`.
 5. (Re)Start the DAQ install.
    * There should be something in the top 10-20 startup log lines that look something like:
-     <br>`INFO:gcp:Loading gcp credentials from local/daq-project-de56aa4b1e47.json`
-     <br>`INFO:gcp:Initialized gcp publisher client daq-project:daq-laptop`
+     <br>`INFO:gcp:Loading gcp credentials from local/daq-testlab-de56aa4b1e47.json`
+     <br>`INFO:gcp:Initialized gcp publisher client daq-project:daq-testlab`
 6. Follow the [Firebase CLI setup instructions](https://firebase.google.com/docs/cli/).
 7. Goto the 'daq/firebase/` directory.
    * Run `firebase use` to set the GCP project to use (as created above).
@@ -39,9 +39,9 @@ section outlines the basic steps to help diagnose and debug the system, past "it
 When the system starts up and runs, there should be some descriptive log messages that highlight
 operation, with obvious error messages when something goes wrong:<pre>
 <em>...</em>
-INFO:gcp:Loading gcp credentials from local/daq-project-de56aa4b1e47.json
-INFO:gcp:Initialized gcp pub/sub daq-project:daq-laptop
-INFO:gcp:Initialized gcp firestore daq-project:daq-laptop
+INFO:gcp:Loading gcp credentials from local/daq-testlab-de56aa4b1e47.json
+INFO:gcp:Initialized gcp pub/sub daq-project:daq-testlab
+INFO:gcp:Initialized gcp firestore daq-project:daq-testlab
 <em>...</em>
 INFO:gcp:Uploaded test report to inst/report_9a02571e8f00.txt
 <em>...</em>
@@ -63,20 +63,18 @@ I  daq_firestore 210621644751867 updating 1537561338017 daq-laptop port-1 5ba552
 I  daq_firestore 210625202516197 updating 1537561338223 daq-laptop port-1 5ba552f2 dhcp daq_firestore 210625202516197
 I  daq_firestore 210621107285036 updating 1537561362562 daq-laptop port-1 5ba552f2 info daq_firestore 210621107285036
 I  daq_firestore 210617247716870 updating 1537561362716 daq-laptop port-1 5ba552f2 dhcp daq_firestore 210617247716870
-I  daq_firestore 210615717506431 updating 1537561362986 daq-laptop port-1 5ba552f2 base daq_firestore 210615717506431
-</pre>
+I  daq_firestore 210615717506431 updating 1537561362986 daq-laptop port-1 5ba552f2 base daq_firestore 210615717506431</pre>
 
 4. <em>Firebase Use Logs:</em>
 The same Cloud Functions are represented in Firebase and can be viewed as part of the
 [Firebase Functions Usage Logs](https://console.firebase.google.com/project/daq-project/functions/usage/current-billing/execution-count)
-(note that you'll have to manually replace `daq-project` with the 
-riate `{projectId}` in order for that link to work).
+(note that you'll have to manually replace `daq-project` with the appropriate `{projectId}` in order for that link to work).
 The logs there will also show any signficant errors highlighting most problems.
 
 5. <em>Firestore Database:</em>
 The data ends up in the
-[Firestore Database](https://console.firebase.google.com/project/daq-project/database/firestore/), again replacing `daq-project`
-with the appropriate `{projectId}`
+[Firestore Database](https://console.cloud.google.com/firestore/data/origin?project=daq-project)
+(again replacing `daq-project` with the appropraite `{projectId}`)
 and filed under `origin/{accountId}` (the name of the service account) of the DAQ install supplying the data.
 
 6. <em>Web Application:</em>

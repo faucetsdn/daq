@@ -52,7 +52,7 @@ public class MudAclGenerator {
     try {
       if (argv.length != 2 && argv.length != 6) {
         System.err
-            .println("Usage: [switch_topology] [mud_dir] [template_dir] ([device_types] [device_topology] [output_dir])");
+            .println("Usage: [mud_dir] [template_dir] ([switch_topology] [device_types] [device_topology] [output_dir])");
         throw new ExpectedException(new IllegalArgumentException("Incorrect arg count"));
       }
       MudAclGenerator generator = new MudAclGenerator();
@@ -93,7 +93,7 @@ public class MudAclGenerator {
       final String indent, OutputStream outputStream) {
     final ErrorTree errorTree = new ErrorTree();
     try {
-      errorTree.message = e.getMessage();
+      errorTree.message = e.toString();
       outputStream.write(prefix.getBytes());
       outputStream.write(errorTree.message.getBytes());
       outputStream.write(NEWLINE_BYTES);
@@ -347,6 +347,7 @@ public class MudAclGenerator {
 
   private void setDeviceTypes(DeviceTypes deviceTypes) {
     this.deviceTypes = deviceTypes;
+    aclProvider.setDeviceTypes(deviceTypes);
   }
 
   private void setAclProvider(AclProvider aclProvider) {

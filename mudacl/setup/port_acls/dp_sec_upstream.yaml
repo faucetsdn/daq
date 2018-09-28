@@ -1,71 +1,38 @@
 ---
 acls:
-  '@from:template_controller_acl':
+  dp_sec_upstream:
   - rule:
-      description: "type controller rule http-frdev"
+      description: "type lightbulb rule mqtt-todev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:01"
       nw_proto: 6
-      nw_dst: "@ctrl:remote-host"
-      tcp_src: 80
-      tcp_dst: 80
-      actions:
-        allow: 1
-  - rule:
-      description: "type controller rule https-frdev"
-      dl_type: "0x0800"
-      dl_src: "@mac:controller"
-      nw_proto: 6
-      nw_dst: "@ctrl:remote-host"
+      nw_src: "127.0.1.1"
       tcp_src: 443
-      tcp_dst: 443
       actions:
         allow: 1
   - rule:
-      description: "type controller rule radiusauth-frdev"
+      description: "type lightbulb rule ssh-todev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller"
-      nw_proto: 17
-      nw_dst: "@ctrl:remote-host"
-      udp_src: 1812
-      udp_dst: 1812
+      dl_dst: "9a:02:57:1e:8f:01"
+      nw_proto: 6
+      nw_src: "127.0.1.1"
+      tcp_dst: 23
       actions:
         allow: 1
   - rule:
-      description: "type controller rule radiusacc-frdev"
+      description: "type lightbulb rule bacnet"
       dl_type: "0x0800"
-      dl_src: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:01"
       nw_proto: 17
-      nw_dst: "@ctrl:remote-host"
-      udp_src: 1813
-      udp_dst: 1813
-      actions:
-        allow: 1
-  - rule:
-      description: "type controller rule radiusproxy-frdev"
-      dl_type: "0x0800"
-      dl_src: "@mac:controller"
-      nw_proto: 17
-      nw_dst: "@ctrl:remote-host"
-      udp_src: 1814
-      udp_dst: 1814
-      actions:
-        allow: 1
-  - rule:
-      description: "type controller rule bacnet-frdev"
-      dl_type: "0x0800"
-      dl_src: "@mac:controller"
-      nw_proto: 17
-      nw_dst: "@ctrl:remote-host"
+      nw_src: "@ctrl:bacnet"
       udp_src: 47808
       udp_dst: 47808
       actions:
         allow: 1
-  '@to:template_controller_acl':
   - rule:
       description: "type controller rule http-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 80
@@ -75,7 +42,7 @@ acls:
   - rule:
       description: "type controller rule https-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 443
@@ -85,7 +52,7 @@ acls:
   - rule:
       description: "type controller rule radiusauth-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 17
       nw_src: "@ctrl:remote-host"
       udp_src: 1812
@@ -95,7 +62,7 @@ acls:
   - rule:
       description: "type controller rule radiusacc-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 17
       nw_src: "@ctrl:remote-host"
       udp_src: 1813
@@ -105,7 +72,7 @@ acls:
   - rule:
       description: "type controller rule radiusproxy-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 17
       nw_src: "@ctrl:remote-host"
       udp_src: 1814
@@ -115,9 +82,9 @@ acls:
   - rule:
       description: "type controller rule bacnet-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "9a:02:57:1e:8f:02"
       nw_proto: 17
-      nw_src: "@ctrl:remote-host"
+      nw_src: "@ctrl:bacnet"
       udp_src: 47808
       udp_dst: 47808
       actions:

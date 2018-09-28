@@ -13,4 +13,6 @@ public interface AclProvider {
   Acl makeUpstreamAcl(DeviceClassifier device, MacIdentifier macAddress);
 
   List<String> targetTypes();
+
+  void setDeviceTypes(DeviceTypes deviceTypes);
 }

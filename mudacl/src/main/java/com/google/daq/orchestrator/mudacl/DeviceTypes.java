@@ -16,6 +16,17 @@ public class DeviceTypes {
 
   static class DeviceClassifier {
     public String type;
+    public String hostname;
+    public String ipAddr;
+    public Map<String, Controller> controllers;
     public boolean isTemplate;
+  }
+
+  static class Controller {
+    public Map<String, Controlee> controlees;
+  }
+
+  static class Controlee {
+    public String hostname;
   }
 }

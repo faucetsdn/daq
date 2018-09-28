@@ -12,12 +12,8 @@ acl_templates=inst/acl_templates
 DEVICE_SPECS_FILE=device_specs.json
 
 cd $ROOT
+mudacl/bin/test.sh
 
-echo Running regression test.
-mkdir -p build/acl_templates/
-mudacl/bin/run.sh $mud_files build/acl_templates/
-diff -r build/acl_templates/ mudacl/test/acl_templates/
-echo Regression passed.
 
 if [ -f $SYSCONF ]; then
     echo Loading configuration from $SYSCONF...

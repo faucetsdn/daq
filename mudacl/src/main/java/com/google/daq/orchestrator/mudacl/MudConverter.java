@@ -2,6 +2,7 @@ package com.google.daq.orchestrator.mudacl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.MacIdentifier;
+import com.google.daq.orchestrator.mudacl.DeviceTypes.Controller;
 import com.google.daq.orchestrator.mudacl.DeviceTypes.DeviceClassifier;
 import com.google.daq.orchestrator.mudacl.MudAclGenerator.ExceptionMap;
 import com.google.daq.orchestrator.mudacl.MudSpec.AccessLists;
@@ -18,13 +19,17 @@ import com.google.daq.orchestrator.mudacl.SwitchTopology.Rule;
 import java.io.File;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class MudConverter implements AclProvider {
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static final String MUD_FILE_FORMAT = "%s.json";
   private static final String FROM_DEVICE_POLICY = "from-device";
@@ -33,7 +38,8 @@ public class MudConverter implements AclProvider {
   private static final String EDGE_DEVICE_DESCRIPTION_FORMAT = "type %s rule %s";
   private static final String JSON_SUFFIX = ".json";
   private static final String DNS_TEMPLATE_FORMAT = "@dns:%s";
-  private static final String CONTROLLER_TEMPLATE_FORMAT = "@ctrl:%s";
+  private static final String CONTROLER_PREFIX = "@ctrl:";
+  private static final String CONTROLLER_TEMPLATE_FORMAT = CONTROLER_PREFIX + "%s";
   private static final String MUD_FILE_SUFFIX = ".json";
   private static final String ACL_TYPE_ERROR_FORMAT = "type was %s, expected ipv4-acl-type";
   private static final String TEST_DNS_NAME = "unit.test.address";
@@ -41,7 +47,8 @@ public class MudConverter implements AclProvider {
 
   private final File rootPath;
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private DeviceTypes deviceTypes;
+  private Map<String, String> hostLookup = new HashMap<>();
 
   MudConverter(File rootPath) {
     if (!rootPath.isDirectory()) {
@@ -49,6 +56,18 @@ public class MudConverter implements AclProvider {
           "Missing mud root directory " + rootPath.getAbsolutePath());
     }
     this.rootPath = rootPath;
+  }
+
+  @Override
+  public void setDeviceTypes(DeviceTypes deviceTypes) {
+    this.deviceTypes = deviceTypes;
+    deviceTypes.macAddrs.values().stream()
+        .filter(device -> device.hostname != null)
+        .forEach(device -> {
+          if (hostLookup.put(device.hostname, device.ipAddr) != null) {
+            throw new RuntimeException("Duplicate hosts specified for host " + device.hostname);
+          }
+        });
   }
 
   @Override
@@ -74,10 +93,54 @@ public class MudConverter implements AclProvider {
   @Override
   public Acl makeEdgeAcl(DeviceClassifier device, MacIdentifier edgeDevice) {
     Acl acl = device == null ? makeUnknownEdgeAcl(edgeDevice) : makeEdgeAcl(device);
+    List<Ace> toRemove = new ArrayList<>();
     for (Ace ace : acl) {
       ace.rule.dl_src = edgeDevice.toString();
+      if (!device.isTemplate) {
+        if (!maybeResolveControllerDst(ace.rule, edgeDevice) &&
+            !maybeResolveControllerSrc(ace.rule, edgeDevice)) {
+          toRemove.add(ace);
+        }
+      }
+    }
+    for (Ace ace : toRemove) {
+      acl.remove(ace);
     }
     return acl;
+  }
+
+  private boolean maybeResolveControllerDst(Rule rule, MacIdentifier edgeDevice) {
+    rule.nw_dst = maybeResolveController(rule.nw_dst, edgeDevice);
+    return rule.nw_dst != null;
+  }
+
+  private boolean maybeResolveControllerSrc(Rule rule, MacIdentifier edgeDevice) {
+    rule.nw_src = maybeResolveController(rule.nw_src, edgeDevice);
+    return rule.nw_src != null;
+  }
+
+  private String maybeResolveController(String nwEntry, MacIdentifier edgeDevice) {
+    if (nwEntry == null || !nwEntry.startsWith(CONTROLER_PREFIX)) {
+      return nwEntry;
+    }
+    DeviceClassifier deviceClassifier = deviceTypes.macAddrs.get(edgeDevice);
+    if (deviceClassifier == null) {
+      throw new RuntimeException("Missing device mapping for " + edgeDevice);
+    }
+    String controllerName = nwEntry.substring(CONTROLER_PREFIX.length());
+    List<String> targets = new ArrayList<>();
+    Controller controller = deviceClassifier.controllers.get(controllerName);
+    if (controller == null) {
+      return null;
+    }
+    controller.controlees.forEach((key, value) -> targets.add(value.hostname));
+    if (targets.size() > 1) {
+      throw new RuntimeException("Multiple controllers not supported for " + edgeDevice);
+    }
+    if (targets.size() == 0) {
+      return null;
+    }
+    return hostLookup.get(targets.get(0)).toString();
   }
 
   private Acl makeEdgeAcl(DeviceClassifier device) {
