@@ -93,10 +93,11 @@ for file in docker/Dockerfile.*; do
         docker load -i /daq/$build_root/docker_image.$module
     else
         echo Build$ext_msg $file into daq/$module, log to $logfile...
+        echo docker build -t $tag $build_args -f $file . > $logfile
         if [ -n "$inline" ]; then
-            docker build -t $tag $build_args -f $file . 2>&1 | tee $logfile || failed=y
+            docker build -t $tag $build_args -f $file . 2>&1 | tee -a $logfile || failed=y
         else
-            docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
+            docker build -t $tag $build_args -f $file . >> $logfile 2>&1 || failed=y
         fi
         if [ -n "$failed" ]; then
             tail $logfile
