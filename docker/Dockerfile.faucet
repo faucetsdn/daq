@@ -4,9 +4,7 @@ FROM faucet/python3
 
 COPY faucet/ /faucet-src/
 
-WORKDIR /faucet-src
-
-RUN ./docker/install-faucet.sh && rm -rf .git
+RUN /faucet-src/docker/install-faucet.sh && rm -rf /faucet-src/.git
 
 # Check for target executable since installer doesn't error out properly.
 RUN which faucet
