@@ -14,9 +14,9 @@ it is the minimum setup to test switch-specific functionality such as PoE.
        |  Controller  |
        |              |
        +--------------+
-         |    |    |
-         |C   |D   |(X)
-         |    |    |
+         |    |    |       C = Control-plane network
+         |C   |D   |(X)    D = Data-plan network
+         |    |    |       X = eXtra network(s)
        +--------------+
        |              |
        |    Switch    |
@@ -26,7 +26,7 @@ it is the minimum setup to test switch-specific functionality such as PoE.
           |        |
        +-----+  +-----+
        |     |  |     |
-       | DUT |  | DUT |
+       | DUT |  | DUT |  DUT = Device Under Test
        |     |  |     |
        +-----+  +-----+
 
@@ -63,12 +63,12 @@ Configuring the test lab switch requires a few separate pieces of setup:
 the specific switch used in any setup, including the necessary OpenFlow controller configuration.
 2. Network topology configuration of the controller host. See `misc/faucet_phy.yaml` for an example
 configuration for an external physical switch. Key points:
-    * Interface `name` for the `pri` switch staking port.
+    * Interface `name` for the data-plane network `pri` switch staking port.
     * 'dp_id` value for the `sec` switch.
     * `description: DAQ autostart` clause for `sec` switch to auto-configure the external interface.
 3. System configuration for controller communication, in the `local/system.conf` file.
 See `misc/system.conf.example_phy` for an example of what this looks like.
-    * `ext_ctrl` value for the interface of the control plane network.
-    * `ext_ofip` value for the ip address (and subnet) to use on the control interface.
-    * `ext_addr` value for the ip address of the switch (used to verify the connection).
-    * 'network_config' entry to point to the appropriate faucet config file.
+    * `ext_ctrl`: interface name of the control-plane network.
+    * `ext_ofip`: ip address (and subnet) to use on the control interface.
+    * `ext_addr`: ip address of the switch (used to verify the connection).
+    * 'network_config': points to the appropriate faucet config file.
