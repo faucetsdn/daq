@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.daq.orchestrator.mudacl.AclHelper.PortAcl;
+import com.google.daq.orchestrator.mudacl.DeviceMaps.DeviceSpec;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.MacIdentifier;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.Placement;
-import com.google.daq.orchestrator.mudacl.DeviceTypes.DeviceClassifier;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Ace;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Acl;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Interface;
@@ -45,7 +45,7 @@ public class MudAclGenerator {
 
   private DeviceTopology deviceTopology;
   private SwitchTopology switchTopology;
-  private DeviceTypes deviceTypes;
+  private DeviceMaps deviceMaps;
   private AclProvider aclProvider;
 
   public static void main(String[] argv) {
@@ -60,7 +60,7 @@ public class MudAclGenerator {
       writePortAcls(new File(argv[1]), prettyErrors(generator::makePortAclMap));
       if (argv.length > 2) {
         generator.setSwitchTopology(YAML_MAPPER.readValue(new File(argv[2]), SwitchTopology.class));
-        generator.setDeviceTypes(YAML_MAPPER.readValue(new File(argv[3]), DeviceTypes.class));
+        generator.setDeviceMaps(YAML_MAPPER.readValue(new File(argv[3]), DeviceMaps.class));
         generator
             .setDeviceTopology(YAML_MAPPER.readValue(new File(argv[4]), DeviceTopology.class));
         writePortAcls(new File(argv[5]), prettyErrors(generator::makePortAclMap));
@@ -196,16 +196,16 @@ public class MudAclGenerator {
     Map<String, Exception> errors = new TreeMap<>();
     for (Entry<MacIdentifier, Placement> target : targetMap.entrySet()) {
       MacIdentifier targetSrc = target.getKey();
-      DeviceClassifier classifier = getDeviceClassifier(targetSrc);
+      DeviceSpec deviceSpec = getDeviceSpec(targetSrc);
       try {
         Placement placement = validatePlacement(target.getValue());
         String aclName = placement.edgeName();
         PortAcl portAcl = portAclMap
             .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement));
-        portAcl.edgeAcl.addAll(aclSanity(aclProvider.makeEdgeAcl(classifier, targetSrc), true));
-        portAcl.upstreamAcl.addAll(aclSanity(aclProvider.makeUpstreamAcl(classifier, targetSrc), false));
+        portAcl.edgeAcl.addAll(aclSanity(aclProvider.makeEdgeAcl(deviceSpec, targetSrc), true));
+        portAcl.upstreamAcl.addAll(aclSanity(aclProvider.makeUpstreamAcl(deviceSpec, targetSrc), false));
       } catch (Exception e) {
-        errors.put(classifier.type, e);
+        errors.put(deviceSpec.type, e);
       }
     }
     if (!errors.isEmpty()) {
@@ -287,16 +287,16 @@ public class MudAclGenerator {
     }
   }
 
-  private DeviceClassifier getDeviceClassifier(MacIdentifier targetSrc) {
+  private DeviceSpec getDeviceSpec(MacIdentifier targetSrc) {
     String targetSrcStr = targetSrc.toString();
     if (targetSrcStr.startsWith(MAC_TEMPLATE_PREFIX)) {
       String templateName = targetSrcStr.substring(MAC_TEMPLATE_PREFIX.length(),
           targetSrcStr.length());
-      return DeviceTypes.templateClassifier(templateName);
+      return DeviceMaps.templateSpec(templateName);
     } else {
-      DeviceClassifier defaultClassifier = DeviceTypes.templateClassifier("default");
-      Map<MacIdentifier, DeviceClassifier> macAddrs = deviceTypes.macAddrs;
-      return macAddrs.containsKey(targetSrc) ? macAddrs.get(targetSrc) : defaultClassifier;
+      DeviceSpec defaultSpec = DeviceMaps.templateSpec("default");
+      Map<MacIdentifier, DeviceSpec> macAddrs = deviceMaps.macAddrs;
+      return macAddrs.getOrDefault(targetSrc, defaultSpec);
     }
   }
 
@@ -345,9 +345,9 @@ public class MudAclGenerator {
     this.switchTopology = switchTopology;
   }
 
-  private void setDeviceTypes(DeviceTypes deviceTypes) {
-    this.deviceTypes = deviceTypes;
-    aclProvider.setDeviceTypes(deviceTypes);
+  private void setDeviceMaps(DeviceMaps deviceMaps) {
+    this.deviceMaps = deviceMaps;
+    aclProvider.setDeviceMaps(deviceMaps);
   }
 
   private void setAclProvider(AclProvider aclProvider) {

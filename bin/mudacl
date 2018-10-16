@@ -9,22 +9,33 @@ ROOT=$(dirname $0)/..
 mud_files=mud_files/
 acl_templates=inst/acl_templates
 
-DEVICE_SPECS_FILE=device_specs.json
-
 cd $ROOT
 mudacl/bin/test.sh
-
 
 if [ -f $SYSCONF ]; then
     echo Loading configuration from $SYSCONF...
     source $SYSCONF
 fi
 
+if [ $# -gt 0 ]; then
+    device_specs=$1
+    shift
+fi
+
+if [ $# -gt 0 ]; then
+    echo Unexpected command line argument: $*
+    false
+fi
+
+if [ -z "$device_specs" ]; then
+    echo Please make sure device_specs is defined in $SYSCONF or on command line.
+    false
+fi
+
 test -d inst/ || mkdir inst
 touch inst/ || sudo chown $USER inst
 
-test -f local/$DEVICE_SPECS_FILE || cp misc/$DEVICE_SPECS_FILE local/
-cp -f local/$DEVICE_SPECS_FILE inst/$DEVICE_SPECS_FILE
+test -f $device_specs || (echo Device specs file $device_specs not found. && false)
 
 rm -rf inst/acl_templates
 mkdir inst/acl_templates
@@ -33,4 +44,4 @@ mkdir inst/port_acls
 
 mudacl/bin/run.sh $mud_files $acl_templates
 
-ls -l inst/acl_templates inst/port_acls inst/$DEVICE_SPECS_FILE
+ls -l inst/acl_templates inst/port_acls

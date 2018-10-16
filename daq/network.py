@@ -128,6 +128,11 @@ class TestNetwork():
             self.sec.addIntf(intf, port=intf_port)
             self._switch_attach(self.sec, intf)
 
+    def is_system_port(self, dpid, port):
+        """Check if the dpid/port combo is a system port for logging"""
+        target_dpid = int(self.sec_dpid)
+        return dpid == target_dpid and port == self.sec_port
+
     def is_device_port(self, dpid, port):
         """Check if the dpid/port combo is for a valid device"""
         target_dpid = int(self.sec_dpid)
@@ -167,11 +172,10 @@ class TestNetwork():
         LOGGER.info("Starting mininet...")
         self.net.start()
 
-    def direct_port_traffic(self, target_mac, target):
+    def direct_port_traffic(self, target_mac, port, target):
         """Direct traffic for a given mac to target port"""
-        port = target['port'] if target else None
-        LOGGER.info('Directing port traffic for %s to %s', target_mac, port)
-        self.topology.direct_port_traffic(target_mac, target)
+        LOGGER.info('Directing traffic for %s on port %s: %s', target_mac, port, bool(target))
+        self.topology.direct_port_traffic(target_mac, port, target)
 
     def device_group_for(self, target_mac):
         """Find the target device group for the given address"""

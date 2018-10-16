@@ -120,7 +120,9 @@ class DAQRunner():
                 self._handle_port_learn(dpid, port, target_mac)
 
     def _handle_port_state(self, dpid, port, active):
-        LOGGER.debug('Port %s dpid %s is active %s', port, dpid, active)
+        LOGGER.debug('Port %s on dpid %s is active %s', port, dpid, active)
+        if self.network.is_system_port(dpid, port):
+            LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
         if self.network.is_device_port(dpid, port):
             if active != (port in self.active_ports):
                 LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
@@ -131,8 +133,11 @@ class DAQRunner():
                     self.target_set_complete(self.port_targets[port], 'port not active')
                 if port in self.active_ports:
                     if self.active_ports[port] is not True:
-                        self.network.direct_port_traffic(self.active_ports[port], None)
+                        self._direct_port_traffic(self.active_ports[port], port, None)
                     del self.active_ports[port]
+
+    def _direct_port_traffic(self, mac, port, target):
+        self.network.direct_port_traffic(mac, port, target)
 
     def _handle_port_learn(self, dpid, port, target_mac):
         LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
@@ -245,7 +250,7 @@ class DAQRunner():
 
             new_host.initialize()
 
-            self.network.direct_port_traffic(target_mac, target)
+            self._direct_port_traffic(target_mac, target_port, target)
 
             self._send_heartbeat()
             return True
@@ -358,6 +363,7 @@ class DAQRunner():
             del self.port_gateways[target_port]
             target_mac = self.active_ports[target_port]
             del self.mac_targets[target_mac]
+            self._direct_port_traffic(target_mac, target_port, None)
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])

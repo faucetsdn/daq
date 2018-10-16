@@ -31,7 +31,8 @@ if [ -d faucet ]; then
 fi
 
 if [ -n "$DAQ_MUD" ]; then
-    bin/mudacl
+    bin/mudacl misc/device_specs.json
+    runargs+=" device_specs=misc/device_specs.json"
 fi
 
 if [ -n "$DAQ_VALIDATE" ]; then

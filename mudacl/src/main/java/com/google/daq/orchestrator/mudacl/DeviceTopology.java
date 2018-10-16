@@ -22,6 +22,16 @@ public class DeviceTopology {
     }
   }
 
+  static class ControllerIdentifier extends StringId {
+    public ControllerIdentifier(String macAddr) {
+      super(macAddr);
+    }
+
+    public static ControllerIdentifier fromString(String macAddr) {
+      return new ControllerIdentifier(macAddr);
+    }
+  }
+
   static class Placement {
     public String dpName;
     public Integer portNum;

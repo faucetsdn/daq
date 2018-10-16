@@ -1,7 +1,10 @@
 # Test Lab Setup
 
 The basic _Test Lab Setup_ is designed to test ~10 devices at a time using a physical network switch. Additionally,
-it is the minimum setup to test switch-specific functionality such as PoE.
+it is the minimum setup to test switch-specific functionality such as PoE. Although hooked together through one switch,
+dynamic network configuration is used to control dataflow in the system, following the outline in the
+[device specs](device_specs.md) docs: by defailt, all devices are completely sequestered and tested
+as if they were the only one on the switch.
 
 ## Architecture
 

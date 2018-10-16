@@ -97,11 +97,22 @@ class Gateway():
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
 
+    def _is_target_expected(self, target):
+        target_mac = target['mac']
+        for target_port in self.targets:
+            if self.targets[target_port]['mac'] == target_mac:
+                return True
+        LOGGER.warning('No target match found for %s in %s', target_mac, self.name)
+        return False
+
     def _dhcp_callback(self, state, target_ip=None, target_mac=None, exception=None):
         target = {
             'ip': target_ip,
             'mac': target_mac
         }
+        if not self._is_target_expected(target) and not exception:
+            exception = Exception(
+                'Unexpected target %s for gateway %s' % (target_mac, self.name))
         self.runner.dhcp_notify(state, target=target,
                                 gateway_set=self.port_set, exception=exception)
 

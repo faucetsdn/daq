@@ -1,9 +1,10 @@
 package com.google.daq.orchestrator.mudacl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.daq.orchestrator.mudacl.DeviceMaps.Controller;
+import com.google.daq.orchestrator.mudacl.DeviceMaps.DeviceSpec;
+import com.google.daq.orchestrator.mudacl.DeviceTopology.ControllerIdentifier;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.MacIdentifier;
-import com.google.daq.orchestrator.mudacl.DeviceTypes.Controller;
-import com.google.daq.orchestrator.mudacl.DeviceTypes.DeviceClassifier;
 import com.google.daq.orchestrator.mudacl.MudAclGenerator.ExceptionMap;
 import com.google.daq.orchestrator.mudacl.MudSpec.AccessLists;
 import com.google.daq.orchestrator.mudacl.MudSpec.AclAce;
@@ -47,7 +48,7 @@ public class MudConverter implements AclProvider {
 
   private final File rootPath;
 
-  private DeviceTypes deviceTypes;
+  private DeviceMaps deviceMaps;
   private Map<String, String> hostLookup = new HashMap<>();
 
   MudConverter(File rootPath) {
@@ -59,9 +60,9 @@ public class MudConverter implements AclProvider {
   }
 
   @Override
-  public void setDeviceTypes(DeviceTypes deviceTypes) {
-    this.deviceTypes = deviceTypes;
-    deviceTypes.macAddrs.values().stream()
+  public void setDeviceMaps(DeviceMaps deviceMaps) {
+    this.deviceMaps = deviceMaps;
+    deviceMaps.macAddrs.values().stream()
         .filter(device -> device.hostname != null)
         .forEach(device -> {
           if (hostLookup.put(device.hostname, device.ipAddr) != null) {
@@ -91,7 +92,7 @@ public class MudConverter implements AclProvider {
   }
 
   @Override
-  public Acl makeEdgeAcl(DeviceClassifier device, MacIdentifier edgeDevice) {
+  public Acl makeEdgeAcl(DeviceSpec device, MacIdentifier edgeDevice) {
     Acl acl = device == null ? makeUnknownEdgeAcl(edgeDevice) : makeEdgeAcl(device);
     List<Ace> toRemove = new ArrayList<>();
     for (Ace ace : acl) {
@@ -123,13 +124,14 @@ public class MudConverter implements AclProvider {
     if (nwEntry == null || !nwEntry.startsWith(CONTROLER_PREFIX)) {
       return nwEntry;
     }
-    DeviceClassifier deviceClassifier = deviceTypes.macAddrs.get(edgeDevice);
-    if (deviceClassifier == null) {
+    DeviceSpec deviceSpec = deviceMaps.macAddrs.get(edgeDevice);
+    if (deviceSpec == null) {
       throw new RuntimeException("Missing device mapping for " + edgeDevice);
     }
-    String controllerName = nwEntry.substring(CONTROLER_PREFIX.length());
+    ControllerIdentifier controllerId =
+        new ControllerIdentifier(nwEntry.substring(CONTROLER_PREFIX.length()));
     List<String> targets = new ArrayList<>();
-    Controller controller = deviceClassifier.controllers.get(controllerName);
+    Controller controller = deviceSpec.controllers.get(controllerId);
     if (controller == null) {
       return null;
     }
@@ -140,10 +142,10 @@ public class MudConverter implements AclProvider {
     if (targets.size() == 0) {
       return null;
     }
-    return hostLookup.get(targets.get(0)).toString();
+    return hostLookup.get(targets.get(0));
   }
 
-  private Acl makeEdgeAcl(DeviceClassifier device) {
+  private Acl makeEdgeAcl(DeviceSpec device) {
     try {
       MudSpec mudSpec = getMudSpec(device);
       Acl acl = expandAcl(mudSpec.mudDescriptor.fromDevicePolicy, mudSpec.accessLists,
@@ -159,7 +161,7 @@ public class MudConverter implements AclProvider {
   }
 
   @Override
-  public Acl makeUpstreamAcl(DeviceClassifier device, MacIdentifier edgeDevice) {
+  public Acl makeUpstreamAcl(DeviceSpec device, MacIdentifier edgeDevice) {
     Acl acl = device == null ? makeUnknownEdgeAcl(edgeDevice) : makeUpstreamAcl(device);
     for (Ace ace : acl) {
       ace.rule.dl_dst = edgeDevice.toString();
@@ -167,7 +169,7 @@ public class MudConverter implements AclProvider {
     return acl;
   }
 
-  private Acl makeUpstreamAcl(DeviceClassifier device) {
+  private Acl makeUpstreamAcl(DeviceSpec device) {
     try {
       MudSpec mudSpec = getMudSpec(device);
       Acl acl = expandAcl(mudSpec.mudDescriptor.toDevicePolicy, mudSpec.accessLists,
@@ -377,7 +379,7 @@ public class MudConverter implements AclProvider {
     }
   }
 
-  private MudSpec getMudSpec(DeviceClassifier device) {
+  private MudSpec getMudSpec(DeviceSpec device) {
     try {
       File mudFile = new File(rootPath, String.format(MUD_FILE_FORMAT, device.type));
       return OBJECT_MAPPER.readValue(mudFile, MudSpec.class);
