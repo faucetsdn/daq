@@ -41,6 +41,8 @@ class GcpManager():
         cred = credentials.Certificate(cred_file)
         firebase_admin.initialize_app(cred)
         LOGGER.info('Initialized gcp firestore %s:%s', self._project, self._client_name)
+        dashboard_url = 'https://%s.firebaseapp.com/?origin=%s' % (self._project, self._client_name)
+        LOGGER.info('Dashboard at %s', dashboard_url)
         return firestore.client()
 
     def _message_callback(self, topic, message, callback):

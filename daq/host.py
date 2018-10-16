@@ -90,7 +90,7 @@ class ConnectedHost():
         if expected is not None:
             message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
-        LOGGER.debug('Target port %d state %s -> %s', self.target_port, self.state, target)
+        LOGGER.debug('Target port %d state: %s -> %s', self.target_port, self.state, target)
         self.state = target
 
     def is_active(self):
@@ -110,6 +110,7 @@ class ConnectedHost():
         """Terminate this host"""
         LOGGER.info('Target port %d terminate, trigger %s', self.target_port, trigger)
         self._state_transition(_STATE.TERM)
+        self.record_result(self.test_name, state='disconnect')
         self._monitor_cleanup()
         if self.running_test:
             try:
@@ -232,6 +233,7 @@ class ConnectedHost():
             self._state_transition(_STATE.DONE, _STATE.NEXT)
             self._finalize_report()
             self.record_result('finish', report=self._report_path)
+            self.record_result(None)
 
     def _initialize_report(self):
         report_path = os.path.join(self.TMPDIR_BASE,
@@ -296,11 +298,12 @@ class ConnectedHost():
         """Record a named result for this test"""
         current = int(time.time())
         if name != self.test_name:
-            LOGGER.debug('Target port %d starting test %s at %d',
-                         self.target_port, self.test_name, current)
+            LOGGER.debug('Target port %d report %s start %d',
+                         self.target_port, name, current)
             self.test_name = name
             self.test_start = current
-        self._push_record(name, current, **kwargs)
+        if name:
+            self._push_record(name, current, **kwargs)
 
     def _push_record(self, name, current=None, **kwargs):
         if not current:

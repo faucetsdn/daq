@@ -21,11 +21,10 @@ important to make sure this works properly to verify the basic install is sound.
 is most useful for basic system sanity checks and system development. See the `misc/faucet.yaml`
 or `misc/faucet_multi.yaml` files for examples of how this is configured.
 
-2. _Adapter_: This uses one or more physical USB interfaces to allow external
-ethernet connections. There is no particular limit on the number of devices that can be connected
-this way except for the limitations of the host's USB subsystem. See the notes at the top of
-the `misc/faucet.yaml` file for instructions on how to configure this setup, and
-`misc/system.conf.example_phy` for a specific example.
+2. _Adapter_: This uses one or more physical USB interfaces to directly connect
+devices (no external switch). There is no particular limit on the number of devices that can be
+connected this way except for the limitations of the host's USB subsystem. See the notes at the
+top of the `misc/faucet.yaml` file for instructions on how to configure this setup.
 
 3. _Test Lab_: Use one external OpenFlow network switch detailed in the
 [test lab setup](test_lab.md) documentation. This is primarily designed for testing small

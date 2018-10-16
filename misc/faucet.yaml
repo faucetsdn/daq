@@ -2,7 +2,7 @@
 # on the 'faux' interface. To test with a real single device
 # on a physical adapter (e.g. USB), replace the 'name: faux'
 # entry with the name of the physical eth interface
-# (e.g. 'eth0'), and remove the 'DAQ autostart' clause.
+# (e.g. 'etx003943A493B3'), and remove the 'DAQ autostart' line.
 #
 dps:
     pri:

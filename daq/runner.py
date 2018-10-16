@@ -120,21 +120,24 @@ class DAQRunner():
                 self._handle_port_learn(dpid, port, target_mac)
 
     def _handle_port_state(self, dpid, port, active):
-        LOGGER.debug('Port dpid %s port %s is active %s', dpid, port, active)
+        LOGGER.debug('Port %s dpid %s is active %s', port, dpid, active)
         if self.network.is_device_port(dpid, port):
+            if active != (port in self.active_ports):
+                LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
             if active:
                 self.active_ports[port] = True
             else:
                 if port in self.port_targets:
-                    self.target_set_complete(self.port_targets[port])
+                    self.target_set_complete(self.port_targets[port], 'port not active')
                 if port in self.active_ports:
                     if self.active_ports[port] is not True:
                         self.network.direct_port_traffic(self.active_ports[port], None)
                     del self.active_ports[port]
 
     def _handle_port_learn(self, dpid, port, target_mac):
-        LOGGER.debug('Port dpid %s port %s is mac %s', dpid, port, target_mac)
+        LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
         if self.network.is_device_port(dpid, port):
+            LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             self.active_ports[port] = target_mac
             self._target_set_trigger(port)
 
@@ -147,7 +150,7 @@ class DAQRunner():
                     all_idle = False
                     target_set.idle_handler()
                 else:
-                    self.target_set_complete(target_set)
+                    self.target_set_complete(target_set, 'target set not active')
             except Exception as e:
                 self.target_set_error(target_set.target_port, e)
         if not self.event_trigger:
@@ -292,7 +295,7 @@ class DAQRunner():
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
-            self.target_set_complete(self.port_targets[target_port])
+            self.target_set_complete(self.port_targets[target_port], 'gateway set terminating')
 
     def _find_gateway_set(self, target_port):
         if target_port not in self._gateway_sets:
@@ -326,19 +329,19 @@ class DAQRunner():
         if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)
-            self.target_set_complete(target_set)
+            self.target_set_complete(target_set, str(e))
         else:
-            self._target_set_finalize(target_port, {'exception': {'exception': str(e)}})
+            self._target_set_finalize(target_port, {'exception': {'exception': str(e)}}, str(e))
 
-    def target_set_complete(self, target_set):
+    def target_set_complete(self, target_set, reason):
         """Handle completion of a target_set"""
         target_port = target_set.target_port
-        self._target_set_finalize(target_port, target_set.results)
+        self._target_set_finalize(target_port, target_set.results, reason)
         self._target_set_cancel(target_port)
 
-    def _target_set_finalize(self, target_port, result_set):
+    def _target_set_finalize(self, target_port, result_set, reason):
         results = self._combine_result_set(target_port, result_set)
-        LOGGER.info('Target port %d complete: %s', target_port, results)
+        LOGGER.info('Target port %d complete: %s (%s)', target_port, results, reason)
         if self.result_log:
             self.result_log.write('%02d: %s\n' % (target_port, results))
             self.result_log.flush()
