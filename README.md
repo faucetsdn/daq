@@ -70,7 +70,9 @@ into a rotating set of logfiles.
 
 The `inst/` subdirectory is the _instance_ runtime director, and holds all the resulting log files
 and diagnostic information from each run. There's a collection of different files in there that provide
-useful information, depending on the specific problem(s) encountered.
+useful information, depending on the specific problem(s) encountered. A device's
+[startup sequence log](docs/startup_pcap.md) provides useful debugging material for intial device
+phases (e.g. DHCP exchange).
 
 Command-line options that can be supplied to most DAQ scripts for diagnostics:
 * `-s`: Only run tests once, otherwise loop forever.

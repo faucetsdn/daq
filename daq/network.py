@@ -9,13 +9,16 @@ from mininet import node as mininet_node
 from mininet import net as mininet_net
 from mininet import link as mininet_link
 from mininet import cli as mininet_cli
+from mininet import util as mininet_util
 
 LOGGER = logging.getLogger('network')
+
 
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
     # pylint: disable=too-few-public-methods
     pass
+
 
 class DummyNode():
     """Dummy node used to handle shadow devices"""
@@ -176,6 +179,28 @@ class TestNetwork():
         """Direct traffic for a given mac to target port"""
         LOGGER.info('Directing traffic for %s on port %s: %s', target_mac, port, bool(target))
         self.topology.direct_port_traffic(target_mac, port, target)
+
+    def delete_mirror_interface(self, port):
+        """Delete a mirroring interface on the given port"""
+        return self.create_mirror_interface(port, delete=True)
+
+    def create_mirror_interface(self, port, delete=False):
+        """Create/delete a mirror interface for the given port"""
+        mirror_intf_name = 'mirror-gw%02d' % port
+        mirror_intf_peer = mirror_intf_name + '-ext'
+        mirror_port = self.topology.MIRROR_PORT_BASE + port
+        if delete:
+            LOGGER.info('Deleting mirror pair %s <-> %s', mirror_intf_name, mirror_intf_peer)
+            self.pri.cmd('ip link del %s' % mirror_intf_name)
+        else:
+            LOGGER.info('Creating mirror pair %s <-> %s at %d',
+                        mirror_intf_name, mirror_intf_peer, mirror_port)
+            mininet_util.makeIntfPair(mirror_intf_name, mirror_intf_peer)
+            self.pri.cmd('ip link set %s up' % mirror_intf_name)
+            self.pri.cmd('ip link set %s up' % mirror_intf_peer)
+            self.pri.vsctl('add-port', self.pri.name, mirror_intf_name, '--',
+                           'set', 'interface', mirror_intf_name, 'ofport_request=%s' % mirror_port)
+        return mirror_intf_name
 
     def device_group_for(self, target_mac):
         """Find the target device group for the given address"""

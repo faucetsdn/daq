@@ -4,6 +4,8 @@ import logging
 import os
 import yaml
 
+from gateway import Gateway
+
 LOGGER = logging.getLogger('topology')
 
 class FaucetTopology():
@@ -22,12 +24,14 @@ class FaucetTopology():
     FROM_ACL_KEY_FORMAT = "@from:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
+    MIRROR_PORT_BASE = 1000
+    SEC_PORT_NO = 7
 
     def __init__(self, config, pri):
         self._mac_map = {}
         self.config = config
         self.pri = pri
-        self.sec_port = 7
+        self.sec_port = self.SEC_PORT_NO
         self.sec_name = 'sec'
         self._device_specs = self._load_device_specs()
         self.topology = self._load_base_network_topology()
@@ -93,6 +97,7 @@ class FaucetTopology():
         return device_intfs
 
     def _convert_network_config(self):
+        self._add_mirror_ports()
         self._add_acl_includes()
         self._write_network_topology()
 
@@ -111,6 +116,17 @@ class FaucetTopology():
         if key not in root:
             root[key] = value
         return root[key]
+
+    def _add_mirror_ports(self):
+        for input_port in range(1, self.SEC_PORT_NO):
+            mirror_port = self.MIRROR_PORT_BASE + input_port
+            mirror_interface = {}
+            mirror_interface['name'] = 'mirror-gw%02d' % input_port
+            mirror_interface['output_only'] = True
+            set_spacing = Gateway.SET_SPACING
+            ports = list(range(input_port * set_spacing, (input_port + 1) * set_spacing))
+            mirror_interface['mirror'] = ports
+            self.topology['dps']['pri']['interfaces'][mirror_port] = mirror_interface
 
     def _add_acl_includes(self):
         self._add_pri_includes()
@@ -172,7 +188,7 @@ class FaucetTopology():
         """Generate all ACLs required for dynamic system operation"""
         self._generate_pri_acls()
         if not self._generate_port_acls(port=port):
-            LOGGER.info('Removed port acls for port %s', port)
+            LOGGER.info('Cleared port acls for port %s', port)
 
     def _generate_pri_acls(self):
         switch_name = self.pri.name
@@ -182,9 +198,12 @@ class FaucetTopology():
 
         for target_mac in self._mac_map:
             target = self._mac_map[target_mac]
+            mirror_port = self.MIRROR_PORT_BASE + target['port']
             ports = list(range(target['range'][0], target['range'][1]))
+            ports += [mirror_port]
             self._add_acl_pri_rule(incoming_acl, dl_src=target_mac, in_vlan=10, ports=ports)
-            self._add_acl_pri_rule(portset_acl, dl_dst=target_mac, out_vlan=10, port=1)
+            self._add_acl_pri_rule(portset_acl, dl_dst=target_mac, out_vlan=10, port=1,
+                                   mirror=mirror_port)
 
         self._add_acl_pri_rule(incoming_acl, allow=0)
         self._add_acl_pri_rule(portset_acl, allow=1)
@@ -222,6 +241,7 @@ class FaucetTopology():
         if output:
             actions['output'] = output
         self._maybe_apply(actions, 'allow', kwargs)
+        self._maybe_apply(actions, 'mirror', kwargs)
 
         subrule = {}
         subrule["actions"] = actions
