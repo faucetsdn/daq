@@ -2,6 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
+
 source local/system.conf
 
 if [ -z "$gcp_cred" ]; then
@@ -19,7 +20,9 @@ if [ -z "$gcp_schema" ]; then
   false
 fi
 
+validator/bin/build.sh
+
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
-validator/bin/run.sh $PWD/$gcp_schema pubsub:$gcp_topic
+validator/bin/run.sh $PWD/$gcp_schema pubsub:$gcp_topic $gcp_ignoreset

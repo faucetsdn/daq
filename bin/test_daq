@@ -36,8 +36,7 @@ if [ -n "$DAQ_MUD" ]; then
 fi
 
 if [ -n "$DAQ_VALIDATE" ]; then
-    # Hack to work-around situations where output is not fully consumed.
-    validator/bin/test.sh || (sleep 10; false)
+    validator/bin/test.sh
 fi
 
 if [ "$DAQ_BUILD" == in ]; then

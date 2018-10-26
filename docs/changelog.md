@@ -24,3 +24,5 @@
 	* MUD file generator 'controller' capability.
 	* Documentation updates: topology, firebase, validator, debugging.
 	* Updated FAUCET to version 1.8.25.
+* 0.8.4
+	* Updating schema validator code structure.
