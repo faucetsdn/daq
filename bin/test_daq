@@ -84,6 +84,9 @@ if [ -n "$DAQ_FAIL" ]; then
         echo Succeeding through expected failure.
     fi
 elif [ "$failed" != 0 ]; then
+    echo Test failed, activation logs:
+    more inst/run-port-*/nodes/*/activate.log | cat || true
+    echo
     echo Test failed.
     false
 fi
