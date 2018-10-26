@@ -19,4 +19,8 @@
 	* Preliminary schema validation capability.
 * 0.8.3
 	* Upload test report to a cloud storage bucket included in web page.
-
+	* Bug fixes for startup pcap capture.
+	* Minor debugging output improvements.
+	* MUD file generator 'controller' capability.
+	* Documentation updates: topology, firebase, validator, debugging.
+	* Updated FAUCET to version 1.8.24.

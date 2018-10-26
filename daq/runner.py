@@ -195,6 +195,7 @@ class DAQRunner():
             if self.event_trigger:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
+            LOGGER.info('If this blocks for too long, check inst/faucet.log for errors')
             self.stream_monitor.event_loop()
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
