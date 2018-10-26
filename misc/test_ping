@@ -3,5 +3,7 @@
 ping -n -c 1 $TARGET_IP
 
 # This is a check that the startup.pcap file exists and is proper.
+ls -l /scans/startup.pcap
+echo $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured.
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"

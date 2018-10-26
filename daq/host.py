@@ -1,5 +1,6 @@
 """Represent a device-under-test"""
 
+import datetime
 import logging
 import os
 import shutil
@@ -30,7 +31,7 @@ class ConnectedHost():
     """Class managing a device-under-test"""
 
     MONITOR_SCAN_SEC = 20
-    REPORT_FORMAT = "report_%s.txt"
+    REPORT_FORMAT = "report_%s_%s.txt"
     TMPDIR_BASE = "inst"
     REPORT_PREFIX = "\n#############"
 
@@ -245,8 +246,11 @@ class ConnectedHost():
             self.record_result(None)
 
     def _initialize_report(self):
-        report_path = os.path.join(self.TMPDIR_BASE,
-                                   self.REPORT_FORMAT % self.target_mac.replace(':', ''))
+        report_timestamp = datetime.datetime.now().replace(microsecond=0).isoformat()
+        report_filename = self.REPORT_FORMAT % (self.target_mac.replace(':', ''),
+                                                report_timestamp)
+        report_path = os.path.join(self.TMPDIR_BASE, report_filename)
+
         LOGGER.info('Creating report as %s', report_path)
         self._report_path = report_path
         self._report_file = open(report_path, "w")
