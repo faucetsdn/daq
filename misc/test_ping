@@ -1,11 +1,19 @@
 #!/bin/bash -e
 
-ping -n -c 1 $TARGET_IP
-
 # This is a check that the startup.pcap file exists and is proper.
+echo
 ls -l /scans/startup.pcap
 echo $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured.
+echo
+tcpdump -en -r /scans/startup.pcap port 67
+echo
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
+echo
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
+echo
 
-echo Done with basic connectivity tests.
+# First ping might fail b/c of warm-up delays.
+ping -n -c 3 $TARGET_IP
+
+echo
+echo Passed basic connectivity tests.

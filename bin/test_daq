@@ -10,6 +10,7 @@ if [ -n "$TRAVIS" ]; then
 fi
 
 runargs=
+cmdargs=$@
 
 if [ ! -f local/system.conf ]; then
     echo Installing local/system.conf...
@@ -68,9 +69,9 @@ fail_mode=${DAQ_FAIL#!}
 failed=0
 echo Running DAQ test...
 if [ "$DAQ_MODE" == "in" ]; then
-    cmd/run $runargs || failed=$?
+    cmd/run $runargs $cmdargs || failed=$?
 else
-    DAQ_FAUX_OPTS=$fail_mode cmd/run local $runargs || failed=$?
+    DAQ_FAUX_OPTS=$fail_mode cmd/run local $runargs $cmdargs || failed=$?
 fi
 
 echo Finished run with exit code $failed.

@@ -37,6 +37,13 @@ class Gateway():
 
     def initialize(self):
         """Initialize the gateway host"""
+        try:
+            self._initialize()
+        except:
+            self.terminate()
+            raise
+
+    def _initialize(self):
         host_name = 'gw%02d' % self.port_set
         host_port = self._switch_port(self.HOST_OFFSET)
         LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
@@ -69,6 +76,7 @@ class Gateway():
             LOGGER.debug('Gateway %s warmup ping failed', host_name)
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
+
         assert self._ping_test(dummy, host), 'host ping failed'
         assert self._ping_test(dummy, self.fake_target), 'fake ping failed'
         assert self._ping_test(host, dummy, src_addr=self.fake_target), 'reverse ping failed'
@@ -110,11 +118,10 @@ class Gateway():
             'ip': target_ip,
             'mac': target_mac
         }
-        if not self._is_target_expected(target) and not exception:
-            exception = Exception(
-                'Unexpected target %s for gateway %s' % (target_mac, self.name))
-        self.runner.dhcp_notify(state, target=target,
-                                gateway_set=self.port_set, exception=exception)
+        if self._is_target_expected(target) and not exception:
+            self.runner.dhcp_notify(state, target=target, gateway_set=self.port_set)
+        else:
+            LOGGER.warning('Unexpected target %s for gateway %s', target_mac, self.name)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)
