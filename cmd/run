@@ -32,6 +32,8 @@ if [ -z "$run_mode" ]; then
 fi
 
 echo run_mode is $run_mode
+echo Clearing previous reports...
+rm -f inst/report_*.txt
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@"

@@ -149,6 +149,9 @@ class ConnectedHost():
             self._state_transition(_STATE.BASE, _STATE.ACTIVE)
 
     def _ping_test(self, src, dst, src_addr=None):
+        if not src or not dst:
+            LOGGER.error('Invalid ping test params, src=%s, dst=%s', src, dst)
+            return False
         return self.runner.ping_test(src, dst, src_addr=src_addr)
 
     def _startup_scan(self):
@@ -170,8 +173,12 @@ class ConnectedHost():
 
     def _base_start(self):
         try:
-            self._base_tests()
+            success = self._base_tests()
             self._monitor_cleanup()
+            if not success:
+                LOGGER.warning('Target port %d base tests failed', self.target_port)
+                self._state_transition(_STATE.ERROR)
+                return
             LOGGER.info('Target port %d done with base.', self.target_port)
             self._monitor_scan()
         except Exception as e:
@@ -226,14 +233,17 @@ class ConnectedHost():
         if not self._ping_test(self.gateway, self.target_ip):
             LOGGER.debug('Target port %d warmup ping failed', self.target_port)
         try:
-            assert self._ping_test(self.gateway, self.target_ip), 'simple ping failed'
-            assert self._ping_test(self.gateway, self.target_ip,
-                                   src_addr=self.fake_target), 'target ping failed'
+            success1 = self._ping_test(self.gateway, self.target_ip), 'simple ping failed'
+            success2 = self._ping_test(self.gateway, self.target_ip,
+                                       src_addr=self.fake_target), 'target ping failed'
+            if not success1 or not success2:
+                return False
         except Exception as e:
             self.record_result('base', exception=e)
             self._monitor_cleanup()
             raise
         self.record_result('base')
+        return True
 
     def _run_next_test(self):
         if self.remaining_tests:

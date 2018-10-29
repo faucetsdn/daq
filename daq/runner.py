@@ -228,18 +228,18 @@ class DAQRunner():
         try:
             group_name = self.network.device_group_for(target_mac)
             gateway = self._activate_device_group(group_name, target_port)
-            target = {
-                'port': target_port,
-                'group': group_name,
-                'fake': gateway.fake_target,
-                'range': gateway.get_port_range(),
-                'mac': target_mac
-            }
-            gateway.attach_target(target_port, target)
         except Exception as e:
-            LOGGER.error('Target port %d gateway error %s', target_port, str(e))
+            LOGGER.error('Target port %d target trigger error %s', target_port, str(e))
             return False
 
+        target = {
+            'port': target_port,
+            'group': group_name,
+            'fake': gateway.fake_target,
+            'range': gateway.get_port_range(),
+            'mac': target_mac
+        }
+        gateway.attach_target(target_port, target)
 
         try:
             self.run_count += 1
@@ -271,31 +271,43 @@ class DAQRunner():
     def _activate_device_group(self, group_name, target_port):
         if group_name in self._device_groups:
             existing = self._device_groups[group_name]
+            LOGGER.info('Gateway for device group %s is %s', group_name, existing.name)
             return existing
         set_num = self._find_gateway_set(target_port)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     group_name, set_num)
         gateway = gateway_manager.Gateway(self, group_name, set_num, self.network)
-        gateway.initialize()
         self._gateway_sets[set_num] = group_name
         self._device_groups[group_name] = gateway
+        try:
+            gateway.initialize()
+        except:
+            LOGGER.debug('Clearing target %s gateway group %s for %s',
+                         target_port, set_num, group_name)
+            del self._gateway_sets[set_num]
+            del self._device_groups[group_name]
+            raise
         return gateway
 
     def dhcp_notify(self, state, target=None, exception=None, gateway_set=None):
         """Handle a DHCP notificaiton"""
+        target_mac = target.get('mac')
+        target_ip = target.get('ip')
+        LOGGER.info('DHCP notify %s is %s on gw%02d (%s)', target_mac,
+                    target_ip, gateway_set, str(exception))
         if exception:
-            LOGGER.error('DHCP exception set %s: %s', gateway_set, exception)
+            LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
             return
-        target_mac = target['mac']
-        target_ip = target['ip']
-        LOGGER.info('DHCP notify %s/%s', target_ip, target_mac)
         if target_mac in self.mac_targets:
             target_host = self.mac_targets[target_mac]
             target_host.dhcp_result(state, target_ip=target_ip, exception=exception)
 
     def _terminate_gateway_set(self, gateway_set):
+        if not gateway_set in self._gateway_sets:
+            LOGGER.warning('Gateway set %s not found in %s', gateway_set, self._gateway_sets)
+            return
         group_name = self._gateway_sets[gateway_set]
         gateway = self._device_groups[group_name]
         ports = [target['port'] for target in gateway.get_targets()]
@@ -351,7 +363,8 @@ class DAQRunner():
         if self.result_log:
             self.result_log.write('%02d: %s\n' % (target_port, results))
             self.result_log.flush()
-        if results and self.fail_mode:
+        suppress_tests = self.fail_mode or self.result_linger
+        if results and suppress_tests:
             LOGGER.warning('Suppressing further tests due to failure.')
             self.run_tests = False
         self.result_sets[target_port] = result_set
@@ -364,7 +377,6 @@ class DAQRunner():
             del self.port_gateways[target_port]
             target_mac = self.active_ports[target_port]
             del self.mac_targets[target_mac]
-            self._direct_port_traffic(target_mac, target_port, None)
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
@@ -372,6 +384,7 @@ class DAQRunner():
                 LOGGER.warning('Target port %d result_linger: %s', target_port, results)
                 self.active_ports[target_port] = True
             else:
+                self._direct_port_traffic(target_mac, target_port, None)
                 target_host.terminate(trigger=False)
                 self._detach_gateway(target_port, target_mac, target_gateway)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
