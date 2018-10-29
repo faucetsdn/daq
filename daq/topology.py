@@ -262,22 +262,23 @@ class FaucetTopology():
         return True
 
     def _generate_port_acl(self, port=None):
-        has_mapping = False
+        target_mac = None
         rules = []
         if self._device_specs:
-            for target_mac in self._mac_map:
-                if self._mac_map[target_mac]['port'] == port:
+            for check_mac in self._mac_map:
+                if self._mac_map[check_mac]['port'] == port:
+                    target_mac = check_mac
                     self._add_acl_port_rules(rules, target_mac, port)
-                    has_mapping = True
 
         filename = self.INST_FILE_PREFIX + self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
-        if has_mapping:
+        if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
+            self._append_default_allow(rules, target_mac)
             self._write_port_acl(port, rules, filename)
         elif os.path.isfile(filename):
             LOGGER.debug("Removing unused port acl file %s", filename)
             os.remove(filename)
-        return has_mapping
+        return target_mac
 
     def _write_port_acl(self, port, rules, filename):
         LOGGER.debug("Writing port acl file %s", filename)
@@ -311,6 +312,16 @@ class FaucetTopology():
         if target_mac in mac_map and 'group' in mac_map[target_mac]:
             return mac_map[target_mac]['group']
         return self._sanitize_mac(target_mac)
+
+    def _append_default_allow(self, rules, target_mac):
+        device_spec = self._device_specs['macAddrs'].get(target_mac)
+        if device_spec and 'default_allow' in device_spec:
+            allow_action = 1 if device_spec['default_allow'] else 0
+            actions = {'allow': allow_action}
+            subrule = {'actions': actions}
+            subrule['description'] = "device_spec default_allow"
+            rule = {'rule': subrule}
+            rules.append(rule)
 
     def _append_acl_template(self, rules, template, target_mac=None):
         filename = self.TEMPLATE_FILE_FORMAT % template

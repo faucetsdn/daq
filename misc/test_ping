@@ -7,3 +7,5 @@ ls -l /scans/startup.pcap
 echo $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured.
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
+
+echo Done with basic connectivity tests.

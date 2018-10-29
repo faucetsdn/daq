@@ -4,9 +4,11 @@
       "type": "lightbulb"
     },
     "9a:02:57:1e:8f:02": {
+      "default_allow": true,
       "group": "testing"
     },
     "9a:02:57:1e:8f:03": {
+      "default_allow": true,
       "group": "testing"
     }
   }
