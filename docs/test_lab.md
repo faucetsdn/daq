@@ -44,8 +44,9 @@ nearly be anything such as a standard laptop or desktop tower. Production grade 
 [FAUCET Hardware Switch](https://faucet.readthedocs.io/en/latest/vendors/index.html) documentation. For a general
 purpose setup any of the enterprise-grade switches should suffice, although specific switches might be more
 appropriate depending on the exact objectives of the lab.
-3. _DUT_ is whatever device is intended for testing. There is no canonical test-lab device, although there is an
-[Android Things](https://developer.android.com/things/) image available that can be used to test some capabilities.
+3. _DUT_ is whatever device is intended for testing. For diagnostics, it is
+possible to loop back, using a physical cable, a switch port to another
+network adapter on the controller machine.
 
 ## Connections
 

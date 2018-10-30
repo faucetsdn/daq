@@ -74,10 +74,12 @@ if [ -n "$daq_intf" ]; then
 fi
 
 cleanup_file=`tempfile`
+
+function external {
+    echo -n
+}
+
 function autostart {
-    shift  # description
-    shift  # DAQ
-    shift  # autostart
     tmp=`tempfile`
     echo DAQ autostart $@
     eval $@ | tee $tmp
@@ -90,10 +92,9 @@ function DAQ {
     $@
 }
 
-if [ -z "$skip_autostart" ]; then
-    grep -e '^\s*description: DAQ autostart\s' $network_config | while read line; do
-        autostart $line
-    done
+if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
+    echo Sourcing $startup_cmds...
+    source $startup_cmds
 fi
 
 if [ -f .pdbrc ]; then

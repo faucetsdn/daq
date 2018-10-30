@@ -24,5 +24,8 @@
 	* MUD file generator 'controller' capability.
 	* Documentation updates: topology, firebase, validator, debugging.
 	* Updated FAUCET to version 1.8.25.
-* 0.8.4
+* 0.9.0
+	* Upping major version number because of breaking config changes.
 	* Updating schema validator code structure.
+	* Improved internal checks on startup sequence.
+	* Autogenerate faucet.yaml file, rather than relying on template.

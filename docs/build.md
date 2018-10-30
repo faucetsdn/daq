@@ -36,5 +36,5 @@ subsection that shows all the various tested configurations. Note that this assu
 _clean_ environment (e.g. no `local/system.conf` file). From there, individual tests can be run locally by
 appending `bin/test_daq` to a `sudo` line of shell environment settings, e.g. as taken from one matrix entry:
 <pre>
-~/daq$ sudo DAQ_CONF=misc/faucet_multi.yaml DAQ_MUD=true DAQ_VALIDATE=y DAQ_RUNS=10 bin/test_daq
+~/daq$ <b>sudo DAQ_CONF=misc/system_multi.conf DAQ_RUNS=10 bin/test_daq</b>
 </pre>

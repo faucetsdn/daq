@@ -48,10 +48,12 @@ def _configure_logging(config):
 
     # For some reason this is necessary for travis.ci
     ROOTLOG.setLevel(level)
-    ROOTLOG.handlers[0].setLevel(level)
 
-    mininet_env = config.get('mininet_loglevel')
-    minilog.setLogLevel(mininet_env if mininet_env else 'info')
+    # This handler is used by everything, so be permissive here.
+    ROOTLOG.handlers[0].setLevel(minilog.LEVELS['debug'])
+
+    mininet_env = config.get('mininet_loglevel', 'info')
+    minilog.setLogLevel(mininet_env)
 
     #pylint: disable=protected-access
     minilog.MininetLogger._log = _stripped_alt_logger

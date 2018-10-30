@@ -12,14 +12,30 @@ fi
 runargs=
 cmdargs=$@
 
-if [ ! -f local/system.conf ]; then
-    echo Installing local/system.conf...
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+LOCAL_CONF=local/system.conf
+SYS_CONF=${DAQ_CONF:-misc/system.conf}
+
+if [ -f $LOCAL_CONF ]; then
+    if ! diff $LOCAL_CONF $SYS_CONF; then
+        echo Cowardly refusing to overwrite existing $LOCAL_CONF
+        false
+    else
+        echo Existing $LOCAL_CONF matches $SYS_CONF, continue!
+    fi
+else
+    echo Installing $SYS_CONF
     mkdir -p local
-    cp misc/system.conf local/
+    cp $SYS_CONF local/system.conf
 fi
 
 # Out with the old, in with the new (use faucet instead).
 sudo /etc/init.d/openvswitch-controller stop || true
+
+echo Cleaning old results...
+sudo rm -rf inst/run-port-* inst/report_*
 
 echo -n "Last DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
@@ -49,10 +65,6 @@ if [ "$DAQ_BUILD" == in ]; then
 elif [ "$DAQ_BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
     echo Not running tests because no-build on release branch.
     exit 0
-fi
-
-if [ -n "$DAQ_CONF" ]; then
-    runargs+=" network_config=$DAQ_CONF"
 fi
 
 if [ -n "$DAQ_RUNS" ]; then

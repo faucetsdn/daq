@@ -24,12 +24,12 @@ env:
   matrix:
     - DAQ_MODE=in DAQ_BUILD=in
     - DAQ_MODE=in DAQ_BUILD=no
-    - DAQ_CONF=misc/faucet_multi.yaml DAQ_MUD=true DAQ_VALIDATE=y DAQ_RUNS=10
+    - DAQ_CONF=misc/system_multi.conf DAQ_MUD=true DAQ_VALIDATE=y DAQ_RUNS=10 DAQ_VERIFY=inst/run-port-03/nodes/nmap03/return_code.txt
     - DAQ_CODECOV=y DAQ_VERIFY=inst/run-port-01/nodes/nmap01/return_code.txt
     - DAQ_FAIL=telnet DAQ_VERIFY=inst/run-port-01/nodes/pass01/return_code.txt
     - DAQ_FAIL=!telnet DAQ_MUD=true DAQ_VERIFY=inst/run-port-01/nodes/pass01/return_code.txt
-    - DAQ_CONF=misc/faucet_multi.yaml DAQ_VERIFY=inst/run-port-03/nodes/nmap03/return_code.txt
-    - DAQ_CONF=misc/faucet_ext.yaml DAQ_VERIFY=inst/run-port-02/nodes/nmap02/return_code.txt
+    - DAQ_CONF=misc/system_multi.conf DAQ_VERIFY=inst/run-port-03/nodes/nmap03/return_code.txt
+    - DAQ_CONF=misc/system_ext.conf DAQ_VERIFY=inst/run-port-02/nodes/nmap02/return_code.txt
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/
