@@ -14,9 +14,6 @@ if [ -f $local_config ]; then
   source $local_config
 fi
 
-mkdir -p local
-date > local/last_ibuild.txt
-
 file=misc/Dockerfile.base
 target=daq/base
 mkdir -p $build_root
