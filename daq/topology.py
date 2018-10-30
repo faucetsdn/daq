@@ -11,7 +11,6 @@ LOGGER = logging.getLogger('topology')
 class FaucetTopology():
     """Topology manager specific to FAUCET configs"""
 
-    DEFAULT_NETWORK_FILE = "misc/faucet.yaml"
     OUTPUT_NETWORK_FILE = "inst/faucet.yaml"
     MAC_PLACEHOLDER = "@mac:"
     DNS_PLACEHOLDER = "@dns:"
@@ -27,23 +26,24 @@ class FaucetTopology():
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
     MIRROR_PORT_BASE = 1000
     PRI_STACK_PORT = 1
-    SEC_PORT_NO = 7
+    SEC_STACK_PORT = 7
     DEFAULT_VLAN = 10
 
     def __init__(self, config, pri):
         self._mac_map = {}
         self.config = config
         self.pri = pri
-        self.sec_port = self.SEC_PORT_NO
+        self.pri_name = pri.name
+        self.sec_port = self.SEC_STACK_PORT
         self.sec_name = 'sec'
+        self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
         self._device_specs = self._load_device_specs()
-        self.topology = self._load_base_network_topology()
-        assert self.topology, 'Could not find network config file'
+        self.topology = self._make_base_network_topology()
 
     def initialize(self):
         """Initialize this topology"""
         LOGGER.debug("Converting existing network topology...")
-        self._convert_network_config()
+        self._write_network_topology()
         self.generate_acls()
 
     def start(self):
@@ -66,43 +66,28 @@ class FaucetTopology():
         with open(filename) as stream:
             return yaml.safe_load(stream)
 
-    def get_sec_intf(self):
-        """Return the external interface for seconday"""
-        return self.topology['dps']['pri']['interfaces'][self.PRI_STACK_PORT].get('name')
+    def get_pri_intf(self):
+        """Return the external interface for seconday, if any"""
+        return self.config.get('ext_pri')
 
     def get_sec_dpid(self):
         """Return the secondary dpid"""
-        return self.topology['dps'][self.sec_name]['dp_id']
+        return self.sec_dpid
 
     def get_sec_port(self):
-        """Return the stacking network port on the secondary"""
-        interfaces = self.topology['dps'][self.sec_name]['interfaces']
-        for interface in interfaces:
-            if 'stack' in interfaces[interface]:
-                stack = interfaces[interface]['stack']
-                assert stack['dp'] == 'pri', 'stack interface should be pri'
-                return int(interface)
-        return None
+        """Return the secondary stacking port"""
+        return self.SEC_STACK_PORT
 
     def get_device_intfs(self):
         """Return list of secondary device interfaces"""
+        intf_split = self.config.get('intf_names', "").split(",")
+        intf_names = intf_split if intf_split[0] else []
         device_intfs = []
-        interfaces = self.topology['dps'][self.sec_name]['interfaces']
-        for interface in interfaces:
-            intf = interfaces[interface]
-            if 'stack' not in intf:
-                port = int(interface)
-                name = intf['name'] if 'name' in intf else 'sec-%d' % port
-                device_intfs.append({
-                    'port': port,
-                    'name': name
-                })
+        for port in range(1, self.SEC_STACK_PORT):
+            named_port = port <= len(intf_names)
+            default_name = '%s-%s' % (self.sec_name, port)
+            device_intfs.append(intf_names[port-1] if named_port else default_name)
         return device_intfs
-
-    def _convert_network_config(self):
-        self._add_mirror_ports()
-        self._add_acl_includes()
-        self._write_network_topology()
 
     def direct_port_traffic(self, target_mac, port_no, target):
         """Direct traffic from a given mac to specified port set"""
@@ -120,59 +105,6 @@ class FaucetTopology():
             root[key] = value
         return root[key]
 
-    def _add_mirror_ports(self):
-        for input_port in range(1, self.SEC_PORT_NO):
-            mirror_port = self.MIRROR_PORT_BASE + input_port
-            mirror_interface = {}
-            mirror_interface['name'] = 'mirror-%02d' % input_port
-            mirror_interface['output_only'] = True
-            self.topology['dps']['pri']['interfaces'][mirror_port] = mirror_interface
-
-    def _add_acl_includes(self):
-        self._add_pri_includes()
-        self._add_sec_includes()
-        for range_port in range(1, self.sec_port):
-            self._add_port_include(range_port)
-
-    def _add_pri_includes(self):
-        switch_name = self.pri.name
-        include = self._ensure_entry(self.topology, 'include', [])
-        pri_filename = self.DP_ACL_FILE_FORMAT
-        include.append(pri_filename)
-        pri_interface = self.topology['dps']['pri']['interfaces'][self.PRI_STACK_PORT]
-        assert 'acl_in' not in pri_interface, 'acl_in already defined on pri interface'
-        pri_interface['acl_in'] = self.INCOMING_ACL_FORMAT % switch_name
-        interface_ranges = self.topology['dps']['pri']['interface_ranges']
-        for interface_range in interface_ranges:
-            port_interface = interface_ranges[interface_range]
-            assert 'acl_in' not in port_interface, 'acl_in already defined on %s' % interface_range
-            port_interface['acl_in'] = self.PORTSET_ACL_FORMAT % switch_name
-
-    def _add_sec_includes(self):
-        switch_name = self.sec_name
-        include = self._ensure_entry(self.topology, 'include', [])
-        sec_filename = self.DP_ACL_FILE_FORMAT
-        include.append(sec_filename)
-        sec_interface = self.topology['dps'][self.sec_name]['interfaces'][self.SEC_PORT_NO]
-        assert 'acl_in' not in sec_interface, 'acl_in already defined on sec interface'
-        sec_interface['acl_in'] = self.INCOMING_ACL_FORMAT % switch_name
-
-    def _add_port_include(self, target_port):
-        rules = []
-        if not self._append_acl_template(rules, 'raw'):
-            return
-        sec_filename = self.PORT_ACL_FILE_FORMAT % (self.sec_name, target_port)
-        include_optional = self._ensure_entry(self.topology, 'include-optional', [])
-        include_optional.append(sec_filename)
-        interface = self.topology['dps'][self.sec_name]['interfaces'][target_port]
-        assert 'acl_in' not in interface, 'acl_in already defined for %s' % sec_filename
-        acl_name = self.PORT_ACL_NAME_FORMAT % (self.sec_name, target_port)
-        interface['acl_in'] = acl_name
-        self._ensure_entry(self.topology, 'acls', {})
-        acls = self.topology['acls']
-        assert acl_name not in acls, 'acl %s already defined in faucet.yaml' % acl_name
-        acls[acl_name] = rules
-
     def _load_device_specs(self):
         device_specs = self.config.get('device_specs')
         if device_specs:
@@ -181,13 +113,104 @@ class FaucetTopology():
         LOGGER.info('No device_specs file specified, skipping...')
         return None
 
-    def _load_base_network_topology(self):
-        config_file = self.config.get('network_config')
-        if config_file:
-            LOGGER.info('Loading local network config from %s', config_file)
-            return self._load_file(config_file)
-        LOGGER.info('Loading default network config from %s', self.DEFAULT_NETWORK_FILE)
-        return self._load_file(self.DEFAULT_NETWORK_FILE)
+    def _make_mirror_interface(self, input_port):
+        interface = {}
+        interface['name'] = 'mirror-%02d' % input_port
+        interface['output_only'] = True
+        return interface
+
+    def _make_gw_interface(self, input_port):
+        input_port = input_port
+        interface = {}
+        interface['acl_in'] = self.PORTSET_ACL_FORMAT % self.pri_name
+        interface['native_vlan'] = self.DEFAULT_VLAN
+        return interface
+
+    def _make_pri_stack_interface(self):
+        interface = {}
+        interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.pri_name
+        interface['stack'] = {'dp': self.sec_name, 'port': self.SEC_STACK_PORT}
+        interface['name'] = self.config.get('ext_pri', 'stack_pri')
+        return interface
+
+    def _make_sec_stack_interface(self):
+        interface = {}
+        interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.sec_name
+        interface['stack'] = {'dp': self.pri_name, 'port': self.PRI_STACK_PORT}
+        interface['name'] = self.config.get('ext_sec', 'stack_pri')
+        return interface
+
+    def _make_default_acl_rules(self):
+        rules = []
+        if not self._append_acl_template(rules, 'raw'):
+            rules += [self._make_default_allow_rule()]
+        return rules
+
+    def _make_default_acls(self):
+        acls = {}
+        for port in range(1, self.SEC_STACK_PORT):
+            acl_name = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
+            acls[acl_name] = self._make_default_acl_rules()
+        return acls
+
+    def _make_sec_port_interface(self, port):
+        interface = {}
+        interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
+        interface['native_vlan'] = self.DEFAULT_VLAN
+        return interface
+
+    def _make_pri_interfaces(self):
+        interfaces = {}
+        interfaces[self.PRI_STACK_PORT] = self._make_pri_stack_interface()
+        for port in self._get_gw_ports():
+            interfaces[port] = self._make_gw_interface(port)
+        for input_port in range(1, self.SEC_STACK_PORT):
+            mirror_port = self.MIRROR_PORT_BASE + input_port
+            interfaces[mirror_port] = self._make_mirror_interface(input_port)
+        return interfaces
+
+    def _make_sec_interfaces(self):
+        interfaces = {}
+        interfaces[self.SEC_STACK_PORT] = self._make_sec_stack_interface()
+        for port in range(1, self.SEC_STACK_PORT):
+            interfaces[port] = self._make_sec_port_interface(port)
+        return interfaces
+
+    def _make_acl_include(self):
+        return [self.DP_ACL_FILE_FORMAT]
+
+    def _make_acl_include_optional(self):
+        include_optional = []
+        for port in range(1, self.SEC_STACK_PORT):
+            include_optional += [self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)]
+        return include_optional
+
+    def _make_pri_topology(self):
+        pri_dp = {}
+        pri_dp['dp_id'] = 1
+        pri_dp['name'] = self.pri_name
+        pri_dp['stack'] = {'priority':1}
+        pri_dp['interfaces'] = self._make_pri_interfaces()
+        return pri_dp
+
+    def _make_sec_topology(self):
+        sec_dp = {}
+        sec_dp['dp_id'] = self.sec_dpid
+        sec_dp['name'] = self.sec_name
+        sec_dp['interfaces'] = self._make_sec_interfaces()
+        return sec_dp
+
+    def _make_base_network_topology(self):
+        dps = {}
+        dps['pri'] = self._make_pri_topology()
+        dps['sec'] = self._make_sec_topology()
+        topology = {}
+        topology['dps'] = dps
+        topology['acls'] = self._make_default_acls()
+        topology['vlans'] = {10:{'description': "Internal DAQ vlan"}}
+        topology['include'] = self._make_acl_include()
+        topology['include-optional'] = self._make_acl_include_optional()
+        return topology
 
     def _write_network_topology(self):
         LOGGER.info('Writing network config to %s', self.OUTPUT_NETWORK_FILE)
@@ -200,10 +223,13 @@ class FaucetTopology():
         if not self._generate_port_acls(port=port):
             LOGGER.info('Cleared port acls for port %s', port)
 
-    def _get_bcast_ports(self):
+    def _get_gw_ports(self):
         min_port = Gateway.SET_SPACING
-        max_port = Gateway.SET_SPACING * self.SEC_PORT_NO
-        return [1] + list(range(min_port, max_port))
+        max_port = Gateway.SET_SPACING * self.SEC_STACK_PORT
+        return list(range(min_port, max_port))
+
+    def _get_bcast_ports(self):
+        return [1] + self._get_gw_ports()
 
     def _generate_pri_acls(self):
         switch_name = self.pri.name
@@ -293,7 +319,7 @@ class FaucetTopology():
         filename = self.INST_FILE_PREFIX + self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
-            self._append_default_allow(rules, target_mac)
+            self._append_device_default_allow(rules, target_mac)
             self._write_port_acl(port, rules, filename)
         elif os.path.isfile(filename):
             LOGGER.debug("Removing unused port acl file %s", filename)
@@ -333,7 +359,12 @@ class FaucetTopology():
             return mac_map[target_mac]['group']
         return self._sanitize_mac(target_mac)
 
-    def _append_default_allow(self, rules, target_mac):
+    def _make_default_allow_rule(self):
+        actions = {'allow': 1}
+        subrule = {'actions': actions}
+        return {'rule': subrule}
+
+    def _append_device_default_allow(self, rules, target_mac):
         device_spec = self._device_specs['macAddrs'].get(target_mac)
         if device_spec and 'default_allow' in device_spec:
             allow_action = 1 if device_spec['default_allow'] else 0

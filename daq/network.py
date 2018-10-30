@@ -101,7 +101,7 @@ class TestNetwork():
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
-        self.ext_intf = self.topology.get_sec_intf()
+        self.ext_intf = self.topology.get_pri_intf()
         if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
@@ -122,9 +122,8 @@ class TestNetwork():
 
     def _attach_sec_device_links(self):
         topology_intfs = self.topology.get_device_intfs()
-        for topology_intf in topology_intfs:
-            intf_name = topology_intf['name']
-            intf_port = topology_intf['port']
+        for intf_port in range(1, len(topology_intfs) + 1):
+            intf_name = topology_intfs[intf_port-1]
             LOGGER.info("Attaching device interface %s on port %d.", intf_name, intf_port)
             intf = mininet_link.Intf(intf_name, node=DummyNode(), port=intf_port)
             intf.port = intf_port

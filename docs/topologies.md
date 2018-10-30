@@ -2,29 +2,30 @@
 
 ## General Setup
 
-The operational network configuration is supplied by a [FAUCET config file](faucet.md)
-(as indicated by the `network_config` configuration option in `system.conf`).
-The general mechanism for setting up a particular topology is:
-1. Copy `misc/system.conf` and `misc/faucet.yaml` to the `local/` subdirectory (creating if needed).
-2. Edit `local/system.conf` as needed, namely changing `network_config` to point to `local/faucet.yaml`.
-3. Edit `local/faucet.yaml` appropriately to specify the desired network topology. See the comments
-at the top of various examples in `misc/faucet*.yaml` files.
+The network topology is auto-generated based on settings in the specified `local/system.conf`
+on startup. Various templates are availabile in `misc/`:
+* _misc/system.conf_: Single faux-device internal test setup.
+* _misc/system_multi.conf_: Test setup with 3 faux-devices.
+* _misc/system_ext.conf_: Test setup for using an external OVS switch.
+* _misc/system_phy.conf_: Setup for using an external physical switch.
 
-General network debugging information can be found in the `inst/faucet.log` file, which will generally
-indicate any networking activity (device port detection) and/or misconfigured switch topologies.
+The system will generate the `inst/faucet.yaml` file, which then triggers the configuration
+of the underlying OpenFlow system. General network debugging information can be found in
+`inst/faucet.log`, which will generally indicate any networking activity (device port detection)
+and/or misconfigured switch topologies.
 
 ## Topology Categories
 
 The different top-level network topologies are:
 1. _Emulation_: This uses a built-in 'faux' device to test the DAQ suite itself. It is
 important to make sure this works properly to verify the basic install is sound. This
-is most useful for basic system sanity checks and system development. See the `misc/faucet.yaml`
-or `misc/faucet_multi.yaml` files for examples of how this is configured.
+is most useful for basic system sanity checks and system development. See the `misc/system.conf`
+or `misc/system_multi.conf` files for examples of how this is configured.
 
 2. _Adapter_: This uses one or more physical USB interfaces to directly connect
 devices (no external switch). There is no particular limit on the number of devices that can be
 connected this way except for the limitations of the host's USB subsystem. See the notes at the
-top of the `misc/faucet.yaml` file for instructions on how to configure this setup.
+top of the `misc/system.conf` file for instructions on how to configure this setup.
 
 3. _Test Lab_: Use one external OpenFlow network switch detailed in the
 [test lab setup](test_lab.md) documentation. This is primarily designed for testing small
