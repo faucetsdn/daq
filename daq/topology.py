@@ -26,7 +26,6 @@ class FaucetTopology():
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
     MIRROR_PORT_BASE = 1000
     PRI_STACK_PORT = 1
-    SEC_STACK_PORT = 7
     DEFAULT_VLAN = 10
 
     def __init__(self, config, pri):
@@ -34,7 +33,7 @@ class FaucetTopology():
         self.config = config
         self.pri = pri
         self.pri_name = pri.name
-        self.sec_port = self.SEC_STACK_PORT
+        self.sec_port = int(config.get('sec_port', "7"), 0)
         self.sec_name = 'sec'
         self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
         self._device_specs = self._load_device_specs()
@@ -76,14 +75,14 @@ class FaucetTopology():
 
     def get_sec_port(self):
         """Return the secondary stacking port"""
-        return self.SEC_STACK_PORT
+        return self.sec_port
 
     def get_device_intfs(self):
         """Return list of secondary device interfaces"""
         intf_split = self.config.get('intf_names', "").split(",")
         intf_names = intf_split if intf_split[0] else []
         device_intfs = []
-        for port in range(1, self.SEC_STACK_PORT):
+        for port in range(1, self.sec_port):
             named_port = port <= len(intf_names)
             default_name = '%s-%s' % (self.sec_name, port)
             device_intfs.append(intf_names[port-1] if named_port else default_name)
@@ -129,7 +128,7 @@ class FaucetTopology():
     def _make_pri_stack_interface(self):
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.pri_name
-        interface['stack'] = {'dp': self.sec_name, 'port': self.SEC_STACK_PORT}
+        interface['stack'] = {'dp': self.sec_name, 'port': self.sec_port}
         interface['name'] = self.config.get('ext_pri', 'stack_pri')
         return interface
 
@@ -148,7 +147,7 @@ class FaucetTopology():
 
     def _make_default_acls(self):
         acls = {}
-        for port in range(1, self.SEC_STACK_PORT):
+        for port in range(1, self.sec_port):
             acl_name = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
             acls[acl_name] = self._make_default_acl_rules()
         return acls
@@ -164,15 +163,15 @@ class FaucetTopology():
         interfaces[self.PRI_STACK_PORT] = self._make_pri_stack_interface()
         for port in self._get_gw_ports():
             interfaces[port] = self._make_gw_interface(port)
-        for input_port in range(1, self.SEC_STACK_PORT):
+        for input_port in range(1, self.sec_port):
             mirror_port = self.MIRROR_PORT_BASE + input_port
             interfaces[mirror_port] = self._make_mirror_interface(input_port)
         return interfaces
 
     def _make_sec_interfaces(self):
         interfaces = {}
-        interfaces[self.SEC_STACK_PORT] = self._make_sec_stack_interface()
-        for port in range(1, self.SEC_STACK_PORT):
+        interfaces[self.sec_port] = self._make_sec_stack_interface()
+        for port in range(1, self.sec_port):
             interfaces[port] = self._make_sec_port_interface(port)
         return interfaces
 
@@ -181,7 +180,7 @@ class FaucetTopology():
 
     def _make_acl_include_optional(self):
         include_optional = []
-        for port in range(1, self.SEC_STACK_PORT):
+        for port in range(1, self.sec_port):
             include_optional += [self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)]
         return include_optional
 
@@ -225,7 +224,7 @@ class FaucetTopology():
 
     def _get_gw_ports(self):
         min_port = Gateway.SET_SPACING
-        max_port = Gateway.SET_SPACING * self.SEC_STACK_PORT
+        max_port = Gateway.SET_SPACING * self.sec_port
         return list(range(min_port, max_port))
 
     def _get_bcast_ports(self):
