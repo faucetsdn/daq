@@ -42,7 +42,7 @@
     <orderEntry type="library" name="Gradle: io.dropwizard.metrics:metrics-core:3.2.2" level="project" />
     <orderEntry type="library" name="Gradle: io.dropwizard.metrics:metrics-jvm:3.2.2" level="project" />
     <orderEntry type="library" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
-    <orderEntry type="library" name="Gradle: com.bugsnag:bugsnag:3.2.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.bugsnag:bugsnag:3.3.0" level="project" />
     <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Gradle: com.hazelcast:hazelcast:3.5.4" level="project" />
     <orderEntry type="library" name="Gradle: org.json:json:20160810" level="project" />

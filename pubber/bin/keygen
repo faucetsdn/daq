@@ -1,0 +1,26 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/../..)
+cd $ROOT
+
+TARGET_PREFIX=local/pubber_
+
+PUBLIC_CERT=${TARGET_PREFIX}cert.pem
+PRIVATE_CERT=${TARGET_PREFIX}private.pem
+PRIVATE_KEY=${TARGET_PREFIX}private.pkcs8
+
+if [ -f $PUBLIC_CERT ]; then
+    echo $PUBLIC_CERT already exists, exiting.
+    false
+fi
+if [ -f $PRIVATE_CERT ]; then
+    echo $PRIVATE_CERT already exists, exiting.
+    false
+fi
+if [ -f $PRIVATE_KEY ]; then
+    echo $PRIVATE_KEY already exists, exiting.
+    false
+fi
+
+openssl req -x509 -nodes -newkey rsa:2048 -keyout $PRIVATE_CERT -days 1000000 -out $PUBLIC_CERT -subj "/CN=unused"
+openssl pkcs8 -topk8 -inform PEM -outform DER -in $PRIVATE_CERT -nocrypt > $PRIVATE_KEY

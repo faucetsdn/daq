@@ -1,4 +1,4 @@
-package com.google.iot.bos;
+package org.faucetsdn.daq.pubber;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -326,8 +326,8 @@ public class MqttPublisher {
       MqttClient mqttClient = notification.getValue();
       if (mqttClient.isConnected()) {
         mqttClient.disconnect();
+        mqttClient.close();
       }
-      mqttClient.close();
     } catch (Exception e) {
       throw new RuntimeException("While closing client " + notification.getKey(), e);
     }
@@ -346,7 +346,7 @@ public class MqttPublisher {
       connectMqttClient(mqttClient, registryId, deviceId);
       return mqttClient;
     } catch (Exception e) {
-      throw new RuntimeException("While getting mqtt client " + deviceId, e);
+      throw new RuntimeException("While getting mqtt client " + deviceId + ": " + e.toString(), e);
     }
   }
 

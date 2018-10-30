@@ -1,4 +1,4 @@
-package com.google.iot.bos.datafmt;
+package org.faucetsdn.daq.datafmt;
 
 import java.util.Date;
 import java.util.Map;
