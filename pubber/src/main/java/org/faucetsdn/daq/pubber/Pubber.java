@@ -18,8 +18,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import org.faucetsdn.daq.datafmt.AbacabMessage;
-import org.faucetsdn.daq.datafmt.AbacabMessage.PointSet;
+import com.faucetsdn.daq.abacab.Message;
+import com.faucetsdn.daq.abacab.Message.PointSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,6 @@ public class Pubber {
   private final Configuration configuration;
   private final AtomicInteger messageDelayMs = new AtomicInteger(DEFAULT_MESSAGE_DELAY);
   private final CountDownLatch configLatch = new CountDownLatch(1);
-  private final Set<String> deviceIds;
 
   private MqttPublisher mqttPublisher;
   private ScheduledFuture<?> scheduledFuture;
@@ -52,7 +51,6 @@ public class Pubber {
     }
     Pubber pubber = new Pubber(args[0]);
     pubber.initialize();
-    pubber.forEach(pubber::publishStateMessage);
     pubber.synchronizeStart();
     pubber.startExecutor();
   }
@@ -67,15 +65,11 @@ public class Pubber {
   private void sendTestMessage() {
     try {
       LOG.info("Sending test messages at " + new Date());
-      forEach(this::sendTestMessage);
+      sendTestMessage(configuration.gatewayId);
     } catch (Exception e) {
       LOG.error("Fatal error during execution", e);
       terminate();
     }
-  }
-
-  private void forEach(Consumer<String> action) {
-    deviceIds.forEach(action);
   }
 
   private void terminate() {
@@ -102,10 +96,6 @@ public class Pubber {
       throw new RuntimeException("While reading configuration file " + configurationFile.getAbsolutePath(), e);
     }
     info("Starting instance for registry " + configuration.registryId);
-
-    deviceIds = ImmutableSet.of(configuration.gatewayId);
-
-    LOG.info("Publishing to device set " + Joiner.on(", ").join(deviceIds));
   }
 
   private void initialize() {
@@ -114,9 +104,8 @@ public class Pubber {
     configuration.keyBytes = getFileBytes(configuration.keyFile);
     mqttPublisher = new MqttPublisher(configuration, this::onMqttReceiveError);
 
-    deviceIds.forEach((deviceId) -> mqttPublisher
-        .registerHandler(configuration.registryId, deviceId, CONFIG_TOPIC,
-            this::configHandler, AbacabMessage.Config.class));
+    mqttPublisher.registerHandler(configuration.registryId, configuration.gatewayId, CONFIG_TOPIC,
+            this::configHandler, Message.Config.class);
   }
 
   private void onMqttReceiveError(Exception e) {
@@ -127,11 +116,12 @@ public class Pubber {
     LOG.info(msg);
   }
 
-  private void configHandler(AbacabMessage.Config config) {
+  private void configHandler(Message.Config config) {
     info("Received new config " + config);
     messageDelayMs.set(DEFAULT_MESSAGE_DELAY);
     info("Publish delay set to " + messageDelayMs.get());
     configLatch.countDown();
+    //publishStateMessage(configuration.gatewayId);
   }
 
   private byte[] getFileBytes(String dataFile) {
@@ -151,7 +141,7 @@ public class Pubber {
 
   private void publishStateMessage(String deviceId) {
     info("Sending state message for device " + deviceId);
-    AbacabMessage.State message = new AbacabMessage.State();
+    Message.State message = new Message.State();
     mqttPublisher.publish(configuration.registryId, deviceId, STATE_TOPIC, message);
   }
 }

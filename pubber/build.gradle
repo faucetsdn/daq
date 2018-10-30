@@ -34,7 +34,6 @@ repositories {
 
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-simple', version:'1.7.5'
-    compile project('datafmt')
     compile 'io.jsonwebtoken:jjwt:0.7.0'
     compile 'com.google.guava:guava:22.0'
     compile 'com.google.cloud:google-cloud-logging:1.7.0'

@@ -1,10 +1,10 @@
-package org.faucetsdn.daq.datafmt;
+package com.faucetsdn.daq.abacab;
 
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class AbacabMessage {
+public class Message {
   public static class PointSet extends AbacabBase {
     public Map<String, Point> points = new TreeMap<>();
   }
