@@ -1,0 +1,41 @@
+{
+  "title": "System metadata snippet",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "location": {
+      "type": "object",
+      "properties": {
+        "site_name": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]+$"
+        }
+      },
+      "required": [
+        "site_name"
+      ]
+    },
+    "physical_tag": {
+      "type": "object",
+      "properties": {
+        "inst_guid": {
+          "type": "string",
+          "pattern": "^[a-z]+://[0-9a-zA-Z_$]+$"
+        },
+        "inst_name": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]+_[A-Z]{3}-[A-Z0-9]{3}$"
+        }
+      },
+      "required": [
+        "inst_guid",
+        "inst_name"
+      ]
+    }
+  },
+  "required": [
+    "location",
+    "physical_tag"
+  ]
+}

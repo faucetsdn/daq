@@ -1,0 +1,52 @@
+{
+  "title": "System state snippet",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "bundles": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "firmware": {
+          "$ref": "#/definitions/bundle_properties"
+        }
+      },
+      "required": [
+        "firmware"
+      ]
+    },
+    "make_model": {
+      "type": "string"
+    },
+    "last_config": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operational": {
+      "type": "boolean"
+    },
+    "status": {
+      "$ref": "file:logentry.json#/definitions/entries"
+    }
+  },
+  "required": [
+    "make_model",
+    "bundles",
+    "operational"
+  ],
+  "definitions": {
+    "bundle_properties": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "timestamp": "2018-08-26T21:39:29.364Z",
+  "system": {
+    "location": {
+      "site_name": "US-SFO-XYY"
+    },
+    "physical_tag": {
+      "inst_guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
+      "inst_name": "US-SFO-XYY_AHU-A01"
+    }
+  },
+  "pointset": {
+    "points": {
+      "return_air_temperature_sensor": {
+        "units": "Celsius"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+Validating 1 schemas
+  Validating 1 files against simple.json
+    Against input simple.tests/simple.json
+      #: required key [rectangle] not found
