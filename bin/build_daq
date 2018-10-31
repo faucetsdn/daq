@@ -26,7 +26,7 @@ fi
 if [ "$DAQ_BUILD" == "in" ]; then
     cmd/inbuild
 elif [ "$DAQ_BUILD" == "skip" ]; then
-    cmd/build skip
+    cmd/inbuild skip
 elif [ "$DAQ_BUILD" != "no" ]; then
     cmd/build inline
 fi
