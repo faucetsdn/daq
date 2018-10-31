@@ -22,7 +22,7 @@ env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   matrix:
-    - DAQ_VALIDATE=y DAQ_LINT=y DAQ_BUILD=skip
+    - DAQ_VALIDATE=y DAQ_LINT=y DAQ_BUILD=skip DAQ_MODE=skip
     - DAQ_CONF=misc/system_multi.conf DAQ_MUD=true DAQ_RUNS=10 DAQ_VERIFY=inst/run-port-03/nodes/nmap03/return_code.txt
     - DAQ_CODECOV=y DAQ_VERIFY=inst/run-port-01/nodes/nmap01/return_code.txt
     - DAQ_FAIL=telnet DAQ_VERIFY=inst/run-port-01/nodes/pass01/return_code.txt

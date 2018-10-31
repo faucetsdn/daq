@@ -86,6 +86,7 @@ for file in docker/Dockerfile.*; do
     fi
     module=${file#docker/Dockerfile.}
     if [ "$module" == base -a -n "$in_container" ]; then
+        echo Skipping base build in container.
         continue
     fi
     logfile=$build_root/docker_build.$module

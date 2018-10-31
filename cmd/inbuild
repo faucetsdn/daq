@@ -3,7 +3,15 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-cmd/build save
+if [ "$1" == skip ]; then
+    build_extra=
+    run_extra=skip
+else
+    build_extra=save
+    run_extra=load
+fi
+
+cmd/build $build_extra
 
 local_config=local/system.conf
 build_root=build
@@ -32,7 +40,7 @@ images=$(docker images | fgrep daq/ | awk '{print $1}')
 echo Runner build on top of base...
 
 # Explicilty run in /daq not /root/daq because of volume mapping.
-cmd/run base /daq/cmd/build load
+cmd/run base /daq/cmd/build $run_extra
 
 if [ -n "$CONTINUOUS_INTEGRATION" ]; then
     echo Skipping container commit since its too intensive for automatic builds.
