@@ -16,7 +16,9 @@ inline=
 copydirs="bin cmd misc faucet mininet docker daq"
 load_mark=/root/load_complete
 
-if [ "$1" == save ]; then
+if [ "$1" == skip ]; then
+    do_images=skip
+elif [ "$1" == save ]; then
     do_images=save
     ext_msg=/save
     shift
@@ -89,7 +91,9 @@ for file in docker/Dockerfile.*; do
     logfile=$build_root/docker_build.$module
     failed=
     tag=daq/$module
-    if [ "$do_images" == load ]; then
+    if [ "$do_images" == skip ]; then
+        echo Skipping in-container build of daq/$module.
+    elif [ "$do_images" == load ]; then
         docker load -i /daq/$build_root/docker_image.$module
     else
         echo Build$ext_msg $file into daq/$module, log to $logfile...
