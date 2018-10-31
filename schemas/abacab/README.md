@@ -24,9 +24,9 @@ Streaming data points from device to cloud ([example](pointset.tests/example.jso
 * [<em>logentry</em>](logentry.json):
 Logging messages from devices ([example](logentry.tests/example.json)).
 * [<em>envelope</em>](envelope.json):
-Message envelope attributes, automatic for each message ([example](envelope.tests/example.json)).
+Message envelope attributes, part of cloud-side processing and not directly visible to a device ([example](envelope.tests/example.json)).
 * [<em>metadata</em>](metadata.json):
-Device metadata, information _about_ a device ([example](metadata.tests/example.json)).
+Device metadata, information _about_ a device in the cloud but is not sent to/from the device ([example](metadata.tests/example.json)).
 
 ## Message Detail Notes
 
