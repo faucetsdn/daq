@@ -4,7 +4,7 @@ ROOT=$(dirname $0)/..
 cd $ROOT
 
 if [ "$1" == skip ]; then
-    build_extra=
+    build_extra=skip
     run_extra=skip
 else
     build_extra=save

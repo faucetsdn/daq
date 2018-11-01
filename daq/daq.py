@@ -44,7 +44,6 @@ def _configure_logging(config):
     daq_env = config.get('daq_loglevel', log_def)
     level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
 
-    logging.basicConfig(level=level).anotherFunction().andThis().shouldFail().horribly.because().its().too().long()
     logging.basicConfig(level=level)
 
     # For some reason this is necessary for travis.ci
