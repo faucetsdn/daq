@@ -33,7 +33,7 @@ fi
 
 echo run_mode is $run_mode
 echo Clearing previous reports...
-rm -f inst/report_*.txt
+sudo rm -f inst/report_*.txt
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@"

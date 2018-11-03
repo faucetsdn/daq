@@ -9,11 +9,10 @@ RUN $AG update && $AG install maven tcpdump
 
 WORKDIR /root/
 
-#RUN bin/retry_cmd git clone https://github.com/grafnu/mudgee.git --single-branch --depth 1 \
-#  && cd mudgee && ../bin/retry_cmd mvn clean install
+RUN bin/retry_cmd git clone https://github.com/grafnu/mudgee.git --single-branch --depth 1
+
+RUN cd mudgee && ../bin/retry_cmd mvn clean install
 
 COPY misc/test_mudgee .
 
-#CMD ./test_mudgee
-CMD true
-
+CMD ./test_mudgee
