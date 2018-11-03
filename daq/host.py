@@ -126,7 +126,7 @@ class ConnectedHost():
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
-            self.runner.target_set_complete(self)
+            self.runner.target_set_complete(self, 'Target port %d termination' % self.target_port)
 
     def idle_handler(self):
         """Trigger events from idle state"""

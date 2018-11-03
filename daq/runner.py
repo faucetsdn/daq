@@ -180,7 +180,7 @@ class DAQRunner():
         LOGGER.debug('Active target sets/state: %s', states)
 
     def _terminate(self):
-        target_set_keys = self.port_targets.keys()
+        target_set_keys = list(self.port_targets.keys())
         for key in target_set_keys:
             self.port_targets[key].terminate()
 
