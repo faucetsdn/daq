@@ -4,7 +4,7 @@
   "properties": {
     "deviceId": {
       "type": "string",
-      "pattern": "^[A-Z]{3}-[A-Z0-9]{3}$"
+      "pattern": "^[A-Z]{3}-[A-Z0-9]{3,6}$"
     },
     "deviceNumId": {
       "type": "string",
