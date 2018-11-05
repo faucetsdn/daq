@@ -2,24 +2,20 @@ package org.faucetsdn.daq.pubber;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
+import com.faucetsdn.daq.abacab.Message;
+import com.faucetsdn.daq.abacab.Message.PointSet;
+import com.faucetsdn.daq.abacab.Message.State;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import com.faucetsdn.daq.abacab.Message;
-import com.faucetsdn.daq.abacab.Message.PointSet;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,17 +29,20 @@ public class Pubber {
   private static final String STATE_TOPIC = "state";
   private static final String CONFIG_TOPIC = "config";
 
-  private static final int DEFAULT_MESSAGE_DELAY = 1000;
+  private static final long DEFAULT_MESSAGE_DELAY_MS = 1000;
   private static final long CONFIG_WAIT_TIME_MS = 10000;
+  private static final long STATE_THROTTLE_MS = 1000;
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
   private final Configuration configuration;
-  private final AtomicInteger messageDelayMs = new AtomicInteger(DEFAULT_MESSAGE_DELAY);
+  private final AtomicLong messageDelayMs = new AtomicLong(DEFAULT_MESSAGE_DELAY_MS);
   private final CountDownLatch configLatch = new CountDownLatch(1);
+  private final State deviceState = new State();
 
   private MqttPublisher mqttPublisher;
   private ScheduledFuture<?> scheduledFuture;
+  private long lastStateTimeMs;
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
@@ -64,7 +63,6 @@ public class Pubber {
 
   private void sendTestMessage() {
     try {
-      LOG.info("Sending test messages at " + new Date());
       sendTestMessage(configuration.gatewayId);
     } catch (Exception e) {
       LOG.error("Fatal error during execution", e);
@@ -118,10 +116,10 @@ public class Pubber {
 
   private void configHandler(Message.Config config) {
     info("Received new config " + config);
-    messageDelayMs.set(DEFAULT_MESSAGE_DELAY);
+    messageDelayMs.set(DEFAULT_MESSAGE_DELAY_MS);
     info("Publish delay set to " + messageDelayMs.get());
     configLatch.countDown();
-    //publishStateMessage(configuration.gatewayId);
+    publishStateMessage(configuration.gatewayId);
   }
 
   private byte[] getFileBytes(String dataFile) {
@@ -139,9 +137,23 @@ public class Pubber {
     mqttPublisher.publish(configuration.registryId, deviceId, POINTSET_TOPIC, message);
   }
 
+
   private void publishStateMessage(String deviceId) {
+    lastStateTimeMs = sleepUntil(lastStateTimeMs + CONFIG_WAIT_TIME_MS);
     info("Sending state message for device " + deviceId);
-    Message.State message = new Message.State();
-    mqttPublisher.publish(configuration.registryId, deviceId, STATE_TOPIC, message);
+    mqttPublisher.publish(configuration.registryId, deviceId, STATE_TOPIC, deviceState);
+  }
+
+  private long sleepUntil(long targetTimeMs) {
+    long currentTime = System.currentTimeMillis();
+    long delay = targetTimeMs - currentTime;
+    try {
+      if (delay > 0) {
+        Thread.sleep(delay);
+      }
+      return System.currentTimeMillis();
+    } catch (Exception e) {
+      throw new RuntimeException("While sleeping for " + delay, e);
+    }
   }
 }
