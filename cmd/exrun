@@ -73,14 +73,14 @@ if [ -n "$daq_intf" ]; then
     false
 fi
 
-cleanup_file=`tempfile`
+cleanup_file=`mktemp`
 
 function external {
     echo -n
 }
 
 function autostart {
-    tmp=`tempfile`
+    tmp=`mktemp`
     echo DAQ autostart $@
     eval $@ | tee $tmp
     grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file
