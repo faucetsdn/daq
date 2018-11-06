@@ -14,18 +14,18 @@ to be tested.
 ## Schema Structure
 
 Schemas are broken down into several sub-schemas that address different message types:
-* [<em>state</em>](state.json):
-Sporadic state updates from device to cloud ([example](state.tests/example.json)).
-* [<em>config</em>](config.json):
-Configuration passed from cloud to device ([example](config.tests/example.json)).
-* [<em>pointset</em>](pointset.json):
-Streaming data points from device to cloud ([example](pointset.tests/example.json)).
-* [<em>logentry</em>](logentry.json):
-Logging messages from devices ([example](logentry.tests/example.json)).
-* [<em>envelope</em>](envelope.json):
-The message envelope that is automatically generated for messages during cloud-side processing ([example](envelope.tests/example.json)).
-* [<em>metadata</em>](metadata.json):
-Device metadata stored in the cloud _about_ a device, but not generally available to the device ([example](metadata.tests/example.json)).
+* State updates ([example](state.tests/example.json)) from device to cloud,
+defined by [<em>state.json</em>](state.json).
+* Configuration ([example](config.tests/example.json)) passed from cloud to device,
+defined by [<em>config.json</em>](config.json).
+* Streaming data points ([example](pointset.tests/example.json)) from device to cloud,
+defined by [<em>pointset.json</em>](pointset.json).
+* Logging messages ([example](logentry.tests/example.json)) from devices,
+defined by [<em>logentry.json</em>](logentry.json).
+* The message envelope ([example](envelope.tests/example.json)), which is automatically generated
+for messages during cloud-side processing, defined by [<em>envelope.json</em>](envelope.json).
+* Device metadata ([example](metadata.tests/example.json)) stored in the cloud _about_ a device,
+but not directly available to the device, defined by [<em>metadata.json</em>](metadata.json).
 
 ## Message Detail Notes
 
