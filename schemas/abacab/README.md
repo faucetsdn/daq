@@ -23,7 +23,7 @@ defined by [<em>config.json</em>](config.json).
 defined by [<em>pointset.json</em>](pointset.json).
 * Logging messages ([example](logentry.tests/example.json)) from devices,
 defined by [<em>logentry.json</em>](logentry.json).
-* The message envelope ([example](envelope.tests/example.json)), representing server-side
+* Message envelope ([example](envelope.tests/example.json)) for server-side
 attributes, defined by [<em>envelope.json</em>](envelope.json).
 * Device metadata ([example](metadata.tests/example.json)) stored _about_ a device,
 but not directly available to the device, defined by [<em>metadata.json</em>](metadata.json).
