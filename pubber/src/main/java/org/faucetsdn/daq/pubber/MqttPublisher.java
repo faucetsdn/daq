@@ -77,6 +77,7 @@ public class MqttPublisher {
       Executors.newFixedThreadPool(PUBLISH_THREAD_COUNT);
 
   private final Configuration configuration;
+  private final String registryId;
 
   private final AtomicInteger publishCounter = new AtomicInteger(0);
   private final AtomicInteger errorCounter = new AtomicInteger(0);
@@ -87,30 +88,31 @@ public class MqttPublisher {
 
   MqttPublisher(Configuration configuration, Consumer<Exception> onError) {
     this.configuration = configuration;
+    this.registryId = configuration.registryId;
     this.onError = onError;
     validateCloudIoTOptions();
   }
 
-  void publish(String registryId, String deviceId, String topic, Object data) {
+  void publish(String deviceId, String topic, Object data) {
     Preconditions.checkNotNull(deviceId, "publish deviceId");
     LOG.debug("Publishing in background " + registryId + "/" + deviceId);
-    publisherExecutor.submit(() -> publishCore(registryId, deviceId, topic, data));
+    publisherExecutor.submit(() -> publishCore(deviceId, topic, data));
   }
 
-  private void publishCore(String registryId, String deviceId, String topic, Object data) {
+  private void publishCore(String deviceId, String topic, Object data) {
     try {
       String payload = OBJECT_MAPPER.writeValueAsString(data);
-      sendMessage(registryId, deviceId, getMessageTopic(deviceId, topic), payload.getBytes());
+      sendMessage(deviceId, getMessageTopic(deviceId, topic), payload.getBytes());
       LOG.debug("Publishing complete " + registryId + "/" + deviceId);
     } catch (Exception e) {
       errorCounter.incrementAndGet();
       LOG.warn(String.format("Publish failed for %s: %s", deviceId, e));
-      closeDeviceClient(registryId, deviceId);
+      closeDeviceClient(deviceId);
     }
   }
 
-  private void closeDeviceClient(String registryId, String deviceId) {
-    mqttClientCache.invalidate(clientKey(registryId, deviceId));
+  private void closeDeviceClient(String deviceId) {
+    mqttClientCache.invalidate(clientKey(deviceId));
   }
 
   void close() {
@@ -130,26 +132,10 @@ public class MqttPublisher {
     }
   }
 
-  private MqttClient newMqttClient(String key) {
+  private MqttClient newBoundClient(String gatewayId, String deviceId) throws Exception {
+    MqttClient mqttClient = mqttClientCache.get(clientKey(gatewayId));
     try {
-      String[] parts = splitClientKey(key);
-      String registryId = parts[0];
-      String deviceId = parts[1];
-      String gatewayId = configuration.gatewayId;
-      if (gatewayId != null && !deviceId.equals(gatewayId)) {
-        return newBoundClient(registryId, gatewayId, deviceId);
-      } else {
-        return newMqttClient(registryId, deviceId);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Creating client for key " + key, e);
-    }
-  }
-
-  private MqttClient newBoundClient(String registryId, String gatewayId, String deviceId) throws Exception {
-    MqttClient mqttClient = mqttClientCache.get(clientKey(registryId, gatewayId));
-    try {
-      connectMqttClient(mqttClient, registryId, gatewayId);
+      connectMqttClient(mqttClient, gatewayId);
       String topic = String.format("/devices/%s/attach", deviceId);
       byte[] payload = new byte[0];
       LOG.info("Publishing attach message to topic " + topic);
@@ -162,11 +148,11 @@ public class MqttPublisher {
   }
 
 
-  private MqttClient newMqttClient(String registryId, String deviceId) {
+  private MqttClient newMqttClient(String deviceId) {
     try {
       Preconditions.checkNotNull(registryId, "registryId is null");
       Preconditions.checkNotNull(deviceId, "deviceId is null");
-      MqttClient mqttClient = new MqttClient(getBrokerUrl(), getClientId(registryId, deviceId),
+      MqttClient mqttClient = new MqttClient(getBrokerUrl(), getClientId(deviceId),
           new MemoryPersistence());
       return mqttClient;
     } catch (Exception e) {
@@ -175,7 +161,7 @@ public class MqttPublisher {
     }
   }
 
-  private void connectMqttClient(MqttClient mqttClient, String registryId, String deviceId)
+  private void connectMqttClient(MqttClient mqttClient, String deviceId)
       throws Exception {
     if (!connectionLock.tryAcquire(CONNECTION_LOCK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
       throw new RuntimeException("Timeout waiting for connection lock");
@@ -184,9 +170,9 @@ public class MqttPublisher {
       if (mqttClient.isConnected()) {
         return;
       }
-      LOG.info("Attempting connection to " + clientKey(registryId, deviceId));
+      LOG.info("Attempting connection to " + clientKey(deviceId));
 
-      mqttClient.setCallback(new MqttCallbackHandler(registryId, deviceId));
+      mqttClient.setCallback(new MqttCallbackHandler(deviceId));
       mqttClient.setTimeToWait(INITIALIZE_TIME_MS);
 
       MqttConnectOptions options = new MqttConnectOptions();
@@ -204,13 +190,13 @@ public class MqttPublisher {
 
       mqttClient.connect(options);
 
-      subscribeToUpdates(mqttClient, registryId, deviceId);
+      subscribeToUpdates(mqttClient, deviceId);
     } finally {
       connectionLock.release();
     }
   }
 
-  private String clientKey(String registryId, String deviceId) {
+  private String clientKey(String deviceId) {
     return String.format("%s%s%s", registryId, KEY_SEPARATOR, deviceId);
   }
 
@@ -218,7 +204,7 @@ public class MqttPublisher {
     return key.split(KEY_SEPARATOR);
   }
 
-  private String getClientId(String registryId, String deviceId) {
+  private String getClientId(String deviceId) {
     // Create our MQTT client. The mqttClientId is a unique string that identifies this device. For
     // Google Cloud IoT, it must be in the format below.
     return String.format(CLIENT_ID_FORMAT, configuration.projectId, configuration.cloudRegion,
@@ -235,7 +221,7 @@ public class MqttPublisher {
     return String.format(MESSAGE_TOPIC_FORMAT, deviceId, topic);
   }
 
-  private void subscribeToUpdates(MqttClient client, String registryId, String deviceId) {
+  private void subscribeToUpdates(MqttClient client, String deviceId) {
     String updateTopic = String.format(CONFIG_UPDATE_TOPIC_FMT, deviceId);
     try {
       client.subscribe(updateTopic);
@@ -249,9 +235,9 @@ public class MqttPublisher {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> void registerHandler(String registryId, String deviceId, String configTopic,
+  public <T> void registerHandler(String deviceId, String mqttTopic,
       Consumer<T> handler, Class<T> messageType) {
-    String key = getHandlerKey(registryId, getMessageTopic(deviceId, configTopic));
+    String key = getHandlerKey(getMessageTopic(deviceId, mqttTopic));
     if (handler == null) {
       handlers.remove(key);
       handlersType.remove(key);
@@ -262,17 +248,19 @@ public class MqttPublisher {
     }
   }
 
-  private String getHandlerKey(String registryId, String configTopic) {
+  private String getHandlerKey(String configTopic) {
     return String.format(HANDLER_KEY_FORMAT, registryId, configTopic);
+  }
+
+  public void connect(String deviceId) {
+    getConnectedClient(deviceId);
   }
 
   private class MqttCallbackHandler implements MqttCallback {
 
-    private final String registryId;
     private final String deviceId;
 
-    MqttCallbackHandler(String registryId, String deviceId) {
-      this.registryId = registryId;
+    MqttCallbackHandler(String deviceId) {
       this.deviceId = deviceId;
     }
 
@@ -293,7 +281,7 @@ public class MqttPublisher {
      * @see MqttCallback#messageArrived(String, MqttMessage)
      */
     public void messageArrived(String topic, MqttMessage message) {
-      String handlerKey = getHandlerKey(registryId, topic);
+      String handlerKey = getHandlerKey(topic);
       Consumer<Object> handler = handlers.get(handlerKey);
       Class<Object> type = handlersType.get(handlerKey);
       if (handler == null) {
@@ -333,17 +321,17 @@ public class MqttPublisher {
     }
   }
 
-  private void sendMessage(String registryId, String deviceId, String mqttTopic,
+  private void sendMessage(String deviceId, String mqttTopic,
       byte[] mqttMessage) throws Exception {
     LOG.debug("Sending message to " + mqttTopic);
-    getMqttClient(registryId, deviceId).publish(mqttTopic, mqttMessage, MQTT_QOS, SHOULD_RETAIN);
+    getConnectedClient(deviceId).publish(mqttTopic, mqttMessage, MQTT_QOS, SHOULD_RETAIN);
     publishCounter.incrementAndGet();
   }
 
-  private MqttClient getMqttClient(String registryId, String deviceId) {
+  private MqttClient getConnectedClient(String deviceId) {
     try {
-      MqttClient mqttClient = mqttClientCache.get(clientKey(registryId, deviceId));
-      connectMqttClient(mqttClient, registryId, deviceId);
+      MqttClient mqttClient = mqttClientCache.get(clientKey(deviceId));
+      connectMqttClient(mqttClient, deviceId);
       return mqttClient;
     } catch (Exception e) {
       throw new RuntimeException("While getting mqtt client " + deviceId + ": " + e.toString(), e);
