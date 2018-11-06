@@ -13,6 +13,9 @@
             "fault": {
               "type": "boolean"
             },
+            "units": {
+              "type": "string",
+            },
             "status": {
               "$ref": "file:logentry.json#/definitions/report"
             }

@@ -9,24 +9,24 @@ public class Message {
 
   public static class State extends AbacabBase {
     public SystemState system = new SystemState();
-    public PointSetDesc pointset;
+    public PointSetState pointset;
   }
 
   public static class Config extends AbacabBase {
     public SystemConfig system;
-    public PointSetDesc pointset;
+    public PointSetState pointset;
   }
 
   public static class PointSet extends AbacabBase {
-    public PointMap points = new PointMap();
+    public Map<String, PointData> points = new HashMap<>();
   }
 
   public static class System extends AbacabBase {
     public Report log;
   }
 
-  public static class PointSetDesc {
-    public PointMap points = new PointMap();
+  public static class PointSetState {
+    public Map<String, PointState> points = new HashMap<>();
   }
 
   public static class SystemState {
@@ -41,14 +41,12 @@ public class Message {
     public Integer report_interval_ms;
   }
 
-  public static class PointMap extends HashMap<String, Point> {
+  public static class PointData {
+    public Object present_value;
   }
 
-  public static class Point {
-    // This value is only used for a device telemetry update.
-    public Object present_value;
-
-    // These values are only used for state/config.
+  public static class PointState {
+    public String units;
     public Boolean fault;
   }
 

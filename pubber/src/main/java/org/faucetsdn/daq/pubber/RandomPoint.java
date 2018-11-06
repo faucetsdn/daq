@@ -1,20 +1,22 @@
 package org.faucetsdn.daq.pubber;
 
-import com.faucetsdn.daq.abacab.Message.Point;
+import com.faucetsdn.daq.abacab.Message.PointData;
+import com.faucetsdn.daq.abacab.Message.PointState;
 
 public class RandomPoint implements AbstractPoint {
 
   private final String name;
   private final double min;
   private final double max;
-  private final Point data = new Point();
-  private final Point config = new Point();
+  private final PointData data = new PointData();
+  private final PointState state = new PointState();
 
-  public RandomPoint(String name, double min, double max) {
+  public RandomPoint(String name, double min, double max, String units) {
     this.name = name;
     this.min = min;
     this.max = max;
-    this.config.fault = max == min;
+    this.state.fault = max == min;
+    this.state.units = units;
     updateData();
   }
 
@@ -24,8 +26,8 @@ public class RandomPoint implements AbstractPoint {
   }
 
   @Override
-  public Point getConfig() {
-    return config;
+  public PointState getState() {
+    return state;
   }
 
   @Override
@@ -34,7 +36,7 @@ public class RandomPoint implements AbstractPoint {
   }
 
   @Override
-  public Point getData() {
+  public PointData getData() {
     return data;
   }
 }

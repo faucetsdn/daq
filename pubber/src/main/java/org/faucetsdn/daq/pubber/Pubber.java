@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.faucetsdn.daq.abacab.Message;
 import com.faucetsdn.daq.abacab.Message.PointSet;
-import com.faucetsdn.daq.abacab.Message.PointSetDesc;
+import com.faucetsdn.daq.abacab.Message.PointSetState;
 import com.faucetsdn.daq.abacab.Report;
 import com.faucetsdn.daq.abacab.Message.State;
 import com.google.common.base.Preconditions;
@@ -73,15 +73,15 @@ public class Pubber {
     info("Starting instance for registry " + configuration.registryId);
 
     initializeDevice();
-    addPoint(new RandomPoint("superimposition_reading", 0, 100));
-    addPoint(new RandomPoint("recalcitrant_angle", 0, 360));
-    addPoint(new RandomPoint("faulty_finding", 1, 1));
+    addPoint(new RandomPoint("superimposition_reading", 0, 100, "Celsius"));
+    addPoint(new RandomPoint("recalcitrant_angle", 0, 360, "deg" ));
+    addPoint(new RandomPoint("faulty_finding", 1, 1, "truth"));
   }
 
   private void initializeDevice() {
     deviceState.system.make_model = "DAQ_pubber";
     deviceState.system.firmware.version = "v1";
-    deviceState.pointset = new PointSetDesc();
+    deviceState.pointset = new PointSetState();
   }
 
   private void startExecutor() {
@@ -133,7 +133,7 @@ public class Pubber {
     if (devicePoints.points.put(pointName, point.getData()) != null) {
       throw new IllegalStateException("Duplicate pointName " + pointName);
     }
-    deviceState.pointset.points.put(pointName, point.getConfig());
+    deviceState.pointset.points.put(pointName, point.getState());
     allPoints.add(point);
   }
 

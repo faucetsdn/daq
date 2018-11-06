@@ -1,14 +1,15 @@
 package org.faucetsdn.daq.pubber;
 
-import com.faucetsdn.daq.abacab.Message.Point;
+import com.faucetsdn.daq.abacab.Message.PointData;
+import com.faucetsdn.daq.abacab.Message.PointState;
 
 public interface AbstractPoint {
 
   String getName();
 
-  Point getData();
+  PointData getData();
 
   void updateData();
 
-  Point getConfig();
+  PointState getState();
 }
