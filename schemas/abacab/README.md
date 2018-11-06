@@ -13,7 +13,8 @@ to be tested.
 
 ## Schema Structure
 
-Schemas are broken down into several sub-schemas that address different message types:
+Schemas are broken down into several sub-schemas that address different aspects
+of device management:
 * State updates ([example](state.tests/example.json)) from device to cloud,
 defined by [<em>state.json</em>](state.json).
 * Configuration ([example](config.tests/example.json)) passed from cloud to device,
@@ -22,9 +23,9 @@ defined by [<em>config.json</em>](config.json).
 defined by [<em>pointset.json</em>](pointset.json).
 * Logging messages ([example](logentry.tests/example.json)) from devices,
 defined by [<em>logentry.json</em>](logentry.json).
-* The message envelope ([example](envelope.tests/example.json)), which is automatically generated
-for messages during cloud-side processing, defined by [<em>envelope.json</em>](envelope.json).
-* Device metadata ([example](metadata.tests/example.json)) stored in the cloud _about_ a device,
+* The message envelope ([example](envelope.tests/example.json)), representing server-side
+attributes, defined by [<em>envelope.json</em>](envelope.json).
+* Device metadata ([example](metadata.tests/example.json)) stored _about_ a device,
 but not directly available to the device, defined by [<em>metadata.json</em>](metadata.json).
 
 ## Message Detail Notes
