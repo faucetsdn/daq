@@ -61,7 +61,6 @@ public class MqttPublisher {
   private static final String CLIENT_ID_FORMAT = "projects/%s/locations/%s/registries/%s/devices/%s";
   private static final int ONE_HOUR_MS = 1000 * 60 * 60;
   private static final int CACHE_EXPIRE_MS = ONE_HOUR_MS;
-  private static final String KEY_SEPARATOR = ":";
   private static final int PUBLISH_THREAD_COUNT = 10;
   private static final int CONNECTION_LOCK_TIMEOUT_MS = 30000;
   private static final String HANDLER_KEY_FORMAT = "%s/%s";
@@ -112,7 +111,7 @@ public class MqttPublisher {
   }
 
   private void closeDeviceClient(String deviceId) {
-    mqttClientCache.invalidate(clientKey(deviceId));
+    mqttClientCache.invalidate(deviceId);
   }
 
   void close() {
@@ -133,7 +132,7 @@ public class MqttPublisher {
   }
 
   private MqttClient newBoundClient(String gatewayId, String deviceId) throws Exception {
-    MqttClient mqttClient = mqttClientCache.get(clientKey(gatewayId));
+    MqttClient mqttClient = mqttClientCache.get(gatewayId);
     try {
       connectMqttClient(mqttClient, gatewayId);
       String topic = String.format("/devices/%s/attach", deviceId);
@@ -170,7 +169,7 @@ public class MqttPublisher {
       if (mqttClient.isConnected()) {
         return;
       }
-      LOG.info("Attempting connection to " + clientKey(deviceId));
+      LOG.info("Attempting connection to " + registryId + ":" + deviceId);
 
       mqttClient.setCallback(new MqttCallbackHandler(deviceId));
       mqttClient.setTimeToWait(INITIALIZE_TIME_MS);
@@ -194,14 +193,6 @@ public class MqttPublisher {
     } finally {
       connectionLock.release();
     }
-  }
-
-  private String clientKey(String deviceId) {
-    return String.format("%s%s%s", registryId, KEY_SEPARATOR, deviceId);
-  }
-
-  private String[] splitClientKey(String key) {
-    return key.split(KEY_SEPARATOR);
   }
 
   private String getClientId(String deviceId) {
@@ -330,7 +321,7 @@ public class MqttPublisher {
 
   private MqttClient getConnectedClient(String deviceId) {
     try {
-      MqttClient mqttClient = mqttClientCache.get(clientKey(deviceId));
+      MqttClient mqttClient = mqttClientCache.get(deviceId);
       connectMqttClient(mqttClient, deviceId);
       return mqttClient;
     } catch (Exception e) {
