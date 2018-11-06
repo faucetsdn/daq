@@ -7,13 +7,17 @@
     "device_status": "ok",
     "object_name": "UK-BRH-XX_AHU-001",
     "fling": "hello",
+    "firmware": {
+      "revision": "should be version"
+    },
     "system_status": "Operational",
-    "status": [
-      {
+    "statuses": {
+      "default": {
         "timestamp": "2018-08-26T21:39:30.364Z",
         "level": 30
       }
-    ],
+    },
+    "status": "hunky-dory"
   },
   "status": [
     {

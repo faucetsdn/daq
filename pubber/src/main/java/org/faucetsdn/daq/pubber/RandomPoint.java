@@ -10,11 +10,11 @@ public class RandomPoint implements AbstractPoint {
   private final Point data = new Point();
   private final Point config = new Point();
 
-  public RandomPoint(String name, double min, double max, String units) {
+  public RandomPoint(String name, double min, double max) {
     this.name = name;
     this.min = min;
     this.max = max;
-    this.config.units = units;
+    this.config.fault = max == min;
     updateData();
   }
 

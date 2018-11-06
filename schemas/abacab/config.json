@@ -18,11 +18,11 @@
         1
       ]
     },
-    "pointset": {
-      "$ref": "file:config_pointset.json#"
-    },
     "system": {
       "$ref": "file:config_system.json#"
+    },
+    "pointset": {
+      "$ref": "file:config_pointset.json#"
     }
   }
 }

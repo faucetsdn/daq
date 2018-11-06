@@ -4,39 +4,10 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "bundles": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "firmware": {
-          "$ref": "#/definitions/bundle_properties"
-        }
-      },
-      "required": [
-        "firmware"
-      ]
-    },
     "make_model": {
       "type": "string"
     },
-    "last_config": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "operational": {
-      "type": "boolean"
-    },
-    "status": {
-      "$ref": "file:logentry.json#/definitions/entries"
-    }
-  },
-  "required": [
-    "make_model",
-    "bundles",
-    "operational"
-  ],
-  "definitions": {
-    "bundle_properties": {
+    "firmware": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -47,6 +18,27 @@
       "required": [
         "version"
       ]
+    },
+    "last_config": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operational": {
+      "type": "boolean"
+    },
+    "statuses": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
+          "$ref": "file:logentry.json#/definitions/report"
+        }
+      }
     }
-  }
+  },
+  "required": [
+    "make_model",
+    "firmware",
+    "operational"
+  ]
 }

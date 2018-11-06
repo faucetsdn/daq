@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.faucetsdn.daq.abacab.Message;
 import com.faucetsdn.daq.abacab.Message.PointSet;
-import com.faucetsdn.daq.abacab.Message.Report;
+import com.faucetsdn.daq.abacab.Message.PointSetDesc;
+import com.faucetsdn.daq.abacab.Report;
 import com.faucetsdn.daq.abacab.Message.State;
 import com.google.common.base.Preconditions;
 import java.io.File;
@@ -35,13 +36,13 @@ public class Pubber {
   private static final int MIN_REPORT_MS = 200;
   private static final int DEFAULT_REPORT_MS = 1000;
   private static final int CONFIG_WAIT_TIME_MS = 10000;
-  private static final int STATE_THROTTLE_MS = 1000;
-  public static final String CONFIG_ERROR_STATUS_KEY = "config_error";
+  private static final int STATE_THROTTLE_MS = 1500;
+  private static final String CONFIG_ERROR_STATUS_KEY = "config_error";
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
   private final Configuration configuration;
-  private final AtomicInteger messageDelayMs = new AtomicInteger(MIN_REPORT_MS);
+  private final AtomicInteger messageDelayMs = new AtomicInteger(DEFAULT_REPORT_MS);
   private final CountDownLatch configLatch = new CountDownLatch(1);
 
   private final State deviceState = new State();
@@ -71,9 +72,16 @@ public class Pubber {
     }
     info("Starting instance for registry " + configuration.registryId);
 
-    deviceState.pointset = new PointSet();
-    addPoint(new RandomPoint("superimposition_reading", 0, 100, "C"));
-    addPoint(new RandomPoint("recalcitrant_angle", 0, 360, "deg"));
+    initializeDevice();
+    addPoint(new RandomPoint("superimposition_reading", 0, 100));
+    addPoint(new RandomPoint("recalcitrant_angle", 0, 360));
+    addPoint(new RandomPoint("faulty_finding", 1, 1));
+  }
+
+  private void initializeDevice() {
+    deviceState.system.make_model = "DAQ_pubber";
+    deviceState.system.firmware.version = "v1";
+    deviceState.pointset = new PointSetDesc();
   }
 
   private void startExecutor() {
@@ -143,10 +151,10 @@ public class Pubber {
     if (toReport != null) {
       LOG.error("Error receiving message: " + toReport);
       Report report = new Report(toReport);
-      deviceState.system.status.put(CONFIG_ERROR_STATUS_KEY, report);
+      deviceState.system.statuses.put(CONFIG_ERROR_STATUS_KEY, report);
       publishStateMessage(configuration.gatewayId);
     } else {
-      Report previous = deviceState.system.status.remove(CONFIG_ERROR_STATUS_KEY);
+      Report previous = deviceState.system.statuses.remove(CONFIG_ERROR_STATUS_KEY);
       if (previous != null) {
         publishStateMessage(configuration.gatewayId);
       }
@@ -160,16 +168,18 @@ public class Pubber {
   private void configHandler(Message.Config config) {
     try {
       info("Received new config " + config);
-      Integer reportInterval = config.system == null ? null : config.system.report_interval_ms;
-      int actualInterval = Integer.max(MIN_REPORT_MS,
-          reportInterval == null ? DEFAULT_REPORT_MS : reportInterval);
-      int previous = messageDelayMs.getAndSet(actualInterval);
+      int previous = messageDelayMs.get();
+      if (config != null) {
+        Integer reportInterval = config.system == null ? null : config.system.report_interval_ms;
+        int actualInterval = Integer.max(MIN_REPORT_MS,
+            reportInterval == null ? DEFAULT_REPORT_MS : reportInterval);
+        messageDelayMs.set(actualInterval);
+        deviceState.system.last_config = config.timestamp;
+      }
       if (scheduledFuture == null || previous != scheduledFuture.getDelay(TimeUnit.MILLISECONDS)) {
         startExecutor();
       }
       configLatch.countDown();
-
-      deviceState.system.last_config = config.timestamp;
       publishStateMessage(configuration.gatewayId);
       reportError(null);
     } catch (Exception e) {
