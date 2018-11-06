@@ -1,11 +1,10 @@
 # ABACAB Schema Target
 
-The [ABACAB](https://www.youtube.com/watch?v=QbjfesCI254) Schema is a simple
-formatting meant to collect data from physical systems such that it can be collected and
-organized in a database, ultimately being able to represent a device with a "digital twin"
-or "shadow device" in the cloud. Nominally meant for use with
-[Googe's Cloud IoT Core](https://cloud.google.com/iot/docs/), as a schema it can be
-applied to any set of data.
+The [ABACAB](https://www.youtube.com/watch?v=QbjfesCI254) Schema (provisional name) is a simple
+specification for the management and operation of physical systems. This data is typically exchanged
+with a cloud entity that can maintain a "digital twin" or "shadow device" in the cloud.
+Nominally meant for use with [Googe's Cloud IoT Core](https://cloud.google.com/iot/docs/),
+as a schema it can be applied to any set of data or hosting setup.
 
 To verify correct operation of a real system, follow the instructions outlined in the
 [validator subsystem docs](../../../docs/validator.md). Additional sample messages are
