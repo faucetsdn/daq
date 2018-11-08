@@ -16,7 +16,7 @@ update them in the future).
 
 <code>$ <b>cmd/clean</b></code> # Clean up docker images that may be lingering.
 
-Sadly, there's no "easy" way to know when you need to run what when, since they simply address
+Sadly, there's no easy way to know when you need to run what when, since they simply address
 different dependencies.
 
 To run in development mode (not a container), use <code>cmd/run <b>local</b> ...</code>,

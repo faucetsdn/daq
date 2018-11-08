@@ -24,7 +24,7 @@ class DockerTest():
 
     def start(self, port, params, callback):
         """Start the docker test"""
-        LOGGER.debug('Target port %d running test %s', self.target_port, self.test_name)
+        LOGGER.debug('Target port %d starting docker test %s', self.target_port, self.test_name)
 
         self.callback = callback
 
@@ -42,6 +42,7 @@ class DockerTest():
                                     vol_maps=vol_maps, tmpdir=self.tmpdir)
         self.docker_host = host
         try:
+            LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             host = self.docker_host
             pipe = host.activate(log_name=None)
             self.docker_log = host.open_log()
@@ -52,16 +53,18 @@ class DockerTest():
             host.terminate()
             self.runner.remove_host(host)
             raise
+        LOGGER.debug("Target port %d created docker test %s", self.target_port, image)
 
     def _docker_error(self, e):
         LOGGER.error('Target port %d docker error: %s', self.target_port, e)
         if self._docker_finalize() is None:
-            raise Exception('Target port %d docker already terminated.' % self.target_port)
+            LOGGER.warning('Target port %d docker already terminated.', self.target_port)
         else:
             self.callback(exception=e)
 
     def _docker_finalize(self):
         if self.docker_host:
+            LOGGER.debug('Target port %d docker finalize', self.target_port)
             self.runner.remove_host(self.docker_host)
             return_code = self.docker_host.terminate()
             self.docker_host = None

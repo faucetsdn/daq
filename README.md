@@ -31,6 +31,9 @@ By default, this will run everything inside of one Docker container named `daq-r
 and can take quite some time to download the initial docker image.
 The output should approximately look like this [example log output](docs/run_log.md).
 
+_NB: The current containerized version of the complete DAQ system is somewhat flaky,
+so you might need to follow the Build Setup instructions at the end of this page._
+
 ## Configuration
 
 After an initial test-install run, edit `local/system.conf` to specify the network adapter
@@ -66,11 +69,19 @@ existing cloud project. Alternatively set up a new project by following the
 setting up a continuous qualification environment: it runs in the background and pipes the output
 into a rotating set of logfiles.
 
+## Containerized Tests
+
+The majority of device tests are run as Docker containers, which provides a convenient bundling of
+all the necessary code. The `docker/` subdirectory contains a set of Docker files that are used
+by the base system. Local or custom tests can be added by following the
+["add a test" documentation](docs/add_test.md). Tests are generally supplied the IP address of the
+target device, which can then be used for any necessary probes (e.g. a nmap port scan).
+
 ## Debugging
 
-The `inst/` subdirectory is the _instance_ runtime director, and holds all the resulting log files
-and diagnostic information from each run. There's a collection of different files in there that provide
-useful information, depending on the specific problem(s) encountered. A device's
+The `inst/` subdirectory is the _inst_ance runtime directory, and holds all the resulting log files
+and diagnostic information from each run. There's a collection of different files in there that
+provide useful information, depending on the specific problem(s) encountered. A device's
 [startup sequence log](docs/startup_pcap.md) provides useful debugging material for intial device
 phases (e.g. DHCP exchange).
 
@@ -108,5 +119,6 @@ switch itself.)
 ## Build Setup
 
 'Building' DAQ is only required for active framework development. Otherwise, stick
-with the packaged runner.  There are a bunch of additional dependenicies and extra development steps.
-See the [build documentation](docs/build.md) for more details on how to build the development system.
+with the packaged runner.  There are a bunch of additional dependenicies and extra
+development steps required. See the [build documentation](docs/build.md) for more details
+on how to build the development system.

@@ -7,6 +7,9 @@
 # [Docker CE Debian Install](https://docs.docker.com/install/linux/docker-ce/debian/) (tested with version 17.12.0-ce).
 #
 
+# Docker versions after this introduced a bug that would prevent "service docker start" from working.
+DOCKER_VERSION='=18.06.1~ce~3-0~ubuntu'
+
 if [ -z "$AG" ]; then
     AG="sudo apt-get -qqy --no-install-recommends"
 fi
@@ -30,4 +33,5 @@ $retry curl -fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key 
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable"
 
 $AG update
-$AG install openvswitch-switch openvswitch-common docker-ce
+
+$AG install openvswitch-switch openvswitch-common docker-ce${DOCKER_VERSION}

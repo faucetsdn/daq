@@ -15,15 +15,13 @@ else
     echo No $LOCAL_SYSTEM found, using defaults.
 fi
 
-if [ "$1" == "local" ]; then
-    run_mode=local
+if [ "${1#run_mode=}" != $1 ]; then
+    run_mode=${1#run_mode=}
     shift
 fi
 
-if [ "$1" == "latest" ]; then
-    run_mode=latest
+if [ "$run_mode" == "latest" ]; then
     run_args=latest
-    shift
 fi
 
 if [ -z "$run_mode" ]; then
@@ -33,7 +31,7 @@ fi
 
 echo run_mode is $run_mode
 echo Clearing previous reports...
-rm -f inst/report_*.txt
+sudo rm -f inst/report_*.txt
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@"
