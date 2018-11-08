@@ -78,13 +78,44 @@ fi
 
 sudo rm -rf $build_root
 mkdir -p $build_root
-sudo date > build/last_build.txt
+sudo date > $build_root/last_build.txt
 
-for file in docker/Dockerfile.*; do
+build_list_file=$build_root/build_list.txt
+echo > $build_list_file
+(
+    shopt -s nullglob
+
+    function include {
+        target=$1
+        source $1
+    }
+
+    function build {
+        if [ -d $1 ]; then
+            echo Including build files from $1
+            echo $1/Dockerfile.* >> $build_list_file
+        else
+            echo Missing build directory $1
+            false
+        fi
+    }
+
+    function add {
+        true
+    }
+    function remove {
+        true
+    }
+
+    include ${host_tests:-misc/host_tests.conf}
+)
+docker_files=$(<$build_list_file)
+
+for file in $docker_files; do
     if [ ${file%\~} != ${file} ]; then
         continue
     fi
-    module=${file#docker/Dockerfile.}
+    module=${file#*/Dockerfile.}
     if [ "$module" == base -a -n "$in_container" ]; then
         echo Skipping base build in container.
         continue

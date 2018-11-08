@@ -47,6 +47,10 @@ if [ -d faucet ]; then
     echo
 fi
 
+if [ "$DAQ_MODE" != "in" ]; then
+    runargs+=" run_mode=local"
+fi
+
 if [ -n "$DAQ_MUD" ]; then
     bin/mudacl misc/device_specs.json
     runargs+=" device_specs=misc/device_specs.json"
@@ -77,15 +81,14 @@ if [ -n "$DAQ_LOG" ]; then
     runargs+=" daq_loglevel=$DAQ_LOG"
 fi
 
+
 fail_mode=${DAQ_FAIL#!}
 failed=0
 echo Running DAQ test...
-if [ "$DAQ_MODE" == "in" ]; then
-    cmd/run $runargs $cmdargs || failed=$?
-elif [ "$DAQ_MODE" == "skip" ]; then
+if [ "$DAQ_MODE" == "skip" ]; then
     echo Skipping daq run.
 else
-    DAQ_FAUX_OPTS=$fail_mode cmd/run local $runargs $cmdargs || failed=$?
+    DAQ_FAUX_OPTS=$fail_mode cmd/run $runargs $cmdargs || failed=$?
 fi
 
 echo Finished run with exit code $failed.

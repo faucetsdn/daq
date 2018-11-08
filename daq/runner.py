@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 import time
 
 import faucet_event_client
@@ -13,6 +14,7 @@ import stream_monitor
 
 LOGGER = logging.getLogger('runner')
 RESULT_LOG_FILE = 'inst/result.log'
+_DEFAULT_TESTS_FILE = "misc/host_tests.conf"
 
 class DAQRunner():
     """Main runner class controlling DAQ. Primarily mediates between
@@ -46,6 +48,10 @@ class DAQRunner():
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
 
+        test_list = self._get_test_list(config.get('host_tests', _DEFAULT_TESTS_FILE), [])
+        config['test_list'] = test_list
+        LOGGER.info('Configured with tests %s', config['test_list'])
+
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
         while self.faucet_events.next_event():
@@ -54,10 +60,10 @@ class DAQRunner():
     def _open_result_log(self):
         return open(RESULT_LOG_FILE, 'w')
 
-    def _send_heartbeat(self):
+    def _send_heartbeat(self, test_list=None):
         self.gcp.publish_message('daq_runner', {
             'name': 'status',
-            'tests': connected_host.ConnectedHost.TEST_ORDER,
+            'tests': test_list,
             'ports': list(self.active_ports.keys()),
             'description': self.description,
             'version': self.version,
@@ -254,10 +260,35 @@ class DAQRunner():
 
             self._direct_port_traffic(target_mac, target_port, target)
 
-            self._send_heartbeat()
+            self._send_heartbeat(new_host.get_tests())
             return True
         except Exception as e:
             self.target_set_error(target_port, e)
+            gateway.detach_target(target_port)
+
+    def _get_test_list(self, test_file, test_list):
+        LOGGER.info('Reading test definition file %s', test_file)
+        with open(test_file) as file:
+            line = file.readline()
+            while line:
+                cmd = re.sub(r'#.*', '', line).strip().split()
+                cmd_name = cmd[0] if cmd else None
+                argument = cmd[1] if len(cmd) > 1 else None
+                if cmd_name == 'add':
+                    LOGGER.debug('Adding test %s from %s', argument, test_file)
+                    test_list.append(argument)
+                elif cmd_name == 'remove':
+                    if argument in test_list:
+                        LOGGER.debug('Removing test %s from %s', argument, test_file)
+                        test_list.remove(argument)
+                elif cmd_name == 'include':
+                    self._get_test_list(argument, test_list)
+                elif cmd_name == 'build' or not cmd_name:
+                    pass
+                else:
+                    LOGGER.warning('Unknown test list command %s', cmd_name)
+                line = file.readline()
+        return test_list
 
     def allocate_test_port(self, target_port):
         """Get the test port for the given target_port"""
@@ -344,7 +375,6 @@ class DAQRunner():
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
         LOGGER.warning('Target port %d (%s) exception: %s', target_port, active, e)
-        LOGGER.exception(e)
         if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)
@@ -360,7 +390,7 @@ class DAQRunner():
 
     def _target_set_finalize(self, target_port, result_set, reason):
         results = self._combine_result_set(target_port, result_set)
-        LOGGER.info('Target port %d complete: %s (%s)', target_port, results, reason)
+        LOGGER.info('Target port %d finalize: %s (%s)', target_port, results, reason)
         if self.result_log:
             self.result_log.write('%02d: %s\n' % (target_port, results))
             self.result_log.flush()
