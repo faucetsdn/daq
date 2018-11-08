@@ -204,6 +204,7 @@ class DAQRunner():
         except KeyboardInterrupt as e:
             LOGGER.error('Keyboard Interrupt')
             LOGGER.exception(e)
+            self.exception = e
 
         if self.config.get('use_console'):
             LOGGER.info('Dropping into interactive command line')

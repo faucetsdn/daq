@@ -23,12 +23,14 @@ if [ "$DAQ_BUILD" != "no" ]; then
   echo
 fi
 
+docker --version
+
 if [ "$DAQ_BUILD" == "in" ]; then
-    cmd/inbuild
+    cmd/inbuild < /dev/null
 elif [ "$DAQ_BUILD" == "skip" ]; then
-    cmd/inbuild skip
+    cmd/inbuild skip < /dev/null
 elif [ "$DAQ_BUILD" != "no" ]; then
-    cmd/build inline
+    cmd/build inline < /dev/null
 fi
 
 # Show the results.
