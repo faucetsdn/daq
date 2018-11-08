@@ -15,7 +15,7 @@ else
     echo No $LOCAL_SYSTEM found, using defaults.
 fi
 
-if [ "${1#run_mode=}" != $1 ]; then
+if [ "${1#run_mode=}" != "$1" ]; then
     run_mode=${1#run_mode=}
     shift
 fi
