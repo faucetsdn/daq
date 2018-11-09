@@ -16,13 +16,6 @@ reuse=
 VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 move_intfs=
 
-echo
-echo Running in a container is currently not supported.
-echo If you find yourself here, please back up and try again.
-echo Thank you for your kind understanding.
-echo
-false
-
 if [ -z "$build" ]; then
     move_intfs=y
 fi
