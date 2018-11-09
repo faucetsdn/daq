@@ -14,6 +14,7 @@ from mininet import log as minilog
 
 import runner
 
+ROOTLOG = logging.getLogger()
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
@@ -41,10 +42,18 @@ def _stripped_alt_logger(self, level, msg, *args, **kwargs):
 def _configure_logging(config):
     log_def = 'debug' if config.get('debug_mode') else 'info'
     daq_env = config.get('daq_loglevel', log_def)
-    logging.basicConfig(level=minilog.LEVELS.get(daq_env, minilog.LEVELS['info']))
+    level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
 
-    mininet_env = config.get('mininet_loglevel')
-    minilog.setLogLevel(mininet_env if mininet_env else 'info')
+    logging.basicConfig(level=level)
+
+    # For some reason this is necessary for travis.ci
+    ROOTLOG.setLevel(level)
+
+    # This handler is used by everything, so be permissive here.
+    ROOTLOG.handlers[0].setLevel(minilog.LEVELS['debug'])
+
+    mininet_env = config.get('mininet_loglevel', 'info')
+    minilog.setLogLevel(mininet_env)
 
     #pylint: disable=protected-access
     minilog.MininetLogger._log = _stripped_alt_logger

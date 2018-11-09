@@ -2,7 +2,7 @@
 
 FROM faucet/python3
 
-COPY faucet/ /faucet-src
+COPY faucet/ /faucet-src/
 
 RUN /faucet-src/docker/install-faucet.sh && rm -rf /faucet-src/.git
 

@@ -9,13 +9,16 @@ from mininet import node as mininet_node
 from mininet import net as mininet_net
 from mininet import link as mininet_link
 from mininet import cli as mininet_cli
+from mininet import util as mininet_util
 
 LOGGER = logging.getLogger('network')
+
 
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
     # pylint: disable=too-few-public-methods
     pass
+
 
 class DummyNode():
     """Dummy node used to handle shadow devices"""
@@ -98,7 +101,7 @@ class TestNetwork():
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
-        self.ext_intf = self.topology.get_sec_intf()
+        self.ext_intf = self.topology.get_pri_intf()
         if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
@@ -119,14 +122,18 @@ class TestNetwork():
 
     def _attach_sec_device_links(self):
         topology_intfs = self.topology.get_device_intfs()
-        for topology_intf in topology_intfs:
-            intf_name = topology_intf['name']
-            intf_port = topology_intf['port']
+        for intf_port in range(1, len(topology_intfs) + 1):
+            intf_name = topology_intfs[intf_port-1]
             LOGGER.info("Attaching device interface %s on port %d.", intf_name, intf_port)
             intf = mininet_link.Intf(intf_name, node=DummyNode(), port=intf_port)
             intf.port = intf_port
             self.sec.addIntf(intf, port=intf_port)
             self._switch_attach(self.sec, intf)
+
+    def is_system_port(self, dpid, port):
+        """Check if the dpid/port combo is a system port for logging"""
+        target_dpid = int(self.sec_dpid)
+        return dpid == target_dpid and port == self.sec_port
 
     def is_device_port(self, dpid, port):
         """Check if the dpid/port combo is for a valid device"""
@@ -167,11 +174,32 @@ class TestNetwork():
         LOGGER.info("Starting mininet...")
         self.net.start()
 
-    def direct_port_traffic(self, target_mac, target):
+    def direct_port_traffic(self, target_mac, port, target):
         """Direct traffic for a given mac to target port"""
-        port = target['port'] if target else None
-        LOGGER.info('Directing port traffic for %s to %s', target_mac, port)
-        self.topology.direct_port_traffic(target_mac, target)
+        LOGGER.info('Directing traffic for %s on port %s: %s', target_mac, port, bool(target))
+        self.topology.direct_port_traffic(target_mac, port, target)
+
+    def delete_mirror_interface(self, port):
+        """Delete a mirroring interface on the given port"""
+        return self.create_mirror_interface(port, delete=True)
+
+    def create_mirror_interface(self, port, delete=False):
+        """Create/delete a mirror interface for the given port"""
+        mirror_intf_name = 'mirror-%02d' % port
+        mirror_intf_peer = mirror_intf_name + '-ext'
+        mirror_port = self.topology.MIRROR_PORT_BASE + port
+        if delete:
+            LOGGER.info('Deleting mirror pair %s <-> %s', mirror_intf_name, mirror_intf_peer)
+            self.pri.cmd('ip link del %s' % mirror_intf_name)
+        else:
+            LOGGER.info('Creating mirror pair %s <-> %s at %d',
+                        mirror_intf_name, mirror_intf_peer, mirror_port)
+            mininet_util.makeIntfPair(mirror_intf_name, mirror_intf_peer)
+            self.pri.cmd('ip link set %s up' % mirror_intf_name)
+            self.pri.cmd('ip link set %s up' % mirror_intf_peer)
+            self.pri.vsctl('add-port', self.pri.name, mirror_intf_name, '--',
+                           'set', 'interface', mirror_intf_name, 'ofport_request=%s' % mirror_port)
+        return mirror_intf_name
 
     def device_group_for(self, target_mac):
         """Find the target device group for the given address"""

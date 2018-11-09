@@ -3,6 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
+INSTLOCK=$INSTDIR/startup.lock
 LOCALDIR=$ROOT/local
 FAUCET_CONF=faucet.yaml
 FAUCET_LOG=$INSTDIR/faucet.log
@@ -12,7 +13,6 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
-network_config=$MISCDIR/$FAUCET_CONF
 skip_autostart=
 
 cd $ROOT
@@ -22,6 +22,11 @@ if [ `whoami` != root ]; then
     sudo $0 "$@" && exit 0
     false
 fi
+
+while [ -f $INSTLOCK ]; do
+    echo Waiting for $INSTLOCK to dissapear!
+    sleep 10
+done
 
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
@@ -39,15 +44,6 @@ source $LOCAL_CONFIG
 if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
-
-for cmdarg in "$@"; do
-    value=${cmdarg#network_config=}
-    if [ "$value" != "$cmdarg" ]; then
-        echo Command line network_config to $value
-        network_config=$value
-    fi
-done
-cmdarg=
 
 export PYTHONPATH=$FAUCET:$MININET
 
@@ -73,12 +69,14 @@ if [ -n "$daq_intf" ]; then
     false
 fi
 
-cleanup_file=`tempfile`
+cleanup_file=`mktemp`
+
+function external {
+    echo -n
+}
+
 function autostart {
-    shift  # description
-    shift  # DAQ
-    shift  # autostart
-    tmp=`tempfile`
+    tmp=`mktemp`
     echo DAQ autostart $@
     eval $@ | tee $tmp
     grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file
@@ -90,20 +88,19 @@ function DAQ {
     $@
 }
 
-if [ -z "$skip_autostart" ]; then
-    grep -e '^\s*description: DAQ autostart\s' $network_config | while read line; do
-        autostart $line
-    done
+if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
+    echo Sourcing $startup_cmds...
+    source $startup_cmds
 fi
 
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
-    runcmd=pdb
+    runcmd="python3 -u -m pdb"
 elif [ -n "$DAQ_CODECOV" ]; then
     echo Running with coverage analysis...
     runcmd="coverage run"
 else
-    runcmd=python3
+    runcmd="python3 -u"
 fi
 
 if [ -d venv ]; then

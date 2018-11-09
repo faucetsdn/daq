@@ -37,6 +37,13 @@ class Gateway():
 
     def initialize(self):
         """Initialize the gateway host"""
+        try:
+            self._initialize()
+        except:
+            self.terminate()
+            raise
+
+    def _initialize(self):
         host_name = 'gw%02d' % self.port_set
         host_port = self._switch_port(self.HOST_OFFSET)
         LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
@@ -69,6 +76,7 @@ class Gateway():
             LOGGER.debug('Gateway %s warmup ping failed', host_name)
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
+
         assert self._ping_test(dummy, host), 'host ping failed'
         assert self._ping_test(dummy, self.fake_target), 'fake ping failed'
         assert self._ping_test(host, dummy, src_addr=self.fake_target), 'reverse ping failed'
@@ -97,13 +105,23 @@ class Gateway():
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
 
+    def _is_target_expected(self, target):
+        target_mac = target['mac']
+        for target_port in self.targets:
+            if self.targets[target_port]['mac'] == target_mac:
+                return True
+        LOGGER.warning('No target match found for %s in %s', target_mac, self.name)
+        return False
+
     def _dhcp_callback(self, state, target_ip=None, target_mac=None, exception=None):
         target = {
             'ip': target_ip,
             'mac': target_mac
         }
-        self.runner.dhcp_notify(state, target=target,
-                                gateway_set=self.port_set, exception=exception)
+        if self._is_target_expected(target) and not exception:
+            self.runner.dhcp_notify(state, target=target, gateway_set=self.port_set)
+        else:
+            LOGGER.warning('Unexpected target %s for gateway %s', target_mac, self.name)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)

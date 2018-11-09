@@ -16,7 +16,9 @@ inline=
 copydirs="bin cmd misc faucet mininet docker daq"
 load_mark=/root/load_complete
 
-if [ "$1" == save ]; then
+if [ "$1" == skip ]; then
+    do_images=skip
+elif [ "$1" == save ]; then
     do_images=save
     ext_msg=/save
     shift
@@ -76,27 +78,62 @@ fi
 
 sudo rm -rf $build_root
 mkdir -p $build_root
-sudo date > build/last_build.txt
+sudo date > $build_root/last_build.txt
 
-for file in docker/Dockerfile.*; do
+build_list_file=$build_root/build_list.txt
+echo > $build_list_file
+(
+    shopt -s nullglob
+
+    function include {
+        target=$1
+        source $1
+    }
+
+    function build {
+        if [ -d $1 ]; then
+            echo Including build files from $1
+            echo $1/Dockerfile.* >> $build_list_file
+        else
+            echo Missing build directory $1
+            false
+        fi
+    }
+
+    function add {
+        true
+    }
+    function remove {
+        true
+    }
+
+    include ${host_tests:-misc/host_tests.conf}
+)
+docker_files=$(<$build_list_file)
+
+for file in $docker_files; do
     if [ ${file%\~} != ${file} ]; then
         continue
     fi
-    module=${file#docker/Dockerfile.}
+    module=${file#*/Dockerfile.}
     if [ "$module" == base -a -n "$in_container" ]; then
+        echo Skipping base build in container.
         continue
     fi
     logfile=$build_root/docker_build.$module
     failed=
     tag=daq/$module
-    if [ "$do_images" == load ]; then
+    if [ "$do_images" == skip ]; then
+        echo Skipping in-container build of daq/$module.
+    elif [ "$do_images" == load ]; then
         docker load -i /daq/$build_root/docker_image.$module
     else
         echo Build$ext_msg $file into daq/$module, log to $logfile...
+        echo docker build -t $tag $build_args -f $file . > $logfile
         if [ -n "$inline" ]; then
-            docker build -t $tag $build_args -f $file . 2>&1 | tee $logfile || failed=y
+            docker build -t $tag $build_args -f $file . 2>&1 | tee -a $logfile || failed=y
         else
-            docker build -t $tag $build_args -f $file . > $logfile 2>&1 || failed=y
+            docker build -t $tag $build_args -f $file . >> $logfile 2>&1 || failed=y
         fi
         if [ -n "$failed" ]; then
             tail $logfile

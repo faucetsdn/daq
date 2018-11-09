@@ -1,0 +1,35 @@
+{
+  "macAddrs": {
+    "9a:02:57:1e:8f:01": {
+      "type": "lightbulb",
+      "hostname": "bacnet-lightbulb",
+      "ipAddr": "100.10.0.1",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "hostname": "bacnet-controller"
+            }
+          }
+        }
+      }
+    },
+    "9a:02:57:1e:8f:02": {
+      "type": "controller",
+      "hostname": "bacnet-controller",
+      "ipAddr": "100.10.0.2",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "hostname": "bacnet-lightbulb"
+            }
+          }
+        }
+      }
+    },
+    "9a:02:57:1e:8f:03": {
+      "type": "telnet"
+    }
+  }
+}

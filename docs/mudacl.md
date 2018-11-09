@@ -14,8 +14,11 @@ contained in the directory specified by the `mud_files` config parameter (defaul
 and generates a set of ACL templates in `inst/acl_templates`. To work with a custom set of MUD files,
 edit `local/system.conf` and specify a different `mud_files` source directory, e.g. `local/test_devices/`.
 
-If there is a device type configuration file (`inst/device_types.json`), the runtime system
-will monitor for referenced devices and apply the resolved ACL files appropriately.
+The `device_specs` configuration entry in `system.conf` specifies a mapping for individual devices
+to various dynamic runtime behavior. See the
+[device specs documentation](device_specs.md) for more details.
+If this file is not specified, then no flow restrictions will be enforced
+(outside of the detailed group-based restrictions).
 
 The following steps show how it all works for a test against the internal faux device. Just requires
 a simple edit to the default `system.conf` file to enable some deviant device behavior. First it runs

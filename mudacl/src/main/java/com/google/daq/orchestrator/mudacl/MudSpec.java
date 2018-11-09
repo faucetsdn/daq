@@ -8,7 +8,7 @@ public class MudSpec {
   @JsonProperty("ietf-mud:mud")
   MudDescriptor mudDescriptor;
 
-  @JsonProperty("ietf-access-control-list:access-lists")
+  @JsonProperty("ietf-access-control-list:acls")
   AccessLists accessLists;
 
   static class MudDescriptor {

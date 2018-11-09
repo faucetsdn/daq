@@ -18,6 +18,11 @@ if [ -z "$ext_addr" ]; then
     false
 fi
 
+if [ "$run_mode" != "local" ]; then
+    echo Non-local run mode not supported for physical switches yet.
+    false
+fi
+
 echo Configuring control interface $ext_ctrl at $ext_ofip
 
 sudo ip addr flush dev $ext_ctrl

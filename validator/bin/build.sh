@@ -3,6 +3,5 @@
 ROOT=$(dirname $0)/..
 
 cd $ROOT
-rm -rf out
-mkdir -p out
+rm -rf build
 ./gradlew shadow

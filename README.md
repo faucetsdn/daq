@@ -26,10 +26,13 @@ minimum set of basic packages, docker, and openvswitch.
 
 Once installed, the basic qualification suite can be run with `cmd/run -s`. The `-s`
 means <em>single shot</em> and will run tests just once and then exit (see the
-[options documentation](options.md) for more details).
+[options documentation](docs/options.md) for more details).
 By default, this will run everything inside of one Docker container named `daq-runner`
 and can take quite some time to download the initial docker image.
 The output should approximately look like this [example log output](docs/run_log.md).
+
+_NB: The current containerized version of the complete DAQ system is somewhat flaky,
+so you might need to follow the Build Setup instructions at the end of this page._
 
 ## Configuration
 
@@ -46,7 +49,7 @@ or cloud credentials.)
 ## Report Generation
 
 After a test run, the system creates a <em>test report document</em> in a file that is named
-something like `inst/report_<em>mac-address</em>.txt`. This file contains a complete summary
+something like <code>inst/report_<em>ma:ca:dd:re:ss</em>.txt</code>. This file contains a complete summary
 of all the test results most germane to qualifying a device (but is not in iteself comprehensive).
 
 ## Network Topologies
@@ -57,20 +60,30 @@ single-device testing through to a production-class environment.
 The recommended course is to start with the simplest (software emulation) and progress
 forward as required for a specific project.
 
-## Testing Dashboard
+## Qualification Dashboard
 
 The (optional) cloud dashboard requires a service-account certification to grant authorization.
-Contact the project owner to obtain a new certificate for a testing dashboard page on an already
+Contact the project owner to obtain a new certificate for a dashboard page on an already
 existing cloud project. Alternatively set up a new project by following the
 [Firebase install instructions](docs/firebase.md). The `bin/stress_test` script is useful for
-setting up a continuous testing environment: it runs in the background and pipes the output
+setting up a continuous qualification environment: it runs in the background and pipes the output
 into a rotating set of logfiles.
+
+## Containerized Tests
+
+The majority of device tests are run as Docker containers, which provides a convenient bundling of
+all the necessary code. The `docker/` subdirectory contains a set of Docker files that are used
+by the base system. Local or custom tests can be added by following the
+["add a test" documentation](docs/add_test.md). Tests are generally supplied the IP address of the
+target device, which can then be used for any necessary probes (e.g. a nmap port scan).
 
 ## Debugging
 
-The `inst/` subdirectory is the _instance_ runtime director, and holds all the resulting log files
-and diagnostic information from each run. There's a collection of different files in there that provide
-useful information, depending on the specific problem(s) encountered.
+The `inst/` subdirectory is the _inst_ance runtime directory, and holds all the resulting log files
+and diagnostic information from each run. There's a collection of different files in there that
+provide useful information, depending on the specific problem(s) encountered. A device's
+[startup sequence log](docs/startup_pcap.md) provides useful debugging material for intial device
+phases (e.g. DHCP exchange).
 
 Command-line options that can be supplied to most DAQ scripts for diagnostics:
 * `-s`: Only run tests once, otherwise loop forever.
@@ -78,7 +91,7 @@ Command-line options that can be supplied to most DAQ scripts for diagnostics:
 * `daq_loglevel=debug`: Add debug info form the DAQ test runner suite.
 * `mininet_loglevel=debug`: Add debug info from the mininet subsystem (verbose!)
 
-See the [options documentation](options.md) file for a more complete
+See the [options documentation](docs/options.md) file for a more complete
 description of all the configuration options.
 
 ## Network Taps
@@ -93,7 +106,7 @@ The [example pcap output file](docs/startup_pcap.md) shows what this should look
 
 If there are device-level network problems then it is possible to use `tcpdump` or similar
 to example the network traffic. When using the `cmd/run` command, the system runs the
-testing framework in a Docker container named `daq-runner` and it moves the test
+framework in a Docker container named `daq-runner` and it moves the test
 network interface(s) into that container. Any tap command must be also run in the container, so it
 looks something like (replacing `faux` with the real adapter name):
 
@@ -105,6 +118,7 @@ switch itself.)
 
 ## Build Setup
 
-Building is only required for active test development. Otherwise, stick
-with the packaged runner.  There are a bunch of additional dependenicies and extra development steps.
-See the [build documentation](docs/build.md) for more details on how to build the development system.
+'Building' DAQ is only required for active framework development. Otherwise, stick
+with the packaged runner.  There are a bunch of additional dependenicies and extra
+development steps required. See the [build documentation](docs/build.md) for more details
+on how to build the development system.

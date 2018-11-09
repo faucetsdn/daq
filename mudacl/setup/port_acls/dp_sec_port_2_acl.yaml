@@ -1,30 +1,12 @@
 ---
 acls:
-  dp_sec_port_1_acl:
+  dp_sec_port_2_acl:
   - rule:
-      description: "type lightbulb rule mqtt-frdev"
+      description: "type controller rule bacnet-frdev"
       dl_type: "0x0800"
-      dl_src: "9a:02:57:1e:8f:01"
-      nw_proto: 6
-      nw_dst: "127.0.1.1"
-      tcp_dst: 443
-      actions:
-        allow: 1
-  - rule:
-      description: "type lightbulb rule ssh-frdev"
-      dl_type: "0x0800"
-      dl_src: "9a:02:57:1e:8f:01"
-      nw_proto: 6
-      nw_dst: "127.0.1.1"
-      tcp_src: 23
-      actions:
-        allow: 1
-  - rule:
-      description: "type lightbulb rule bacnet"
-      dl_type: "0x0800"
-      dl_src: "9a:02:57:1e:8f:01"
+      dl_src: "9a:02:57:1e:8f:02"
       nw_proto: 17
-      nw_dst: "@ctrl:bacnet"
+      nw_dst: "100.10.0.1"
       udp_src: 47808
       udp_dst: 47808
       actions:
