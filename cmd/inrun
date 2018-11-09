@@ -72,6 +72,14 @@ if [ -z "$reuse" ]; then
    sudo docker rm -f daq-runner > /dev/null 2>&1 || true
 fi
 
+if [ $IMAGE == daqf/runner ]; then
+    echo
+    echo You should not be here. Running in a container is not currently supported.
+    echo Take a few steps back, and try again. Sorry.
+    echo
+    false
+fi
+
 TARGET=$IMAGE:$VERSION
 
 docker_args+=" --env DAQ_CONTAINER=$IMAGE"
