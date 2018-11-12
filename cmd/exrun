@@ -55,6 +55,11 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
+if [ -n "$device_specs" ]; then
+    echo Creating MUD templates for $device_specs...
+    bin/mudacl $device_specs
+fi
+
 mkdir -p $INSTDIR
 rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG
 

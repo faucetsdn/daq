@@ -142,7 +142,7 @@ class FaucetTopology():
     def _make_default_acl_rules(self):
         rules = []
         if not self._append_acl_template(rules, 'raw'):
-            rules += [self._make_default_allow_rule()]
+            rules.append(self._augment_sec_port_acl(self._make_default_allow_rule()))
         return rules
 
     def _make_default_acls(self):
@@ -363,6 +363,13 @@ class FaucetTopology():
         subrule = {'actions': actions}
         return {'rule': subrule}
 
+    def _augment_sec_port_acl(self, acls):
+        actions = acls['rule']['actions']
+        assert not 'output' in actions, 'output actions explicitly defined'
+        if actions['allow']:
+            actions['output'] = {'port': self.sec_port}
+        return acls
+
     def _append_device_default_allow(self, rules, target_mac):
         device_spec = self._device_specs['macAddrs'].get(target_mac)
         if device_spec and 'default_allow' in device_spec:
@@ -370,8 +377,8 @@ class FaucetTopology():
             actions = {'allow': allow_action}
             subrule = {'actions': actions}
             subrule['description'] = "device_spec default_allow"
-            rule = {'rule': subrule}
-            rules.append(rule)
+            acl = {'rule': subrule}
+            rules.append(self._augment_sec_port_acl(acl))
 
     def _append_acl_template(self, rules, template, target_mac=None):
         filename = self.TEMPLATE_FILE_FORMAT % template
@@ -383,7 +390,7 @@ class FaucetTopology():
             new_rule = acl['rule']
             self._resolve_template_field(new_rule, 'dl_src', target_mac=target_mac)
             self._resolve_template_field(new_rule, 'nw_dst')
-            rules.append(acl)
+            rules.append(self._augment_sec_port_acl(acl))
         return True
 
     def _resolve_template_field(self, rule, field, target_mac=None):
