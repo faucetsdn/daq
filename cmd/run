@@ -8,12 +8,14 @@ cd $ROOT
 run_mode=$(cat misc/RELEASE_VERSION)
 run_args=
 
-if [ -f "$LOCAL_SYSTEM" ]; then
-    echo Loading config from $LOCAL_SYSTEM
-    source $LOCAL_SYSTEM
-else
-    echo No $LOCAL_SYSTEM found, using defaults.
+if [ ! -f "$LOCAL_SYSTEM" ]; then
+    echo No $LOCAL_SYSTEM found, copying defaults...
+    mkdir -p local
+    cp misc/system.conf $LOCAL_SYSTEM
 fi
+
+echo Loading config from $LOCAL_SYSTEM
+source $LOCAL_SYSTEM
 
 if [ "${1#run_mode=}" != "$1" ]; then
     run_mode=${1#run_mode=}
