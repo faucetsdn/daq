@@ -5,7 +5,7 @@
     "last-update": "2018-09-23T20:43:36+02:00",
     "cache-validity": 48,
     "is-supported": true,
-    "systeminfo": "Generic BACnet controller",
+    "systeminfo": "Generic BACnet controller - BACnet inbound only",
     "from-device-policy": {
       "access-lists": {
         "access-list": [
@@ -157,30 +157,6 @@
                   "source-port": {
                     "operator": "eq",
                     "port": 443
-                  }
-                }
-              },
-              "actions": {
-                "forwarding": "accept"
-              }
-            },
-            {
-              "name": "bacnet-frdev",
-              "matches": {
-                "ietf-mud:mud": {
-                  "controller": "bacnet"
-                },
-                "ipv4": {
-                  "protocol": 17
-                },
-                "udp": {
-                  "destination-port": {
-                    "operator": "eq",
-                    "port": 47808
-                  },
-                  "source-port": {
-                    "operator": "eq",
-                    "port": 47808
                   }
                 }
               },
