@@ -81,30 +81,6 @@
               "actions": {
                 "forwarding": "accept"
               }
-            },
-            {
-              "name": "bacnet-todev",
-              "matches": {
-                "ietf-mud:mud": {
-                  "controller": "bacnet"
-                },
-                "ipv4": {
-                  "protocol": 17
-                },
-                "udp": {
-                  "source-port": {
-                    "operator": "eq",
-                    "port": 47808
-                  },
-                  "destination-port": {
-                    "operator": "eq",
-                    "port": 47808
-                  }
-                }
-              },
-              "actions": {
-                "forwarding": "accept"
-              }
             }
           ]
         }
