@@ -25,6 +25,8 @@ RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv re
 
 COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
 
-COPY misc/start_faux .
+COPY misc/start_faux bin/
+COPY misc/bacnet_discover bin/
 
-ENTRYPOINT ["./start_faux"]
+
+ENTRYPOINT ["bin/start_faux"]
