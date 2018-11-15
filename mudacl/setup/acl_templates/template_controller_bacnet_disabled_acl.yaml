@@ -1,0 +1,44 @@
+---
+acls:
+  '@from:template_controller_bacnet_disabled_acl':
+  - rule:
+      description: "type controller_bacnet_disabled rule http-frdev"
+      dl_type: "0x0800"
+      dl_src: "@mac:controller_bacnet_disabled"
+      nw_proto: 6
+      nw_dst: "@ctrl:remote-host"
+      tcp_src: 80
+      tcp_dst: 80
+      actions:
+        allow: 1
+  - rule:
+      description: "type controller_bacnet_disabled rule https-frdev"
+      dl_type: "0x0800"
+      dl_src: "@mac:controller_bacnet_disabled"
+      nw_proto: 6
+      nw_dst: "@ctrl:remote-host"
+      tcp_src: 443
+      tcp_dst: 443
+      actions:
+        allow: 1
+  '@to:template_controller_bacnet_disabled_acl':
+  - rule:
+      description: "type controller_bacnet_disabled rule http-todev"
+      dl_type: "0x0800"
+      dl_dst: "@mac:controller_bacnet_disabled"
+      nw_proto: 6
+      nw_src: "@ctrl:remote-host"
+      tcp_src: 80
+      tcp_dst: 80
+      actions:
+        allow: 1
+  - rule:
+      description: "type controller_bacnet_disabled rule https-todev"
+      dl_type: "0x0800"
+      dl_dst: "@mac:controller_bacnet_disabled"
+      nw_proto: 6
+      nw_src: "@ctrl:remote-host"
+      tcp_src: 443
+      tcp_dst: 443
+      actions:
+        allow: 1
