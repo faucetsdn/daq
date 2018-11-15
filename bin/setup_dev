@@ -41,7 +41,7 @@ echo LSB release version $release
 
 $AG install \
     software-properties-common apt-transport-https iproute2 \
-    realpath git ethtool curl apache2-utils iputils-ping lsof \
+    git ethtool curl apache2-utils iputils-ping lsof \
     ca-certificates sudo net-tools tcpdump build-essential \
     isc-dhcp-client network-manager netcat gnupg2 strace \
     python3 python3-pkg-resources python3-setuptools python3-dev \

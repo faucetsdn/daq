@@ -17,7 +17,8 @@ fi
 echo AG is $AG
 
 $AG update
-$AG install lsb-release realpath git curl sudo apt-transport-https software-properties-common
+$AG install realpath || true  # On newer versions this is included elsewhere.
+$AG install lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent
 
 retry=bin/retry_cmd
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
