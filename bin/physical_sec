@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-source $ROOT/local/system.conf
+
+cd $ROOT
+source misc/config_base.sh
 
 if [ -z "$ext_ctrl" ]; then
     echo ext_ctrl not defined for physical_sec.

@@ -20,17 +20,13 @@ if [ -z "$build" ]; then
     move_intfs=y
 fi
 
-if [ -f $LOCAL_CONFIG ]; then
-    echo Loading container configuration from $LOCAL_CONFIG
-    source $LOCAL_CONFIG
-fi
+cd $ROOT
+source misc/config_base.sh
 
 docker_args+="\
   --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
   --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
   --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
-
-cd $ROOT
 
 if [ "$1" == latest ]; then
     pull_docker=n

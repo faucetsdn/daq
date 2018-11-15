@@ -7,6 +7,9 @@ local_config=$ROOT/local/system.conf
 postfix=
 intf_mac=9a:02:57:1e:8f:00
 
+cd $ROOT
+source misc/config_base.sh
+
 # If the first argument is a number, then it's a port designation.
 if [ $# -gt 0 -a $(($1)) -gt 0 ]; then
     port_num=$1
@@ -24,11 +27,6 @@ if ifconfig "$1" > /dev/null 2>&1 ; then
 fi
 
 FAUX_ARGS="$*"
-
-if [ -f $local_config ]; then
-  echo Loading faux configuration from $local_config
-  source $local_config
-fi
 
 CONTAINER=daq-faux$postfix
 

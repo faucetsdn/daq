@@ -1,7 +1,12 @@
 #!/bin/bash -e
 
 ROOT=$(dirname $0)/..
+local_config=local/system.conf
+build_root=build
+build_args=
+
 cd $ROOT
+source misc/config_base.sh
 
 if [ "$1" == skip ]; then
     build_extra=skip
@@ -12,15 +17,6 @@ else
 fi
 
 cmd/build $build_extra
-
-local_config=local/system.conf
-build_root=build
-build_args=
-
-if [ -f $local_config ]; then
-  echo Loading build configuration from $local_config
-  source $local_config
-fi
 
 file=misc/Dockerfile.base
 target=daq/base

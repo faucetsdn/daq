@@ -9,11 +9,7 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
 cd $ROOT
-
-if [ -f $LOCAL_CONFIG ]; then
-    echo Loading daq run configuration from $LOCAL_CONFIG
-    source $LOCAL_CONFIG
-fi
+source misc/config_base.sh
 
 mkdir -p $INSTDIR
 

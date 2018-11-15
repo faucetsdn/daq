@@ -15,13 +15,14 @@ export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
 skip_autostart=
 
-cd $ROOT
-
 if [ `whoami` != root ]; then
     echo Running as root...
     sudo $0 "$@" && exit 0
     false
 fi
+
+cd $ROOT
+source misc/config_base.sh
 
 while [ -f $INSTLOCK ]; do
     echo Waiting for $INSTLOCK to dissapear!
@@ -31,15 +32,7 @@ done
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
 
-if [ ! -f $LOCAL_CONFIG ]; then
-    mkdir -p $LOCALDIR
-    echo Copying default $SYSTEM_CONF to $LOCAL_CONFIG
-    cp misc/$SYSTEM_CONF $LOCAL_CONFIG
-fi
-
 echo Release version $DAQ_VERSION
-echo Loading daq run configuration from $LOCAL_CONFIG
-source $LOCAL_CONFIG
 
 if [ "$1" == "-h" ]; then
     skip_autostart=y

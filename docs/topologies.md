@@ -4,7 +4,7 @@
 
 The network topology is auto-generated based on settings in the specified `local/system.conf`
 on startup. Various templates are availabile in `misc/`:
-* _misc/system.conf_: Single faux-device internal test setup.
+* _misc/system_base.conf_: Single faux-device internal test setup.
 * _misc/system_multi.conf_: Test setup with 3 faux-devices.
 * _misc/system_ext.conf_: Test setup for using an external OVS switch.
 * _misc/system_phy.conf_: Setup for using an external physical switch.
@@ -19,8 +19,8 @@ and/or misconfigured switch topologies.
 The different top-level network topologies are:
 1. _Emulation_: This uses a built-in 'faux' device to test the DAQ suite itself. It is
 important to make sure this works properly to verify the basic install is sound. This
-is most useful for basic system sanity checks and system development. See the `misc/system.conf`
-or `misc/system_multi.conf` files for examples of how this is configured.
+is most useful for basic system sanity checks and system development. See `misc/system_base.conf`
+or `misc/system_multi.conf` for examples of how this is configured.
 
 2. _Adapter_: This uses one or more physical USB interfaces to directly connect
 devices (no external switch). There is no particular limit on the number of devices that can be
