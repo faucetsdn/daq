@@ -50,36 +50,6 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller rule radiusauth-todev"
-      dl_type: "0x0800"
-      dl_dst: "9a:02:57:1e:8f:02"
-      nw_proto: 17
-      nw_src: "@ctrl:remote-host"
-      udp_src: 1812
-      udp_dst: 1812
-      actions:
-        allow: 1
-  - rule:
-      description: "type controller rule radiusacc-todev"
-      dl_type: "0x0800"
-      dl_dst: "9a:02:57:1e:8f:02"
-      nw_proto: 17
-      nw_src: "@ctrl:remote-host"
-      udp_src: 1813
-      udp_dst: 1813
-      actions:
-        allow: 1
-  - rule:
-      description: "type controller rule radiusproxy-todev"
-      dl_type: "0x0800"
-      dl_dst: "9a:02:57:1e:8f:02"
-      nw_proto: 17
-      nw_src: "@ctrl:remote-host"
-      udp_src: 1814
-      udp_dst: 1814
-      actions:
-        allow: 1
-  - rule:
       description: "type controller rule bacnet-todev"
       dl_type: "0x0800"
       dl_dst: "9a:02:57:1e:8f:02"
