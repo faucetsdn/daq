@@ -27,7 +27,7 @@ echo Building $file into $target, log to $logfile...
 failed=
 docker build -t $target $build_args -f $file . > $logfile 2>&1 || failed=y
 if [ -n "$failed" ]; then
-    tail $logfilr
+    tail $logfile
     false
 fi
 

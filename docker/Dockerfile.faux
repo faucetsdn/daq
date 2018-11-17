@@ -6,9 +6,9 @@
 FROM daq/aardvark:latest as bacnet_build
 
 # Run this separately so it can be shared with other builds.
-RUN $AG update && $AG install default-jre
+RUN $AG update && $AG install openjdk-8-jre
 
-RUN $AG update && $AG install default-jdk git
+RUN $AG update && $AG install openjdk-8-jdk git
 
 RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch --depth 1 \
   && cd bacnet4j && ../bin/retry_cmd ./gradlew shadow
@@ -16,7 +16,7 @@ RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-bran
 FROM daq/aardvark:latest
 
 # Run this separately so it can be shared with other builds.
-RUN $AG update && $AG install default-jre
+RUN $AG update && $AG install openjdk-8-jre
 
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl ifupdown
 
