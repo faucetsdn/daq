@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo hold_test $@
+
+$@
+
+if [ $? != 0 ]; then
+   while [ ! -f hold_test.result ]; do
+      echo Wating for hold_test.result
+      sleep 1
+   done
+   result=$(< hold_test.result)
+   echo Result is $result
+   rm hold_test.result
+   exit $result
+fi

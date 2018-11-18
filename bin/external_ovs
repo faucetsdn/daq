@@ -12,7 +12,8 @@ ext_pri=${ext_bridge}-pri
 ext_sec=${ext_bridge}-sec
 
 ROOT=$(realpath $(dirname $0)/..)
-source $ROOT/local/system.conf
+cd $ROOT
+source misc/config_base.sh
 
 echo ext_dpid is $ext_dpid
 echo network_config is $network_config

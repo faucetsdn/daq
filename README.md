@@ -79,9 +79,9 @@ target device, which can then be used for any necessary probes (e.g. a nmap port
 
 ## Debugging
 
-The `inst/` subdirectory is the _inst_ance runtime directory, and holds all the resulting log files
-and diagnostic information from each run. There's a collection of different files in there that
-provide useful information, depending on the specific problem(s) encountered. A device's
+The `inst/` subdirectory is the <em>inst</em>ance runtime directory, and holds all the resulting
+log files and diagnostic information from each run. There's a collection of different files in
+there that provide useful information, depending on the specific problem(s) encountered. A device's
 [startup sequence log](docs/startup_pcap.md) provides useful debugging material for intial device
 phases (e.g. DHCP exchange).
 

@@ -3,10 +3,9 @@
 """Main entrypoint for DAQ. Handles command line parsing and other
 misc setup tasks."""
 
-import configparser
-import io
 import logging
 import os
+import re
 import signal
 import sys
 
@@ -65,12 +64,19 @@ def _write_pid_file():
         pid_file.write(str(pid))
 
 def _read_config_into(filename, config):
-    parser = configparser.ConfigParser()
-    with open(filename) as stream:
-        stream = io.StringIO("[top]\n" + stream.read())
-        parser.read_file(stream)
-    for item in parser.items('top'):
-        config[item[0]] = item[1]
+    print('Reading config from %s' % filename)
+    with open(filename) as file:
+        line = file.readline()
+        while line:
+            parts = re.sub(r'#.*', '', line).strip().split('=')
+            entry = parts[0].split() if parts else None
+            if len(parts) == 2:
+                config[parts[0].strip()] = parts[1].strip().strip('"').strip("'")
+            elif len(entry) == 2 and entry[0] == 'source':
+                _read_config_into(entry[1], config)
+            elif parts and parts[0]:
+                raise Exception('Unknown config entry: %s' % line)
+            line = file.readline()
 
 def _parse_args(args):
     config = {}

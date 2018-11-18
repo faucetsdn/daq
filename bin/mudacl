@@ -12,10 +12,7 @@ acl_templates=inst/acl_templates
 cd $ROOT
 mudacl/bin/test.sh
 
-if [ -f $SYSCONF ]; then
-    echo Loading configuration from $SYSCONF...
-    source $SYSCONF
-fi
+source misc/config_base.sh
 
 if [ $# -gt 0 ]; then
     device_specs=$1
