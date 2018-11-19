@@ -4,10 +4,10 @@
 
 The network topology is auto-generated based on settings in the specified `local/system.conf`
 on startup. Various templates are availabile in `misc/`:
-* _misc/system_base.conf_: Single faux-device internal test setup.
-* _misc/system_multi.conf_: Test setup with 3 faux-devices.
-* _misc/system_ext.conf_: Test setup for using an external OVS switch.
-* _misc/system_phy.conf_: Setup for using an external physical switch.
+* `misc/system_base.conf`: Single faux-device internal test setup.
+* `misc/system_multi.conf`: Test setup with 3 faux-devices.
+* `misc/system_ext.conf`: Test setup for using an external OVS switch.
+* `misc/system_phy.conf`: Setup for using an external physical switch.
 
 The system will generate the `inst/faucet.yaml` file, which then triggers the configuration
 of the underlying OpenFlow system. General network debugging information can be found in
@@ -25,7 +25,7 @@ or `misc/system_multi.conf` for examples of how this is configured.
 2. _Adapter_: This uses one or more physical USB interfaces to directly connect
 devices (no external switch). There is no particular limit on the number of devices that can be
 connected this way except for the limitations of the host's USB subsystem. See the notes at the
-top of the `misc/system.conf` file for instructions on how to configure this setup.
+top of the `misc/system_base.conf` file for instructions on how to configure this setup.
 
 3. _Test Lab_: Use one external OpenFlow network switch detailed in the
 [test lab setup](test_lab.md) documentation. This is primarily designed for testing small
