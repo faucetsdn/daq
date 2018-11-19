@@ -9,7 +9,7 @@ that set. Direct file-based validations run against an explicitly specified sub-
 validator dynamically chooses the sub-schema based off of message parameters. There's currently two schemas
 available, defined in the `validator/schemas/` subdirectory:
 * `simple`, which is really just there to make sure the system works.
-* [`abacab`](../validator/schemas/abacab/README.md), which is a building-oriented schema for data collection.
+* [`udmi`](../schemas/udmi/README.md), which is a building-oriented schema for data collection.
 
 ## Validation Mechanisms
 
@@ -72,7 +72,7 @@ E.g., to validate messages on the `projects/gcp-account/topics/telemetry` topic,
 ~/daq$ <b>fgrep gcp_ local/system.conf</b>
 gcp_cred=local/gcp-project-ce6716521378.json
 gcp_topic=telemetry_topic
-gcp_schema=validator/schemas/abacab/
+gcp_schema=schemas/udmi/
 </pre>
 
 When using the
@@ -97,11 +97,11 @@ Using credentials from /home/user/daq/local/gcp-project-ce6716521378.json
 
 BUILD SUCCESSFUL in 3s
 2 actionable tasks: 2 executed
-Executing validator /home/user/daq/validator/schemas/abacab/ pubsub:telemetry_topic...
-Running schema . in /home/user/daq/validator/schemas/abacab
+Executing validator /home/user/daq/validator/schemas/udmi/ pubsub:telemetry_topic...
+Running schema . in /home/user/daq/validator/schemas/udmi
 Ignoring subfolders []
 Results will be uploaded to https://console.cloud.google.com/firestore/data/registries/?project=gcp-project
-Also found in such directories as /home/user/daq/validator/schemas/abacab/out
+Also found in such directories as /home/user/daq/validator/schemas/udmi/out
 Connecting to pubsub topic telemetry_topic
 Entering pubsub message loop on projects/gcp-project/subscriptions/daq-validator
 Success validating out/pointset_FCU_09_INT_NE_07.json
