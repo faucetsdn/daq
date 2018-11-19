@@ -4,11 +4,11 @@ ROOT=$(realpath $(dirname $0)/..)
 
 test -d $ROOT/daq && sudo rm -rf $ROOT/inst $ROOT/build
 
-docker ps -aq --no-trunc | xargs -r docker rm || true
+docker ps -aq --no-trunc | xargs -r docker rm -f || true
 
-docker images | egrep ^daqf/ | awk '{print $1":"$2}' | xargs docker rmi || true
+docker images | egrep ^daqf/ | awk '{print $1":"$2}' | xargs -r docker rmi || true
 
-docker images | egrep ^daq/ | awk '{print $1":"$2}' | xargs docker rmi || true
+docker images | egrep ^daq/ | awk '{print $1":"$2}' | xargs -r docker rmi || true
 
 docker images -q --filter dangling=true | xargs -r docker rmi || true
 

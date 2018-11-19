@@ -144,12 +144,6 @@ if [ -n "$move_intfs" ]; then
         move_intf $intf
     done
 
-    if [ -n "$ext_dpid" ]; then
-	echo Activating physical switch in container...
-	sudo docker exec daq-runner bin/physical_sec
-        echo Result is $?
-    fi
-
     echo Done with interface migration.
 fi
 

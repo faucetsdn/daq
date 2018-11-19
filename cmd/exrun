@@ -62,12 +62,12 @@ sleep 1
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-if [ -n "$daq_intf" ]; then
-    echo daq_intf is deprecated, please use a local/faucet.yaml
-    false
-fi
-
 cleanup_file=`mktemp`
+
+if [ -n "$ext_ctrl" ]; then
+    echo Activating external switch...
+    bin/physical_sec
+fi
 
 function external {
     echo -n
