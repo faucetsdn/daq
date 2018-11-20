@@ -1,10 +1,10 @@
 ---
 acls:
-  '@from:template_controller_acl':
+  '@from:template_controller_bacnet_outbound_only_acl':
   - rule:
-      description: "type controller rule http-frdev"
+      description: "type controller_bacnet_outbound_only rule http-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller"
+      dl_src: "@mac:controller_bacnet_outbound_only"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_src: 80
@@ -12,9 +12,9 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller rule https-frdev"
+      description: "type controller_bacnet_outbound_only rule https-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller"
+      dl_src: "@mac:controller_bacnet_outbound_only"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_src: 443
@@ -22,20 +22,20 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller rule bacnet-frdev"
+      description: "type controller_bacnet_outbound_only rule bacnet-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller"
+      dl_src: "@mac:controller_bacnet_outbound_only"
       nw_proto: 17
       nw_dst: "@ctrl:bacnet"
       udp_src: 47808
       udp_dst: 47808
       actions:
         allow: 1
-  '@to:template_controller_acl':
+  '@to:template_controller_bacnet_outbound_only_acl':
   - rule:
-      description: "type controller rule http-todev"
+      description: "type controller_bacnet_outbound_only rule http-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "@mac:controller_bacnet_outbound_only"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 80
@@ -43,22 +43,12 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller rule https-todev"
+      description: "type controller_bacnet_outbound_only rule https-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller"
+      dl_dst: "@mac:controller_bacnet_outbound_only"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 443
       tcp_dst: 443
-      actions:
-        allow: 1
-  - rule:
-      description: "type controller rule bacnet-todev"
-      dl_type: "0x0800"
-      dl_dst: "@mac:controller"
-      nw_proto: 17
-      nw_src: "@ctrl:bacnet"
-      udp_src: 47808
-      udp_dst: 47808
       actions:
         allow: 1

@@ -15,13 +15,14 @@ export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
 skip_autostart=
 
-cd $ROOT
-
 if [ `whoami` != root ]; then
     echo Running as root...
     sudo $0 "$@" && exit 0
     false
 fi
+
+cd $ROOT
+source misc/config_base.sh
 
 while [ -f $INSTLOCK ]; do
     echo Waiting for $INSTLOCK to dissapear!
@@ -31,15 +32,7 @@ done
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
 
-if [ ! -f $LOCAL_CONFIG ]; then
-    mkdir -p $LOCALDIR
-    echo Copying default $SYSTEM_CONF to $LOCAL_CONFIG
-    cp misc/$SYSTEM_CONF $LOCAL_CONFIG
-fi
-
 echo Release version $DAQ_VERSION
-echo Loading daq run configuration from $LOCAL_CONFIG
-source $LOCAL_CONFIG
 
 if [ "$1" == "-h" ]; then
     skip_autostart=y
@@ -55,6 +48,11 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
+if [ -n "$device_specs" ]; then
+    echo Creating MUD templates for $device_specs...
+    bin/mudacl $device_specs
+fi
+
 mkdir -p $INSTDIR
 rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG
 
@@ -64,12 +62,12 @@ sleep 1
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-if [ -n "$daq_intf" ]; then
-    echo daq_intf is deprecated, please use a local/faucet.yaml
-    false
-fi
-
 cleanup_file=`mktemp`
+
+if [ -n "$ext_ctrl" ]; then
+    echo Activating external switch...
+    bin/physical_sec
+fi
 
 function external {
     echo -n

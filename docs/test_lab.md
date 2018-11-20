@@ -11,7 +11,7 @@ switch.
 
 ```
            Internet
-              |            
+              |
               |
        +--------------+
        |              |
@@ -53,10 +53,11 @@ using a physical cable, a switch port to another network adapter on the controll
 
 There are several (minimum two) network connections (ethernet cables) required between the switch
 and controller machines. A standard USB-dongle Ethernet adapter should be sufficient for each.
-1. _Control_ plane which supports the OpenFlow controller connection between switch and controller
-host.
-2. _Data_ plane connection which provides for all data access for the devices. Internet access for
-the devices will be filtered/proxied through the controller host.
+1. _Control_ plane, which supports the OpenFlow controller connection between switch and controller
+host. The port used for this is defined as part of the vendor-specific switch setup (see below).
+2. _Data_ plane connection, which provides for all data access for the devices. Internet access for
+the devices will be filtered/proxied through the controller host. The port used for this is defined
+by the `sec_port` config (see below).
 3. _eXtra_ devices (not required) that can be used to run a simulated device on the controller
 host. 3x eXtra is recommened for a full test lab setup because it allows for running
 [core FAUCET switch tests](https://faucet.readthedocs.io/en/latest/testing.html#hardware-switch-testing-with-docker).
@@ -67,7 +68,7 @@ At least 1 eXtra is useful for diagnosing any switch configuration problems.
 Configuring the test lab switch requires a few separate pieces of setup:
 1. The [FAUCET Vendor-Specific Documentation](https://docs.faucet.nz/en/latest/vendors/index.html)
 for the specific switch used in any setup, including the necessary OpenFlow controller
-configuration.
+configuration (such as the port used for the control plane uplink).
 2. System configuration of the controller host. See `misc/system_phy.conf` for an example
 configuration for an external physical switch. Key entries are:
     * `ext_dpid`: Data plane ID for the connected physical switch.
@@ -75,3 +76,13 @@ configuration for an external physical switch. Key entries are:
     * `ext_pri` : Interface name of the data-plane network.
     * `ext_ofip`: Control plane interface IP address (and subnet).
     * `ext_addr`: External switch IP address (used to verify the connection).
+    * `sec_port`: Port of secondary (external) switch for the data-plane uplink (defaults to 7).
+
+## Testing
+
+The `bin/physical_sec` script will setup and test the basic connection to the external physical switch:
+```
+~/daq$ bin/physical_sec
+Reading config from /home/user/daq/local/system.conf
+ext_ctrl not defined for physical_sec.
+```

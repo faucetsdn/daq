@@ -26,7 +26,7 @@ DAQ without MUD, showing the exposed telnet port, and then again with MUD enforc
 allow telnet.
 
 <pre>
-<b>~/daq$</b> diff local/system.conf misc/system.conf
+<b>~/daq$</b> diff local/system.conf misc/system_base.conf
 7c7
 < daq_intf=faux-1!
 ---

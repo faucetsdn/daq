@@ -16,7 +16,7 @@ An example `flakey` test is included as a tutorial primer. To configure, do the 
 * `mkdir -p local/docker` -- Make local directories.
 * `cp misc/local_tests.conf local/` -- Copy the example test configuraiton file.
 * `cp misc/Dockerfile.test_flaky local/docker/` -- Copy the example Docker file to build directory.
-* `cp misc/system.conf local/system.conf` -- Create local version of system.conf file.
+* `cp misc/system_base.conf local/system.conf` -- Create local version of system.conf file.
 * `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
 
 ## Component Build

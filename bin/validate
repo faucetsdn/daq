@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-source local/system.conf
+source misc/config_base.sh
 
 if [ -z "$gcp_cred" ]; then
   echo Please make sure gcp_cred is defined in local/system.conf

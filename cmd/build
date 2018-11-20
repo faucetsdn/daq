@@ -4,7 +4,6 @@
 set -o pipefail
 
 ROOT=$(dirname $0)/..
-cd $ROOT
 
 local_config=local/system.conf
 build_root=build
@@ -15,6 +14,9 @@ ext_msg=
 inline=
 copydirs="bin cmd misc faucet mininet docker daq"
 load_mark=/root/load_complete
+
+cd $ROOT
+source misc/config_base.sh
 
 if [ "$1" == skip ]; then
     do_images=skip
@@ -34,11 +36,6 @@ fi
 if [ "$1" == inline ]; then
     inline=y
     shift
-fi
-
-if [ -f $local_config ]; then
-  echo Loading build configuration from $local_config
-  source $local_config
 fi
 
 target_version=$(cat misc/FAUCET_VERSION)

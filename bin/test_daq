@@ -88,6 +88,7 @@ echo Running DAQ test...
 if [ "$DAQ_MODE" == "skip" ]; then
     echo Skipping daq run.
 else
+    echo DAQ_FAUX_OPTS=$fail_mode cmd/run $runargs $cmdargs
     DAQ_FAUX_OPTS=$fail_mode cmd/run $runargs $cmdargs || failed=$?
 fi
 

@@ -1,7 +1,12 @@
 #!/bin/bash -e
 
 ROOT=$(dirname $0)/..
+local_config=local/system.conf
+build_root=build
+build_args=
+
 cd $ROOT
+source misc/config_base.sh
 
 if [ "$1" == skip ]; then
     build_extra=skip
@@ -13,15 +18,6 @@ fi
 
 cmd/build $build_extra
 
-local_config=local/system.conf
-build_root=build
-build_args=
-
-if [ -f $local_config ]; then
-  echo Loading build configuration from $local_config
-  source $local_config
-fi
-
 file=misc/Dockerfile.base
 target=daq/base
 mkdir -p $build_root
@@ -31,16 +27,20 @@ echo Building $file into $target, log to $logfile...
 failed=
 docker build -t $target $build_args -f $file . > $logfile 2>&1 || failed=y
 if [ -n "$failed" ]; then
-    tail $logfilr
+    tail $logfile
     false
 fi
 
 images=$(docker images | fgrep daq/ | awk '{print $1}')
 
+# Force because inbuild implies release version, not local.
+run_mode=$(cat misc/RELEASE_VERSION)
+
 echo Runner build on top of base...
 
 # Explicilty run in /daq not /root/daq because of volume mapping.
-cmd/run base /daq/cmd/build $run_extra
+echo cmd/run run_mode=$run_mode base /daq/cmd/build $run_extra
+cmd/run run_mode=$run_mode base /daq/cmd/build $run_extra
 
 if [ -n "$CONTINUOUS_INTEGRATION" ]; then
     echo Skipping container commit since its too intensive for automatic builds.

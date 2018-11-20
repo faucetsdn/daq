@@ -4,7 +4,7 @@
 # daq/runner at build time (cmd/build) to pre-build internal docker images.
 #
 # Need to use ubuntu because mininet is very persnickity about versions.
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 
 # Dump all our junks into the root home directory.
 WORKDIR /root/daq
