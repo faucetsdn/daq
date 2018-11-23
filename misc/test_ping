@@ -5,7 +5,7 @@ echo
 ls -l /scans/startup.pcap
 echo $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured.
 echo
-tcpdump -en -r /scans/startup.pcap port 67
+tcpdump -en -r /scans/startup.pcap ip
 echo
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
 echo

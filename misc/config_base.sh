@@ -1,7 +1,7 @@
 # Script file included by all setup scripts to load local config.
 
 LOCAL_SYSTEM=local/system.conf
-DEFAULT_CONF=${DAQ_CONF:-misc/system.conf}
+DEFAULT_CONF=${DAQ_CONF:-misc/system_base.conf}
 
 run_mode=$(cat misc/RELEASE_VERSION)
 

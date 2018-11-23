@@ -26,13 +26,10 @@ minimum set of basic packages, docker, and openvswitch.
 
 Once installed, the basic qualification suite can be run with `cmd/run -s`. The `-s`
 means <em>single shot</em> and will run tests just once and then exit (see the
-[options documentation](docs/options.md) for more details).
-By default, this will run everything inside of one Docker container named `daq-runner`
-and can take quite some time to download the initial docker image.
+[options documentation](docs/options.md) for more details). Runtime configuraiton
+is always pulled from `local/system.conf`, and if this file does not exist a baseline
+one will be copied from `misc/system_base.conf`.
 The output should approximately look like this [example log output](docs/run_log.md).
-
-_NB: The current containerized version of the complete DAQ system is somewhat flaky,
-so you might need to follow the Build Setup instructions at the end of this page._
 
 ## Configuration
 
