@@ -31,6 +31,7 @@ class ConnectedHost():
     """Class managing a device-under-test"""
 
     _MONITOR_SCAN_SEC = 20
+    _STARTUP_MIN_TIME_SEC = 5
     _REPORT_FORMAT = "report_%s_%s.txt"
     _TMPDIR_BASE = "inst"
     _REPORT_PREFIX = "\n#############"
@@ -64,6 +65,7 @@ class ConnectedHost():
         self._report_path = None
         self._report_file = None
         self._initialize_report()
+        self._startup_time = None
 
     def _initialize_tempdir(self):
         tmpdir = os.path.join(self._TMPDIR_BASE, 'run-port-%02d' % self.target_port)
@@ -141,6 +143,10 @@ class ConnectedHost():
         """Handle completion of DHCP subtask"""
         if self.state != _STATE.ACTIVE:
             return
+        timedelta = datetime.datetime.now() - self._startup_time
+        if timedelta < datetime.timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
+            LOGGER.warning('Target port %d ignoring premature dhcp_result', self.target_port)
+            return
         self.target_ip = target_ip
         self._push_record('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
@@ -148,6 +154,7 @@ class ConnectedHost():
             self._state_transition(_STATE.ERROR, _STATE.ACTIVE)
             self.runner.target_set_error(self.target_port, exception)
         else:
+            LOGGER.info('Target port %d dhcp_result %s', self.target_port, target_ip)
             self._state_transition(_STATE.BASE, _STATE.ACTIVE)
 
     def _ping_test(self, src, dst, src_addr=None):
@@ -159,6 +166,7 @@ class ConnectedHost():
     def _startup_scan(self):
         assert not self._tcp_monitor, 'tcp_monitor already active'
         startup_file = os.path.join(self.scan_base, 'startup.pcap')
+        self._startup_time = datetime.datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
         network = self.runner.network
         tcp_filter = ''

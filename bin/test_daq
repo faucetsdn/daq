@@ -16,7 +16,7 @@ ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
 LOCAL_CONF=local/system.conf
-SYS_CONF=${DAQ_CONF:-misc/system.conf}
+SYS_CONF=${DAQ_CONF:-misc/system_base.conf}
 
 if [ -f $LOCAL_CONF ]; then
     if ! diff $LOCAL_CONF $SYS_CONF; then
