@@ -17,7 +17,6 @@ LOGGER = logging.getLogger('network')
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
     # pylint: disable=too-few-public-methods
-    pass
 
 
 class DummyNode():
@@ -25,11 +24,9 @@ class DummyNode():
     # pylint: disable=invalid-name
     def addIntf(self, node, port=None):
         """No-op for adding an interface"""
-        pass
 
     def cmd(self, cmd, *args, **kwargs):
         """No-op for running a command"""
-        pass
 
 
 class TestNetwork():
