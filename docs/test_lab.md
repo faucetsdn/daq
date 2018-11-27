@@ -81,8 +81,27 @@ configuration for an external physical switch. Key entries are:
 ## Testing
 
 The `bin/physical_sec` script will setup and test the basic connection to the external physical switch:
-```
-~/daq$ bin/physical_sec
-Reading config from /home/user/daq/local/system.conf
-ext_ctrl not defined for physical_sec.
-```
+<pre>
+~/daq$ <b>bin/physical_sec</b>
+Loading config from local/system.conf
+Configuring control interface enx00e04c68036b at 192.0.2.10/16
+Checking external connection to 192.0.2.138
+PING 192.0.2.138 (192.0.2.138) 56(84) bytes of data.
+64 bytes from 192.0.2.138: icmp_seq=1 ttl=64 time=2.79 ms
+
+--- 192.0.2.138 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 2.790/2.790/2.790/0.000 ms
+
+DAQ autoclean ip link set down dev enx00e04c68036b
+Done with physical switch configuration.
+</pre>
+
+## Common Errors
+
+The following message in `inst/faucet.log` indicates that a switch is trying
+to connect to faucet, but `ext_dpid` is configured wrong: simply copy/paste
+the hex dipd (e.g. _0x1aeb960541_) into the config file.
+<pre>
+Nov 20 23:23:56 faucet ERROR    <ryu.controller.ofp_event.EventOFPSwitchFeatures object at 0x7fd22a14dcc0>: unknown datapath DPID 115621627201 (0x1aeb960541)
+</pre>
