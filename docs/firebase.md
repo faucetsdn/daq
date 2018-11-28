@@ -20,7 +20,7 @@ of test results.
    * Edit `daq/local/system.conf` to specify the `gcp_cred` setting to point to the downloaded file
      (with a path relative to the `daq/` install directory), e.g.
      `gcp_cred=local/daq-testlab-de56aa4b1e47.json`.
-5. (Re)Start the DAQ install.
+5. (Re)Start DAQ (`cmd/run`).
    * There should be something in the top 10-20 startup log lines that look something like:
      <br>`INFO:gcp:Loading gcp credentials from local/daq-testlab-de56aa4b1e47.json`
      <br>`INFO:gcp:Initialized gcp publisher client daq-project:daq-testlab`
