@@ -1,0 +1,28 @@
+{
+  "title": "Device Config Schema",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "required": [
+    "timestamp",
+    "version",
+    "system"
+  ],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "enum": [
+        1
+      ]
+    },
+    "system": {
+      "$ref": "file:config_system.json#"
+    },
+    "pointset": {
+      "$ref": "file:config_pointset.json#"
+    }
+  }
+}
