@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
+if [ -z "$DAQ_TEST" ]; then
+    echo DAQ_TEST not defined.
+    false
+fi
+
+if [ -z "$DAQ_RESULT" ]; then
+    echo DAQ_TEST not defined.
+    false
+fi
+
 function delay_finish {
     # Travis doesn't always wait for buffer to flush on exit, so give some time.
     sleep 10
@@ -9,33 +19,11 @@ if [ -n "$TRAVIS" ]; then
     trap delay_finish EXIT
 fi
 
-runargs=
-cmdargs=$@
-
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-LOCAL_CONF=local/system.conf
-SYS_CONF=${DAQ_CONF:-misc/system_base.conf}
-
-if [ -f $LOCAL_CONF ]; then
-    if ! diff $LOCAL_CONF $SYS_CONF; then
-        echo Cowardly refusing to overwrite existing $LOCAL_CONF
-        false
-    else
-        echo Existing $LOCAL_CONF matches $SYS_CONF, continue!
-    fi
-else
-    echo Installing $SYS_CONF
-    mkdir -p local
-    cp $SYS_CONF local/system.conf
-fi
-
 # Out with the old, in with the new (use faucet instead).
 sudo /etc/init.d/openvswitch-controller stop || true
-
-echo Cleaning old results...
-sudo rm -rf inst/run-port-* inst/report_*
 
 echo -n "Last DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
@@ -47,73 +35,27 @@ if [ -d faucet ]; then
     echo
 fi
 
-if [ "$DAQ_MODE" != "in" ]; then
-    runargs+=" run_mode=local"
-fi
-
-if [ -n "$DAQ_MUD" ]; then
-    bin/mudacl misc/device_specs.json
-    runargs+=" device_specs=misc/device_specs.json"
-fi
-
-if [ -n "$DAQ_VALIDATE" ]; then
-    validator/bin/test.sh
-fi
-
-if [ "$DAQ_BUILD" == in ]; then
-    if [ -n "$runargs" ]; then
-        echo Error -- build args must be first.
-        false
-    fi
-    runargs+=" latest reuse"
-elif [ "$DAQ_BUILD" == "no" -a "$TRAVIS_BRANCH" == release ]; then
-    echo Not running tests because no-build on release branch.
-    exit 0
-fi
-
-if [ -n "$DAQ_RUNS" ]; then
-    runargs+=" -f run_limit=$DAQ_RUNS"
-else
-    runargs+=" -s"
-fi
-
-if [ -n "$DAQ_LOG" ]; then
-    runargs+=" daq_loglevel=$DAQ_LOG"
-fi
-
-
-fail_mode=${DAQ_FAIL#!}
-failed=0
-echo Running DAQ test...
-if [ "$DAQ_MODE" == "skip" ]; then
-    echo Skipping daq run.
-else
-    echo DAQ_FAUX_OPTS=$fail_mode cmd/run $runargs $cmdargs
-    DAQ_FAUX_OPTS=$fail_mode cmd/run $runargs $cmdargs || failed=$?
-fi
-
-echo Finished run with exit code $failed.
-
-if [ -n "$DAQ_FAIL" ]; then
-    if [ "$fail_mode" == "$DAQ_FAIL" -a "$failed" == 0 ]; then
-        echo Test did not fail as expected with $DAQ_FAIL.
-        false
-    else
-        echo Succeeding through expected failure.
-    fi
-elif [ "$failed" != 0 ]; then
-    echo Test failed, activation logs:
-    more inst/run-port-*/nodes/*/activate.log | cat || true
-    echo
-    echo Test failed.
+if [ -d inst ]; then
+    echo Directory inst/ exists, clean out before test run.
     false
 fi
 
-if [ -n "$DAQ_VERIFY" ]; then
-    result=$(cat $DAQ_VERIFY)
-    echo Result in $DAQ_VERIFY is $result.
-    if [ "$result" != 0 ]; then
-        echo Test verification result is not 0.
-        false
-    fi
+if [ -d local ]; then
+    echo Directory local/ exists, clean out before test run.
+    false
 fi
+
+mkdir -p local inst
+
+export TEST_RESULTS=test_results.log
+
+echo Running test script $DAQ_TEST
+$DAQ_TEST
+echo
+echo Test results $TEST_RESULTS
+cat $TEST_RESULTS
+echo
+echo Comparing results against $DAQ_RESULT
+diff $TEST_RESULTS $DAQ_RESULT
+echo
+echo Done with tests.

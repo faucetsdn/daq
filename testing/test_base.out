@@ -1,0 +1,8 @@
+01: []
+Open port tests
+01: ['01:nmap:1']
+01: []
+External switch tests
+02: []
+    dp_id: 1
+    dp_id: 4886718345

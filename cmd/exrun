@@ -38,6 +38,12 @@ if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
+if [ "$1" == "codecov" ]; then
+    echo Running with codecov support b/c command line.
+    daq_codecov=y
+    shift
+fi
+
 export PYTHONPATH=$FAUCET:$MININET
 
 # Dump configuration settings for debugging.
@@ -94,7 +100,7 @@ fi
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
     runcmd="python3 -u -m pdb"
-elif [ -n "$DAQ_CODECOV" ]; then
+elif [ -n "$daq_codecov" ]; then
     echo Running with coverage analysis...
     runcmd="coverage run"
 else
@@ -115,7 +121,7 @@ export TERM=dumb
 exit_code=0
 $runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?
 
-if [ -n "$DAQ_CODECOV" ]; then
+if [ -n "$daq_codecov" ]; then
     codecov
 fi
 

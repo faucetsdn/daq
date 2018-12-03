@@ -315,7 +315,7 @@ class ConnectedHost():
         result_path = os.path.join(self.tmpdir, 'nodes', host_name, 'return_code.txt')
         try:
             with open(result_path, 'a') as output_stream:
-                output_stream.write(str(return_code))
+                output_stream.write(str(return_code) + '\n')
         except Exception as e:
             LOGGER.error('While writing result code: %s', e)
         report_path = os.path.join(self.tmpdir, 'nodes', host_name, 'tmp', 'report.txt')

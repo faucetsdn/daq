@@ -5,7 +5,6 @@ set -o pipefail
 
 ROOT=$(dirname $0)/..
 
-local_config=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
@@ -16,7 +15,6 @@ copydirs="bin cmd misc faucet mininet docker daq"
 load_mark=/root/load_complete
 
 cd $ROOT
-source misc/config_base.sh
 
 if [ "$1" == skip ]; then
     do_images=skip
