@@ -9,3 +9,4 @@ echo Validator exit code $? | tee -a $TEST_RESULTS
 cmd/inbuild skip
 echo cmd/inbuild exit code $? | tee -a $TEST_RESULTS
 
+echo Done with tests | tee -a $TEST_RESULTS

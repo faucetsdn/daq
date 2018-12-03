@@ -50,7 +50,13 @@ if [ -n "${options[bacnet]}" ]; then
     java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar com.serotonin.bacnet4j.test.LoopDevice $local_ip $broadcast_ip &
 fi
 
+if [ -n "${options[discover]}" ]; then
+    echo Starting bacnet discover loop.
+    (while true; do bin/bacnet_discover; sleep 1; done) &
+fi
+
 if [ -n "${options[curl]}" ]; then
+    echo Starting curl loop.
     (while true; do curl -o - http://google.com; sleep 1; done) &
 fi
 

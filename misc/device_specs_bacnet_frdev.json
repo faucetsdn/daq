@@ -5,7 +5,7 @@
       "group": "testing"
     },
     "9a:02:57:1e:8f:02": {
-      "type": "controller_bacnet_inbound_only",
+      "type": "bacnet_frdev",
       "group": "testing"
     },
   }

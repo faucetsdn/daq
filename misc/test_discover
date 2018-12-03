@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+# This is a check that bacnet discovery is seen in the monitor log.
+bcast=$(tcpdump -en -r /scans/monitor.pcap port 47808 and ether broadcast | wc -l)
+ucast=$(tcpdump -en -r /scans/monitor.pcap port 47808 and not ether broadcast | wc -l)
+
+echo bcast $bcast and ucast $ucast
+
+
+

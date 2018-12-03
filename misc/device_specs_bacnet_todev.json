@@ -5,9 +5,8 @@
       "group": "testing"
     },
     "9a:02:57:1e:8f:02": {
-      "type": "controller_bacnet_outbound_only",
+      "type": "bacnet_todev",
       "group": "testing"
     },
   }
 }
-

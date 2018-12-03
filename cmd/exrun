@@ -55,8 +55,8 @@ if [ ! -d $FAUCET ]; then
 fi
 
 if [ -n "$device_specs" ]; then
-    echo Creating MUD templates for $device_specs...
-    bin/mudacl $device_specs
+    echo Creating MUD templates...
+    bin/mudacl
 fi
 
 mkdir -p $INSTDIR

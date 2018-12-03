@@ -6,7 +6,7 @@ if [ -z "$DAQ_TEST" ]; then
 fi
 
 if [ -z "$DAQ_RESULT" ]; then
-    echo DAQ_TEST not defined.
+    echo DAQ_RESULT not defined.
     false
 fi
 
@@ -47,10 +47,12 @@ fi
 
 mkdir -p local inst
 
-export TEST_RESULTS=test_results.log
+echo I am g`whoami`
+
+export TEST_RESULTS=inst/test_results.log
 
 echo Running test script $DAQ_TEST
-$DAQ_TEST
+sudo TEST_RESULTS=$TEST_RESULTS $DAQ_TEST
 echo
 echo Test results $TEST_RESULTS
 cat $TEST_RESULTS
