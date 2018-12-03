@@ -102,7 +102,7 @@ The [example pcap output file](docs/startup_pcap.md) shows what this should look
 (Replace `01` with the appropriate port set number.)
 
 If there are device-level network problems then it is possible to use `tcpdump` or similar
-to example the network traffic. When using the `cmd/run` command, the system runs the
+to examine the network traffic. When using the `cmd/run` command, the system runs the
 framework in a Docker container named `daq-runner` and it moves the test
 network interface(s) into that container. Any tap command must be also run in the container, so it
 looks something like (replacing `faux` with the real adapter name):
