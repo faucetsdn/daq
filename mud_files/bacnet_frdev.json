@@ -5,7 +5,7 @@
     "last-update": "2018-09-23T20:43:36+02:00",
     "cache-validity": 48,
     "is-supported": true,
-    "systeminfo": "Generic BACnet controller - BACnet outbound only",
+    "systeminfo": "Generic BACnet controller - BACnet from-device only",
     "from-device-policy": {
       "access-lists": {
         "access-list": [

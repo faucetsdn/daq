@@ -1,3 +1,4 @@
+Base tests
 01: []
 Open port tests
 01: ['01:nmap:1']
@@ -6,3 +7,9 @@ External switch tests
 02: []
     dp_id: 1
     dp_id: 4886718345
+Mud profile tests
+bacnet base discovery 1 and 1
+bacnet todev 0 and 0
+bacnet frdev 1 and 1
+bacnet none 0 and 0
+Done with tests

@@ -1,7 +1,7 @@
 ## Testing BACnet
 
 * Setup system like `misc/system_multi.conf`
-* Run in no-test mode with bacnet device enabled: `sudo DAQ_FAUX_OPTS=bacnet cmd/run -n`
+* Run in no-test mode with bacnet device enabled on faux3: `sudo DAQ_FAUX3_OPTS=bacnet cmd/run -n`
 * Wait until faux-3 gets an IP address:<pre>
 &hellip;
 INFO:runner:DHCP notify 9a:02:57:1e:8f:03 is 10.20.83.164 on gw02 (None)

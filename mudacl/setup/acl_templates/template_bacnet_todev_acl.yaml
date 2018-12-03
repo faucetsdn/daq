@@ -1,10 +1,10 @@
 ---
 acls:
-  '@from:template_controller_bacnet_inbound_only_acl':
+  '@from:template_bacnet_todev_acl':
   - rule:
-      description: "type controller_bacnet_inbound_only rule http-frdev"
+      description: "type bacnet_todev rule http-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller_bacnet_inbound_only"
+      dl_src: "@mac:bacnet_todev"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_src: 80
@@ -12,20 +12,20 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller_bacnet_inbound_only rule https-frdev"
+      description: "type bacnet_todev rule https-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:controller_bacnet_inbound_only"
+      dl_src: "@mac:bacnet_todev"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_src: 443
       tcp_dst: 443
       actions:
         allow: 1
-  '@to:template_controller_bacnet_inbound_only_acl':
+  '@to:template_bacnet_todev_acl':
   - rule:
-      description: "type controller_bacnet_inbound_only rule http-todev"
+      description: "type bacnet_todev rule http-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller_bacnet_inbound_only"
+      dl_dst: "@mac:bacnet_todev"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 80
@@ -33,9 +33,9 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller_bacnet_inbound_only rule https-todev"
+      description: "type bacnet_todev rule https-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller_bacnet_inbound_only"
+      dl_dst: "@mac:bacnet_todev"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 443
@@ -43,9 +43,9 @@ acls:
       actions:
         allow: 1
   - rule:
-      description: "type controller_bacnet_inbound_only rule bacnet-todev"
+      description: "type bacnet_todev rule bacnet-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:controller_bacnet_inbound_only"
+      dl_dst: "@mac:bacnet_todev"
       nw_proto: 17
       nw_src: "@ctrl:bacnet"
       udp_src: 47808

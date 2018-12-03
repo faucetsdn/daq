@@ -8,6 +8,7 @@ ROOT=$(dirname $0)/..
 
 mud_files=mud_files/
 acl_templates=inst/acl_templates
+port_acls=inst/port_acls
 
 cd $ROOT
 mudacl/bin/test.sh
@@ -15,30 +16,18 @@ mudacl/bin/test.sh
 source misc/config_base.sh
 
 if [ $# -gt 0 ]; then
-    device_specs=$1
-    shift
-fi
-
-if [ $# -gt 0 ]; then
     echo Unexpected command line argument: $*
-    false
-fi
-
-if [ -z "$device_specs" ]; then
-    echo Please make sure device_specs is defined in $SYSCONF or on command line.
     false
 fi
 
 test -d inst/ || mkdir inst
 touch inst/ || sudo chown $USER inst
 
-test -f $device_specs || (echo Device specs file $device_specs not found. && false)
-
-rm -rf inst/acl_templates
-mkdir inst/acl_templates
-rm -rf inst/port_acls
-mkdir inst/port_acls
+rm -rf $acl_templates || sudo rm -rf $acl_templates
+mkdir $acl_templates
+rm -rf $port_acls || sudo rm -rf $port_acls
+mkdir $port_acls
 
 mudacl/bin/run.sh $mud_files $acl_templates
 
-ls -l inst/acl_templates inst/port_acls
+ls -l $acl_templates $port_acls
