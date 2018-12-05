@@ -8,18 +8,21 @@ ext_dpid=$1
 shift
 
 ext_bridge=ext-ovs
-ext_pri=${ext_bridge}-pri
-ext_sec=${ext_bridge}-sec
+ext_ofpt=6600
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 source misc/config_base.sh
 
+ext_pri=${ext_intf}
+ext_sec=${ext_intf%-pri}-sec
+
 echo ext_dpid is $ext_dpid
 echo network_config is $network_config
 
 dpid=$(printf %016x $ext_dpid)
-sudo ovs-vsctl --if-exists del-br $ext_bridge -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:6633 \
+sudo ovs-vsctl --if-exists del-br $ext_bridge \
+     -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:$ext_ofpt \
      -- set bridge $ext_bridge other_config:datapath-id=$dpid
 echo Created bridge $ext_bridge with dpid $dpid
 

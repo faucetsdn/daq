@@ -1,5 +1,3 @@
 FROM daq/aardvark:latest
 
-COPY misc/test_hold .
-
-CMD ./test_hold
+CMD ["tail", "-f", "/dev/null" ]

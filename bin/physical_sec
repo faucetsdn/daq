@@ -9,6 +9,12 @@ if [ -z "$ext_ctrl" ]; then
     false
 fi
 
+if [ -z "$ext_intf" ]; then
+    # Not actally used in this script, but needed elsewhere.
+    echo ext_intf not defined for physical_sec.
+    false
+fi
+
 if [ -z "$ext_ofip" ]; then
     echo ext_ofip not defined for physical_sec.
     false
@@ -26,13 +32,27 @@ fi
 
 echo Configuring control interface $ext_ctrl at $ext_ofip
 
+if ! ifconfig $ext_ctrl || ! ifconfig $ext_intf; then
+    echo
+    echo Interfaces $ext_ctrl and $ext_intf not found, current set:
+    ifconfig -a | fgrep flags
+    echo
+    false
+fi
+
 sudo ip addr flush dev $ext_ctrl
 sudo ip addr add $ext_ofip dev $ext_ctrl
 
 sudo ip link set up dev $ext_ctrl
 
 echo Checking external connection to $ext_addr
-ping -c 1 $ext_addr
+if ! ping -c 1 $ext_addr; then
+    echo
+    echo That didn\'t seem to work.
+    echo Look for network traffix: tcpdump -ni $ext_ctrl arp
+    echo
+    false
+fi
 
 echo
 echo DAQ autoclean ip link set down dev $ext_ctrl

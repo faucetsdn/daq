@@ -34,6 +34,7 @@ class TestNetwork():
 
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
+    DEFAULT_OF_PORT = 6653
 
     def __init__(self, config):
         self.config = config
@@ -43,6 +44,7 @@ class TestNetwork():
         self.sec_dpid = None
         self.sec_port = None
         self.ext_intf = None
+        self.ext_ofpt = int(config.get('ext_ofpt', self.DEFAULT_OF_PORT))
         self.switch_links = {}
         self.topology = None
 
@@ -98,7 +100,7 @@ class TestNetwork():
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
-        self.ext_intf = self.topology.get_pri_intf()
+        self.ext_intf = self.topology.get_ext_intf()
         if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
@@ -163,7 +165,8 @@ class TestNetwork():
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
         controller = mininet_node.RemoteController
-        self.net.addController('controller', controller=controller, ip=target_ip, port=6633)
+        self.net.addController('controller', controller=controller,
+                               ip=target_ip, port=self.ext_ofpt)
 
         LOGGER.debug("Adding secondary...")
         self._create_secondary()

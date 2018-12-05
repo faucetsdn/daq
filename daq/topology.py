@@ -65,9 +65,9 @@ class FaucetTopology():
         with open(filename) as stream:
             return yaml.safe_load(stream)
 
-    def get_pri_intf(self):
+    def get_ext_intf(self):
         """Return the external interface for seconday, if any"""
-        return self.config.get('ext_pri')
+        return self.config.get('ext_intf')
 
     def get_sec_dpid(self):
         """Return the secondary dpid"""
@@ -129,14 +129,14 @@ class FaucetTopology():
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.pri_name
         interface['stack'] = {'dp': self.sec_name, 'port': self.sec_port}
-        interface['name'] = self.config.get('ext_pri', 'stack_pri')
+        interface['name'] = 'stack_pri'
         return interface
 
     def _make_sec_stack_interface(self):
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.sec_name
         interface['stack'] = {'dp': self.pri_name, 'port': self.PRI_STACK_PORT}
-        interface['name'] = self.config.get('ext_sec', 'stack_pri')
+        interface['name'] = self.config.get('ext_intf', 'stack_sec')
         return interface
 
     def _make_default_acl_rules(self):

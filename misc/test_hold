@@ -1,5 +1,0 @@
-#!/bin/sh
-
-echo test hold foreverz.
-
-tail -f /dev/null
