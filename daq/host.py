@@ -30,7 +30,7 @@ class _STATE():
 class ConnectedHost():
     """Class managing a device-under-test"""
 
-    _MONITOR_SCAN_SEC = 20
+    _MONITOR_SCAN_SEC = 60
     _STARTUP_MIN_TIME_SEC = 5
     _REPORT_FORMAT = "report_%s_%s.txt"
     _TMPDIR_BASE = "inst"
