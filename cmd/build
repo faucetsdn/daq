@@ -5,6 +5,7 @@ set -o pipefail
 
 ROOT=$(dirname $0)/..
 
+LOCAL_SYSTEM=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=
@@ -15,6 +16,13 @@ copydirs="bin cmd misc faucet mininet docker daq"
 load_mark=/root/load_complete
 
 cd $ROOT
+if [ -f $LOCAL_SYSTEM ]; then
+    # Don't use setup script to avoid creating local directory.
+    echo Loading config from $LOCAL_SYSTEM...
+    source $LOCAL_SYSTEM
+else
+    echo No $LOCAL_SYSTEM found.
+fi
 
 if [ "$1" == skip ]; then
     do_images=skip
