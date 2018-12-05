@@ -26,7 +26,8 @@ minimum set of basic packages, docker, and openvswitch.
 
 Once installed, the basic qualification suite can be run with `cmd/run -s`. The `-s`
 means <em>single shot</em> and will run tests just once and then exit (see the
-[options documentation](docs/options.md) for more details). Runtime configuraiton
+[options documentation](docs/options.md) for more details). The `local/` directory is 
+created upon first execution of `cmd/run`. Runtime configuraiton
 is always pulled from `local/system.conf`, and if this file does not exist a baseline
 one will be copied from `misc/system_base.conf`.
 The output should approximately look like this [example log output](docs/run_log.md).
