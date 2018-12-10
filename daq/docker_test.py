@@ -53,7 +53,7 @@ class DockerTest():
             host.terminate()
             self.runner.remove_host(host)
             raise
-        LOGGER.debug("Target port %d created docker test %s", self.target_port, image)
+        LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
     def _docker_error(self, e):
         LOGGER.error('Target port %d docker error: %s', self.target_port, e)
@@ -84,8 +84,8 @@ class DockerTest():
         LOGGER.debug("Target port %d docker complete, return=%d (%s)",
                      self.target_port, return_code, exception)
         if return_code:
-            LOGGER.info("Target port %d FAILED test %s with error %s: %s",
+            LOGGER.info("Target port %d test %s failed: %s %s",
                         self.target_port, self.test_name, return_code, exception)
         else:
-            LOGGER.info("Target port %d PASSED test %s", self.target_port, self.test_name)
+            LOGGER.info("Target port %d test %s passed", self.target_port, self.test_name)
         self.callback(return_code=return_code, exception=exception)

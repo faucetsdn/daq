@@ -22,7 +22,7 @@ fi
 
 echo run_mode is $run_mode
 echo Clearing previous reports...
-sudo rm -f inst/report_*.txt
+sudo rm -rf inst/report_*.txt inst/run-port-*
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@"

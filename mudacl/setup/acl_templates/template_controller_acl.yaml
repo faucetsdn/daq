@@ -7,7 +7,6 @@ acls:
       dl_src: "@mac:controller"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
-      tcp_src: 80
       tcp_dst: 80
       actions:
         allow: 1
@@ -18,7 +17,6 @@ acls:
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_src: 443
-      tcp_dst: 443
       actions:
         allow: 1
   - rule:
@@ -39,7 +37,6 @@ acls:
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 80
-      tcp_dst: 80
       actions:
         allow: 1
   - rule:
@@ -48,7 +45,6 @@ acls:
       dl_dst: "@mac:controller"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
-      tcp_src: 443
       tcp_dst: 443
       actions:
         allow: 1

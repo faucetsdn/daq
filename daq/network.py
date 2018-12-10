@@ -202,5 +202,9 @@ class TestNetwork():
         return mirror_intf_name
 
     def device_group_for(self, target_mac):
-        """Find the target device group for the given address"""
+        """Find the target device group for the given address."""
         return self.topology.device_group_for(target_mac)
+
+    def device_group_size(self, group_name):
+        """Return the size of the given group."""
+        return self.topology.device_group_size(group_name)

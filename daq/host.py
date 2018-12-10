@@ -30,7 +30,7 @@ class _STATE():
 class ConnectedHost():
     """Class managing a device-under-test"""
 
-    _MONITOR_SCAN_SEC = 40
+    _MONITOR_SCAN_SEC = 30
     _STARTUP_MIN_TIME_SEC = 5
     _REPORT_FORMAT = "report_%s_%s.txt"
     _TMPDIR_BASE = "inst"
@@ -101,14 +101,16 @@ class ConnectedHost():
         LOGGER.debug('Target port %d state: %s -> %s', self.target_port, self.state, target)
         self.state = target
 
-    def is_active(self):
-        """Return True if this host is still under active test."""
-        LOGGER.debug('Target port %d is_active check state %s', self.target_port, self.state)
+    def is_running(self):
+        """Return True if this host is running active test."""
         return self.state != _STATE.ERROR and self.state != _STATE.DONE
 
-    def _activate(self):
-        LOGGER.info('Target port %d activating as %s', self.target_port, self.target_mac)
+    def is_active(self):
+        """Return True if this host is ready to be activated."""
+        return self.state == _STATE.ACTIVE
 
+    def _activate(self):
+        LOGGER.info('Target port %d waiting for dhcp as %s', self.target_port, self.target_mac)
         self._state_transition(_STATE.ACTIVE, _STATE.INIT)
         self.record_result('sanity')
         self._push_record('info', state=self.target_mac)
@@ -139,14 +141,14 @@ class ConnectedHost():
         elif self.state == _STATE.BASE:
             self._base_start()
 
-    def dhcp_result(self, state, target_ip=None, exception=None):
+    def trigger(self, state, target_ip=None, exception=None):
         """Handle completion of DHCP subtask"""
         if self.state != _STATE.ACTIVE:
-            return
+            return False
         timedelta = datetime.datetime.now() - self._startup_time
         if timedelta < datetime.timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
-            LOGGER.warning('Target port %d ignoring premature dhcp_result', self.target_port)
-            return
+            LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
+            return False
         self.target_ip = target_ip
         self._push_record('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
@@ -154,8 +156,9 @@ class ConnectedHost():
             self._state_transition(_STATE.ERROR, _STATE.ACTIVE)
             self.runner.target_set_error(self.target_port, exception)
         else:
-            LOGGER.info('Target port %d dhcp_result %s', self.target_port, target_ip)
+            LOGGER.info('Target port %d triggered as %s', self.target_port, target_ip)
             self._state_transition(_STATE.BASE, _STATE.ACTIVE)
+        return True
 
     def _ping_test(self, src, dst, src_addr=None):
         if not src or not dst:

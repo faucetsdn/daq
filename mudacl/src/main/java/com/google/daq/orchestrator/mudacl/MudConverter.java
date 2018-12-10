@@ -135,7 +135,9 @@ public class MudConverter implements AclProvider {
     if (controller == null) {
       return null;
     }
-    controller.controlees.forEach((key, value) -> targets.add(value.hostname));
+    controller.controlees.forEach(
+        (ctrlName, ctclValue) -> ctclValue.hostnames.forEach(
+            (hostName, hostProperties) -> targets.add(hostName)));
     if (targets.size() > 1) {
       throw new RuntimeException("Multiple controllers not supported for " + edgeDevice);
     }

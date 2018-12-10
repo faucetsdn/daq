@@ -8,21 +8,27 @@
         "bacnet": {
           "controlees": {
             "bacnet": {
-              "hostname": "bacnet-controller"
+              "hostnames": {
+                "bacnet-controller": {
+                }
+              }
             }
           }
         }
       }
     },
     "9a:02:57:1e:8f:02": {
-      "type": "controller",
+      "type": "bacnet",
       "hostname": "bacnet-controller",
       "ipAddr": "100.10.0.2",
       "controllers": {
         "bacnet": {
           "controlees": {
             "bacnet": {
-              "hostname": "bacnet-lightbulb"
+              "hostnames": {
+                "bacnet-lightbulb": {
+                }
+              }
             }
           }
         }

@@ -86,7 +86,6 @@ configuration for an external physical switch. Key entries are:
 The `bin/physical_sec` script will setup and test the basic connection to the external physical switch:
 <pre>
 ~/daq$ <b>bin/physical_sec</b>
-~/daq$ bin/physical_sec
 Loading config from local/system.conf
 Configuring control interface enxb49cdff33ad9 at 192.168.1.10/16
 enxb49cdff33ad9: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500

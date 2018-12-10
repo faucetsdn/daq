@@ -102,7 +102,7 @@ if [ -f .pdbrc ]; then
     runcmd="python3 -u -m pdb"
 elif [ -n "$daq_codecov" ]; then
     echo Running with coverage analysis...
-    runcmd="coverage run"
+    runcmd="coverage run --source=daq -a"
 else
     runcmd="python3 -u"
 fi
@@ -120,10 +120,6 @@ export TERM=dumb
 
 exit_code=0
 $runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?
-
-if [ -n "$daq_codecov" ]; then
-    codecov
-fi
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file

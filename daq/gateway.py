@@ -34,6 +34,8 @@ class Gateway():
         self.tmpdir = None
         self.targets = {}
         self.test_ports = {}
+        self.ready = {}
+        self.activated = False
 
     def initialize(self):
         """Initialize the gateway host"""
@@ -76,7 +78,6 @@ class Gateway():
             LOGGER.debug('Gateway %s warmup ping failed', host_name)
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
-
         assert self._ping_test(dummy, host), 'host ping failed'
         assert self._ping_test(dummy, self.fake_target), 'fake ping failed'
         assert self._ping_test(host, dummy, src_addr=self.fake_target), 'reverse ping failed'
@@ -131,17 +132,26 @@ class Gateway():
         return tmpdir
 
     def attach_target(self, target_port, target):
-        """Attach the given target to this gateway"""
+        """Attach the given target to this gateway; return number of attached targets."""
         assert target_port not in self.targets, 'target already attached to gw'
         LOGGER.info('Attaching target %d to gateway group %s', target_port, self.name)
         self.targets[target_port] = target
+        return len(self.targets)
 
     def detach_target(self, target_port):
-        """Detach the given target from this gateway"""
+        """Detach the given target from this gateway; return number of remaining targets."""
         assert target_port in self.targets, 'target not attached to gw'
         LOGGER.info('Detach target %d from gateway group %s', target_port, self.name)
         del self.targets[target_port]
-        return bool(self.targets)
+        return len(self.targets)
+
+    def target_ready(self, target_mac):
+        """Mark a target ready, and return set of ready targets or False if already ready."""
+        if target_mac in self.ready:
+            return False
+        LOGGER.info('Ready target %s from gateway group %s', target_mac, self.name)
+        self.ready[target_mac] = True
+        return self.ready
 
     def get_targets(self):
         """Return the host targets associated with this gateway"""

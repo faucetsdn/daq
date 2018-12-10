@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ `whoami` != 'root' ]; then
+    echo Need to run as root.
+    exit -1
+fi
+
+echo DAQ aux tests | tee $TEST_RESULTS
+
 mudacl/bin/test.sh
 echo Mudacl exit code $? | tee -a $TEST_RESULTS
 validator/bin/test.sh

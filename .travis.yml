@@ -22,9 +22,9 @@ env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   matrix:
-    - DAQ_TEST=testing/test_base.sh  DAQ_RESULT=testing/test_base.out
-    - DAQ_TEST=testing/test_multi.sh DAQ_RESULT=testing/test_multi.out
-    - DAQ_TEST=testing/test_aux.sh   DAQ_RESULT=testing/test_aux.out
+    - DAQ_TEST=base
+    - DAQ_TEST=multi
+    - DAQ_TEST=aux
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/

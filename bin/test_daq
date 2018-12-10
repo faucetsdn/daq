@@ -5,11 +5,6 @@ if [ -z "$DAQ_TEST" ]; then
     false
 fi
 
-if [ -z "$DAQ_RESULT" ]; then
-    echo DAQ_RESULT not defined.
-    false
-fi
-
 function delay_finish {
     # Travis doesn't always wait for buffer to flush on exit, so give some time.
     sleep 10
@@ -49,15 +44,24 @@ mkdir -p local inst
 
 echo I am g`whoami`
 
-export TEST_RESULTS=inst/test_results.log
+TEST_SCRIPT=testing/test_$DAQ_TEST.sh
+RESULT_FILE=testing/test_$DAQ_TEST.out
+TEST_RESULTS=inst/test_$DAQ_TEST.log
 
-echo Running test script $DAQ_TEST
-sudo TEST_RESULTS=$TEST_RESULTS $DAQ_TEST
+echo Running test script $TEST_SCRIPT
+sudo TEST_RESULTS=$TEST_RESULTS $TEST_SCRIPT
+
+if [ -f .coverage ]; then
+    echo Generating codecov report...
+    source venv/bin/activate
+    codecov -F ${DAQ_TEST##*/}
+fi
+
 echo
 echo Test results $TEST_RESULTS
 cat $TEST_RESULTS
 echo
-echo Comparing results against $DAQ_RESULT
-diff $TEST_RESULTS $DAQ_RESULT
+echo Comparing results against $RESULT_FILE
+diff $TEST_RESULTS $RESULT_FILE
 echo
 echo Done with tests.

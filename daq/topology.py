@@ -1,5 +1,6 @@
 """Faucet-specific topology module"""
 
+import copy
 import logging
 import os
 import yaml
@@ -12,9 +13,9 @@ class FaucetTopology():
     """Topology manager specific to FAUCET configs"""
 
     OUTPUT_NETWORK_FILE = "inst/faucet.yaml"
-    MAC_PLACEHOLDER = "@mac:"
-    DNS_PLACEHOLDER = "@dns:"
-    CONT_PLACEHOLDER = "@ctrl:"
+    MAC_PREFIX = "@mac:"
+    DNS_PREFIX = "@dns:"
+    CTL_PREFIX = "@ctrl:"
     INST_FILE_PREFIX = "inst/"
     BROADCAST_MAC = "ff:ff:ff:ff:ff:ff"
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
@@ -22,6 +23,7 @@ class FaucetTopology():
     PORT_ACL_FILE_FORMAT = "port_acls/dp_%s_port_%d_acl.yaml"
     TEMPLATE_FILE_FORMAT = "inst/acl_templates/template_%s_acl.yaml"
     FROM_ACL_KEY_FORMAT = "@from:template_%s_acl"
+    TO_ACL_KEY_FORMAT = "@to:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
     MIRROR_PORT_BASE = 1000
@@ -43,7 +45,7 @@ class FaucetTopology():
         """Initialize this topology"""
         LOGGER.debug("Converting existing network topology...")
         self._write_network_topology()
-        self.generate_acls()
+        self._generate_acls()
 
     def start(self):
         """Start this instance"""
@@ -97,7 +99,7 @@ class FaucetTopology():
         else:
             LOGGER.debug('Ignoring no-change in port status for %s on %d', target_mac, port_no)
             return
-        self.generate_acls(port=port_no)
+        self._generate_acls()
 
     def _ensure_entry(self, root, key, value):
         if key not in root:
@@ -142,7 +144,7 @@ class FaucetTopology():
     def _make_default_acl_rules(self):
         rules = []
         if not self._append_acl_template(rules, 'raw'):
-            rules.append(self._augment_sec_port_acl(self._make_default_allow_rule()))
+            self._append_augmented_rule(rules, self._make_default_allow_rule())
         return rules
 
     def _make_default_acls(self):
@@ -206,21 +208,27 @@ class FaucetTopology():
         topology = {}
         topology['dps'] = dps
         topology['acls'] = self._make_default_acls()
-        topology['vlans'] = {10:{'description': "Internal DAQ vlan"}}
+        topology['vlans'] = self._make_vlan_description(10)
         topology['include'] = self._make_acl_include()
         topology['include-optional'] = self._make_acl_include_optional()
         return topology
+
+    def _make_vlan_description(self, vlan_id):
+        return {
+            vlan_id: {
+                'description': "Internal DAQ vlan",
+                'unicast_flood': False
+            }
+        }
 
     def _write_network_topology(self):
         LOGGER.info('Writing network config to %s', self.OUTPUT_NETWORK_FILE)
         with open(self.OUTPUT_NETWORK_FILE, "w") as output_stream:
             yaml.safe_dump(self.topology, stream=output_stream)
 
-    def generate_acls(self, port=None):
-        """Generate all ACLs required for dynamic system operation"""
+    def _generate_acls(self):
         self._generate_main_acls()
-        if not self._generate_port_acls(port=port):
-            LOGGER.info('Cleared port acls for port %s', port)
+        self._generate_port_acls()
 
     def _get_gw_ports(self):
         min_port = Gateway.SET_SPACING
@@ -239,9 +247,7 @@ class FaucetTopology():
             target = self._mac_map[target_mac]
             mirror_port = self.MIRROR_PORT_BASE + target['port']
             incoming = list(range(target['range'][0], target['range'][1])) + [mirror_port]
-            self._add_acl_rule(incoming_acl, dl_src=target_mac,
-                               in_vlan=self.DEFAULT_VLAN, ports=incoming)
-            self._add_acl_rule(incoming_acl, dl_src=target_mac, port=mirror_port)
+            self._add_acl_rule(incoming_acl, dl_src=target_mac, ports=incoming)
             portset = [1, mirror_port]
             self._add_acl_rule(portset_acl, dl_dst=target_mac, ports=portset)
 
@@ -289,21 +295,18 @@ class FaucetTopology():
 
         subrule = {}
         subrule["actions"] = actions
-        self._maybe_apply(subrule, "dl_src", kwargs)
-        self._maybe_apply(subrule, "dl_dst", kwargs)
-        self._maybe_apply(subrule, "vlan_vid", in_vlan)
+        self._maybe_apply(subrule, 'dl_src', kwargs)
+        self._maybe_apply(subrule, 'dl_dst', kwargs)
+        self._maybe_apply(subrule, 'vlan_vid', in_vlan)
 
         rule = {}
-        rule["rule"] = subrule
+        rule['rule'] = subrule
 
         acl.append(rule)
 
-    def _generate_port_acls(self, port=None):
-        if port:
-            return self._generate_port_acl(port=port)
-        for range_port in range(1, self.sec_port):
-            self._generate_port_acl(port=range_port)
-        return True
+    def _generate_port_acls(self):
+        for port in range(1, self.sec_port):
+            self._generate_port_acl(port=port)
 
     def _generate_port_acl(self, port=None):
         target_mac = None
@@ -334,14 +337,16 @@ class FaucetTopology():
         with open(filename, "w") as output_stream:
             yaml.safe_dump(port_acl, stream=output_stream)
 
-    def _add_acl_port_rules(self, rules, target_mac, port):
-        mac_map = self._device_specs['macAddrs']
-        if target_mac not in mac_map:
+    def _get_device_type(self, target_mac):
+        device_macs = self._device_specs['macAddrs']
+        if target_mac not in device_macs:
             LOGGER.info("No device spec found for %s", target_mac)
-            device_type = 'default'
-        else:
-            device_info = mac_map[target_mac]
-            device_type = device_info['type'] if 'type' in device_info else 'default'
+            return 'default'
+        device_info = device_macs[target_mac]
+        return device_info['type'] if 'type' in device_info else 'default'
+
+    def _add_acl_port_rules(self, rules, target_mac, port):
+        device_type = self._get_device_type(target_mac)
         LOGGER.info("Applying acl template %s/%s to port %s", target_mac, device_type, port)
         self._append_acl_template(rules, device_type, target_mac)
 
@@ -357,16 +362,47 @@ class FaucetTopology():
             return mac_map[target_mac]['group']
         return self._sanitize_mac(target_mac)
 
+    def device_group_size(self, group_name):
+        """Return the size of the device group"""
+        if not self._device_specs:
+            return 1
+        mac_map = self._device_specs['macAddrs']
+        count = 0
+        for target_mac in mac_map:
+            if mac_map[target_mac].get('group') == group_name:
+                count += 1
+        return count if count else 1
+
     def _make_default_allow_rule(self):
         actions = {'allow': 1}
         subrule = {'actions': actions}
         return {'rule': subrule}
 
-    def _augment_sec_port_acl(self, acls):
+    def _append_augmented_rule(self, rules, acl, targets=None):
+        if targets is None:
+            rules.append(self._augment_sec_port_acl(acl, None, None))
+            return
+
+        dl_dst = self.BROADCAST_MAC
+        ports = [target['port'] for target in targets]
+        rules.append(self._augment_sec_port_acl(acl, ports, dl_dst))
+
+        for target in targets:
+            rules.append(self._augment_sec_port_acl(acl, [target['port']], target['mac']))
+
+    def _augment_sec_port_acl(self, acls, ports, dl_dst):
+        acls = copy.deepcopy(acls)
         actions = acls['rule']['actions']
         assert not 'output' in actions, 'output actions explicitly defined'
         if actions['allow']:
-            actions['output'] = {'port': self.sec_port}
+            out_ports = ports + [self.sec_port] if ports else [self.sec_port]
+            actions['output'] = {'ports': out_ports}
+            if dl_dst:
+                acls['rule']['dl_dst'] = dl_dst
+            udp_src = acls['rule'].get('udp_src')
+            is_dhcp = int(udp_src) == 68 if udp_src else False
+            if ports is not None and not is_dhcp:
+                del actions['allow']
         return acls
 
     def _append_device_default_allow(self, rules, target_mac):
@@ -377,28 +413,92 @@ class FaucetTopology():
             subrule = {'actions': actions}
             subrule['description'] = "device_spec default_allow"
             acl = {'rule': subrule}
-            rules.append(self._augment_sec_port_acl(acl))
+            self._append_augmented_rule(rules, acl)
 
-    def _append_acl_template(self, rules, template, target_mac=None):
-        filename = self.TEMPLATE_FILE_FORMAT % template
+    def _get_acl_template(self, device_type):
+        filename = self.TEMPLATE_FILE_FORMAT % device_type
         if not self._device_specs:
+            return None
+        return self._load_file(filename)
+
+    def _append_acl_template(self, rules, device_type, target_mac=None):
+        template_acl = self._get_acl_template(device_type)
+        if not template_acl:
             return False
-        template_acl = self._load_file(filename)
-        template_key = self.FROM_ACL_KEY_FORMAT % template
+        template_key = self.FROM_ACL_KEY_FORMAT % device_type
         for acl in template_acl['acls'][template_key]:
             new_rule = acl['rule']
             self._resolve_template_field(new_rule, 'dl_src', target_mac=target_mac)
-            self._resolve_template_field(new_rule, 'nw_dst')
-            rules.append(self._augment_sec_port_acl(acl))
+            target = self._resolve_template_field(new_rule, 'nw_dst')
+            targets = self._resolve_targets(target, target_mac, new_rule)
+            self._append_augmented_rule(rules, acl, targets)
+        return True
+
+    def _resolve_targets(self, target, src_mac, src_rule):
+        if not target or not target.startswith(self.CTL_PREFIX):
+            return None
+        controller = target[len(self.CTL_PREFIX):]
+        bridge = self._device_specs['macAddrs'][src_mac]
+        if 'controllers' not in bridge:
+            return None
+        if controller not in bridge['controllers']:
+            return None
+        middle = bridge['controllers'][controller]['controlees']
+        if controller not in middle:
+            return None
+        target_macs = middle[controller]['mac_addrs']
+        target_ports = []
+        for target_mac in target_macs:
+            if self._allow_target_mac(target_mac, src_rule, controller):
+                target = self._mac_map[target_mac]
+                target_ports.append(target)
+        return target_ports
+
+    def _allow_target_mac(self, target_mac, src_rule, controller):
+        if not target_mac in self._mac_map:
+            return False
+        device_type = self._get_device_type(target_mac)
+        template_acl = self._get_acl_template(device_type)
+        if not template_acl:
+            return False
+        device_macs = self._device_specs['macAddrs']
+        if target_mac not in device_macs:
+            return False
+        device_info = device_macs[target_mac]
+        device_type = device_info['type'] if 'type' in device_info else 'default'
+        template_key = self.TO_ACL_KEY_FORMAT % device_type
+        for acl in template_acl['acls'][template_key]:
+            target_rule = acl['rule']
+            if self._rule_match(src_rule, target_rule, controller):
+                return True
+        return False
+
+    def _rule_match(self, src_rule, dst_rule, controller):
+        LOGGER.debug('Checking rule match for controller %s', controller)
+        dst_ctl = self.CTL_PREFIX + controller
+        if dst_rule.get('nw_src') != dst_ctl:
+            return False
+        match = self._conditional_match(src_rule, dst_rule, 'udp_src')
+        match = match and self._conditional_match(src_rule, dst_rule, 'udp_dst')
+        match = match and self._conditional_match(src_rule, dst_rule, 'tcp_src')
+        match = match and self._conditional_match(src_rule, dst_rule, 'tcp_dst')
+        return match
+
+    def _conditional_match(self, src_rule, dst_rule, field):
+        src = src_rule.get(field)
+        dst = dst_rule.get(field)
+        if src and dst:
+            return src == dst
         return True
 
     def _resolve_template_field(self, rule, field, target_mac=None):
         if field not in rule:
-            return
+            return None
         placeholder = rule[field]
-        if placeholder.startswith(self.MAC_PLACEHOLDER):
+        if placeholder.startswith(self.MAC_PREFIX):
             rule[field] = target_mac
-        elif placeholder.startswith(self.DNS_PLACEHOLDER):
+        elif placeholder.startswith(self.DNS_PREFIX):
             del rule[field]
-        elif placeholder.startswith(self.CONT_PLACEHOLDER):
+        elif placeholder.startswith(self.CTL_PREFIX):
             del rule[field]
+        return placeholder

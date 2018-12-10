@@ -32,6 +32,7 @@ class DAQRunner():
         self.active_ports = {}
         self._device_groups = {}
         self._gateway_sets = {}
+        self._target_mac_ip = {}
         self.gcp = gcp.GcpManager(self.config)
         self.description = config.get('site_description', '').strip("\"")
         self.version = os.environ['DAQ_VERSION']
@@ -146,18 +147,19 @@ class DAQRunner():
         self.network.direct_port_traffic(mac, port, target)
 
     def _handle_port_learn(self, dpid, port, target_mac):
-        LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
         if self.network.is_device_port(dpid, port):
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             self.active_ports[port] = target_mac
             self._target_set_trigger(port)
+        else:
+            LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
 
     def _handle_system_idle(self):
         all_idle = True
         # Iterate over copy of list to prevent fail-on-modification.
         for target_set in list(self.port_targets.values()):
             try:
-                if target_set.is_active():
+                if target_set.is_running():
                     all_idle = False
                     target_set.idle_handler()
                 else:
@@ -235,6 +237,9 @@ class DAQRunner():
         try:
             group_name = self.network.device_group_for(target_mac)
             gateway = self._activate_device_group(group_name, target_port)
+            if gateway.activated:
+                LOGGER.debug('Target port %d trigger deferred b/c activated gateway', target_port)
+                return False
         except Exception as e:
             LOGGER.error('Target port %d target trigger error %s', target_port, str(e))
             return False
@@ -288,6 +293,8 @@ class DAQRunner():
                 else:
                     LOGGER.warning('Unknown test list command %s', cmd_name)
                 line = file.readline()
+        if self.config.get('keep_hold'):
+            test_list.append('hold')
         return test_list
 
     def allocate_test_port(self, target_port):
@@ -303,7 +310,7 @@ class DAQRunner():
     def _activate_device_group(self, group_name, target_port):
         if group_name in self._device_groups:
             existing = self._device_groups[group_name]
-            LOGGER.info('Gateway for device group %s is %s', group_name, existing.name)
+            LOGGER.debug('Gateway for existing device group %s is %s', group_name, existing.name)
             return existing
         set_num = self._find_gateway_set(target_port)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
@@ -325,16 +332,37 @@ class DAQRunner():
         """Handle a DHCP notificaiton"""
         target_mac = target.get('mac')
         target_ip = target.get('ip')
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s)', target_mac,
-                    target_ip, gateway_set, str(exception))
+        self._target_mac_ip[target_mac] = target_ip
+        LOGGER.debug('DHCP notify %s is %s on gw%02d (%s)', target_mac,
+                     target_ip, gateway_set, str(exception))
         if exception:
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
             return
-        if target_mac in self.mac_targets:
-            target_host = self.mac_targets[target_mac]
-            target_host.dhcp_result(state, target_ip=target_ip, exception=exception)
+
+        target_host = self.mac_targets[target_mac]
+        if not target_host.is_active():
+            LOGGER.debug('DHCP device %s ignoring spurious notify', target_mac)
+            return
+
+        group_name = self._gateway_sets[gateway_set]
+        gateway = self._device_groups[group_name]
+        ready_devices = gateway.target_ready(target_mac)
+        group_size = self.network.device_group_size(group_name)
+
+        if not ready_devices:
+            LOGGER.debug('DHCP device %s already ready in group %s', target_mac, group_name)
+        elif len(ready_devices) == group_size:
+            gateway.activated = True
+            for target_mac in ready_devices:
+                LOGGER.info('DHCP activating target %s', target_mac)
+                target_host = self.mac_targets[target_mac]
+                target_ip = self._target_mac_ip[target_mac]
+                triggered = target_host.trigger(state, target_ip=target_ip)
+                assert triggered, 'host %s not triggered' % target_mac
+        else:
+            LOGGER.info('DHCP deferring activation of %s in group %s', target_mac, group_name)
 
     def _terminate_gateway_set(self, gateway_set):
         if not gateway_set in self._gateway_sets:

@@ -46,10 +46,6 @@
                   "source-port": {
                     "operator": "eq",
                     "port": 80
-                  },
-                  "destination-port": {
-                    "operator": "eq",
-                    "port": 80
                   }
                 }
               },
@@ -67,11 +63,7 @@
                   "protocol": 6
                 },
                 "tcp": {
-                  "ietf-mud:direction-initiated": "from-device",
-                  "source-port": {
-                    "operator": "eq",
-                    "port": 443
-                  },
+                  "ietf-mud:direction-initiated": "to-device",
                   "destination-port": {
                     "operator": "eq",
                     "port": 443
@@ -124,12 +116,8 @@
                   "protocol": 6
                 },
                 "tcp": {
-                  "ietf-mud:direction-initiated": "to-device",
+                  "ietf-mud:direction-initiated": "from-device",
                   "destination-port": {
-                    "operator": "eq",
-                    "port": 80
-                  },
-                  "source-port": {
                     "operator": "eq",
                     "port": 80
                   }
@@ -150,10 +138,6 @@
                 },
                 "tcp": {
                   "ietf-mud:direction-initiated": "to-device",
-                  "destination-port": {
-                    "operator": "eq",
-                    "port": 443
-                  },
                   "source-port": {
                     "operator": "eq",
                     "port": 443

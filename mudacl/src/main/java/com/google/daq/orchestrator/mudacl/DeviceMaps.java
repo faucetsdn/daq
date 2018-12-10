@@ -35,6 +35,10 @@ public class DeviceMaps {
   }
 
   static class Controlee {
-    public String hostname;
+    public Map<String, HostProperties> hostnames;
+    public Map<String, HostProperties> mac_addrs;
+  }
+
+  static class HostProperties {
   }
 }
