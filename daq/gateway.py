@@ -18,6 +18,7 @@ class Gateway():
     TEST_OFFSET_START = 2
     TEST_OFFSET_LIMIT = 10
     SET_SPACING = 10
+    _PING_RETRY_COUNT = 10
 
     TEST_IP_FORMAT = '192.168.84.%d'
 
@@ -74,7 +75,9 @@ class Gateway():
                                                      self._dhcp_callback, log_file)
         self.dhcp_monitor.start()
 
-        if not self._ping_test(host, dummy):
+        ping_retry = self._PING_RETRY_COUNT
+        while not self._ping_test(host, dummy) and ping_retry:
+            ping_retry -= 1
             LOGGER.debug('Gateway %s warmup ping failed', host_name)
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
