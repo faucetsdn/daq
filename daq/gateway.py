@@ -149,11 +149,10 @@ class Gateway():
         return len(self.targets)
 
     def target_ready(self, target_mac):
-        """Mark a target ready, and return set of ready targets or False if already ready."""
-        if target_mac in self.ready:
-            return False
-        LOGGER.info('Ready target %s from gateway group %s', target_mac, self.name)
-        self.ready[target_mac] = True
+        """Mark a target ready, and return set of ready targets"""
+        if not target_mac in self.ready:
+            LOGGER.info('Ready target %s from gateway group %s', target_mac, self.name)
+            self.ready[target_mac] = True
         return self.ready
 
     def get_targets(self):

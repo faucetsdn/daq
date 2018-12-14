@@ -348,21 +348,32 @@ class DAQRunner():
 
         group_name = self._gateway_sets[gateway_set]
         gateway = self._device_groups[group_name]
+
+        if gateway.activated:
+            LOGGER.debug('DHCP activation group %s already activated', group_name)
+            return
+
         ready_devices = gateway.target_ready(target_mac)
         group_size = self.network.device_group_size(group_name)
 
-        if not ready_devices:
-            LOGGER.debug('DHCP device %s already ready in group %s', target_mac, group_name)
-        elif len(ready_devices) == group_size:
-            gateway.activated = True
-            for target_mac in ready_devices:
-                LOGGER.info('DHCP activating target %s', target_mac)
-                target_host = self.mac_targets[target_mac]
-                target_ip = self._target_mac_ip[target_mac]
-                triggered = target_host.trigger(state, target_ip=target_ip)
-                assert triggered, 'host %s not triggered' % target_mac
-        else:
-            LOGGER.info('DHCP deferring activation of %s in group %s', target_mac, group_name)
+        if len(ready_devices) != group_size:
+            LOGGER.info('DHCP waiting for additional members of group %s', group_name)
+            return
+
+        ready_trigger = True
+        for target_mac in ready_devices:
+            ready_trigger = ready_trigger and target_host.trigger_ready()
+        if not ready_trigger:
+            LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
+            return
+
+        gateway.activated = True
+        for target_mac in ready_devices:
+            LOGGER.info('DHCP activating target %s', target_mac)
+            target_host = self.mac_targets[target_mac]
+            target_ip = self._target_mac_ip[target_mac]
+            triggered = target_host.trigger(state, target_ip=target_ip)
+            assert triggered, 'host %s not triggered' % target_mac
 
     def _terminate_gateway_set(self, gateway_set):
         if not gateway_set in self._gateway_sets:

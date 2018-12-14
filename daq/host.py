@@ -141,12 +141,18 @@ class ConnectedHost():
         elif self.state == _STATE.BASE:
             self._base_start()
 
-    def trigger(self, state, target_ip=None, exception=None):
-        """Handle completion of DHCP subtask"""
+    def trigger_ready(self):
+        """Check if this host is ready to be triggered"""
         if self.state != _STATE.ACTIVE:
             return False
         timedelta = datetime.datetime.now() - self._startup_time
         if timedelta < datetime.timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
+            return False
+        return True
+
+    def trigger(self, state, target_ip=None, exception=None):
+        """Handle completion of DHCP subtask"""
+        if not self.trigger_ready():
             LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
             return False
         self.target_ip = target_ip
