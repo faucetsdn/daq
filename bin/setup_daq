@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+bin/setup_base
+
+bin/setup_dev
+
+bin/build_daq
+

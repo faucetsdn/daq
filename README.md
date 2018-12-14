@@ -1,122 +1,63 @@
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
-A flexible IoT Device Automated Qualification (DAQ) framework utilizing the FAUCET SDN controller.
-More details about goals and objectives can be found in the IEEE Computer article
-[Taming the IoT: Operationalized Testing to Secure Connected Devices](https://www.computer.org/csdl/mags/co/2018/06/mco2018060090-abs.html).
-Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
-list for ongoing discussion about using DAQ for device testing.
+DAQ is a framework designed to test and operate IoT devices in an enterprise IoT environment.
+Nominally about device testing and qualification, Device Automated Qualification (DAQ), provides
+a means to _automate_ many capabilities, resulting in a more manageable, robust, and
+secure platform.
 
-The goal is to provide an IoT testing framework with three main objectives:
-* Test enterprise IoT devices for compliance to established network & security standards.
-* Use TDD methodologies to push IoT specifications out to device developers.
-* Dynamically manage network infrastructure to appropriately restrict communication patterns.
+Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
+list for ongoing discussion about using DAQ for enterprise IoT devices.
+
+There are several main categories of capabilities that DAQ addresses:
+* [_Individual device automated qualification and testing_](docs/qualification.md):
+Testing the behavior of a device against established security and network standards.
+More details about the goals and objectives behind this can be found in the IEEE Computer article
+[Taming the IoT: Operationalized Testing to Secure Connected Devices](https://www.computer.org/csdl/mags/co/2018/06/mco2018060090-abs.html).
+* [_Network security microsegmentation flow management_](docs/mudacl.md): Use standard
+[SDN capabilities](https://queue.acm.org/detail.cfm?id=2560327), such as the
+[FAUCET OpenFlow controller](https://faucet.nz/), to automatically configure network to enforce
+tight "microsegmentation" on the network.
+* [_Universal Device Management Interface (UDMI)_](schemas/udmi/README.md): An interface
+specification designed to normalize the management of IoT devices from different manufacturers.
+This is a simple standard that provides for many of the common features not present in
+existing protocols (e.g. BACnet).
+* _Device Management Tools_: A suite of tools, consoles, and dashboards that help operate
+a robust ecosystem of IoT devices. (Details forthcoming.)
 
 ## System Requirements
 
+Most aspects of DAQ assume a baseline setup consisting of:
 * Linux install: DAQ has been tested against both `Ubuntu 16.04.4 LTS xenial` and
 `Debian GNU/Linux 9.4 stretch`, YMMV with other platforms.
 * Dedicated network adapters: At the very minimum one dedicated ethernet adapter is
 required. This could either be a separate built-in NIC, or a USB-Ethernet dongle.
-* (Optional) OpenFlow-compatible hardware switch: See instructions below on setup.
+* (Optional) OpenFlow-compatible hardware switch, described in the
+[Network Topologies](docs/topologies.md) overview.
 
-## Quickstart
+## Folder Structure
 
-Running `bin/setup_base` will setup the basic prerequisites. This will install a
-minimum set of basic packages, docker, and openvswitch.
+The top-level DAQ folders correspond to the following structure:
+* `bin/`: System setup and management commands.
+* _`build/`_: Dynamically created directory for build logs.
+* `cmd/`: Primary commands for running DAQ testing.
+* `daq/`: Python source for DAQ runtime.
+* `docker/`: Docker build files for DAQ components and tests.
+* `docs/`: Documentation.
+* _`faucet/`_: Dynamically downloaded version of SDN controller.
+* `firebase/`: Hosted pages and functions for web dashboard.
+* `functions/`: Additional Cloud Functions for data processing.
+* _`inst/`_: Install directory for specific runtime contents.
+* **`local/`**: Local setup and config information.
+* _`mininet/`_: Local version of the mininet virtual network host framework.
+* `misc/`: Miscellaneous support files.
+* `mudacl/`: Utilities for managing and testing MUD network files.
+* `mud_files/`: Examples and prototype device MUD files.
+* `pubber/`: Sample code for generating cloud-ingest traffic.
+* `schemas/`: Device/cloud data exchange schemas.
+* `testing/`: Scripts for system continuous integration testing.
+* `validator/`: Tools for validating data exchange schemas.
+* _`venv/`_: Dynamically downloaded python virtual environment files.
 
-Once installed, the basic qualification suite can be run with `cmd/run -s`. The `-s`
-means <em>single shot</em> and will run tests just once and then exit (see the
-[options documentation](docs/options.md) for more details). The `local/` directory is 
-created upon first execution of `cmd/run`. Runtime configuraiton
-is always pulled from `local/system.conf`, and if this file does not exist a baseline
-one will be copied from `misc/system_base.conf`.
-The output should approximately look like this [example log output](docs/run_log.md).
-
-## Configuration
-
-After an initial test-install run, edit `local/system.conf` to specify the network adapter
-name(s) of the device adapter(s) or external physical switch.
-If the file does not exist, it will be populated with a default version on system start with
-defaults that use the internal _faux_ test client: This is recommended the first time around
-as it will test the install to make sure everything works properly. The various options are
-documented in the configuration file itself. Note that the file follows "assignment" semantics,
-so the last declaration of a variable will be the only one that sticks. (The `local/`
-subdirectory contains all information local to the DAQ install, such as configuration information
-or cloud credentials.)
-
-## Report Generation
-
-After a test run, the system creates a <em>test report document</em> in a file that is named
-something like <code>inst/report_<em>ma:ca:dd:re:ss</em>.txt</code>. This file contains a complete summary
-of all the test results most germane to qualifying a device (but is not in iteself comprehensive).
-
-## Network Topologies
-
-There are several level of network topologies that are used for different testing purposes
-(detailed in the [Network Topologies](docs/topologies.md) subsection), covering the range from
-single-device testing through to a production-class environment.
-The recommended course is to start with the simplest (software emulation) and progress
-forward as required for a specific project.
-
-## Qualification Dashboard
-
-The (optional) cloud dashboard requires a service-account certification to grant authorization.
-Contact the project owner to obtain a new certificate for a dashboard page on an already
-existing cloud project. Alternatively set up a new project by following the
-[Firebase install instructions](docs/firebase.md). The `bin/stress_test` script is useful for
-setting up a continuous qualification environment: it runs in the background and pipes the output
-into a rotating set of logfiles.
-
-## Containerized Tests
-
-The majority of device tests are run as Docker containers, which provides a convenient bundling of
-all the necessary code. The `docker/` subdirectory contains a set of Docker files that are used
-by the base system. Local or custom tests can be added by following the
-["add a test" documentation](docs/add_test.md). Tests are generally supplied the IP address of the
-target device, which can then be used for any necessary probes (e.g. a nmap port scan).
-
-## Debugging
-
-The `inst/` subdirectory is the <em>inst</em>ance runtime directory, and holds all the resulting
-log files and diagnostic information from each run. There's a collection of different files in
-there that provide useful information, depending on the specific problem(s) encountered. A device's
-[startup sequence log](docs/startup_pcap.md) provides useful debugging material for intial device
-phases (e.g. DHCP exchange).
-
-Command-line options that can be supplied to most DAQ scripts for diagnostics:
-* `-s`: Only run tests once, otherwise loop forever.
-* `-e`: Activate tests on device plug-in only, otherwise test any active port.
-* `daq_loglevel=debug`: Add debug info form the DAQ test runner suite.
-* `mininet_loglevel=debug`: Add debug info from the mininet subsystem (verbose!)
-
-See the [options documentation](docs/options.md) file for a more complete
-description of all the configuration options.
-
-## Network Taps
-
-The startup (including DHCP negotiation and baseline ping tests) network capture can be found
-in the node-specific directory, and can be parsed using tcpdump with something like:
-
-`tcpdump -en -r inst/run-port-01/nodes/gw01/tmp/startup.pcap ip`
-
-The [example pcap output file](docs/startup_pcap.md) shows what this should look like for a normal run.
-(Replace `01` with the appropriate port set number.)
-
-If there are device-level network problems then it is possible to use `tcpdump` or similar
-to examine the network traffic. When using the `cmd/run` command, the system runs the
-framework in a Docker container named `daq-runner` and it moves the test
-network interface(s) into that container. Any tap command must be also run in the container, so it
-looks something like (replacing `faux` with the real adapter name):
-
-`docker exec daq-runner tcpdump -eni faux`
-
-(If you are monitoring a full hardware setup with a physical switch, and not an individual
-device adapter, the packets will be tagged by VLAN that corresponds to the device port on the
-switch itself.)
-
-## Build Setup
-
-'Building' DAQ is only required for active framework development. Otherwise, stick
-with the packaged runner.  There are a bunch of additional dependenicies and extra
-development steps required. See the [build documentation](docs/build.md) for more details
-on how to build the development system.
+Items in _italics_ can generally be deleted without any loss of functionality (dynamically
+created at install/runtime). The **local** subdirectory contains local setup information that
+is not part of the source distribution.
