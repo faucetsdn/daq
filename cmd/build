@@ -26,6 +26,7 @@ fi
 
 if [ "$1" == skip ]; then
     do_images=skip
+    shift
 elif [ "$1" == save ]; then
     do_images=save
     ext_msg=/save
