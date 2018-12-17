@@ -58,10 +58,9 @@ host. The port used for this is defined as part of the vendor-specific switch se
 2. _Data_ plane connection, which provides for all data access for the devices. Internet access for
 the devices will be filtered/proxied through the controller host. The port used for this is defined
 by the `sec_port` config (see below).
-3. _eXtra_ devices (not required) that can be used to run a simulated device on the controller
-host. 3x eXtra is recommened for a full test lab setup because it allows for running
-[core FAUCET switch tests](https://faucet.readthedocs.io/en/latest/testing.html#hardware-switch-testing-with-docker).
-At least 1 eXtra is useful for diagnosing any switch configuration problems.
+3. _eXtra_ devices, also known as _faux_ devices (not required), can be used to run a simulated device on the controller
+host. They can be used as a stand-alone device or alongside physical devices for further testing. 3 or more eXtra are recommended for a full test lab setup because it allows for running [core FAUCET switch tests](https://faucet.readthedocs.io/en/latest/testing.html#hardware-switch-testing-with-docker).
+At least 1 eXtra is useful for diagnosing any switch configuration problems. To create _eXtra/faux_ devices, use `cmd/faux [interface name]`, ie `cmd/faux eth1`.
 
 ## Configuration
 
