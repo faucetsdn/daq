@@ -76,7 +76,7 @@ but not directly available to the device, defined by [<em>metadata.json</em>](me
 ## Validation
 
 To verify correct operation of a real system, follow the instructions outlined in the
-[validator subsystem docs](../../../docs/validator.md), which provides for a suitable
+[validator subsystem docs](../../docs/validator.md), which provides for a suitable
 communication channel. Additional sample messages are easy to include in the regression
 suite if there are new cases to test.
 
