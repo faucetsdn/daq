@@ -1,0 +1,21 @@
+FROM daq/aardvark:latest as bacnet_build
+
+# Do this alone first so it can be re-used by other build files.
+RUN $AG update && $AG install openjdk-8-jre
+
+RUN $AG update && $AG install openjdk-8-jdk git
+
+ENV HASH=26061994f1e292f8de0666cc8db111b6abf9cbdd
+
+RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch --depth 1 \
+  && cd bacnet4j && git reset --hard $HASH && ../bin/retry_cmd ./gradlew shadow
+
+FROM daq/aardvark:latest
+
+RUN $AG update && $AG install openjdk-8-jre
+
+COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
+
+COPY misc/test_discover .
+
+CMD ["./test_discover"]

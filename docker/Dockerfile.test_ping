@@ -1,3 +1,5 @@
 FROM daq/aardvark:latest
 
-CMD ping -n -c 1 $TARGET_IP
+COPY misc/test_ping .
+
+CMD ./test_ping

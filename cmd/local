@@ -1,16 +1,42 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-IFCONF=/etc/network/interfaces.d/local-daq.conf
+PORTOFF=8
+
+if [ -n "$1" ]; then
+    portset=$1
+    shift
+else
+    portset=1
+fi
+
+ofport=$portset$PORTOFF
 
 echo Cleaning up local link...
 sudo ip link del local-daq 2>/dev/null || true
+sudo ip link del local 2>/dev/null || true
 
-echo Instaling network local-daq.conf config file.
-sudo cp $ROOT/misc/local-daq.conf $IFCONF
+echo Deleting old local port
+sudo ovs-vsctl del-port pri local || true
 
-echo DAQ autoclean rm -f $IFCONF
-
+echo Creating local link pair local local-daq
 sudo ip link add local type veth peer name local-daq
+sudo ifconfig local up
+sudo ifconfig local-daq up
 
-echo Created local link pair local local-daq
+echo Connecting local interface to gw set $portset port $ofport. Hope that\'s right.
+sudo ovs-vsctl add-port pri local -- set interface local ofport_request=$ofport
+
+echo Requesting local IP address
+sudo dhclient local-daq
+echo
+echo Local IP:
+ifconfig local-daq | fgrep 'inet '
+
+echo Delete default route b/c its bad, mkay.
+sudo route del default dev local-daq
+echo
+route -n
+echo
+echo Target IP:
+docker exec -ti daq-faux-1 ifconfig | fgrep 'inet '

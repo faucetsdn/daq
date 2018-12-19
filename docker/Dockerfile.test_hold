@@ -1,0 +1,3 @@
+FROM daq/aardvark:latest
+
+CMD ["tail", "-f", "/dev/null" ]

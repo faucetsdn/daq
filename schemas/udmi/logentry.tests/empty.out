@@ -1,0 +1,7 @@
+Validating 1 schemas
+  Validating 1 files against logentry.json
+    Against input logentry.tests/empty.json
+      #: 3 schema violations found
+        #: required key [entries] not found
+        #: required key [timestamp] not found
+        #: required key [version] not found

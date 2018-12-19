@@ -1,29 +1,18 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-LOCAL_SYSTEM=local/system.conf
-
-cd $ROOT
-
-run_mode=$(cat misc/RELEASE_VERSION)
 run_args=
 
-if [ -f "$LOCAL_SYSTEM" ]; then
-    echo Loading config from $LOCAL_SYSTEM
-    source $LOCAL_SYSTEM
-else
-    echo No $LOCAL_SYSTEM found, using defaults.
-fi
+cd $ROOT
+source misc/config_base.sh
 
-if [ "$1" == "local" ]; then
-    run_mode=local
+if [ "${1#run_mode=}" != "$1" ]; then
+    run_mode=${1#run_mode=}
     shift
 fi
 
-if [ "$1" == "latest" ]; then
-    run_mode=latest
+if [ "$run_mode" == "latest" ]; then
     run_args=latest
-    shift
 fi
 
 if [ -z "$run_mode" ]; then
@@ -32,6 +21,8 @@ if [ -z "$run_mode" ]; then
 fi
 
 echo run_mode is $run_mode
+echo Clearing previous reports...
+sudo rm -rf inst/report_*.txt inst/run-port-*
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@"

@@ -115,8 +115,6 @@ class StreamMonitor():
         else:
             LOGGER.exception(e)
 
-
-
     def process_poll_result(self, event, fd):
         """Process an individual poll result"""
         if event & select.POLLNVAL:

@@ -41,6 +41,8 @@ class GcpManager():
         cred = credentials.Certificate(cred_file)
         firebase_admin.initialize_app(cred)
         LOGGER.info('Initialized gcp firestore %s:%s', self._project, self._client_name)
+        dashboard_url = 'https://%s.firebaseapp.com/?origin=%s' % (self._project, self._client_name)
+        LOGGER.info('Dashboard at %s', dashboard_url)
         return firestore.client()
 
     def _message_callback(self, topic, message, callback):
@@ -88,3 +90,4 @@ class GcpManager():
         bucket = self._storage.get_bucket(self._report_bucket_name)
         blob = bucket.blob(report_file_name)
         blob.upload_from_filename(report_file_name)
+        LOGGER.info('Uploaded test report to %s', report_file_name)

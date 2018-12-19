@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.daq.orchestrator.mudacl.AclHelper.PortAcl;
+import com.google.daq.orchestrator.mudacl.DeviceMaps.DeviceSpec;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.MacIdentifier;
 import com.google.daq.orchestrator.mudacl.DeviceTopology.Placement;
-import com.google.daq.orchestrator.mudacl.DeviceTypes.DeviceClassifier;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Ace;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Acl;
 import com.google.daq.orchestrator.mudacl.SwitchTopology.Interface;
@@ -45,14 +45,14 @@ public class MudAclGenerator {
 
   private DeviceTopology deviceTopology;
   private SwitchTopology switchTopology;
-  private DeviceTypes deviceTypes;
+  private DeviceMaps deviceMaps;
   private AclProvider aclProvider;
 
   public static void main(String[] argv) {
     try {
       if (argv.length != 2 && argv.length != 6) {
         System.err
-            .println("Usage: [switch_topology] [mud_dir] [template_dir] ([device_types] [device_topology] [output_dir])");
+            .println("Usage: [mud_dir] [template_dir] ([switch_topology] [device_types] [device_topology] [output_dir])");
         throw new ExpectedException(new IllegalArgumentException("Incorrect arg count"));
       }
       MudAclGenerator generator = new MudAclGenerator();
@@ -60,10 +60,10 @@ public class MudAclGenerator {
       writePortAcls(new File(argv[1]), prettyErrors(generator::makePortAclMap));
       if (argv.length > 2) {
         generator.setSwitchTopology(YAML_MAPPER.readValue(new File(argv[2]), SwitchTopology.class));
-        generator.setDeviceTypes(YAML_MAPPER.readValue(new File(argv[3]), DeviceTypes.class));
+        generator.setDeviceMaps(YAML_MAPPER.readValue(new File(argv[3]), DeviceMaps.class));
         generator
             .setDeviceTopology(YAML_MAPPER.readValue(new File(argv[4]), DeviceTopology.class));
-        writePortAcls(new File(argv[5]), generator.makePortAclMap());
+        writePortAcls(new File(argv[5]), prettyErrors(generator::makePortAclMap));
       }
     } catch (ExpectedException e) {
       System.err.println(e.toString());
@@ -93,7 +93,7 @@ public class MudAclGenerator {
       final String indent, OutputStream outputStream) {
     final ErrorTree errorTree = new ErrorTree();
     try {
-      errorTree.message = e.getMessage();
+      errorTree.message = e.toString();
       outputStream.write(prefix.getBytes());
       outputStream.write(errorTree.message.getBytes());
       outputStream.write(NEWLINE_BYTES);
@@ -196,16 +196,16 @@ public class MudAclGenerator {
     Map<String, Exception> errors = new TreeMap<>();
     for (Entry<MacIdentifier, Placement> target : targetMap.entrySet()) {
       MacIdentifier targetSrc = target.getKey();
-      DeviceClassifier classifier = getDeviceClassifier(targetSrc);
+      DeviceSpec deviceSpec = getDeviceSpec(targetSrc);
       try {
         Placement placement = validatePlacement(target.getValue());
         String aclName = placement.edgeName();
         PortAcl portAcl = portAclMap
             .computeIfAbsent(aclName, (baseName) -> new PortAcl(placement));
-        portAcl.edgeAcl.addAll(aclSanity(aclProvider.makeEdgeAcl(classifier, targetSrc), true));
-        portAcl.upstreamAcl.addAll(aclSanity(aclProvider.makeUpstreamAcl(classifier, targetSrc), false));
+        portAcl.edgeAcl.addAll(aclSanity(aclProvider.makeEdgeAcl(deviceSpec, targetSrc), true));
+        portAcl.upstreamAcl.addAll(aclSanity(aclProvider.makeUpstreamAcl(deviceSpec, targetSrc), false));
       } catch (Exception e) {
-        errors.put(classifier.type, e);
+        errors.put(deviceSpec.type, e);
       }
     }
     if (!errors.isEmpty()) {
@@ -225,17 +225,46 @@ public class MudAclGenerator {
   private Collection<Ace> aclSanity(Acl aces, boolean isEdge) {
     for (Ace ace : aces) {
       Rule rule = ace.rule;
-      boolean validDstPort = (rule.nw_proto == AclHelper.IP_PROTO_TCP ? rule.tcp_dst : rule.udp_dst) != null;
-      boolean validDstAddr = rule.nw_dst != null;
-      boolean validSrcPort = (rule.nw_proto == AclHelper.IP_PROTO_TCP ? rule.tcp_src : rule.udp_src) != null;
-      boolean validSrcAddr = rule.nw_src != null;
-      boolean validPort = validDstPort || validSrcPort;
-      if (!isEdge || validDstPort || validDstAddr) {
-        continue;
+      try {
+        checkWhitelistedRules(rule);
+        checkWildcardedAcls(isEdge, rule);
+      } catch (Exception e) {
+        throw new RuntimeException("While processing " + rule.description, e);
       }
-      throw new RuntimeException("Cowardly refusing to create wildcarded ACL " + rule.description);
     }
     return aces;
+  }
+
+  private void checkWhitelistedRules(Rule rule) {
+    if (AclHelper.UDP_NTP_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_NTP_PORT.equals(rule.udp_dst)) {
+      throw new IllegalArgumentException("Should not include NTP ports in ACLs");
+    }
+    if (AclHelper.UDP_DNS_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_DNS_PORT.equals(rule.udp_dst) ||
+        AclHelper.TCP_DNS_PORT.equals(rule.tcp_src) ||
+        AclHelper.TCP_DNS_PORT.equals(rule.tcp_dst)) {
+      throw new IllegalArgumentException("Should not include DNS ports in ACLs");
+    }
+    if (AclHelper.UDP_DHCP_CLIENT_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_DHCP_CLIENT_PORT.equals(rule.udp_dst) ||
+        AclHelper.UDP_DHCP_SERVER_PORT.equals(rule.udp_src) ||
+        AclHelper.UDP_DHCP_SERVER_PORT.equals(rule.udp_dst)) {
+      throw new IllegalArgumentException("Should not include DHCP ports in ACLs");
+    }
+  }
+
+  private void checkWildcardedAcls(boolean isEdge, Rule rule) {
+    boolean validDstPort = (AclHelper.NW_PROTO_TCP.equals(rule.nw_proto) ? rule.tcp_dst : rule.udp_dst) != null;
+    boolean validDstAddr = rule.nw_dst != null;
+    boolean validSrcPort = (AclHelper.NW_PROTO_TCP.equals(rule.nw_proto) ? rule.tcp_src : rule.udp_src) != null;
+    boolean validSrcAddr = rule.nw_src != null;
+    if (isEdge && !validDstPort && !validDstAddr) {
+      throw new RuntimeException("Cowardly refusing to create wildcarded edge ACL " + rule.description);
+    }
+    if (!isEdge && !validSrcPort && !validSrcAddr) {
+      throw new RuntimeException("Cowardly refusing to create wildcarded upstream ACL " + rule.description);
+    }
   }
 
   private void addTemplateEntries(Map<String, PortAcl> portAclMap) {
@@ -258,16 +287,16 @@ public class MudAclGenerator {
     }
   }
 
-  private DeviceClassifier getDeviceClassifier(MacIdentifier targetSrc) {
+  private DeviceSpec getDeviceSpec(MacIdentifier targetSrc) {
     String targetSrcStr = targetSrc.toString();
     if (targetSrcStr.startsWith(MAC_TEMPLATE_PREFIX)) {
       String templateName = targetSrcStr.substring(MAC_TEMPLATE_PREFIX.length(),
           targetSrcStr.length());
-      return DeviceTypes.templateClassifier(templateName);
+      return DeviceMaps.templateSpec(templateName);
     } else {
-      DeviceClassifier defaultClassifier = DeviceTypes.templateClassifier("default");
-      Map<MacIdentifier, DeviceClassifier> macAddrs = deviceTypes.macAddrs;
-      return macAddrs.containsKey(targetSrc) ? macAddrs.get(targetSrc) : defaultClassifier;
+      DeviceSpec defaultSpec = DeviceMaps.templateSpec("default");
+      Map<MacIdentifier, DeviceSpec> macAddrs = deviceMaps.macAddrs;
+      return macAddrs.getOrDefault(targetSrc, defaultSpec);
     }
   }
 
@@ -316,8 +345,9 @@ public class MudAclGenerator {
     this.switchTopology = switchTopology;
   }
 
-  private void setDeviceTypes(DeviceTypes deviceTypes) {
-    this.deviceTypes = deviceTypes;
+  private void setDeviceMaps(DeviceMaps deviceMaps) {
+    this.deviceMaps = deviceMaps;
+    aclProvider.setDeviceMaps(deviceMaps);
   }
 
   private void setAclProvider(AclProvider aclProvider) {

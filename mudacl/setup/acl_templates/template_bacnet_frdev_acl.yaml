@@ -1,0 +1,14 @@
+---
+acls:
+  '@from:template_bacnet_frdev_acl':
+  - rule:
+      description: "type bacnet_frdev rule bacnet-frdev"
+      dl_type: "0x0800"
+      dl_src: "@mac:bacnet_frdev"
+      nw_proto: 17
+      nw_dst: "@ctrl:bacnet"
+      udp_src: 47808
+      udp_dst: 47808
+      actions:
+        allow: 1
+  '@to:template_bacnet_frdev_acl': []

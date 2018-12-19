@@ -1,0 +1,14 @@
+---
+acls:
+  '@from:template_bacnet_todev_acl': []
+  '@to:template_bacnet_todev_acl':
+  - rule:
+      description: "type bacnet_todev rule bacnet-todev"
+      dl_type: "0x0800"
+      dl_dst: "@mac:bacnet_todev"
+      nw_proto: 17
+      nw_src: "@ctrl:bacnet"
+      udp_src: 47808
+      udp_dst: 47808
+      actions:
+        allow: 1

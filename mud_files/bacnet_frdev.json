@@ -1,0 +1,72 @@
+{
+  "ietf-mud:mud": {
+    "mud-version": 1,
+    "mud-url": "https://digital-building.org/mud/bacnet",
+    "last-update": "2018-09-23T20:43:36+02:00",
+    "cache-validity": 48,
+    "is-supported": true,
+    "systeminfo": "Generic BACnet device, from-device only",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "mud-58064-v4fr"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name": "mud-58064-v4to"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name": "mud-58064-v4to",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+          ]
+        }
+      },
+      {
+        "name": "mud-58064-v4fr",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "bacnet-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "bacnet"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

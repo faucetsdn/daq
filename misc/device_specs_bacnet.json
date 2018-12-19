@@ -1,0 +1,36 @@
+{
+  "macAddrs": {
+    "9a:02:57:1e:8f:01": {
+      "type": "bacnet",
+      "group": "testing",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "mac_addrs": {
+                "9a:02:57:1e:8f:02": {
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "9a:02:57:1e:8f:02": {
+      "type": "bacnet",
+      "group": "testing",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "mac_addrs": {
+                "9a:02:57:1e:8f:01": {
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -6,6 +6,8 @@
 # [Open vSwitch Debian Install](http://docs.openvswitch.org/en/latest/intro/install/distributions/#debian) (tested with version 2.6.2).
 # [Docker CE Debian Install](https://docs.docker.com/install/linux/docker-ce/debian/) (tested with version 17.12.0-ce).
 #
+# Docker versions after this introduced a bug that would prevent "service docker start" from working.
+DOCKER_VERSION_BASE="=18.06.1~ce~3-0"
 
 if [ -z "$AG" ]; then
     AG="sudo apt-get -qqy --no-install-recommends"
@@ -14,7 +16,8 @@ fi
 echo AG is $AG
 
 $AG update
-$AG install lsb-release realpath git curl sudo apt-transport-https software-properties-common
+$AG install realpath || true  # On newer versions this is included elsewhere.
+$AG install lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent
 
 retry=bin/retry_cmd
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
@@ -30,4 +33,6 @@ $retry curl -fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key 
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable"
 
 $AG update
-$AG install openvswitch-switch openvswitch-common docker-ce
+
+DOCKER_VERSION=${DOCKER_VERSION_BASE}~${distrib}
+$AG install openvswitch-switch openvswitch-common docker-ce${DOCKER_VERSION}

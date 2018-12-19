@@ -9,6 +9,8 @@ on the command line, or with the more verbose long-form (`single_shot=true`).
 * `-d`, `debug_mode`: Shorthand for enabling debug mode options.
 * `-e`, `event_trigger`: Wait for port up trigger to start.
 * `-f`, `fail_mode`: Fail test run immediately when any test fails.
+* `-h`, `show_help`: Show help information.
+* `-k`, `keep_hold`: Add a hold test that keeps runing for debugging.
 * `-l`, `result_linger`: Keep services in place on failure.
 * `-n`, `no_test`: Do not test devices, just put them on the network.
 * `-s`, `single_shot`: Don't repeat tests, only do one run.

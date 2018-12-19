@@ -76,8 +76,8 @@ class DhcpMonitor():
         assert self.target_ip, 'dhcp ACK missing ip address'
         assert self.target_mac, 'dhcp ACK missing mac address'
         delta = int(time.time()) - self.scan_start
-        LOGGER.info('DHCP monitor %s received reply after %ds: %s/%s',
-                    self.name, delta, self.target_ip, self.target_mac)
+        LOGGER.debug('DHCP monitor %s received reply after %ds: %s/%s',
+                     self.name, delta, self.target_ip, self.target_mac)
         weak_result = delta > self.DHCP_THRESHHOLD_SEC
         state = 'weak' if weak_result else None
         self.callback(state, target_ip=self.target_ip, target_mac=self.target_mac)

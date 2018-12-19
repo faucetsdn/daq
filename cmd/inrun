@@ -2,6 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst/
+INSTLOCK=$INSTDIR/startup.lock
 LOCALDIR=$ROOT/local/
 MISCDIR=$ROOT/misc/
 IMAGE=daqf/runner
@@ -13,18 +14,19 @@ docker_args=
 build=
 reuse=
 VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
+move_intfs=
 
-if [ -f $LOCAL_CONFIG ]; then
-    echo Loading container configuration from $LOCAL_CONFIG
-    source $LOCAL_CONFIG
+if [ -z "$build" ]; then
+    move_intfs=y
 fi
+
+cd $ROOT
+source misc/config_base.sh
 
 docker_args+="\
   --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
   --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
   --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
-
-cd $ROOT
 
 if [ "$1" == latest ]; then
     pull_docker=n
@@ -48,8 +50,9 @@ if [ "$1" == base -o "$1" == rebuild ]; then
     shift
 fi
 
-if [ "$1" == live ]; then
-    echo Mapping local daq live into runner process.
+if [ "$1" == local ]; then
+    pull_docker=n
+    echo Mapping local daq into runner process.
     docker_args+=" -v $PWD:/root/daq"
     shift
 fi
@@ -63,6 +66,14 @@ mkdir -p $INSTDIR
 
 if [ -z "$reuse" ]; then
    sudo docker rm -f daq-runner > /dev/null 2>&1 || true
+fi
+
+if [ $IMAGE == daqf/runner ]; then
+    echo
+    echo You should not be here. Running in a container is not currently supported.
+    echo Take a few steps back, and try again. Sorry.
+    echo
+    false
 fi
 
 TARGET=$IMAGE:$VERSION
@@ -85,22 +96,18 @@ if [ "$pull_docker" == y ]; then
 fi
 
 function move_intf {
-    sleep 2
     base=$1
     intf=${base%!}
-    echo intf $base
+    echo moving intf $base into container...
     if [ -n "$base" -a "$base" == "$intf" ]; then
-        pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
-        link=$(ip link show $intf 2>/dev/null )
-        success=
-        if [ "$pid" != 0 -a -n "$link" ]; then
-            echo Moving interface $intf into container pid $pid...
-            sudo ip link set $intf netns $pid && success=true
+        link=$(ip link show $intf 2>/dev/null) || true
+        if [ -z "$link" ]; then
+            echo Could not find interface $intf
+            false
         fi
-
-        if [ -z "$success" ]; then
-            echo Could not move intf to process/intf $pid/$intf, terminating daq-runner.
-            sudo docker kill daq-runner > /dev/null
+        if [ "$pid" != 0 ]; then
+            echo Moving interface $intf into container pid $pid...
+            sudo ip link set $intf netns $pid
         fi
     fi
 }
@@ -109,27 +116,6 @@ function move_intf {
 echo Configuring apparmor...
 sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.tcpdump || true
 hash -r
-
-if [ -z "$build" ]; then
-    if [ -n "$ext_dpid" ]; then
-	intfs="$ext_intf $ext_ctrl"
-    else
-	intfs=$(echo $daq_intf | tr , ' ')
-    fi
-    (
-        for intf in $intfs; do
-            move_result="$(move_intf $intf)"
-            # WTF I need to do \r\n is beyond me. But there it is.
-            if [ -n "$move_result" ]; then
-		printf "${move_result}\r\n"
-            fi
-	done
-	if [ -n "$ext_dpid" ]; then
-	    echo Activating physical switch in container...
-	    sudo docker exec daq-runner bin/physical_sec
-	fi
-    ) &
-fi
 
 if [ -n "$reuse" ]; then
     echo Running in already existing daq-runner container...
@@ -140,6 +126,28 @@ fi
 
 docker image inspect $TARGET > /dev/null
 
+sudo touch $INSTLOCK
+
 echo Starting $TARGET "$@"...
-sudo docker run --privileged --name daq-runner $docker_args $TARGET "$@"
+sudo docker run -d --privileged --name daq-runner $docker_args $TARGET "$@"
+pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
+echo Container pid $pid
+
+if [ -n "$move_intfs" ]; then
+    if [ -n "$ext_dpid" ]; then
+	intfs="$ext_intf $ext_ctrl"
+    else
+	intfs=$(echo $daq_intf | tr , ' ')
+    fi
+
+    for intf in $intfs; do
+        move_intf $intf
+    done
+
+    echo Done with interface migration.
+fi
+
+sudo rm -f $INSTLOCK
+
+sudo docker attach daq-runner
 echo Done with run $?

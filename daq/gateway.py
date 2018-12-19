@@ -18,6 +18,7 @@ class Gateway():
     TEST_OFFSET_START = 2
     TEST_OFFSET_LIMIT = 10
     SET_SPACING = 10
+    _PING_RETRY_COUNT = 10
 
     TEST_IP_FORMAT = '192.168.84.%d'
 
@@ -34,9 +35,18 @@ class Gateway():
         self.tmpdir = None
         self.targets = {}
         self.test_ports = {}
+        self.ready = {}
+        self.activated = False
 
     def initialize(self):
         """Initialize the gateway host"""
+        try:
+            self._initialize()
+        except:
+            self.terminate()
+            raise
+
+    def _initialize(self):
         host_name = 'gw%02d' % self.port_set
         host_port = self._switch_port(self.HOST_OFFSET)
         LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
@@ -65,7 +75,9 @@ class Gateway():
                                                      self._dhcp_callback, log_file)
         self.dhcp_monitor.start()
 
-        if not self._ping_test(host, dummy):
+        ping_retry = self._PING_RETRY_COUNT
+        while not self._ping_test(host, dummy) and ping_retry:
+            ping_retry -= 1
             LOGGER.debug('Gateway %s warmup ping failed', host_name)
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
@@ -97,13 +109,23 @@ class Gateway():
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
 
+    def _is_target_expected(self, target):
+        target_mac = target['mac']
+        for target_port in self.targets:
+            if self.targets[target_port]['mac'] == target_mac:
+                return True
+        LOGGER.warning('No target match found for %s in %s', target_mac, self.name)
+        return False
+
     def _dhcp_callback(self, state, target_ip=None, target_mac=None, exception=None):
         target = {
             'ip': target_ip,
             'mac': target_mac
         }
-        self.runner.dhcp_notify(state, target=target,
-                                gateway_set=self.port_set, exception=exception)
+        if self._is_target_expected(target) and not exception:
+            self.runner.dhcp_notify(state, target=target, gateway_set=self.port_set)
+        else:
+            LOGGER.warning('Unexpected target %s for gateway %s', target_mac, self.name)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)
@@ -113,17 +135,25 @@ class Gateway():
         return tmpdir
 
     def attach_target(self, target_port, target):
-        """Attach the given target to this gateway"""
+        """Attach the given target to this gateway; return number of attached targets."""
         assert target_port not in self.targets, 'target already attached to gw'
         LOGGER.info('Attaching target %d to gateway group %s', target_port, self.name)
         self.targets[target_port] = target
+        return len(self.targets)
 
     def detach_target(self, target_port):
-        """Detach the given target from this gateway"""
+        """Detach the given target from this gateway; return number of remaining targets."""
         assert target_port in self.targets, 'target not attached to gw'
         LOGGER.info('Detach target %d from gateway group %s', target_port, self.name)
         del self.targets[target_port]
-        return bool(self.targets)
+        return len(self.targets)
+
+    def target_ready(self, target_mac):
+        """Mark a target ready, and return set of ready targets"""
+        if not target_mac in self.ready:
+            LOGGER.info('Ready target %s from gateway group %s', target_mac, self.name)
+            self.ready[target_mac] = True
+        return self.ready
 
     def get_targets(self):
         """Return the host targets associated with this gateway"""

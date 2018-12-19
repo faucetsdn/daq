@@ -8,33 +8,26 @@ ROOT=$(dirname $0)/..
 
 mud_files=mud_files/
 acl_templates=inst/acl_templates
-
-DEVICE_SPECS_FILE=device_specs.json
+port_acls=inst/port_acls
 
 cd $ROOT
+mudacl/bin/test.sh
 
-echo Running regression test.
-mkdir -p build/acl_templates/
-mudacl/bin/run.sh $mud_files build/acl_templates/
-diff -r build/acl_templates/ mudacl/test/acl_templates/
-echo Regression passed.
+source misc/config_base.sh
 
-if [ -f $SYSCONF ]; then
-    echo Loading configuration from $SYSCONF...
-    source $SYSCONF
+if [ $# -gt 0 ]; then
+    echo Unexpected command line argument: $*
+    false
 fi
 
 test -d inst/ || mkdir inst
 touch inst/ || sudo chown $USER inst
 
-test -f local/$DEVICE_SPECS_FILE || cp misc/$DEVICE_SPECS_FILE local/
-cp -f local/$DEVICE_SPECS_FILE inst/$DEVICE_SPECS_FILE
-
-rm -rf inst/acl_templates
-mkdir inst/acl_templates
-rm -rf inst/port_acls
-mkdir inst/port_acls
+rm -rf $acl_templates || sudo rm -rf $acl_templates
+mkdir $acl_templates
+rm -rf $port_acls || sudo rm -rf $port_acls
+mkdir $port_acls
 
 mudacl/bin/run.sh $mud_files $acl_templates
 
-ls -l inst/acl_templates inst/port_acls inst/$DEVICE_SPECS_FILE
+ls -l $acl_templates $port_acls

@@ -3,6 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
+INSTLOCK=$INSTDIR/startup.lock
 LOCALDIR=$ROOT/local
 FAUCET_CONF=faucet.yaml
 FAUCET_LOG=$INSTDIR/faucet.log
@@ -12,10 +13,7 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
-network_config=$MISCDIR/$FAUCET_CONF
 skip_autostart=
-
-cd $ROOT
 
 if [ `whoami` != root ]; then
     echo Running as root...
@@ -23,31 +21,28 @@ if [ `whoami` != root ]; then
     false
 fi
 
+cd $ROOT
+source misc/config_base.sh
+
+while [ -f $INSTLOCK ]; do
+    echo Waiting for $INSTLOCK to dissapear!
+    sleep 10
+done
+
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
 
-if [ ! -f $LOCAL_CONFIG ]; then
-    mkdir -p $LOCALDIR
-    echo Copying default $SYSTEM_CONF to $LOCAL_CONFIG
-    cp misc/$SYSTEM_CONF $LOCAL_CONFIG
-fi
-
 echo Release version $DAQ_VERSION
-echo Loading daq run configuration from $LOCAL_CONFIG
-source $LOCAL_CONFIG
 
 if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
-for cmdarg in "$@"; do
-    value=${cmdarg#network_config=}
-    if [ "$value" != "$cmdarg" ]; then
-        echo Command line network_config to $value
-        network_config=$value
-    fi
-done
-cmdarg=
+if [ "$1" == "codecov" ]; then
+    echo Running with codecov support b/c command line.
+    daq_codecov=y
+    shift
+fi
 
 export PYTHONPATH=$FAUCET:$MININET
 
@@ -59,6 +54,11 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
+if [ -n "$device_specs" ]; then
+    echo Creating MUD templates...
+    bin/mudacl
+fi
+
 mkdir -p $INSTDIR
 rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG
 
@@ -68,17 +68,19 @@ sleep 1
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-if [ -n "$daq_intf" ]; then
-    echo daq_intf is deprecated, please use a local/faucet.yaml
-    false
+cleanup_file=`mktemp`
+
+if [ -n "$ext_ctrl" ]; then
+    echo Activating external switch...
+    bin/physical_sec
 fi
 
-cleanup_file=`tempfile`
+function external {
+    echo -n
+}
+
 function autostart {
-    shift  # description
-    shift  # DAQ
-    shift  # autostart
-    tmp=`tempfile`
+    tmp=`mktemp`
     echo DAQ autostart $@
     eval $@ | tee $tmp
     grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file
@@ -90,20 +92,19 @@ function DAQ {
     $@
 }
 
-if [ -z "$skip_autostart" ]; then
-    grep -e '^\s*description: DAQ autostart\s' $network_config | while read line; do
-        autostart $line
-    done
+if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
+    echo Sourcing $startup_cmds...
+    source $startup_cmds
 fi
 
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
-    runcmd=pdb
-elif [ -n "$DAQ_CODECOV" ]; then
+    runcmd="python3 -u -m pdb"
+elif [ -n "$daq_codecov" ]; then
     echo Running with coverage analysis...
-    runcmd="coverage run"
+    runcmd="coverage run --source=daq -a"
 else
-    runcmd=python3
+    runcmd="python3 -u"
 fi
 
 if [ -d venv ]; then
@@ -119,10 +120,6 @@ export TERM=dumb
 
 exit_code=0
 $runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?
-
-if [ -n "$DAQ_CODECOV" ]; then
-    codecov
-fi
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file
