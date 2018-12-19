@@ -60,5 +60,10 @@ if [ -n "${options[curl]}" ]; then
     (while true; do curl -o - http://google.com; sleep 1; done) &
 fi
 
+if [ -n "${options[brute]}" ]; then
+    echo Starting brute test.
+    python pentests/brute_server.py 0.0.0.0 10000 1 &
+fi
+
 echo Blocking for all eternety.
 tail -f /dev/null
