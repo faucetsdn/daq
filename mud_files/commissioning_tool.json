@@ -172,9 +172,7 @@
               "name" : "sox-frdev",
               "matches" : {
                 "ietf-mud:mud" : {
-                  "local-networks" : [
-                    null
-                  ]
+                  "controller" : "commissioning_tool"
                 },
                 "ipv4" : {
                   "protocol" : 17
