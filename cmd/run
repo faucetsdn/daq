@@ -20,7 +20,7 @@ if [ -z "$run_mode" ]; then
     false
 fi
 
-echo run_mode is $run_mode
+echo Starting `date`, run_mode is $run_mode
 echo Clearing previous reports...
 sudo rm -rf inst/report_*.txt inst/run-port-*
 
