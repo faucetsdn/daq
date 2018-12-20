@@ -75,18 +75,7 @@ gcp_topic=telemetry_topic
 gcp_schema=validator/schemas/abacab/
 </pre>
 
-When using the
-[GCP Cloud IoT Core MQTT Bridge](https://cloud.google.com/iot/docs/how-tos/mqtt-bridge#publishing_telemetry_events)
-there are multiple ways the subschema used during validation is chosen.
-* An `events` message is validated against the sub-schema indicated by the MQTT topic `subFolder`. E.g., the MQTT
-topic `/devices/{device-id}/events/pointset` will be validated against `.../pointset.json`.
-* [Device state messages](https://cloud.google.com/iot/docs/how-tos/config/getting-state#reporting_device_state)
-are validated against the `.../state.json` schema.
-* All messages have their attributes validated against the `.../attributes.json` schema. These attributes are
-automatically defined by the MQTT Client ID and Topic, so are not explicitly included in any message payload.
-* (There currently is no PubSub stream validation of device config messages.)
-
-Running the `bin/validate` script will will parse the configuration file and automatically start
+Running `bin/validate` will parse the configuration file and automatically start
 verifying PubSub messages against the indicated schema.
 The execution output has a link to a location in the Firestore setup
 where schema results will be stored, along with a local directory of results.
@@ -112,3 +101,28 @@ Error validating out/pointset_TCE01_01_NE_Controls.json: DeviceId TCE01_01_NE_Co
 Success validating out/logentry_FCU_01_SE_04.json
 <em>&hellip;</em>
 </pre>
+
+### Types and Topics
+
+When using the
+[GCP Cloud IoT Core MQTT Bridge](https://cloud.google.com/iot/docs/how-tos/mqtt-bridge#publishing_telemetry_events)
+there are multiple ways the subschema used during validation is chosen.
+* All messages have their attributes validated against the `.../attributes.json` schema. These attributes are
+automatically defined server-side by the MQTT Client ID and Topic, and are not explicitly included in any message payload.
+* A [device event message](https://cloud.google.com/iot/docs/how-tos/mqtt-bridge#publishing_telemetry_events)
+is validated against the sub-schema indicated by the MQTT topic `subFolder`. E.g., the MQTT
+topic `/devices/{device-id}/events/pointset` will be validated against `.../pointset.json`.
+* [Device state messages](https://cloud.google.com/iot/docs/how-tos/config/getting-state#reporting_device_state)
+are validated against the `.../state.json` schema on `/devices/{device-id}/state` MQTT topic.
+* (There currently is no stream validation of
+[device config messages](https://cloud.google.com/iot/docs/how-tos/config/configuring-devices#mqtt), which are sent on the
+`/devices/{device-id}/config` topic.)
+
+See this handy-dandy table:
+
+| Type     | Category | subFolder |                MQTT Topic              |  Schema File  |
+|----------|----------|-----------|----------------------------------------|---------------|
+| state    | state    | _n/a_     | `/devices/{device_id}/state`           | state.json    |
+| config   | config   | _n/a_     | `/devices/{device-id}/config`          | config.json   |
+| pointset | event    | pointset  | `/devices/{device-id}/events/pointset` | pointset.json |
+| logentry | event    | logentry  | `/devices/{device-id}/events/logentry` | logentry.json |
