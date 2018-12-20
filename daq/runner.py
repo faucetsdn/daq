@@ -50,6 +50,8 @@ class DAQRunner():
         self.result_log = self._open_result_log()
 
         test_list = self._get_test_list(config.get('host_tests', _DEFAULT_TESTS_FILE), [])
+        if self.config.get('keep_hold'):
+            test_list.append('hold')
         config['test_list'] = test_list
         LOGGER.info('Configured with tests %s', config['test_list'])
 
@@ -293,8 +295,6 @@ class DAQRunner():
                 else:
                     LOGGER.warning('Unknown test list command %s', cmd_name)
                 line = file.readline()
-        if self.config.get('keep_hold'):
-            test_list.append('hold')
         return test_list
 
     def allocate_test_port(self, target_port):

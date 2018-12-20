@@ -16,4 +16,5 @@ COPY bin/setup_base bin/
 RUN bin/setup_base
 
 COPY bin/setup_dev bin/
+COPY subset/ subset/
 RUN DAQ_CONTAINER=build bin/setup_dev

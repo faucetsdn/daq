@@ -2,4 +2,8 @@ DAQ aux tests
 Mudacl exit code 0
 Validator exit code 0
 cmd/inbuild exit code 0
+Extended tests
+Login success!
+Failed after retries.
+Exception [Errno 111] Connection refused
 Done with tests

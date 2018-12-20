@@ -12,7 +12,7 @@ build_args=
 do_images=
 ext_msg=
 inline=
-copydirs="bin cmd misc faucet mininet docker daq"
+copydirs="bin cmd misc faucet mininet docker daq subset"
 load_mark=/root/load_complete
 
 cd $ROOT

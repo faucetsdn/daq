@@ -61,8 +61,11 @@ if [ -n "${options[curl]}" ]; then
 fi
 
 if [ -n "${options[brute]}" ]; then
-    echo Starting brute test.
-    python pentests/brute_server.py 0.0.0.0 10000 1 &
+    echo Starting brute server.
+    python pentests/brute_server.py bad 10000 &
+elif [ -n "${options[nobrute]}" ]; then
+    echo Starting nobrute server.
+    python pentests/brute_server.py good 10000 &
 fi
 
 echo Blocking for all eternety.

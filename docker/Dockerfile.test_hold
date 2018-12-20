@@ -1,3 +1,7 @@
 FROM daq/aardvark:latest
 
-CMD ["tail", "-f", "/dev/null" ]
+RUN $AG update && $AG install ethtool netcat curl
+
+COPY misc/test_hold .
+
+CMD ./test_hold
