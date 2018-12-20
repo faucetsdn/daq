@@ -1,5 +1,6 @@
 """Gateway module for device testing"""
 
+import datetime
 import logging
 import os
 import shutil
@@ -78,7 +79,7 @@ class Gateway():
         ping_retry = self._PING_RETRY_COUNT
         while not self._ping_test(host, dummy) and ping_retry:
             ping_retry -= 1
-            LOGGER.debug('Gateway %s warmup ping failed', host_name)
+            LOGGER.info('Gateway %s warmup ping failed at %s', host_name, datetime.datetime.now())
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
         assert self._ping_test(dummy, host), 'host ping failed'
