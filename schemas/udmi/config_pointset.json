@@ -2,27 +2,23 @@
   "title": "pointset config snippet",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
   "properties": {
     "points": {
       "additionalProperties": false,
       "patternProperties": {
         "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
-          "$ref": "#/definitions/point_property_names"
-        }
-      }
-    }
-  },
-  "definitions": {
-    "point_property_names": {
-      "propertyNames": {
-        "oneOf": [
-          {
-            "enum": [
-              "cov_increment",
-              "force_value"
-            ]
+          "additionalProperties": false,
+          "properties": {
+            "min_update_ms": {
+              "type": "number",
+              "minimum": 1000
+            },
+            "force_value": {
+              "type": ["number", "string", "boolean"]
+            }
           }
-        ]
+        }
       }
     }
   }

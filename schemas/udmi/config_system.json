@@ -4,11 +4,26 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "report_interval_ms": {
+    "max_update_ms": {
       "type": "number",
-      "minimum": 100
+      "minimum": 10000
+    },
+    "min_loglevel": {
+      "type": "number",
+      "minimum": 100,
+      "maximum": 800
+    },
+    "auth_key": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "private": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "private"
+      ]
     }
-  },
-  "required": [
-  ]
+  }
 }

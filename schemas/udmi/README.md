@@ -60,18 +60,23 @@ very large structures or high-bandwidth streams.
 
 Schemas are broken down into several top-level sub-schemas that are invoked for
 different aspects of device management:
-* _State_ updates ([example](state.tests/example.json)) from device to cloud,
-defined by [<em>state.json</em>](state.json).
-* _Configuration_ ([example](config.tests/example.json)) passed from cloud to device,
-defined by [<em>config.json</em>](config.json).
-* Streaming data _points_ ([example](pointset.tests/example.json)) from device to cloud,
+* Device _state_ ([example](state.tests/example.json)), sent from device to cloud,
+defined by [<em>state.json</em>](state.json). There is one current 'state' message per device,
+which is considered 'sicky' until a new state message is sent.
+* Device _config_ ([example](config.tests/example.json)), passed from cloud to device,
+defined by [<em>config.json</em>](config.json). There is one active 'config' message per device,
+which should be considered current until a new config is recevied.
+* Streaming _pointset_ ([example](pointset.tests/example.json)) from device to cloud,
 defined by [<em>pointset.json</em>](pointset.json).
-* _Logging_ messages ([example](logentry.tests/example.json)) from devices,
+* Monitoring _logentry_ messages ([example](logentry.tests/example.json)) from devices,
 defined by [<em>logentry.json</em>](logentry.json).
 * Message _envelope_ ([example](envelope.tests/example.json)) for server-side
 attributes, defined by [<em>envelope.json</em>](envelope.json).
 * Device _metadata_ ([example](metadata.tests/example.json)) stored _about_ a device,
 but not directly available to the device, defined by [<em>metadata.json</em>](metadata.json).
+
+A device client implementation will typically only be aware of the _state_, _config_,
+_points_, _logentry_ messages, while all others are server-side only.
 
 ## Validation
 
@@ -84,40 +89,51 @@ suite if there are new cases to test.
 
 ### State Message
 
-* See note below about 'State status' fields.
+* See notes below about 'State status' fields.
+* There is an implicit minimum update interval of _one second_ applied to state updates, and it
+is considered an error to update device state more often than that.
+* `last_config` should be the timestamp _from_ the `timestamp` field of the last successfully
+parsed `config` message.
 
 ### Config Message
 
-* The `report_interval_ms` field represents a periodic trigger for the device sending a `pointset`
-message. If undefined then the system should only use `cov_increment` based updates instead
-(if defined).
+* `max_update_ms`: Maximum time betwen telemetry updates. The system should proactively send an
+update often enough to make sure it happens before this time. Typically, this means that the
+entire necessary data set can be sent perodically at this interval.
+* `min_update_ms`: Minimum time between point updates. Updates that happen faster than this time
+(e.g. due to _cov_ events) should be coalessed so that only the most recent update is sent.
+* `force_value`: Override value for a point to be used during diagnostics and diagnosis. Should
+override any operational values, but not override alarm conditions.
+* `min_loglevel`: Indicates the minimum loglevel for reporting log messages below which log entries
+should not be sent. See note below for a description of the level value.
 
 ### Logentry Message
 
-* See note below about 'Logentry entries' fields.
+* See notes below about 'logentry entries' fields.
 
 ### State status and logentry entries fields
 
-The State and Logentry messages both have very similar `status` and `entries` sub-fields,
-respectively.
+The State and Logentry messages both have `status` and `entries` sub-fields, respectivly, that
+follow the same structure.
 * State `status` entries represent 'sticky' conditions that persist until the situation is cleared,
 e.g. "device disconnected".
+* A `statuses` entry is a map of 'sticky' conditions that are keyed on a value that can be
+used to manage updates by a particular (device dependent) subsystem.
 * Logentry `entries` fields are transitory event that happen, e.g. "connection failed".
-* Both `status` and `entries` fields are arrays, allowing multiple updates to be included.
-* Config parse errors should be represented as a system-level device state status entry.
+* The log `entries` field is an array that can be used to collaesce multiple log updates into
+one message.
+* Config parse errors should be represented as a system-level device state `status` entry.
 * The `message` field sould be a one-line representation of the triggering condition.
 * The `detail` field can be multi-line and include more detail, e.g. a complete program
 stack-trace.
 * The `category` field is a device-specific representation of which sub-system the message comes
-from. In
-a Java environment, for example, it would be the fully qualified path name of the Class triggering
-the message.
-* The status `timestamp` field should be the timestamp the condition was triggered, or most
-recently updated. It might
-be different than the top-level message `timestamp` if the condition is not checked often, or is
-sticky until
-it's cleared.
-* A logentry `timestamp` field is the time that the event occured.
+from. In a Java environment, for example, it would be the fully qualified path name of the Class
+triggering the message.
+* A `status` or `statuses` `timestamp` field should be the timestamp the condition was triggered,
+or most recently updated. It might be different than the top-level message `timestamp` if the
+condition is not checked often or is sticky until it's cleared.
+* A logentry `entries` `timestamp` field is the time that the event occured, which is potentially
+different than the top-level `timestamp` field (which is when the log was sent).
 * The status `level` should conform to the numerical
 [Stackdriver LogEntry](https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity)
 levels. The `DEFAULT` value of 0 is not allowed (lowest value is 100, maximum 800).

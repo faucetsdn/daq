@@ -8,7 +8,7 @@
   },
   "type": "config",
   "system": {
-    "report_interval_ms": "500"
+    "max_update_ms": "500"
   },
   "points": {
     "version": 1,
