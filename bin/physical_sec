@@ -4,6 +4,15 @@ ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 source misc/config_base.sh
 
+iprefix=ctrl
+
+echo Cleaning switch bridge, if any...
+sudo ip link del $iprefix-pri 2>/dev/null || true
+sudo ip link del $iprefix-swx 2>/dev/null || true
+sudo ip link del $iprefix-swa 2>/dev/null || true
+sudo ovs-vsctl --if-exists del-port pri $iprefix-pri
+sudo ovs-vsctl --if-exists del-br $iprefix-br
+
 if [ -z "$ext_ctrl" ]; then
     echo ext_ctrl not defined for physical_sec.
     false
