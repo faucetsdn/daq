@@ -26,7 +26,9 @@ class FaucetTopology():
     TO_ACL_KEY_FORMAT = "@to:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_acl"
-    MIRROR_PORT_BASE = 1000
+    _MIRROR_IFACE_FORMAT = "mirror-%d"
+    _MIRROR_PORT_BASE = 1000
+    _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
     PRI_STACK_PORT = 1
     DEFAULT_VLAN = 10
 
@@ -114,10 +116,28 @@ class FaucetTopology():
         LOGGER.info('No device_specs file specified, skipping...')
         return None
 
+    def mirror_iface_name(self, input_port):
+        """Interface name to use for a given mirror port"""
+        return self._MIRROR_IFACE_FORMAT % input_port
+
+    def mirror_port(self, input_port):
+        """Network port to use for mirroring interface"""
+        return self._MIRROR_PORT_BASE + input_port
+
+    def switch_port(self):
+        """Network port to use for local switch connection"""
+        return self._SWITCH_LOCAL_PORT
+
     def _make_mirror_interface(self, input_port):
         interface = {}
-        interface['name'] = 'mirror-%02d' % input_port
+        interface['name'] = self.mirror_iface_name(input_port)
         interface['output_only'] = True
+        return interface
+
+    def _make_switch_interface(self):
+        interface = {}
+        interface['name'] = 'local_switch'
+        interface['native_vlan'] = self.DEFAULT_VLAN
         return interface
 
     def _make_gw_interface(self, input_port):
@@ -166,8 +186,9 @@ class FaucetTopology():
         for port in self._get_gw_ports():
             interfaces[port] = self._make_gw_interface(port)
         for input_port in range(1, self.sec_port):
-            mirror_port = self.MIRROR_PORT_BASE + input_port
+            mirror_port = self.mirror_port(input_port)
             interfaces[mirror_port] = self._make_mirror_interface(input_port)
+        interfaces[self._SWITCH_LOCAL_PORT] = self._make_switch_interface()
         return interfaces
 
     def _make_sec_interfaces(self):
@@ -236,7 +257,7 @@ class FaucetTopology():
         return list(range(min_port, max_port))
 
     def _get_bcast_ports(self):
-        return [1] + self._get_gw_ports()
+        return [1, self._SWITCH_LOCAL_PORT] + self._get_gw_ports()
 
     def _generate_main_acls(self):
         incoming_acl = []
@@ -245,7 +266,7 @@ class FaucetTopology():
 
         for target_mac in self._mac_map:
             target = self._mac_map[target_mac]
-            mirror_port = self.MIRROR_PORT_BASE + target['port']
+            mirror_port = self.mirror_port(target['port'])
             incoming = list(range(target['range'][0], target['range'][1])) + [mirror_port]
             self._add_acl_rule(incoming_acl, dl_src=target_mac, ports=incoming)
             portset = [1, mirror_port]

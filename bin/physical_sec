@@ -55,10 +55,9 @@ sudo ip addr add $ext_ofip dev $ext_ctrl
 sudo ip link set up dev $ext_ctrl
 
 echo Checking external connection to $ext_addr
-if ! ping -c 1 $ext_addr; then
+if ! ping -c 2 $ext_addr; then
     echo
     echo That didn\'t seem to work.
-    echo Look for network traffix: tcpdump -ni $ext_ctrl arp
     echo
     false
 fi

@@ -310,9 +310,13 @@ class ConnectedHost():
             'gateway_mac': self.gateway.MAC(),
             'scan_base': self.scan_base
         }
+
         self.test_host = docker_test.DockerTest(self.runner, self, test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         host_name = self.test_host.host_name if self.test_host else 'unknown'
+        if 'ext_loip' in self.config:
+            params['local_ip'] = self.config['ext_loip'].replace('@', str(self.test_port))
+            params['switch_ip'] = self.config['ext_addr']
         LOGGER.debug('test_host start %s/%s', self.test_name, host_name)
         self.test_host.start(self.test_port, params, self._docker_callback)
 

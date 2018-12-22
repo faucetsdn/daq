@@ -37,6 +37,9 @@ cp misc/system_ext.conf local/system.conf
 $cmdrun -s
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
+fgrep time inst/run-port-02/nodes/ping02/activate.log
+count=$(fgrep time inst/run-port-02/nodes/ping02/activate.log | wc -l)
+echo switch ping $count | tee -a $TEST_RESULTS
 
 # Test various configurations of mud files.
 

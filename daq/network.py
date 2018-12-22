@@ -35,6 +35,7 @@ class TestNetwork():
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
     DEFAULT_OF_PORT = 6653
+    _CTRL_PRI_IFACE = 'ctrl-pri'
 
     def __init__(self, config):
         self.config = config
@@ -174,10 +175,19 @@ class TestNetwork():
         LOGGER.info("Starting mininet...")
         self.net.start()
 
+        if 'ext_loip' in self.config:
+            self._attach_switch_interface(self._CTRL_PRI_IFACE)
+
     def direct_port_traffic(self, target_mac, port, target):
         """Direct traffic for a given mac to target port"""
         LOGGER.info('Directing traffic for %s on port %s: %s', target_mac, port, bool(target))
         self.topology.direct_port_traffic(target_mac, port, target)
+
+    def _attach_switch_interface(self, switch_intf_name):
+        switch_port = self.topology.switch_port()
+        LOGGER.info('Attaching switch interface %s on port %s', switch_intf_name, switch_port)
+        self.pri.vsctl('add-port', self.pri.name, switch_intf_name, '--',
+                       'set', 'interface', switch_intf_name, 'ofport_request=%s' % switch_port)
 
     def delete_mirror_interface(self, port):
         """Delete a mirroring interface on the given port"""
@@ -185,9 +195,9 @@ class TestNetwork():
 
     def create_mirror_interface(self, port, delete=False):
         """Create/delete a mirror interface for the given port"""
-        mirror_intf_name = 'mirror-%02d' % port
+        mirror_intf_name = self.topology.mirror_iface_name(port)
         mirror_intf_peer = mirror_intf_name + '-ext'
-        mirror_port = self.topology.MIRROR_PORT_BASE + port
+        mirror_port = self.topology.mirror_port(port)
         if delete:
             LOGGER.info('Deleting mirror pair %s <-> %s', mirror_intf_name, mirror_intf_peer)
             self.pri.cmd('ip link del %s' % mirror_intf_name)

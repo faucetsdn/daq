@@ -12,6 +12,13 @@ echo
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
 echo
 
+# Setup for accessing control plane switch.
+if [ -n "$LOCAL_IP" ]; then
+    echo Configuring network with local address $LOCAL_IP
+    ip addr add $LOCAL_IP dev `hostname`-eth0
+    ping -n -c 4 $SWITCH_IP
+fi
+
 # First ping might fail b/c of warm-up delays.
 ping -n -c 3 $TARGET_IP
 

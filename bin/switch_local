@@ -1,0 +1,93 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+source misc/config_base.sh
+
+iprefix=ctrl
+ctrl_bridge=${iprefix}-br
+ctrl_pri=${iprefix}-pri
+ctrl_alt=${iprefix}-alt
+ctrl_swx=${iprefix}-swx
+ctrl_swy=${iprefix}-swy
+ctrl_swa=${iprefix}-swa
+ctrl_swb=${iprefix}-swb
+
+if [ -n "$ext_ctrl" ]; then
+    cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
+    echo Pulled cplane_mac $cplane_mac from $ext_ctrl
+else
+    cplane_mac=f8:39:71:c9:7a:09
+    echo Using default cplane_mac $cplane_mac
+fi
+
+echo Cleaning old setup...
+sudo ip link del $ctrl_pri 2>/dev/null || true
+sudo ip link del $ctrl_bridge 2>/dev/null || true
+sudo ip link del $ctrl_swx 2>/dev/null || true
+sudo ip link del $ctrl_swa 2>/dev/null || true
+sudo ovs-vsctl --if-exists del-port pri $ctrl_pri
+sudo ovs-vsctl --if-exists del-br $ctrl_bridge
+
+echo Creating ovs-link interfaces...
+sudo ip link add $ctrl_pri type veth peer name $ctrl_alt
+sudo ip link set $ctrl_pri up
+sudo ip link set $ctrl_alt up
+
+echo Creating local-link interfaces...
+sudo ip link add $ctrl_swx type veth peer name $ctrl_swy
+sudo ip link set $ctrl_swy address $cplane_mac
+sudo ip link set $ctrl_swx up
+sudo ip link set $ctrl_swy up
+
+echo Creating local bridge...
+sudo ovs-vsctl add-br $ctrl_bridge
+sudo ovs-vsctl add-port $ctrl_bridge $ctrl_alt
+sudo ovs-vsctl add-port $ctrl_bridge $ctrl_swx
+
+if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
+    echo Creating daq-switch, because only ext_addr defined.
+
+    docker rm -f daq-switch || true
+    cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daq/test_hold)
+    pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
+
+    ipsuffix=${ext_ofip#*/}
+    targetip=$ext_addr/${ipsuffix}
+    echo Creating docker with veth -swb at $targetip
+    sudo ip link add $ctrl_swa type veth peer name $ctrl_swb
+    sudo ip link set $ctrl_swa address $cplane_mac
+    sudo ip link set $ctrl_swa up
+    sudo ip link set $ctrl_swb netns $pid
+    docker exec daq-switch ip addr add $targetip dev $ctrl_swb
+    docker exec daq-switch ip link set $ctrl_swb up
+
+    ext_ctrl=$ctrl_swa
+else
+    sudo ip link set $ext_ctrl up
+fi
+
+if [ -z "$ext_ctrl" ]; then
+    echo ext_ctrl not defined, skipping configuration.
+else
+    echo Bridging $ext_ctrl to $ctrl_bridge
+    sudo ovs-vsctl add-port $ctrl_bridge $ext_ctrl
+    sudo ip addr flush dev $ext_ctrl
+fi
+
+if [ -z "$ext_ofip" ]; then
+    echo ext_ofip not defined, skipping configuration.
+else
+    echo Configuring $ctrl_swy with $ext_ofip
+    sudo ip addr add $ext_ofip dev $ctrl_swy
+fi
+
+echo Checking external connection to $ext_addr
+if ! ping -n -c 2 $ext_addr; then
+    echo
+    echo That didn\'t seem to work.
+    echo
+    false
+fi
+
+echo Done with local switch setup.
