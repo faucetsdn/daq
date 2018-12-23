@@ -23,9 +23,10 @@ for iface in 1 2 3 4 5 6 7 8 9; do
 done
 echo intf_names=${ifaces#,} >> local/system.conf
 
-
 echo DAQ stress test | tee $TEST_RESULTS
-$cmdrun -f run_limit=50
-more inst/run-port-*/nodes/nmap*/return_code.txt | tee -a $TEST_RESULTS
+$cmdrun run_limit=40
+cat inst/result.log
+results=$(fgrep [] inst/result.log | wc -l)
+echo Enough results $(($results > 30)) | tee -a $TEST_RESULTS
 
 echo Done with tests | tee -a $TEST_RESULTS

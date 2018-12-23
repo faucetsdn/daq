@@ -18,6 +18,12 @@ while ! ifconfig -a | fgrep -q faux-eth0; do
     sleep 1
 done
 
+# To capture all the data in/out of the faux device for debugging, uncomment
+# the following lines. The pcap file will end up in inst/faux/{hostname}.pcap
+# on the DAQ controller.
+#echo Starting pcap capture...
+#tcpdump -nUi faux-eth0 -w /tmp/`hostname`.pcap &
+
 ip addr show faux-eth0
 
 if [ -n "${options[xdhcp]}" ]; then
@@ -42,12 +48,13 @@ echo Faux device at $local_ip bcast $broadcast_ip
 # Setup dummy telnet listener to trigger port-scan failure
 if [ -n "${options[telnet]}" ]; then
     echo Enabling mock telnet server...
-    nc -lk -p 23 -e date &
+    (while true; do echo Telnet `date`; nc -nvlt -p 23 -e `which date`; done) &
 fi
 
 if [ -n "${options[bacnet]}" ]; then
     echo Starting bacnet loop device.
-    java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar com.serotonin.bacnet4j.test.LoopDevice $local_ip $broadcast_ip &
+    java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar \
+         com.serotonin.bacnet4j.test.LoopDevice $local_ip $broadcast_ip &
 fi
 
 if [ -n "${options[discover]}" ]; then
@@ -62,10 +69,10 @@ fi
 
 if [ -n "${options[brute]}" ]; then
     echo Starting brute server.
-    python pentests/brute_server.py bad 10000 &
+    (python pentests/brute_server.py bad 10000; echo Brute done.) &
 elif [ -n "${options[nobrute]}" ]; then
     echo Starting nobrute server.
-    python pentests/brute_server.py good 10000 &
+    (python pentests/brute_server.py good 10000; echo Brute done.) &
 fi
 
 echo Blocking for all eternety.

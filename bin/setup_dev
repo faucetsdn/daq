@@ -7,7 +7,7 @@
 #
 
 ROOT=$(dirname $0)/..
-FAUCET=https://github.com/grafnu/faucet.git
+FAUCET=https://github.com/faucetsdn/faucet.git
 FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
 MININET=https://github.com/mininet/mininet
 MININETV=2.3.0d3

@@ -1,38 +1,3 @@
 DAQ stress test
-::::::::::::::
-inst/run-port-01/nodes/nmap01/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-02/nodes/nmap02/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-03/nodes/nmap03/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-04/nodes/nmap04/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-05/nodes/nmap05/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-06/nodes/nmap06/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-07/nodes/nmap07/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-08/nodes/nmap08/return_code.txt
-::::::::::::::
-0
-::::::::::::::
-inst/run-port-09/nodes/nmap09/return_code.txt
-::::::::::::::
-0
+Enough results 1
 Done with tests

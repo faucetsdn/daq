@@ -1,5 +1,6 @@
 """Module for running docker-container tests"""
 
+import datetime
 import logging
 
 from clib import docker_host
@@ -21,11 +22,13 @@ class DockerTest():
         self.docker_log = None
         self.docker_host = None
         self.callback = None
+        self.start_time = None
 
     def start(self, port, params, callback):
         """Start the docker test"""
         LOGGER.debug('Target port %d starting docker test %s', self.target_port, self.test_name)
 
+        self.start_time = datetime.datetime.now()
         self.callback = callback
 
         env_vars = ["TARGET_NAME=" + self.host_name,
@@ -86,11 +89,13 @@ class DockerTest():
             return_code = -1
             exception = e
             LOGGER.exception(e)
+        delay = (datetime.datetime.now() - self.start_time).total_seconds()
         LOGGER.debug("Target port %d docker complete, return=%d (%s)",
                      self.target_port, return_code, exception)
         if return_code:
-            LOGGER.info("Target port %d test %s failed: %s %s",
-                        self.target_port, self.test_name, return_code, exception)
+            LOGGER.info("Target port %d test %s failed %ss: %s %s",
+                        self.target_port, self.test_name, delay, return_code, exception)
         else:
-            LOGGER.info("Target port %d test %s passed", self.target_port, self.test_name)
+            LOGGER.info("Target port %d test %s passed %ss",
+                        self.target_port, self.test_name, delay)
         self.callback(return_code=return_code, exception=exception)

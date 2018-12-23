@@ -57,7 +57,7 @@ if [ -n "$realintf" ]; then
     sudo ip link set $realintf netns $pid
     docker exec $CONTAINER ip link set $realintf name faux-eth0
     docker exec $CONTAINER ip link set faux-eth0 up
-    docker exec $CONTAINER ifconfig faux-eth0
+    docker exec $CONTAINER ip link show faux-eth0
 else
     intf=faux$postfix
     echo Removing old interface $intf

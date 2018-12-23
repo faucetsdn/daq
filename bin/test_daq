@@ -45,7 +45,7 @@ mkdir -p local inst
 echo I am g`whoami`
 
 TEST_SCRIPT=testing/test_$DAQ_TEST.sh
-RESULT_FILE=testing/test_$DAQ_TEST.out
+GOLDEN_FILE=testing/test_$DAQ_TEST.out
 TEST_RESULTS=inst/test_$DAQ_TEST.log
 
 echo Running test script $TEST_SCRIPT
@@ -61,7 +61,7 @@ echo
 echo Test results $TEST_RESULTS
 cat $TEST_RESULTS
 echo
-echo Comparing results against $RESULT_FILE
-diff $TEST_RESULTS $RESULT_FILE
+echo Comparing results against $GOLDEN_FILE
+diff $GOLDEN_FILE $TEST_RESULTS
 echo
 echo Done with tests.

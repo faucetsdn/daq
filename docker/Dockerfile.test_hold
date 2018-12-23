@@ -1,6 +1,6 @@
 FROM daq/aardvark:latest
 
-RUN $AG update && $AG install ethtool netcat curl
+RUN $AG update && $AG install ethtool netcat curl nmap
 
 COPY misc/test_hold .
 

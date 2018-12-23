@@ -5,5 +5,8 @@ cmd/inbuild exit code 0
 Extended tests
 Login success!
 Failed after retries.
-Exception [Errno 111] Connection refused
+Target port 10000 not open.
+01: ['01:nmap:1', '01:brute:1']
+02: ['02:nmap:1']
+03: []
 Done with tests
