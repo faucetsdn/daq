@@ -367,7 +367,7 @@ class DAQRunner():
             LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
             return
 
-        gateway.activated = True
+        gateway.activate()
         for target_mac in ready_devices:
             LOGGER.info('DHCP activating target %s', target_mac)
             target_host = self.mac_targets[target_mac]

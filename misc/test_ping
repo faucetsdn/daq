@@ -12,7 +12,9 @@ echo
 tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
 echo
 
-# Setup for accessing control plane switch.
+# Setup for accessing control plane switch. If LOCAL_IP is defined, which
+# is the intended local address for this node on the control plane then
+# SWITCH_IP will be the IP address of the OpenFlow switch.
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP
     ip addr add $LOCAL_IP dev `hostname`-eth0
