@@ -50,7 +50,7 @@ if ! ifconfig $ext_ctrl || ! ifconfig $ext_intf; then
 fi
 
 sudo ip addr flush dev $ext_ctrl
-sudo ip addr add $ext_ofip dev $ext_ctrl
+sudo ip addr add $ext_ofip/16 dev $ext_ctrl
 
 sudo ip link set up dev $ext_ctrl
 
