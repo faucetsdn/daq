@@ -78,7 +78,7 @@
               "name" : "sox-todev",
               "matches" : {
                 "ietf-mud:mud" : {
-                  "controller" : "commissioning_tool"
+                  "controller" : "commissioning-tool"
                 },
                 "ipv4" : {
                   "protocol" : 17
@@ -172,7 +172,7 @@
               "name" : "sox-frdev",
               "matches" : {
                 "ietf-mud:mud" : {
-                  "controller" : "commissioning_tool"
+                  "controller" : "commissioning-tool"
                 },
                 "ipv4" : {
                   "protocol" : 17
