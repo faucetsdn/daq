@@ -1,0 +1,220 @@
+{
+  "ietf-mud:mud": {
+    "mud-version": 1,
+    "mud-url": "https://digital-building.org/mud/commissioning_tool",
+    "last-update" : "2018-12-18T17:32:14.031Z",
+    "cache-validity": 48,
+    "is-supported": true,
+    "systeminfo": "Generic commissioning tool",
+    "from-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name" : "from-ipv4-commissioning"
+          }
+        ]
+      }
+    },
+    "to-device-policy": {
+      "access-lists": {
+        "access-list": [
+          {
+            "name" : "to-ipv4-commissioning"
+          }
+        ]
+      }
+    }
+  },
+  "ietf-access-control-list:acls": {
+    "acl": [
+      {
+        "name" : "to-ipv4-commissioning",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "http-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "from-device",
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 80
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "https-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 443
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name" : "sox-todev",
+              "matches" : {
+                "ietf-mud:mud" : {
+                  "controller" : "commissioning-tool"
+                },
+                "ipv4" : {
+                  "protocol" : 17
+                },
+                "udp" : {
+                  "destination-port" : {
+                    "operator" : "eq",
+                    "port" : 1876
+                  }
+                }
+              },
+              "actions" : {
+                "forwarding" : "accept"
+              }
+            },
+            {
+              "name": "bacnet-todev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "bacnet"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  },
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name" : "from-ipv4-commissioning",
+        "type": "ipv4-acl-type",
+        "aces": {
+          "ace": [
+            {
+              "name": "http-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "from-device",
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 80
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name": "https-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "remote-host"
+                },
+                "ipv4": {
+                  "protocol": 6
+                },
+                "tcp": {
+                  "ietf-mud:direction-initiated": "to-device",
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 443
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            },
+            {
+              "name" : "sox-frdev",
+              "matches" : {
+                "ietf-mud:mud" : {
+                  "controller" : "commissioning-tool"
+                },
+                "ipv4" : {
+                  "protocol" : 17
+                },
+                "udp" : {
+                  "source-port" : {
+                    "operator" : "eq",
+                    "port" : 1876
+                  }
+                }
+              },
+              "actions" : {
+                "forwarding" : "accept"
+              }
+            },
+            {
+              "name": "bacnet-frdev",
+              "matches": {
+                "ietf-mud:mud": {
+                  "controller": "bacnet"
+                },
+                "ipv4": {
+                  "protocol": 17
+                },
+                "udp": {
+                  "destination-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  },
+                  "source-port": {
+                    "operator": "eq",
+                    "port": 47808
+                  }
+                }
+              },
+              "actions": {
+                "forwarding": "accept"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
