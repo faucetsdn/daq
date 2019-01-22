@@ -45,14 +45,27 @@ sudo ovs-vsctl add-br $ctrl_bridge
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_alt
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_swx
 
+if [ -z "$ext_ofip" ]; then
+    echo ext_ofip not defined, skipping configuration.
+else
+    echo Configuring $ctrl_swy with $ext_ofip
+    sudo ip addr add $ext_ofip dev $ctrl_swy
+fi
+
+ipsuffix=${ext_ofip#*/}
+
+if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
+    echo ip suffix for ext_ofip not properly defined.
+    false
+fi
+
 if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
     echo Creating daq-switch, because only ext_addr defined.
 
     docker rm -f daq-switch || true
-    cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daq/test_hold)
+    cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daq/switch)
     pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
-    ipsuffix=${ext_ofip#*/}
     targetip=$ext_addr/${ipsuffix}
     echo Creating docker with veth -swb at $targetip
     sudo ip link add $ctrl_swa type veth peer name $ctrl_swb
@@ -75,13 +88,6 @@ else
     sudo ip addr flush dev $ext_ctrl
 fi
 
-if [ -z "$ext_ofip" ]; then
-    echo ext_ofip not defined, skipping configuration.
-else
-    echo Configuring $ctrl_swy with $ext_ofip
-    sudo ip addr add $ext_ofip dev $ctrl_swy
-fi
-
 echo Checking external connection to $ext_addr
 if ! ping -n -c 2 $ext_addr; then
     echo
@@ -90,4 +96,9 @@ if ! ping -n -c 2 $ext_addr; then
     false
 fi
 
+echo DAQ autoclean docker rm -f daq-switch
+echo DAQ autoclean ip link del $ctrl_pri
+echo DAQ autoclean ip link del $ctrl_swx
+echo DAQ autoclean ip link del $ctrl_bridge
+echo DAQ autoclean ip link del $ctrl_swa
 echo Done with local switch setup.

@@ -29,6 +29,13 @@ if [ -z "$ext_ofip" ]; then
     false
 fi
 
+ipsuffix=${ext_ofip#*/}
+
+if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
+    echo ip netmask suffix not properly defined for ext_ofip.
+    false
+fi
+
 if [ -z "$ext_addr" ]; then
     echo ext_addr not defined for physical_sec.
     false

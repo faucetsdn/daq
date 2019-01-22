@@ -92,16 +92,6 @@ if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
     source $startup_cmds
 fi
 
-if [ -n "$ext_ctrl" ]; then
-    echo Activating external switch...
-    bin/physical_sec
-fi
-
-if [ -n "$ext_loip" ]; then
-    echo Activating switch bridge...
-    bin/switch_local
-fi
-
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
     runcmd="python3 -u -m pdb"

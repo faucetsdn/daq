@@ -10,10 +10,10 @@ the `@` will be automaticaly replaced with test port set number.
 Doing this causes the `LOCAL_IP` and `SWITCH_IP` env variables to be set in
 test containers. See `misc/test_ping` for an example of how to use them.
 
-If `ext_ctrl` is defined, then this will enable access to the actual
- physical switch. If `ext_ctrl` is _not_ defined, then the system
-will spin up a special `daq-switch` Docker container to masquerade as a switch
-(just responds to a ping, no actual switch functionality).
+If `ext_ctrl` is defined, then this will enable access to the actual physical
+switch. If `ext_ctrl` is _not_ defined, then the system will spin up a special
+`daq-switch` Docker container, defined by `Dockerfile.switch`, to masquerade as
+the switch for unit testing.
 
 ## Test Run
 This is a sample test run while using a simulated docker switch container
