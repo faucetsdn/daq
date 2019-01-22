@@ -31,6 +31,10 @@
           }
         }
       }
+    },
+    "9a:02:57:1e:8f:03": {
+      "type": "bacnet",
+      "group": "testing"
     }
   }
 }

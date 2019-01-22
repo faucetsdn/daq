@@ -5,6 +5,13 @@ CLASS=com.serotonin.bacnet4j.test.DiscoveryTest
 TARGET="Object name = BACnet device"
 TMPOUT=`tempfile`
 
+if [ "$1" == "loop" ]; then
+    shift
+    subcmd=loop
+else
+    subcmd=noloop
+fi
+
 # Pick the one not-lo inet v4 address.
 line=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
 
@@ -15,7 +22,7 @@ broadcast_ip=${parts[3]}
 
 echo Scanning bacnet $broadcast_ip from $local_ip
 
-java -cp $JAR $CLASS $local_ip $broadcast_ip | tee $TMPOUT
+java -cp $JAR $CLASS $local_ip $broadcast_ip $subcmd | tee $TMPOUT
 
 # For testing, consider the presense of bacnet a failure.
 ! fgrep "$TARGET" $TMPOUT

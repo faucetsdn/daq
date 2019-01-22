@@ -10,7 +10,7 @@ External switch tests
 switch ping 2
 Mud profile tests
 device open 1 1 1
-cntrlr open 1 1 0
+cntrlr open 1 1 1
 device base 1 1 0
 cntrlr base 1 1 0
 device todev 0 0 0
@@ -19,4 +19,6 @@ device frdev 1 0 0
 cntrlr frdev 1 0 0
 device none 0 0 0
 cntrlr none 0 0 0
+device star 1 1 1
+cntrlr star 1 1 0
 Done with tests

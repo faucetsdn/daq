@@ -59,7 +59,7 @@ fi
 
 if [ -n "${options[discover]}" ]; then
     echo Starting bacnet discover loop.
-    (while true; do bin/bacnet_discover; sleep 1; done) &
+    bin/bacnet_discover loop &
 fi
 
 if [ -n "${options[curl]}" ]; then
