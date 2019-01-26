@@ -63,10 +63,13 @@ class StreamMonitor():
     def log_monitors(self):
         """Log all active monitors"""
         log_str = ''
+        count = 0
         for fd in self.callbacks:
             name = self.callbacks[fd][0]
             log_str = log_str + ', %s fd %d' % (name, fd)
-        LOGGER.debug('Monitoring fds %s', log_str[2:])
+            count += 1
+        LOGGER.debug('Monitoring %d fds %s', count, log_str[2:])
+        return count
 
     def trigger_callback(self, fd):
         """Trigger a data callback for the given fd"""

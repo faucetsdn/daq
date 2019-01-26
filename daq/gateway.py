@@ -18,9 +18,9 @@ class Gateway():
     GATEWAY_OFFSET = 0
     DUMMY_OFFSET = 1
     TEST_OFFSET_START = 2
-    TEST_OFFSET_LIMIT = 10
+    NUM_SET_PORTS = 4
     SET_SPACING = 10
-    _PING_RETRY_COUNT = 10
+    _PING_RETRY_COUNT = 5
 
     TEST_IP_FORMAT = '192.168.84.%d'
 
@@ -82,9 +82,11 @@ class Gateway():
         self.dhcp_monitor.start()
 
         ping_retry = self._PING_RETRY_COUNT
-        while not self._ping_test(host, dummy) and ping_retry:
+        while not self._ping_test(host, dummy):
             ping_retry -= 1
-            LOGGER.info('Gateway %s warmup ping failed at %s', host_name, datetime.datetime.now())
+            LOGGER.info('Gateway %s warmup failed at %s with %d',
+                        host_name, datetime.datetime.now(), ping_retry)
+            assert ping_retry, 'warmup ping failure'
 
         assert self._ping_test(host, dummy), 'dummy ping failed'
         assert self._ping_test(dummy, host), 'host ping failed'
@@ -96,8 +98,12 @@ class Gateway():
     def activate(self):
         """Mark this gateway as activated once all hosts are present"""
         self.activated = True
+        self._scan_finalize()
+
+    def _scan_finalize(self, forget=True):
         if self._scan_monitor:
-            self.runner.monitor_forget(self._scan_monitor.stream())
+            if forget:
+                self.runner.monitor_forget(self._scan_monitor.stream())
             self._scan_monitor.terminate()
             self._scan_monitor = None
 
@@ -106,7 +112,7 @@ class Gateway():
         test_port = self._switch_port(self.TEST_OFFSET_START)
         while test_port in self.test_ports:
             test_port = test_port + 1
-        limit_port = self._switch_port(self.TEST_OFFSET_LIMIT)
+        limit_port = self._switch_port(self.NUM_SET_PORTS)
         assert test_port < limit_port, 'no test ports available'
         self.test_ports[test_port] = True
         return test_port
@@ -114,23 +120,24 @@ class Gateway():
     def _startup_scan(self, host):
         assert not self._scan_monitor, 'startup_scan already active'
         startup_file = '/tmp/startup.pcap'
-        LOGGER.info('Gateway %s startup capture in container %s', self.port_set, startup_file)
+        LOGGER.info('Gateway %s startup capture %s in container\'s %s', self.port_set,
+                    self.host_intf, startup_file)
         tcp_filter = ''
         helper = tcpdump_helper.TcpdumpHelper(host, tcp_filter, packets=None,
                                               intf_name=self.host_intf, timeout=None,
                                               pcap_out=startup_file, blocking=False)
         self._scan_monitor = helper
-        self.runner.monitor_stream('gateway', helper.stream(),
+        self.runner.monitor_stream('start%d' % self.port_set, helper.stream(),
                                    helper.next_line, hangup=self._scan_complete,
                                    error=self._scan_error)
 
     def _scan_complete(self):
         LOGGER.info('Gateway %d scan complete', self.port_set)
-        self._scan_monitor = None
+        self._scan_finalize(forget=False)
 
     def _scan_error(self, e):
         LOGGER.error('Gateway %d monitor error: %s', self.port_set, e)
-        self._scan_monitor = None
+        self._scan_finalize()
 
     def release_test_port(self, test_port):
         """Release the given port from the gateway"""
@@ -139,7 +146,7 @@ class Gateway():
 
     def get_port_range(self):
         """Get the port range utilized by this gateway group"""
-        return (self._switch_port(0), self._switch_port(self.SET_SPACING))
+        return (self._switch_port(0), self._switch_port(self.NUM_SET_PORTS))
 
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
@@ -197,9 +204,10 @@ class Gateway():
     def terminate(self):
         """Terminate this instance"""
         assert not self.targets, 'gw %s has targets %s' % (self.name, self.targets)
-        LOGGER.info('Terminating gateway %s', self.name)
+        LOGGER.info('Terminating gateway %d/%s', self.port_set, self.name)
         if self.dhcp_monitor:
             self.dhcp_monitor.cleanup()
+        self._scan_finalize()
         if self.host:
             try:
                 self.host.terminate()

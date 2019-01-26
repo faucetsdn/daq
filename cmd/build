@@ -51,8 +51,8 @@ local_version=$(cd faucet; git rev-list -n 1 HEAD)
 if [ "$target_version" != "$local_version" ]; then
     echo Local faucet commit is at: $local_version
     echo Mismatch with misc/FAUCET_VERSION: $target_version
-    echo Try 'bin/clean_dev && bin/setup_dev' to reset.
-    echo Or, manually update one version or the other as needed.
+    echo Try 'bin/clean_dev && bin/setup_dev' to reset, or maybe:
+    echo echo $local_version \> misc/FAUCET_VERSION
     false
 fi
 

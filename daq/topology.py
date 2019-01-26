@@ -252,9 +252,12 @@ class FaucetTopology():
         self._generate_port_acls()
 
     def _get_gw_ports(self):
-        min_port = Gateway.SET_SPACING
-        max_port = Gateway.SET_SPACING * self.sec_port
-        return list(range(min_port, max_port))
+        ports = []
+        for port_set in range(1, self.sec_port):
+            base_port = Gateway.SET_SPACING * port_set
+            end_port = base_port + Gateway.NUM_SET_PORTS
+            ports.extend(range(base_port, end_port))
+        return ports
 
     def _get_bcast_ports(self):
         return [1, self._SWITCH_LOCAL_PORT] + self._get_gw_ports()
@@ -270,7 +273,7 @@ class FaucetTopology():
             incoming = list(range(target['range'][0], target['range'][1])) + [mirror_port]
             self._add_acl_rule(incoming_acl, dl_src=target_mac, ports=incoming)
             portset = [1, mirror_port]
-            self._add_acl_rule(portset_acl, dl_dst=target_mac, ports=portset)
+            self._add_acl_rule(portset_acl, dl_dst=target_mac, ports=portset, allow=1)
 
         self._add_acl_rule(incoming_acl, allow=0)
         self._add_acl_rule(portset_acl, dl_dst=self.BROADCAST_MAC,
@@ -287,7 +290,7 @@ class FaucetTopology():
         pri_acls["acls"] = acls
 
         filename = self.INST_FILE_PREFIX + self.DP_ACL_FILE_FORMAT
-        LOGGER.debug("Writing updated pri acls to %s", filename)
+        LOGGER.debug('Writing updated pri acls to %s', filename)
         with open(filename, "w") as output_stream:
             yaml.safe_dump(pri_acls, stream=output_stream)
 

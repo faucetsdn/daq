@@ -175,10 +175,11 @@ class DAQRunner():
                     all_idle = False
         if not self.port_targets and not self.run_tests:
             if self.faucet_events:
-                LOGGER.warning('No active ports remaining: ending test run.')
                 self.monitor_forget(self.faucet_events.sock)
                 self.faucet_events.disconnect()
                 self.faucet_events = None
+                count = self.stream_monitor.log_monitors()
+                LOGGER.warning('No active ports remaining (%d): ending test run.', count)
             all_idle = False
         if all_idle:
             LOGGER.debug('No active device ports, waiting for trigger event...')
@@ -244,6 +245,9 @@ class DAQRunner():
                 return False
         except Exception as e:
             LOGGER.error('Target port %d target trigger error %s', target_port, str(e))
+            if self.fail_mode:
+                LOGGER.warning('Suppressing further tests due to failure.')
+                self.run_tests = False
             return False
 
         target = {
