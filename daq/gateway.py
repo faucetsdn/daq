@@ -144,10 +144,6 @@ class Gateway():
         assert test_port in self.test_ports, 'test port not allocated'
         del self.test_ports[test_port]
 
-    def get_port_range(self):
-        """Get the port range utilized by this gateway group"""
-        return (self._switch_port(0), self._switch_port(self.NUM_SET_PORTS))
-
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
 

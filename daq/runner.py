@@ -73,9 +73,6 @@ class DAQRunner():
             'timestamp': int(time.time()),
         })
 
-    def _port_control(self, message):
-        LOGGER.info('port_control %s', message)
-
     def initialize(self):
         """Initialize DAQ instance"""
         self._send_heartbeat()
@@ -254,7 +251,7 @@ class DAQRunner():
             'port': target_port,
             'group': group_name,
             'fake': gateway.fake_target,
-            'range': gateway.get_port_range(),
+            'port_set': gateway.port_set,
             'mac': target_mac
         }
         gateway.attach_target(target_port, target)

@@ -28,6 +28,6 @@ $cmdrun run_limit=40
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 echo Found $results successful runs.
-echo Enough results $(($results > 20)) | tee -a $TEST_RESULTS
+echo Enough results $(($results >= 40)) | tee -a $TEST_RESULTS
 
 echo Done with tests | tee -a $TEST_RESULTS
