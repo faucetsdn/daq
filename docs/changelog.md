@@ -29,3 +29,16 @@
 	* Updating schema validator code structure.
 	* Improved internal checks on startup sequence.
 	* Autogenerate faucet.yaml file, rather than relying on template.
+* 0.9.1
+	* Adding test_config option for dynamic test configurations.
+	* Enforce gateway test group isolation.
+	* Issue a representative FCU example for UDMI encodings.
+	* Bacnet topology tests (open, single, halves, star)
+	* Mock-switch capability for direct-to-switch tests.
+	* Bacnet4j version updates for looped discovery tests.
+	* Packet capture files for gateways and individual tests.
+	* General improvements to system test stability.
+	* Brute-force telnet password checks.
+	* Update Faucet version to 1.8.32.
+	* Increased MUD-file enforcement (to-device).
+	* Misc build issues for current Debian/Ubuntu systems.
