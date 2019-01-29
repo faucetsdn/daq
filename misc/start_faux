@@ -33,7 +33,7 @@ if [ -n "${options[xdhcp]}" ]; then
     ip addr show faux-eth0
 else
     echo Running dhclient...
-    dhclient
+    dhclient -v
     ip addr show faux-eth0
 fi
 

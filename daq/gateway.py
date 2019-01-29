@@ -40,6 +40,7 @@ class Gateway():
         self.test_ports = {}
         self.ready = {}
         self.activated = False
+        self.result_linger = False
         self._scan_monitor = None
 
     def initialize(self):

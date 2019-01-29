@@ -9,16 +9,22 @@ External switch tests
     dp_id: 4886718345
 switch ping 2
 Mud profile tests
+result open 01: [] 02: [] 03: []
 device open 1 1 1
 cntrlr open 1 1 1
+result base 01: [] 02: ['02:ping:1'] 03: []
 device base 1 1 0
 cntrlr base 1 1 0
+result todev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device todev 0 0 0
 cntrlr todev 0 0 0
+result frdev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device frdev 1 0 0
 cntrlr frdev 1 0 0
+result none 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device none 0 0 0
 cntrlr none 0 0 0
+result star 01: [] 02: ['02:ping:1'] 03: []
 device star 1 1 1
 cntrlr star 1 1 0
 Done with tests

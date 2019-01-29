@@ -43,6 +43,10 @@ class DockerTest():
 
         vol_maps = [params['scan_base'] + ":/scans"]
 
+        conf_base = params.get('conf_base')
+        if conf_base:
+            vol_maps += [conf_base + ":/config"]
+
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)

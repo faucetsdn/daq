@@ -59,6 +59,7 @@ cntrlr_xcast="$cntrlr_traffic and ether host 9a:02:57:1e:8f:03"
 function test_mud {
     type=$1
     $cmdrun -s device_specs=misc/device_specs_bacnet_$type.json
+    echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
     bcast=$($device_bcast | wc -l)
     ucast=$($device_ucast | wc -l)
     xcast=$($device_xcast | wc -l)

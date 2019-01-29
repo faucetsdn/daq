@@ -46,6 +46,7 @@ class ConnectedHost():
         self.tmpdir = self._initialize_tempdir()
         self.run_id = '%06x' % int(time.time())
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
+        self._conf_base = self._initialize_conf_base()
         self.state = None
         self.no_test = config.get('no_test', False)
         self._state_transition(_STATE.READY if self.no_test else _STATE.INIT)
@@ -72,6 +73,16 @@ class ConnectedHost():
         shutil.rmtree(tmpdir, ignore_errors=True)
         os.makedirs(tmpdir)
         return tmpdir
+
+    def _initialize_conf_base(self):
+        test_config = self.config.get('test_config')
+        if not test_config:
+            return None
+        conf_base = os.path.abspath(os.path.join(test_config, 'port-%02d' % self.target_port))
+        if not os.path.isdir(conf_base):
+            LOGGER.warning('Test config directory not found: %s', conf_base)
+            return None
+        return conf_base
 
     def initialize(self):
         """Fully initialize a new host set"""
@@ -206,7 +217,8 @@ class ConnectedHost():
 
     def _monitor_cleanup(self, forget=True):
         if self._tcp_monitor:
-            LOGGER.info('Target port %d monitor scan complete', self.target_port)
+            now = datetime.datetime.now()
+            LOGGER.info('Target port %d monitor scan complete at %s', self.target_port, now)
             if forget:
                 self.runner.monitor_forget(self._tcp_monitor.stream())
             self._tcp_monitor.terminate()
@@ -223,8 +235,9 @@ class ConnectedHost():
         self._state_transition(_STATE.MONITOR, _STATE.BASE)
         self.record_result('monitor', time=self._MONITOR_SCAN_SEC, state='run')
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-        LOGGER.info('Target port %d background scan for %d seconds...',
-                    self.target_port, self._MONITOR_SCAN_SEC)
+        now = datetime.datetime.now()
+        LOGGER.info('Target port %d background scan at %s for %ds',
+                    self.target_port, now, self._MONITOR_SCAN_SEC)
         network = self.runner.network
         tcp_filter = ''
         intf_name = self._mirror_intf_name
@@ -308,6 +321,7 @@ class ConnectedHost():
             'target_mac': self.target_mac,
             'gateway_ip': self.gateway.IP(),
             'gateway_mac': self.gateway.MAC(),
+            'conf_base': self._conf_base,
             'scan_base': self.scan_base
         }
 

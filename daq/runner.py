@@ -38,6 +38,7 @@ class DAQRunner():
         self.version = os.environ['DAQ_VERSION']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
+        self._linger_exit = False
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.event_trigger = config.get('event_trigger', False)
@@ -171,12 +172,14 @@ class DAQRunner():
                     self._target_set_trigger(target_port)
                     all_idle = False
         if not self.port_targets and not self.run_tests:
-            if self.faucet_events:
+            if self.faucet_events and not self._linger_exit:
                 self.monitor_forget(self.faucet_events.sock)
                 self.faucet_events.disconnect()
                 self.faucet_events = None
                 count = self.stream_monitor.log_monitors()
                 LOGGER.warning('No active ports remaining (%d): ending test run.', count)
+            if self._linger_exit:
+                LOGGER.warning('Result linger on exit.')
             all_idle = False
         if all_idle:
             LOGGER.debug('No active device ports, waiting for trigger event...')
@@ -434,10 +437,13 @@ class DAQRunner():
         if self.result_log:
             self.result_log.write('%02d: %s\n' % (target_port, results))
             self.result_log.flush()
+
         suppress_tests = self.fail_mode or self.result_linger
         if results and suppress_tests:
             LOGGER.warning('Suppressing further tests due to failure.')
             self.run_tests = False
+            if self.result_linger:
+                self._linger_exit = True
         self.result_sets[target_port] = result_set
 
     def _target_set_cancel(self, target_port):
@@ -451,9 +457,11 @@ class DAQRunner():
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
-            if results and self.result_linger:
+            this_result_linger = results and self.result_linger
+            if target_gateway.result_linger or this_result_linger:
                 LOGGER.warning('Target port %d result_linger: %s', target_port, results)
                 self.active_ports[target_port] = True
+                target_gateway.result_linger = True
             else:
                 self._direct_port_traffic(target_mac, target_port, None)
                 target_host.terminate(trigger=False)
