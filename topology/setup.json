@@ -1,0 +1,38 @@
+{
+  'faucet_yaml': '/etc/faucet/faucet.yaml',
+  'naming': {
+    'tier1': '-t1sw',
+    'tier2': '-t2sw',
+    'ctl': '-ctl'
+  },
+  'device_description': 'IoT Device',
+  'vlan': {
+    'description': 'Faucet IoT',
+    'name': 'Faucet_IoT'
+  },
+  'gauge': {
+    'db_type': 'prometheus',
+    'interval': 10
+  },
+  'db_types': {
+    'prometheus': {
+      'prometheus_addr': '0.0.0.0',
+      'prometheus_port': 9303,
+      'type': 'prometheus'
+    }
+  },
+  'switch_lldp_beacon': {
+    'max_per_interval': 5,
+    'send_interval': 5
+  },
+  'port_lldp_beacon': {
+    'enable': true
+  },
+  'loop_protect_external': true,
+  'uplink_iface': {
+    'description': 'uplink access',
+    'lacp': 1,
+    'lldp_beacon': {'enable': true},
+    'loop_protect_external': true
+  }
+}

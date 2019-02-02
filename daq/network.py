@@ -3,7 +3,7 @@
 import logging
 import os
 
-import topology
+from topology import FaucetTopology
 
 from mininet import node as mininet_node
 from mininet import net as mininet_net
@@ -159,7 +159,7 @@ class TestNetwork():
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
 
         LOGGER.info("Activating faucet topology...")
-        self.topology = topology.FaucetTopology(self.config, self.pri)
+        self.topology = FaucetTopology(self.config, self.pri)
         self.topology.initialize()
         self.topology.start()
 

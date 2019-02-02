@@ -1,5 +1,7 @@
 # Changelog
 
+* 0.9.2
+	* Stacking topology generator.
 * 0.9.1
 	* Adding test_config option for dynamic test configurations.
 	* Enforce gateway test group isolation.

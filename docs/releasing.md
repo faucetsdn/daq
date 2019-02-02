@@ -1,7 +1,7 @@
 # Releasing Instructions
 
 * Bring `release` branch to same version as master.
-* Determine new release version (e.g. '0.9.1')
+* Determine new release version (e.g. `0.9.1`) updated from `misc/RELEASE_VERSION`
 * Update and commit new version in `misc/RELEASE_VERSION`
 * Tag new version: `git tag -a -m "Release 0.9.1" release-0.9.1`
 * Check latest commit log message:
@@ -15,6 +15,7 @@ Date:   Tue Jan 29 11:45:12 2019 -0800
 </pre>
 * Push `release` branch.
 * Switch to `master` branch and merge in `release` branch.
-* Push `master` branch.
-* Push release tags: `git push --tags`
+* Push release tags: `git push --tags`.
+* Push `master` branch .
 * Verify Travis CI build for `release` branch completes successfully.
+* Make sure `master` branch and tags are pushed to `faucet` origin.

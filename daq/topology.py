@@ -34,7 +34,6 @@ class FaucetTopology():
     DEFAULT_VLAN = 10
 
     def __init__(self, config, pri):
-        self._mac_map = {}
         self.config = config
         self.pri = pri
         self.pri_name = pri.name
@@ -42,6 +41,7 @@ class FaucetTopology():
         self.sec_name = 'sec'
         self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
         self._device_specs = self._load_device_specs()
+        self._mac_map = {}
         self.topology = self._make_base_network_topology()
 
     def initialize(self):

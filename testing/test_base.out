@@ -1,4 +1,5 @@
-Base tests
+Running testing/test_base.sh
+Base Tests
 01: []
 Open port tests
 01: ['01:nmap:1']

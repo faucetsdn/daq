@@ -1,6 +1,11 @@
-DAQ aux tests
+Running testing/test_aux.sh
+Aux Tests
+Generator tests
+Only in topology/un-moon/: site_config.json
+mudacl tests
 Mudacl exit code 0
 Validator exit code 0
+Lint checks
 cmd/inbuild exit code 0
 Extended tests
 Login success!

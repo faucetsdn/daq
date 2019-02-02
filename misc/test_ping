@@ -19,13 +19,9 @@ if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP
     ip addr add $LOCAL_IP dev `hostname`-eth0
     ping -n -c 5 $SWITCH_IP
+else
+    echo LOCAL_IP not configured, assuming no network switch.
 fi
-
-echo ARP
-arp -n
-echo ROUTE
-route -n
-echo
 
 monitor_filter=/config/monitor_filter.txt
 filter_out=/tmp/monitor_filter.out

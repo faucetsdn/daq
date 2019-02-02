@@ -31,6 +31,50 @@ FLAG_MAP = {
     's': 'single_shot'
 }
 
+class DAQ:
+    """Wrapper class for configuration management"""
+
+    def __init__(self, args):
+        """Parse command line arguments"""
+        config = {}
+        for arg in args[1:]:
+            if arg:
+                print('processing arg: %s' % arg)
+                if arg[0] == '-':
+                    if arg[1:] in FLAG_MAP:
+                        config[FLAG_MAP[arg[1:]]] = True
+                    else:
+                        raise Exception('Unknown command line arg %s' % arg)
+                elif '=' in arg:
+                    parts = arg.split('=', 1)
+                    config[parts[0]] = parts[1]
+                else:
+                    _read_config_into(arg, config)
+        self.config = config
+        print('Configuration map: %s', config)
+
+    def configure_logging(self):
+        """Configure logging"""
+        config = self.config
+        log_def = 'debug' if config.get('debug_mode') else 'info'
+        daq_env = config.get('daq_loglevel', log_def)
+        level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
+
+        logging.basicConfig(level=level)
+
+        # For some reason this is necessary for travis.ci
+        ROOTLOG.setLevel(level)
+
+        # This handler is used by everything, so be permissive here.
+        ROOTLOG.handlers[0].setLevel(minilog.LEVELS['debug'])
+
+        mininet_env = config.get('mininet_loglevel', 'info')
+        minilog.setLogLevel(mininet_env)
+
+        #pylint: disable=protected-access
+        minilog.MininetLogger._log = _stripped_alt_logger
+
+
 def _stripped_alt_logger(self, level, msg, *args, **kwargs):
     #pylint: disable=unused-argument
     """A logger for messages that strips whitespace"""
@@ -38,25 +82,6 @@ def _stripped_alt_logger(self, level, msg, *args, **kwargs):
     if stripped:
         #pylint: disable=protected-access
         ALT_LOG._log(level, stripped, *args, **kwargs)
-
-def _configure_logging(config):
-    log_def = 'debug' if config.get('debug_mode') else 'info'
-    daq_env = config.get('daq_loglevel', log_def)
-    level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
-
-    logging.basicConfig(level=level)
-
-    # For some reason this is necessary for travis.ci
-    ROOTLOG.setLevel(level)
-
-    # This handler is used by everything, so be permissive here.
-    ROOTLOG.handlers[0].setLevel(minilog.LEVELS['debug'])
-
-    mininet_env = config.get('mininet_loglevel', 'info')
-    minilog.setLogLevel(mininet_env)
-
-    #pylint: disable=protected-access
-    minilog.MininetLogger._log = _stripped_alt_logger
 
 def _write_pid_file():
     pid = os.getpid()
@@ -79,23 +104,6 @@ def _read_config_into(filename, config):
                 raise Exception('Unknown config entry: %s' % line)
             line = file.readline()
 
-def _parse_args(args):
-    config = {}
-    for arg in args[1:]:
-        if arg:
-            print('processing arg: %s' % arg)
-            if arg[0] == '-':
-                if arg[1:] in FLAG_MAP:
-                    config[FLAG_MAP[arg[1:]]] = True
-                else:
-                    raise Exception('Unknown command line arg %s' % arg)
-            elif '=' in arg:
-                parts = arg.split('=', 1)
-                config[parts[0]] = parts[1]
-            else:
-                _read_config_into(arg, config)
-    return config
-
 def _show_help():
     print("Common run options:")
     for option in FLAG_MAP:
@@ -103,9 +111,9 @@ def _show_help():
     print("See system.conf for a detailed accounting of potential options.")
 
 def _execute():
-    config = _parse_args(sys.argv)
-    _configure_logging(config)
-    LOGGER.info('configuration map: %s', config)
+    daq = DAQ(sys.argv)
+    daq.configure_logging()
+    config = daq.config
 
     if 'show_help' in config:
         _show_help()

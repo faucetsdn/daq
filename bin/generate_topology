@@ -1,0 +1,20 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+source misc/config_base.sh
+
+FAUCET=$(realpath $ROOT/faucet)
+MININET=$(realpath $ROOT/mininet)
+
+export PYTHONPATH=$FAUCET:$MININET
+source venv/bin/activate
+
+if [ -n "$DAQ_CODECOV" ]; then
+    echo Running with codecov analysis...
+    runcmd="coverage run --source=daq -a"
+else
+    runcmd="python3 -u"
+fi
+
+$runcmd daq/generator.py "$@"

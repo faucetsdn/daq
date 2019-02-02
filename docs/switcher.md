@@ -3,6 +3,9 @@
 This setup defines how to access the the control plane from a container test.
 
 ## Required Config
+
+TODO: Add bit about `startup_cmds` requirement.
+
 In addition to the `ext_ofip` and `ext_addr` config values, setting
 `ext_loip` will enable switch control-plane access. It should be set
 to a pattern for the test container IP, e.g. `192.0.3.@/16`, where

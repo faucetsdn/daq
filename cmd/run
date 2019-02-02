@@ -2,6 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 run_args=
+cmdrun_log=inst/cmdrun.log
 
 cd $ROOT
 source misc/config_base.sh
@@ -23,9 +24,10 @@ fi
 echo Starting `date`, run_mode is $run_mode
 echo Clearing previous reports...
 sudo rm -rf inst/report_*.txt inst/run-port-*
+mkdir -p inst
 
 if [ "$run_mode" == local ]; then
-    cmd/exrun $run_args "$@"
+    cmd/exrun $run_args "$@" 2>&1 | tee $cmdrun_log
 else
-    cmd/inrun $run_args "$@"
+    cmd/inrun $run_args "$@" 2>&1 | tee $cmdrun_log
 fi

@@ -1,12 +1,8 @@
 #!/bin/bash
 
-if [ `whoami` != 'root' ]; then
-    echo Need to run as root.
-    exit -1
-fi
+source testing/test_preamble.sh
 
-echo Writing test results to $TEST_RESULTS
-cmdrun="cmd/run codecov"
+echo Many Tests >> $TEST_RESULTS
 
 echo source misc/system.conf > local/system.conf
 
@@ -23,8 +19,8 @@ for iface in 1 2 3 4 5 6 7 8 9; do
 done
 echo intf_names=${ifaces#,} >> local/system.conf
 
-echo DAQ stress test | tee $TEST_RESULTS
-$cmdrun run_limit=40
+echo DAQ stress test | tee -a $TEST_RESULTS
+cmd/run run_limit=40
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 echo Found $results successful runs.
