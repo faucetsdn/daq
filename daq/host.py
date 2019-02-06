@@ -331,6 +331,7 @@ class ConnectedHost():
         if 'ext_loip' in self.config:
             params['local_ip'] = self.config['ext_loip'].replace('@', str(self.test_port))
             params['switch_ip'] = self.config['ext_addr']
+            params['switch_port'] = str(self.target_port)
         LOGGER.debug('test_host start %s/%s', self.test_name, host_name)
         self.test_host.start(self.test_port, params, self._docker_callback)
 

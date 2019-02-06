@@ -16,8 +16,9 @@ echo
 # is the intended local address for this node on the control plane then
 # SWITCH_IP will be the IP address of the OpenFlow switch.
 if [ -n "$LOCAL_IP" ]; then
-    echo Configuring network with local address $LOCAL_IP
+    echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
+    echo Switch test with port $SWITCH_PORT.
     ping -n -c 5 $SWITCH_IP
 else
     echo LOCAL_IP not configured, assuming no network switch.

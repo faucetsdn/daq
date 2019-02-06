@@ -8,6 +8,7 @@ External switch tests
 02: []
     dp_id: 1
     dp_id: 4886718345
+Switch test with port 2.
 switch ping 2
 Mud profile tests
 result open 01: [] 02: [] 03: []
