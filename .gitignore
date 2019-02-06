@@ -1,5 +1,6 @@
 # Development files
 
+.build_hash
 *~
 .pdbrc
 .pdbrcX

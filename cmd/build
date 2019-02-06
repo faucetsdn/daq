@@ -161,3 +161,6 @@ fi
 if [ "$do_images" == load ]; then
     touch $load_mark
 fi
+
+echo Updating .build_hash
+bin/build_hash.sh > .build_hash
