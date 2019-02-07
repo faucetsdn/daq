@@ -1,0 +1,102 @@
+{
+  "macAddrs": {
+    "9a:02:57:1e:8f:01": {
+      "type": "bacnet",
+      "group": "group-1",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "mac_addrs": {
+                "9a:02:57:1e:8f:02": {
+                },
+                "9a:02:57:1e:8f:04": {
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "9a:02:57:1e:8f:02": {
+      "type": "controller",
+      "group": "group-1",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "mac_addrs": {
+                "9a:02:57:1e:8f:01": {
+                },
+                "9a:02:57:1e:8f:04": {
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "9a:02:57:1e:8f:03": {
+      "type": "bacnet",
+      "group": "default"
+    },
+    "9a:02:57:1e:8f:04": {
+      "type": "commissioning_tool",
+      "group": "group-1",
+      "controllers": {
+        "bacnet": {
+          "controlees": {
+            "bacnet": {
+              "mac_addrs": {
+                "9a:02:57:1e:8f:01": {
+                },
+                "9a:02:57:1e:8f:02": {
+                },
+                "9a:02:57:1e:8f:05": {
+                },
+                "9a:02:57:1e:8f:06": {
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "9a:02:57:1e:8f:05": {
+    "type": "bacnet",
+    "group": "group-1",
+    "controllers": {
+      "bacnet": {
+        "controlees": {
+          "bacnet": {
+            "mac_addrs": {
+              "9a:02:57:1e:8f:02": {
+              },
+              "9a:02:57:1e:8f:04": {
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "9a:02:57:1e:8f:06": {
+    "type": "bacnet",
+    "group": "group-1",
+    "controllers": {
+      "bacnet": {
+        "controlees": {
+          "bacnet": {
+            "mac_addrs": {
+              "9a:02:57:1e:8f:02": {
+              },
+              "9a:02:57:1e:8f:04": {
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

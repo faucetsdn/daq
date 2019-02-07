@@ -23,6 +23,7 @@ env:
     - DAQ_TEST=base
     - DAQ_TEST=many
     - DAQ_TEST=aux
+    - DAQ_TEST=topo
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/

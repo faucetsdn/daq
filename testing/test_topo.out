@@ -1,0 +1,6 @@
+Running testing/test_topo.sh
+Topology Tests
+DAQ topologies test
+device minimal 0 0 1
+cntrlr minimal 0 0 1
+Done with tests
