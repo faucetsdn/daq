@@ -80,9 +80,8 @@ if [ -n "$in_container" ]; then
     echo Now running in `pwd`
 fi
 
-sudo rm -rf $build_root
+sudo rm -rf $build_root .build_hash
 mkdir -p $build_root
-sudo date > $build_root/last_build.txt
 
 build_list_file=$build_root/build_list.txt
 echo > $build_list_file

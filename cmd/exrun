@@ -48,19 +48,16 @@ if [ ! -d $FAUCET ]; then
     false
 fi
 
-if [ -n "$device_specs" ]; then
-    echo Creating MUD templates...
-    bin/mudacl
-fi
-
 mkdir -p $INSTDIR
 rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG
 
 docker ps > /dev/null 2>&1 || service docker start
-sleep 1
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
+
+echo Creating fACL templates...
+bin/mudacl
 
 cleanup_file=`mktemp`
 

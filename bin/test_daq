@@ -62,7 +62,7 @@ echo
 echo Test results $TEST_RESULTS
 cat $TEST_RESULTS
 echo
-echo Comparing results against $GOLDEN_FILE
+echo Comparing $GOLDEN_FILE against $TEST_RESULTS
 diff $GOLDEN_FILE $TEST_RESULTS
 echo
 echo Done with tests.

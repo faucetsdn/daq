@@ -1,6 +1,7 @@
 Running testing/test_topo.sh
 Topology Tests
-DAQ topologies test
-device minimal 0 0 1
-cntrlr minimal 0 0 1
+Running minimal 3
+bacnet 01/02 1 0 1
+bacnet 02/03 0 0 1
+bacnet 03/01 0 0 1
 Done with tests

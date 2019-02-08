@@ -8,66 +8,65 @@ echo Topology Tests >> $TEST_RESULTS
 function generate_system {
   echo source misc/system.conf > local/system.conf
 
-  # The number of faux devices is expressed in the FAUX_NUM variable
-  FAUX_NUM=$1
+  type=$1
+  faux_num=$2
 
   topostartup=inst/startup_topo.cmd
   rm -f $topostartup
   echo startup_cmds=$topostartup >> local/system.conf
 
-  # Specify the secondary port as number of faux devices + 1
-  echo sec_port=`echo $FAUX_NUM+1 | bc` >> local/system.conf
+  echo sec_port=$((faux_num+1)) >> local/system.conf
 
-  # Create arbitrary number of faux devices
-  ifaces=
-  for iface in $(eval echo {1..$FAUX_NUM}); do
-      ifaces=${ifaces},faux-$iface
+  # Create required number of faux devices
+  for iface in $(seq 1 $faux_num); do
+      iface_names=${iface_names},faux-$iface
       echo autostart cmd/faux $iface discover >> $topostartup
   done
-  echo intf_names=${ifaces#,} >> local/system.conf
+  echo intf_names=${iface_names#,} >> local/system.conf
+
   # Specify a different set of tests
   echo host_tests=misc/topo_tests.conf >> local/system.conf
+
+  echo site_description=\"$type with $devices devices\" >> local/system.conf
+  echo device_specs=misc/device_specs_topo_$type.json >> local/system.conf
 }
 
-echo DAQ topologies test | tee -a $TEST_RESULTS
+MAC_BASE=9a:02:57:1e:8f
 
-# Ensure that all the ACLs have been generated
-bin/mudacl
+function check_bacnet {
+    at_dev=$(printf %02d $1)
+    ex_dev=$(printf %02d $2)
 
-minimal_device_traffic="tcpdump -en -r inst/run-port-01/scans/monitor.pcap port 47808"
-minimal_device_bcast="$minimal_device_traffic and ether broadcast"
-minimal_device_ucast="$minimal_device_traffic and ether dst 9a:02:57:1e:8f:02"
-minimal_device_xcast="$minimal_device_traffic and ether host 9a:02:57:1e:8f:03"
-minimal_cntrlr_traffic="tcpdump -en -r inst/run-port-02/scans/monitor.pcap port 47808"
-minimal_cntrlr_bcast="$minimal_cntrlr_traffic and ether broadcast"
-minimal_cntrlr_ucast="$minimal_cntrlr_traffic and ether dst 9a:02:57:1e:8f:01"
-minimal_cntrlr_xcast="$minimal_cntrlr_traffic and ether host 9a:02:57:1e:8f:03"
+    at_mac=$MAC_BASE:$(printf %02x $at_dev)
+    ex_mac=$MAC_BASE:$(printf %02x $ex_dev)
 
-function test_topo {
+    tcp_base="tcpdump -en -r inst/run-port-$at_dev/scans/monitor.pcap port 47808"
+
+    ucast_to=`$tcp_base and ether dst $ex_mac | wc -l`
+    ucast_cross=`$tcp_base and not ether src $at_mac and not ether dst $at_mac | wc -l`
+    bcast_out=`$tcp_base and ether broadcast and ether src $at_mac | wc -l`
+
+    # Monitoring is currently broken, so only captures outgoing packets, so this doesn't work.
+    bcast_from=`$tcp_base and ether broadcast and ether src $ex_mac | wc -l`
+
+    echo bacnet $at_dev/$ex_dev $((ucast_to > 0)) $((ucast_cross > 0)) $((bcast_out > 0)) | tee -a $TEST_RESULTS
+}
+
+function run_topo {
     type=$1
     devices=$2
-    echo "Generate system topology for system $type and $devices devices"
-    generate_system $devices
-    echo "Running DAQ tests"
-    cmd/run -s site_description=$type device_specs=misc/device_specs_topo_$type.json
-    # TODO: include additional test results checks and print them in test results file
-    # For reference, faux devices MAC addresses are in the form 9a:02:57:1e:8f:XX
-    bcast=$(eval echo \$$type\_device_bcast | wc -l)
-    ucast=$(eval echo \$$type\_device_ucast | wc -l)
-    xcast=$(eval echo \$$type\_device_xcast | wc -l)
-    echo device $type $(($bcast > 2)) $(($ucast > 2)) $(($xcast > 0)) | tee -a $TEST_RESULTS
-    bcast=$(eval echo \$$type\_cntrlr_bcast | wc -l)
-    ucast=$(eval echo \$$type\_cntrlr_ucast | wc -l)
-    xcast=$(eval echo \$$type\_cntrlr_xcast | wc -l)
-    echo cntrlr $type $(($bcast > 2)) $(($ucast > 2)) $(($xcast > 0)) | tee -a $TEST_RESULTS
+
+    # Clean out in case there's an error
+    rm -rf inst/run-port-*
+
+    echo Running $type $devices | tee -a $TEST_RESULTS
+    generate_system $type $devices
+    cmd/run -s
 }
 
-# Run tests. The first option is the name of the test, the second one is the number of devices
-#test_topo one 1
-test_topo minimal 3
-#test_topo minimal_commissioning 4
-#test_topo complete 6
-#test_topo headend 11
-#test_topo two_groups 11
+run_topo minimal 3
+check_bacnet 1 2
+check_bacnet 2 3
+check_bacnet 3 1
 
 echo Done with tests | tee -a $TEST_RESULTS

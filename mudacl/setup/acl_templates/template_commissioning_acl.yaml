@@ -1,75 +1,75 @@
 ---
 acls:
-  '@from:template_commissioning_tool_acl':
+  '@from:template_commissioning_acl':
   - rule:
-      description: "type commissioning_tool rule http-frdev"
+      description: "type commissioning rule http-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:commissioning_tool"
+      dl_src: "@mac:commissioning"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_dst: 80
       actions:
         allow: 1
   - rule:
-      description: "type commissioning_tool rule https-frdev"
+      description: "type commissioning rule https-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:commissioning_tool"
+      dl_src: "@mac:commissioning"
       nw_proto: 6
       nw_dst: "@ctrl:remote-host"
       tcp_src: 443
       actions:
         allow: 1
   - rule:
-      description: "type commissioning_tool rule sox-frdev"
+      description: "type commissioning rule sox-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:commissioning_tool"
+      dl_src: "@mac:commissioning"
       nw_proto: 17
       nw_dst: "@ctrl:commissioning-tool"
       udp_src: 1876
       actions:
         allow: 1
   - rule:
-      description: "type commissioning_tool rule bacnet-frdev"
+      description: "type commissioning rule bacnet-frdev"
       dl_type: "0x0800"
-      dl_src: "@mac:commissioning_tool"
+      dl_src: "@mac:commissioning"
       nw_proto: 17
       nw_dst: "@ctrl:bacnet"
       udp_src: 47808
       udp_dst: 47808
       actions:
         allow: 1
-  '@to:template_commissioning_tool_acl':
+  '@to:template_commissioning_acl':
   - rule:
-      description: "type commissioning_tool rule http-todev"
+      description: "type commissioning rule http-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:commissioning_tool"
+      dl_dst: "@mac:commissioning"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_src: 80
       actions:
         allow: 1
   - rule:
-      description: "type commissioning_tool rule https-todev"
+      description: "type commissioning rule https-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:commissioning_tool"
+      dl_dst: "@mac:commissioning"
       nw_proto: 6
       nw_src: "@ctrl:remote-host"
       tcp_dst: 443
       actions:
         allow: 1
   - rule:
-      description: "type commissioning_tool rule sox-todev"
+      description: "type commissioning rule sox-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:commissioning_tool"
+      dl_dst: "@mac:commissioning"
       nw_proto: 17
       nw_src: "@ctrl:commissioning-tool"
       udp_dst: 1876
       actions:
         allow: 1
   - rule:
-      description: "type commissioning_tool rule bacnet-todev"
+      description: "type commissioning rule bacnet-todev"
       dl_type: "0x0800"
-      dl_dst: "@mac:commissioning_tool"
+      dl_dst: "@mac:commissioning"
       nw_proto: 17
       nw_src: "@ctrl:bacnet"
       udp_src: 47808
