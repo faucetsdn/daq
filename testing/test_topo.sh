@@ -18,6 +18,7 @@ function generate_system {
   echo sec_port=$((faux_num+1)) >> local/system.conf
 
   # Create required number of faux devices
+  iface_names=
   for iface in $(seq 1 $faux_num); do
       iface_names=${iface_names},faux-$iface
       echo autostart cmd/faux $iface discover >> $topostartup
@@ -68,5 +69,12 @@ run_topo minimal 3
 check_bacnet 1 2
 check_bacnet 2 3
 check_bacnet 3 1
+
+run_topo minimal_commissioning 4
+check_bacnet 1 2
+check_bacnet 2 3
+check_bacnet 3 1
+check_bacnet 2 4
+check_bacnet 1 4
 
 echo Done with tests | tee -a $TEST_RESULTS

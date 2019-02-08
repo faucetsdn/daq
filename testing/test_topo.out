@@ -4,4 +4,10 @@ Running minimal 3
 bacnet 01/02 1 0 1
 bacnet 02/03 0 0 1
 bacnet 03/01 0 0 1
+Running minimal_commissioning 4
+bacnet 01/02 1 0 1
+bacnet 02/03 0 0 1
+bacnet 03/01 0 0 1
+bacnet 02/04 1 0 1
+bacnet 01/04 1 0 1
 Done with tests

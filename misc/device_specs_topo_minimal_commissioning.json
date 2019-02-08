@@ -41,7 +41,7 @@
       "group": "default"
     },
     "9a:02:57:1e:8f:04": {
-      "type": "commissioning_tool",
+      "type": "commissioning",
       "group": "group-1",
       "controllers": {
         "bacnet": {
