@@ -13,9 +13,9 @@ Date:   Tue Jan 29 11:45:12 2019 -0800
 
     Release 0.9.1
 </pre>
-* Push `release` branch.
-* Switch to `master` branch and merge in `release` branch.
 * Push release tags: `git push --tags`.
-* Push `master` branch .
+* Push `release` branch.
 * Verify Travis CI build for `release` branch completes successfully.
-* Make sure `master` branch and tags are pushed to `faucet` origin.
+* Switch to `master` branch and merge in `release` branch.
+* Push `master` branch .
+* Make sure `master` branch and tags are pushed to `faucetsdn` origin.
