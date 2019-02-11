@@ -4,6 +4,8 @@
 	* Stacking topology generator.
 	* SWITCH_PORT env variable available to tests.
 	* Automatic detection of re-build required.
+	* Topology test for "commissioning".
+	* Stability improvements for network topology tests.
 * 0.9.1
 	* Adding test_config option for dynamic test configurations.
 	* Enforce gateway test group isolation.
