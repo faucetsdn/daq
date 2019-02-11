@@ -2,6 +2,8 @@
 
 source testing/test_preamble.sh
 
+NUM_DEVICES=10
+
 echo Many Tests >> $TEST_RESULTS
 
 echo source misc/system.conf > local/system.conf
@@ -10,10 +12,11 @@ manystartup=inst/startup_many.cmd
 rm -f $manystartup
 echo startup_cmds=$manystartup >> local/system.conf
 
-echo sec_port=10 >> local/system.conf
+echo monitor_scan_sec=5 >> local/system.conf
+echo sec_port=$((NUM_DEVICES+1)) >> local/system.conf
 
 ifaces=
-for iface in 1 2 3 4 5 6 7 8 9; do
+for iface in $(seq 1 $NUM_DEVICES); do
     ifaces=${ifaces},faux-$iface
     echo autostart cmd/faux $iface >> $manystartup
 done

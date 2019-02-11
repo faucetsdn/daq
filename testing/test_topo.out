@@ -1,13 +1,22 @@
 Running testing/test_topo.sh
 Topology Tests
+Running open 3
+check_socket 01 02 1 1
+check_socket 02 01 1 1
+check_bacnet 01 02 1 1 1 1
+check_bacnet 02 03 1 1 1 1
+check_bacnet 03 01 1 1 1 1
 Running minimal 3
-bacnet 01/02 1 0 1
-bacnet 02/03 0 0 1
-bacnet 03/01 0 0 1
-Running minimal_commissioning 4
-bacnet 01/02 1 0 1
-bacnet 02/03 0 0 1
-bacnet 03/01 0 0 1
-bacnet 02/04 1 0 1
-bacnet 01/04 1 0 1
+check_bacnet 01 02 1 1 1 1
+check_bacnet 02 03 0 1 1 1
+check_bacnet 03 01 1 1 1 1
+Running commissioning 4
+check_socket 01 04 0 0
+check_socket 01 02 0 0
+check_socket 04 01 0 0
+check_bacnet 01 02 1 1 1 1
+check_bacnet 01 04 1 1 1 1
+check_bacnet 02 03 0 1 1 1
+check_bacnet 02 04 1 1 1 1
+check_bacnet 03 01 1 1 1 1
 Done with tests

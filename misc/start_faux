@@ -35,6 +35,12 @@ else
     echo Running dhclient...
     dhclient -v
     ip addr show faux-eth0
+
+    # dhclient relies on systemd to update resolv.conf -- but this setup does
+    # not use systemd, so get all hacky and update manually.
+    dhcp_dns=$(fgrep DNS= /run/systemd/resolved.conf.d/isc-dhcp-v4-faux-eth0.conf)
+    echo Updating resolv.conf with $dhcp_dns
+    echo nameserver ${dhcp_dns#DNS=} > /etc/resolv.conf
 fi
 
 # Pick the one not-lo inet v4 address.
@@ -48,7 +54,7 @@ echo Faux device at $local_ip bcast $broadcast_ip
 # Setup dummy telnet listener to trigger port-scan failure
 if [ -n "${options[telnet]}" ]; then
     echo Enabling mock telnet server...
-    (while true; do echo Telnet `date`; nc -nvlt -p 23 -e `which date`; done) &
+    (while true; do echo Telnet `hostname`; nc -nvlt -p 23 -e `which hostname`; done) &
 fi
 
 if [ -n "${options[bacnet]}" ]; then
@@ -73,6 +79,14 @@ if [ -n "${options[brute]}" ]; then
 elif [ -n "${options[nobrute]}" ]; then
     echo Starting nobrute server.
     (python pentests/brute_server.py good 10000; echo Brute done.) &
+fi
+
+conf_file=/config/start_faux.sh
+if [ -f $conf_file ]; then
+    echo Loading $conf_file...
+    source $conf_file
+else
+    echo Runtime config $conf_file not found.
 fi
 
 echo Blocking for all eternety.

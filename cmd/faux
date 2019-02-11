@@ -36,16 +36,24 @@ fi
 
 echo Launching faux $FAUX_ARGS...
 
-mkdir -p $INSTDIR
-
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
     echo -n "Clensing old container "
     docker rm -f $CONTAINER
 fi
 
-docker_args="\
-        -v $INSTDIR/faux:/tmp \
-        "
+FAUXTMP=$INSTDIR/faux/$CONTAINER/tmp
+sudo rm -rf $FAUXTMP
+sudo mkdir -p $FAUXTMP
+
+docker_args="-v $FAUXTMP:/tmp"
+
+CONFIG_DIR=$ROOT/${test_config%/}/$CONTAINER
+if [ -d "$CONFIG_DIR" ]; then
+    echo Mapping config dir $CONFIG_DIR...
+    docker_args="$docker_args -v $CONFIG_DIR:/config"
+elif [ -n "$test_config" ]; then
+    echo Config dir $CONFIG_DIR not found.
+fi
 
 cid=$(docker run -d --privileged --name $CONTAINER --hostname $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)

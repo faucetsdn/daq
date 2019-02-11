@@ -24,19 +24,13 @@ else
     echo LOCAL_IP not configured, assuming no network switch.
 fi
 
-monitor_filter=/config/monitor_filter.txt
-filter_out=/tmp/monitor_filter.out
-if [ -f $monitor_filter ]; then
-    filter=$(<$monitor_filter)
-    tcpdump -en -r /scans/monitor.pcap $filter > $filter_out
-    cat $filter_out
-    count=$(wc -l < $filter_out)
-    echo Found $count from $filter
-    [ $count -gt 0 ]
+ping_runtime=/config/ping_runtime.sh
+if [ -f $ping_runtime ]; then
+    echo Executing $ping_runtime
+    source $ping_runtime
 else
-    echo $monitor_filter not found.
+    echo $ping_runtime not found.
 fi
-echo
 
 # First ping might fail b/c of warm-up delays.
 ping -n -c 5 $TARGET_IP

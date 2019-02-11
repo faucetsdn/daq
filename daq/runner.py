@@ -360,8 +360,9 @@ class DAQRunner():
         ready_devices = gateway.target_ready(target_mac)
         group_size = self.network.device_group_size(group_name)
 
-        if len(ready_devices) != group_size:
-            LOGGER.info('DHCP waiting for additional members of group %s', group_name)
+        remaining = group_size - len(ready_devices)
+        if remaining and self.run_tests:
+            LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
             return
 
         ready_trigger = True
@@ -457,7 +458,8 @@ class DAQRunner():
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
-            this_result_linger = results and self.result_linger
+            fail_linger = results or not self.fail_mode
+            this_result_linger = fail_linger and self.result_linger
             if target_gateway.result_linger or this_result_linger:
                 LOGGER.warning('Target port %d result_linger: %s', target_port, results)
                 self.active_ports[target_port] = True

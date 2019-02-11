@@ -1,1 +1,0 @@
-ether host 9a:02:57:1e:8f:02 and port 47808

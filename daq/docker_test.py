@@ -58,6 +58,8 @@ class DockerTest():
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             host = self.docker_host
             pipe = host.activate(log_name=None)
+            # Docker tests don't use DHCP, so manually set up DNS.
+            host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,

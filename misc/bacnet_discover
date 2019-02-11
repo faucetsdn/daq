@@ -4,6 +4,7 @@ JAR=bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar
 CLASS=com.serotonin.bacnet4j.test.DiscoveryTest
 TARGET="Object name = BACnet device"
 TMPOUT=`tempfile`
+BACNET_EXPECTED=
 
 if [ "$1" == "loop" ]; then
     shift
@@ -24,5 +25,16 @@ echo Scanning bacnet $broadcast_ip from $local_ip
 
 java -cp $JAR $CLASS $local_ip $broadcast_ip $subcmd | tee $TMPOUT
 
-# For testing, consider the presense of bacnet a failure.
-! fgrep "$TARGET" $TMPOUT
+bacnet_runtime=/config/bacnet_runtime.sh
+if [ -f $bacnet_runtime ]; then
+    echo Processing $bacnet_runtime
+    source $bacnet_runtime
+fi
+
+if [ -z "$BACNET_EXPECTED" ]; then
+    # For testing, consider the presense of bacnet a failure.
+    ! fgrep "$TARGET" $TMPOUT
+else
+    echo Bacnet expected!
+    fgrep "$TARGET" $TMPOUT
+fi

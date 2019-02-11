@@ -18,7 +18,7 @@ class Gateway():
     GATEWAY_OFFSET = 0
     DUMMY_OFFSET = 1
     TEST_OFFSET_START = 2
-    NUM_SET_PORTS = 4
+    NUM_SET_PORTS = 6
     SET_SPACING = 10
     _PING_RETRY_COUNT = 5
 
