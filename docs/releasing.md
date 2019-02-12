@@ -17,5 +17,5 @@ Date:   Tue Jan 29 11:45:12 2019 -0800
 * Push `release` branch.
 * Verify Travis CI build for `release` branch completes successfully.
 * Switch to `master` branch and merge in `release` branch.
-* Push `master` branch .
-* Make sure `master` branch and tags are pushed to `faucetsdn` origin.
+* Push `master` branch.
+* Make sure `master` branch _and tags_ are pushed to `faucetsdn` origin.
