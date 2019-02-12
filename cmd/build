@@ -80,7 +80,7 @@ if [ -n "$in_container" ]; then
     echo Now running in `pwd`
 fi
 
-sudo rm -rf $build_root .build_hash
+sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
 
 build_list_file=$build_root/build_list.txt
@@ -163,3 +163,4 @@ fi
 
 echo Updating .build_hash
 bin/build_hash.sh > .build_hash
+mv -f .build_files .build_built

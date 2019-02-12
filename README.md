@@ -52,9 +52,12 @@ The top-level DAQ folders correspond to the following structure:
 * `misc/`: Miscellaneous support files.
 * `mudacl/`: Utilities for managing and testing MUD network files.
 * `mud_files/`: Examples and prototype device MUD files.
+* _`out/`_: Misc transitory output files.
 * `pubber/`: Sample code for generating cloud-ingest traffic.
 * `schemas/`: Device/cloud data exchange schemas.
+* `subset/`: Subsets of device tests (e.g. penetration tests).
 * `testing/`: Scripts for system continuous integration testing.
+* `topology/`: Network topology setups.
 * `validator/`: Tools for validating data exchange schemas.
 * _`venv/`_: Dynamically downloaded python virtual environment files.
 
