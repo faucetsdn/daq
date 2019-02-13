@@ -28,6 +28,10 @@ if [ "$build_hash" != "$local_hash" ]; then
     echo Local build hash does not match, or not found.
     echo Please run cmd/build, or if you know what you\'re doing:
     echo echo $build_hash \> .build_hash
+    if [ -f .build_built ]; then
+        echo Output of: diff .build_built .build_files
+        diff .build_built .build_files || true
+    fi
     false
 fi
 

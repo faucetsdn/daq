@@ -89,6 +89,7 @@ echo > $build_list_file
     shopt -s nullglob
 
     function include {
+        echo Including tests from $1
         target=$1
         source $1
     }

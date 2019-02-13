@@ -127,10 +127,9 @@ class DAQRunner():
                 self._handle_port_learn(dpid, port, target_mac)
 
     def _handle_port_state(self, dpid, port, active):
-        LOGGER.debug('Port %s on dpid %s is active %s', port, dpid, active)
         if self.network.is_system_port(dpid, port):
             LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
-        if self.network.is_device_port(dpid, port):
+        elif self.network.is_device_port(dpid, port):
             if active != (port in self.active_ports):
                 LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
             if active:
@@ -142,6 +141,8 @@ class DAQRunner():
                     if self.active_ports[port] is not True:
                         self._direct_port_traffic(self.active_ports[port], port, None)
                     del self.active_ports[port]
+        else:
+            LOGGER.debug('Port %s on dpid %s is active %s', port, dpid, active)
 
     def _direct_port_traffic(self, mac, port, target):
         self.network.direct_port_traffic(mac, port, target)
@@ -345,31 +346,9 @@ class DAQRunner():
             self._terminate_gateway_set(gateway_set)
             return
 
-        target_host = self.mac_targets[target_mac]
-        if not target_host.is_active():
-            LOGGER.debug('DHCP device %s ignoring spurious notify', target_mac)
-            return
+        (gateway, ready_devices) = self._should_activate_target(target_mac, target_ip, gateway_set)
 
-        group_name = self._gateway_sets[gateway_set]
-        gateway = self._device_groups[group_name]
-
-        if gateway.activated:
-            LOGGER.debug('DHCP activation group %s already activated', group_name)
-            return
-
-        ready_devices = gateway.target_ready(target_mac)
-        group_size = self.network.device_group_size(group_name)
-
-        remaining = group_size - len(ready_devices)
-        if remaining and self.run_tests:
-            LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
-            return
-
-        ready_trigger = True
-        for target_mac in ready_devices:
-            ready_trigger = ready_trigger and target_host.trigger_ready()
-        if not ready_trigger:
-            LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
+        if not ready_devices:
             return
 
         gateway.activate()
@@ -379,6 +358,36 @@ class DAQRunner():
             target_ip = self._target_mac_ip[target_mac]
             triggered = target_host.trigger(state, target_ip=target_ip)
             assert triggered, 'host %s not triggered' % target_mac
+
+    def _should_activate_target(self, target_mac, target_ip, gateway_set):
+        target_host = self.mac_targets[target_mac]
+        if not target_host.is_active():
+            LOGGER.debug('DHCP device %s ignoring spurious notify', target_mac)
+            return (False, False)
+
+        group_name = self._gateway_sets[gateway_set]
+        gateway = self._device_groups[group_name]
+
+        if gateway.activated:
+            LOGGER.debug('DHCP activation group %s already activated', group_name)
+            return (False, False)
+
+        ready_devices = gateway.target_ready(target_mac)
+        group_size = self.network.device_group_size(group_name)
+
+        remaining = group_size - len(ready_devices)
+        if remaining and self.run_tests:
+            LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
+            return (False, False)
+
+        ready_trigger = True
+        for target_mac in ready_devices:
+            ready_trigger = ready_trigger and target_host.trigger_ready()
+        if not ready_trigger:
+            LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
+            return (False, False)
+
+        return (gateway, ready_devices)
 
     def _terminate_gateway_set(self, gateway_set):
         if not gateway_set in self._gateway_sets:

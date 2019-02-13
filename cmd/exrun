@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+set -o pipefail
+
 ROOT=$(realpath $(dirname $0)/..)
 MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
@@ -14,6 +16,7 @@ LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 cleanup="echo cleanup"
 skip_autostart=
+cleanup_file=inst/exrun_cleanup.cmd
 
 if [ `whoami` != root ]; then
     echo Running as root...
@@ -59,24 +62,27 @@ $ovsctl status || sudo $ovsctl start
 echo Creating fACL templates...
 bin/mudacl
 
-cleanup_file=`mktemp`
-
-function external {
-    echo -n
-}
-
 function autostart {
     tmp=`mktemp`
     echo DAQ autostart $@
     eval $@ | tee $tmp
-    grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file
+    grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file || true
 }
 
 function DAQ {
     shift # autoclean
     echo Cleanup $@
-    $@
+    $@ || true
 }
+
+sudo rm -f $cleanup_file
+if [ -n "$ext_loip" ]; then
+    autostart bin/switch_local
+elif [ -n "$ext_ctrl" ]; then
+    autostart bin/physical_sec
+fi
+
+export DAQ_SUPPRESS_PHY_SETUP=y
 
 if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
     echo Sourcing $startup_cmds...

@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+if [ -n "$DAQ_SUPPRESS_PHY_SETUP" ]; then
+    echo Suppressing startup_cmds switch_local.
+    exit 0
+fi
+
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 source misc/config_base.sh

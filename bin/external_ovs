@@ -36,19 +36,3 @@ echo Added interface link $ext_pri to $ext_sec
 echo DAQ autoclean ovs-vsctl del-br $ext_bridge
 echo DAQ autoclean ip link del $ext_pri
 
-function autostart {
-    echo -n
-}
-
-function external {
-    link=$1
-    port=$2
-    echo Adding link $link as port $port
-    sudo ovs-vsctl add-port $ext_bridge $link -- set interface $link ofport_request=$port
-    sudo ifconfig $link up || true
-}
-
-if [ -n "$startup_cmds" ]; then
-    echo Sourcing $startup_cmds...
-    source $startup_cmds
-fi

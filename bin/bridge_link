@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+bridge=$1
+link=$2
+port=$3
+sudo ovs-vsctl add-port $bridge $link -- set interface $link ofport_request=$port
+sudo ifconfig $link up
+echo Added link $link as port $port on $bridge
