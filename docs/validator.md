@@ -7,9 +7,9 @@ any policy, i.e. which schema to use when, rather just a mechanism to test and v
 The "schema set" is a configurable variable, and the system maps various events to different sub-schemas within
 that set. Direct file-based validations run against an explicitly specified sub-schema, while the dynamic PubSub
 validator dynamically chooses the sub-schema based off of message parameters. There's currently two schemas
-available, defined in the `validator/schemas/` subdirectory:
+available, defined in the `schemas/` subdirectory:
 * `simple`, which is really just there to make sure the system works.
-* [`abacab`](../validator/schemas/abacab/README.md), which is a building-oriented schema for data collection.
+* [`udmi`](../schemas/udmi/README.md), which is a building-oriented schema for data collection.
 
 ## Validation Mechanisms
 
