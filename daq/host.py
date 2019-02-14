@@ -35,6 +35,7 @@ class ConnectedHost():
     _REPORT_FORMAT = "report_%s_%s.txt"
     _TMPDIR_BASE = "inst"
     _REPORT_PREFIX = "\n#############"
+    _FAIL_BASE_FORMAT = "inst/fail_%s"
 
     def __init__(self, runner, gateway, target, config):
         self.runner = runner
@@ -68,6 +69,7 @@ class ConnectedHost():
         self._initialize_report()
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
+        self._fail_hook = config.get('fail_hook')
 
     def _initialize_tempdir(self):
         tmpdir = os.path.join(self._TMPDIR_BASE, 'run-port-%02d' % self.target_port)
@@ -348,6 +350,10 @@ class ConnectedHost():
         host_name = self.test_host.host_name if self.test_host else 'unknown'
         LOGGER.debug('test_host callback %s/%s was %s with %s',
                      self.test_name, host_name, return_code, exception)
+        if (return_code or exception) and self._fail_hook:
+            fail_file = self._FAIL_BASE_FORMAT % self.test_host.host_name
+            LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
+            os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
         self.record_result(self.test_name, code=return_code, exception=exception)
         result_path = os.path.join(self.tmpdir, 'nodes', host_name, 'return_code.txt')
         try:

@@ -4,6 +4,7 @@
 	* Fixes for broken local_switch setup and docs.
 	* Build and release documentation updates.
 	* Port debounce feature for flaky switch connections.
+	* Debugging fail_hook setting.
 * 0.9.2
 	* Stacking topology generator.
 	* SWITCH_PORT env variable available to tests.

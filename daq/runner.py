@@ -147,7 +147,7 @@ class DAQRunner():
 
     def _handle_port_state_raw(self, dpid, port, active):
         if self.network.is_system_port(dpid, port):
-            LOGGER.warning('System port %s on dpid %s is active %s', port, dpid, active)
+            LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
             return
         elif not self.network.is_device_port(dpid, port):
             LOGGER.debug('Unknown port %s on dpid %s is active %s', port, dpid, active)

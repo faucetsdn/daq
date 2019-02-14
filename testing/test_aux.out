@@ -14,4 +14,12 @@ Target port 10000 not open.
 01: ['01:nmap:1', '01:brute:1']
 02: ['02:nmap:1']
 03: []
+ctrl-br.flows
+ctrl-br.ofctl
+ext-ovs.flows
+ext-ovs.ofctl
+pri.flows
+pri.ofctl
+sec.flows
+sec.ofctl
 Done with tests
