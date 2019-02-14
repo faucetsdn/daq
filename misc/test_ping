@@ -19,7 +19,7 @@ if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
     echo Switch test with port $SWITCH_PORT.
-    ping -n -c 5 $SWITCH_IP
+    ping -n -c 10 $SWITCH_IP
 else
     echo LOCAL_IP not configured, assuming no network switch.
 fi
@@ -33,7 +33,7 @@ else
 fi
 
 # First ping might fail b/c of warm-up delays.
-ping -n -c 5 $TARGET_IP
+ping -n -c 10 $TARGET_IP
 
 echo
 echo Passed basic connectivity tests.

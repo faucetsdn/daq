@@ -3,6 +3,7 @@
 import logging
 import os
 import re
+import threading
 import time
 
 import faucet_event_client
@@ -22,6 +23,7 @@ class DAQRunner():
     class owns the main event loop and shards out work to subclasses."""
 
     MAX_GATEWAYS = 10
+    _PORT_DEBOUNCE_SEC = 5
 
     def __init__(self, config):
         self.config = config
@@ -30,6 +32,7 @@ class DAQRunner():
         self.mac_targets = {}
         self.result_sets = {}
         self.active_ports = {}
+        self._port_timers = {}
         self._device_groups = {}
         self._gateway_sets = {}
         self._target_mac_ip = {}
@@ -38,7 +41,7 @@ class DAQRunner():
         self.version = os.environ['DAQ_VERSION']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
-        self._linger_exit = False
+        self._linger_exit = 0
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.event_trigger = config.get('event_trigger', False)
@@ -49,6 +52,8 @@ class DAQRunner():
         self.run_count = 0
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
+        self._port_lock = threading.Lock()
+        self._port_debounce_sec = int(config.get('port_debounce_sec', self._PORT_DEBOUNCE_SEC))
 
         test_list = self._get_test_list(config.get('host_tests', _DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
@@ -127,22 +132,38 @@ class DAQRunner():
                 self._handle_port_learn(dpid, port, target_mac)
 
     def _handle_port_state(self, dpid, port, active):
-        if self.network.is_system_port(dpid, port):
-            LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
-        elif self.network.is_device_port(dpid, port):
-            if active != (port in self.active_ports):
-                LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
-            if active:
-                self.active_ports[port] = True
+        with self._port_lock:
+            port_key = "%s-%s" % (dpid, port)
+            if port_key in self._port_timers:
+                self._port_timers[port_key].cancel()
+                LOGGER.debug('Port timer %s cancelled', port_key)
+            if self._port_debounce_sec > 0:
+                args = (dpid, port, active)
+                timer = threading.Timer(self._port_debounce_sec, self._handle_port_state_raw, args)
+                self._port_timers[port_key] = timer
+                LOGGER.debug('Port timer %s set for %d sec', port_key, self._port_debounce_sec)
             else:
-                if port in self.port_targets:
-                    self.target_set_complete(self.port_targets[port], 'port not active')
-                if port in self.active_ports:
-                    if self.active_ports[port] is not True:
-                        self._direct_port_traffic(self.active_ports[port], port, None)
-                    del self.active_ports[port]
+                self._handle_port_state_raw(dpid, port, active)
+
+    def _handle_port_state_raw(self, dpid, port, active):
+        if self.network.is_system_port(dpid, port):
+            LOGGER.warning('System port %s on dpid %s is active %s', port, dpid, active)
+            return
+        elif not self.network.is_device_port(dpid, port):
+            LOGGER.debug('Unknown port %s on dpid %s is active %s', port, dpid, active)
+            return
+
+        if active != (port in self.active_ports):
+            LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
+        if active:
+            self.active_ports[port] = True
         else:
-            LOGGER.debug('Port %s on dpid %s is active %s', port, dpid, active)
+            if port in self.port_targets:
+                self.target_set_complete(self.port_targets[port], 'port not active')
+            if port in self.active_ports:
+                if self.active_ports[port] is not True:
+                    self._direct_port_traffic(self.active_ports[port], port, None)
+                del self.active_ports[port]
 
     def _direct_port_traffic(self, mac, port, target):
         self.network.direct_port_traffic(mac, port, target)
@@ -179,7 +200,8 @@ class DAQRunner():
                 self.faucet_events = None
                 count = self.stream_monitor.log_monitors()
                 LOGGER.warning('No active ports remaining (%d): ending test run.', count)
-            if self._linger_exit:
+            if self._linger_exit == 1:
+                self._linger_exit = 2
                 LOGGER.warning('Result linger on exit.')
             all_idle = False
         if all_idle:
@@ -453,7 +475,7 @@ class DAQRunner():
             LOGGER.warning('Suppressing further tests due to failure.')
             self.run_tests = False
             if self.result_linger:
-                self._linger_exit = True
+                self._linger_exit = 1
         self.result_sets[target_port] = result_set
 
     def _target_set_cancel(self, target_port):
@@ -467,8 +489,7 @@ class DAQRunner():
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
-            fail_linger = results or not self.fail_mode
-            this_result_linger = fail_linger and self.result_linger
+            this_result_linger = results and self.result_linger
             if target_gateway.result_linger or this_result_linger:
                 LOGGER.warning('Target port %d result_linger: %s', target_port, results)
                 self.active_ports[target_port] = True

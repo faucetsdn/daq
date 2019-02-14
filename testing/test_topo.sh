@@ -42,6 +42,7 @@ function generate {
   echo test_config=inst/runtime_conf/ >> local/system.conf
   # Don't use default monitor scan to get both src/dst traffic.
   echo monitor_scan_sec=0 >> local/system.conf
+  echo port_debounce_sec=0 >> local/system.conf
 }
 
 MAC_BASE=9a:02:57:1e:8f
