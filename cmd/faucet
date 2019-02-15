@@ -13,6 +13,19 @@ ext_ofpt=6653
 cd $ROOT
 source misc/config_base.sh
 
+if [ -n "$1" ]; then
+    CONTAINER=$1
+    INSTDIR=$INSTDIR/faucet/$CONTAINER
+    shift
+fi
+
+if [ -n "$1" ]; then
+    ext_ofpt=$1
+    shift
+fi
+
+echo Creating faucet instance $CONTAINER on port $ext_ofpt in $INSTDIR
+
 mkdir -p $INSTDIR
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then

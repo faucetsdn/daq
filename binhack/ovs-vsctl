@@ -1,0 +1,3 @@
+#!/bin/bash
+# There's a bug somewhere in xenial OVS that causes ovs-vsctl to hang sometimes.
+timeout 30 $OVSVSCTL_ORIG "$@"

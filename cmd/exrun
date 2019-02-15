@@ -14,9 +14,8 @@ export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
-cleanup="echo cleanup"
 skip_autostart=
-cleanup_file=inst/exrun_cleanup.cmd
+cleanup_file=inst/exrun_cleanup.sh
 
 if [ `whoami` != root ]; then
     echo Running as root...
@@ -52,7 +51,7 @@ if [ ! -d $FAUCET ]; then
 fi
 
 mkdir -p $INSTDIR
-rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG
+rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG $cleanup_file
 
 docker ps > /dev/null 2>&1 || service docker start
 
@@ -109,6 +108,10 @@ echo Executing: $runcmd daq/daq.py $LOCAL_CONFIG $@
 
 export PYTHONDONTWRITEBYTECODE=True
 export TERM=dumb
+
+echo Prepending $ROOT/binhack to PATH
+export OVSVSCTL_ORIG=`which ovs-vsctl`
+export PATH=$ROOT/binhack:$PATH
 
 exit_code=0
 $runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?

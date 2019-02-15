@@ -17,4 +17,5 @@ RUN bin/setup_base
 
 COPY bin/setup_dev bin/
 COPY subset/ subset/
+COPY misc/FAUCET_VERSION misc/
 RUN DAQ_CONTAINER=build bin/setup_dev

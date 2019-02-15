@@ -1,5 +1,9 @@
 {
   'faucet_yaml': '/etc/faucet/faucet.yaml',
+  'faucet_dp_mac_format': '0e:00:00:00:%02x:%02x',
+  'lacp_timeout': 5,
+  'upstream_lacp': 1,
+  'combinatorial_port_flood': true,
   'naming': {
     'tier1': '-t1sw',
     'tier2': '-t2sw',
@@ -21,6 +25,7 @@
       'type': 'prometheus'
     }
   },
+  'receive_lldp': true,
   'switch_lldp_beacon': {
     'max_per_interval': 5,
     'send_interval': 5
@@ -30,9 +35,6 @@
   },
   'loop_protect_external': true,
   'uplink_iface': {
-    'description': 'uplink access',
-    'lacp': 1,
-    'lldp_beacon': {'enable': true},
-    'loop_protect_external': true
+    'lacp': 1
   }
 }

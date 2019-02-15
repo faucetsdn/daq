@@ -1,0 +1,136 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+#############################################################
+
+function add_br {
+    bname=$1
+    dpid=$(printf %016x $2)
+    port=$3
+    sudo ovs-vsctl --if-exists del-br $bname \
+         -- add-br $bname \
+         -- set bridge $bname other_config:datapath-id=$dpid
+
+    if [ -n "$port" ]; then
+        sudo ovs-vsctl set-controller $bname tcp:127.0.0.1:$port
+    fi
+
+    echo Added $bname 0x$dpid on $port
+}
+
+function add_link {
+    br_a=$1
+    pt_a=$2
+    br_b=$3
+    pt_b=$4
+
+    iface_a=$br_a-eth$pt_a
+    iface_b=$br_b-eth$pt_b
+
+    sudo ip link del $iface_a || true
+    sudo ip link del $iface_b || true
+    sudo ip link add $iface_a type veth peer name $iface_b
+    sudo ifconfig $iface_a up
+    sudo ifconfig $iface_b up
+    sudo ovs-vsctl add-port $br_a $iface_a -- set interface $iface_a ofport_request=$pt_a
+    sudo ovs-vsctl add-port $br_b $iface_b -- set interface $iface_b ofport_request=$pt_b || true
+    echo Added $iface_a linked $iface_b
+}
+
+function add_iface {
+    br=$1
+    pt=$2
+    iface=$3
+    sudo ovs-vsctl add-port $br $iface -- set interface $iface ofport_request=$pt
+}
+
+function add_oeth {
+    br_a=$1
+    pt_a=$2
+    iface_a=$br_a-eth$pt_a
+    iface_b=$3
+
+    sudo ip link del $iface_a || true
+    sudo ip link del $iface_b || true
+    sudo ip link add $iface_a type veth peer name $iface_b
+    sudo ifconfig $iface_a up
+    sudo ovs-vsctl add-port $br_a $iface_a -- set interface $iface_a ofport_request=$pt_a
+    echo Added $iface_a linked to $iface_b
+}
+
+###########################################################
+
+sudo modprobe bonding
+
+rm -rf inst/faucet
+
+bin/generate_topology site_config=topology/nz-kiwi/site_config.json topo_dir=inst/faucet/
+
+mkdir -p inst/faucet/corp-agg
+cp misc/corp_faucet.yaml inst/faucet/corp-agg/faucet.yaml
+
+docker kill nz-kiwi-ctl1 || true
+docker kill nz-kiwi-ctl2 || true
+docker kill corp-agg || true
+
+cmd/faux 1 xdhcp
+cmd/faux 2 xdhcp
+cmd/faux 3 xdhcp
+docker exec -ti daq-faux-1 ip addr flush faux-eth0
+docker exec -ti daq-faux-1 ifconfig faux-eth0 192.168.0.1/16
+docker exec -ti daq-faux-2 ip addr flush faux-eth0
+docker exec -ti daq-faux-2 ifconfig faux-eth0 192.168.0.2/16
+docker exec -ti daq-faux-3 ip addr flush faux-eth0
+docker exec -ti daq-faux-3 ifconfig faux-eth0 192.168.0.3/16
+
+add_br t1sw1 147058198527 6653 # 0x510 6653
+add_br t2sw1 246406202821729 6653 # 0x0b1 6653
+add_br t1sw2 147058198569 6663 # 0x930 6663
+add_br t2sw2 115621717294 6663 # 0x0b2 6663
+add_br corp  0x111 6673
+
+add_oeth t1sw1 1 corp-eth10
+add_oeth t1sw1 2 corp-eth11
+
+add_link t1sw1 22 t2sw2 7
+add_link t1sw1 23 t2sw1 7
+
+add_oeth t1sw2 1 corp-eth20
+add_oeth t1sw2 2 corp-eth21
+
+add_link t1sw2 22 t2sw2 6
+add_link t1sw2 23 t2sw1 6
+
+sudo ip link del bond1 || true
+sudo ip link add bond1 type bond mode 802.3ad
+sudo ip link set bond1 up
+sudo ip link set corp-eth10 master bond1
+sudo ip link set corp-eth11 master bond1
+sudo ip link set up dev corp-eth10
+sudo ip link set up dev corp-eth11
+sudo ovs-vsctl add-port corp bond1 -- set interface bond1 ofport_request=10
+
+sudo ip link del bond2 || true
+sudo ip link add bond2 type bond mode 802.3ad
+sudo ip link set bond2 up
+sudo ip link set corp-eth20 master bond2
+sudo ip link set corp-eth21 master bond2
+sudo ip link set up dev corp-eth20
+sudo ip link set up dev corp-eth21
+sudo ovs-vsctl add-port corp bond2 -- set interface bond2 ofport_request=20
+
+add_iface t2sw1 1 faux-1
+add_iface t2sw2 1 faux-2
+add_iface corp 1 faux-3
+
+# Delay to let OVS stabilize.
+sleep 5
+
+# Now kick in faucet.
+cmd/faucet nz-kiwi-ctl1 6653
+cmd/faucet nz-kiwi-ctl2 6663
+cmd/faucet corp-agg 6673
+
+echo Done with stack setup.

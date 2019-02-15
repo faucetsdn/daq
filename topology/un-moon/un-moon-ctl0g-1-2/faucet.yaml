@@ -1,2 +1,40 @@
-include: [vlans.yaml, dps.yaml]
+dps:
+  un-moon-t1sw0g-1-2:
+    combinatorial_port_flood: true
+    dp_id: '0x223d5a0829'
+    faucet_dp_mac: 0e:00:00:00:02:01
+    hardware: GenericTFM
+    interfaces:
+      16:
+        lacp: 1
+        tagged_vlans: [323]
+      17:
+        loop_protect_external: true
+        tagged_vlans: [323]
+      18:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        stack: {dp: un-moon-t2sw0g-1-2, port: 51}
+    lacp_timeout: 5
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    stack: {priority: 1, upstream_lacp: 1}
+  un-moon-t2sw0g-1-2:
+    combinatorial_port_flood: true
+    dp_id: '0xe01aea308c61'
+    faucet_dp_mac: 0e:00:00:00:02:02
+    hardware: Allied-Telesis
+    interface_ranges:
+      1-23: {description: IoT Device, native_vlan: 323}
+    interfaces:
+      50:
+        loop_protect_external: true
+        tagged_vlans: [323]
+      51:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        stack: {dp: un-moon-t1sw0g-1-2, port: 18}
+    lacp_timeout: 5
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
 version: 2
+vlans:
+  Faucet_IoT: {description: Faucet IoT, vid: 323}

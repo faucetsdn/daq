@@ -97,7 +97,7 @@ class DAQRunner():
     def cleanup(self):
         """Cleanup instance"""
         try:
-            LOGGER.debug("Stopping network...")
+            LOGGER.info("Stopping network...")
             self.network.stop()
         except Exception as e:
             LOGGER.error('Exception: %s', e)
@@ -359,14 +359,20 @@ class DAQRunner():
         """Handle a DHCP notificaiton"""
         target_mac = target.get('mac')
         target_ip = target.get('ip')
-        self._target_mac_ip[target_mac] = target_ip
         LOGGER.debug('DHCP notify %s is %s on gw%02d (%s)', target_mac,
                      target_ip, gateway_set, str(exception))
+
         if exception:
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
             return
+
+        if not target_mac:
+            LOGGER.warning('DHCP target mac missing')
+            return
+
+        self._target_mac_ip[target_mac] = target_ip
 
         (gateway, ready_devices) = self._should_activate_target(target_mac, target_ip, gateway_set)
 
@@ -382,6 +388,10 @@ class DAQRunner():
             assert triggered, 'host %s not triggered' % target_mac
 
     def _should_activate_target(self, target_mac, target_ip, gateway_set):
+        if target_mac not in self.mac_targets:
+            LOGGER.warning('DHCP targets missing %s', target_mac)
+            return (False, False)
+
         target_host = self.mac_targets[target_mac]
         if not target_host.is_active():
             LOGGER.debug('DHCP device %s ignoring spurious notify', target_mac)
@@ -536,7 +546,9 @@ class DAQRunner():
 
     def _combine_result_set(self, set_key, result_sets):
         results = []
-        for result_set_key in result_sets:
+        result_set_keys = list(result_sets)
+        result_set_keys.sort()
+        for result_set_key in result_set_keys:
             result = result_sets[result_set_key]
             exception = self._extract_exception(result)
             code_string = result['code'] if 'code' in result else None

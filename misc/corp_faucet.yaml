@@ -1,0 +1,9 @@
+dps:
+  corp:
+    dp_id: 273
+    interfaces:
+      1: {native_vlan: 100}
+      10: {native_vlan: 100}
+      11: {native_vlan: 100}
+      20: {native_vlan: 100}
+      21: {native_vlan: 100}

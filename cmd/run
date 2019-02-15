@@ -22,7 +22,7 @@ if [ -z "$run_mode" ]; then
 fi
 
 test -f .build_hash || touch .build_hash
-build_hash=$(bin/build_hash.sh)
+build_hash=$(bin/build_hash)
 local_hash=$(< .build_hash)
 if [ "$build_hash" != "$local_hash" ]; then
     echo Local build hash does not match, or not found.
@@ -38,7 +38,9 @@ fi
 echo Starting `date`, run_mode is $run_mode
 echo Clearing previous reports...
 sudo rm -rf inst/report_*.txt inst/run-port-* $cmdrun_log
+
 mkdir -p inst
+sudo chown $USER -R inst
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@" 2>&1 | tee $cmdrun_log

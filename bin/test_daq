@@ -49,7 +49,7 @@ GOLDEN_FILE=testing/test_$DAQ_TEST.out
 TEST_RESULTS=inst/test_$DAQ_TEST.log
 
 echo Running test script $TEST_SCRIPT
-sudo TEST_RESULTS=$TEST_RESULTS DAQ_CODECOV=y $TEST_SCRIPT
+sudo PATH=$PATH TEST_RESULTS=$TEST_RESULTS DAQ_CODECOV=y $TEST_SCRIPT
 
 if [ -f .coverage ]; then
     codecov_tag=${DAQ_TEST##*/}

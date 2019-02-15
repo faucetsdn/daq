@@ -161,8 +161,9 @@ class Gateway():
             'ip': target_ip,
             'mac': target_mac
         }
-        if self._is_target_expected(target) and not exception:
-            self.runner.dhcp_notify(state, target=target, gateway_set=self.port_set)
+        if self._is_target_expected(target) or exception:
+            self.runner.dhcp_notify(state, target=target, exception=exception,
+                                    gateway_set=self.port_set)
         else:
             LOGGER.warning('Unexpected target %s for gateway %s', target_mac, self.name)
 

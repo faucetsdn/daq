@@ -7,8 +7,11 @@
 #
 
 ROOT=$(dirname $0)/..
-FAUCET=https://github.com/faucetsdn/faucet.git
-FAUCETV=$(cat $ROOT/misc/FAUCET_VERSION) || true
+cd $ROOT
+
+FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
+FAUCETB=${DAQ_FAUCET_BRANCH}
+FAUCETV=$(cat misc/FAUCET_VERSION)
 MININET=https://github.com/mininet/mininet
 MININETV=2.3.0d3
 
@@ -22,8 +25,6 @@ fi
 
 echo AG is $AG
 echo PIP is $PIP
-
-cd $ROOT
 echo Setup root is $PWD
 
 if [ "$DAQ_BUILD" == "no" ]; then
@@ -45,31 +46,24 @@ $AG install \
     ca-certificates sudo net-tools tcpdump build-essential \
     isc-dhcp-client network-manager netcat gnupg2 strace \
     python3 python3-pkg-resources python3-setuptools python3-dev \
-    python3-pip openjdk-8-jdk python
+    python3-pip openjdk-8-jdk python emacs-nox python3-venv
 
-# Fix permissions in case they have wandered...
-test -f venv && sudo chown `stat . -c %u:%g` -R venv/
-
-# Ubuntu Trusty (used by Travis CI) has some different package names!
-if [ "$release" == "trusty" ]; then
-    $AG install emacs24-nox
-    $PIP install virtualenv
-    python3 -m virtualenv venv
-else
-    $AG install emacs-nox python3-venv
-    python3 -m venv venv
-fi
-
-echo Running in container $DAQ_CONTAINER
 # Can't use venv inside of containers because of absolute paths.
-if [ -z "$DAQ_CONTAINER" ]; then
+if [ -n "$DAQ_CONTAINER" -o -n "$TRAVIS" ]; then
+    echo Skipping venv activation.
+    mkdir -p venv/bin
+    touch venv/bin/activate
+else
+    # Fix permissions in case they have wandered...
+    test -f venv && sudo chown `stat . -c %u:%g` -R venv/
+    python3 -m venv venv
     source venv/bin/activate
 fi
 
 echo Installing python dependencies...
 $PIP install wheel
 $PIP install --index-url=https://pypi.python.org/simple pylint \
-    netifaces pyyaml codecov firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+    netifaces pyyaml codecov coverage firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -92,12 +86,23 @@ else
     )
 fi
 
+echo Resetting .cache directory permissions...
+test -n "$USER" && sudo chown $USER -R $HOME/.cache
+
 if [ -d faucet ]; then
     echo faucet already installed, skipping.
 elif [ -z "$FAUCETV" ]; then
     echo No faucet version found, skipping.
 else
-    echo Cloning $FAUCET $FAUCETV...
-    git clone -n $FAUCET faucet
-    (cd faucet; git reset --hard $FAUCETV)
+    echo Cloning $FAUCETR...
+    git clone -n $FAUCETR faucet
+    if [ -n "$FAUCETB" ]; then
+        echo Switching to branch $FAUCETB...
+        (cd faucet; git checkout $FAUCETB --)
+        (cd faucet; git rev-list -n 1 HEAD) > misc/FAUCET_VERSION
+        echo Updated FAUCET_VERSION to $(cat misc/FAUCET_VERSION)
+    else
+        echo Forcing faucet commit $FAUCETV
+        (cd faucet; git reset --hard $FAUCETV)
+    fi
 fi
