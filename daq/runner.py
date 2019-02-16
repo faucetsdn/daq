@@ -3,8 +3,8 @@
 import logging
 import os
 import re
-import threading
 import time
+import traceback
 
 import faucet_event_client
 import gateway as gateway_manager
@@ -23,7 +23,6 @@ class DAQRunner():
     class owns the main event loop and shards out work to subclasses."""
 
     MAX_GATEWAYS = 10
-    _PORT_DEBOUNCE_SEC = 5
 
     def __init__(self, config):
         self.config = config
@@ -32,7 +31,6 @@ class DAQRunner():
         self.mac_targets = {}
         self.result_sets = {}
         self.active_ports = {}
-        self._port_timers = {}
         self._device_groups = {}
         self._gateway_sets = {}
         self._target_mac_ip = {}
@@ -52,8 +50,6 @@ class DAQRunner():
         self.run_count = 0
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
-        self._port_lock = threading.Lock()
-        self._port_debounce_sec = int(config.get('port_debounce_sec', self._PORT_DEBOUNCE_SEC))
 
         test_list = self._get_test_list(config.get('host_tests', _DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
@@ -63,8 +59,9 @@ class DAQRunner():
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
-        while self.faucet_events.next_event():
-            pass
+        if self.faucet_events:
+            while self.faucet_events.next_event():
+                pass
 
     def _open_result_log(self):
         return open(RESULT_LOG_FILE, 'w')
@@ -86,8 +83,8 @@ class DAQRunner():
         self.network.initialize()
 
         LOGGER.debug("Attaching event channel...")
-        self.faucet_events = faucet_event_client.FaucetEventClient()
-        self.faucet_events.connect(os.getenv('FAUCET_EVENT_SOCK'))
+        self.faucet_events = faucet_event_client.FaucetEventClient(self.config)
+        self.faucet_events.connect()
 
         LOGGER.info("Waiting for system to settle...")
         time.sleep(3)
@@ -118,8 +115,8 @@ class DAQRunner():
         """Get the internal interface for the host"""
         return self.network.get_host_interface(host)
 
-    def _handle_faucet_event(self):
-        while True:
+    def _handle_faucet_events(self):
+        while self.faucet_events:
             event = self.faucet_events.next_event()
             LOGGER.debug('Faucet event %s', event)
             if not event:
@@ -132,20 +129,6 @@ class DAQRunner():
                 self._handle_port_learn(dpid, port, target_mac)
 
     def _handle_port_state(self, dpid, port, active):
-        with self._port_lock:
-            port_key = "%s-%s" % (dpid, port)
-            if port_key in self._port_timers:
-                self._port_timers[port_key].cancel()
-                LOGGER.debug('Port timer %s cancelled', port_key)
-            if self._port_debounce_sec > 0:
-                args = (dpid, port, active)
-                timer = threading.Timer(self._port_debounce_sec, self._handle_port_state_raw, args)
-                self._port_timers[port_key] = timer
-                LOGGER.debug('Port timer %s set for %d sec', port_key, self._port_debounce_sec)
-            else:
-                self._handle_port_state_raw(dpid, port, active)
-
-    def _handle_port_state_raw(self, dpid, port, active):
         if self.network.is_system_port(dpid, port):
             LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
             return
@@ -156,7 +139,8 @@ class DAQRunner():
         if active != (port in self.active_ports):
             LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
         if active:
-            self.active_ports[port] = True
+            if not self.active_ports.get(port):
+                self.active_ports[port] = True
         else:
             if port in self.port_targets:
                 self.target_set_complete(self.port_targets[port], 'port not active')
@@ -177,6 +161,8 @@ class DAQRunner():
             LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
 
     def _handle_system_idle(self):
+        # Some synthetic faucet events don't come in on the socket, so process them here.
+        self._handle_faucet_events()
         all_idle = True
         # Iterate over copy of list to prevent fail-on-modification.
         for target_set in list(self.port_targets.values()):
@@ -225,7 +211,7 @@ class DAQRunner():
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
                                                    loop_hook=self._loop_hook)
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_event)
+            self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events)
             if self.event_trigger:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
@@ -460,6 +446,7 @@ class DAQRunner():
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
         LOGGER.warning('Target port %d (%s) exception: %s', target_port, active, e)
+        LOGGER.error('Exception: %s', ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)))
         if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)

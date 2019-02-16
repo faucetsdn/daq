@@ -51,7 +51,7 @@ class DAQ:
                 else:
                     _read_config_into(arg, config)
         self.config = config
-        print('Configuration map: %s', config)
+        print('Configuration map:', config)
 
     def configure_logging(self):
         """Configure logging"""
