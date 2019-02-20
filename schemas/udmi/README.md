@@ -1,10 +1,11 @@
-# UDMI Schema Target
+# UDMI Schema
 
 The Universal Device Management Interface (UDMI) provides a high-level specification for the
 management and operation of physical IoT systems. This data is typically exchanged
 with a cloud entity that can maintain a "digital twin" or "shadow device" in the cloud.
 Nominally meant for use with [Googe's Cloud IoT Core](https://cloud.google.com/iot/docs/),
-as a schema it can be applied to any set of data or hosting setup.
+as a schema it can be applied to any set of data or hosting setup. Additionally, the schema
+has provisions for basic telemetry ingestion, such as datapoint streaming from an IoT device.
 
 By deisgn, this schema is intended to be:
 * <b>U</b>niversal: Apply to all subsystems in a building, not a singular vertical solution.
@@ -22,8 +23,9 @@ manual operation (aren't automated), and increase the security exposure of the s
 (since they need to expose these management ports).
 
 UDMI is intended to support a few primary use-cases:
+* _Telemetry Ingestion_: Ingest device data points in a standardized format.
 * _Device Testability_: e.g. Trigger a fake alarm to test reporting mechanims.
-* _Commissioning Tools_: Streamline system install and setup.
+* _Commissioning Tools_: Streamline complete system setup and install.
 * _Operational Diagnostics_: Make it easy for system operators to diagnoe basic faults.
 * _Status and Logging_: Report system operational metrics to hosting infrastructure.
 * _Key Rotation_: Manage encryption keys and certificates in accordance with best practice.

@@ -9,14 +9,14 @@ Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/da
 list for ongoing discussion about using DAQ for enterprise IoT devices.
 
 There are several main categories of capabilities that DAQ addresses:
-* [_Individual device automated qualification and testing_](docs/qualification.md):
+* [_Device automated qualification and testing_](docs/qualification.md):
 Testing the behavior of a device against established security and network standards.
 More details about the goals and objectives behind this can be found in the IEEE Computer article
 [Taming the IoT: Operationalized Testing to Secure Connected Devices](https://www.computer.org/csdl/mags/co/2018/06/mco2018060090-abs.html).
-* [_Network security microsegmentation flow management_](docs/mudacl.md): Use standard
+* [_Network security orchestration_](docs/orchestration.md): Use standard
 [SDN capabilities](https://queue.acm.org/detail.cfm?id=2560327), such as the
-[FAUCET OpenFlow controller](https://faucet.nz/), to automatically configure network to enforce
-tight "microsegmentation" on the network.
+[FAUCET OpenFlow controller](https://faucet.nz/), to orchestrate "microsegmentation" on
+the network for improved security.
 * [_Universal Device Management Interface (UDMI)_](schemas/udmi/README.md): An interface
 specification designed to normalize the management of IoT devices from different manufacturers.
 This is a simple standard that provides for many of the common features not present in
