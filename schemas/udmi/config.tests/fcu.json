@@ -8,16 +8,17 @@
   "pointset": {
     "points": {
       "space_temperature_sensor": {
+        "min_update_ms": 2000
       },
       "fan_run_status": {
         "force_value": true
       },
       "fan_run_enable": {
-        "min_update_ms": 2000,
+        "min_update_ms": 3000,
+        "force_value": false
       },
        "chilled_water_valve_percentage_command": {
-        "min_update_ms": 1000,
-        "force_value": 150
+        "min_update_ms": 1000
       }
     }
   }
