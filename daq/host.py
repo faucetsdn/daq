@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import pytz
 import shutil
 import time
 
@@ -303,18 +304,21 @@ class ConnectedHost():
             self.runner.target_set_error(self.target_port, e)
 
     def _initialize_report(self):
-        report_timestamp = datetime.datetime.now().replace(microsecond=0).isoformat()
+        report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
         report_filename = self._REPORT_FORMAT % (self.target_mac.replace(':', ''),
-                                                 report_timestamp)
+                                                 report_when.isoformat().replace(':', ''))
         report_path = os.path.join(self._TMPDIR_BASE, report_filename)
 
         LOGGER.info('Creating report as %s', report_path)
         self._report_path = report_path
         self._report_file = open(report_path, "w")
         self._report_file.write('DAQ scan report for device %s\n' % self.target_mac)
+        self._report_file.write('Started %s' % report_when)
+        self._report_file.flush()
 
     def _report_write(self, msg):
         self._report_file.write('%s %s\n' % (self._REPORT_PREFIX, msg))
+        self._report_file.flush()
 
     def _finalize_report(self):
         LOGGER.info('Finalizing report %s', self._report_path)
@@ -366,6 +370,7 @@ class ConnectedHost():
             self._report_write('Report for test %s' % self.test_name)
             with open(report_path, 'r') as report_stream:
                 shutil.copyfileobj(report_stream, self._report_file)
+            self._report_file.flush()
         self.test_host = None
         self.runner.release_test_port(self.target_port, self.test_port)
         if exception:
