@@ -4,6 +4,8 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const PubSub = require(`@google-cloud/pubsub`);
+const pubsub = new PubSub();
 
 const EXPIRY_MS = 1000 * 60 * 60 * 24;
 
@@ -72,7 +74,7 @@ function get_device_doc(registryId, deviceId) {
   return dev;
 }
 
-exports.device_telemetry = functions.pubsub.topic('telemetry').onPublish((event) => {
+exports.device_telemetry = functions.pubsub.topic('target').onPublish((event) => {
   const registryId = event.attributes.deviceRegistryId;
   const deviceId = event.attributes.deviceId;
   const base64 = event.data;
@@ -89,17 +91,36 @@ exports.device_telemetry = functions.pubsub.topic('telemetry').onPublish((event)
   return null;
 });
 
-exports.device_state = functions.pubsub.topic('device_state').onPublish((event) => {
-  const registryId = event.attributes.deviceRegistryId;
-  const deviceId = event.attributes.deviceId;
+exports.device_state = functions.pubsub.topic('state').onPublish((event) => {
+  const attributes = event.attributes;
+  const registryId = attributes.deviceRegistryId;
+  const deviceId = attributes.deviceId;
   const base64 = event.data;
   const msgString = Buffer.from(base64, 'base64').toString();
   const msgObject = JSON.parse(msgString);
 
-  device_doc = get_device_doc(registryId, deviceId).collection('state').doc('latest');
+  console.log(`Processing state update for ${deviceId}`, msgObject);
 
-  console.log(deviceId, msgObject);
+  attributes.subFolder = 'state';
+  publishPubsubMessage('target', msgObject, attributes);
+
+  device_doc = get_device_doc(registryId, deviceId).collection('state').doc('latest');
   device_doc.set(msgObject);
 
   return null;
 });
+
+function publishPubsubMessage(topicName, data, attributes) {
+  const dataBuffer = Buffer.from(JSON.stringify(data));
+
+  pubsub
+    .topic(topicName)
+    .publisher()
+    .publish(dataBuffer, attributes)
+    .then(messageId => {
+      console.debug(`Message ${messageId} published to ${topicName}.`);
+    })
+    .catch(err => {
+      console.error('publishing error:', err);
+    });
+}

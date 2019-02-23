@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/../..)
+cd $ROOT
+
+java -jar pubber/build/libs/pubber-1.0-SNAPSHOT-all.jar local/pubber.json

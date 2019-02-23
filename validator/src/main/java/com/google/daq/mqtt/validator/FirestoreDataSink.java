@@ -6,6 +6,7 @@ import com.google.cloud.ServiceOptions;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.common.base.Preconditions;
 import com.google.daq.mqtt.validator.ExceptionMap.ErrorTree;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,8 +65,12 @@ class FirestoreDataSink {
     if (oldError.get() != null) {
       throw oldError.getAndSet(null);
     }
+
     try {
       String registryId = attributes.get("deviceRegistryId");
+      Preconditions.checkNotNull(deviceId, "deviceId attribute not defined");
+      Preconditions.checkNotNull(schemaId, "schemaId not properly defined");
+      Preconditions.checkNotNull(registryId, "deviceRegistryId attribute not defined");
       String instantNow = dateTimeFormatter.format(Instant.now());
       DocumentReference registryDoc = db.collection("registries").document(registryId);
       registryDoc.update("validated", instantNow);

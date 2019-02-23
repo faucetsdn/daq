@@ -15,9 +15,9 @@ mininet/
 local/
 firebase/.firebaserc
 firebase/.firebase
-**/node_modules/
 firebase/functions/package-lock.json
 nohup.out
+**/node_modules/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

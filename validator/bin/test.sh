@@ -7,7 +7,7 @@ bin/build.sh
 
 schema_root=../schemas
 
-errorfile=`tempfile`
+errorfile=`mktemp`
 rm -f $errorfile
 
 build=y

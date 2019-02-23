@@ -1,0 +1,12 @@
+{
+  "name": "firebase_write",
+  "version": "0.0.1",
+  "engines": {
+    "node": "^8"
+  },
+  "author": "Google LLC",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "firebase-admin": "~6.0.0"
+  }
+}

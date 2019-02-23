@@ -9,11 +9,14 @@ that set. Direct file-based validations run against an explicitly specified sub-
 validator dynamically chooses the sub-schema based off of message parameters. There's currently two schemas
 available, defined in the `schemas/` subdirectory:
 * `simple`, which is really just there to make sure the system works.
-* [`udmi`](../schemas/udmi/README.md), which is a building-oriented schema for data collection.
+* [`UDMI`](../schemas/udmi/README.md), which is a building-oriented schema for data collection.
 
 ## Validation Mechanisms
 
-There are several different ways to run the validator depending on your specific objective, outlined below.
+There are several different ways to run the validator depending on your specific objective:
+* Local File Validation
+* Integration Testing
+* PubSub Stream Validation
 
 ### Local File Validation
 
@@ -23,14 +26,12 @@ Specifying a directory, rather than a specific schema or input, will run against
 An output file is generated that has details about the schema validation result.
 
 <pre>
-~/daq/validator$ <b>bin/run.sh schemas/simple/simple.json schemas/simple/simple.tests/example.json</b>
-
-BUILD SUCCESSFUL in 3s
-2 actionable tasks: 2 executed
+~/daq$ <b>validator/bin/run.sh schemas/simple/simple.json schemas/simple/simple.tests/example.json</b>
 Executing validator schemas/simple/simple.json schemas/simple/simple.tests/example.json...
-Running schema simple.json in /home/user/daq/validator/schemas/simple
+Running schema simple.json in /home/user/daq/schemas/simple
 Validating example.json against simple.json
 Validation complete, exit 0
+~/daq$
 </pre>
 
 ### Integration Testing
@@ -59,14 +60,20 @@ Done with validation.
 
 ### PubSub Stream Validation
 
-Streaming validation validates a stream of messages pulled from a GCP PubSub topic. There are three values required
-in the `local/system.conf` file to make it work:
+Validating a live PubSub stream requires more setup, but ultimately most closely reflects what an
+actual system would be doing during operation. The [DAQ PubSub Documentation](pubsub.md) details
+how to set this up. It uses the same underlying schema files as the techniques above, but routes
+it though a live stream in the cloud.
+
+Streaming validation validates a stream of messages pulled from a GCP PubSub topic.
+There are three configuration values required in the `local/system.conf` file to make it work:
 * `gcp_cred`: The service account credentials, as per the general [DAQ Firebase setup](firebase.md).
 * `gcp_topic`: The _PubSub_ (not MQTT) topic name.
 * `gcp_schema`: Indicates which schema to validate against.
 
 You will need to add full Project Editor permissions for the service account.
-E.g., to validate messages on the `projects/gcp-account/topics/telemetry` topic, there should be something like:
+E.g., to validate messages on the `projects/gcp-account/topics/telemetry` topic,
+there should be something like:
 
 <pre>
 ~/daq$ <b>fgrep gcp_ local/system.conf</b>

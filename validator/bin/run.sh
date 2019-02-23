@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
-ROOT=$(dirname $0)/..
+ROOT=$(dirname $0)/../..
 cd $ROOT
 
-jarfile=$(realpath build/libs/validator-1.0-SNAPSHOT-all.jar)
+jarfile=validator/build/libs/validator-1.0-SNAPSHOT-all.jar
 
 if [ -z "$1" -o -z "$2" ]; then
     echo Usage: $0 [schema] [target]
@@ -13,6 +13,11 @@ fi
 schema=$1
 target=$2
 ignoreset=$3
+
+if [ ! -f $jarfile ]; then
+    echo Building validator...
+    validator/bin/build.sh
+fi
 
 echo Executing validator $schema $target...
 
@@ -32,7 +37,8 @@ echo Running schema $schemafile in $schemadir
 rm -rf $schemadir/out
 
 error=0
-(cd $schemadir; java -jar $jarfile $schemafile $target $ignoreset) || error=$?
+absjar=$(realpath $jarfile)
+(cd $schemadir; java -jar $absjar $schemafile $target $ignoreset) || error=$?
 
 echo Validation complete, exit $error
 exit $error

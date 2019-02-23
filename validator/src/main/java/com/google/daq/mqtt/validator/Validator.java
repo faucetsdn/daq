@@ -3,6 +3,7 @@ package com.google.daq.mqtt.validator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -132,12 +133,16 @@ public class Validator {
       File errorFile = new File(OUT_BASE_FILE, String.format(ERROR_FILE_FORMAT, schemaId, deviceId));
       errorFile.delete();
 
-      if (Strings.isNullOrEmpty(subFolder)
-          || ignoreSubSet.contains(subFolder)
-          || !schemaMap.containsKey(schemaId)) {
-        String missingMessage = String.format(SCHEMA_SKIP_FORMAT, schemaId, deviceId);
-        System.out.println(missingMessage);
-        OBJECT_MAPPER.writeValue(errorFile, missingMessage);
+      try {
+        Preconditions.checkNotNull(deviceId, "Missing deviceId in message");
+        if (Strings.isNullOrEmpty(subFolder)
+            || ignoreSubSet.contains(subFolder)
+            || !schemaMap.containsKey(schemaId)) {
+          throw new IllegalArgumentException(String.format(SCHEMA_SKIP_FORMAT, schemaId, deviceId));
+        }
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+        OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
         return;
       }
       try {
