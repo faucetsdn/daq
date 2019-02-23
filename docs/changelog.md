@@ -1,6 +1,7 @@
 # Changelog
 
 * Next Version
+	* Device description capability for report generation.
 	* Fixes for broken local_switch setup and docs.
 	* Build and release documentation updates.
 	* Dual stacking topology tests.

@@ -24,9 +24,9 @@ if [ -z "$run_mode" ]; then
     false
 fi
 
-echo Starting `date`, run_mode is $run_mode
-echo Clearing previous reports...
-sudo rm -rf inst/report_*.txt inst/run-port-* $cmdrun_log
+echo Starting `date`, run_mode is $run_mode.
+echo Clearing previous state...
+sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 mkdir -p inst
 sudo chown -f $USER -R inst $build_hashf $build_files || true
 

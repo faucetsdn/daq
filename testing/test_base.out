@@ -1,6 +1,25 @@
 Running testing/test_base.sh
 Base Tests
 01: []
+DAQ scan report for device 9a:02:57:1e:8f:00
+XXX
+
+Sample device description.
+By default would be in local/devices/ rather than misc/.
+
+#############
+
+Report for test nmap
+No open ports found.
+
+#############
+
+Report for test brute
+Target port 10000 not open.
+
+#############
+
+Report complete.
 Open port tests
 01: ['01:nmap:1']
 01: []
