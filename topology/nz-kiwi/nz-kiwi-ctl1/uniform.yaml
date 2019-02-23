@@ -1,0 +1,48 @@
+acls:
+  uniform_acl:
+  - rule:
+      actions: {allow: 1}
+      description: ICMP Allow
+      dl_type: '0x0800'
+      nw_proto: 1
+  - rule:
+      actions: {allow: 1}
+      description: ARP Allow
+      dl_type: '0x0806'
+  - rule:
+      actions: {allow: 1}
+      description: DHCP Allow
+      dl_type: '0x0800'
+      nw_proto: 17
+      udp_dst: 67
+      udp_src: 68
+  - rule:
+      actions: {allow: 1}
+      description: DNS Allow
+      dl_type: '0x0800'
+      nw_proto: 17
+      udp_dst: 53
+  - rule:
+      actions: {allow: 1}
+      description: DHCP Broadcast
+      dl_dst: ff:ff:ff:ff:ff:ff
+      dl_type: '0x0800'
+      nw_proto: 17
+      udp_dst: 67
+      udp_src: 68
+  - rule:
+      actions: {allow: 1}
+      description: https_to
+      dl_type: '0x0800'
+      nw_proto: 6
+      tcp_dst: 443
+  - rule:
+      actions: {allow: 1}
+      description: https_from
+      dl_type: '0x0800'
+      nw_proto: 6
+      tcp_src: 443
+  - rule:
+      actions: {allow: 0}
+      description: Default Deny
+      dl_type: '0x0800'

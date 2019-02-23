@@ -64,12 +64,11 @@ function add_oeth {
 
 sudo modprobe bonding
 
-rm -rf inst/faucet
-
-bin/generate_topology site_config=topology/nz-kiwi/site_config.json topo_dir=inst/faucet/
-
+sudo rm -rf inst/faucet
 mkdir -p inst/faucet/corp-agg
+
 cp misc/corp_faucet.yaml inst/faucet/corp-agg/faucet.yaml
+cp -a topology/nz-kiwi/* inst/faucet/
 
 docker kill nz-kiwi-ctl1 || true
 docker kill nz-kiwi-ctl2 || true
@@ -78,6 +77,7 @@ docker kill corp-agg || true
 cmd/faux 1 xdhcp
 cmd/faux 2 xdhcp
 cmd/faux 3 xdhcp
+
 docker exec -ti daq-faux-1 ip addr flush faux-eth0
 docker exec -ti daq-faux-1 ifconfig faux-eth0 192.168.0.1/16
 docker exec -ti daq-faux-2 ip addr flush faux-eth0
@@ -85,10 +85,10 @@ docker exec -ti daq-faux-2 ifconfig faux-eth0 192.168.0.2/16
 docker exec -ti daq-faux-3 ip addr flush faux-eth0
 docker exec -ti daq-faux-3 ifconfig faux-eth0 192.168.0.3/16
 
-add_br t1sw1 147058198527 6653 # 0x510 6653
-add_br t2sw1 246406202821729 6653 # 0x0b1 6653
-add_br t1sw2 147058198569 6663 # 0x930 6663
-add_br t2sw2 115621717294 6663 # 0x0b2 6663
+add_br t1sw1 177 6653 # 0x510 6653
+add_br t2sw1 2352 6653 # 0x0b1 6653
+add_br t1sw2 178 6663 # 0x930 6663
+add_br t2sw2 1296 6663 # 0x0b2 6663
 add_br corp  0x111 6673
 
 add_oeth t1sw1 1 corp-eth10

@@ -57,6 +57,12 @@ if [ -n "${options[telnet]}" ]; then
     (while true; do echo Telnet `hostname`; nc -nvlt -p 23 -e `which hostname`; done) &
 fi
 
+# Setup dummy https listener to trigger port-scan failure
+if [ -n "${options[https]}" ]; then
+    echo Enabling mock https server...
+    (while true; do echo https`hostname`; nc -nvlt -p 443 -e `which hostname`; done) &
+fi
+
 if [ -n "${options[bacnet]}" ]; then
     echo Starting bacnet loop device.
     java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar \

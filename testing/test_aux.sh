@@ -4,14 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-echo Generator tests | tee -a $TEST_RESULTS
-rm -rf topology/out
-normalize_base=topology/un-moon/un-moon-ctl0g-1-1/
-bin/generate_topology raw_topo=$normalize_base topo_dir=topology/out/normalized
-diff -r topology/out/normalized $normalize_base | tee -a $TEST_RESULTS
-bin/generate_topology site_config=topology/un-moon/site_config.json topo_dir=topology/out/generated
-diff -r topology/out/generated topology/un-moon/ | tee -a $TEST_RESULTS
-
 echo mudacl tests | tee -a $TEST_RESULTS
 mudacl/bin/test.sh
 echo Mudacl exit code $? | tee -a $TEST_RESULTS

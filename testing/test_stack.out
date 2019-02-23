@@ -1,141 +1,14 @@
 Running testing/test_stack.sh
+Generator tests
+Only in topology/nz-kiwi: site_config.json
+Only in topology/: setup.json
+Only in topology/un-moon: site_config.json
 Stacking Tests
-OVS bridge corp
-OFPT_FEATURES_REPLY (xid=0x2): dpid:0000000000000111
-n_tables:254, n_buffers:0
-capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
-actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
- 1(faux-3):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 10(bond1):
-     config:     0
-     state:      0
-     current:    10GB-FD
-     speed: 10000 Mbps now, 0 Mbps max
- 20(bond2):
-     config:     0
-     state:      0
-     current:    10GB-FD
-     speed: 10000 Mbps now, 0 Mbps max
- LOCAL(corp):
-     config:     PORT_DOWN
-     state:      LINK_DOWN
-     speed: 0 Mbps now, 0 Mbps max
-OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
-OVS bridge t1sw1
-OFPT_FEATURES_REPLY (xid=0x2): dpid:000000223d5a07ff
-n_tables:254, n_buffers:0
-capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
-actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
- 1(t1sw1-eth1):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 2(t1sw1-eth2):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 22(t1sw1-eth22):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 23(t1sw1-eth23):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- LOCAL(t1sw1):
-     config:     PORT_DOWN
-     state:      LINK_DOWN
-     speed: 0 Mbps now, 0 Mbps max
-OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
-OVS bridge t1sw2
-OFPT_FEATURES_REPLY (xid=0x2): dpid:000000223d5a0829
-n_tables:254, n_buffers:0
-capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
-actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
- 1(t1sw2-eth1):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 2(t1sw2-eth2):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 22(t1sw2-eth22):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 23(t1sw2-eth23):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- LOCAL(t1sw2):
-     config:     PORT_DOWN
-     state:      LINK_DOWN
-     speed: 0 Mbps now, 0 Mbps max
-OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
-OVS bridge t2sw1
-OFPT_FEATURES_REPLY (xid=0x2): dpid:0000e01aea308c61
-n_tables:254, n_buffers:0
-capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
-actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
- 1(faux-1):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 6(t2sw1-eth6):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 7(t2sw1-eth7):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- LOCAL(t2sw1):
-     config:     PORT_DOWN
-     state:      LINK_DOWN
-     speed: 0 Mbps now, 0 Mbps max
-OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
-OVS bridge t2sw2
-OFPT_FEATURES_REPLY (xid=0x2): dpid:0000001aeb97652e
-n_tables:254, n_buffers:0
-capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
-actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
- 1(faux-2):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 6(t2sw2-eth6):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- 7(t2sw2-eth7):
-     config:     0
-     state:      0
-     current:    10GB-FD COPPER
-     speed: 10000 Mbps now, 0 Mbps max
- LOCAL(t2sw2):
-     config:     PORT_DOWN
-     state:      LINK_DOWN
-     speed: 0 Mbps now, 0 Mbps max
-OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
 Waiting 60 sec for stack to settle
+(UNKNOWN) [192.168.0.2] 23 (?) : Connection timed out
+(UNKNOWN) [192.168.0.2] 443 (?) : Connection refused
+pcap sane 1 1 1 1
+telnet 0 0 https 0 2
 daq-faux-1: ping -c 10 192.168.0.2 10
 daq-faux-1: ping -c 10 192.168.0.3 10
 daq-faux-2: ping -c 10 192.168.0.1 10

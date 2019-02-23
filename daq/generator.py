@@ -14,6 +14,8 @@ class TopologyGenerator():
     """Topology generator for Faucet top-level configs"""
 
     _YAML_POSTFIX = '.yaml'
+    _UNIFORM_ACL_NAME = 'uniform_acl'
+    _UNIFORM_FILE_NAME = 'uniform.yaml'
 
     def __init__(self, daq_config):
         self.config = daq_config.config
@@ -56,6 +58,7 @@ class TopologyGenerator():
             target = self._make_target(domain)
             self._write_config(target, 'faucet.yaml', self._make_faucet(domain))
             self._write_config(target, 'gauge.yaml', self._make_gauge(domain))
+            self._write_config(target, self._UNIFORM_FILE_NAME, self._make_uniform())
 
     def _load_config(self, path):
         LOGGER.info('Loading %s', path)
@@ -85,10 +88,48 @@ class TopologyGenerator():
             'domain': domain
         }
 
+    def _make_uniform(self):
+        pre_rules = self._make_uniform_rules(self._setup['pre_acls'])
+        site_rules = self._make_uniform_rules(self._site.get('uniform_acls'))
+        post_rules = self._make_uniform_rules(self._setup['post_acls'])
+        return {
+            "acls": {
+                self._UNIFORM_ACL_NAME: pre_rules + site_rules + post_rules
+            }
+        }
+
+    def _make_uniform_rules(self, entries):
+        if not entries:
+            return []
+        rules = []
+        for entry in entries:
+            entry = copy.deepcopy(entry)
+
+            allow = entry.get('allow', True)
+            if 'allow' in entry:
+                del entry['allow']
+            entry['actions'] = {
+                'allow': 1 if allow else 0
+            }
+
+            if not 'dl_type' in entry:
+                entry['dl_type'] = '0x0800'
+
+            if 'tcp_src' in entry or 'tcp_dst' in entry:
+                entry['nw_proto'] = 6
+            if 'udp_src' in entry or 'udp_dst' in entry:
+                entry['nw_proto'] = 17
+
+            rules.append({
+                'rule': entry
+            })
+        return rules
+
     def _make_faucet(self, domain):
         return {
             'vlans': self._make_vlans(),
             'dps': self._make_dps(domain),
+            'include': [self._UNIFORM_FILE_NAME],
             'version': 2
         }
 
@@ -156,6 +197,7 @@ class TopologyGenerator():
     def _make_device_interface(self):
         return {
             'description': self._setup['device_description'],
+            'acl_in': self._UNIFORM_ACL_NAME,
             'native_vlan': self._site['vlan_id']
         }
 

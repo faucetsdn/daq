@@ -3,6 +3,9 @@
 ROOT=$(realpath $(dirname $0)/..)
 run_args=
 cmdrun_log=inst/cmdrun.log
+build_hashf=.build_hash
+build_files=.build_files
+build_built=.build_built
 
 cd $ROOT
 source misc/config_base.sh
@@ -21,26 +24,25 @@ if [ -z "$run_mode" ]; then
     false
 fi
 
-test -f .build_hash || touch .build_hash
-build_hash=$(bin/build_hash)
-local_hash=$(< .build_hash)
-if [ "$build_hash" != "$local_hash" ]; then
-    echo Local build hash does not match, or not found.
-    echo Please run cmd/build, or if you know what you\'re doing:
-    echo echo $build_hash \> .build_hash
-    if [ -f .build_built ]; then
-        echo Output of: diff .build_built .build_files
-        diff .build_built .build_files || true
-    fi
-    false
-fi
-
 echo Starting `date`, run_mode is $run_mode
 echo Clearing previous reports...
 sudo rm -rf inst/report_*.txt inst/run-port-* $cmdrun_log
-
 mkdir -p inst
-sudo chown $USER -R inst
+sudo chown -f $USER -R inst $build_hashf $build_files || true
+
+test -f $build_hashf || touch $build_hashf
+build_hash=$(bin/build_hash)
+local_hash=$(< $build_hashf)
+if [ "$build_hash" != "$local_hash" ]; then
+    echo Local build hash does not match, or not found.
+    echo Please run cmd/build, or if you know what you\'re doing:
+    echo echo $build_hash \> $build_hashf
+    if [ -f $build_built ]; then
+        echo Output of: diff $build_built $build_files
+        diff $build_built $build_files || true
+    fi
+    false
+fi
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args "$@" 2>&1 | tee $cmdrun_log
