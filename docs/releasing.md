@@ -4,7 +4,7 @@
 * Determine new release version (e.g. `0.9.1`) updated from `misc/RELEASE_VERSION`.
 * Update and commit new version in `misc/RELEASE_VERSION`.
 * Update and commit entries in in `docs/changelog.md`.
-* Tag new version: `git tag -a -m "$(cat misc/RELEASE_VERSION)" $(cat misc/RELEASE_VERSION)`
+* Tag new version: `git tag -a -m "$(cat misc/RELEASE_VERSION)" release-$(cat misc/RELEASE_VERSION)`
 * Check latest commit log message:
 <pre>
 ~/daq$ git log -n 1
