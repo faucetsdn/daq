@@ -98,7 +98,7 @@ echo telnet $telnet6 $telnet7 https $https6 $https7 | tee -a $TEST_RESULTS
 cat $nodes_dir/* | tee -a $TEST_RESULTS
 
 echo Faucet logs
-more inst/faucet/*/faucet.log
+more inst/faucet/*/faucet.log | cat
 echo nz-kiwi-ctl1
 docker logs nz-kiwi-ctl1 | tail
 echo nz-kiwi-ctl2

@@ -137,7 +137,7 @@ function run_test {
     fgrep :ping: inst/result.log | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
-    more inst/run-port-*/nodes/ping*/activate.log
+    more inst/run-port-*/nodes/ping*/activate.log | cat
 }
 
 generate open 3
