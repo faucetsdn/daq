@@ -1,0 +1,15 @@
+FROM daq/aardvark:latest
+
+RUN $AG update && $AG install openjdk-8-jre
+
+RUN $AG update && $AG install openjdk-8-jdk
+
+RUN $AG update && $AG install maven
+
+RUN $AG update && $AG install netcat
+
+COPY subset/switches/ switches/ 
+
+RUN cd switches && mvn clean compile assembly:single -X
+
+CMD ["./switches/test_switch"]
