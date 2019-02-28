@@ -8,10 +8,12 @@ There are three levels of device configuration:
 ## Device Descriptions
 
 Device descriptions are simple text files indexed by MAC address included in generated
-reports. Located by default in <code>local/devices/<em>MAC_ADDR</em>.txt</code>, they are
-copied unmodified into the report. See
-[`misc/9a:02:57:1e:8f:00.txt`](../misc/9a:02:57:1e:8f:00.txt)
-for an example (the base directory is configurable by the `device_path` parameter).
+reports. Located by default in
+<code>local/site/devices/<em>macaddressXX</em>/report_description.txt</code>,
+they are copied unmodified into the report. See
+[`misc/test_site/devices/9a02571e8f00/report_description.txt`](../misc/test_site/devices/9a02571e8f00/report_description.txt)
+for an example. The base site directory (`local/site`) is configurable by the
+`site_path` config parameter.
 
 ## Device Groupings
 
