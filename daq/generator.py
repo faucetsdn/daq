@@ -49,7 +49,7 @@ class TopologyGenerator():
             self._write_yaml(topo_dir, filename, loaded_yaml)
 
     def _generate_topology(self):
-        setup_config = 'topology/setup.json'
+        setup_config = self.config.get('topo_setup')
         self._setup = self._load_config(setup_config)
         site_config = self.config.get('site_config')
         assert site_config, 'site_config not defined'
@@ -159,9 +159,17 @@ class TopologyGenerator():
         t2_dp_names = list(self._make_t2_dps(domain).keys())
         return t1_dp_names + t2_dp_names
 
+    def _maybe_add(self, var, key, value):
+        if value is not None:
+            var[key] = value
+
     def _make_t1_dps(self, domain):
         t1_conf = self._site['tier1']['domains'][domain]
         dp_name = self._get_t1_dp_name(domain)
+        stack = {
+            'priority': 1
+        }
+        self._maybe_add(stack, 'upstream_lacp', self._setup.get('upstream_lacp'))
         return {
             dp_name: {
                 'dp_id': t1_conf['dp_id'],
@@ -171,10 +179,7 @@ class TopologyGenerator():
                 'lacp_timeout': self._setup['lacp_timeout'],
                 'lldp_beacon': self._get_switch_lldp_beacon(),
                 'interfaces': self._make_t1_dp_interfaces(t1_conf, domain),
-                'stack': {
-                    'priority': 1,
-                    'upstream_lacp': self._setup['upstream_lacp'],
-                }
+                'stack': stack
             }
         }
 
@@ -208,11 +213,11 @@ class TopologyGenerator():
             tier2_spec = tier1_ports[tier1_port]
             if tier2_spec['domain'] == domain:
                 interfaces.update({
-                    tier1_port:self._make_t1_stack_interface(tier2_spec)
+                    tier1_port: self._make_t1_stack_interface(tier2_spec)
                 })
             else:
                 interfaces.update({
-                    tier1_port:self._make_t2_cross_interface()
+                    tier1_port: self._make_t2_cross_interface()
                 })
 
         return interfaces
@@ -288,7 +293,7 @@ class TopologyGenerator():
 
     def _get_ctl_name(self, target):
         site_name = self._site['site_name']
-        switch_type = self._setup['naming']['ctl']
+        switch_type = self._setup['naming']['control']
         return site_name + switch_type + target.get('location', '') + target['domain']
 
     def _get_t1_dp_name(self, domain):

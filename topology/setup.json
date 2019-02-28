@@ -7,7 +7,7 @@
   'naming': {
     'tier1': '-t1sw',
     'tier2': '-t2sw',
-    'ctl': '-ctl'
+    'control': '-ctr'
   },
   'device_description': 'IoT Device',
   'vlan': {

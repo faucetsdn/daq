@@ -16,7 +16,7 @@ cap_length=20
 
 echo Generator tests | tee -a $TEST_RESULTS
 rm -rf out/topology
-normalize_base=topology/un-moon/un-moon-ctl0g-1-1/
+normalize_base=topology/un-moon/un-moon-ctr0g-1-1/
 bin/generate_topology raw_topo=$normalize_base topo_dir=out/topology/normalized
 diff -r out/topology/normalized $normalize_base | tee -a $TEST_RESULTS
 
@@ -99,10 +99,10 @@ cat $nodes_dir/* | tee -a $TEST_RESULTS
 
 echo Faucet logs
 more inst/faucet/*/faucet.log | cat
-echo nz-kiwi-ctl1
-docker logs nz-kiwi-ctl1 | tail
-echo nz-kiwi-ctl2
-docker logs nz-kiwi-ctl2 | tail
+echo nz-kiwi-ctr1
+docker logs nz-kiwi-ctr1 | tail
+echo nz-kiwi-ctr2
+docker logs nz-kiwi-ctr2 | tail
 
 echo Done with stack test. | tee -a $TEST_RESULTS
 

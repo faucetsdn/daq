@@ -70,8 +70,8 @@ mkdir -p inst/faucet/corp-agg
 cp misc/corp_faucet.yaml inst/faucet/corp-agg/faucet.yaml
 cp -a topology/nz-kiwi/* inst/faucet/
 
-docker kill nz-kiwi-ctl1 || true
-docker kill nz-kiwi-ctl2 || true
+docker kill nz-kiwi-ctr1 || true
+docker kill nz-kiwi-ctr2 || true
 docker kill corp-agg || true
 
 cmd/faux 1 xdhcp
@@ -129,8 +129,8 @@ add_iface corp 1 faux-3
 sleep 5
 
 # Now kick in faucet.
-cmd/faucet nz-kiwi-ctl1 6653
-cmd/faucet nz-kiwi-ctl2 6663
+cmd/faucet nz-kiwi-ctr1 6653
+cmd/faucet nz-kiwi-ctr2 6663
 cmd/faucet corp-agg 6673
 
 echo Done with stack setup.

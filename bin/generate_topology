@@ -17,4 +17,8 @@ else
     runcmd="python3 -u"
 fi
 
-$runcmd daq/generator.py "$@"
+if [ -z "$topo_setup" ]; then
+    topo_setup=topology/setup.json
+fi
+
+$runcmd $ROOT/daq/generator.py topo_setup=$topo_setup "$@"
