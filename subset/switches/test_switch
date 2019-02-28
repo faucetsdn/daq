@@ -9,8 +9,7 @@ if [ -n "$LOCAL_IP" ]; then
     echo Switch test with port $SWITCH_PORT.
     ping -n -c 10 $SWITCH_IP
     java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT
+    cp -r tmp/report.txt /tmp/report.txt
 else
-    echo LOCAL_IP not configured, assuming no network switch.
+    echo LOCAL_IP not configured, assuming no network switch. | tee /tmp/report.txt
 fi
-
-cp -r tmp/report.txt /tmp/report.txt

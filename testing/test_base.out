@@ -19,12 +19,17 @@ Target port 10000 not open.
 
 #############
 
+Report for test switch
+LOCAL_IP not configured, assuming no network switch.
+
+#############
+
 Report complete.
 Open port tests
 01: ['01:nmap:1']
 01: []
 External switch tests
-02: []
+02: ['02:switch:1']
     dp_id: 1
     dp_id: 4886718345
 Switch test with port 2.
