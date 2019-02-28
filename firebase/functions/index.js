@@ -4,7 +4,7 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const PubSub = require(`@google-cloud/pubsub`);
+const {PubSub} = require(`@google-cloud/pubsub`);
 const pubsub = new PubSub();
 
 const EXPIRY_MS = 1000 * 60 * 60 * 24;
