@@ -1,10 +1,10 @@
 # Releasing Instructions
 
 * Bring `release` branch to same version as `master`.
-* Determine new release version (e.g. `0.9.1`) updated from `misc/RELEASE_VERSION`.
-* Update and commit new version in `misc/RELEASE_VERSION`.
-* Update and commit entries in in `docs/changelog.md`.
-* Tag new version: `git tag -a -m "$(cat misc/RELEASE_VERSION)" release-$(cat misc/RELEASE_VERSION)`
+* Update new release version in `misc/RELEASE_VERSION`
+* Update/check headers and entries in in `docs/changelog.md`.
+* Commit changes using `git commit -a -m "release-$(cat misc/RELEASE_VERSION)"`
+* Tag new version: `git tag -a -m "release-$(cat misc/RELEASE_VERSION)" release-$(cat misc/RELEASE_VERSION)`
 * Check latest commit log message:
 <pre>
 ~/daq$ git log -n 1
@@ -14,9 +14,7 @@ Date:   Tue Jan 29 11:45:12 2019 -0800
 
     Release 0.9.1
 </pre>
+* Push `release` branch, and verify Travis CI build completes successfully.
+* Switch to `master` branch and merge in `release` branch, push to upstream repo.
 * Push release tags: `git push --tags`.
-* Push `release` branch.
-* Verify Travis CI build for `release` branch completes successfully.
-* Switch to `master` branch and merge in `release` branch.
-* Push `master` branch.
-* Make sure `master` branch _and tags_ are pushed to `faucetsdn` origin.
+* Push `master` and tags to any other origins (namely `faucetsdn/daq`).

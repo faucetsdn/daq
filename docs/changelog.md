@@ -1,6 +1,6 @@
 # Changelog
 
-* Next Version
+* 0.9.4
 	* Faucet update to 1.8.35
 	* Move device configuration data under `site_path` parameter.
 	* Switch-based tests (port errors, port negotiation)
