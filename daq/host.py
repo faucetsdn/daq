@@ -3,7 +3,6 @@
 import datetime
 import logging
 import os
-import pytz
 import shutil
 import time
 
@@ -20,7 +19,7 @@ class _STATE():
     ERROR = 'Error condition'
     INIT = 'Initizalization'
     READY = 'Ready but not active'
-    ACTIVE = 'Activated device'
+    WAITING = 'Waiting for activation'
     BASE = 'Baseline tests'
     MONITOR = 'Network monitor'
     NEXT = 'Ready for next'
@@ -120,13 +119,13 @@ class ConnectedHost():
         """Return True if this host is running active test."""
         return self.state != _STATE.ERROR and self.state != _STATE.DONE
 
-    def is_active(self):
+    def is_waiting(self):
         """Return True if this host is ready to be activated."""
-        return self.state == _STATE.ACTIVE
+        return self.state == _STATE.WAITING
 
-    def _activate(self):
+    def _prepare(self):
         LOGGER.info('Target port %d waiting for dhcp as %s', self.target_port, self.target_mac)
-        self._state_transition(_STATE.ACTIVE, _STATE.INIT)
+        self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity')
         self._push_record('info', state=self.target_mac)
         self.record_result('dhcp', state='run')
@@ -152,21 +151,28 @@ class ConnectedHost():
     def idle_handler(self):
         """Trigger events from idle state"""
         if self.state == _STATE.INIT:
-            self._activate()
+            self._prepare()
         elif self.state == _STATE.BASE:
             self._base_start()
 
     def trigger_ready(self):
         """Check if this host is ready to be triggered"""
-        if self.state != _STATE.ACTIVE:
+        if self.state != _STATE.WAITING:
             return False
         timedelta = datetime.datetime.now() - self._startup_time
         if timedelta < datetime.timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
         return True
 
-    def trigger(self, state, target_ip=None, exception=None):
+    def trigger(self, state, target_ip=None, exception=None, delta_sec=-1):
         """Handle completion of DHCP subtask"""
+        trigger_path = os.path.join(self.scan_base, 'dhcp_triggers.txt')
+        with open(trigger_path, 'a') as output_stream:
+            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        if self.target_ip:
+            LOGGER.debug('Target port %d already triggered', self.target_port)
+            assert self.target_ip == target_ip, "target_ip mismatch"
+            return True
         if not self.trigger_ready():
             LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
             return False
@@ -174,11 +180,11 @@ class ConnectedHost():
         self._push_record('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
         if exception:
-            self._state_transition(_STATE.ERROR, _STATE.ACTIVE)
+            self._state_transition(_STATE.ERROR, _STATE.WAITING)
             self.runner.target_set_error(self.target_port, exception)
         else:
             LOGGER.info('Target port %d triggered as %s', self.target_port, target_ip)
-            self._state_transition(_STATE.BASE, _STATE.ACTIVE)
+            self._state_transition(_STATE.BASE, _STATE.WAITING)
         return True
 
     def _ping_test(self, src, dst, src_addr=None):

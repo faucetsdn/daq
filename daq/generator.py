@@ -252,7 +252,6 @@ class TopologyGenerator():
 
     def _make_t2_dp(self, t2_conf, t1_port):
         t2_defaults = self._site['tier2']['defaults']
-        dp_name = self._get_t2_dp_name(t2_conf)
         return {
             'dp_id': t2_conf['dp_id'],
             'combinatorial_port_flood': self._setup['combinatorial_port_flood'],

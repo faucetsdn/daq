@@ -341,12 +341,12 @@ class DAQRunner():
             raise
         return gateway
 
-    def dhcp_notify(self, state, target=None, exception=None, gateway_set=None):
+    def dhcp_notify(self, state, target=None, exception=None, gateway_set=None, delta_sec=-1):
         """Handle a DHCP notificaiton"""
         target_mac = target.get('mac')
         target_ip = target.get('ip')
-        LOGGER.debug('DHCP notify %s is %s on gw%02d (%s)', target_mac,
-                     target_ip, gateway_set, str(exception))
+        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
+                    target_ip, gateway_set, state, str(exception), delta_sec)
 
         if exception:
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
@@ -365,30 +365,38 @@ class DAQRunner():
         if not ready_devices:
             return
 
-        gateway.activate()
-        for target_mac in ready_devices:
-            LOGGER.info('DHCP activating target %s', target_mac)
+        if ready_devices is True:
             target_host = self.mac_targets[target_mac]
-            target_ip = self._target_mac_ip[target_mac]
-            triggered = target_host.trigger(state, target_ip=target_ip)
-            assert triggered, 'host %s not triggered' % target_mac
+            target_host.trigger(state, target_ip=target_ip, delta_sec=delta_sec)
+            return
+
+        gateway.activate()
+        if len(ready_devices) > 1:
+            state = 'group'
+            delta_sec = -1
+        for ready_mac in ready_devices:
+            LOGGER.info('DHCP activating target %s', ready_mac)
+            ready_host = self.mac_targets[ready_mac]
+            ready_ip = self._target_mac_ip[ready_mac]
+            triggered = ready_host.trigger(state, target_ip=ready_ip, delta_sec=delta_sec)
+            assert triggered, 'host %s not triggered' % ready_mac
 
     def _should_activate_target(self, target_mac, target_ip, gateway_set):
         if target_mac not in self.mac_targets:
             LOGGER.warning('DHCP targets missing %s', target_mac)
             return (False, False)
 
-        target_host = self.mac_targets[target_mac]
-        if not target_host.is_active():
-            LOGGER.debug('DHCP device %s ignoring spurious notify', target_mac)
-            return (False, False)
-
         group_name = self._gateway_sets[gateway_set]
         gateway = self._device_groups[group_name]
 
         if gateway.activated:
-            LOGGER.debug('DHCP activation group %s already activated', group_name)
-            return (False, False)
+            LOGGER.info('DHCP activation group %s already activated', group_name)
+            return (gateway, True)
+
+        target_host = self.mac_targets[target_mac]
+        if not target_host.is_waiting():
+            LOGGER.info('DHCP device %s ignoring spurious notify', target_mac)
+            return (gateway, False)
 
         ready_devices = gateway.target_ready(target_mac)
         group_size = self.network.device_group_size(group_name)
@@ -396,14 +404,14 @@ class DAQRunner():
         remaining = group_size - len(ready_devices)
         if remaining and self.run_tests:
             LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
-            return (False, False)
+            return (gateway, False)
 
         ready_trigger = True
         for target_mac in ready_devices:
             ready_trigger = ready_trigger and target_host.trigger_ready()
         if not ready_trigger:
             LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
-            return (False, False)
+            return (gateway, False)
 
         return (gateway, ready_devices)
 
