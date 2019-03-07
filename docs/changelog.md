@@ -1,5 +1,7 @@
 # Changelog
 
+* New Version
+	* DHCP long switchover and dhcp request logs.
 * 0.9.4
 	* Faucet update to 1.8.35
 	* Move device configuration data under `site_path` parameter.
