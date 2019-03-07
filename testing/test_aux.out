@@ -9,6 +9,7 @@ Extended tests
 Login success!
 Failed after retries.
 Target port 10000 not open.
+dhcp requests 2 1
 01: ['01:brute:1', '01:nmap:1']
 02: ['02:nmap:1']
 03: []

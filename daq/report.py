@@ -3,9 +3,9 @@
 import datetime
 import logging
 import os
-import pytz
 import shutil
-import time
+
+import pytz
 
 LOGGER = logging.getLogger('report')
 
@@ -47,6 +47,7 @@ class ReportGenerator():
         self._file.flush()
 
     def finalize(self):
+        """finalize this report"""
         LOGGER.info('Finalizing report %s', self.path)
         self.write('Report complete.')
         self._file.close()

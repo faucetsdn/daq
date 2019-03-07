@@ -98,6 +98,7 @@ class Gateway():
 
     def activate(self):
         """Mark this gateway as activated once all hosts are present"""
+        self.host.cmd('./increase_leasetime')
         self.activated = True
         self._scan_finalize()
 
@@ -156,14 +157,14 @@ class Gateway():
         LOGGER.warning('No target match found for %s in %s', target_mac, self.name)
         return False
 
-    def _dhcp_callback(self, state, target_ip=None, target_mac=None, exception=None):
+    def _dhcp_callback(self, state, target_ip=None, target_mac=None, delta_sec=-1, exception=None):
         target = {
             'ip': target_ip,
             'mac': target_mac
         }
         if self._is_target_expected(target) or exception:
             self.runner.dhcp_notify(state, target=target, exception=exception,
-                                    gateway_set=self.port_set)
+                                    gateway_set=self.port_set, delta_sec=delta_sec)
         else:
             LOGGER.warning('Unexpected target %s for gateway %s', target_mac, self.name)
 

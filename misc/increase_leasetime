@@ -1,0 +1,10 @@
+#!/bin/bash -e
+#
+# Dynamically increase the DHCP lease time, requires killing and restarting
+# dnsmasq as per documentation (SIGHUP does not reload configuration file).
+
+sed -i s/,120s/,500s/ /etc/dnsmasq.conf
+
+kill $(cat /var/run/dnsmasq.pid)
+
+dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp

@@ -9,4 +9,6 @@ RUN $AG update && $AG install dnsmasq ethtool iptables netcat python
 
 COPY misc/start_networking .
 
+COPY misc/increase_leasetime .
+
 ENTRYPOINT ["./start_networking"]
