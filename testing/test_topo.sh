@@ -38,7 +38,7 @@ function generate {
   echo host_tests=misc/topo_tests.conf >> local/system.conf
 
   echo site_description=\"$type with $devices devices\" >> local/system.conf
-  echo device_specs=misc/device_specs_topo_$type.json >> local/system.conf
+  echo device_specs=misc/device_specs/topo_$type.json >> local/system.conf
   echo test_config=inst/runtime_conf/ >> local/system.conf
   # Don't use default monitor scan to get both src/dst traffic.
   echo monitor_scan_sec=0 >> local/system.conf

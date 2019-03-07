@@ -21,7 +21,7 @@ sed s/Started.*00:00/XXX/ inst/reports/report_9a02571e8f00_*.txt | tee -a $TEST_
     cat inst/run-port-01/nodes/nmap01/activate.log
 
     # Except with a default MUD file that blocks the port.
-    echo device_specs=misc/device_specs_simple.json >> local/system.conf
+    echo device_specs=misc/device_specs/simple.json >> local/system.conf
     cmd/run -s
     more inst/result.log | tee -a $TEST_RESULTS
     cat inst/run-port-01/nodes/nmap01/activate.log
@@ -54,7 +54,7 @@ cntrlr_xcast="$cntrlr_traffic and ether host 9a:02:57:1e:8f:03"
 
 function test_mud {
     type=$1
-    cmd/run -s device_specs=misc/device_specs_bacnet_$type.json
+    cmd/run -s device_specs=misc/device_specs/bacnet_$type.json
     echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
     bcast=$($device_bcast | wc -l)
     ucast=$($device_ucast | wc -l)
