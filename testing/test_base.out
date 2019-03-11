@@ -5,7 +5,7 @@ DAQ scan report for device 9a02571e8f00
 XXX
 
 Sample device description.
-By default would be in local/devices/ rather than misc/.
+By default would be in local/site/ rather than misc/test_site/.
 
 #############
 

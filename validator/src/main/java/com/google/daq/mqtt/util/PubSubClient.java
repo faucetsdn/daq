@@ -1,4 +1,4 @@
-package com.google.daq.mqtt.validator;
+package com.google.daq.mqtt.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,7 +23,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-class PubSubClient {
+public class PubSubClient {
 
   private static final String CONNECT_ERROR_FORMAT = "While connecting to %s/%s";
 
@@ -42,7 +42,7 @@ class PubSubClient {
 
   private Subscriber subscriber;
 
-  PubSubClient(String topicId) {
+  public PubSubClient(String topicId) {
     try {
       ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(
           PROJECT_ID, SUBSCRIPTION_NAME);
@@ -55,12 +55,12 @@ class PubSubClient {
     }
   }
 
-  boolean isActive() {
+  public boolean isActive() {
     return active.get();
   }
 
   @SuppressWarnings("unchecked")
-  void processMessage(BiConsumer<Map<String, Object>, Map<String, String>> handler) {
+  public void processMessage(BiConsumer<Map<String, Object>, Map<String, String>> handler) {
     try {
       PubsubMessage message = messages.take();
       Map<String, String> attributes = message.getAttributesMap();
@@ -91,7 +91,7 @@ class PubSubClient {
     }
   }
 
-  String getSubscriptionId() {
+  public String getSubscriptionId() {
     return subscriber.getSubscriptionNameString();
   }
 

@@ -25,4 +25,4 @@ validator/bin/build.sh
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
-validator/bin/run.sh $PWD/$gcp_schema pubsub:$gcp_topic $gcp_ignoreset
+validator/bin/validate.sh $PWD/$gcp_schema pubsub:$gcp_topic $gcp_ignoreset

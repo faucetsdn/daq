@@ -1,4 +1,4 @@
-package com.google.daq.mqtt.validator;
+package com.google.daq.mqtt.util;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -7,13 +7,13 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import org.everit.json.schema.ValidationException;
 
-class ExceptionMap extends RuntimeException {
+public class ExceptionMap extends RuntimeException {
 
   private static final byte[] NEWLINE_BYTES = "\n".getBytes();
 
   final Map<String, Exception> exceptions = new TreeMap<>();
 
-  ExceptionMap(String description) {
+  public ExceptionMap(String description) {
     super(description);
   }
 
@@ -21,19 +21,19 @@ class ExceptionMap extends RuntimeException {
     exceptions.forEach(consumer);
   }
 
-  void throwIfNotEmpty() {
+  public void throwIfNotEmpty() {
     if (!exceptions.isEmpty() || getCause() != null) {
       throw this;
     }
   }
 
-  void put(String key, Exception exception) {
+  public void put(String key, Exception exception) {
     if (exceptions.put(key, exception) != null) {
       throw new IllegalArgumentException("Exception key already defined: " + key);
     }
   }
 
-  static ErrorTree format(Exception e, String indent) {
+  public static ErrorTree format(Exception e, String indent) {
     return format(e, "", indent);
   }
 
@@ -60,7 +60,7 @@ class ExceptionMap extends RuntimeException {
     return errorTree;
   }
 
-  static class ErrorTree {
+  public static class ErrorTree {
     public String prefix;
     public String message;
     public ErrorTree cause;

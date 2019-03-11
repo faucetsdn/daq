@@ -65,7 +65,7 @@ class ConnectedHost():
         self.target_ip = None
         self.record_result('startup', state='run')
         self._report = report.ReportGenerator(os.path.join(self._TMPDIR_BASE, 'reports'),
-                                              os.path.join(config.get('site_path'), 'devices'),
+                                              os.path.join(config.get('site_path'), 'mac_addrs'),
                                               self.target_mac)
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
