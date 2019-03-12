@@ -49,7 +49,7 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
   boolean debug = false;
 
   public SwitchTelnetClientSocket(
-    String remoteIpAddress, int remotePort, SwitchInterrogator interrogator, boolean debug) {
+      String remoteIpAddress, int remotePort, SwitchInterrogator interrogator, boolean debug) {
     this.remoteIpAddress = remoteIpAddress;
     this.remotePort = remotePort;
     this.interrogator = interrogator;
@@ -418,3 +418,4 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
     }
   }
 }
+
