@@ -49,20 +49,17 @@ public class SwitchInterrogator implements Runnable {
     "show interface port1.0.",
     "show platform port port1.0.",
     "show run",
-    "show stack"
+    "show stack",
+    "show power inline power-consumption",
   };
+
+  String[] commandToggle = {"interface ethernet port1.0.", "shutdown", "no shutdown"};
 
   int interfacePos = 1;
   int platformPos = 2;
 
   String[] show_stack_expected = {
-    "ID",
-    "Pending ID",
-    "MAC address",
-    "Priority",
-    "Status",
-    "Role",
-    "\n"
+    "ID", "Pending ID", "MAC address", "Priority", "Status", "Role", "\n"
   };
 
   int[] show_stack_pointers = new int[7];
@@ -214,14 +211,10 @@ public class SwitchInterrogator implements Runnable {
       System.out.println(
           java.time.LocalTime.now() + "receiveDataLen:" + data.length() + "receiveData:" + data);
     }
-
-    Runnable runnable =
-        () -> {
-          parseData(data);
-        };
-    Thread parseThread = new Thread(runnable);
-
-    parseThread.start();
+    if (data != null) {
+      Thread parseThread = new Thread(() -> parseData(data));
+      parseThread.start();
+    }
   }
 
   private void parse_packet(String raw_data, String[] show_expected, int[] show_pointers) {
@@ -250,7 +243,8 @@ public class SwitchInterrogator implements Runnable {
     }
   }
 
-  private void parse_single(String raw_data, String[] expected_array, int[] pointers_array, String[] data_array) {
+  private void parse_single(
+      String raw_data, String[] expected_array, int[] pointers_array, String[] data_array) {
     int start = 0;
     for (int x = 0; x < expected_array.length; x++) {
       start = recursive_data(raw_data, expected_array[x], start);
@@ -285,7 +279,8 @@ public class SwitchInterrogator implements Runnable {
     }
   }
 
-  private void parse_inline(String raw_data, String[] expected, int[] pointers, String[] data_array) {
+  private void parse_inline(
+      String raw_data, String[] expected, int[] pointers, String[] data_array) {
     int start = 0;
 
     for (int x = 0; x < expected.length; x++) {
@@ -390,7 +385,8 @@ public class SwitchInterrogator implements Runnable {
                 requestFlag += 1;
               } else {
                 System.out.println("finished running configuration requests");
-                System.exit(0);
+                validateTests();
+                telnetClientSocket.disposeConnection();
               }
             } else {
               parseRequestFlag(data, requestFlag);
@@ -445,6 +441,49 @@ public class SwitchInterrogator implements Runnable {
     return data;
   }
 
+  private void validateTests() {
+    try {
+      String link_status = show_interface_data[1];
+      String dropped_packets = show_interface_data[12];
+
+      String current_speed = show_interface_data[4];
+      String configured_speed = show_interface_data[7];
+
+      String current_duplex = show_interface_data[3];
+      String configured_duplex = show_interface_data[6];
+
+      if (link_status.equals("UP") && Integer.parseInt(dropped_packets) == 0) {
+        login_report += "\nswitch.port.link=true";
+      } else {
+        login_report += "\nswitch.port.link=false";
+      }
+
+      if (current_speed != null) {
+        if (configured_speed.equals("auto") && Integer.parseInt(current_speed) >= 10) {
+          login_report += "\nswitch.port.speed=true";
+        } else {
+          login_report += "\nswitch.port.speed=false";
+        }
+      } else {
+        login_report += "\nswitch.port.speed=false";
+      }
+
+      if (current_duplex != null) {
+        if (configured_duplex.equals("auto") && current_duplex.equals("full")) {
+          login_report += "\nswitch.port.duplex=true";
+        } else {
+          login_report += "\nswitch.port.duplex=false";
+        }
+      } else {
+        login_report += "\nswitch.port.duplex=false";
+      }
+
+      writeReport();
+    } catch (Exception e) {
+      System.err.println("Exception validateTests:" + e.getMessage());
+    }
+  }
+
   private void writeReport() {
     try {
       if (debug) {
@@ -464,3 +503,4 @@ public class SwitchInterrogator implements Runnable {
     }
   }
 }
+
