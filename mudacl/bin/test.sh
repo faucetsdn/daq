@@ -8,7 +8,7 @@ OUTDIR=out
 
 ./gradlew shadow
 
-echo Running regression test.
+echo Running mudacl regression test...
 rm -rf $OUTDIR || sudo rm -rf $OUTDIR
 mkdir -p $OUTDIR/acl_templates $OUTDIR/port_acls
 

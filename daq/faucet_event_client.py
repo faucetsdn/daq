@@ -144,12 +144,6 @@ class FaucetEventClient():
                 return event
         return None
 
-    def as_ports_status(self, event):
-        """Convert the event to port status info, if applicable"""
-        if not event or 'PORTS_STATUS' not in event:
-            return (None, None)
-        return (event['dp_id'], event['PORTS_STATUS'])
-
     def _make_port_state(self, dpid, port, status, debounced=False):
         port_change = {}
         port_change['port_no'] = port
@@ -160,6 +154,18 @@ class FaucetEventClient():
         event['PORT_CHANGE'] = port_change
         event['debounced'] = debounced
         return event
+
+    def as_config_change(self, event):
+        """Convert the event to dp change info, if applicable"""
+        if not event or 'CONFIG_CHANGE' not in event:
+            return (None, None)
+        return (event['dp_id'], event['CONFIG_CHANGE'].get('restart_type'))
+
+    def as_ports_status(self, event):
+        """Convert the event to port status info, if applicable"""
+        if not event or 'PORTS_STATUS' not in event:
+            return (None, None)
+        return (event['dp_id'], event['PORTS_STATUS'])
 
     def as_port_state(self, event):
         """Convert event to a port state info, if applicable"""

@@ -21,4 +21,6 @@ if [ -z "$topo_setup" ]; then
     topo_setup=topology/setup.json
 fi
 
+python3 --version
+
 $runcmd $ROOT/daq/generator.py topo_setup=$topo_setup "$@"

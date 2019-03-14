@@ -150,6 +150,8 @@ class Gateway():
         return self.port_set * self.SET_SPACING + offset
 
     def _is_target_expected(self, target):
+        if not target:
+            return False
         target_mac = target['mac']
         for target_port in self.targets:
             if self.targets[target_port]['mac'] == target_mac:
@@ -157,16 +159,9 @@ class Gateway():
         LOGGER.warning('No target match found for %s in %s', target_mac, self.name)
         return False
 
-    def _dhcp_callback(self, state, target_ip=None, target_mac=None, delta_sec=-1, exception=None):
-        target = {
-            'ip': target_ip,
-            'mac': target_mac
-        }
+    def _dhcp_callback(self, state, target, exception=None):
         if self._is_target_expected(target) or exception:
-            self.runner.dhcp_notify(state, target=target, exception=exception,
-                                    gateway_set=self.port_set, delta_sec=delta_sec)
-        else:
-            LOGGER.warning('Unexpected target %s for gateway %s', target_mac, self.name)
+            self.runner.dhcp_notify(state, target, self.port_set, exception=exception)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)

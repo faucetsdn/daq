@@ -2,5 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 build_files=$ROOT/.build_files
-find misc/ docker/ subset/ -type f | sort | xargs sha1sum > $build_files
+faucet_version=$(cd faucet; git rev-list -n 1 HEAD)
+echo "$faucet_version  faucet/HEAD" > $build_files
+find misc/ docker/ subset/ -type f | sort | xargs sha1sum >> $build_files
 cat $build_files | sha256sum | awk '{print $1}'

@@ -53,6 +53,7 @@ if [ -n "$DAQ_CONTAINER" -o -n "$TRAVIS" ]; then
     echo Skipping venv activation.
     mkdir -p venv/bin
     touch venv/bin/activate
+    PIP="sudo -H $PIP"
 else
     # Fix permissions in case they have wandered...
     test -f venv && sudo chown `stat . -c %u:%g` -R venv/
@@ -60,10 +61,18 @@ else
     source venv/bin/activate
 fi
 
+python3 --version
+
+echo Updating pip...
+$PIP install --upgrade pip
+
 echo Installing python dependencies...
 $PIP install wheel
-$PIP install --index-url=https://pypi.python.org/simple pylint \
-    netifaces pyyaml codecov coverage firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+$PIP install --upgrade --index-url=https://pypi.python.org/simple \
+    pylint cryptography requests netifaces codecov coverage \
+    firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+
+$PIP freeze
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -90,19 +99,20 @@ echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
 
 if [ -d faucet ]; then
-    echo faucet already installed, skipping.
+    echo faucet already installed, faucet version $(cd faucet; git rev-list -n 1 HEAD)
 elif [ -z "$FAUCETV" ]; then
     echo No faucet version found, skipping.
 else
     echo Cloning $FAUCETR...
-    git clone -n $FAUCETR faucet
+    git clone $FAUCETR faucet
     if [ -n "$FAUCETB" ]; then
         echo Switching to branch $FAUCETB...
         (cd faucet; git checkout $FAUCETB --)
         (cd faucet; git rev-list -n 1 HEAD) > misc/FAUCET_VERSION
-        echo Updated FAUCET_VERSION to $(cat misc/FAUCET_VERSION)
+        (cd faucet; git status)
+        echo Updated faucet version to $(cat misc/FAUCET_VERSION)
     else
-        echo Forcing faucet commit $FAUCETV
+        echo Forcing faucet version $FAUCETV
         (cd faucet; git reset --hard $FAUCETV)
     fi
 fi
