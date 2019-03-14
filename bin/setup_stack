@@ -85,11 +85,15 @@ docker exec -ti daq-faux-2 ifconfig faux-eth0 192.168.0.2/16
 docker exec -ti daq-faux-3 ip addr flush faux-eth0
 docker exec -ti daq-faux-3 ifconfig faux-eth0 192.168.0.3/16
 
-add_br t1sw1 177 6653 # 0x510 6653
-add_br t2sw1 2352 6653 # 0x0b1 6653
-add_br t1sw2 178 6663 # 0x930 6663
-add_br t2sw2 1296 6663 # 0x0b2 6663
-add_br corp  0x111 6673
+cmd/faucet nz-kiwi-ctr1 6663
+cmd/faucet nz-kiwi-ctr2 6673
+cmd/faucet corp-agg 6683
+
+add_br t1sw1 177 6663 # 0x510 6653
+add_br t2sw1 2352 6663 # 0x0b1 6653
+add_br t1sw2 178 6673 # 0x930 6663
+add_br t2sw2 1296 6673 # 0x0b2 6663
+add_br corp  0x111 6683
 
 add_oeth t1sw1 1 corp-eth10
 add_oeth t1sw1 2 corp-eth11
@@ -125,12 +129,10 @@ add_iface t2sw1 1 faux-1
 add_iface t2sw2 1 faux-2
 add_iface corp 1 faux-3
 
+# Now restart one faucet instance to see if it goes crazy.
+cmd/faucet nz-kiwi-ctr2 6673
+
 # Delay to let OVS stabilize.
 sleep 5
-
-# Now kick in faucet.
-cmd/faucet nz-kiwi-ctr1 6653
-cmd/faucet nz-kiwi-ctr2 6663
-cmd/faucet corp-agg 6673
 
 echo Done with stack setup.

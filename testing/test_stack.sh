@@ -107,10 +107,9 @@ docker logs nz-kiwi-ctr2 | tail
 echo Done with stack test. | tee -a $TEST_RESULTS
 
 echo Cleanup bridges...
-sudo ovs-vsctl del-br corp
-sudo ovs-vsctl del-br t1sw1
-sudo ovs-vsctl del-br t1sw2
-sudo ovs-vsctl del-br t2sw1
-sudo ovs-vsctl del-br t2sw2
+for bridge in corp t1sw1 t2sw2 t2sw1 t2sw2; do
+    echo Cleaning $bridge...
+    sudo timeout 1m ovs-vsctl del-br $bridge
+done
 
 echo Done with cleanup. Goodby.

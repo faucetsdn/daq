@@ -58,7 +58,7 @@ docker ps > /dev/null 2>&1 || service docker start
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
-echo Creating fACL templates...
+echo Creating mudacl templates...
 bin/mudacl
 
 function autostart {

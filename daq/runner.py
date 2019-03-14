@@ -50,6 +50,7 @@ class DAQRunner():
         self.run_count = 0
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
+        self._system_active = False
 
         test_list = self._get_test_list(config.get('host_tests', _DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
@@ -127,12 +128,16 @@ class DAQRunner():
             (dpid, port, target_mac) = self.faucet_events.as_port_learn(event)
             if dpid and port:
                 self._handle_port_learn(dpid, port, target_mac)
+            (dpid, restart_type) = self.faucet_events.as_config_change(event)
+            if dpid is not None:
+                LOGGER.debug('dp_id %d restart %s', dpid, restart_type)
 
     def _handle_port_state(self, dpid, port, active):
         if self.network.is_system_port(dpid, port):
             LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
+            self._system_active = active
             return
-        elif not self.network.is_device_port(dpid, port):
+        if not self.network.is_device_port(dpid, port):
             LOGGER.debug('Unknown port %s on dpid %s is active %s', port, dpid, active)
             return
 
@@ -238,6 +243,10 @@ class DAQRunner():
         target_mac = self.active_ports[target_port]
         assert target_mac is not True, 'Target port %d triggered but not learned' % target_port
 
+        if not self._system_active:
+            LOGGER.warning('Target port %d ignored, system not active', target_port)
+            return False
+
         if target_port in self.port_targets:
             LOGGER.debug('Target port %d already active', target_port)
             return False
@@ -341,18 +350,19 @@ class DAQRunner():
             raise
         return gateway
 
-    def dhcp_notify(self, state, target=None, exception=None, gateway_set=None, delta_sec=-1):
+    def dhcp_notify(self, state, target, gateway_set, exception=None):
         """Handle a DHCP notificaiton"""
-        target_mac = target.get('mac')
-        target_ip = target.get('ip')
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
-                    target_ip, gateway_set, state, str(exception), delta_sec)
-
-        if exception:
+        if exception or not target:
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
             return
+
+        target_mac = target['mac']
+        target_ip = target['ip']
+        delta_sec = target['delta']
+        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
+                    target_ip, gateway_set, state, str(exception), delta_sec)
 
         if not target_mac:
             LOGGER.warning('DHCP target mac missing')
@@ -366,10 +376,12 @@ class DAQRunner():
             return
 
         if ready_devices is True:
-            target_host = self.mac_targets[target_mac]
-            target_host.trigger(state, target_ip=target_ip, delta_sec=delta_sec)
+            self.mac_targets[target_mac].trigger(state, target_ip=target_ip, delta_sec=delta_sec)
             return
 
+        self._activate_gateway(state, gateway, ready_devices, delta_sec)
+
+    def _activate_gateway(self, state, gateway, ready_devices, delta_sec):
         gateway.activate()
         if len(ready_devices) > 1:
             state = 'group'
@@ -407,8 +419,9 @@ class DAQRunner():
             return (gateway, False)
 
         ready_trigger = True
-        for target_mac in ready_devices:
-            ready_trigger = ready_trigger and target_host.trigger_ready()
+        for ready_mac in ready_devices:
+            ready_host = self.mac_targets[ready_mac]
+            ready_trigger = ready_trigger and ready_host.trigger_ready()
         if not ready_trigger:
             LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
             return (gateway, False)
@@ -454,7 +467,8 @@ class DAQRunner():
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
         LOGGER.warning('Target port %d (%s) exception: %s', target_port, active, e)
-        LOGGER.error('Exception: %s', ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)))
+        message = ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
+        LOGGER.error('Exception: %s', message)
         if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=e)

@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# Set so pipe through tee will fail.
+set -o pipefail
+
 ROOT=$(realpath $(dirname $0)/..)
 run_args=
 cmdrun_log=inst/cmdrun.log

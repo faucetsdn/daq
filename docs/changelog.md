@@ -1,5 +1,10 @@
 # Changelog
 
+* New Version
+	* Updating python packages.
+	* Forced delay after faucet config changes as workaround.
+	* Faucet performance fix for large port counts.
+	* Fix internal lint checks.
 * 0.9.4
 	* Faucet update to 1.8.35
 	* Move device configuration data under `site_path` parameter.

@@ -79,7 +79,12 @@ class DhcpMonitor():
         LOGGER.debug('DHCP monitor %s received reply after %ds: %s/%s',
                      self.name, delta, self.target_ip, self.target_mac)
         state = 'long' if delta > self.DHCP_THRESHHOLD_SEC else None
-        self.callback(state, target_ip=self.target_ip, target_mac=self.target_mac, delta_sec=delta)
+        target = {
+            'ip': self.target_ip,
+            'mac': self.target_mac,
+            'delta': delta
+        }
+        self.callback(state, target)
         self.target_ip = None
         self.target_mac = None
         self.scan_start = int(time.time())
@@ -92,4 +97,4 @@ class DhcpMonitor():
         if self.dhcp_log:
             self.dhcp_log.write('Monitor error %s\n' % e)
         self.cleanup(forget=False)
-        self.callback('error', exception=e)
+        self.callback('error', None, exception=e)

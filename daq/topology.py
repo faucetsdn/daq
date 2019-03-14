@@ -3,6 +3,7 @@
 import copy
 import logging
 import os
+import time
 import yaml
 
 from gateway import Gateway
@@ -30,6 +31,7 @@ class FaucetTopology():
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
+    _NETWORK_SETTLE_SEC = 10
     PRI_STACK_PORT = 1
     DEFAULT_VLAN = 10
 
@@ -40,6 +42,7 @@ class FaucetTopology():
         self.sec_port = int(config.get('sec_port', "7"), 0)
         self.sec_name = 'sec'
         self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
+        self._settle_sec = int(config.get('settle_sec', self._NETWORK_SETTLE_SEC))
         self._device_specs = self._load_device_specs()
         self._mac_map = {}
         self.topology = self._make_base_network_topology()
@@ -103,6 +106,9 @@ class FaucetTopology():
             LOGGER.debug('Ignoring no-change in port status for %s on %d', target_mac, port_no)
             return
         self._generate_acls()
+        if self._settle_sec:
+            LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
+            time.sleep(self._settle_sec)
 
     def _ensure_entry(self, root, key, value):
         if key not in root:
