@@ -259,7 +259,7 @@ class DAQRunner():
             group_name = self.network.device_group_for(target_mac)
             gateway = self._activate_device_group(group_name, target_port)
             if gateway.activated:
-                LOGGER.debug('Target port %d trigger deferred b/c activated gateway', target_port)
+                LOGGER.debug('Target port %d trigger ignored b/c activated gateway', target_port)
                 return False
         except Exception as e:
             LOGGER.error('Target port %d target trigger error %s', target_port, str(e))
@@ -343,6 +343,7 @@ class DAQRunner():
         try:
             gateway.initialize()
         except:
+            LOGGER.error('Cleaning up from failed gateway initialization')
             LOGGER.debug('Clearing target %s gateway group %s for %s',
                          target_port, set_num, group_name)
             del self._gateway_sets[set_num]
