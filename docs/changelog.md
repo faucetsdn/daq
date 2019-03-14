@@ -1,6 +1,7 @@
 # Changelog
 
 * New Version
+	* DHCP long switchover and dhcp request logs.
 	* Updating python packages.
 	* Forced delay after faucet config changes as workaround.
 	* Faucet performance fix for large port counts.
