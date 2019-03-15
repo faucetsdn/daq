@@ -1,9 +1,12 @@
 #!/bin/bash -e
 
+REPORT_FILE=/tmp/report.txt
+echo Baseline ping test report > $REPORT_FILE
+
 # This is a check that the startup.pcap file exists and is proper.
 echo
 ls -l /scans/startup.pcap
-echo $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured.
+echo \# $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $REPORT_FILE
 echo
 tcpdump -en -r /scans/startup.pcap ip
 echo
@@ -19,9 +22,12 @@ if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
     echo Switch test with port $SWITCH_PORT.
-    ping -n -c 10 $SWITCH_IP
+    status=pass
+    ping -n -c 10 $SWITCH_IP || status=fail
+    echo RESULT $status base.switch.ping target $SWITCH_IP:$SWITCH_PORT >> $REPORT_FILE
 else
     echo LOCAL_IP not configured, assuming no network switch.
+    echo RESULT skip base.switch.ping >> $REPORT_FILE
 fi
 
 ping_runtime=/config/ping_runtime.sh
@@ -33,7 +39,9 @@ else
 fi
 
 # First ping might fail b/c of warm-up delays.
-ping -n -c 10 $TARGET_IP
+status=pass
+ping -n -c 10 $TARGET_IP || status=fail
+echo RESULT $status base.target.ping target \# $TARGET_IP >> $REPORT_FILE
 
 echo
-echo Passed basic connectivity tests.
+echo Done with basic connectivity tests.

@@ -39,9 +39,9 @@ or cloud credentials.)
 
 After a test run, the system creates a <em>test report document</em> in a file that is named
 something like <code>inst/report_<em>macaddressXX</em>_<em>timestamp</em>.txt</code>. This file
-contains a complete summary of all the test results most germane to qualifying a device (but is not
-in iteself comprehensive). If properly configured, this report will be uploaded to the configured
-cloud instance and available for download from the Web UI.
+contains a complete summary of all the test results most germane to qualifying a device
+([complete example report](report.md)). If properly configured, this report will be uploaded to
+the configured cloud instance and available for download from the Web UI.
 
 ## Qualification Dashboard
 

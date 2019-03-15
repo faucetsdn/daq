@@ -45,6 +45,14 @@ if [ "$1" == inline ]; then
     shift
 fi
 
+if [ -n "$DAQ_TARGETS" ]; then
+    declare -A test_set
+    for target in $(echo $DAQ_TARGETS | sed 's/,/ /'); do
+        echo Enabling target $target
+        test_set[$target]=y
+    done
+fi
+
 target_version=$(cat misc/FAUCET_VERSION)
 local_version=$(cd faucet; git rev-list -n 1 HEAD)
 
@@ -127,12 +135,14 @@ for file in $docker_files; do
     logfile=$build_root/docker_build.$module
     failed=
     tag=daq/$module
-    if [ "$do_images" == skip ]; then
-        echo Skipping in-container build of daq/$module.
+    if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
+        echo Skipping non-enabled $tag
+    elif [ "$do_images" == skip ]; then
+        echo Skipping in-container build of $tag
     elif [ "$do_images" == load ]; then
         docker load -i /daq/$build_root/docker_image.$module
     else
-        echo Build$ext_msg $file into daq/$module, log to $logfile...
+        echo Build$ext_msg $file into $tag, log to $logfile...
         echo docker build -t $tag $build_args -f $file . > $logfile
         if [ -n "$inline" ]; then
             docker build -t $tag $build_args -f $file . 2>&1 | tee -a $logfile || failed=y

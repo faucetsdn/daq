@@ -1,9 +1,11 @@
 # Changelog
 
 * New Version
+	* DAQ_TARGETS env variable for incremental builds.
+	* Report file cleanup, with embedded test results.
 	* DHCP long switchover and dhcp request logs.
-	* Updating python packages.
-	* Forced delay after faucet config changes as workaround.
+	* Updating python package versions.
+	* Forced workaround delay for faucet config change race-condition.
 	* Faucet performance fix for large port counts.
 	* Fix internal lint checks.
 * 0.9.4

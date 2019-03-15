@@ -35,7 +35,6 @@ class ConnectedHost():
     _STARTUP_MIN_TIME_SEC = 5
     _TMPDIR_BASE = "inst/"
     _FAIL_BASE_FORMAT = "inst/fail_%s"
-    _TEST_PREFIX = "\n#############\n"
 
     def __init__(self, runner, gateway, target, config):
         self.runner = runner
@@ -65,7 +64,7 @@ class ConnectedHost():
         self.target_ip = None
         self.record_result('startup', state='run')
         self._report = report.ReportGenerator(os.path.join(self._TMPDIR_BASE, 'reports'),
-                                              os.path.join(config.get('site_path'), 'devices'),
+                                              os.path.join(config.get('site_path'), 'mac_addrs'),
                                               self.target_mac)
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
@@ -301,7 +300,6 @@ class ConnectedHost():
             else:
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
-                self._report.write(self._TEST_PREFIX)
                 self._report.finalize()
                 self.runner.gcp.upload_report(self._report.path)
                 self.record_result('finish', report=self._report.path)
@@ -352,9 +350,7 @@ class ConnectedHost():
             LOGGER.error('While writing result code: %s', e)
         report_path = os.path.join(self.tmpdir, 'nodes', host_name, 'tmp', 'report.txt')
         if os.path.isfile(report_path):
-            self._report.write(self._TEST_PREFIX)
-            self._report.write('Report for test %s' % self.test_name)
-            self._report.copy(report_path)
+            self._report.accumulate(self.test_name, report_path)
         self.test_host = None
         self.runner.release_test_port(self.target_port, self.test_port)
         if exception:
