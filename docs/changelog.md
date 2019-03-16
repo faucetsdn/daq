@@ -1,6 +1,6 @@
 # Changelog
 
-* New Version
+* 0.9.5
 	* DAQ_TARGETS env variable for incremental builds.
 	* Report file cleanup, with embedded test results.
 	* DHCP long switchover and dhcp request logs.
