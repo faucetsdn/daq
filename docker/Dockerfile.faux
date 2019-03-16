@@ -31,4 +31,7 @@ COPY subset/pentests/brute_server.py pentests/
 COPY misc/start_faux bin/
 COPY misc/bacnet_discover bin/
 
+# Weird workaround for problem running tcdump in a privlidged container.
+RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+
 ENTRYPOINT ["bin/start_faux"]

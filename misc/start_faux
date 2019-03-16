@@ -8,37 +8,44 @@ for option in $*; do
 done
 
 # Disable docker's built-in resolv mechanism and install standard resolvconf.
-# Can't do this at runtime since it requires permissions that aren't availble
-# at build time.
+# Do this at runtime since it requires permissions that aren't availble at build.
 umount /etc/resolv.conf
 dpkg -i resolvconf_*.deb
 
-while ! ifconfig -a | fgrep -q faux-eth0; do
-    echo Waiting for faux-eth0 to exist...
+while ! ifconfig -a | fgrep -q BROADCAST; do
+    echo Waiting for container interface to exist...
     sleep 1
 done
+
+intf_name=$(ip link | fgrep BROADCAST | sed -rn 's/^[0-9]+: ([-a-z0-9]+).*$/\1/p')
+if [ -n "$intf_name" ]; then
+    echo Local interface is $intf_name
+else
+    echo Local interface not found.
+    exit 1
+fi
 
 # To capture all the data in/out of the faux device for debugging, uncomment
 # the following lines. The pcap file will end up in inst/faux/{hostname}.pcap
 # on the DAQ controller.
 #echo Starting pcap capture...
-#tcpdump -nUi faux-eth0 -w /tmp/`hostname`.pcap &
+#tcpdump -nUi $intf_name -w /tmp/`hostname`.pcap &
 
-ip addr show faux-eth0
+ip addr show $intf_name
 
 if [ -n "${options[xdhcp]}" ]; then
     echo Assigning static ip address...
-    ip link set up dev faux-eth0
-    ip addr add 10.20.0.5/8 dev faux-eth0
-    ip addr show faux-eth0
+    ip link set up dev $intf_name
+    ip addr add 10.20.0.5/8 dev $intf_name
+    ip addr show $intf_name
 else
     echo Running dhclient...
     dhclient -v
-    ip addr show faux-eth0
+    ip addr show $intf_name
 
     # dhclient relies on systemd to update resolv.conf -- but this setup does
     # not use systemd, so get all hacky and update manually.
-    dhcp_dns=$(fgrep DNS= /run/systemd/resolved.conf.d/isc-dhcp-v4-faux-eth0.conf)
+    dhcp_dns=$(fgrep DNS= /run/systemd/resolved.conf.d/isc-dhcp-v4-$intf_name.conf)
     echo Updating resolv.conf with $dhcp_dns
     echo nameserver ${dhcp_dns#DNS=} > /etc/resolv.conf
 fi
