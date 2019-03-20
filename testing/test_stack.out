@@ -1,5 +1,6 @@
 Running testing/test_stack.sh
 Generator tests
+Only in topology/: not-normal
 Only in topology/: setup.json
 Only in topology/zz-bond: site_config.json
 Only in topology/zz-nobond: site_config.json

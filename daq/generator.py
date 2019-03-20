@@ -16,6 +16,7 @@ class TopologyGenerator():
     _YAML_POSTFIX = '.yaml'
     _UNIFORM_ACL_NAME = 'uniform_acl'
     _UNIFORM_FILE_NAME = 'uniform.yaml'
+    _INCLUDE_SET = [_UNIFORM_FILE_NAME]
 
     def __init__(self, daq_config):
         self.config = daq_config.config
@@ -40,13 +41,54 @@ class TopologyGenerator():
         topo_dir = self.config.get('topo_dir', 'inst')
         if not os.path.exists(topo_dir):
             os.makedirs(topo_dir)
+        configs = {}
         for filename in os.listdir(source_dir):
             if not filename.endswith(self._YAML_POSTFIX):
                 LOGGER.info('Skipping non-yaml file %s', filename)
                 continue
             in_path = os.path.join(source_dir, filename)
-            loaded_yaml = self._load_config(in_path)
-            self._write_yaml(topo_dir, filename, loaded_yaml)
+            configs[filename] = self._load_config(in_path)
+        self._flatten_configs(configs)
+        for config in configs:
+            self._write_yaml(topo_dir, config, configs[config])
+
+    def _flatten_configs(self, configs):
+        faucet_conf = configs['faucet.yaml']
+        assert 'include-optional' not in faucet_conf, 'can not normalize include-optional'
+        if 'include' not in faucet_conf:
+            LOGGER.info('No includes found.')
+            return
+        include_set = set(faucet_conf['include'])
+        for target in faucet_conf['include']:
+            assert target in configs, 'config target %s not found' % target
+            if target in self._INCLUDE_SET:
+                LOGGER.info('Preserving include entry %s', target)
+            else:
+                LOGGER.info('Flattening include entry %s', target)
+                self._flatten_include(faucet_conf, configs[target])
+                self._delete_config_file(target)
+                include_set.remove(target)
+                del configs[target]
+        for exclude in self._INCLUDE_SET:
+            assert exclude not in faucet_conf, 'file %s should not be included' % exclude
+        if include_set:
+            faucet_conf['include'] = list(include_set)
+        else:
+            del faucet_conf['include']
+
+    def _flatten_include(self, faucet_conf, target_conf):
+        keys = set(target_conf.keys())
+        keys.discard('version')
+        for part in keys:
+            assert part not in faucet_conf, 'faucet config already contains %s' % faucet_conf
+            faucet_conf[part] = target_conf[part]
+
+    def _delete_config_file(self, target):
+        topo_dir = self.config.get('topo_dir', 'inst')
+        target_path = os.path.join(topo_dir, target)
+        if os.path.exists(target_path):
+            LOGGER.info('Removing %s', target_path)
+            os.remove(target_path)
 
     def _generate_topology(self):
         setup_config = self.config.get('topo_setup')
