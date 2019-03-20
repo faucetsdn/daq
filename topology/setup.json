@@ -2,7 +2,8 @@
   'faucet_yaml': '/etc/faucet/faucet.yaml',
   'faucet_dp_mac_format': '0e:00:00:00:%02x:%02x',
   'lacp_timeout': 5,
-  'upstream_lacp': 1,
+  'default_hardware': 'GenericTFM',
+  'egress_description': 'egress',
   'combinatorial_port_flood': true,
   'naming': {
     'tier1': '-t1sw',
@@ -34,9 +35,6 @@
     'enable': true
   },
   'loop_protect_external': true,
-  'uplink_iface': {
-    'lacp': 1
-  },
   "pre_acls": [
     {
       "description": "ICMP Allow",

@@ -5,8 +5,8 @@ dps:
     faucet_dp_mac: 0e:00:00:00:02:01
     hardware: Generic
     interfaces:
-      1: {lacp: 1, native_vlan: 100}
-      2: {lacp: 1, native_vlan: 100}
+      1: {description: egress, lacp: 1, loop_protect_external: true, native_vlan: 100}
+      2: {description: egress, lacp: 1, loop_protect_external: true, native_vlan: 100}
       22:
         lldp_beacon: {enable: true}
         receive_lldp: true

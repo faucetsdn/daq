@@ -163,19 +163,23 @@ class TopologyGenerator():
         if value is not None:
             var[key] = value
 
+    def _maybe_update(self, var, target):
+        if target is not None:
+            var.update(target)
+
     def _make_t1_dps(self, domain):
         t1_conf = self._site['tier1']['domains'][domain]
         dp_name = self._get_t1_dp_name(domain)
         stack = {
             'priority': 1
         }
-        self._maybe_add(stack, 'upstream_lacp', self._setup.get('upstream_lacp'))
+        self._maybe_add(stack, 'upstream_lacp', self._site['tier1'].get('upstream_lacp'))
         return {
             dp_name: {
                 'dp_id': t1_conf['dp_id'],
                 'combinatorial_port_flood': self._setup['combinatorial_port_flood'],
                 'faucet_dp_mac': self._make_faucet_dp_mac(domain, 1),
-                'hardware': self._site['tier1']['defaults']['hardware'],
+                'hardware': self._make_t1_hardware(domain),
                 'lacp_timeout': self._setup['lacp_timeout'],
                 'lldp_beacon': self._get_switch_lldp_beacon(),
                 'interfaces': self._make_t1_dp_interfaces(t1_conf, domain),
@@ -183,20 +187,37 @@ class TopologyGenerator():
             }
         }
 
+    def _make_t1_hardware(self, domain):
+        t1_conf = self._site['tier1']
+        if 'defaults' in t1_conf:
+            if 'hardware' in t1_conf['defaults']:
+                return t1_conf['defaults']['hardware']
+        return self._setup['default_hardware']
+
     def _make_faucet_dp_mac(self, domain, tier):
         return self._setup['faucet_dp_mac_format'] % (int(domain), tier)
 
     def _make_t1_dp_interfaces(self, t1_conf, domain):
         interfaces = {}
         for uplink_port in self._site['tier1']['uplink_ports']:
-            interfaces.update({uplink_port: self._make_uplink_interface()})
+            interfaces.update({uplink_port: self._make_uplink_interface(domain)})
         interfaces.update(self._make_t1_stack_interfaces(domain))
         return interfaces
 
-    def _make_uplink_interface(self):
-        interface = {}
-        interface.update(self._setup['uplink_iface'])
-        interface.update(self._site['tier1']['uplink_port'])
+    def _make_uplink_interface(self, domain):
+        upstream_lacp = self._site['tier1'].get('upstream_lacp')
+        interface = {
+            'description': self._setup['egress_description']
+        }
+        if self._setup['loop_protect_external']:
+            interface['loop_protect_external'] = True
+        if self._site['tier1'].get('uplink_native'):
+            interface['native_vlan'] = self._site['vlan_id']
+        else:
+            interface['tagged_vlans'] = [self._site['vlan_id']]
+        self._maybe_update(interface, self._setup.get('uplink_iface'))
+        self._maybe_add(interface, 'lacp', upstream_lacp)
+        self._maybe_add(interface, 'name', self._site['tier1']['domains'][domain].get('name'))
         return interface
 
     def _make_device_interface(self):
@@ -256,12 +277,19 @@ class TopologyGenerator():
             'dp_id': t2_conf['dp_id'],
             'combinatorial_port_flood': self._setup['combinatorial_port_flood'],
             'faucet_dp_mac': self._make_faucet_dp_mac(t2_conf['domain'], 2),
-            'hardware': t2_defaults['hardware'],
+            'hardware': self._make_t2_hardware(t2_defaults, t2_conf),
             'lacp_timeout': self._setup['lacp_timeout'],
             'lldp_beacon': self._get_switch_lldp_beacon(),
             'interface_ranges': self._make_t2_interface_ranges(),
             'interfaces': self._make_t2_interfaces(t2_conf, t1_port)
         }
+
+    def _make_t2_hardware(self, defaults, conf):
+        if 'hardware' in conf:
+            return conf['hardware']
+        if 'hardware' in defaults:
+            return defaults['hardware']
+        return self._setup['default_hardware']
 
     def _make_t2_interface_ranges(self):
         interface_ranges = self._site['tier2']['defaults']['device_ports']

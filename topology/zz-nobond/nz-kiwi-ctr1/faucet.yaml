@@ -5,8 +5,7 @@ dps:
     faucet_dp_mac: 0e:00:00:00:01:01
     hardware: Generic
     interfaces:
-      1: {lacp: 1, native_vlan: 100}
-      2: {lacp: 1, native_vlan: 100}
+      1: {description: egress, loop_protect_external: true, native_vlan: 100}
       22:
         loop_protect_external: true
         tagged_vlans: [100]
@@ -16,7 +15,7 @@ dps:
         stack: {dp: nz-kiwi-t2sw1, port: 7}
     lacp_timeout: 5
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
-    stack: {priority: 1, upstream_lacp: 1}
+    stack: {priority: 1}
   nz-kiwi-t2sw1:
     combinatorial_port_flood: true
     dp_id: 2352

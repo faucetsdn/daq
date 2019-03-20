@@ -1,18 +1,18 @@
 Running testing/test_stack.sh
 Generator tests
-Only in topology/nz-kiwi: site_config.json
 Only in topology/: setup.json
-Only in topology/un-moon: site_config.json
+Only in topology/zz-bond: site_config.json
+Only in topology/zz-nobond: site_config.json
 Stacking Tests
-Waiting 60 sec for stack to settle
+Testing stack mode nobond
 (UNKNOWN) [192.168.0.2] 23 (?) : Connection timed out
 (UNKNOWN) [192.168.0.2] 443 (?) : Connection refused
 pcap sane 1 1 1 1
-telnet 0 0 https 0 2
+nobond telnet 0 https 2
 daq-faux-1: ping -c 10 192.168.0.2 10
 daq-faux-1: ping -c 10 192.168.0.3 10
 daq-faux-2: ping -c 10 192.168.0.1 10
 daq-faux-2: ping -c 10 192.168.0.3 10
 daq-faux-3: ping -c 10 192.168.0.1 10
 daq-faux-3: ping -c 10 192.168.0.2 10
-Done with stack test.
+Done with stack test nobond.

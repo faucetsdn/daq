@@ -11,12 +11,12 @@ nodes_dir=$out_dir/nodes
 
 mkdir -p $out_dir $nodes_dir
 
-setup_delay=60
-cap_length=20
+ping_count=10
+cap_length=$((ping_count + 20))
 
 echo Generator tests | tee -a $TEST_RESULTS
 rm -rf out/topology
-normalize_base=topology/un-moon/un-moon-ctr0g-1-1/
+normalize_base=topology/zz-bond/nz-kiwi-ctr1/
 bin/generate_topology raw_topo=$normalize_base topo_dir=out/topology/normalized
 diff -r out/topology/normalized $normalize_base | tee -a $TEST_RESULTS
 
@@ -30,84 +30,86 @@ for site in $sites; do
 done
 diff -r out/topology/generated topology/ | tee -a $TEST_RESULTS
 
-echo Stacking Tests >> $TEST_RESULTS
-
-bin/setup_stack || exit 1
-
-echo Configured bridges:
-bridges=$(ovs-vsctl list-br | sort)
-for bridge in $bridges; do
-    echo
-    echo OVS bridge $bridge
-    ovs-ofctl show $bridge
-done
-
-echo
-echo Waiting $setup_delay sec for stack to settle | tee -a $TEST_RESULTS
-sleep $setup_delay
-
 function test_pair {
     src=$1
     dst=$2
 
     host=daq-faux-$src
     out_file=$nodes_dir/$host-$dst
-    cmd="ping -c 10 192.168.0.$dst"
+    cmd="ping -c $ping_count 192.168.0.$dst"
     echo $host: $cmd
     echo -n $host: $cmd\ > $out_file
     docker exec $host $cmd | fgrep time= | fgrep -v DUP | wc -l >> $out_file 2>/dev/null &
 }
 
-echo Capturing pcap to $t2sw1p6_pcap for $cap_length seconds...
-timeout $cap_length tcpdump -eni t2sw1-eth6 -w $t2sw1p6_pcap &
-timeout $cap_length tcpdump -eni t2sw1-eth7 -w $t2sw1p7_pcap &
-sleep 5
+function test_stack {
+    mode=$1
+    echo Testing stack mode $mode | tee -a $TEST_RESULTS
+    bin/setup_stack $mode || exit 1
 
-test_pair 1 2
-test_pair 1 3
-test_pair 2 1
-test_pair 2 3
-test_pair 3 1
-test_pair 3 2
+    # Restart one faucet instance to see if it goes crazy.
+    #cmd/faucet nz-kiwi-ctr2 6673
 
-docker exec daq-faux-1 nc -w 1 192.168.0.2 23 2>&1 | tee -a $TEST_RESULTS
-docker exec daq-faux-1 nc -w 1 192.168.0.2 443 2>&1 | tee -a $TEST_RESULTS
+    echo Capturing pcap to $t2sw1p6_pcap for $cap_length seconds...
+    timeout $cap_length tcpdump -eni t2sw1-eth6 -w $t2sw1p6_pcap &
+    timeout $cap_length tcpdump -eni t2sw1-eth7 -w $t2sw1p7_pcap &
+    sleep 5
 
-echo Waiting for pair tests to complete...
-start_time=$(date +%s)
-wait
-end_time=$(date +%s)
-echo Waited $((end_time - start_time))s.
+    echo Executing 2nd warm-up
+    docker exec daq-faux-1 ping -c 3 192.168.0.2 &
+    docker exec daq-faux-1 ping -c 3 192.168.0.3 &
+    docker exec daq-faux-2 ping -c 3 192.168.0.1 &
+    docker exec daq-faux-2 ping -c 3 192.168.0.3 &
+    docker exec daq-faux-3 ping -c 3 192.168.0.1 &
+    docker exec daq-faux-3 ping -c 3 192.168.0.2 &
+    sleep 3
 
-bcount6=$(tcpdump -en -r $t2sw1p6_pcap | wc -l) 2>/dev/null
-bcount7=$(tcpdump -en -r $t2sw1p7_pcap | wc -l) 2>/dev/null
-echo pcap count is $bcount6 $bcount7
-echo pcap sane $((bcount6 > 2)) $((bcount6 < 16)) $((bcount7 > 90)) $((bcount7 < 120)) | tee -a $TEST_RESULTS
-echo pcap t2sw1p6
-tcpdump -en -c 20 -r $t2sw1p6_pcap
-echo pcap t2sw1p7
-tcpdump -en -c 200 -r $t2sw1p7_pcap
-echo pcap end
+    test_pair 1 2
+    test_pair 1 3
+    test_pair 2 1
+    test_pair 2 3
+    test_pair 3 1
+    test_pair 3 2
 
-telnet6=$(tcpdump -en -r $t2sw1p6_pcap vlan and port 23 | wc -l) 2>/dev/null
-https6=$(tcpdump -en -r $t2sw1p6_pcap vlan and port 443 | wc -l) 2>/dev/null
-telnet7=$(tcpdump -en -r $t2sw1p7_pcap vlan and port 23 | wc -l) 2>/dev/null
-https7=$(tcpdump -en -r $t2sw1p7_pcap vlan and port 443 | wc -l) 2>/dev/null
-echo telnet $telnet6 $telnet7 https $https6 $https7 | tee -a $TEST_RESULTS
+    echo Starting TCP probes...
+    docker exec daq-faux-1 nc -w 1 192.168.0.2 23 2>&1 | tee -a $TEST_RESULTS
+    docker exec daq-faux-1 nc -w 1 192.168.0.2 443 2>&1 | tee -a $TEST_RESULTS
 
-cat $nodes_dir/* | tee -a $TEST_RESULTS
+    echo Waiting for pair tests to complete...
+    start_time=$(date +%s)
+    wait
+    end_time=$(date +%s)
+    echo Waited $((end_time - start_time))s.
 
-echo Faucet logs
-more inst/faucet/*/faucet.log | cat
-echo nz-kiwi-ctr1
-docker logs nz-kiwi-ctr1 | tail
-echo nz-kiwi-ctr2
-docker logs nz-kiwi-ctr2 | tail
+    bcount6=$(tcpdump -en -r $t2sw1p6_pcap | wc -l) 2>/dev/null
+    bcount7=$(tcpdump -en -r $t2sw1p7_pcap | wc -l) 2>/dev/null
+    echo pcap $mode count is $bcount6 $bcount7
+    echo pcap sane $((bcount6 > 2)) $((bcount6 < 120)) $((bcount7 > 2)) $((bcount7 < 120)) \
+        | tee -a $TEST_RESULTS
+    echo pcap t2sw1p6
+    tcpdump -en -c 20 -r $t2sw1p6_pcap
+    echo pcap t2sw1p7
+    tcpdump -en -c 200 -r $t2sw1p7_pcap
+    echo pcap end
 
-echo Done with stack test. | tee -a $TEST_RESULTS
+    telnet6=$(tcpdump -en -r $t2sw1p6_pcap vlan and port 23 | wc -l) 2>/dev/null
+    https6=$(tcpdump -en -r $t2sw1p6_pcap vlan and port 443 | wc -l) 2>/dev/null
+    telnet7=$(tcpdump -en -r $t2sw1p7_pcap vlan and port 23 | wc -l) 2>/dev/null
+    https7=$(tcpdump -en -r $t2sw1p7_pcap vlan and port 443 | wc -l) 2>/dev/null
+    echo $mode telnet $((telnet6 + telnet)) https $((https6 + https7)) | tee -a $TEST_RESULTS
+
+    cat $nodes_dir/* | tee -a $TEST_RESULTS
+
+    echo Done with stack test $mode. | tee -a $TEST_RESULTS
+}
+
+echo Stacking Tests >> $TEST_RESULTS
+test_stack nobond
+# https://github.com/faucetsdn/faucet/issues/2864
+#test_stack bond
 
 echo Cleanup bridges...
-for bridge in corp t1sw1 t2sw2 t2sw1 t2sw2; do
+for bridge in corp t1sw1 t1sw2 t2sw1 t2sw2; do
     echo Cleaning $bridge...
     sudo timeout 1m ovs-vsctl del-br $bridge
 done
