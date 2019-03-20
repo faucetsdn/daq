@@ -31,6 +31,18 @@ acls:
       udp_dst: 67
       udp_src: 68
   - rule:
+      actions: {allow: 1}
+      description: https_to
+      dl_type: '0x0800'
+      nw_proto: 6
+      tcp_dst: 443
+  - rule:
+      actions: {allow: 1}
+      description: https_from
+      dl_type: '0x0800'
+      nw_proto: 6
+      tcp_src: 443
+  - rule:
       actions: {allow: 0}
       description: Default Deny
       dl_type: '0x0800'

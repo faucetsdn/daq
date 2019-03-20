@@ -1,0 +1,50 @@
+{
+  "site_name": "nz-kiwi",
+  "vlan_id": 100,
+  "tier1": {
+    "uplink_ports": [1, 2],
+    "uplink_native": true,
+    "upstream_lacp": 1,
+    "defaults": {
+      "hardware": "Generic"
+    },
+    "domains": {
+      "1": {
+        "dp_id": 177
+      },
+      "2": {
+        "dp_id": 178
+      }
+    }
+  },
+  "tier2": {
+    "defaults": {
+      "hardware": "Generic",
+      "device_ports": "1"
+    },
+    "tier1_ports": {
+      22: {
+        "dp_id": 1296,
+        "domain": "2",
+        "stack_port": 6,
+        "cross_port": 7
+      },
+      23: {
+        "dp_id": 2352,
+        "domain": "1",
+        "stack_port": 7,
+        "cross_port": 6
+      }
+    }
+  },
+  "uniform_acls": [
+    {
+      "description": "https_to",
+      "tcp_dst": 443
+    },
+    {
+      "description": "https_from",
+      "tcp_src": 443
+    }
+  ]
+}

@@ -4,11 +4,11 @@ faucet_configs: [/etc/faucet/faucet.yaml]
 watchers:
   flow_table:
     db: prometheus
-    dps: [un-moon-t1sw0g-1-2, un-moon-t2sw0g-1-2]
+    dps: [nz-kiwi-t1sw1, nz-kiwi-t2sw1]
     interval: 10
     type: flow_table
   port_stats:
     db: prometheus
-    dps: [un-moon-t1sw0g-1-2, un-moon-t2sw0g-1-2]
+    dps: [nz-kiwi-t1sw1, nz-kiwi-t2sw1]
     interval: 10
     type: port_stats

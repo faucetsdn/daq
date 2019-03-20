@@ -1,0 +1,14 @@
+dbs:
+  prometheus: {prometheus_addr: 0.0.0.0, prometheus_port: 9303, type: prometheus}
+faucet_configs: [/etc/faucet/faucet.yaml]
+watchers:
+  flow_table:
+    db: prometheus
+    dps: [nz-kiwi-t1sw2, nz-kiwi-t2sw2]
+    interval: 10
+    type: flow_table
+  port_stats:
+    db: prometheus
+    dps: [nz-kiwi-t1sw2, nz-kiwi-t2sw2]
+    interval: 10
+    type: port_stats

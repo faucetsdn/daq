@@ -2,10 +2,8 @@
   "site_name": "nz-kiwi",
   "vlan_id": 100,
   "tier1": {
-    "uplink_ports": [1, 2],
-    "uplink_port": {
-      "native_vlan": 100
-    },
+    "uplink_ports": [1],
+    "uplink_native": true,
     "defaults": {
       "hardware": "Generic"
     },

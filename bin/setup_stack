@@ -3,6 +3,12 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
+if [ -z "$1" ]; then
+    echo $0 [mode]
+fi
+mode=$1
+shift
+
 #############################################################
 
 function add_br {
@@ -62,13 +68,13 @@ function add_oeth {
 
 ###########################################################
 
-sudo modprobe bonding
-
 sudo rm -rf inst/faucet
 mkdir -p inst/faucet/corp-agg
+sudo modprobe bonding
 
-cp misc/corp_faucet.yaml inst/faucet/corp-agg/faucet.yaml
-cp -a topology/nz-kiwi/* inst/faucet/
+echo Configuring mode $mode...
+cp misc/corp_$mode.yaml inst/faucet/corp-agg/faucet.yaml
+cp -a topology/zz-$mode/* inst/faucet/
 
 docker kill nz-kiwi-ctr1 || true
 docker kill nz-kiwi-ctr2 || true
@@ -108,31 +114,43 @@ add_link t1sw2 22 t2sw2 6
 add_link t1sw2 23 t2sw1 6
 
 sudo ip link del bond1 || true
-sudo ip link add bond1 type bond mode 802.3ad
-sudo ip link set bond1 up
-sudo ip link set corp-eth10 master bond1
-sudo ip link set corp-eth11 master bond1
+if [ $mode == bond ]; then
+    sudo ip link add bond1 type bond mode 802.3ad
+    sudo ip link set bond1 up
+    sudo ip link set corp-eth10 master bond1
+    sudo ip link set corp-eth11 master bond1
+    upstream1=bond1
+else
+    upstream1=corp-eth10
+fi
 sudo ip link set up dev corp-eth10
 sudo ip link set up dev corp-eth11
-sudo ovs-vsctl add-port corp bond1 -- set interface bond1 ofport_request=10
+sudo ovs-vsctl add-port corp $upstream1 -- set interface $upstream1 ofport_request=10
 
 sudo ip link del bond2 || true
-sudo ip link add bond2 type bond mode 802.3ad
-sudo ip link set bond2 up
-sudo ip link set corp-eth20 master bond2
-sudo ip link set corp-eth21 master bond2
+if [ $mode == bond ]; then
+    sudo ip link add bond2 type bond mode 802.3ad
+    sudo ip link set bond2 up
+    sudo ip link set corp-eth20 master bond2
+    sudo ip link set corp-eth21 master bond2
+    upstream2=bond2
+else
+    upstream2=corp-eth20
+fi
 sudo ip link set up dev corp-eth20
 sudo ip link set up dev corp-eth21
-sudo ovs-vsctl add-port corp bond2 -- set interface bond2 ofport_request=20
+sudo ovs-vsctl add-port corp $upstream2 -- set interface $upstream2 ofport_request=20
 
 add_iface t2sw1 1 faux-1
 add_iface t2sw2 1 faux-2
 add_iface corp 1 faux-3
 
-# Now restart one faucet instance to see if it goes crazy.
-cmd/faucet nz-kiwi-ctr2 6673
+echo Starting connection warm-up for 30s...
+docker exec daq-faux-1 ping -q -c 30 192.168.0.2 &
+docker exec daq-faux-2 ping -q -c 30 192.168.0.3 &
+docker exec daq-faux-3 ping -q -c 30 192.168.0.1 &
 
-# Delay to let OVS stabilize.
-sleep 5
+echo Waiting for warm-ups to complete...
+wait
 
-echo Done with stack setup.
+echo Done with stack setup mode $mode.

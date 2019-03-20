@@ -243,7 +243,6 @@ class FaucetTopology():
     def _make_vlan_description(self, vlan_id):
         return {
             vlan_id: {
-                'description': "Internal DAQ vlan",
                 'unicast_flood': False
             }
         }

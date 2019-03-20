@@ -1,0 +1,40 @@
+dps:
+  nz-kiwi-t1sw2:
+    combinatorial_port_flood: true
+    dp_id: 178
+    faucet_dp_mac: 0e:00:00:00:02:01
+    hardware: Generic
+    interfaces:
+      1: {description: egress, lacp: 1, loop_protect_external: true, native_vlan: 100}
+      2: {description: egress, lacp: 1, loop_protect_external: true, native_vlan: 100}
+      22:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        stack: {dp: nz-kiwi-t2sw2, port: 6}
+      23:
+        loop_protect_external: true
+        tagged_vlans: [100]
+    lacp_timeout: 5
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    stack: {priority: 1, upstream_lacp: 1}
+  nz-kiwi-t2sw2:
+    combinatorial_port_flood: true
+    dp_id: 1296
+    faucet_dp_mac: 0e:00:00:00:02:02
+    hardware: Generic
+    interface_ranges:
+      '1': {acl_in: uniform_acl, description: IoT Device, native_vlan: 100}
+    interfaces:
+      6:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        stack: {dp: nz-kiwi-t1sw2, port: 22}
+      7:
+        loop_protect_external: true
+        tagged_vlans: [100]
+    lacp_timeout: 5
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+include: [uniform.yaml]
+version: 2
+vlans:
+  Faucet_IoT: {description: Faucet IoT, vid: 100}

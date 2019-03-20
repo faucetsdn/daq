@@ -16,6 +16,7 @@ class TopologyGenerator():
     _YAML_POSTFIX = '.yaml'
     _UNIFORM_ACL_NAME = 'uniform_acl'
     _UNIFORM_FILE_NAME = 'uniform.yaml'
+    _INCLUDE_SET = [_UNIFORM_FILE_NAME]
 
     def __init__(self, daq_config):
         self.config = daq_config.config
@@ -40,13 +41,54 @@ class TopologyGenerator():
         topo_dir = self.config.get('topo_dir', 'inst')
         if not os.path.exists(topo_dir):
             os.makedirs(topo_dir)
+        configs = {}
         for filename in os.listdir(source_dir):
             if not filename.endswith(self._YAML_POSTFIX):
                 LOGGER.info('Skipping non-yaml file %s', filename)
                 continue
             in_path = os.path.join(source_dir, filename)
-            loaded_yaml = self._load_config(in_path)
-            self._write_yaml(topo_dir, filename, loaded_yaml)
+            configs[filename] = self._load_config(in_path)
+        self._flatten_configs(configs)
+        for config in configs:
+            self._write_yaml(topo_dir, config, configs[config])
+
+    def _flatten_configs(self, configs):
+        faucet_conf = configs['faucet.yaml']
+        assert 'include-optional' not in faucet_conf, 'can not normalize include-optional'
+        if 'include' not in faucet_conf:
+            LOGGER.info('No includes found.')
+            return
+        include_set = set(faucet_conf['include'])
+        for target in faucet_conf['include']:
+            assert target in configs, 'config target %s not found' % target
+            if target in self._INCLUDE_SET:
+                LOGGER.info('Preserving include entry %s', target)
+            else:
+                LOGGER.info('Flattening include entry %s', target)
+                self._flatten_include(faucet_conf, configs[target])
+                self._delete_config_file(target)
+                include_set.remove(target)
+                del configs[target]
+        for exclude in self._INCLUDE_SET:
+            assert exclude not in faucet_conf, 'file %s should not be included' % exclude
+        if include_set:
+            faucet_conf['include'] = list(include_set)
+        else:
+            del faucet_conf['include']
+
+    def _flatten_include(self, faucet_conf, target_conf):
+        keys = set(target_conf.keys())
+        keys.discard('version')
+        for part in keys:
+            assert part not in faucet_conf, 'faucet config already contains %s' % faucet_conf
+            faucet_conf[part] = target_conf[part]
+
+    def _delete_config_file(self, target):
+        topo_dir = self.config.get('topo_dir', 'inst')
+        target_path = os.path.join(topo_dir, target)
+        if os.path.exists(target_path):
+            LOGGER.info('Removing %s', target_path)
+            os.remove(target_path)
 
     def _generate_topology(self):
         setup_config = self.config.get('topo_setup')
@@ -163,19 +205,23 @@ class TopologyGenerator():
         if value is not None:
             var[key] = value
 
+    def _maybe_update(self, var, target):
+        if target is not None:
+            var.update(target)
+
     def _make_t1_dps(self, domain):
         t1_conf = self._site['tier1']['domains'][domain]
         dp_name = self._get_t1_dp_name(domain)
         stack = {
             'priority': 1
         }
-        self._maybe_add(stack, 'upstream_lacp', self._setup.get('upstream_lacp'))
+        self._maybe_add(stack, 'upstream_lacp', self._site['tier1'].get('upstream_lacp'))
         return {
             dp_name: {
                 'dp_id': t1_conf['dp_id'],
                 'combinatorial_port_flood': self._setup['combinatorial_port_flood'],
                 'faucet_dp_mac': self._make_faucet_dp_mac(domain, 1),
-                'hardware': self._site['tier1']['defaults']['hardware'],
+                'hardware': self._make_t1_hardware(domain),
                 'lacp_timeout': self._setup['lacp_timeout'],
                 'lldp_beacon': self._get_switch_lldp_beacon(),
                 'interfaces': self._make_t1_dp_interfaces(t1_conf, domain),
@@ -183,20 +229,37 @@ class TopologyGenerator():
             }
         }
 
+    def _make_t1_hardware(self, domain):
+        t1_conf = self._site['tier1']
+        if 'defaults' in t1_conf:
+            if 'hardware' in t1_conf['defaults']:
+                return t1_conf['defaults']['hardware']
+        return self._setup['default_hardware']
+
     def _make_faucet_dp_mac(self, domain, tier):
         return self._setup['faucet_dp_mac_format'] % (int(domain), tier)
 
     def _make_t1_dp_interfaces(self, t1_conf, domain):
         interfaces = {}
         for uplink_port in self._site['tier1']['uplink_ports']:
-            interfaces.update({uplink_port: self._make_uplink_interface()})
+            interfaces.update({uplink_port: self._make_uplink_interface(domain)})
         interfaces.update(self._make_t1_stack_interfaces(domain))
         return interfaces
 
-    def _make_uplink_interface(self):
-        interface = {}
-        interface.update(self._setup['uplink_iface'])
-        interface.update(self._site['tier1']['uplink_port'])
+    def _make_uplink_interface(self, domain):
+        upstream_lacp = self._site['tier1'].get('upstream_lacp')
+        interface = {
+            'description': self._setup['egress_description']
+        }
+        if self._setup['loop_protect_external']:
+            interface['loop_protect_external'] = True
+        if self._site['tier1'].get('uplink_native'):
+            interface['native_vlan'] = self._site['vlan_id']
+        else:
+            interface['tagged_vlans'] = [self._site['vlan_id']]
+        self._maybe_update(interface, self._setup.get('uplink_iface'))
+        self._maybe_add(interface, 'lacp', upstream_lacp)
+        self._maybe_add(interface, 'name', self._site['tier1']['domains'][domain].get('name'))
         return interface
 
     def _make_device_interface(self):
@@ -256,12 +319,19 @@ class TopologyGenerator():
             'dp_id': t2_conf['dp_id'],
             'combinatorial_port_flood': self._setup['combinatorial_port_flood'],
             'faucet_dp_mac': self._make_faucet_dp_mac(t2_conf['domain'], 2),
-            'hardware': t2_defaults['hardware'],
+            'hardware': self._make_t2_hardware(t2_defaults, t2_conf),
             'lacp_timeout': self._setup['lacp_timeout'],
             'lldp_beacon': self._get_switch_lldp_beacon(),
             'interface_ranges': self._make_t2_interface_ranges(),
             'interfaces': self._make_t2_interfaces(t2_conf, t1_port)
         }
+
+    def _make_t2_hardware(self, defaults, conf):
+        if 'hardware' in conf:
+            return conf['hardware']
+        if 'hardware' in defaults:
+            return defaults['hardware']
+        return self._setup['default_hardware']
 
     def _make_t2_interface_ranges(self):
         interface_ranges = self._site['tier2']['defaults']['device_ports']
