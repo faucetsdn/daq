@@ -11,4 +11,7 @@ COPY misc/start_networking .
 
 COPY misc/increase_leasetime .
 
+# Weird workaround for problem running tcdump in a privlidged container.
+RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+
 ENTRYPOINT ["./start_networking"]
