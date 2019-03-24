@@ -1,5 +1,8 @@
 # Changelog
 
+* New Version
+	* UDMI Tech Stack definition (MQTT + JSON + UDMI)
+	* Generate markdown-based reports in site device folder.
 * 0.9.5
 	* DAQ_TARGETS env variable for incremental builds.
 	* Report file cleanup, with embedded test results.

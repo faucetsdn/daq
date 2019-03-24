@@ -6,7 +6,7 @@ echo Baseline ping test report > $REPORT_FILE
 # This is a check that the startup.pcap file exists and is proper.
 echo
 ls -l /scans/startup.pcap
-echo \# $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $REPORT_FILE
+echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $REPORT_FILE
 echo
 tcpdump -en -r /scans/startup.pcap ip
 echo
@@ -41,7 +41,7 @@ fi
 # First ping might fail b/c of warm-up delays.
 status=pass
 ping -n -c 10 $TARGET_IP || status=fail
-echo RESULT $status base.target.ping target \# $TARGET_IP >> $REPORT_FILE
+echo RESULT $status base.target.ping target %% $TARGET_IP >> $REPORT_FILE
 
 echo
 echo Done with basic connectivity tests.

@@ -14,6 +14,9 @@ By deisgn, this schema is intended to be:
 * <b>I</b>nterface: Define an interface specification, rather than a client-library or
 RPC mechanism.
 
+See the associated [UDMI Tech Stack](TECH_STACK.md) for details about transport mechanism
+outside of the core schema definition.
+
 ## Use Cases
 
 The essence behind UDMI is an automated mechanism for IoT system management. Many current

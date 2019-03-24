@@ -82,9 +82,9 @@ function test_stack {
 
     bcount6=$(tcpdump -en -r $t2sw1p6_pcap | wc -l) 2>/dev/null
     bcount7=$(tcpdump -en -r $t2sw1p7_pcap | wc -l) 2>/dev/null
-    echo pcap $mode count is $bcount6 $bcount7
-    echo pcap sane $((bcount6 > 2)) $((bcount6 < 120)) $((bcount7 > 2)) $((bcount7 < 120)) \
-        | tee -a $TEST_RESULTS
+    bcount_total=$((bcount6 + bcount7))
+    echo pcap $mode count is $bcount6 $bcount7 $bcount_total
+    echo pcap sane $((bcount_total > 100)) $((bcount_total < 120)) | tee -a $TEST_RESULTS
     echo pcap t2sw1p6
     tcpdump -en -c 20 -r $t2sw1p6_pcap
     echo pcap t2sw1p7

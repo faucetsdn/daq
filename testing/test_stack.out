@@ -8,7 +8,7 @@ Stacking Tests
 Testing stack mode nobond
 (UNKNOWN) [192.168.0.2] 23 (?) : Connection timed out
 (UNKNOWN) [192.168.0.2] 443 (?) : Connection refused
-pcap sane 1 1 1 1
+pcap sane 1 1
 nobond telnet 0 https 2
 daq-faux-1: ping -c 10 192.168.0.2 10
 daq-faux-1: ping -c 10 192.168.0.3 10
