@@ -145,9 +145,9 @@ for file in $docker_files; do
         echo Build$ext_msg $file into $tag, log to $logfile...
         echo docker build -t $tag $build_args -f $file . > $logfile
         if [ -n "$inline" ]; then
-            docker build -t $tag $build_args -f $file . 2>&1 | tee -a $logfile || failed=y
+            bin/retry_cmd docker build -t $tag $build_args -f $file . 2>&1 | tee -a $logfile || failed=y
         else
-            docker build -t $tag $build_args -f $file . >> $logfile 2>&1 || failed=y
+            bin/retry_cmd docker build -t $tag $build_args -f $file . >> $logfile 2>&1 || failed=y
         fi
         if [ -n "$failed" ]; then
             tail $logfile
