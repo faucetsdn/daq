@@ -120,7 +120,7 @@ class Gateway():
 
     def _startup_scan(self, host):
         assert not self._scan_monitor, 'startup_scan already active'
-        startup_file = '/tmp/startup.pcap'
+        startup_file = '/tmp/gateway.pcap'
         LOGGER.info('Gateway %s startup capture %s in container\'s %s', self.port_set,
                     self.host_intf, startup_file)
         tcp_filter = ''

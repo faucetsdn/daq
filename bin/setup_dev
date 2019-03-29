@@ -23,6 +23,10 @@ if [ -z "$PIP" ]; then
     PIP="python3 -m pip"
 fi
 
+if [ -n "$TRAVIS" ]; then
+    DAQ_CONTAINER=travis
+fi
+
 echo AG is $AG
 echo PIP is $PIP
 echo Setup root is $PWD
@@ -53,7 +57,7 @@ $AG install python-pip
 python -m pip install setuptools
 
 # Can't use venv inside of containers because of absolute paths.
-if [ -n "$DAQ_CONTAINER" -o -n "$TRAVIS" ]; then
+if [ -n "$DAQ_CONTAINER" ]; then
     echo Skipping venv activation.
     mkdir -p venv/bin
     touch venv/bin/activate
@@ -75,6 +79,10 @@ $PIP install wheel
 $PIP install --upgrade --index-url=https://pypi.python.org/simple \
     pylint cryptography requests netifaces codecov coverage setuptools \
     firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+
+if [ -z "$DAQ_CONTAINER" ]; then
+    $PIP install pyyaml==3.12
+fi
 
 $PIP freeze
 
