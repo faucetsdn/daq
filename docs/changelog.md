@@ -2,6 +2,7 @@
 
 * New Version
 	* UDMI Tech Stack definition (MQTT + JSON + UDMI).
+	* Updating BacNET tests to have more predictable/regular identifiers.
 	* Generate markdown-based reports in site device folder.
 	* Debian Stretch setup/install fixes.
 	* Update to Faucet 1.9.1.
