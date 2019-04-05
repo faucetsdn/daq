@@ -36,14 +36,12 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:guava:22.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.apis:google-api-services-cloudiot:v1-rev20170922-1.22.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.api-client:google-api-client:1.22.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: io.moquette:moquette-broker:0.10" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.bugsnag:bugsnag:3.4.4" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.librato.metrics:librato-java:2.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.9.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: joda-time:joda-time:2.9.7" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: io.moquette:moquette-broker:0.10" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: io.dropwizard.metrics:metrics-jvm:3.2.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.librato.metrics:librato-java:2.1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: io.dropwizard.metrics:metrics-core:3.2.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.oauth-client:google-oauth-client:1.22.0" level="project" />
@@ -54,8 +52,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.j2objc:j2objc-annotations:1.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.mojo:animal-sniffer-annotations:1.14" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: io.netty:netty-tcnative-boringssl-static:2.0.3.Final" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.9.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: io.netty:netty-transport-native-epoll:4.1.12.Final:linux-x86_64" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: io.netty:netty-transport-native-unix-common:4.1.12.Final" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: io.netty:netty-codec-http2:4.1.14.Final" level="project" />
@@ -81,6 +77,13 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.7" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.httpcomponents:httpcore:4.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: commons-logging:commons-logging:1.1.1" level="project" />
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library name="Gradle: jackson-databind-2.8.8:8">
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.slf4j:slf4j-simple:1.7.5" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.jsonwebtoken:jjwt:0.7.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.cloud:google-cloud-logging:1.7.0" level="project" />
@@ -105,14 +108,12 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.guava:guava:22.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.apis:google-api-services-cloudiot:v1-rev20170922-1.22.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.api-client:google-api-client:1.22.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.moquette:moquette-broker:0.10" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.bugsnag:bugsnag:3.4.4" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.librato.metrics:librato-java:2.1.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.9.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: joda-time:joda-time:2.9.7" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.moquette:moquette-broker:0.10" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.dropwizard.metrics:metrics-jvm:3.2.2" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.librato.metrics:librato-java:2.1.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.dropwizard.metrics:metrics-core:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.oauth-client:google-oauth-client:1.22.0" level="project" />
@@ -123,8 +124,6 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.j2objc:j2objc-annotations:1.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.codehaus.mojo:animal-sniffer-annotations:1.14" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.netty:netty-tcnative-boringssl-static:2.0.3.Final" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.9.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.netty:netty-transport-native-epoll:4.1.12.Final:linux-x86_64" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.netty:netty-transport-native-unix-common:4.1.12.Final" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.netty:netty-codec-http2:4.1.14.Final" level="project" />
@@ -150,6 +149,13 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.code.gson:gson:2.7" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.apache.httpcomponents:httpcore:4.0.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: commons-logging:commons-logging:1.1.1" level="project" />
+    <orderEntry type="module-library" scope="RUNTIME">
+      <library name="Gradle: jackson-databind-2.8.8:8">
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" scope="TEST" name="Gradle: org.slf4j:slf4j-simple:1.7.5" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.jsonwebtoken:jjwt:0.7.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.cloud:google-cloud-logging:1.7.0" level="project" />
@@ -174,16 +180,14 @@
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.guava:guava:22.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.apis:google-api-services-cloudiot:v1-rev20170922-1.22.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.api-client:google-api-client:1.22.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: io.moquette:moquette-broker:0.10" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.bugsnag:bugsnag:3.4.4" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.librato.metrics:librato-java:2.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.9.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: joda-time:joda-time:2.9.7" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: io.moquette:moquette-broker:0.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.mockito:mockito-core:1.10.19" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.dropwizard.metrics:metrics-jvm:3.2.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.librato.metrics:metrics-librato:5.1.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.librato.metrics:librato-java:2.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.dropwizard.metrics:metrics-core:3.2.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.oauth-client:google-oauth-client:1.22.0" level="project" />
@@ -194,8 +198,6 @@
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.j2objc:j2objc-annotations:1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.codehaus.mojo:animal-sniffer-annotations:1.14" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.netty:netty-tcnative-boringssl-static:2.0.3.Final" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.9.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.netty:netty-transport-native-epoll:4.1.12.Final:linux-x86_64" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.netty:netty-transport-native-unix-common:4.1.12.Final" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: io.netty:netty-codec-http2:4.1.14.Final" level="project" />
@@ -223,5 +225,12 @@
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.code.gson:gson:2.7" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.apache.httpcomponents:httpcore:4.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: commons-logging:commons-logging:1.1.1" level="project" />
+    <orderEntry type="module-library" scope="TEST">
+      <library name="Gradle: jackson-databind-2.8.8:8">
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

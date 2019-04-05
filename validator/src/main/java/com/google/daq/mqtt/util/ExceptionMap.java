@@ -1,4 +1,4 @@
-package com.google.daq.mqtt.validator;
+package com.google.daq.mqtt.util;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -7,13 +7,14 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import org.everit.json.schema.ValidationException;
 
-class ExceptionMap extends RuntimeException {
+public class ExceptionMap extends RuntimeException {
 
   private static final byte[] NEWLINE_BYTES = "\n".getBytes();
+  private static final byte[] SEPARATOR_BYTES = ": ".getBytes();
 
   final Map<String, Exception> exceptions = new TreeMap<>();
 
-  ExceptionMap(String description) {
+  public ExceptionMap(String description) {
     super(description);
   }
 
@@ -21,19 +22,19 @@ class ExceptionMap extends RuntimeException {
     exceptions.forEach(consumer);
   }
 
-  void throwIfNotEmpty() {
+  public void throwIfNotEmpty() {
     if (!exceptions.isEmpty() || getCause() != null) {
       throw this;
     }
   }
 
-  void put(String key, Exception exception) {
+  public void put(String key, Exception exception) {
     if (exceptions.put(key, exception) != null) {
       throw new IllegalArgumentException("Exception key already defined: " + key);
     }
   }
 
-  static ErrorTree format(Exception e, String indent) {
+  public static ErrorTree format(Exception e, String indent) {
     return format(e, "", indent);
   }
 
@@ -44,29 +45,38 @@ class ExceptionMap extends RuntimeException {
     final String newPrefix = prefix + indent;
     if (e instanceof ExceptionMap) {
       if (e.getCause() != null) {
-        errorTree.cause = format(e.getCause(), newPrefix, indent);
+        errorTree.child = format(e.getCause(), newPrefix, indent);
       }
       ((ExceptionMap) e).forEach(
-          (key, sub) -> errorTree.causes.put(key, format(sub, newPrefix, indent)));
+          (key, sub) -> errorTree.children.put(key, format(sub, newPrefix, indent)));
     } else if (e instanceof ValidationException) {
       ((ValidationException) e).getCausingExceptions().forEach(
-          sub -> errorTree.causes.put(sub.getMessage(), format(sub, newPrefix, indent)));
+          sub -> errorTree.children.put(sub.getMessage(), format(sub, newPrefix, indent)));
     } else if (e.getCause() != null) {
-      errorTree.cause = format(e.getCause(), newPrefix, indent);
+      errorTree.child = format(e.getCause(), newPrefix, indent);
     }
-    if (errorTree.causes.isEmpty()) {
-      errorTree.causes = null;
+    if (errorTree.children.isEmpty()) {
+      errorTree.children = null;
+    }
+    if (errorTree.child == null && errorTree.children == null && errorTree.message == null) {
+      errorTree.message = e.toString();
+      if (e instanceof NullPointerException) {
+        e.printStackTrace();
+      }
     }
     return errorTree;
   }
 
-  static class ErrorTree {
+  public static class ErrorTree {
     public String prefix;
     public String message;
-    public ErrorTree cause;
-    public Map<String, ErrorTree> causes = new TreeMap<>();
+    public ErrorTree child;
+    public Map<String, ErrorTree> children = new TreeMap<>();
 
     public void write(PrintStream err) {
+      if (message == null && children == null && child == null) {
+        throw new RuntimeException("Empty ErrorTree object");
+      }
       try {
         if (message != null) {
           err.write(prefix.getBytes());
@@ -76,11 +86,11 @@ class ExceptionMap extends RuntimeException {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-      if (cause != null) {
-        cause.write(err);
+      if (child != null) {
+        child.write(err);
       }
-      if (causes != null) {
-        causes.forEach((key, value) -> value.write(err));
+      if (children != null) {
+        children.forEach((key, value) -> value.write(err));
       }
     }
   }

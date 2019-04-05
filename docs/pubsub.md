@@ -15,7 +15,7 @@ Streaming validation validates a stream of messages pulled from a GCP PubSub top
 in the `local/system.conf` file required to make it work:
 * `gcp_cred`: The service account credentials, as per the general [DAQ Firebase setup](firebase.md).
 * `gcp_topic`: The _PubSub_ (not MQTT) topic name.
-* `gcp_schema`: Indicates which schema to validate against.
+* `schema_path`: Indicates which schema to validate against.
 
 You will need to add full Project Editor permissions for the service account.
 E.g., to validate messages against the UDMI schema on the `projects/gcp-account/topics/target` topic,
@@ -25,7 +25,7 @@ there should be something like:
 ~/daq$ <b>fgrep gcp_ local/system.conf</b>
 gcp_cred=local/gcp-account-de56aa4b1e47.json
 gcp_topic=target
-gcp_schema=schemas/udmi
+schema_path=schemas/udmi
 </pre>
 
 ## Message/Schema Mapping

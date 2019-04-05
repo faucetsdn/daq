@@ -1,0 +1,8 @@
+Validating 1 schemas
+  Validating 1 files against properties.json
+    Against input properties.tests/pointset.json
+      #: 4 schema violations found
+        #: extraneous key [points] is not permitted
+        #: extraneous key [timestamp] is not permitted
+        #: required key [connect] not found
+        #: required key [key_type] not found

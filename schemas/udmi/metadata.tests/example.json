@@ -3,17 +3,24 @@
   "timestamp": "2018-08-26T21:39:29.364Z",
   "system": {
     "location": {
-      "site_name": "US-SFO-XYY"
+      "site_name": "US-SFO-XYY",
+      "section": "NW-2F",
+      "position": {
+        "x": 10,
+        "y": 20
+      }
     },
     "physical_tag": {
-      "inst_guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
-      "inst_name": "US-SFO-XYY_AHU-A01"
+      "asset": {
+        "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
+        "name": "US-SFO-XYY_AHU-1"
+      }
     }
   },
   "pointset": {
     "points": {
       "return_air_temperature_sensor": {
-        "units": "Celsius"
+        "units": "Degrees-Celsius"
       }
     }
   }

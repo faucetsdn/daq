@@ -4,6 +4,7 @@
 	* UDMI Tech Stack definition (MQTT + JSON + UDMI).
 	* Updating BacNET tests to have more predictable/regular identifiers.
 	* Generate markdown-based reports in site device folder.
+	* Registrar tool for cloud-based device registration.
 	* Debian Stretch setup/install fixes.
 	* Update to Faucet 1.9.1.
 * 0.9.5

@@ -48,7 +48,7 @@ class ReportGenerator():
         else:
             LOGGER.info('Device description %s not found', dev_path)
 
-        out_base = config.get('site_report', dev_base)
+        out_base = config.get('site_reports', dev_base)
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
         if os.path.isdir(out_path):
             self._alt_path = os.path.join(out_path, self._SIMPLE_FORMAT)

@@ -18,6 +18,10 @@
         1
       ]
     },
+    "hash": {
+      "type": "string",
+      "pattern": "^[0-9a-z]{8}$"
+    },
     "system": {
       "$ref": "file:metadata_system.json#"
     },

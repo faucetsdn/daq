@@ -1,5 +1,5 @@
 {
-  "deviceRegistryId": "test-registry",
+  "deviceRegistryId": "test/registry",
   "deviceNumId": "921302198324X",
-  "deviceId": "fcu_NW1"
+  "deviceId": "fcu-1"
 }

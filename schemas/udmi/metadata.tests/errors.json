@@ -4,6 +4,11 @@
   "system": {
     "location": {
       "site": "New Zealand"
+    },
+    "physical_tag": {
+      "asset": {
+        "name": "US-SFO-XYY_AHU-A01"
+      }
     }
   },
   "pointset": {
