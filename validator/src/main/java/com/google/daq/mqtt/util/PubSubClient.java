@@ -1,4 +1,4 @@
-package com.google.daq.mqtt.validator;
+package com.google.daq.mqtt.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,7 +23,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-class PubSubClient {
+public class PubSubClient {
 
   private static final String CONNECT_ERROR_FORMAT = "While connecting to %s/%s";
 
@@ -35,14 +35,13 @@ class PubSubClient {
       REFRESH_ERROR_FORMAT = "While refreshing subscription to topic %s subscription %s";
 
   private static final String PROJECT_ID = ServiceOptions.getDefaultProjectId();
-  private static final int REFRESH_DELAY_MS = 5000;
 
   private final AtomicBoolean active = new AtomicBoolean();
   private final BlockingQueue<PubsubMessage> messages = new LinkedBlockingDeque<>();
 
   private Subscriber subscriber;
 
-  PubSubClient(String topicId) {
+  public PubSubClient(String topicId) {
     try {
       ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(
           PROJECT_ID, SUBSCRIPTION_NAME);
@@ -55,12 +54,12 @@ class PubSubClient {
     }
   }
 
-  boolean isActive() {
+  public boolean isActive() {
     return active.get();
   }
 
   @SuppressWarnings("unchecked")
-  void processMessage(BiConsumer<Map<String, Object>, Map<String, String>> handler) {
+  public void processMessage(BiConsumer<Map<String, Object>, Map<String, String>> handler) {
     try {
       PubsubMessage message = messages.take();
       Map<String, String> attributes = message.getAttributesMap();
@@ -91,7 +90,7 @@ class PubSubClient {
     }
   }
 
-  String getSubscriptionId() {
+  public String getSubscriptionId() {
     return subscriber.getSubscriptionNameString();
   }
 

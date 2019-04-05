@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Gradle: io.netty:netty-codec-http2:4.1.14.Final">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec-http2/4.1.14.Final/d2af27befab8e1abfbf37d1ac2a5185dce1dbe/netty-codec-http2-4.1.14.Final.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec-http2/4.1.14.Final/netty-codec-http2-4.1.14.Final.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

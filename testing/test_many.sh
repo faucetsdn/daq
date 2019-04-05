@@ -27,6 +27,6 @@ cmd/run run_limit=40 settle_sec=0
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 echo Found $results successful runs.
-echo Enough results $(($results == 40)) | tee -a $TEST_RESULTS
+echo Enough results $(($results >= 40)) | tee -a $TEST_RESULTS
 
 echo Done with tests | tee -a $TEST_RESULTS

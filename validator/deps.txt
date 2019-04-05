@@ -1,0 +1,1767 @@
+:dependencies
+
+------------------------------------------------------------
+Root project
+------------------------------------------------------------
+
+apiElements - API elements for main. (n)
+No dependencies
+
+archives - Configuration for archive artifacts.
+No dependencies
+
+compile - Dependencies for source set 'main' (deprecated, use 'implementation ' instead).
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+     +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+     +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+     +--- com.google.api:gax-grpc:1.42.0 (*)
+     +--- com.google.api:api-common:1.7.0 (*)
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+     +--- io.grpc:grpc-stub:1.18.0 (*)
+     +--- io.grpc:grpc-auth:1.18.0 (*)
+     +--- io.opencensus:opencensus-api:0.18.0 (*)
+     +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+     |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+     |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+     \--- javax.annotation:javax.annotation-api:1.3.2
+
+compileClasspath - Compile classpath for source set 'main'.
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+     +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+     +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+     +--- com.google.api:gax-grpc:1.42.0 (*)
+     +--- com.google.api:api-common:1.7.0 (*)
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+     +--- io.grpc:grpc-stub:1.18.0 (*)
+     +--- io.grpc:grpc-auth:1.18.0 (*)
+     +--- io.opencensus:opencensus-api:0.18.0 (*)
+     +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+     |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+     |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+     \--- javax.annotation:javax.annotation-api:1.3.2
+
+compileOnly - Compile only dependencies for source set 'main'.
+No dependencies
+
+default - Configuration for default artifacts.
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+     +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+     +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+     +--- com.google.api:gax-grpc:1.42.0 (*)
+     +--- com.google.api:api-common:1.7.0 (*)
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+     +--- io.grpc:grpc-stub:1.18.0 (*)
+     +--- io.grpc:grpc-auth:1.18.0 (*)
+     +--- io.opencensus:opencensus-api:0.18.0 (*)
+     +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+     |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+     |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+     \--- javax.annotation:javax.annotation-api:1.3.2
+
+implementation - Implementation only dependencies for source set 'main'. (n)
+No dependencies
+
+runtime - Runtime dependencies for source set 'main' (deprecated, use 'runtimeOnly ' instead).
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+     +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+     +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+     +--- com.google.api:gax-grpc:1.42.0 (*)
+     +--- com.google.api:api-common:1.7.0 (*)
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+     +--- io.grpc:grpc-stub:1.18.0 (*)
+     +--- io.grpc:grpc-auth:1.18.0 (*)
+     +--- io.opencensus:opencensus-api:0.18.0 (*)
+     +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+     |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+     |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+     \--- javax.annotation:javax.annotation-api:1.3.2
+
+runtimeClasspath - Runtime classpath of source set 'main'.
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+     +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+     +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+     +--- com.google.api:gax-grpc:1.42.0 (*)
+     +--- com.google.api:api-common:1.7.0 (*)
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+     |    +--- com.google.protobuf:protobuf-java:3.6.1
+     |    +--- com.google.api:api-common:1.7.0 (*)
+     |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+     |    \--- javax.annotation:javax.annotation-api:1.3.2
+     +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+     +--- io.grpc:grpc-stub:1.18.0 (*)
+     +--- io.grpc:grpc-auth:1.18.0 (*)
+     +--- io.opencensus:opencensus-api:0.18.0 (*)
+     +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+     |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+     |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+     \--- javax.annotation:javax.annotation-api:1.3.2
+
+runtimeElements - Elements of runtime for main. (n)
+No dependencies
+
+runtimeOnly - Runtime only dependencies for source set 'main'. (n)
+No dependencies
+
+shadow
+No dependencies
+
+testCompile - Dependencies for source set 'test' (deprecated, use 'testImplementation ' instead).
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api:api-common:1.7.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+|    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- junit:junit:4.12
+     \--- org.hamcrest:hamcrest-core:1.3
+
+testCompileClasspath - Compile classpath for source set 'test'.
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api:api-common:1.7.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+|    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- junit:junit:4.12
+     \--- org.hamcrest:hamcrest-core:1.3
+
+testCompileOnly - Compile only dependencies for source set 'test'.
+No dependencies
+
+testImplementation - Implementation only dependencies for source set 'test'. (n)
+No dependencies
+
+testRuntime - Runtime dependencies for source set 'test' (deprecated, use 'testRuntimeOnly ' instead).
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api:api-common:1.7.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+|    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- junit:junit:4.12
+     \--- org.hamcrest:hamcrest-core:1.3
+
+testRuntimeClasspath - Runtime classpath of source set 'test'.
++--- com.fasterxml.jackson.core:jackson-databind:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.8.0
+|    \--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
++--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2
+|    +--- com.fasterxml.jackson.core:jackson-core:2.8.2 -> 2.9.6
+|    \--- org.yaml:snakeyaml:1.15
++--- com.github.everit-org.json-schema:org.everit.json.schema:1.9.1
+|    +--- org.json:json:20180130
+|    +--- com.google.guava:guava:22.0 -> 26.0-android
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    +--- com.google.errorprone:error_prone_annotations:2.1.3 -> 2.2.0
+|    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.14 -> 1.17
+|    +--- commons-validator:commons-validator:1.6
+|    |    +--- commons-beanutils:commons-beanutils:1.9.2
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2
+|    |    |    \--- commons-collections:commons-collections:3.2.1 -> 3.2.2
+|    |    +--- commons-digester:commons-digester:1.8.1
+|    |    +--- commons-logging:commons-logging:1.2
+|    |    \--- commons-collections:commons-collections:3.2.2
+|    +--- com.damnhandy:handy-uri-templates:2.1.6
+|    |    \--- joda-time:joda-time:2.9.4
+|    \--- com.google.re2j:re2j:1.1
++--- com.google.guava:guava:22.0 -> 26.0-android (*)
++--- com.google.cloud:google-cloud-logging:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.http-client:google-http-client:1.28.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    +--- io.opencensus:opencensus-api:0.18.0
+|    |    |    |    \--- io.grpc:grpc-context:1.14.0 -> 1.18.0
+|    |    |    \--- io.opencensus:opencensus-contrib-http-util:0.18.0
+|    |    |         +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.google.api:api-common:1.7.0
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    \--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    +--- com.google.api:gax:1.42.0
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0
+|    |    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    +--- com.google.http-client:google-http-client-jackson2:1.28.0
+|    |    |    |    |    +--- com.google.http-client:google-http-client:1.28.0 (*)
+|    |    |    |    |    \--- com.fasterxml.jackson.core:jackson-core:2.9.6
+|    |    |    |    \--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1
+|    |    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    |    +--- com.google.guava:guava:19.0 -> 26.0-android (*)
+|    |    |    \--- com.google.code.gson:gson:2.7
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0
+|    |    |    \--- com.google.protobuf:protobuf-java:3.6.0 -> 3.6.1
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- com.google.api:api-common:1.5.0 -> 1.7.0 (*)
+|    |    |    \--- com.google.api.grpc:proto-google-common-protos:1.11.0 -> 1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0
+|    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.protobuf:protobuf-java-util:3.6.1 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0
+|    |    |    +--- io.grpc:grpc-core:1.18.0
+|    |    |    |    +--- io.grpc:grpc-context:1.18.0
+|    |    |    |    +--- com.google.code.gson:gson:2.7
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    |    +--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    |    \--- io.opencensus:opencensus-contrib-grpc-metrics:0.18.0
+|    |    |    |         \--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    |    +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |    +--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.12.0 -> 1.14.0 (*)
+|    |    |    \--- io.grpc:grpc-protobuf-lite:1.18.0
+|    |    |         +--- io.grpc:grpc-core:1.18.0 (*)
+|    |    |         +--- org.checkerframework:checker-compat-qual:2.5.2
+|    |    |         \--- com.google.guava:guava:25.1-android -> 26.0-android (*)
+|    |    +--- io.grpc:grpc-context:1.18.0
+|    |    +--- io.grpc:grpc-netty-shaded:1.18.0
+|    |    |    \--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    +--- io.grpc:grpc-stub:1.18.0
+|    |    |    \--- io.grpc:grpc-core:1.18.0 (*)
+|    |    +--- io.grpc:grpc-auth:1.18.0
+|    |    |    +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |    \--- com.google.auth:google-auth-library-credentials:0.9.0 -> 0.13.0
+|    |    +--- com.google.api:gax-grpc:1.42.0
+|    |    |    +--- com.google.api:gax:1.42.0 (*)
+|    |    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |    +--- com.google.guava:guava:26.0-android (*)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.threeten:threetenbp:1.3.3
+|    |    |    +--- com.google.auth:google-auth-library-oauth2-http:0.13.0 (*)
+|    |    |    +--- com.google.auth:google-auth-library-credentials:0.13.0
+|    |    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    |    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    |    |    \--- io.grpc:grpc-alts:1.18.0
+|    |    |         +--- io.grpc:grpc-auth:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-netty-shaded:[1.18.0] -> 1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |         +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |         +--- org.apache.commons:commons-lang3:3.5
+|    |    |         +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |         +--- com.google.auth:google-auth-library-oauth2-http:0.9.0 -> 0.13.0 (*)
+|    |    |         \--- io.grpc:grpc-grpclb:1.18.0
+|    |    |              +--- io.grpc:grpc-core:[1.18.0] -> 1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    |              +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    |              +--- com.google.protobuf:protobuf-java:3.5.1 -> 3.6.1
+|    |    |              \--- com.google.protobuf:protobuf-java-util:3.5.1 -> 3.6.1 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-logging-v2:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.apis:google-api-services-cloudiot:v1-rev20181120-1.27.0
+|    \--- com.google.api-client:google-api-client:1.27.0
+|         +--- com.google.oauth-client:google-oauth-client:1.27.0
+|         |    +--- com.google.http-client:google-http-client:1.27.0 -> 1.28.0 (*)
+|         |    +--- com.google.code.findbugs:jsr305:3.0.2
+|         |    \--- com.google.guava:guava:20.0 -> 26.0-android (*)
+|         +--- com.google.http-client:google-http-client-jackson2:1.27.0 -> 1.28.0 (*)
+|         \--- com.google.guava:guava:20.0 -> 26.0-android (*)
++--- commons-io:commons-io:2.5
++--- com.google.cloud:google-cloud-pubsub:1.66.0
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-iam-v1:0.12.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:grpc-google-cloud-pubsub-v1:1.48.0
+|    |    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    |    +--- io.grpc:grpc-protobuf:1.18.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-cloud-pubsub-v1:1.48.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
++--- com.google.cloud:google-cloud-firestore:0.84.0-beta
+|    +--- com.google.cloud:google-cloud-core:1.66.0 (*)
+|    +--- com.google.cloud:google-cloud-core-grpc:1.66.0 (*)
+|    +--- com.google.api:gax-grpc:1.42.0 (*)
+|    +--- com.google.api:api-common:1.7.0 (*)
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- com.google.api.grpc:proto-google-cloud-firestore-v1beta1:0.49.0
+|    |    +--- com.google.protobuf:protobuf-java:3.6.1
+|    |    +--- com.google.api:api-common:1.7.0 (*)
+|    |    +--- com.google.api.grpc:proto-google-common-protos:1.14.0 (*)
+|    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    +--- io.grpc:grpc-netty-shaded:1.18.0 (*)
+|    +--- io.grpc:grpc-stub:1.18.0 (*)
+|    +--- io.grpc:grpc-auth:1.18.0 (*)
+|    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    +--- io.opencensus:opencensus-contrib-grpc-util:0.18.0
+|    |    +--- io.opencensus:opencensus-api:0.18.0 (*)
+|    |    \--- io.grpc:grpc-core:1.14.0 -> 1.18.0 (*)
+|    \--- javax.annotation:javax.annotation-api:1.3.2
+\--- junit:junit:4.12
+     \--- org.hamcrest:hamcrest-core:1.3
+
+testRuntimeOnly - Runtime only dependencies for source set 'test'. (n)
+No dependencies
+
+(*) - dependencies omitted (listed previously)
+
+BUILD SUCCESSFUL in 1s
+1 actionable task: 1 executed

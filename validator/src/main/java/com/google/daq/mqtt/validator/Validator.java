@@ -7,7 +7,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.daq.mqtt.validator.ExceptionMap.ErrorTree;
+import com.google.daq.mqtt.util.ExceptionMap;
+import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
+import com.google.daq.mqtt.util.FirestoreDataSink;
+import com.google.daq.mqtt.util.PubSubClient;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -82,7 +85,7 @@ public class Validator {
     Map<String, Schema> schemaMap = new HashMap<>();
     for (File schemaFile : makeFileList(schemaSpec)) {
       Schema schema = getSchema(schemaFile);
-       String fullName = schemaFile.getName();
+      String fullName = schemaFile.getName();
       String schemaName = schemaFile.getName()
           .substring(0, fullName.length() - JSON_SUFFIX.length());
       schemaMap.put(schemaName, schema);

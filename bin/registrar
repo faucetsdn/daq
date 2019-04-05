@@ -1,0 +1,28 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+source misc/config_base.sh
+
+if [ -z "$gcp_cred" ]; then
+    echo Need to define [gcp_cred] config variable.
+    false
+fi
+
+if [ -z "$site_path" ]; then
+    echo Need to define [site_path] config variable.
+    false
+fi
+
+if [ -z "$schema_path" ]; then
+    echo Need to define [schema_path] config variable.
+    false
+fi
+
+validator/bin/build.sh
+
+export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
+echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
+
+validator/bin/registrar.sh $gcp_cred $site_path $schema_path

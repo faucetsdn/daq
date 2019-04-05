@@ -1,10 +1,17 @@
 Validating 1 schemas
   Validating 1 files against metadata.json
     Against input metadata.tests/errors.json
-      #: 4 schema violations found
-        #/pointset: 2 schema violations found
-          #/pointset/points/return_air_temperature_sensor: extraneous key [monkeys] is not permitted
+      #: 8 schema violations found
+        #/pointset: 3 schema violations found
+          #/pointset/points/return_air_temperature_sensor: 2 schema violations found
+            #/pointset/points/return_air_temperature_sensor/units: Celsius is not a valid enum value
+            #/pointset/points/return_air_temperature_sensor: extraneous key [monkeys] is not permitted
           #/pointset: extraneous key [rabbits] is not permitted
-        #/system: 2 schema violations found
-          #/system/location: required key [site_name] not found
-          #/system: required key [physical_tag] not found
+        #/system: 5 schema violations found
+          #/system/location: 3 schema violations found
+            #/system/location: extraneous key [site] is not permitted
+            #/system/location: required key [section] not found
+            #/system/location: required key [site_name] not found
+          #/system/physical_tag/asset: 2 schema violations found
+            #/system/physical_tag/asset/name: string [US-SFO-XYY_AHU-A01] does not match pattern ^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]+_[A-Z]{3}-[1-9][0-9]{0,2}$
+            #/system/physical_tag/asset: required key [guid] not found

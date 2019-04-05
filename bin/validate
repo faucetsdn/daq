@@ -15,8 +15,8 @@ if [ -z "$gcp_topic" ]; then
   false
 fi
 
-if [ -z "$gcp_schema" ]; then
-  echo Please make sure gcp_schema is defined in local/system.conf
+if [ -z "$schema_path" ]; then
+  echo Please make sure schema_path is defined in local/system.conf
   false
 fi
 
@@ -25,4 +25,4 @@ validator/bin/build.sh
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
-validator/bin/run.sh $PWD/$gcp_schema pubsub:$gcp_topic $gcp_ignoreset
+validator/bin/validate.sh $PWD/$schema_path pubsub:$gcp_topic $gcp_ignoreset
