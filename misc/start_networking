@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-LOCAL_IF=$HOSTNAME-eth0
+LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_IF=eth0
+
+echo Starting networking for $LOCAL_IF and $EXT_IF
 
 # Enable a web-server for configuration access.
 mkdir -p /tmp/public
