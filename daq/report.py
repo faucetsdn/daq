@@ -13,13 +13,14 @@ LOGGER = logging.getLogger('report')
 class ReportGenerator():
     """Generate a report for device qualification"""
 
-    _NAME_FORMAT = "report_%s_%s.txt"
+    _NAME_FORMAT = "report_%s_%s.md"
     _SIMPLE_FORMAT = "device_report.md"
     _TEST_SEPARATOR = "\n## %s\n"
     _RESULT_REGEX = r'^RESULT (.*?)\s*(#.*)?$'
     _SUMMARY_LINE = "Report summary"
     _REPORT_COMPLETE = "Report complete"
     _REPORT_HEADER = "# DAQ scan report for device %s"
+    _REPORT_DESC = "report_description.md"
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
 
@@ -41,7 +42,7 @@ class ReportGenerator():
         self._writeln('Started %%%% %s' % report_when)
 
         dev_base = config.get('site_path', tmp_base)
-        dev_path = os.path.join(dev_base, 'mac_addrs', self._clean_mac, 'report_description.txt')
+        dev_path = os.path.join(dev_base, 'mac_addrs', self._clean_mac, self._REPORT_DESC)
         if os.path.isfile(dev_path):
             self._writeln('')
             self._append_file(dev_path, add_pre=False)
