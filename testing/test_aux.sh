@@ -35,7 +35,10 @@ more inst/run-port-*/nodes/nmap*/activate.log | cat
 more inst/run-port-*/nodes/brute*/activate.log | cat
 ls inst/fail_fail01/ | tee -a $TEST_RESULTS
 
-(diff inst/reports/report_9a02571e8f01_*.txt docs/device_report.md \
-     && echo No report diff) | tee -a $TEST_RESULTS
+report_file=inst/reports/report_9a02571e8f01_*.txt
+sed docs/device_report.md -e 's/\s*%%.*//' > out/redacted_docs.md
+sed $report_file -e 's/\s*%%.*//' > out/redacted_file.md
+
+(diff out/redacted_docs.md out/redacted_file.md && echo No report diff) | tee -a $TEST_RESULTS
 
 echo Done with tests | tee -a $TEST_RESULTS

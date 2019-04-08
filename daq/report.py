@@ -38,7 +38,7 @@ class ReportGenerator():
         self.path = report_path
         self._file = open(report_path, "w")
         self._writeln(self._REPORT_HEADER % self._clean_mac)
-        self._writeln('Started %s' % report_when)
+        self._writeln('Started %%%% %s' % report_when)
 
         dev_base = config.get('site_path', tmp_base)
         dev_path = os.path.join(dev_base, 'mac_addrs', self._clean_mac, 'report_description.txt')
