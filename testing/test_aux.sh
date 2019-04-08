@@ -35,12 +35,7 @@ more inst/run-port-*/nodes/nmap*/activate.log | cat
 more inst/run-port-*/nodes/brute*/activate.log | cat
 ls inst/fail_fail01/ | tee -a $TEST_RESULTS
 
-(diff inst/reports/report_9a02571e8f01_*.txt \
-      misc/test_site/devices/9a02571e8f01/device_report.md \
+(diff inst/reports/report_9a02571e8f01_*.txt docs/device_report.md \
      && echo No report diff) | tee -a $TEST_RESULTS
-
-echo @@@@@@@ Sample report with template device description
-cat inst/reports/report_9a02571e8f01_*.txt
-echo @@@@@@@ Done with sample report.
 
 echo Done with tests | tee -a $TEST_RESULTS
