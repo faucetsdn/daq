@@ -1,6 +1,6 @@
 # Changelog
 
-* New Version
+* 0.9.6:
 	* UDMI Tech Stack definition (MQTT + JSON + UDMI).
 	* Updating BacNET tests to have more predictable/regular identifiers.
 	* Generate markdown-based reports in site device folder.
