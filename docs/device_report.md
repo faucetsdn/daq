@@ -1,5 +1,5 @@
 # DAQ scan report for device 9a02571e8f01
-Started 2019-03-23 14:47:25+00:00
+Started %% 2019-04-08 16:45:36+00:00
 
 |  Role  |      Name       |
 |--------|-----------------|
@@ -39,32 +39,32 @@ Free text including description of device and links to more information
 
 ## Report summary
 
-```
 skip base.switch.ping
-pass base.target.ping target
-pass security.ports.nmap
-```
+pass base.target.ping target %% 10.20.10.38
+fail security.ports.nmap
 
 ## Module ping
 
 ```
 Baseline ping test report
-# 98 packets captured.
+%% 38 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target # 10.20.32.38
+RESULT pass base.target.ping target %% 10.20.10.38
 ```
 
 ## Module nmap
 
 ```
-No open ports found.
-RESULT pass security.ports.nmap
+10000/open/tcp//snet-sensor-mgmt///
+RESULT fail security.ports.nmap
 ```
 
 ## Module brute
 
 ```
-Target port 10000 not open.
+Username:manager
+Password:friend
+Login success!
 ```
 
 ## Module switch

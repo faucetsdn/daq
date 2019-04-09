@@ -2,16 +2,18 @@ Running testing/test_base.sh
 Base Tests
 01: []
 # DAQ scan report for device 9a02571e8f00
-XXX
+Started
 
 Sample device description.
 By default would be in local/site/ rather than misc/test_site/.
 
+```
 \|/          (__)
      `\------(oo)
        ||    (__)
        ||w--||     \|/
    \|/
+```
 
 ## Report summary
 
