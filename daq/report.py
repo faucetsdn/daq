@@ -84,12 +84,14 @@ class ReportGenerator():
 
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
+        self._writeln(self._PRE_START_MARKER)
         for (_, path) in self._reports:
             with open(path) as stream:
                 for line in stream:
                     match = re.search(self._RESULT_REGEX, line)
                     if match:
                         self._writeln(match.group(1))
+        self._writeln(self._PRE_END_MARKER)
 
     def _copy_test_reports(self):
         for (name, path) in self._reports:

@@ -46,7 +46,8 @@ class ConnectedHost():
         self.tmpdir = self._initialize_tempdir()
         self.run_id = '%06x' % int(time.time())
         self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        self._conf_base = self._initialize_conf_base()
+        self._conf_base = self._get_conf_base()
+        self._dev_base = self._get_dev_base()
         self.state = None
         self.no_test = config.get('no_test', False)
         self._state_transition(_STATE.READY if self.no_test else _STATE.INIT)
@@ -74,7 +75,7 @@ class ConnectedHost():
         os.makedirs(tmpdir)
         return tmpdir
 
-    def _initialize_conf_base(self):
+    def _get_conf_base(self):
         test_config = self.config.get('test_config')
         if not test_config:
             return None
@@ -83,6 +84,17 @@ class ConnectedHost():
             LOGGER.warning('Test config directory not found: %s', conf_base)
             return None
         return conf_base
+
+    def _get_dev_base(self):
+        dev_base = self.config.get('site_path')
+        if not dev_base:
+            return None
+        clean_mac = self.target_mac.replace(':', '')
+        dev_path = os.path.abspath(os.path.join(dev_base, 'mac_addrs', clean_mac))
+        if not os.path.isdir(dev_path):
+            LOGGER.warning('Device config dir not found: %s', dev_path)
+            return None
+        return dev_path
 
     def initialize(self):
         """Fully initialize a new host set"""
@@ -317,6 +329,7 @@ class ConnectedHost():
             'gateway_ip': self.gateway.IP(),
             'gateway_mac': self.gateway.MAC(),
             'conf_base': self._conf_base,
+            'dev_base': self._dev_base,
             'scan_base': self.scan_base
         }
 

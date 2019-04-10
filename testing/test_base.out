@@ -17,9 +17,11 @@ By default would be in local/site/ rather than misc/test_site/.
 
 ## Report summary
 
+```
 skip base.switch.ping
 pass base.target.ping target
 pass security.ports.nmap
+```
 
 ## Module ping
 
@@ -33,7 +35,7 @@ RESULT pass base.target.ping target
 ## Module nmap
 
 ```
-No open ports found.
+No invalid ports found.
 RESULT pass security.ports.nmap
 ```
 
