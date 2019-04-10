@@ -4,7 +4,7 @@
 set -o pipefail
 
 ROOT=$(realpath $(dirname $0)/..)
-run_args=
+run_args="$@"
 cmdrun_log=inst/cmdrun.log
 build_hashf=.build_hash
 build_files=.build_files
@@ -12,15 +12,6 @@ build_built=.build_built
 
 cd $ROOT
 source misc/config_base.sh
-
-if [ "${1#run_mode=}" != "$1" ]; then
-    run_mode=${1#run_mode=}
-    shift
-fi
-
-if [ "$run_mode" == "latest" ]; then
-    run_args=latest
-fi
 
 if [ -z "$run_mode" ]; then
     echo run_mode not defined.
@@ -48,7 +39,7 @@ if [ "$build_hash" != "$local_hash" ]; then
 fi
 
 if [ "$run_mode" == local ]; then
-    cmd/exrun $run_args "$@" 2>&1 | tee $cmdrun_log
+    cmd/exrun $run_args 2>&1 | tee $cmdrun_log
 else
-    cmd/inrun $run_args "$@" 2>&1 | tee $cmdrun_log
+    cmd/inrun $run_args 2>&1 | tee $cmdrun_log
 fi

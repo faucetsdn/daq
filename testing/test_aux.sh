@@ -22,8 +22,10 @@ fail_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=misc/test_site
 site_reports=local/tmp
+startup_faux_1_opts=brute
+startup_faux_2_opts=nobrute
 EOF
-DAQ_FAUX1_OPTS=brute DAQ_FAUX2_OPTS=nobrute cmd/run -s
+cmd/run -s
 tail -qn 1 inst/run-port-*/nodes/brute*/tmp/report.txt | tee -a $TEST_RESULTS
 more inst/run-port-*/scans/dhcp_triggers.txt | cat
 dhcp_short=$(fgrep None inst/run-port-01/scans/dhcp_triggers.txt | wc -l)

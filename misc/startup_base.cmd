@@ -1,2 +1,1 @@
-autostart cmd/faux $DAQ_FAUX_OPTS
-
+autostart cmd/faux $startup_faux_opts

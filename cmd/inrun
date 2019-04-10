@@ -9,58 +9,50 @@ IMAGE=daqf/runner
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 DOCKER_STARTUP_TIMEOUT_MS=60000
+VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 pull_docker=y
 docker_args=
 build=
 reuse=
-VERSION=$(cat $ROOT/misc/RELEASE_VERSION)
 move_intfs=
-
-if [ -z "$build" ]; then
-    move_intfs=y
-fi
+run_args="$@"
 
 cd $ROOT
 source misc/config_base.sh
 
-docker_args+="\
-  --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
-  --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
-  --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
-
-if [ "$1" == latest ]; then
+if [ "$run_mode" == latest ]; then
     pull_docker=n
     VERSION=latest
-    shift
 fi
 
-if [ "$1" == reuse ]; then
+if [ "$run_mode" == reuse ]; then
     reuse=y
-    shift
 fi
 
-if [ "$1" == base -o "$1" == rebuild ]; then
-    if [ "$1" == base ]; then
+if [ "$run_mode" == base -o "$run_mode" == rebuild ]; then
+    if [ "$run_mode" == base ]; then
         IMAGE=daq/base
         VERSION=latest
     fi
     build=y
     pull_docker=n
     docker_args+=" -v $PWD:/daq/"
-    shift
 fi
 
-if [ "$1" == local ]; then
+if [ "$run_mode" == local ]; then
     pull_docker=n
     echo Mapping local daq into runner process.
     docker_args+=" -v $PWD:/root/daq"
-    shift
 fi
 
-if [ "$1" == bash ]; then
-    docker_args+=" -ti --entrypoint /bin/bash"
-    shift
+if [ "$run_cmd" == bash ]; then
+    docker_args+=" -ti"
 fi
+
+docker_args+="\
+  --env MININET_LOGLEVEL=$MININET_LOGLEVEL\
+  --env DOCKER_STARTUP_TIMEOUT_MS=$DOCKER_STARTUP_TIMEOUT_MS \
+  --env DAQ_LOGLEVEL=$DAQ_LOGLEVEL"
 
 mkdir -p $INSTDIR
 
@@ -83,6 +75,7 @@ if [ -z "$build" ]; then
     docker_args+=" -v $INSTDIR:/root/daq/inst"
     docker_args+=" -v $LOCALDIR:/root/daq/local"
     docker_args+=" -v $MISCDIR:/root/daq/misc"
+    move_intfs=y
 fi
 
 if [ "$pull_docker" == y ]; then
@@ -129,7 +122,7 @@ docker image inspect $TARGET > /dev/null
 sudo touch $INSTLOCK
 
 echo Starting $TARGET "$@"...
-sudo docker run -d --privileged --name daq-runner $docker_args $TARGET "$@"
+sudo docker run -d --privileged --name daq-runner $docker_args $TARGET $run_cmd $run_extra
 pid=$(sudo docker inspect --format '{{.State.Pid}}' daq-runner)
 echo Container pid $pid
 

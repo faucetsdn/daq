@@ -5,13 +5,13 @@ misc setup tasks."""
 
 import logging
 import os
-import re
 import signal
 import sys
 
 from mininet import log as minilog
 
 import runner
+import configurator
 
 ROOTLOG = logging.getLogger()
 LOGGER = logging.getLogger('daq')
@@ -19,39 +19,12 @@ ALT_LOG = logging.getLogger('mininet')
 
 _PID_FILE = 'inst/daq.pid'
 
-FLAG_MAP = {
-    'c': 'use_console',
-    'd': 'debug_mode',
-    'e': 'event_trigger',
-    'f': 'fail_mode',
-    'h': 'show_help',
-    'k': 'keep_hold',
-    'l': 'result_linger',
-    'n': 'no_test',
-    's': 'single_shot'
-}
-
 class DAQ:
     """Wrapper class for configuration management"""
 
     def __init__(self, args):
-        """Parse command line arguments"""
-        config = {}
-        for arg in args[1:]:
-            if arg:
-                print('processing arg: %s' % arg)
-                if arg[0] == '-':
-                    if arg[1:] in FLAG_MAP:
-                        config[FLAG_MAP[arg[1:]]] = True
-                    else:
-                        raise Exception('Unknown command line arg %s' % arg)
-                elif '=' in arg:
-                    parts = arg.split('=', 1)
-                    config[parts[0]] = parts[1]
-                else:
-                    _read_config_into(arg, config)
-        self.config = config
-        print('Configuration map:', config)
+        config_helper = configurator.Configurator(verbose=True)
+        self.config = config_helper.parse_args(args)
 
     def configure_logging(self):
         """Configure logging"""
@@ -89,34 +62,14 @@ def _write_pid_file():
     with open(_PID_FILE, 'w') as pid_file:
         pid_file.write(str(pid))
 
-def _read_config_into(filename, config):
-    print('Reading config from %s' % filename)
-    with open(filename) as file:
-        line = file.readline()
-        while line:
-            parts = re.sub(r'#.*', '', line).strip().split('=')
-            entry = parts[0].split() if parts else None
-            if len(parts) == 2:
-                config[parts[0].strip()] = parts[1].strip().strip('"').strip("'")
-            elif len(entry) == 2 and entry[0] == 'source':
-                _read_config_into(entry[1], config)
-            elif parts and parts[0]:
-                raise Exception('Unknown config entry: %s' % line)
-            line = file.readline()
-
-def _show_help():
-    print("Common run options:")
-    for option in FLAG_MAP:
-        print("  -%s: %s" % (option, FLAG_MAP[option]))
-    print("See system.conf for a detailed accounting of potential options.")
-
 def _execute():
     daq = DAQ(sys.argv)
+    configurator.print_config(daq.config)
     daq.configure_logging()
     config = daq.config
 
-    if 'show_help' in config:
-        _show_help()
+    if config.get('show_help'):
+        configurator.show_help()
         return 0
 
     _write_pid_file()

@@ -16,6 +16,7 @@ LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
+run_args="$@"
 
 if [ `whoami` != root ]; then
     echo Running as root...
@@ -41,9 +42,6 @@ if [ "$1" == "-h" ]; then
 fi
 
 export PYTHONPATH=$FAUCET:$MININET
-
-# Dump configuration settings for debugging.
-set | egrep ^[a-z][a-z_]*=
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found.

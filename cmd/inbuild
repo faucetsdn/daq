@@ -39,8 +39,8 @@ run_mode=$(cat misc/RELEASE_VERSION)
 echo Runner build on top of base...
 
 # Explicilty run in /daq not /root/daq because of volume mapping.
-echo cmd/run run_mode=$run_mode base /daq/cmd/build $run_extra
-cmd/run run_mode=$run_mode base /daq/cmd/build $run_extra
+echo cmd/run run_mode=base run_cmd=/daq/cmd/build run_extra=$run_extra
+cmd/run run_mode=base run_cmd=/daq/cmd/build run_extra=$run_extra
 
 if [ -n "$CONTINUOUS_INTEGRATION" ]; then
     echo Skipping container commit since its too intensive for automatic builds.

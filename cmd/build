@@ -16,13 +16,8 @@ copydirs="bin cmd misc faucet mininet docker daq subset"
 load_mark=/root/load_complete
 
 cd $ROOT
-if [ -f $LOCAL_SYSTEM ]; then
-    # Don't use setup script to avoid creating local directory.
-    echo Loading config from $LOCAL_SYSTEM...
-    source $LOCAL_SYSTEM
-else
-    echo No $LOCAL_SYSTEM found.
-fi
+DONT_MAKE_LOCAL=y
+source misc/config_base.sh
 
 if [ "$1" == skip ]; then
     do_images=skip

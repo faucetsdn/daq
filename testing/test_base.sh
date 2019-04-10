@@ -11,21 +11,18 @@ more inst/result.log | tee -a $TEST_RESULTS
 sed 's/\s*%%.*//' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 
 # Test block for open-port failures.
-(
-    echo Open port tests | tee -a $TEST_RESULTS
+echo Open port tests | tee -a $TEST_RESULTS
 
-    export DAQ_FAUX_OPTS=telnet
-    # Check that an open port causes the appropriate failure.
-    cmd/run -s
-    more inst/result.log | tee -a $TEST_RESULTS
-    cat inst/run-port-01/nodes/nmap01/activate.log
+# Check that an open port causes the appropriate failure.
+cmd/run -s startup_faux_opts=telnet
+more inst/result.log | tee -a $TEST_RESULTS
+cat inst/run-port-01/nodes/nmap01/activate.log
 
-    # Except with a default MUD file that blocks the port.
-    echo device_specs=misc/device_specs/simple.json >> local/system.conf
-    cmd/run -s
-    more inst/result.log | tee -a $TEST_RESULTS
-    cat inst/run-port-01/nodes/nmap01/activate.log
-)
+# Except with a default MUD file that blocks the port.
+echo device_specs=misc/device_specs/simple.json >> local/system.conf
+cmd/run -s startup_faux_opts=telnet
+more inst/result.log | tee -a $TEST_RESULTS
+cat inst/run-port-01/nodes/nmap01/activate.log
 
 # Test an "external" switch.
 echo External switch tests | tee -a $TEST_RESULTS
