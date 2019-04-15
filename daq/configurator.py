@@ -6,6 +6,7 @@ import re
 import sys
 
 FLAG_MAP = {
+    'b': 'build_tests',
     'c': 'use_console',
     'd': 'debug_mode',
     'e': 'event_trigger',

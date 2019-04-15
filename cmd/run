@@ -24,6 +24,10 @@ sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 mkdir -p inst
 sudo chown -f $USER -R inst $build_hashf $build_files || true
 
+if [ -n "$build_tests" ]; then
+    cmd/build
+fi
+
 test -f $build_hashf || touch $build_hashf
 build_hash=$(bin/build_hash)
 local_hash=$(< $build_hashf)

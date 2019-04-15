@@ -16,13 +16,16 @@ class ReportGenerator():
     _NAME_FORMAT = "report_%s_%s.md"
     _SIMPLE_FORMAT = "device_report.md"
     _TEST_SEPARATOR = "\n## %s\n"
-    _RESULT_REGEX = r'^RESULT (.*?)\s*(#.*)?$'
+    _RESULT_REGEX = r'^RESULT (.*?)\s+(.*?)\s+([^%]*)\s*(%%.*)?$'
     _SUMMARY_LINE = "Report summary"
     _REPORT_COMPLETE = "Report complete"
     _REPORT_HEADER = "# DAQ scan report for device %s"
     _REPORT_DESC = "report_description.md"
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
+    _TABLE_DIV = "---"
+    _TABLE_MARK = '|'
+    _SUMMARY_HEADERS = ["Result", "Test", "Notes"]
 
     def __init__(self, config, tmp_base, target_mac):
         self._reports = []
@@ -82,16 +85,22 @@ class ReportGenerator():
             LOGGER.info('Copying report to %s', self._alt_path)
             shutil.copyfile(self.path, self._alt_path)
 
+    def _write_table(self, items):
+        self._writeln(self._TABLE_MARK + self._TABLE_MARK.join(items) + self._TABLE_MARK)
+
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
-        self._writeln(self._PRE_START_MARKER)
+        self._write_table(self._SUMMARY_HEADERS)
+        self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
+        matches = {}
         for (_, path) in self._reports:
             with open(path) as stream:
                 for line in stream:
                     match = re.search(self._RESULT_REGEX, line)
                     if match:
-                        self._writeln(match.group(1))
-        self._writeln(self._PRE_END_MARKER)
+                        matches[match.group(2)] = [match.group(1), match.group(2), match.group(3)]
+        for match in sorted(matches.keys()):
+            self._write_table(matches[match])
 
     def _copy_test_reports(self):
         for (name, path) in self._reports:
