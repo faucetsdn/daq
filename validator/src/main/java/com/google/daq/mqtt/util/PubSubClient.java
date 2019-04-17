@@ -16,6 +16,8 @@ import com.google.pubsub.v1.ProjectTopicName;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.Subscription;
+import io.grpc.LoadBalancerRegistry;
+import io.grpc.internal.PickFirstLoadBalancerProvider;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -40,6 +42,11 @@ public class PubSubClient {
   private final BlockingQueue<PubsubMessage> messages = new LinkedBlockingDeque<>();
 
   private Subscriber subscriber;
+
+  {
+    // Why this needs to be done there is no rhyme or reason.
+    LoadBalancerRegistry.getDefaultRegistry().register(new PickFirstLoadBalancerProvider());
+  }
 
   public PubSubClient(String topicId) {
     try {
