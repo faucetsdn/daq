@@ -47,7 +47,7 @@
             "additionalProperties": false,
             "guid": {
               "type": "string",
-              "pattern": "^[a-z]+://[0-9a-zA-Z_$]+$"
+              "pattern": "^[a-z]+://[-0-9a-zA-Z_$]+$"
             },
             "name": {
               "type": "string",
