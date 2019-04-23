@@ -109,7 +109,7 @@ public class Registrar {
       }
       System.err.println(String.format("Processed %d devices", localDevices.size()));
     } catch (Exception e) {
-      throw new RuntimeException("While processing devices", e);
+      exceptionMap.put("Processing devices", e);
     }
     exceptionMap.throwIfNotEmpty();
   }
