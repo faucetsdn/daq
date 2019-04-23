@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +170,9 @@ public class CloudIotManager {
           .setPageSize(LIST_PAGE_SIZE)
           .execute()
           .getDevices();
+      if (devices == null) {
+        return new ArrayList<>();
+      }
       if (devices.size() == LIST_PAGE_SIZE) {
         throw new RuntimeException("Returned exact page size, likely not fetched all devices");
       }
