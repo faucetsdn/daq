@@ -13,7 +13,8 @@ from google.auth import _default as google_auth
 
 LOGGER = logging.getLogger('gcp')
 
-class GcpManager():
+
+class GcpManager:
     """Manager class for working with GCP"""
 
     REPORT_BUCKET_FORMAT = '%s.appspot.com'
@@ -27,7 +28,8 @@ class GcpManager():
             return
         cred_file = self.config['gcp_cred']
         LOGGER.info('Loading gcp credentials from %s', cred_file)
-        # Normal execution assumes default credentials. pylint: disable=protected-access
+        # Normal execution assumes default credentials.
+        # pylint: disable=protected-access
         (self._credentials, self._project) = google_auth._load_credentials_from_file(cred_file)
         self._client_name = self._parse_creds(cred_file)
         self._pubber = pubsub_v1.PublisherClient(credentials=self._credentials)
@@ -45,7 +47,8 @@ class GcpManager():
         LOGGER.info('Dashboard at %s', dashboard_url)
         return firestore.client()
 
-    def _message_callback(self, topic, message, callback):
+    @staticmethod
+    def _message_callback(topic, message, callback):
         LOGGER.info('Received topic %s message: %s', topic, message)
         callback(message)
         message.ack()
@@ -68,7 +71,7 @@ class GcpManager():
         if 'encode' not in message:
             message = json.dumps(message)
         LOGGER.debug('Sending to topic_path %s/%s: %s', self._project, topic, message)
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         topic_path = self._pubber.topic_path(self._project, topic)
         future = self._pubber.publish(topic_path, message.encode('utf-8'),
                                       projectId=self._project, origin=self._client_name)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Configuraiton manager class for daqy-things."""
+"""Configuration manager class for daqy-things."""
 
 import re
 import sys
@@ -18,12 +18,14 @@ FLAG_MAP = {
     's': 'single_shot'
 }
 
+
 def show_help():
     """Show help information on the console output."""
     print("Common run options:")
     for option in FLAG_MAP:
         print("  -%s: %s" % (option, FLAG_MAP[option]))
     print("See misc/system.conf for a detailed accounting of potential options.")
+
 
 def print_config(config):
     """Dump config info as key=value to console out."""
@@ -34,7 +36,8 @@ def print_config(config):
         config_list.append("%s=%s%s%s" % (key, quote, config[key], quote))
     print(*config_list, sep='\n')
 
-class Configurator():
+
+class Configurator:
     """Manager class for system configuration."""
 
     def __init__(self, verbose=False):
@@ -76,6 +79,7 @@ class Configurator():
                 else:
                     self._read_config_into(arg, config)
         return config
+
 
 if __name__ == '__main__':
     CONFIG = Configurator()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Main entrypoint for DAQ. Handles command line parsing and other
+"""Main entry-point for DAQ. Handles command line parsing and other
 misc setup tasks."""
 
 import logging
@@ -13,11 +13,12 @@ from mininet import log as minilog
 import runner
 import configurator
 
-ROOTLOG = logging.getLogger()
+ROOT_LOG = logging.getLogger()
 LOGGER = logging.getLogger('daq')
 ALT_LOG = logging.getLogger('mininet')
 
 _PID_FILE = 'inst/daq.pid'
+
 
 class DAQ:
     """Wrapper class for configuration management"""
@@ -36,31 +37,33 @@ class DAQ:
         logging.basicConfig(level=level)
 
         # For some reason this is necessary for travis.ci
-        ROOTLOG.setLevel(level)
+        ROOT_LOG.setLevel(level)
 
         # This handler is used by everything, so be permissive here.
-        ROOTLOG.handlers[0].setLevel(minilog.LEVELS['debug'])
+        ROOT_LOG.handlers[0].setLevel(minilog.LEVELS['debug'])
 
         mininet_env = config.get('mininet_loglevel', 'info')
         minilog.setLogLevel(mininet_env)
 
-        #pylint: disable=protected-access
+        # pylint: disable=protected-access
         minilog.MininetLogger._log = _stripped_alt_logger
 
 
 def _stripped_alt_logger(self, level, msg, *args, **kwargs):
-    #pylint: disable=unused-argument
+    # pylint: disable=unused-argument
     """A logger for messages that strips whitespace"""
     stripped = msg.strip()
     if stripped:
-        #pylint: disable=protected-access
+        # pylint: disable=protected-access
         ALT_LOG._log(level, stripped, *args, **kwargs)
+
 
 def _write_pid_file():
     pid = os.getpid()
     LOGGER.info('pid is %d', pid)
     with open(_PID_FILE, 'w') as pid_file:
         pid_file.write(str(pid))
+
 
 def _execute():
     daq = DAQ(sys.argv)
