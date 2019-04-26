@@ -5,7 +5,7 @@
 
 FROM daq/aardvark:latest
 
-RUN $AG update && $AG install dnsmasq ethtool iptables netcat python
+RUN $AG update && $AG install dnsmasq ethtool iptables netcat python freeradius
 
 COPY misc/start_networking .
 

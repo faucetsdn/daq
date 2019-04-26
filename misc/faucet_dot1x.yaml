@@ -1,0 +1,25 @@
+dps:
+    br-dot1x:
+        dp_id: 0x250
+        timeout: 7201
+        arp_neighbor_timeout: 3600
+        dot1x:
+            nfv_intf: dplane-eth0
+            nfv_sw_port: 3
+            radius_ip: 172.17.0.12
+            radius_port: 1812
+            radius_secret: testing123
+        interfaces:
+            1:
+                native_vlan: 100
+                dot1x: True
+            2:
+                native_vlan: 100
+            3:
+                native_vlan: 100
+            4:
+                native_vlan: 100
+            5:
+                native_vlan: 100
+vlans:
+        100:
