@@ -20,4 +20,4 @@ COPY bin/retry_cmd bin/
 
 ENV AG="bin/retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
 
-RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace
+RUN $AG update && $AG install net-tools bash iproute2 iputils-ping tcpdump strace vim
