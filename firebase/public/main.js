@@ -12,6 +12,11 @@ const row_timestamps = {};
 
 let last_result_time_sec = 0;
 
+const origin_id = getQueryParam('origin');
+const port_id = getQueryParam('port');
+const registry_id = getQueryParam('registry');
+const device_id = getQueryParam('device');
+
 function appendTestCell(row, column) {
   const columnElement = document.createElement('td');
   columnElement.setAttribute('label', column);
@@ -190,13 +195,26 @@ function handleOriginResult(origin, port, runid, test, result) {
   const status = getResultStatus(result);
   statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
   setRowState(port, runid);
-  setGridValue(port, test, runid, status);
+  const gridElement = setGridValue(port, test, runid, status);
   if (result.info) {
     setGridValue(port, 'info', runid, result.info);
   }
   if (result.report) {
     addReportBucket(origin, port, runid, result.report);
   }
+  if (test == 'info') {
+    makeConfigLink(gridElement, status);
+  }
+}
+
+function makeConfigLink(element, info) {
+  const parts = info.split('/');
+  const device_id = parts[0];
+  const device_link = document.createElement('a');
+  device_link.href = `config.html?origin=${origin_id}&device=${device_id}`;
+  device_link.innerHTML = element.innerHTML;
+  element.innerHTML = '';
+  element.appendChild(device_link);
 }
 
 function addReportBucket(origin, row, runid, reportName) {
@@ -252,10 +270,10 @@ function listOrigins(db) {
   const link_group = document.getElementById('origins');
   db.collection('origin').get().then((snapshot) => {
     snapshot.forEach((origin) => {
-      origin_id = origin.id;
+      origin = origin.id;
       const origin_link = document.createElement('a');
-      origin_link.setAttribute('href', '/?origin=' + origin_id);
-      origin_link.innerHTML = origin_id;
+      origin_link.setAttribute('href', '/?origin=' + origin);
+      origin_link.innerHTML = origin;
       link_group.appendChild(origin_link);
       link_group.appendChild(document.createElement('p'));
     });
@@ -286,18 +304,17 @@ function listDevices(db, registryId) {
     }).catch((e) => statusUpdate('registry list error', e));
 }
 
-function setupTriggers() {
+function getFirestoreDb() {
   var db = firebase.firestore();
   const settings = {
     timestampsInSnapshots: true
   };
   db.settings(settings);
+  return db;
+}
 
-  const origin_id = getQueryParam('origin');
-  const port_id = getQueryParam('port');
-  const registry_id = getQueryParam('registry');
-  const device_id = getQueryParam('device');
-
+function dashboardSetup() {
+  var db = getFirestoreDb();
   if (port_id) {
     ensureGridRow('header');
     ensureGridColumn('row', port_id);
@@ -312,18 +329,22 @@ function setupTriggers() {
     listOrigins(db);
     listRegistries(db);
   }
+
+  return origin_id;
 }
 
 function triggerOrigin(db, origin_id) {
   const latest = (ref) => {
-    return ref.orderBy('timestamp', 'desc').limit(3);
+    return ref.orderBy('updated', 'desc').limit(3);
   }
 
   ref = db.collection('origin').doc(origin_id);
-  ref.collection('port').doc('port-undefined').onSnapshot((result) => {
+  ref.collection('runner').doc('heartbeat').onSnapshot((result) => {
     const message = result.data().message;
     ensureColumns(message.tests);
-    document.querySelector('#description').innerHTML = message.description;
+    const description = document.querySelector('#description .description');
+    description.innerHTML = message.description;
+    description.href = `config.html?origin=${origin_id}`
     const version = `DAQ v${message.version}`
     document.querySelector('#version').innerHTML = version
   });
@@ -390,10 +411,70 @@ function interval_updater() {
   }
 }
 
+function getJsonEditor() {
+  const container = document.getElementById('jsoneditor');
+  const options = {
+    //mode: 'view'
+  };
+  return new JSONEditor(container, options);
+}
+
+function loadJsoneditor() {
+  const subtitle = device_id
+        ? `${origin_id} device ${device_id}`
+        : `${origin_id} system`;
+  document.getElementById('title_origin').innerHTML = subtitle;
+
+  const db = getFirestoreDb();
+  const origin_doc = db.collection('origin').doc(origin_id);
+  const config_doc = origin_doc.collection('runner').doc('config');
+  config_doc.get().then((snapshot) => {
+    if (device_id) {
+      loadDeviceConfig(origin_doc, snapshot.data().config);
+    } else {
+      const jsonEditor = getJsonEditor();
+      jsonEditor.set(snapshot.data().config);
+      jsonEditor.setName('system_config');
+      jsonEditor.expandAll();
+    }
+  });
+}
+
+function loadDeviceConfig(origin_doc, runner_config) {
+  const device_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('latest')
+  device_doc.get().then((snapshot) => {
+    const jsonEditor = getJsonEditor();
+    if (snapshot.exists) {
+      jsonEditor.set(snapshot.data().config);
+    } else {
+      device_config = makeDeviceConfig(runner_config);
+      device_doc.set(device_config);
+      jsonEditor.set(device_config.config);
+    }
+    jsonEditor.setName('device_config');
+    jsonEditor.expandAll();
+  });
+}
+
+function makeDeviceConfig(runner_config) {
+  runner_config['device'] = {
+    'name': 'Device Name',
+    'mac_addr': device_id
+  };
+  return {
+    'config': runner_config,
+    'updated': new Date().toJSON()
+  };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   try {
+    if (document.getElementById('jsoneditor')) {
+      loadJsoneditor();
+    } else {
+      dashboardSetup();
+    }
     statusUpdate('System initialized.');
-    setupTriggers();
     setInterval(interval_updater, 1000);
   } catch (e) {
     statusUpdate('Loading error', e)

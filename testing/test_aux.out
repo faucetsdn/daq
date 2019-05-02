@@ -21,5 +21,17 @@ pri.flows
 pri.ofctl
 sec.flows
 sec.ofctl
+Test runtime config
+{
+  "modules": {
+    "brute": {},
+    "nmap": {},
+    "switch": {
+      "enabled": true
+    }
+  },
+  "runtime": true
+}
+Redacted docs diff
 No report diff
 Done with tests

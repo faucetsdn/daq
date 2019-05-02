@@ -13,9 +13,9 @@ class DockerTest():
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
-    def __init__(self, runner, parent, test_name):
-        self.target_port = parent.target_port
-        self.tmpdir = parent.tmpdir
+    def __init__(self, runner, target_port, tmpdir, test_name):
+        self.target_port = target_port
+        self.tmpdir = tmpdir
         self.test_name = test_name
         self.runner = runner
         self.host_name = '%s%02d' % (test_name, self.target_port)

@@ -8,13 +8,14 @@ import time
 
 from clib import tcpdump_helper
 
+import configurator
 import docker_test
 import report
 
 LOGGER = logging.getLogger('host')
 
 
-class _STATE():
+class _STATE:
     """Host state enum for testing cycle"""
     ERROR = 'Error condition'
     INIT = 'Initizalization'
@@ -28,13 +29,14 @@ class _STATE():
     TERM = 'Host terminated'
 
 
-class ConnectedHost():
+class ConnectedHost:
     """Class managing a device-under-test"""
 
     _MONITOR_SCAN_SEC = 30
     _STARTUP_MIN_TIME_SEC = 5
-    _TMPDIR_BASE = "inst/"
+    _INST_DIR = "inst/"
     _FAIL_BASE_FORMAT = "inst/fail_%s"
+    _MODULE_CONFIG = "module_config.json"
 
     def __init__(self, runner, gateway, target, config):
         self.runner = runner
@@ -43,11 +45,12 @@ class ConnectedHost():
         self.target_port = target['port']
         self.target_mac = target['mac']
         self.fake_target = target['fake']
-        self.tmpdir = self._initialize_tempdir()
+        self.devdir = self._init_devdir()
         self.run_id = '%06x' % int(time.time())
-        self.scan_base = os.path.abspath(os.path.join(self.tmpdir, 'scans'))
-        self._conf_base = self._get_conf_base()
-        self._dev_base = self._get_dev_base()
+        self.scan_base = os.path.abspath(os.path.join(self.devdir, 'scans'))
+        self._loaded_config = None
+        self._port_base = self._get_port_base()
+        self._device_base = self.get_device_base(config, self.target_mac)
         self.state = None
         self.no_test = config.get('no_test', False)
         self._state_transition(_STATE.READY if self.no_test else _STATE.INIT)
@@ -64,18 +67,18 @@ class ConnectedHost():
         self._tcp_monitor = None
         self.target_ip = None
         self.record_result('startup', state='run')
-        self._report = report.ReportGenerator(config, self._TMPDIR_BASE, self.target_mac)
+        self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac)
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
         self._fail_hook = config.get('fail_hook')
 
-    def _initialize_tempdir(self):
-        tmpdir = os.path.join(self._TMPDIR_BASE, 'run-port-%02d' % self.target_port)
-        shutil.rmtree(tmpdir, ignore_errors=True)
-        os.makedirs(tmpdir)
-        return tmpdir
+    def _init_devdir(self):
+        devdir = os.path.join(self._INST_DIR, 'run-port-%02d' % self.target_port)
+        shutil.rmtree(devdir, ignore_errors=True)
+        os.makedirs(devdir)
+        return devdir
 
-    def _get_conf_base(self):
+    def _get_port_base(self):
         test_config = self.config.get('test_config')
         if not test_config:
             return None
@@ -85,15 +88,16 @@ class ConnectedHost():
             return None
         return conf_base
 
-    def _get_dev_base(self):
-        dev_base = self.config.get('site_path')
+    @staticmethod
+    def get_device_base(config, target_mac):
+        """Get the base config for a host device"""
+        dev_base = config.get('site_path')
         if not dev_base:
             return None
-        clean_mac = self.target_mac.replace(':', '')
+        clean_mac = target_mac.replace(':', '')
         dev_path = os.path.abspath(os.path.join(dev_base, 'mac_addrs', clean_mac))
         if not os.path.isdir(dev_path):
             LOGGER.warning('Device config dir not found: %s', dev_path)
-            return None
         return dev_path
 
     def initialize(self):
@@ -101,8 +105,10 @@ class ConnectedHost():
         LOGGER.info('Target port %d initializing...', self.target_port)
         # There is a race condition here with ovs assigning ports, so wait a bit.
         time.sleep(2)
-        shutil.rmtree(self.tmpdir, ignore_errors=True)
+        shutil.rmtree(self.devdir, ignore_errors=True)
         os.makedirs(self.scan_base)
+        self._loaded_config = self._load_module_config()
+        self._publish_module_config(None, self._loaded_config)
         network = self.runner.network
         self._mirror_intf_name = network.create_mirror_interface(self.target_port)
         if self.no_test:
@@ -328,12 +334,13 @@ class ConnectedHost():
             'target_mac': self.target_mac,
             'gateway_ip': self.gateway.IP(),
             'gateway_mac': self.gateway.MAC(),
-            'conf_base': self._conf_base,
-            'dev_base': self._dev_base,
+            'conf_base': self._port_base,
+            'dev_base': self._device_base,
             'scan_base': self.scan_base
         }
 
-        self.test_host = docker_test.DockerTest(self.runner, self, test_name)
+        self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
+                                                test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         host_name = self.test_host.host_name if self.test_host else 'unknown'
         if 'ext_loip' in self.config:
@@ -342,24 +349,34 @@ class ConnectedHost():
             params['switch_ip'] = self.config['ext_addr']
             params['switch_port'] = str(self.target_port)
         LOGGER.debug('test_host start %s/%s', self.test_name, host_name)
+        self._set_module_config(test_name, self._loaded_config)
         self.test_host.start(self.test_port, params, self._docker_callback)
 
+    def _host_name(self):
+        return self.test_host.host_name if self.test_host else 'unknown'
+
+    def _host_dir_path(self):
+        return os.path.join(self.devdir, 'nodes', self._host_name())
+
+    def _host_tmp_path(self):
+        return os.path.join(self._host_dir_path(), 'tmp')
+
     def _docker_callback(self, return_code=None, exception=None):
-        host_name = self.test_host.host_name if self.test_host else 'unknown'
+        host_name = self._host_name()
         LOGGER.debug('test_host callback %s/%s was %s with %s',
                      self.test_name, host_name, return_code, exception)
         if (return_code or exception) and self._fail_hook:
-            fail_file = self._FAIL_BASE_FORMAT % self.test_host.host_name
+            fail_file = self._FAIL_BASE_FORMAT % host_name
             LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
             os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
         self.record_result(self.test_name, code=return_code, exception=exception)
-        result_path = os.path.join(self.tmpdir, 'nodes', host_name, 'return_code.txt')
+        result_path = os.path.join(self._host_dir_path(), 'return_code.txt')
         try:
             with open(result_path, 'a') as output_stream:
                 output_stream.write(str(return_code) + '\n')
         except Exception as e:
             LOGGER.error('While writing result code: %s', e)
-        report_path = os.path.join(self.tmpdir, 'nodes', host_name, 'tmp', 'report.txt')
+        report_path = os.path.join(self._host_tmp_path(), 'report.txt')
         if os.path.isfile(report_path):
             self._report.accumulate(self.test_name, report_path)
         self.test_host = None
@@ -370,6 +387,18 @@ class ConnectedHost():
         else:
             self._state_transition(_STATE.NEXT, _STATE.TESTING)
             self._run_next_test()
+
+    def _set_module_config(self, name, loaded_config):
+        tmp_dir = self._host_tmp_path()
+        configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
+        self._publish_module_config(name, self._loaded_config)
+
+    def _load_module_config(self):
+        config = self.runner.get_base_config()
+        device_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
+        configurator.merge_config(config, device_config)
+        configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG)
+        return config
 
     def record_result(self, name, **kwargs):
         """Record a named result for this test"""
@@ -385,14 +414,29 @@ class ConnectedHost():
     def _push_record(self, name, current=None, **kwargs):
         if not current:
             current = int(time.time())
+        assert self.run_id, 'run_id undefined'
+        assert self.target_port, 'target_port undefined'
         result = {
             'name': name,
             'runid': self.run_id,
             'started': self.test_start,
-            'timestamp': current,
+            'timestamp': datetime.datetime.fromtimestamp(current).isoformat(),
             'port': self.target_port
         }
         for arg in kwargs:
             result[arg] = None if kwargs[arg] is None else str(kwargs[arg])
         self.results[name] = result
-        self.runner.gcp.publish_message('daq_runner', result)
+        self.runner.gcp.publish_message('daq_runner', 'test_result', result)
+
+    def _publish_module_config(self, name, loaded_config):
+        current = int(time.time())
+        assert self.run_id, 'run_id undefined'
+        assert self.target_port, 'target_port undefined'
+        result = {
+            'name': name,
+            'runid': self.run_id,
+            'timestamp': datetime.datetime.fromtimestamp(current).isoformat(),
+            'port': self.target_port,
+            'config': loaded_config
+        }
+        self.runner.gcp.publish_message('daq_runner', 'runner_config', result)

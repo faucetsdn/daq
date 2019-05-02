@@ -1,14 +1,12 @@
 #!/bin/bash -e
 
-PROJECT=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
-
-if [ -z "$PROJECT" ]; then
-    echo No cloud project configured.
+if [ $# != 1 ]; then
+    echo Usage: $0 [project_id]
     false
 fi
 
+PROJECT=$1
 echo Configured for cloud project $PROJECT
-echo Set default using: gcloud config set project XXX
 
 firebase deploy --only functions --project $PROJECT
 

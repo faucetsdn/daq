@@ -78,7 +78,7 @@ echo Installing python dependencies...
 $PIP install wheel
 $PIP install --upgrade --index-url=https://pypi.python.org/simple \
     pylint cryptography requests netifaces codecov coverage setuptools \
-    firebase-admin==2.11.0 google-cloud-pubsub==0.32.1
+    firebase-admin==2.16.0 google-cloud-pubsub==0.40.0
 
 if [ -z "$DAQ_CONTAINER" ]; then
     $PIP install pyyaml==3.12

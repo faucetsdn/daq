@@ -2,8 +2,14 @@
 
 """Configuration manager class for daqy-things."""
 
+import json
+import logging
+import os
 import re
 import sys
+import yaml
+
+LOGGER = logging.getLogger('config')
 
 FLAG_MAP = {
     'b': 'build_tests',
@@ -35,6 +41,49 @@ def print_config(config):
         quote = '"' if ' ' in str(value) else ''
         config_list.append("%s=%s%s%s" % (key, quote, config[key], quote))
     print(*config_list, sep='\n')
+
+
+def merge_config(base, adding):
+    """Update a dict object and follow nested objects"""
+    if not adding:
+        return
+    for key in sorted(adding.keys()):
+        value = adding[key]
+        if value and isinstance(value, dict) and key in base:
+            merge_config(base[key], value)
+        else:
+            base[key] = value
+
+
+def load_config(path, filename):
+    """Load a config file"""
+    if not path:
+        return None
+    config_file = os.path.join(path, filename)
+    if not os.path.exists(config_file):
+        LOGGER.info('Skipping missing %s', config_file)
+        return None
+    LOGGER.info('Loading config from %s', config_file)
+    with open(config_file) as data_file:
+        return yaml.safe_load(data_file)
+
+
+def load_and_merge(base, path, filename):
+    """Load a config file and merge with an existing base"""
+    merge_config(base, load_config(path, filename))
+
+
+def write_config(path, filename, config):
+    """Write a config file"""
+    if not path:
+        return
+    if not os.path.exists(path):
+        os.makedirs(path)
+    config_file = os.path.join(path, filename)
+    LOGGER.info('Writing config to %s', config_file)
+    with open(config_file, 'w') as output_stream:
+        output_stream.write(json.dumps(config, indent=2, sort_keys=True))
+        output_stream.write('\n')
 
 
 class Configurator:
