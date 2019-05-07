@@ -417,9 +417,9 @@ class ConnectedHost:
                     self.test_name, host_name, return_code, exception)
         failed = return_code or exception
         if failed and self._fail_hook:
-                fail_file = self._FAIL_BASE_FORMAT % host_name
-                LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
-                os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
+            fail_file = self._FAIL_BASE_FORMAT % host_name
+            LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
+            os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
         state = 'fail' if failed else 'pass'
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
         result_path = os.path.join(self._host_dir_path(), 'return_code.txt')
