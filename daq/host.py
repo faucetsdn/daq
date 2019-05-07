@@ -93,6 +93,7 @@ class ConnectedHost:
 
     @staticmethod
     def make_runid():
+        """Create a timestamped runid"""
         return '%06x' % int(time.time())
 
     def _init_devdir(self):
@@ -474,6 +475,7 @@ class ConnectedHost:
 
     @staticmethod
     def clear_port(gcp_instance, port):
+        """Clear the given port in the ui to a startup init state"""
         result = {
             'name': 'startup',
             'state': 'init',
