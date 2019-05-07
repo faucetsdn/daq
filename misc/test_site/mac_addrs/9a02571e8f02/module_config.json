@@ -9,6 +9,14 @@
     "type": "*** Type ***",
     "version": "*** Version ***"
   },
+  "modules": {
+    "switch": {
+      "enabled": true
+    },
+    "foobar": {
+      "enabled": false
+    }
+  },
   "ports": {
     "tcp": {
       "443": {
