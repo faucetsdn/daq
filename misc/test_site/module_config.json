@@ -5,10 +5,10 @@
       "enabled": true
     },
     "nmap": {
-      "enabled": false
+      "enabled": true
     },
     "switch": {
-      "enabled": true
+      "enabled": false
     }
   },
   "process": {
