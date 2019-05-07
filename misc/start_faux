@@ -36,7 +36,7 @@ ip addr show $intf_name
 if [ -n "${options[xdhcp]}" ]; then
     echo Assigning static ip address...
     ip link set up dev $intf_name
-    ip addr add 10.20.0.5/8 dev $intf_name broadcast 10.255.255.255
+    ip addr add 10.20.0.5/16 dev $intf_name broadcast 10.20.255.255
     ip addr show $intf_name
 else
     echo Running dhclient...

@@ -6,7 +6,7 @@ echo Base Tests >> $TEST_RESULTS
 
 cp misc/system_base.conf local/system.conf
 
-cmd/run -s site_path=misc/test_site/ site_reports=local/test_site
+cmd/run -s site_path=misc site_reports=local/test_site
 more inst/result.log | tee -a $TEST_RESULTS
 sed 's/\s*%%.*//' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 

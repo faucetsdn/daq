@@ -39,8 +39,16 @@ div {
     background: #FAA;
 }
 
+#testgrid table tr ~ tr td[status=err] {
+    background: #E66;
+}
+
 #testgrid table tr ~ tr td[status=run] {
     background: #EE6;
+}
+
+#testgrid table tr ~ tr td[status=hold] {
+    background: #AAF;
 }
 
 #testgrid table tr ~ tr td[label=info] {
@@ -49,4 +57,40 @@ div {
 
 #testgrid table tr ~ tr td[label=timer] {
     background: #EEE;
+}
+
+#config_body .saving_indicator {
+    color: #f00;
+    opacity: 0;
+}
+
+#config_body.saving .saving_indicator {
+    opacity: 1;
+}
+
+#config_body .dated_indicator {
+    color: #f00;
+    display: none;
+}
+
+#config_body.dated .dated_indicator {
+    display: inline;
+}
+
+#config_body .provisional_indicator {
+    color: #f00;
+    display: none;
+}
+
+#config_body.provisional .provisional_indicator {
+    display: inline;
+}
+
+#config_body .save_button {
+    color: #004ED0;
+    opacity: 0;
+}
+
+#config_body.dirty .save_button {
+    opacity: 1;
 }

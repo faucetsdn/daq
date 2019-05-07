@@ -6,9 +6,16 @@ IMAGE=daq/faux
 local_config=$ROOT/local/system.conf
 postfix=
 intf_mac=9a:02:57:1e:8f:00
+create_local=
 
 cd $ROOT
 source misc/config_base.sh
+
+# If the first argument is :lo, then create a local IP address.
+if [ "$1" == ":lo" ]; then
+    create_local=y
+    shift
+fi
 
 # If the argument starts with a :, then it's an interface name.
 if [ "${1#:}" != "$1" ]; then
@@ -73,6 +80,11 @@ else
     echo Adding new interface to $pid...
     sudo ip link add $intf type veth peer name faux-eth0 addr $intf_mac netns $pid
     sudo ip link set $intf up
+fi
+
+if [ -n "$create_local" ]; then
+    sudo ip addr add 10.20.0.1/16 broadcast 10.20.255.255 dev $intf
+    sudo ip addr show dev $intf
 fi
 
 echo Done with faux device launch.

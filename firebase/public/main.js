@@ -4,11 +4,13 @@
  */
 
 const PORT_ROW_COUNT = 25;
-const ROW_TIMEOUT_SEC = 500
+const ROW_TIMEOUT_SEC = 500;
 
 const display_columns = [ ];
 const display_rows = [ ];
 const row_timestamps = {};
+
+const data_state = {};
 
 let last_result_time_sec = 0;
 
@@ -16,6 +18,17 @@ const origin_id = getQueryParam('origin');
 const port_id = getQueryParam('port');
 const registry_id = getQueryParam('registry');
 const device_id = getQueryParam('device');
+const run_id = getQueryParam('runid');
+
+var db;
+
+document.addEventListener('DOMContentLoaded', () => {
+  db = firebase.firestore();
+  const settings = {
+    timestampsInSnapshots: true
+  };
+  db.settings(settings);
+});
 
 function appendTestCell(row, column) {
   const columnElement = document.createElement('td');
@@ -88,7 +101,7 @@ function ensureGridRow(label, content, max_rows) {
 
 function setGridValue(row, column, runid, value) {
   const selector = `#testgrid table tr[label="${row}"] td[label="${column}"]`;
-  const targetElement = document.querySelector(selector)
+  const targetElement = document.querySelector(selector);
 
   if (targetElement) {
     const previous = targetElement.getAttribute('runid');
@@ -101,7 +114,7 @@ function setGridValue(row, column, runid, value) {
         targetElement.setAttribute('status', value);
       }
     }
-    const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`)
+    const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
     const rowTime = rowElement.getAttribute('runid');
     const rowPrev = rowElement.getAttribute('prev');
     updateTimeClass(targetElement, rowTime, rowPrev);
@@ -121,7 +134,7 @@ function setRowState(row, new_runid) {
   let runid = rowElement.getAttribute('runid') || 0;
   let prev = rowElement.getAttribute('prev') || 0;
   console.log('rowstate', row, 'mudgee', new_runid, runid, prev);
-  if (runid == new_runid) {
+  if (runid === new_runid) {
     return;
   } else if (!runid || new_runid > runid) {
     rowElement.setAttribute('prev', runid);
@@ -145,10 +158,10 @@ function updateTimeClass(entry, target, prev) {
   const row = entry.getAttribute('row');
   const column = entry.getAttribute('label');
   console.log('update', row, column, value, target, prev);
-  if (value == target) {
+  if (value === target) {
     entry.classList.add('current');
     entry.classList.remove('old', 'gone');
-  } else if (value == prev) {
+  } else if (value === prev) {
     entry.classList.add('old');
     entry.classList.remove('current', 'gone');
   } else {
@@ -177,7 +190,7 @@ function getResultStatus(result) {
     return result.state;
   }
   if (result.exception) {
-    return 'fail';
+    return 'err';
   }
   return Number(result.code) ? 'fail' : 'pass';
 }
@@ -186,35 +199,48 @@ function handleOriginResult(origin, port, runid, test, result) {
   if (result.timestamp > last_result_time_sec) {
     last_result_time_sec = result.timestamp;
   }
-  if (result.timestamp > (row_timestamps[port] || 0)) {
+  if (!row_timestamps[port] || row_timestamps[port] < result.timestamp) {
     row_timestamps[port] = result.timestamp;
   }
-  const href =`?origin=${origin}&port=${port}`
+  const href =`?origin=${origin}&port=${port}`;
   ensureGridRow(port, `<a href="${href}">${port}</a>`);
   ensureGridColumn(test);
   const status = getResultStatus(result);
   statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
   setRowState(port, runid);
   const gridElement = setGridValue(port, test, runid, status);
-  if (result.info) {
-    setGridValue(port, 'info', runid, result.info);
-  }
   if (result.report) {
     addReportBucket(origin, port, runid, result.report);
   }
-  if (test == 'info') {
-    makeConfigLink(gridElement, status);
+  if (test === 'info') {
+    makeConfigLink(gridElement, status, port, runid);
+  }
+  if (test == 'startup') {
+    makeActivateLink(gridElement, port);
   }
 }
 
-function makeConfigLink(element, info) {
+function makeConfigLink(element, info, port, runid) {
   const parts = info.split('/');
   const device_id = parts[0];
   const device_link = document.createElement('a');
-  device_link.href = `config.html?origin=${origin_id}&device=${device_id}`;
+  device_link.href = `config.html?origin=${origin_id}&device=${device_id}&port=${port}&runid=${runid}`;
   device_link.innerHTML = element.innerHTML;
   element.innerHTML = '';
   element.appendChild(device_link);
+}
+
+function activateRun(port) {
+  console.log('Activate run port', port);
+  const origin_doc = db.collection('origin').doc(origin_id);
+  const control_doc = origin_doc.collection('control').doc(port).collection('config').doc('definition');
+  control_doc.update({
+    'config.paused': false
+  });
+}
+
+function makeActivateLink(element, port) {
+  element.onclick = () => activateRun(port)
 }
 
 function addReportBucket(origin, row, runid, reportName) {
@@ -253,12 +279,12 @@ function handlePortResult(origin, port, runid, test, result) {
 }
 
 function watcherAdd(ref, collection, limit, handler) {
-  const base = ref.collection(collection)
+  const base = ref.collection(collection);
   const target = limit ? limit(base) : base;
   target.onSnapshot((snapshot) => {
-    delay = 100;
+    let delay = 100;
     snapshot.docChanges.forEach((change) => {
-      if (change.type == 'added') {
+      if (change.type === 'added') {
         setTimeout(() => handler(ref.collection(collection).doc(change.doc.id), change.doc.id), delay);
         delay = delay + 100;
       }
@@ -304,17 +330,7 @@ function listDevices(db, registryId) {
     }).catch((e) => statusUpdate('registry list error', e));
 }
 
-function getFirestoreDb() {
-  var db = firebase.firestore();
-  const settings = {
-    timestampsInSnapshots: true
-  };
-  db.settings(settings);
-  return db;
-}
-
 function dashboardSetup() {
-  var db = getFirestoreDb();
   if (port_id) {
     ensureGridRow('header');
     ensureGridColumn('row', port_id);
@@ -336,12 +352,12 @@ function dashboardSetup() {
 function triggerOrigin(db, origin_id) {
   const latest = (ref) => {
     return ref.orderBy('updated', 'desc').limit(3);
-  }
+  };
 
-  ref = db.collection('origin').doc(origin_id);
+  let ref = db.collection('origin').doc(origin_id);
   ref.collection('runner').doc('heartbeat').onSnapshot((result) => {
     const message = result.data().message;
-    ensureColumns(message.tests);
+    message.states && ensureColumns(message.states);
     const description = document.querySelector('#description .description');
     description.innerHTML = message.description;
     description.href = `config.html?origin=${origin_id}`
@@ -363,15 +379,16 @@ function triggerOrigin(db, origin_id) {
 function triggerPort(db, origin_id, port_id) {
   const latest = (ref) => {
     return ref.orderBy('timestamp', 'desc').limit(PORT_ROW_COUNT);
-  }
+  };
 
-  ref = db.collection('origin').doc(origin_id).collection('port');
+  const origin_doc = db.collection('origin').doc(origin_id);
+  const heartbeat_doc = origin_doc.collection('runner').doc('heartbeat');
 
-  ref.doc('port-undefined').onSnapshot((result) => {
-    ensureColumns(result.data().message.tests)
+  heartbeat_doc.onSnapshot((result) => {
+    ensureColumns(result.data().message.states)
   });
 
-  watcherAdd(ref.doc(port_id), "runid", latest, (ref, runid_id) => {
+  watcherAdd(origin_doc.collection('port').doc(port_id), "runid", latest, (ref, runid_id) => {
     watcherAdd(ref, "test", undefined, (ref, test_id) => {
       ref.onSnapshot((result) => {
         // TODO: Handle results going away.
@@ -398,79 +415,100 @@ function triggerDevice(db, registry_id, device_id) {
 
 function interval_updater() {
   if (last_result_time_sec) {
-    const time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec)
+    const time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec);
     document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
   }
-  for (row in row_timestamps) {
-    timestamp = row_timestamps[row]
-    const time_delta_sec = Math.floor(Date.now()/1000.0 - timestamp)
-    const selector=`#testgrid table tr[label="${row}"`
+  for (const row in row_timestamps) {
+    const last_update = new Date(row_timestamps[row]);
+    const time_delta_sec = Math.floor((Date.now() - last_update)/1000.0);
+    const selector=`#testgrid table tr[label="${row}"`;
     const runid = document.querySelector(selector).getAttribute('runid');
     setGridValue(row, 'timer', runid, `${time_delta_sec} sec`);
     setRowClass(row, time_delta_sec > ROW_TIMEOUT_SEC);
   }
 }
 
-function getJsonEditor() {
-  const container = document.getElementById('jsoneditor');
+function getJsonEditor(container_id, onChange) {
+  const container = document.getElementById(container_id);
   const options = {
-    //mode: 'view'
+    mode: onChange ? undefined : 'view',
+    onChangeJSON: onChange
   };
   return new JSONEditor(container, options);
 }
 
-function loadJsoneditor() {
+function setDatedStatus(attribute, value) {
+  data_state[attribute] = value;
+
+  const element = document.getElementById('config_body');
+  element.classList.toggle('dirty', data_state.dirty > data_state.saved);
+  element.classList.toggle('saving', data_state.pushed > data_state.saved);
+  element.classList.toggle('dated', data_state.saved > data_state.updated);
+  element.classList.toggle('provisional', data_state.provisional);
+}
+
+function pushConfigChange(config_editor, config_doc) {
+  const json = config_editor.get();
+  const timestamp = new Date().toJSON();
+  config_doc.update({
+    'config': json,
+    'timestamp': timestamp
+  });
+  setDatedStatus('pushed', timestamp);
+}
+
+function setDirtyState() {
+  setDatedStatus('dirty', new Date().toJSON());
+}
+
+function loadEditor(config_doc, element_id, label, onConfigEdit) {
+  const editor = getJsonEditor(element_id, onConfigEdit);
+  editor.setName(label);
+  editor.set(null);
+  config_doc.onSnapshot((snapshot) => {
+    const firstUpdate = editor.get() == null;
+    let snapshot_data = snapshot.data();
+    editor.update(snapshot_data.config);
+    if (firstUpdate) {
+      editor.expandAll();
+    }
+    if (onConfigEdit) {
+      setDatedStatus('saved', snapshot_data.saved);
+    } else {
+      setDatedStatus('updated', snapshot_data.updated);
+      const snapshot_config = (snapshot_data && snapshot_data.config && snapshot_data.config.config) || {};
+      setDatedStatus('provisional', !snapshot_config.run_info);
+    }
+  });
+  return editor;
+}
+
+function loadJsonEditors() {
+  let latest_doc;
+  let config_doc;
   const subtitle = device_id
         ? `${origin_id} device ${device_id}`
         : `${origin_id} system`;
   document.getElementById('title_origin').innerHTML = subtitle;
 
-  const db = getFirestoreDb();
   const origin_doc = db.collection('origin').doc(origin_id);
-  const config_doc = origin_doc.collection('runner').doc('config');
-  config_doc.get().then((snapshot) => {
-    if (device_id) {
-      loadDeviceConfig(origin_doc, snapshot.data().config);
-    } else {
-      const jsonEditor = getJsonEditor();
-      jsonEditor.set(snapshot.data().config);
-      jsonEditor.setName('system_config');
-      jsonEditor.expandAll();
-    }
-  });
-}
+  if (device_id) {
+    config_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('definition');
+    latest_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('latest');
+  } else {
+    config_doc = origin_doc.collection('runner').doc('setup').collection('config').doc('definition');
+    latest_doc = origin_doc.collection('runner').doc('setup').collection('config').doc('latest');
+  }
+  config_editor = loadEditor(config_doc, 'config_editor', 'config', setDirtyState);
+  loadEditor(latest_doc, 'latest_editor', 'latest', null);
 
-function loadDeviceConfig(origin_doc, runner_config) {
-  const device_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('latest')
-  device_doc.get().then((snapshot) => {
-    const jsonEditor = getJsonEditor();
-    if (snapshot.exists) {
-      jsonEditor.set(snapshot.data().config);
-    } else {
-      device_config = makeDeviceConfig(runner_config);
-      device_doc.set(device_config);
-      jsonEditor.set(device_config.config);
-    }
-    jsonEditor.setName('device_config');
-    jsonEditor.expandAll();
-  });
-}
-
-function makeDeviceConfig(runner_config) {
-  runner_config['device'] = {
-    'name': 'Device Name',
-    'mac_addr': device_id
-  };
-  return {
-    'config': runner_config,
-    'updated': new Date().toJSON()
-  };
+  document.querySelector('#config_body .save_button').onclick = () => pushConfigChange(config_editor, config_doc)
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   try {
-    if (document.getElementById('jsoneditor')) {
-      loadJsoneditor();
+    if (document.getElementById('config_editor')) {
+      loadJsonEditors();
     } else {
       dashboardSetup();
     }

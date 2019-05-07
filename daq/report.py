@@ -6,11 +6,13 @@ import os
 import re
 import shutil
 
+import jinja2
 import pytz
 
 LOGGER = logging.getLogger('report')
 
-class ReportGenerator():
+
+class ReportGenerator:
     """Generate a report for device qualification"""
 
     _NAME_FORMAT = "report_%s_%s.md"
@@ -20,14 +22,15 @@ class ReportGenerator():
     _SUMMARY_LINE = "Report summary"
     _REPORT_COMPLETE = "Report complete"
     _REPORT_HEADER = "# DAQ scan report for device %s"
-    _REPORT_DESC = "report_description.md"
+    _REPORT_TEMPLATE = "report_template.md"
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
     _TABLE_DIV = "---"
     _TABLE_MARK = '|'
     _SUMMARY_HEADERS = ["Result", "Test", "Notes"]
 
-    def __init__(self, config, tmp_base, target_mac):
+    def __init__(self, config, tmp_base, target_mac, module_config):
+        self._config = config
         self._reports = []
         self._clean_mac = target_mac.replace(':', '')
         report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
@@ -44,15 +47,9 @@ class ReportGenerator():
         self._writeln(self._REPORT_HEADER % self._clean_mac)
         self._writeln('Started %%%% %s' % report_when)
 
-        dev_base = config.get('site_path', tmp_base)
-        dev_path = os.path.join(dev_base, 'mac_addrs', self._clean_mac, self._REPORT_DESC)
-        if os.path.isfile(dev_path):
-            self._writeln('')
-            self._append_file(dev_path, add_pre=False)
-        else:
-            LOGGER.info('Device description %s not found', dev_path)
+        self._append_report_header(module_config)
 
-        out_base = config.get('site_reports', dev_base)
+        out_base = config.get('site_reports', config.get('site_path', tmp_base))
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
         if os.path.isdir(out_path):
             self._alt_path = os.path.join(out_path, self._SIMPLE_FORMAT)
@@ -72,6 +69,23 @@ class ReportGenerator():
             shutil.copyfileobj(input_stream, self._file)
         if add_pre:
             self._writeln(self._PRE_END_MARKER)
+
+    def _append_report_header(self, module_config):
+        template_file = os.path.join(self._config.get('site_path'), self._REPORT_TEMPLATE)
+        if not os.path.exists(template_file):
+            LOGGER.info('Skipping missed report header template %s', template_file)
+            return
+        LOGGER.info('Adding templated report header from %s', template_file)
+        self._writeln('')
+        try:
+            undefined_logger = jinja2.make_logging_undefined(logger=LOGGER, base=jinja2.Undefined)
+            environment = jinja2.Environment(loader=jinja2.FileSystemLoader('.'),
+                                             undefined=undefined_logger)
+            self._writeln(environment.get_template(template_file).render(module_config))
+        except Exception as e:
+            self._writeln('Report generation error: %s' % e)
+            self._writeln('Failing data model:\n%s' % str(module_config))
+            LOGGER.error('Report generation failed: %s', e)
 
     def finalize(self):
         """Finalize this report"""

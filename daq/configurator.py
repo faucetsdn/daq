@@ -2,6 +2,7 @@
 
 """Configuration manager class for daqy-things."""
 
+import copy
 import json
 import logging
 import os
@@ -49,17 +50,17 @@ def merge_config(base, adding):
         return
     for key in sorted(adding.keys()):
         value = adding[key]
-        if value and isinstance(value, dict) and key in base:
+        if isinstance(value, dict) and key in base:
             merge_config(base[key], value)
         else:
-            base[key] = value
+            base[key] = copy.deepcopy(value)
 
 
-def load_config(path, filename):
+def load_config(path, filename=None):
     """Load a config file"""
     if not path:
         return None
-    config_file = os.path.join(path, filename)
+    config_file = os.path.join(path, filename) if filename else path
     if not os.path.exists(config_file):
         LOGGER.info('Skipping missing %s', config_file)
         return None
@@ -68,7 +69,7 @@ def load_config(path, filename):
         return yaml.safe_load(data_file)
 
 
-def load_and_merge(base, path, filename):
+def load_and_merge(base, path, filename=None):
     """Load a config file and merge with an existing base"""
     merge_config(base, load_config(path, filename))
 

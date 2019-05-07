@@ -1,41 +1,32 @@
 # DAQ scan report for device 9a02571e8f01
-Started %% 2019-04-11 18:38:30+00:00
+Started %% 2019-05-07 04:06:49+00:00
 
-|  Role  |      Name       |
-|--------|-----------------|
-|Operator| <operator_name> |
-|Reviewer| <reviewer_name> |
-|Approver| <approver_name> |
-|--------|-----------------|
-|Test report date    | <test_timestamp>  |
-|Test report revision| <revision_number> |
+|  Role  |      Name              |
+|--------|------------------------|
+|Operator| *** Operator Name *** |
+|Reviewer| *** Reviewer Name *** |
+|Approver| *** Approver Name *** |
+|--------|------------------------|
+| Test report date | 2019-05-07T04:06:49.499Z |
+| DAQ version      | 0.9.6 |
 
-## Device identification
+## Device Identification
 
 | Device        | Entry              |
 |---------------|--------------------|
-| Name          | <device_name>      |
-| GUID          | <device_guid>      |
-| MAC addr      | <mac_address>      |
-| Hostname      | <hostname>         |
-| Type          | <device_type>      |
-| Manufacturer  | <manufacturer>     |
-| Model         | <model>            |
-| Serial Number | <serial_number>    |
-| Version       | <firmware_version> |
+| Name          |  |
+| GUID          |  |
+| MAC addr      | 9a:02:57:1e:8f:01 |
+| Hostname      |  |
+| Type          |  |
+| Make          |  |
+| Model         |  |
+| Serial Number |  |
+| Version       |  |
 
-## Device description
+## Device Description
 
-Free text including description of device and links to more information
-(datasheets, manuals, installation notes, etc.)
-
-## Test priorities
-
-| Test Name       | Priority    |
-|-----------------|-------------|
-| category1.test1 | REQUIRED    |
-| category1.test2 | RECOMMENDED |
-| category2.test1 | REQUIRED    |
+N/A
 
 ## Report summary
 
@@ -50,9 +41,9 @@ Free text including description of device and links to more information
 
 ```
 Baseline ping test report
-%% 52 packets captured.
+%% 37 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.58.38
+RESULT pass base.target.ping target %% 10.20.90.38
 ```
 
 ## Module nmap

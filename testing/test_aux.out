@@ -23,12 +23,40 @@ sec.flows
 sec.ofctl
 Test runtime config
 {
+  "device_info": {
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "mac_addr": "*** MAC Address ***",
+    "make": "*** Make ***",
+    "model": "*** Model ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "type": "*** Type ***",
+    "version": "*** Version ***"
+  },
   "modules": {
-    "brute": {},
-    "nmap": {},
+    "brute": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
     "switch": {
       "enabled": true
     }
+  },
+  "ports": {
+    "tcp": {
+      "443": {
+        "allowed": true,
+        "reason": "Administrative Web-Server"
+      }
+    }
+  },
+  "report_info": {
+    "approver": "*** Approver Name ***",
+    "operator": "*** Operator Name ***",
+    "reviewer": "*** Reviewer Name ***"
   },
   "runtime": true
 }

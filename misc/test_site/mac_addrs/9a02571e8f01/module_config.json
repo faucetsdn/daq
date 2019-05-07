@@ -1,1 +1,15 @@
-{}
+{
+  "device_info": {
+  },
+  "modules": {
+    "brute": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true
+    }
+  }
+}

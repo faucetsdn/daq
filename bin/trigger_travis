@@ -1,0 +1,28 @@
+#!/bin/bash -e
+
+OUTFILE=$HOME/.travis.out
+
+echo Trigger build at `date` > $OUTFILE
+
+echo Reading info from $HOME/.travis.env >> $OUTFILE
+source $HOME/.travis.env
+
+if [ -z "$TRAVIS_API_TOKEN" ]; then
+    echo TRAVIS_API_TOKEN not defined.
+    false
+fi
+
+body='{
+"request": {
+"branch":"master"
+}}'
+
+curl -s -X POST \
+   -H "Content-Type: application/json" \
+   -H "Accept: application/json" \
+   -H "Travis-API-Version: 3" \
+   -H "Authorization: token $TRAVIS_API_TOKEN" \
+   -d "$body" \
+   https://api.travis-ci.org/repo/grafnu%2Fdaq/requests >> $OUTFILE 2>&1
+
+echo Trigger complete. >> $OUTFILE

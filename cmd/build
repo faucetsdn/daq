@@ -5,7 +5,6 @@ set -o pipefail
 
 ROOT=$(dirname $0)/..
 
-LOCAL_SYSTEM=local/system.conf
 build_root=build
 in_container=$DAQ_CONTAINER
 build_args=

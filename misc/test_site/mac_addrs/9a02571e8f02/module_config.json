@@ -1,7 +1,20 @@
 {
-  "modules": {
-    "switch": {
-      "enabled": true
+  "device_info": {
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "make": "*** Make ***",
+    "model": "*** Model ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "type": "*** Type ***",
+    "version": "*** Version ***"
+  },
+  "ports": {
+    "tcp": {
+      "443": {
+        "allowed": true,
+        "reason": "Administrative Web-Server"
+      }
     }
   }
 }

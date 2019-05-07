@@ -146,7 +146,6 @@ public class MqttPublisher {
     return mqttClient;
   }
 
-
   private MqttClient newMqttClient(String deviceId) {
     try {
       Preconditions.checkNotNull(registryId, "registryId is null");

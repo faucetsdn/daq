@@ -1,11 +1,19 @@
 {
+  "device_description": "N/A",
   "modules": {
-    "nmap": {
+    "brute": {
+      "enabled": true
     },
-    "switch": {
+    "nmap": {
       "enabled": false
     },
-    "brute": {
+    "switch": {
+      "enabled": true
     }
+  },
+  "process": {
+    "approver": "*** Approver Name ***",
+    "operator": "*** Operator Name ***",
+    "reviewer": "*** Reviewer Name ***"
   }
 }

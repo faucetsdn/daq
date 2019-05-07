@@ -9,3 +9,5 @@ bin/setup_dev
 
 bin/build_daq
 
+echo Done with setup_daq.
+

@@ -15,13 +15,19 @@ from google.auth import _default as google_auth
 LOGGER = logging.getLogger('gcp')
 
 
+def get_timestamp():
+    """"Get a JSON-compatible formatted timestamp"""
+    return datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+
+
 class GcpManager:
     """Manager class for working with GCP"""
 
     REPORT_BUCKET_FORMAT = '%s.appspot.com'
 
-    def __init__(self, config):
+    def __init__(self, config, callback_handler):
         self.config = config
+        self._callback_handler = callback_handler
         if 'gcp_cred' not in config:
             LOGGER.info('No gcp_cred credential specified in config')
             self._pubber = None
@@ -50,39 +56,50 @@ class GcpManager:
         LOGGER.info('Dashboard at %s', dashboard_url)
         return firestore.client()
 
-    @staticmethod
-    def _on_snapshot(callback, doc_snapshot):
-        for doc in doc_snapshot:
-            callback(doc.to_dict()['config'])
+    def _on_snapshot(self, callback, doc_snapshot, immediate):
+        def handler():
+            for doc in doc_snapshot:
+                doc_data = doc.to_dict()
+                timestamp = doc_data['timestamp']
+                if immediate or doc_data['saved'] != timestamp:
+                    callback(doc_data['config'])
+                    doc.reference.update({
+                        'saved': timestamp
+                    })
+        self._callback_handler(handler)
 
-    def register_config(self, path, config, callback=None):
+    def register_config(self, path, config, callback=None, immediate=False):
         """Register a config blob with callback"""
         if not self._firestore:
             return
 
-        if path in self._config_callbacks:
-            LOGGER.info('Unsubscribe callback %s', path)
-            self._config_callbacks[path].unsubscribe()
-            del self._config_callbacks[path]
+        assert path, 'empty config path'
+        full_path = 'origin/%s/%s/config/definition' % (self._client_name, path)
 
-        separator = '/' if path else ''
-        config_doc = self._firestore.document('origin/%s/%s%sconfig/definition' %
-                                              (self._client_name, path, separator))
+        if full_path in self._config_callbacks:
+            LOGGER.info('Unsubscribe callback %s', path)
+            self._config_callbacks[full_path].unsubscribe()
+            del self._config_callbacks[full_path]
+
+        config_doc = self._firestore.document(full_path)
         if config is not None:
-            LOGGER.info('Registering %s', path)
+            timestamp = get_timestamp()
+            LOGGER.info('Registering %s', full_path)
             config_doc.set({
                 'config': config,
-                'timestamp': datetime.datetime.now().isoformat()
+                'saved': timestamp,
+                'timestamp': timestamp
             })
         else:
-            LOGGER.info('Releasing %s', path)
+            LOGGER.info('Releasing %s', full_path)
             config_doc.delete()
 
         if callback:
             assert config is not None, 'callback defined when deleting config??!?!'
-            snapshot_future = config_doc.on_snapshot(
-                lambda doc_snapshot, changed, read_time: self._on_snapshot(callback, doc_snapshot))
-            self._config_callbacks[path] = snapshot_future
+            on_snapshot = lambda doc_snapshot, changed, read_time:\
+                self._on_snapshot(callback, doc_snapshot, immediate)
+            snapshot_future = config_doc.on_snapshot(on_snapshot)
+            self._config_callbacks[full_path] = snapshot_future
 
     def release_config(self, path):
         """Release a config blob and remove it from the live data system"""
@@ -105,7 +122,7 @@ class GcpManager:
             return
         envelope = {
             'type': message_type,
-            'timestamp': datetime.datetime.now().isoformat(),
+            'timestamp': get_timestamp(),
             'payload': message
         }
         message_str = json.dumps(envelope)
