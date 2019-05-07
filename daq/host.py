@@ -61,7 +61,7 @@ class ConnectedHost:
         self.target_mac = target['mac']
         self.fake_target = target['fake']
         self.devdir = self._init_devdir()
-        self.run_id = '%06x' % int(time.time())
+        self.run_id = self.make_runid()
         self.scan_base = os.path.abspath(os.path.join(self.devdir, 'scans'))
         self._port_base = self._get_port_base()
         self._device_base = self._get_device_base(config, self.target_mac)
@@ -90,6 +90,10 @@ class ConnectedHost:
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
                                               self._loaded_config)
+
+    @staticmethod
+    def make_runid():
+        return '%06x' % int(time.time())
 
     def _init_devdir(self):
         devdir = os.path.join(self._INST_DIR, 'run-port-%02d' % self.target_port)
@@ -189,7 +193,7 @@ class ConnectedHost:
     def _prepare(self):
         LOGGER.info('Target port %d waiting for dhcp as %s', self.target_port, self.target_mac)
         self._state_transition(_STATE.WAITING, _STATE.INIT)
-        self.record_result('sanity')
+        self.record_result('sanity', state='pass')
         self.record_result('dhcp', state='run')
 
     def terminate(self, trigger=True):
@@ -331,7 +335,7 @@ class ConnectedHost:
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
         self._monitor_cleanup(forget=False)
-        self.record_result('monitor')
+        self.record_result('monitor', state='pass')
         self._monitor_continue()
 
     def _monitor_continue(self):
@@ -352,7 +356,7 @@ class ConnectedHost:
             self.record_result('base', exception=e)
             self._monitor_cleanup()
             raise
-        self.record_result('base')
+        self.record_result('base', state='pass')
         return True
 
     def _run_next_test(self):
@@ -364,7 +368,7 @@ class ConnectedHost:
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self._report.finalize()
                 self._gcp.upload_report(self._report.path)
-                self.record_result('finish', report=self._report.path)
+                self.record_result('finish', state='done', report=self._report.path)
                 self._report = None
                 self.record_result(None)
         except Exception as e:
@@ -411,11 +415,13 @@ class ConnectedHost:
         host_name = self._host_name()
         LOGGER.info('test_host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
-        if (return_code or exception) and self._fail_hook:
-            fail_file = self._FAIL_BASE_FORMAT % host_name
-            LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
-            os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
-        self.record_result(self.test_name, code=return_code, exception=exception)
+        failed = return_code or exception
+        if failed and self._fail_hook:
+                fail_file = self._FAIL_BASE_FORMAT % host_name
+                LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
+                os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
+        state = 'fail' if failed else 'pass'
+        self.record_result(self.test_name, state=state, code=return_code, exception=exception)
         result_path = os.path.join(self._host_dir_path(), 'return_code.txt')
         try:
             with open(result_path, 'a') as output_stream:
@@ -465,6 +471,17 @@ class ConnectedHost:
             self.test_start = current
         if name:
             self._record_result(name, current, **kwargs)
+
+    @staticmethod
+    def clear_port(gcp_instance, port):
+        result = {
+            'name': 'startup',
+            'state': 'init',
+            'runid': ConnectedHost.make_runid(),
+            'timestamp': gcp.get_timestamp(),
+            'port': port
+        }
+        gcp_instance.publish_message('daq_runner', 'test_result', result)
 
     def _record_result(self, name, run_info=True, current=None, **kwargs):
         result = {
