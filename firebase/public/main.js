@@ -186,13 +186,16 @@ function statusUpdate(message, e) {
 }
 
 function getResultStatus(result) {
-  if (result.state) {
-    return result.state;
-  }
   if (result.exception) {
     return 'err';
   }
-  return Number(result.code) ? 'fail' : 'pass';
+  if (result.state) {
+    return result.state;
+  }
+  if (Number(result.code)) {
+    return 'fail';
+  }
+  return 'unknown';
 }
 
 function handleOriginResult(origin, port, runid, test, result) {
@@ -360,8 +363,8 @@ function triggerOrigin(db, origin_id) {
     message.states && ensureColumns(message.states);
     const description = document.querySelector('#description .description');
     description.innerHTML = message.description;
-    description.href = `config.html?origin=${origin_id}`
-    const version = `DAQ v${message.version}`
+    description.href = `config.html?origin=${origin_id}`;
+    const version = `DAQ v${message.version}`;
     document.querySelector('#version').innerHTML = version
   });
   watcherAdd(ref, "port", undefined, (ref, port_id) => {
