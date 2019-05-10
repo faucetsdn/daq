@@ -63,7 +63,7 @@ def load_config(path, filename=None):
     config_file = os.path.join(path, filename) if filename else path
     if not os.path.exists(config_file):
         LOGGER.info('Skipping missing %s', config_file)
-        return None
+        return {}
     LOGGER.info('Loading config from %s', config_file)
     with open(config_file) as data_file:
         return yaml.safe_load(data_file)
