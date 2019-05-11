@@ -49,7 +49,7 @@ class ReportGenerator:
 
         self._append_report_header(module_config)
 
-        out_base = config.get('site_reports', config.get('site_path', tmp_base))
+        out_base = config.get('out_path', config.get('site_path', tmp_base))
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
         if os.path.isdir(out_path):
             self._alt_path = os.path.join(out_path, self._SIMPLE_FORMAT)
