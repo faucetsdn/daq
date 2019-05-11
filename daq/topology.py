@@ -370,6 +370,7 @@ class FaucetTopology():
         return target_mac
 
     def _write_empty_include(self, filename):
+        # Workaround for faucet issue: https://github.com/faucetsdn/faucet/issues/2952
         LOGGER.debug("Writing empty acl file %s", filename)
         port_acl = {
             'acls': {}
