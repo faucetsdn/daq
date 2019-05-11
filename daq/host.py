@@ -138,7 +138,7 @@ class ConnectedHost:
         clean_mac = target_mac.replace(':', '')
         dev_path = os.path.abspath(os.path.join(dev_base, 'mac_addrs', clean_mac))
         if not os.path.isdir(dev_path):
-            self._create_device_dir(config.get('out_path', dev_base))
+            self._create_device_dir(dev_base)
         return dev_path
 
     def _create_device_dir(self, path):
