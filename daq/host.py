@@ -144,10 +144,10 @@ class ConnectedHost:
     def _create_device_dir(self, path):
         LOGGER.warning('Creating empty device dir: %s', path)
         os.mkdir(path)
-        template_dir = self.config['device_template']
+        template_dir = self.config.get('device_template')
         if not template_dir:
             return
-        LOGGER.info('Copying template files from %s', os.path.abspath(template_dir))
+        LOGGER.info('Copying device_template files from %s', os.path.abspath(template_dir))
         for file in os.listdir(template_dir):
             LOGGER.info('Copying %s...', file)
             shutil.copy(os.path.join(template_dir, file), path)
