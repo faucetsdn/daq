@@ -213,7 +213,7 @@ class FaucetTopology():
             base_name = self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
             include_optional += [base_name]
             filename = self.INST_FILE_PREFIX + base_name
-            self._write_empty_include(port, filename)
+            self._write_empty_include(filename)
         return include_optional
 
     def _make_pri_topology(self):
@@ -366,12 +366,16 @@ class FaucetTopology():
             self._append_device_default_allow(rules, target_mac)
             self._write_port_acl(port, rules, filename)
         elif os.path.isfile(filename):
-            self._write_empty_include(port, filename)
+            self._write_empty_include(filename)
         return target_mac
 
-    def _write_empty_include(self, port, filename):
-        rules = [self._make_default_allow_rule()]
-        self._write_port_acl(port, rules, filename)
+    def _write_empty_include(self, filename):
+        LOGGER.debug("Writing empty acl file %s", filename)
+        port_acl = {
+            'acls': {}
+        }
+        with open(filename, "w") as output_stream:
+            yaml.safe_dump(port_acl, stream=output_stream)
 
     def _write_port_acl(self, port, rules, filename):
         LOGGER.debug("Writing port acl file %s", filename)
