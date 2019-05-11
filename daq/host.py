@@ -138,16 +138,17 @@ class ConnectedHost:
         clean_mac = target_mac.replace(':', '')
         dev_path = os.path.abspath(os.path.join(dev_base, 'mac_addrs', clean_mac))
         if not os.path.isdir(dev_path):
-            self._create_device_dir(dev_base)
+            self._create_device_dir(dev_path)
         return dev_path
 
     def _create_device_dir(self, path):
-        LOGGER.warning('Creating empty device dir: %s', path)
-        os.mkdir(path)
+        LOGGER.warning('Creating new device dir: %s', path)
+        os.makedirs(path)
         template_dir = self.config.get('device_template')
         if not template_dir:
+            LOGGER.warning('Skipping defaults since no device_template found')
             return
-        LOGGER.info('Copying device_template files from %s', os.path.abspath(template_dir))
+        LOGGER.info('Copying template files from %s to %s', template_dir, path)
         for file in os.listdir(template_dir):
             LOGGER.info('Copying %s...', file)
             shutil.copy(os.path.join(template_dir, file), path)

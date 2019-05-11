@@ -6,7 +6,7 @@ echo Base Tests >> $TEST_RESULTS
 
 cp misc/system_base.conf local/system.conf
 
-rm -rf inst/tmp_site && mkdir inst/tmp_site
+rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 
 cmd/run -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
