@@ -16,7 +16,7 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
-        "[a-z]": {
+        "^[a-z]{3,8}$": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -29,6 +29,11 @@
     },
     "process": {
       "additionalProperties": false,
+      "required": [
+        "approver",
+        "operator",
+        "reviewer"
+      ],
       "properties": {
         "approver": {
           "type": "string",
