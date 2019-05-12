@@ -1,0 +1,5 @@
+sudo ovs-vsctl del-br br-dot1x
+docker rm -f daq-faux-1 || true
+docker rm -f daq-faux-2 || true
+docker rm -f daq-ntwk || true
+docker rm -f faucet_dot1x || true

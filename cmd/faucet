@@ -45,5 +45,5 @@ docker_volumes="\
         -v $INSTDIR:/etc/faucet \
         -v $INSTDIR:/var/log/faucet"
 
-cid=$(docker run -d --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $IMAGE)
+cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $IMAGE)
 echo Container $CONTAINER started as $cid
