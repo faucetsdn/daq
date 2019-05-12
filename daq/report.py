@@ -73,7 +73,7 @@ class ReportGenerator:
     def _append_report_header(self, module_config):
         template_file = os.path.join(self._config.get('site_path'), self._REPORT_TEMPLATE)
         if not os.path.exists(template_file):
-            LOGGER.info('Skipping missed report header template %s', template_file)
+            LOGGER.info('Skipping missing report header template %s', template_file)
             return
         LOGGER.info('Adding templated report header from %s', template_file)
         self._writeln('')
