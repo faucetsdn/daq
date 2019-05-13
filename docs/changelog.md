@@ -1,5 +1,9 @@
 # Changelog
 
+* Next Version
+	* Device and system schema validation in web-ui.
+	* Automatic population of new device directory from template.
+	* Faucet version 1.9.4 update.
 * 0.9.7:
         * Device-level test configuration (e.g. allowed open ports)
 	* Use table for test report output
