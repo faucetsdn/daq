@@ -99,6 +99,7 @@ class GcpManager:
             on_snapshot = lambda doc_snapshot, changed, read_time:\
                 self._on_snapshot(callback, doc_snapshot, immediate)
             snapshot_future = config_doc.on_snapshot(on_snapshot)
+            LOGGER.info('snapshot_future %s' % str(snapshot_future._rpc._callbacks))
             self._config_callbacks[full_path] = snapshot_future
 
     def release_config(self, path):
