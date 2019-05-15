@@ -49,7 +49,7 @@ class ReportGenerator:
 
         self._append_report_header(module_config)
 
-        out_base = config.get('site_reports', config.get('site_path', tmp_base))
+        out_base = config.get('site_path', tmp_base)
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
         if os.path.isdir(out_path):
             self._alt_path = os.path.join(out_path, self._SIMPLE_FORMAT)
@@ -73,7 +73,7 @@ class ReportGenerator:
     def _append_report_header(self, module_config):
         template_file = os.path.join(self._config.get('site_path'), self._REPORT_TEMPLATE)
         if not os.path.exists(template_file):
-            LOGGER.info('Skipping missed report header template %s', template_file)
+            LOGGER.info('Skipping missing report header template %s', template_file)
             return
         LOGGER.info('Adding templated report header from %s', template_file)
         self._writeln('')

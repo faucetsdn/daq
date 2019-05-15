@@ -12,5 +12,5 @@ echo Subscription pull: gcloud pubsub subscriptions pull --auto-ack daq_monitor 
 echo Firestore address: https://console.cloud.google.com/firestore/data/?project=$PROJECT
 echo Application host : https://$PROJECT.firebaseapp.com
 echo
-echo Running firebase deploy --only functions --project $PROJECT
-firebase deploy --only functions --project $PROJECT
+echo Running: firebase deploy --project $PROJECT
+firebase deploy --project $PROJECT

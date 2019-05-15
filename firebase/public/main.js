@@ -431,13 +431,32 @@ function interval_updater() {
   }
 }
 
-function getJsonEditor(container_id, onChange) {
+function applySchema(editor, schema_url) {
+  if (!schema_url) {
+    return;
+  }
+
+  // Not sure why this is required, but without it the system complains it's not defined??!?!
+  const refs = {
+    'http://json-schema.org/draft-07/schema#': true
+  };
+
+  console.log(`Loading editor schema ${schema_url}`);
+  fetch(schema_url)
+      .then(response => response.json())
+      .then(json => editor.setSchema(json, refs))
+      .catch(rejection => console.log(rejection));
+}
+
+function getJsonEditor(container_id, onChange, schema_url) {
   const container = document.getElementById(container_id);
   const options = {
     mode: onChange ? undefined : 'view',
     onChangeJSON: onChange
   };
-  return new JSONEditor(container, options);
+  const editor = new JSONEditor(container, options);
+  applySchema(editor, schema_url);
+  return editor;
 }
 
 function setDatedStatus(attribute, value) {
@@ -464,8 +483,8 @@ function setDirtyState() {
   setDatedStatus('dirty', new Date().toJSON());
 }
 
-function loadEditor(config_doc, element_id, label, onConfigEdit) {
-  const editor = getJsonEditor(element_id, onConfigEdit);
+function loadEditor(config_doc, element_id, label, onConfigEdit, schema) {
+  const editor = getJsonEditor(element_id, onConfigEdit, schema);
   editor.setName(label);
   editor.set(null);
   config_doc.onSnapshot((snapshot) => {
@@ -489,6 +508,7 @@ function loadEditor(config_doc, element_id, label, onConfigEdit) {
 function loadJsonEditors() {
   let latest_doc;
   let config_doc;
+  let schema_url;
   const subtitle = device_id
         ? `${origin_id} device ${device_id}`
         : `${origin_id} system`;
@@ -498,12 +518,14 @@ function loadJsonEditors() {
   if (device_id) {
     config_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('definition');
     latest_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('latest');
+    schema_url = 'schema_device.json';
   } else {
     config_doc = origin_doc.collection('runner').doc('setup').collection('config').doc('definition');
     latest_doc = origin_doc.collection('runner').doc('setup').collection('config').doc('latest');
+    schema_url = 'schema_system.json';
   }
-  config_editor = loadEditor(config_doc, 'config_editor', 'config', setDirtyState);
   loadEditor(latest_doc, 'latest_editor', 'latest', null);
+  const config_editor = loadEditor(config_doc, 'config_editor', 'config', setDirtyState, schema_url);
 
   document.querySelector('#config_body .save_button').onclick = () => pushConfigChange(config_editor, config_doc)
 }
