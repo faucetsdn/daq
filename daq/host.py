@@ -85,6 +85,7 @@ class ConnectedHost:
         self.reload_config()
         assert self._loaded_config, 'config was not loaded'
         self.remaining_tests = self._get_enabled_tests()
+        LOGGER.info('Host %s running with enabled tests %s', self.target_port, self.remaining_tests)
 
         self.record_result('startup', state='prep')
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())

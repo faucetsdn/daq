@@ -99,8 +99,20 @@ class GcpManager:
             on_snapshot = lambda doc_snapshot, changed, read_time:\
                 self._on_snapshot(callback, doc_snapshot, immediate)
             snapshot_future = config_doc.on_snapshot(on_snapshot)
-            LOGGER.info('snapshot_future %s' % str(snapshot_future._rpc._callbacks))
             self._config_callbacks[full_path] = snapshot_future
+            self._apply_callback_hack(snapshot_future)
+
+    def _wrap_callback(self, old_closer, future):
+        if future.cancelled():
+            LOGGER.warning('Ignoring expected cancelled callback')
+            return
+        old_closer(future)
+
+    def _apply_callback_hack(self, snapshot_future):
+        callbacks = snapshot_future._rpc._callbacks
+        old_closer = callbacks.pop(0)
+        wrapped_handler = lambda future: self._wrap_callback(old_closer, future)
+        callbacks.insert(0, wrapped_handler)
 
     def release_config(self, path):
         """Release a config blob and remove it from the live data system"""
