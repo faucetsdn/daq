@@ -103,18 +103,26 @@ class GcpManager:
             self._apply_callback_hack(snapshot_future)
 
     def _wrap_callback(self, callbacks, reason):
-        if reason.cancelled():
-            LOGGER.warning('Ignoring expected cancelled callback')
-            return
-        LOGGER.info('Cascading callback to %s handlers', len(callbacks))
+        LOGGER.info('Cascading callback to %s', callbacks)
         for callback in callbacks:
-            callback(reason)
+            try:
+                callback(reason)
+            except Exception as e:
+                LOGGER.error('Capturing RPC error: %s', str(e))
+        LOGGER.info('Done with cascade')
+
+    def _hack_recv(self, rpc):
+        LOGGER.warning('Intercepted recv %s', str(rpc))
+        return rpc._recoverable(rpc._recv)
 
     def _apply_callback_hack(self, snapshot_future):
         # pylint: disable=protected-access
-        callbacks = snapshot_future._rpc._callbacks
+        rpc = snapshot_future._rpc
+        rpc.recv = lambda: self._hack_recv(rpc)
+        callbacks = rpc._callbacks
+        LOGGER.warning('Hacking recv callback for %s as %s', str(rpc), callbacks)
         wrapped_handler = lambda reason: self._wrap_callback(callbacks, reason)
-        snapshot_future._rpc._callbacks = [wrapped_handler]
+        rpc._callbacks = [wrapped_handler]
 
     def release_config(self, path):
         """Release a config blob and remove it from the live data system"""
