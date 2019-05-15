@@ -102,17 +102,19 @@ class GcpManager:
             self._config_callbacks[full_path] = snapshot_future
             self._apply_callback_hack(snapshot_future)
 
-    def _wrap_callback(self, old_closer, future):
-        if future.cancelled():
+    def _wrap_callback(self, callbacks, reason):
+        if reason.cancelled():
             LOGGER.warning('Ignoring expected cancelled callback')
             return
-        old_closer(future)
+        LOGGER.info('Cascading callback to %s handlers', len(callbacks))
+        for callback in callbacks:
+            callback(reason)
 
     def _apply_callback_hack(self, snapshot_future):
+        # pylint: disable=protected-access
         callbacks = snapshot_future._rpc._callbacks
-        old_closer = callbacks.pop(0)
-        wrapped_handler = lambda future: self._wrap_callback(old_closer, future)
-        callbacks.insert(0, wrapped_handler)
+        wrapped_handler = lambda reason: self._wrap_callback(callbacks, reason)
+        snapshot_future._rpc._callbacks = [wrapped_handler]
 
     def release_config(self, path):
         """Release a config blob and remove it from the live data system"""
