@@ -4,12 +4,26 @@ The testing system DAQ uses is based on Docker containers. General familiarity w
 assumed, as specific details are out of scope for this documentation. There are two steps
 for testing: building the tests, and running them.
 
-Test configuration is controlled through the configuration parameter `host_tests`, which defaults
-to `misc/host_tests.conf`. That file provides directives used to build and run tests appropriately.
-Explicitly setting this value (e.g. to a local file in the `local/` directory) can be used to
-customize base behavior. Once set, both the `cmd/build` and `cmd/run` processes will pick it up.
+Test build configuration is controlled through the configuration parameter `host_tests`,
+which defaults to `misc/host_tests.conf`. That file provides directives used to build tests
+and specify which ones are available at runtime. Explicitly setting this value (e.g. to a
+local file in the `local/` directory) can be used to customize base behavior. Once set,
+both the `cmd/build` and `cmd/run` processes will pick it up.
 
-## Example Setup
+The `misc/host_tests.conf` specifies the baseline set of tests that is used for basic regression
+integration testing. `misc/all_tests.conf` is used to represent all of the tests available
+to the system: more comprehensive, but slower to build and run.
+
+Test _subsets_ should have a simple name that describes the rough idea of the group. Individual
+test _modules_ are encapsulated in Dockerfiles that should have the name `Dockerfile.test_XXX`
+where `XXX` represents the name of the individual test module. Generally best practice is to
+follow the example set by the `subset/switcher` group of tests when adding a new subset.
+
+## Example Test Setups
+
+The _switcher_ test is configured in the `misc/all_tests.conf` file. To add a new test, there
+should be a parallel structure, starting with a `build.conf` entry pointing to the new test
+specification.
 
 An example `flakey` test is included as a tutorial primer. To configure, do the following stems
 (assuming a clean starting point):
@@ -18,6 +32,10 @@ An example `flakey` test is included as a tutorial primer. To configure, do the 
 * `cp misc/Dockerfile.test_flaky local/docker/` -- Copy the example Docker file to build directory.
 * `cp misc/system_base.conf local/system.conf` -- Create local version of system.conf file.
 * `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
+
+This, of course, only works for local development when using the `local_tests.conf` config. To
+formalize a test and include it in the overal system build it should be included in
+`misc/all_tests.conf`.
 
 ## Component Build
 
@@ -63,6 +81,14 @@ INFO:host:Target port 1 no more tests remaining
 INFO:host:Finalizing report inst/report_9a02571e8f00_2018-11-06T21:20:51.txt
 &hellip;
 </pre>
+
+## Dynamic Configuration
+
+The dynamic configuration of a test (if it is actually executed or is skipped completely),
+is controller through the `module_config.json` file associated with the specific site install.
+See `misc/module_config.json` for an example of what this looks like. Without this entry,
+the test will be included into the runtime set of modules but not actually executed. The
+execution behavior can be altered at runtime (through the web UI).
 
 ## Test Development
 
