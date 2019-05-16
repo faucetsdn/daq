@@ -79,6 +79,7 @@ class GcpManager:
         if full_path in self._config_callbacks:
             LOGGER.info('Unsubscribe callback %s', path)
             self._config_callbacks[full_path].unsubscribe()
+            LOGGER.info('Unsubscribed callback %s', path)
             del self._config_callbacks[full_path]
 
         config_doc = self._firestore.document(full_path)
@@ -103,16 +104,14 @@ class GcpManager:
             self._apply_callback_hack(snapshot_future)
 
     def _wrap_callback(self, callbacks, reason):
-        LOGGER.info('Cascading callback to %s', callbacks)
         for callback in callbacks:
             try:
                 callback(reason)
             except Exception as e:
                 LOGGER.error('Capturing RPC error: %s', str(e))
-        LOGGER.info('Done with cascade')
 
     def _hack_recv(self, rpc):
-        LOGGER.warning('Intercepted recv %s', str(rpc))
+        LOGGER.error('Intercepted active %s %s', rpc.is_active, str(rpc))
         return rpc._recoverable(rpc._recv)
 
     def _apply_callback_hack(self, snapshot_future):
@@ -120,7 +119,7 @@ class GcpManager:
         rpc = snapshot_future._rpc
         rpc.recv = lambda: self._hack_recv(rpc)
         callbacks = rpc._callbacks
-        LOGGER.warning('Hacking recv callback for %s as %s', str(rpc), callbacks)
+        LOGGER.error('Hacking recv callback for %s as %s', str(rpc), callbacks)
         wrapped_handler = lambda reason: self._wrap_callback(callbacks, reason)
         rpc._callbacks = [wrapped_handler]
 
