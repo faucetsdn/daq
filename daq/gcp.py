@@ -111,8 +111,12 @@ class GcpManager:
                 LOGGER.error('Capturing RPC error: %s', str(e))
 
     def _hack_recv(self, rpc):
-        LOGGER.error('Intercepted active %s %s', rpc.is_active, str(rpc))
-        return rpc._recoverable(rpc._recv)
+        #LOGGER.error('Intercepted _state %s', rpc.call._state.code)
+        try:
+            return rpc._recoverable(rpc._recv) # Erp.
+        except Exception as e:
+            LOGGER.error('Captured _state %s', rpc.call._state.code)
+            raise e
 
     def _apply_callback_hack(self, snapshot_future):
         # pylint: disable=protected-access
