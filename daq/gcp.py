@@ -115,6 +115,7 @@ class GcpManager:
                 LOGGER.error('Capturing RPC error: %s', str(e))
 
     def _hack_recv(self, rpc, path):
+        # pylint: disable=protected-access
         try:
             return rpc._recoverable(rpc._recv) # Erp.
         except Exception as e:
