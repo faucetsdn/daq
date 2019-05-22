@@ -21,6 +21,7 @@ cmd/faux 2 xdhcp
 echo "Created faux containers"
 
 docker cp misc/freeradius/wpasupplicant.conf daq-faux-1:/root/wpasupplicant.conf
+docker cp misc/freeradius/wpasupplicant.conf.wng daq-faux-1:/root/wpasupplicant.conf.wng
 
 docker exec daq-faux-1 ip addr flush faux-eth0
 docker exec daq-faux-1 ifconfig faux-eth0 192.168.12.1/16
@@ -70,10 +71,10 @@ sudo ovs-vsctl set-controller br-dot1x tcp:$ip_fc:6653
 sudo ovs-vsctl add-port br-dot1x faux-1  -- set interface faux-1 ofport_request=1
 sudo ovs-vsctl add-port br-dot1x faux-2 -- set interface faux-2 ofport_request=2
 sudo ovs-vsctl add-port br-dot1x dplane0 -- set interface dplane0 ofport_request=3
-
 sleep 15
 docker exec daq-faux-1 wpa_supplicant -B -t -c wpasupplicant.conf -i faux-eth0 -D wired
 echo "Waiting for system to settle"
 sleep 35
 docker exec daq-faux-1 ping -q -c 10 192.168.12.2
-
+wpa_pid=$(docker exec daq-faux-1 ps ax | grep wpa_supplicant | awk '{print $1}')
+docker exec daq-faux-1 kill $wpa_pid
