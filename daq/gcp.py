@@ -11,6 +11,7 @@ from firebase_admin import firestore
 from google.cloud import pubsub_v1
 from google.cloud import storage
 from google.auth import _default as google_auth
+from grpc import StatusCode
 
 LOGGER = logging.getLogger('gcp')
 
@@ -47,6 +48,7 @@ class GcpManager:
         self._report_bucket_name = self.REPORT_BUCKET_FORMAT % self._project
         self._ensure_report_bucket()
         self._config_callbacks = {}
+        LOGGER.info('Connection initialized at %s', get_timestamp())
 
     def _initialize_firestore(self, cred_file):
         cred = credentials.Certificate(cred_file)
@@ -78,7 +80,7 @@ class GcpManager:
 
         if full_path in self._config_callbacks:
             LOGGER.info('Unsubscribe callback %s', path)
-            self._config_callbacks[full_path].unsubscribe()
+            self._config_callbacks[full_path]['future'].unsubscribe()
             del self._config_callbacks[full_path]
 
         config_doc = self._firestore.document(full_path)
@@ -97,9 +99,49 @@ class GcpManager:
         if callback:
             assert config is not None, 'callback defined when deleting config??!?!'
             on_snapshot = lambda doc_snapshot, changed, read_time:\
-                self._on_snapshot(callback, doc_snapshot, immediate)
-            snapshot_future = config_doc.on_snapshot(on_snapshot)
-            self._config_callbacks[full_path] = snapshot_future
+                          self._on_snapshot(callback, doc_snapshot, immediate)
+            self._register_callback(config_doc, full_path, on_snapshot)
+
+    def _register_callback(self, config_doc, full_path, on_snapshot):
+        snapshot_future = config_doc.on_snapshot(on_snapshot)
+        self._config_callbacks[full_path] = {
+            'future': snapshot_future,
+            'config_doc': config_doc,
+            'on_snapshot': on_snapshot
+        }
+        self._apply_callback_hack(full_path, snapshot_future)
+
+    def _wrap_callback(self, callbacks, reason):
+        for callback in callbacks:
+            try:
+                callback(reason)
+            except Exception as e:
+                LOGGER.error('Capturing RPC error: %s', str(e))
+
+    def _hack_recv(self, rpc, path):
+        # pylint: disable=protected-access
+        try:
+            return rpc._recoverable(rpc._recv) # Erp.
+        except Exception as e:
+            LOGGER.error('Error intercepted at %s, %s for %s', get_timestamp(),
+                         rpc.call._state.code, path)
+            if rpc.call._state.code == StatusCode.INTERNAL:
+                self._restart_callback(path)
+            raise e
+
+    def _restart_callback(self, path):
+        LOGGER.warning('Restarting callback %s', path)
+        callback = self._config_callbacks[path]
+        self._register_callback(callback['config_doc'], path, callback['on_snapshot'])
+
+    def _apply_callback_hack(self, path, snapshot_future):
+        # pylint: disable=protected-access
+        rpc = snapshot_future._rpc
+        rpc.recv = lambda: self._hack_recv(rpc, path)
+        callbacks = rpc._callbacks
+        LOGGER.info('Patching recv callback for %s with %s', path, len(callbacks))
+        wrapped_handler = lambda reason: self._wrap_callback(callbacks, reason)
+        rpc._callbacks = [wrapped_handler]
 
     def release_config(self, path):
         """Release a config blob and remove it from the live data system"""
