@@ -2,7 +2,7 @@
 
 source testing/test_preamble.sh
 
-NUM_DEVICES=10
+NUM_DEVICES=8
 
 echo Many Tests >> $TEST_RESULTS
 
