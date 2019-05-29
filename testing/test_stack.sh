@@ -84,11 +84,11 @@ function test_stack {
     bcount7=$(tcpdump -en -r $t2sw1p7_pcap | wc -l) 2>/dev/null
     bcount_total=$((bcount6 + bcount7))
     echo pcap $mode count is $bcount6 $bcount7 $bcount_total
-    echo pcap sane $((bcount_total > 100)) $((bcount_total < 130)) | tee -a $TEST_RESULTS
+    echo pcap sane $((bcount_total > 100)) $((bcount_total < 220)) | tee -a $TEST_RESULTS
     echo pcap t2sw1p6
     tcpdump -en -c 20 -r $t2sw1p6_pcap
     echo pcap t2sw1p7
-    tcpdump -en -c 200 -r $t2sw1p7_pcap
+    tcpdump -en -c 20 -r $t2sw1p7_pcap
     echo pcap end
 
     telnet6=$(tcpdump -en -r $t2sw1p6_pcap vlan and port 23 | wc -l) 2>/dev/null
