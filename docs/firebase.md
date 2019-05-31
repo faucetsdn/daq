@@ -12,7 +12,7 @@ of test results.
 [Google Cloud Platform (GCP) service accounts page]
 (https://console.cloud.google.com/iam-admin/serviceaccounts?project=daq-project)
    * This is <em>not</em> from the Firebase page: it has to be from the base GCP page.
-   * Create a new service account with a semi-meaningful name like 'daq-testlab'.
+   * Create a new service account with a semi-meaningful name like `daq-testlab`.
    * Add the _Pub/Sub Admin_, _Storage Admin_, _Cloud Datastore User_, and _Firebase Admin_ roles.
    * Furnish a new private key.
 4. Install the downloaded key into the DAQ install.
