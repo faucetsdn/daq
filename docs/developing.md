@@ -45,9 +45,9 @@ is no difference.
 
 If there are unexplained differences in the `.out` file, then the test output log
 itself should be checked to see what actually went wrong, since there's likely
-not enough information in the `.out` files to diagnose effectively. The `.out` output
-should be available in the logs, so you can typically search for it to find the relevant
-error position.
+not enough information in the `.out` files to diagnose effectively. The complete
+log output is avaliable from a Travis run (or locally when you run locally), and
+the triggering line from the `.out` difference should be there as well (search for it!).
 
 ## Local Integration Tests
 
