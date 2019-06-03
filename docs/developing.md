@@ -41,7 +41,7 @@ Travis runs a suite of tests defined in the `.travis.yml` file. Each `DAQ_TEST`
 entry triggers a separate run through the `bin/test_daq` script. E.g. `DAQ_TEST=many`
 ultimately runs `testing/test_many.sh`.  The test output results are compared against
 the golden `.out` file (e.g. `testing/test_many.out`) and the tests pass if there
-is no difference.
+is no difference. (Look in `bin/test_daq` to see exactly what it's doing.)
 
 If there are unexplained differences in the `.out` file, then the test output log
 itself should be checked to see what actually went wrong, since there's likely
