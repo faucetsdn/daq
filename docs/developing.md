@@ -5,7 +5,9 @@
 In order to guarintee the integrety of the DAQ framework itself, a suite of
 _integration tests_ is used that encompasses the core python code as well as general
 execution of the main test modules. This is different than the _device tests_ which
-are run against a target device.
+are run against a target device. The main purpose of the integration is to catch
+unintended consequences of any code change, and to make sure that existing code
+doesn't break in unexpected ways.
 
 ## Faux Device & Internal Switch
 
