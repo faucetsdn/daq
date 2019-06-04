@@ -59,7 +59,7 @@ corresponding golden `.out` file. Running tests locally is not always 100% exact
 same as running things in a real (against physical devices on a physical switch) or
 CI environment, but in most cases it provides a workable method.
 
-It is recommended to start from a clear DAQ configuration by running `rm -rf local` 
+It is recommended to start from a clear DAQ configuration by running `rm -rf local`
 from the main DAQ folder before running the local integration tests.
 
 When developing a new test, the output should appear in the corresponding `.out` file,
