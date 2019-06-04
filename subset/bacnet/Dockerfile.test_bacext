@@ -14,8 +14,12 @@ FROM daq/aardvark:latest
 
 RUN $AG update && $AG install openjdk-8-jre
 
-COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
+RUN $AG update && $AG install openjdk-8-jdk git
 
-COPY misc/bacnet_discover .
+COPY subset/bacnet/ .
 
-CMD ["./bacnet_discover"]
+COPY --from=bacnet_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
+
+RUN cd bacnetTests && ./gradlew build
+
+CMD ["./test_bacext"]

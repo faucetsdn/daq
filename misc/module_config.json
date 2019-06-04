@@ -8,6 +8,9 @@
     },
     "brute": {
       "enabled": true
+    },
+    "bacext": {
+      "enabled": true
     }
   }
 }
