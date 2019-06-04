@@ -2,7 +2,7 @@
 
 ## Integration Testing
 
-In order to guarintee the integrety of the DAQ framework itself, a suite of
+In order to guarantee the integrity of the DAQ framework itself, a suite of
 _integration tests_ is used that encompasses the core python code as well as general
 execution of the main test modules. This is different than the _device tests_ which
 are run against a target device. The main purpose of the integration is to catch
@@ -24,10 +24,10 @@ an excessively long lease renew time, or not to DHCP at all. Although tests ulti
 run againt physical hardware (the device under test), it's a core software engineering
 foundation to have a solid integration test environment.
 
-Simiarly, for most simulation uses it's better to run using an internal OVS switch with
-the Faux devices, rmoving the dependency on physical infrastruture. The system ultimately
-needs to work in both, but developming against a virtual environment is typically much
-faster than continually working with physical components (unless activly debugging
+Similarly, for most simulation uses it's better to run using an internal OVS switch with
+the Faux devices, removing the dependency on physical infrastruture. The system ultimately
+needs to work in both, but developing against a virtual environment is typically much
+faster than continually working with physical components (unless actively debugging
 problems that only manifest themselves physically). If there is a problem in the 'real'
 world, then the first step is typically to try and reproduce it virtually.
 
@@ -59,7 +59,10 @@ corresponding golden `.out` file. Running tests locally is not always 100% exact
 same as running things in a real (against physical devices on a physical switch) or
 CI environment, but in most cases it provides a workable method.
 
-When developing a new test, the output should appear the the corresponding `.out` file,
+It is recommended to start from a clear DAQ configuration by running `rm -rf local` 
+from the main DAQ folder before running the local integration tests.
+
+When developing a new test, the output should appear in the corresponding `.out` file,
 which should be updated appropriatley. The easiest way to migrate in new changes is to
 just copy the `out/` file to `testing/`, but care must be taken that only expected
 changes are included with a new PR. Ultimately the Travis CI tests must pass, not the
@@ -69,7 +72,7 @@ local tests, to guard against any local filesystem changes.
 
 Lint checks are performed as part of the `testing/test_aux.sh` script. They are extra
 tricky because they are typically very sensitive to the exact version of every package
-installed, so they're somewhat unrelaible except when run through a pristine environment
+installed, so they're somewhat unreliable except when run through a pristine environment
 on Travis. An error output of `cmd/inbuild exit code 1` in the logs indicates that
 something went wrong with the lint checks, but it can sometimes happen locally when
 there is no problem on Travis (and Travis wins).
