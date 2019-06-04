@@ -1,13 +1,19 @@
 {
   "modules": {
+    "bacnet": {
+      "enabled": true
+    },
     "brute": {
+      "enabled": true
+    },
+    "mudgee": {
       "enabled": true
     },
     "nmap": {
       "enabled": true
     },
     "switch": {
-      "enabled": false
+      "enabled": true
     }
   },
   "process": {

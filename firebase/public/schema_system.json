@@ -4,14 +4,10 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "required": [
-    "device_description",
     "modules",
     "process"
   ],
   "properties": {
-    "device_description": {
-      "type": "string"
-    },
     "modules": {
       "type": "object",
       "additionalProperties": false,
@@ -31,8 +27,7 @@
       "additionalProperties": false,
       "required": [
         "approver",
-        "operator",
-        "reviewer"
+        "operator"
       ],
       "properties": {
         "approver": {
@@ -40,10 +35,6 @@
           "pattern": "^[^*]"
         },
         "operator": {
-          "type": "string",
-          "pattern": "^[^*]"
-        },
-        "reviewer": {
           "type": "string",
           "pattern": "^[^*]"
         }
