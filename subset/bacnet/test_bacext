@@ -1,0 +1,36 @@
+#!/bin/bash -e
+
+JAR=bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar
+TARGET="Object name = BACnet device"
+TMPOUT=`tempfile`
+REPORT=/tmp/report.txt
+
+# Pick the one not-lo inet v4 address.
+line=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
+
+read -r -a parts <<< "$line"
+
+local_ip=${parts[1]%/*}
+broadcast_ip=${parts[3]}
+
+version_test_id="bacnet_VERSION"
+
+echo Scanning bacnet $broadcast_ip from $local_ip
+
+java -jar $JAR $version_test_id $broadcast_ip $local_ip | tee $TMPOUT
+
+bacnet_runtime=/config/bacnet_runtime.sh
+if [ -f $bacnet_runtime ]; then
+    echo Processing $bacnet_runtime
+    source $bacnet_runtime
+fi
+
+if [ -z "$BACNET_EXPECTED" ]; then
+    # For testing, consider the presense of bacnet a failure.
+    ! fgrep "$TARGET" $TMPOUT
+else
+    echo Bacnet expected!
+    fgrep "$TARGET" $TMPOUT
+fi
+
+cat tmp/*Report*.txt >> $REPORT
