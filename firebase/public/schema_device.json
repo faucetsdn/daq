@@ -4,19 +4,40 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "required": [
+    "device_datasheets_url",
+    "device_description",
+    "device_image",
     "device_info",
-    "modules"
+    "device_manuals_url",
+    "modules",
+    "process"
   ],
   "properties": {
+    "device_datasheets_url": {
+      "type": "string",
+      "pattern": "^[^*]"
+    },
+    "device_description": {
+      "type": "string",
+      "pattern": "^[^*]"
+    },
+    "device_image": {
+      "type": "string",
+      "pattern": "^[^*]"
+    },
     "device_info": {
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
-        "^[a-z]{3,12}$": {
+        "^[a-z_]{3,32}$": {
           "type": "string",
           "pattern": "^[^*]"
         }
       }
+    },
+    "device_manuals_url": {
+      "type": "string",
+      "pattern": "^[^*]"
     },
     "modules": {
       "type": "object",
@@ -35,6 +56,17 @@
     },
     "ports": {
       "type": "object"
+    },
+    "process": {
+      "additionalProperties": false,
+      "required": [
+        "attempt_number"
+      ],
+      "properties": {
+        "attempt_number": {
+          "type": "integer"
+        }
+      }
     }
   }
 }
