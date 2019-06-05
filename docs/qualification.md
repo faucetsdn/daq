@@ -13,16 +13,47 @@ a report is generated and optionally uploaded to a web dashboard.
 Before you proceed, be sure you have done the following:
 
 -Create an appropriate new GCP service account. Download the JSON key file associated with your new account. You will need this key to configure your DAQ system.
+
 -Set the service account with appropriate permissions in IAM. These include: Cloud iOT Admin, Cloud Datastore User, Pub/Sub Admin and Storage Admin. Note that you will need to search for Cloud iOT Admin in the IAM page in order to add it to your list of permissions.
+
 -Create a new VM in GCP with suitable # of processors (nominally 2), appropriate RAM, an appropriate name.
+
 -Log in to the new VM. You can do so from the GCP web SSH interface.
+
 -Install Git on the new vm: “sudo apt-get install git” 
+
 -Run the following: git clone https://github.com/faucetsdn/daq.git - this will set up an appropriate directory structure within directory /daq
+
 -Change to your daq directory: cd daq
--Run the following: sudo bin/setup_base - The setup_base command installs a minimum set of basic packages, including docker and Open vSwitch,
--Run the following: sudo bin/setup_dev.The setup_dev command installs the development environment dependencies, including python3, various network tools, a Java development kit and specific versions of Mininet and Faucet.
+
+-Run the following: sudo bin/setup_base - The setup_base command installs a minimum set of basic packages, including docker and Open vSwitch
+-Run the following: sudo bin/setup_dev.The setup_dev command installs the development environment dependencies, including python3, various network tools, a Javadevelopment kit and specific versions of Mininet and Faucet.
+
 -Copy the json key file you downloaded in step 1 to your daq/local directory
+
 -In /daq/local create a system.conf file. Point your system.conf file’s gcp credentials to the json key you copied to this location. Contents of system.conf should be similar to the following:
+#Base configuration file for DAQ
+# Load defaults.
+source misc/system.conf
+# Description description for dashboard.
+site_description="Multi-Device Configuration"
+# Upstream dataplane port from the external (secondary) switch.
+# Not strictly necessary, but included for illustrative purposes.
+sec_port=4
+# CSV separated list of names to assign to external switch interfaces.
+intf_names=faux-1,faux-2,faux-3
+# Command file with startup commands.
+startup_cmds=misc/startup_multi.cmd
+host_tests=misc/all_tests.conf
+site_path=misc/test_gcp_credsite
+site_reports=local/tmp
+startup_faux_1_opts=brute
+startup_faux_2_opts=nobrute
+gcp_cred=local/bos-daq-testing-64ce7b96be2c.json
+
+Now, you should be ready to build and run your DAQ tests.
+
+
 
 ## Quickstart
 
