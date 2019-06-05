@@ -9,9 +9,15 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
 ext_ofpt=6653
+docker_volumes=
 
 cd $ROOT
 source misc/config_base.sh
+
+if [ "$1" == "local" ]; then
+    docker_volumes="-v $ROOT/faucet/faucet:/usr/lib/python3.6/site-packages/faucet"
+    shift
+fi
 
 if [ -n "$1" ]; then
     CONTAINER=$1
@@ -41,7 +47,7 @@ docker_envs="\
         --env FAUCET_CONFIG_STAT_RELOAD=1 \
         --env FAUCET_EVENT_SOCK=$event_sock"
 
-docker_volumes="\
+docker_volumes+="\
         -v $INSTDIR:/etc/faucet \
         -v $INSTDIR:/var/log/faucet"
 
