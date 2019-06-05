@@ -32,24 +32,8 @@ Before you proceed, be sure you have done the following:
 -Copy the json key file you downloaded in step 1 to your daq/local directory
 
 -In /daq/local create a system.conf file. Point your system.conf file’s gcp credentials to the json key you copied to this location. Contents of system.conf should be similar to the following:
-#Base configuration file for DAQ
-# Load defaults.
-source misc/system.conf
-# Description description for dashboard.
-site_description="Multi-Device Configuration"
-# Upstream dataplane port from the external (secondary) switch.
-# Not strictly necessary, but included for illustrative purposes.
-sec_port=4
-# CSV separated list of names to assign to external switch interfaces.
-intf_names=faux-1,faux-2,faux-3
-# Command file with startup commands.
-startup_cmds=misc/startup_multi.cmd
-host_tests=misc/all_tests.conf
-site_path=misc/test_gcp_credsite
-site_reports=local/tmp
-startup_faux_1_opts=brute
-startup_faux_2_opts=nobrute
-gcp_cred=local/bos-daq-testing-64ce7b96be2c.json
+
+[insert link to sample system.conf here]
 
 Now, you should be ready to build and run your DAQ tests.
 
