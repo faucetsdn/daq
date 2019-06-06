@@ -1,0 +1,6 @@
+#!/bin/bash -e 
+
+echo Using the host hardware address $TARGET_MAC
+
+java -jar mac_oui/build/libs/mac_oui-all.jar $TARGET_MAC
+cp report/report.txt /tmp/report.txt

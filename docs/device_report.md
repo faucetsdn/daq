@@ -1,5 +1,5 @@
 # DAQ scan report for device 9a02571e8f01
-Started %% 2019-06-06 13:09:40+00:00
+Started %% 2019-06-06 14:00:35+00:00
 
 |  Role  |      Name              | Status |
 |--------|------------------------|--------|
@@ -8,7 +8,7 @@ Started %% 2019-06-06 13:09:40+00:00
 
 | Test iteration   |                        |
 |------------------|------------------------|
-| Test report date | 2019-06-06T13:09:40.370Z |
+| Test report date | 2019-06-06T14:00:34.975Z |
 | DAQ version      | 0.9.7 |
 | Attempt number   | 1 |
 
@@ -44,6 +44,7 @@ Started %% 2019-06-06 13:09:40+00:00
 |---|---|---|
 |skip|base.switch.ping||
 |pass|base.target.ping|target |
+|fail|connection.mac_oui||
 |fail|network.brute||
 |fail|protocol.bacnet.version||
 |pass|security.ports.nmap||
@@ -54,9 +55,9 @@ Started %% 2019-06-06 13:09:40+00:00
 
 ```
 Baseline ping test report
-%% 65 packets captured.
+%% 82 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.5.38
+RESULT pass base.target.ping target %% 10.20.6.38
 ```
 
 ## Module nmap
@@ -80,6 +81,13 @@ RESULT fail network.brute
 
 ```
 LOCAL_IP not configured, assuming no network switch.
+```
+
+## Module macoui
+
+```
+Mac OUI Test
+RESULT fail connection.mac_oui
 ```
 
 ## Module bacext

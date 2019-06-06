@@ -12,6 +12,9 @@ RESULT pass protocol.bacnet.version
 RESULT fail network.brute
 RESULT pass network.brute
 RESULT skip network.brute
+RESULT fail connection.mac_oui
+RESULT fail connection.mac_oui
+RESULT pass connection.mac_oui
 RESULT skip security.tls.v3
 RESULT skip security.x509
 RESULT fail security.tls.v3
@@ -39,6 +42,9 @@ sec.ofctl
   },
   "foobar": {
     "enabled": false
+  },
+  "macoui": {
+    "enabled": true
   },
   "nmap": {
     "enabled": true

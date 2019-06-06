@@ -3,6 +3,9 @@
     "nmap": {
       "enabled": true
     },
+    "macoui": {
+     "enabled": true 
+    },
     "switch": {
       "enabled": true
     },

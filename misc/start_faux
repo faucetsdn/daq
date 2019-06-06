@@ -25,6 +25,13 @@ else
     exit 1
 fi
 
+# Setup change-of-mac address for macoui testing.
+if [ -n "${options[macoui]}" ]; then
+    new_mac=3c:5a:b4:1e:8f:0a
+    echo Setting alternate mac $new_mac on $intf_name
+    ip link set addr $new_mac dev $intf_name
+fi
+
 # To capture all the data in/out of the faux device for debugging, uncomment
 # the following lines. The pcap file will end up in inst/faux/{hostname}.pcap
 # on the DAQ controller.

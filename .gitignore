@@ -8,6 +8,7 @@
 *~
 .pdbrc
 .pdbrcX
+*.save
 
 # Runtime or sub-module files
 inst/
@@ -19,6 +20,7 @@ firebase/.firebase
 firebase/functions/package-lock.json
 nohup.out
 **/node_modules/
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

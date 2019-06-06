@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/daq.iml" filepath="$PROJECT_DIR$/daq.iml" />
       <module fileurl="file://$PROJECT_DIR$/firebase/firebase.iml" filepath="$PROJECT_DIR$/firebase/firebase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/subset/connection/mac_oui/mac_oui.iml" filepath="$PROJECT_DIR$/subset/connection/mac_oui/mac_oui.iml" />
     </modules>
   </component>
 </project>
