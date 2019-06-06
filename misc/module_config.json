@@ -11,6 +11,9 @@
     },
     "bacext": {
       "enabled": true
+    },
+    "tls": {
+      "enabled": true
     }
   }
 }

@@ -20,7 +20,7 @@ FROM daq/aardvark:latest
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
 
-RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl python ifupdown
+RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl python ifupdown openssl
 
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
@@ -28,6 +28,7 @@ RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv re
 COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
 
 COPY subset/pentests/brute_server.py pentests/
+COPY subset/security/tlsfaux tlsfaux/
 COPY misc/start_faux bin/
 COPY misc/bacnet_discover bin/
 

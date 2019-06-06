@@ -1,5 +1,5 @@
 # DAQ scan report for device 9a02571e8f01
-Started %% 2019-06-04 15:35:26+00:00
+Started %% 2019-06-06 13:09:40+00:00
 
 |  Role  |      Name              | Status |
 |--------|------------------------|--------|
@@ -8,7 +8,7 @@ Started %% 2019-06-04 15:35:26+00:00
 
 | Test iteration   |                        |
 |------------------|------------------------|
-| Test report date | 2019-06-04T15:35:26.211Z |
+| Test report date | 2019-06-06T13:09:40.370Z |
 | DAQ version      | 0.9.7 |
 | Attempt number   | 1 |
 
@@ -47,14 +47,16 @@ Started %% 2019-06-04 15:35:26+00:00
 |fail|network.brute||
 |fail|protocol.bacnet.version||
 |pass|security.ports.nmap||
+|skip|security.tls.v3||
+|skip|security.x509||
 
 ## Module ping
 
 ```
 Baseline ping test report
-%% 61 packets captured.
+%% 65 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.2.38
+RESULT pass base.target.ping target %% 10.20.5.38
 ```
 
 ## Module nmap
@@ -84,6 +86,14 @@ LOCAL_IP not configured, assuming no network switch.
 
 ```
 RESULT fail protocol.bacnet.version
+```
+
+## Module tls
+
+```
+IOException unable to connect to server.
+RESULT skip security.tls.v3
+RESULT skip security.x509
 ```
 
 ## Report complete
