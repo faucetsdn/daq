@@ -21,3 +21,16 @@ technology stack for compliant IoT devices.
 | config   | config   | _n/a_     | `/devices/{device-id}/config`          | config.json   |
 | pointset | event    | pointset  | `/devices/{device-id}/events/pointset` | pointset.json |
 | logentry | event    | logentry  | `/devices/{device-id}/events/logentry` | logentry.json |
+
+# Certificate Requirements
+
+For device 802.1x certificates (network authentication, _not_ Cloud IoT authentitation), the following
+guidelines apply:
+
+* MUST support 802.1X-2004 with authentication using EAP-TLS standard.
+* Credentials for EAP-TLS should conform to X.509v3.
+* Key types MUST support a minimum of RSA at minimum bit length of 2048.
+* Key types ideally support ECDH and ECDSA as well at a minimum bit length of 224.
+* Owner identity keys and certificates MUST be rotatable, ideally via API method and with fallback to previous credential in case rotation fails.
+* Vendor supplied device specific identity keys and certificates may be static, but only if owner identity credentials are possible.
+* Ideally supports 802.1X-2010, 802.1AR and 802.1AE (MACSEC) for devices that will be placed in high-risk environments (outside, and public areas).
