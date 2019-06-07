@@ -1,20 +1,22 @@
-## Testing BACnet
+## BACnet Manual Tests
+
+(This is how to manually work with BACnet testing, not an automated BACnet test.)
 
 * Setup system like `misc/system_multi.conf`
-* Run in no-test mode with bacnet device enabled on faux3: `sudo DAQ_FAUX3_OPTS=bacnet cmd/run -n`
+* Run in no-test mode with bacnet device enabled on faux3: `cmd/run startup_faux_3_opts=bacnet -n`
 * Wait until faux-3 gets an IP address:<pre>
 &hellip;
 INFO:runner:DHCP notify 9a:02:57:1e:8f:03 is 10.20.83.164 on gw02 (None)
 &hellip;
 </pre>
 
-* Check that bacnet client is running (requires IP address):<pre>
+* Check that bacnet client is running:<pre>
 ~/daq$ docker exec -ti daq-faux-3 ps ax -H
    PID TTY      STAT   TIME COMMAND
    226 pts/0    Rs+    0:00 ps ax -H
      1 ?        Ss     0:00 /bin/bash bin/start_faux bacnet
    177 ?        Ss     0:00   dhclient
-   183 ?        Sl     0:00   java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar co
+   183 ?        Sl     0:00   <b>java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar co<b>
    184 ?        S      0:00   tail -f /dev/null
 </pre>
 

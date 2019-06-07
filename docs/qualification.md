@@ -13,15 +13,14 @@ a report is generated and optionally uploaded to a web dashboard.
 
 Running `bin/setup_daq` will setup all key components and the basic prerequisites.
 For the system overall, this installs a minimum set of basic packages, docker, and openvswitch.
-Additionally, it sets up a local install of required packages and components.
+Additionally, it sets up a local install of required packages and components. After setup,
+also run `cmd/build` to build the necessary Docker images.
 
-Once installed, the basic qualification suite can be run with `cmd/run -s`. The `-s`
-means <em>single shot</em> and will run tests just once and then exit (see the
-[options documentation](options.md) for more details). The `local/` directory is 
-created upon first execution of `cmd/run`. Runtime configuration
-is always pulled from `local/system.conf`, and if this file does not exist a baseline
-one will be copied from `misc/system_base.conf`.
-The output should approximately look like this [example log output](run_log.md).
+To configure the system to run the comprehensive suite of tests, copy `misc/system_all.conf` to
+`local/system.conf` (creating `local` if necessary). The basic qualification suite can be run with
+`cmd/run -s`. The `-s` means <em>single shot</em> and will run tests just once and then exit (see the
+[options documentation](options.md) for more details). The output should approximately look like this
+[example log output](run_log.md).
 
 ## Configuration
 
