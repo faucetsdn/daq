@@ -16,12 +16,12 @@ INFO:runner:DHCP notify 9a:02:57:1e:8f:03 is 10.20.83.164 on gw02 (None)
    226 pts/0    Rs+    0:00 ps ax -H
      1 ?        Ss     0:00 /bin/bash bin/start_faux bacnet
    177 ?        Ss     0:00   dhclient
-   183 ?        Sl     0:00   <b>java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar co<b>
+   183 ?        Sl     0:00   <b>java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar co</b>
    184 ?        S      0:00   tail -f /dev/null
 </pre>
 
 * Run BACnet discovery in the other container:<pre>
-~/daq$ docker exec -ti daq-faux-2 bin/bacnet_discover
+~/daq$ <b>docker exec -ti daq-faux-2 bin/bacnet_discover</b>
 Scanning bacnet 10.255.255.255 from 10.20.83.163
 Binding to address 0.0.0.0:47808
 Local address is 10.20.83.163:47808
@@ -42,7 +42,7 @@ Done with receive loop
 </pre>
 
 * Also can monitor BACnet traffic exchange (in another window when running discovery):<pre>
-~/daq$ sudo tcpdump -eni pri-eth1 port 47808
+~/daq$ <b>sudo tcpdump -eni pri-eth1 port 47808</b>
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on pri-eth1, link-type EN10MB (Ethernet), capture size 262144 bytes
 20:32:19.258922 9a:02:57:1e:8f:02 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 63: 10.20.83.163.47808 > 10.255.255.255.47808: UDP, length 21

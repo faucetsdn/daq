@@ -1,18 +1,21 @@
+#!/bin/bash -e
+
+sudo rm -rf inst/faucet/faucet1 && mkdir -p inst/faucet/faucet1
+sudo rm -rf inst/faucet/faucet2 && mkdir -p inst/faucet/faucet2
+
+cp topology/alta-dev/faucet.yaml inst/faucet/faucet1/faucet.yaml
+cp topology/alta-dev/faucet.yaml inst/faucet/faucet2/faucet.yaml
+
+cp topology/alta-dev/gauge.yaml inst/faucet/faucet1/gauge.yaml
+cp topology/alta-dev/gauge.yaml inst/faucet/faucet2/gauge.yaml
+
+cmd/faucet faucet1 6655
+cmd/faucet gauge faucet1 6656 9306
+cmd/faucet faucet2 6657
+cmd/faucet gauge faucet2 6658 9308
+
 sudo ip addr flush ganga
 sudo ip addr add 192.0.2.10/24 dev ganga
 
-sudo rm -rf inst/faucet/faucet1
-mkdir -p inst/faucet/faucet1
-sudo rm -rf inst/faucet/faucet2
-mkdir -p inst/faucet/faucet2
-
-cp topology/alta-dev/faucet_alta.yaml inst/faucet/faucet1/faucet.yaml 
-cp topology/alta-dev/faucet_alta.yaml inst/faucet/faucet2/faucet.yaml 
-
-cmd/faucet faucet1 6655
-cmd/faucet faucet2 6657
-
 cmd/faux -n :yamuna
 cmd/faux :satlej
-
-

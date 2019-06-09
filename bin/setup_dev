@@ -9,7 +9,7 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
+FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/grafnu/faucet}
 FAUCETB=${DAQ_FAUCET_BRANCH}
 FAUCETV=$(cat misc/FAUCET_VERSION)
 MININET=https://github.com/mininet/mininet

@@ -1,0 +1,73 @@
+dps:
+  nz-kiwi-t1sw1:
+    dp_id: 177
+    faucet_dp_mac: 0e:00:00:00:01:01
+    hardware: Generic
+    interfaces:
+      1: {description: egress, lacp: 1, loop_protect_external: true, native_vlan: 100}
+      9:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        tagged_vlans: [100]
+      10:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        tagged_vlans: [100]
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+  nz-kiwi-t2sw1:
+    dp_id: 2352
+    faucet_dp_mac: 0e:00:00:00:01:02
+    hardware: Generic
+    interface_ranges:
+      '1': {acl_in: uniform_acl, description: IoT Device, native_vlan: 100}
+    interfaces:
+      49:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        loop_protect_external: true
+        tagged_vlans: [100]
+      50:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        loop_protect_external: true
+        tagged_vlans: [100]
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+  nz-kiwi-t1sw2:
+    combinatorial_port_flood: true
+    dp_id: 178
+    faucet_dp_mac: 0e:00:00:00:02:01
+    hardware: Generic
+    interfaces:
+      1: {description: egress, lacp: 1, loop_protect_external: true, native_vlan: 100}
+      9:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        tagged_vlans: [100]
+      10:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        tagged_vlans: [100]
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+  nz-kiwi-t2sw2:
+    combinatorial_port_flood: true
+    dp_id: 1296
+    faucet_dp_mac: 0e:00:00:00:02:02
+    hardware: Generic
+    interface_ranges:
+      '1': {acl_in: uniform_acl, description: IoT Device, native_vlan: 100}
+    interfaces:
+      49:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        loop_protect_external: true
+        tagged_vlans: [100]
+      50:
+        lldp_beacon: {enable: true}
+        receive_lldp: true
+        loop_protect_external: true
+        tagged_vlans: [100]
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+include: [uniform.yaml]
+version: 2
+vlans:
+  Faucet_IoT: {description: Faucet IoT, vid: 100}

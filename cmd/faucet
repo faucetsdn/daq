@@ -9,7 +9,10 @@ SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
 ext_ofpt=6653
+gauge_pt=6654
+prom_pt=
 docker_volumes=
+port_opts=
 
 cd $ROOT
 source misc/config_base.sh
@@ -19,9 +22,16 @@ if [ "$1" == "local" ]; then
     shift
 fi
 
+if [ "$1" == "gauge" ]; then
+    CONTAINER=daq-gauge
+    IMAGE=faucet/gauge
+    docker pull $IMAGE || true
+    shift
+fi
+
 if [ -n "$1" ]; then
-    CONTAINER=$1
-    INSTDIR=$INSTDIR/faucet/$CONTAINER
+    CONTAINER=$CONTAINER-$1
+    INSTDIR=$INSTDIR/faucet/daq-faucet-$1
     shift
 fi
 
@@ -30,7 +40,12 @@ if [ -n "$1" ]; then
     shift
 fi
 
-echo Creating faucet instance $CONTAINER on port $ext_ofpt in $INSTDIR
+if [ -n "$1" ]; then
+    prom_pt=$1
+    shift
+fi
+
+echo Creating $IMAGE instance $CONTAINER on port $ext_ofpt in $INSTDIR
 
 mkdir -p $INSTDIR
 
@@ -51,5 +66,9 @@ docker_volumes+="\
         -v $INSTDIR:/etc/faucet \
         -v $INSTDIR:/var/log/faucet"
 
-cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $IMAGE)
+if [ -n "$prom_pt" ]; then
+    port_opts="-p $prom_pt:9303"
+fi
+
+cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $port_opts $IMAGE)
 echo Container $CONTAINER started as $cid

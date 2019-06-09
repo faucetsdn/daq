@@ -1,10 +1,5 @@
 Running testing/test_stack.sh
 Generator tests
-Only in topology/: alta-dev
-Only in topology/: not-normal
-Only in topology/: setup.json
-Only in topology/zz-bond: site_config.json
-Only in topology/zz-nobond: site_config.json
 Stacking Tests
 Testing stack mode nobond
 (UNKNOWN) [192.168.0.2] 23 (?) : Connection timed out
@@ -18,6 +13,18 @@ daq-faux-2: ping -c 10 192.168.0.3 10
 daq-faux-3: ping -c 10 192.168.0.1 10
 daq-faux-3: ping -c 10 192.168.0.2 10
 Done with stack test nobond.
+Testing stack mode bond
+(UNKNOWN) [192.168.0.2] 23 (?) : Connection timed out
+(UNKNOWN) [192.168.0.2] 443 (?) : Connection refused
+pcap sane 1 1
+bond telnet 0 https 2
+daq-faux-1: ping -c 10 192.168.0.2 10
+daq-faux-1: ping -c 10 192.168.0.3 10
+daq-faux-2: ping -c 10 192.168.0.1 10
+daq-faux-2: ping -c 10 192.168.0.3 10
+daq-faux-3: ping -c 10 192.168.0.1 10
+daq-faux-3: ping -c 10 192.168.0.2 10
+Done with stack test bond.
 Dot1x setup
-10 packets transmitted  10 received
+10 packets transmitted  0 received
 10 packets transmitted  0 received

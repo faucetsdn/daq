@@ -15,13 +15,21 @@ function add_br {
     bname=$1
     dpid=$(printf %016x $2)
     port=$3
-    echo Adding $bname 0x$dpid on $port
+    port2=$4
+    echo Adding $bname 0x$dpid on $port $port2
     sudo ovs-vsctl --if-exists del-br $bname \
          -- add-br $bname \
+         -- set-fail-mode $bname secure \
          -- set bridge $bname other_config:datapath-id=$dpid
 
+    if [ -n "$port2" ]; then
+        p2cmd="tcp:127.0.0.1:$port2"
+    else
+        p2cmd=
+    fi
+
     if [ -n "$port" ]; then
-        sudo ovs-vsctl set-controller $bname tcp:127.0.0.1:$port
+        sudo ovs-vsctl set-controller $bname tcp:127.0.0.1:$port $p2cmd
     fi
 }
 
@@ -67,17 +75,23 @@ function add_oeth {
 
 ###########################################################
 
-sudo rm -rf inst/faucet
-mkdir -p inst/faucet/corp-agg
-sudo modprobe bonding
-
 echo Configuring mode $mode...
-cp misc/corp_$mode.yaml inst/faucet/corp-agg/faucet.yaml
-cp -a topology/zz-$mode/* inst/faucet/
 
-docker kill nz-kiwi-ctr1 || true
-docker kill nz-kiwi-ctr2 || true
-docker kill corp-agg || true
+sudo rm -rf inst/faucet
+mkdir -p inst/faucet/daq-faucet-corp
+cp misc/corp_$mode.yaml inst/faucet/daq-faucet-corp/faucet.yaml
+docker kill daq-faucet-corp || true
+sudo modprobe bonding
+cmd/faucet corp 6683
+
+for index in 1 2; do
+    controller=daq-faucet-$index
+    mkdir -p inst/faucet/$controller/
+    cp topology/zz-$mode/*.yaml inst/faucet/$controller/
+    docker kill $controller || true
+    cmd/faucet $index $((6000 + index))
+    cmd/faucet gauge $index $((7000 + index)) $((9000 + index))
+done
 
 cmd/faux 1 xdhcp
 cmd/faux 2 xdhcp
@@ -90,27 +104,23 @@ docker exec -ti daq-faux-2 ifconfig faux-eth0 192.168.0.2/16
 docker exec -ti daq-faux-3 ip addr flush faux-eth0
 docker exec -ti daq-faux-3 ifconfig faux-eth0 192.168.0.3/16
 
-cmd/faucet nz-kiwi-ctr1 6663
-cmd/faucet nz-kiwi-ctr2 6673
-cmd/faucet corp-agg 6683
-
-add_br t1sw1 177 6663 # 0x510 6653
-add_br t2sw1 2352 6663 # 0x0b1 6653
-add_br t1sw2 178 6673 # 0x930 6663
-add_br t2sw2 1296 6673 # 0x0b2 6663
 add_br corp  0x111 6683
+add_br t1sw1 177 6001 7001
+add_br t2sw1 2352 6001 7001
+add_br t1sw2 178 6002 7002
+add_br t2sw2 1296 6002 7002
 
 add_oeth t1sw1 1 corp-eth10
 add_oeth t1sw1 2 corp-eth11
 
-add_link t1sw1 22 t2sw2 7
-add_link t1sw1 23 t2sw1 7
+add_link t1sw1 9 t2sw1 49
+add_link t1sw1 10 t2sw2 49
 
 add_oeth t1sw2 1 corp-eth20
 add_oeth t1sw2 2 corp-eth21
 
-add_link t1sw2 22 t2sw2 6
-add_link t1sw2 23 t2sw1 6
+add_link t1sw2 9 t2sw2 50
+add_link t1sw2 10 t2sw1 50
 
 sudo ip link del bond1 || true
 if [ $mode == bond ]; then
