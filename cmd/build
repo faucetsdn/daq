@@ -47,14 +47,18 @@ if [ -n "$DAQ_TARGETS" ]; then
     done
 fi
 
-target_version=$(cat misc/FAUCET_VERSION)
 local_version=$(cd faucet; git rev-list -n 1 HEAD)
+if [ "$1" == -f ]; then
+    echo Forcing misc/FAUCET_VERSION to $local_version
+    echo $local_version > misc/FAUCET_VERSION
+    shift
+fi
 
+target_version=$(cat misc/FAUCET_VERSION)
 if [ "$target_version" != "$local_version" ]; then
     echo Local faucet commit is at: $local_version
     echo Mismatch with misc/FAUCET_VERSION: $target_version
-    echo Try 'bin/clean_dev && bin/setup_dev' to reset, or maybe:
-    echo echo $local_version \> misc/FAUCET_VERSION
+    echo Try 'bin/clean_dev && bin/setup_dev' to reset, or use -f.
     false
 fi
 

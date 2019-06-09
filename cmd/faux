@@ -2,7 +2,6 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
-IMAGE=daq/faux
 local_config=$ROOT/local/system.conf
 postfix=
 intf_mac=9a:02:57:1e:8f:00
@@ -11,7 +10,19 @@ create_local=
 cd $ROOT
 source misc/config_base.sh
 
-# If the first argument is :lo, then create a local IP address.
+# If the argument is -n then create a networking container
+if [ "$1" == "-n" ]; then
+    container_prefix=daq-networking
+    image=daq/networking
+    net_opt=
+    shift
+else
+    container_prefix=daq-faux
+    image=daq/faux
+    net_opt=--net=none
+fi
+
+# If the argument is :lo, then create a local IP address.
 if [ "$1" == ":lo" ]; then
     create_local=y
     shift
@@ -35,7 +46,7 @@ fi
 
 FAUX_ARGS="$*"
 
-CONTAINER=daq-faux$postfix
+CONTAINER=$container_prefix$postfix
 
 if [ -z "$FAUX_ARGS" ]; then
     FAUX_ARGS="$faux_args"
@@ -62,7 +73,9 @@ elif [ -n "$test_config" ]; then
     echo Config dir $CONFIG_DIR not found.
 fi
 
-cid=$(docker run -d --privileged --name $CONTAINER --hostname $CONTAINER --net=none $docker_args $IMAGE $FAUX_ARGS)
+docker_args="$docker_args -e LOCAL_IF=$realintf"
+
+cid=$(docker run -d --privileged --name $CONTAINER --hostname $CONTAINER $net_opt $docker_args $image $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
 echo DAQ autoclean docker kill $CONTAINER
