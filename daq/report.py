@@ -1,5 +1,6 @@
 """Device report handler"""
 
+import copy
 import datetime
 import logging
 import os
@@ -21,7 +22,7 @@ class ReportGenerator:
     _RESULT_REGEX = r'^RESULT (.*?)\s+(.*?)\s+([^%]*)\s*(%%.*)?$'
     _SUMMARY_LINE = "Report summary"
     _REPORT_COMPLETE = "Report complete"
-    _REPORT_HEADER = "# DAQ scan report for device %s"
+    _DEFAULT_HEADER = "# DAQ scan report for device %s"
     _REPORT_TEMPLATE = "report_template.md"
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
@@ -31,11 +32,13 @@ class ReportGenerator:
 
     def __init__(self, config, tmp_base, target_mac, module_config):
         self._config = config
+        self._module_config = copy.deepcopy(module_config)
         self._reports = []
         self._clean_mac = target_mac.replace(':', '')
         report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
         report_filename = self._NAME_FORMAT % (self._clean_mac,
                                                report_when.isoformat().replace(':', ''))
+        self._start_time = report_when
         self._filename = report_filename
         report_base = os.path.join(tmp_base, 'reports')
         if not os.path.isdir(report_base):
@@ -43,11 +46,7 @@ class ReportGenerator:
         report_path = os.path.join(report_base, report_filename)
         LOGGER.info('Creating report as %s', report_path)
         self.path = report_path
-        self._file = open(report_path, "w")
-        self._writeln(self._REPORT_HEADER % self._clean_mac)
-        self._writeln('Started %%%% %s' % report_when)
-
-        self._append_report_header(module_config)
+        self._file = None
 
         out_base = config.get('site_path', tmp_base)
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
@@ -59,7 +58,6 @@ class ReportGenerator:
 
     def _writeln(self, msg):
         self._file.write(msg + '\n')
-        self._file.flush()
 
     def _append_file(self, input_path, add_pre=True):
         LOGGER.info('Copying test report %s', input_path)
@@ -70,26 +68,31 @@ class ReportGenerator:
         if add_pre:
             self._writeln(self._PRE_END_MARKER)
 
-    def _append_report_header(self, module_config):
+    def _append_report_header(self):
         template_file = os.path.join(self._config.get('site_path'), self._REPORT_TEMPLATE)
         if not os.path.exists(template_file):
             LOGGER.info('Skipping missing report header template %s', template_file)
+            self._writeln(self._DEFAULT_HEADER % self._clean_mac)
             return
         LOGGER.info('Adding templated report header from %s', template_file)
-        self._writeln('')
         try:
             undefined_logger = jinja2.make_logging_undefined(logger=LOGGER, base=jinja2.Undefined)
             environment = jinja2.Environment(loader=jinja2.FileSystemLoader('.'),
                                              undefined=undefined_logger)
-            self._writeln(environment.get_template(template_file).render(module_config))
+            self._writeln(environment.get_template(template_file).render(self._module_config))
         except Exception as e:
             self._writeln('Report generation error: %s' % e)
-            self._writeln('Failing data model:\n%s' % str(module_config))
+            self._writeln('Failing data model:\n%s' % str(self._module_config))
             LOGGER.error('Report generation failed: %s', e)
 
     def finalize(self):
         """Finalize this report"""
         LOGGER.info('Finalizing report %s', self._filename)
+        self._module_config['clean_mac'] = self._clean_mac
+        self._module_config['start_time'] = self._start_time
+        self._module_config['end_time'] = datetime.datetime.now(pytz.utc).replace(microsecond=0)
+        self._file = open(self.path, "w")
+        self._append_report_header()
         self._write_test_summary()
         self._copy_test_reports()
         self._writeln(self._TEST_SEPARATOR % self._REPORT_COMPLETE)
@@ -121,6 +124,6 @@ class ReportGenerator:
             self._writeln(self._TEST_SEPARATOR % ("Module " + name))
             self._append_file(path)
 
-    def accumulate(self, test_name, report_path):
+    def accumulate(self, test_name, test_path):
         """Accumulate a test report into the overall device report"""
-        self._reports.append((test_name, report_path))
+        self._reports.append((test_name, test_path))

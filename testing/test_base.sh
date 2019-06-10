@@ -4,6 +4,13 @@ source testing/test_preamble.sh
 
 echo Base Tests >> $TEST_RESULTS
 
+function redact {
+    sed -e 's/\s*%%.*//' \
+        -e 's/2019-.*T.*Z/XXX/' \
+        -e 's/2019-.*00:00/XXX/' \
+        -e 's/DAQ version.*//'
+}
+
 cp misc/system_base.conf local/system.conf
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
@@ -11,7 +18,7 @@ cp misc/report_template.md inst/tmp_site/
 
 cmd/run -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
-sed 's/\s*%%.*//' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
+cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Test block for open-port failures.
 echo Open port tests | tee -a $TEST_RESULTS
@@ -20,11 +27,13 @@ echo Open port tests | tee -a $TEST_RESULTS
 cmd/run -s startup_faux_opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
+fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 
 # Except with a default MUD file that blocks the port.
 echo device_specs=misc/device_specs/simple.json >> local/system.conf
 cmd/run -s startup_faux_opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
+fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 
 # Test an "external" switch.
