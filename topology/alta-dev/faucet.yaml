@@ -7,42 +7,37 @@ dps:
       9:
         lldp_beacon: {enable: true}
         receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
+        native_vlan: 171
       10:
         lldp_beacon: {enable: true}
         receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
-      24: {description: whiplash-em3, mirror: 28}
+        native_vlan: 171
       28:
-        description: juniper-mx240-9:xe-0/0/3
-#        lacp: 1
+        description: Juniper-Uplink-1
+        lacp: 1
+        lacp_peers: [9, 10]
+        tagged_vlans: [171]
+        lldp_beacon: {enable: true}
         receive_lldp: true
-#        tagged_vlans: [323]
-        native_vlan: 323
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
   us-mtv-900-t2sw2-0-1:
     dp_id: 0x0000e01aea10785c
     faucet_dp_mac: 0e:00:00:00:02:01
     hardware: Allied-Telesis
     interface_ranges:
-      1-46: {description: IoT Host, native_vlan: 323}
+      1-46: {description: IoT Host, native_vlan: 171}
     interfaces:
       49:
         lldp_beacon: {enable: true}
-        name: port1.0.49
-        receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
+        lldp_failover: 48
         loop_protect_external: true
+        receive_lldp: true
+        native_vlan: 171
       48:
         lldp_beacon: {enable: true}
-        name: port1.0.50
-        receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
         loop_protect_external: true
+        receive_lldp: true
+        native_vlan: 171
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
   us-mtv-900-t1sw2-0-2:
     dp_id: 0x000000223d5a0ff1
@@ -52,43 +47,38 @@ dps:
       9:
         lldp_beacon: {enable: true}
         receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
+        native_vlan: 171
       10:
         lldp_beacon: {enable: true}
         receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
-      24: {description: whiplash-em4, native_vlan: 323}
+        native_vlan: 171
       28:
-        description: juniper-mx240-10:xe-0/0/3
-#        lacp: 1
+        description: Juniper-Uplink-2
+        lacp: 1
+        lacp_peers: [9, 10]
+        tagged_vlans: [171]
+        lldp_beacon: {enable: true}
         receive_lldp: true
-#        tagged_vlans: [323]
-        native_vlan: 323
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
   us-mtv-900-t2sw2-0-2:
     dp_id: 0x0000e01aea1077f2
     faucet_dp_mac: 0e:00:00:00:02:02
     hardware: Allied-Telesis
     interface_ranges:
-      1-46: {description: IoT Host, native_vlan: 323}
+      1-46: {description: IoT Host, native_vlan: 171}
     interfaces:
       49:
         lldp_beacon: {enable: true}
-        name: port1.0.49
-        receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
+        lldp_failover: 48
         loop_protect_external: true
+        receive_lldp: true
+        native_vlan: 171
       48:
         lldp_beacon: {enable: true}
-        name: port1.0.50
-        receive_lldp: true
-        native_vlan: 323
-#        tagged_vlans: [323]
         loop_protect_external: true
+        receive_lldp: true
+        native_vlan: 171
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
 version: 2
 vlans:
-  323: {description: BOS-IOT}
+  171: {description: BOS-IOT}
