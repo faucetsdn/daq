@@ -5,6 +5,11 @@ EXT_IF=eth0
 
 echo Starting networking for $LOCAL_IF and $EXT_IF
 
+while ! ifconfig -a | fgrep -q $LOCAL_IF; do
+    echo Waiting for interface $LOCAL_IF to exist...
+    sleep 1
+done
+
 # Enable a web-server for configuration access.
 mkdir -p /tmp/public
 (cd /tmp/public; python -m SimpleHTTPServer &)
@@ -18,7 +23,12 @@ iptables -A FORWARD -i $LOCAL_IF -o $EXT_IF -j ACCEPT
 # Pick a random DHCP range to force clients to pick a new address.
 subnet=$((RANDOM % 99 + 1))
 echo Configuring with subnet 10.20.$subnet.XX
-echo dhcp-range=10.20.$subnet.1,10.20.$subnet.254,120s >> /etc/dnsmasq.conf
+echo dhcp-range=10.20.$subnet.100,10.20.$subnet.254,120s >> /etc/dnsmasq.conf
+
+if ! ip addr show dev $LOCAL_IF | fgrep -q 'inet '; then
+  echo Assigning gateway address 10.20.$subnet.1/16
+  ip addr add 10.20.$subnet.1/16 dev $LOCAL_IF
+fi
 
 # Don't run in foreground so it writes the PID file.
 dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp
