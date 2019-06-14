@@ -9,9 +9,10 @@
     "type": "*** Type ***",
     "version": "*** Version ***"
   },
+  "device_type": "rocket", 
   "modules": {
     "switch": {
-      "enabled": true
+      "enabled": false
     },
     "foobar": {
       "enabled": false

@@ -68,7 +68,7 @@ docker_args="-v $FAUXTMP:/tmp"
 CONFIG_DIR=$ROOT/${test_config%/}/$CONTAINER
 if [ -d "$CONFIG_DIR" ]; then
     echo Mapping config dir $CONFIG_DIR...
-    docker_args="$docker_args -v $CONFIG_DIR:/config"
+    docker_args="$docker_args -v $CONFIG_DIR:/config/start"
 elif [ -n "$test_config" ]; then
     echo Config dir $CONFIG_DIR not found.
 fi

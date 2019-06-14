@@ -14,21 +14,24 @@
   },
   "device_manuals_url": "*** Device Manuals URL ***",
   "modules": {
-    "brute": {
-      "enabled": true
-    },
-    "nmap": {
+    "pass": {
       "enabled": true
     },
     "switch": {
       "enabled": true
     }
   },
-  "ports": {
+  "servers": {
     "tcp": {
-      "443": {
-        "allowed": true,
-        "reason": "Administrative Web-Server"
+      "ports": {
+        "443": {
+          "allowed": true,
+          "reason": "Administrative Web-Server"
+        },
+        "10000": {
+          "allowed": true,
+          "reason": "Testing snet-sensor-mgmt"
+        }
       }
     }
   },

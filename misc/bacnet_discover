@@ -25,7 +25,7 @@ echo Scanning bacnet $broadcast_ip from $local_ip
 
 java -cp $JAR $CLASS $local_ip $broadcast_ip $subcmd | tee $TMPOUT
 
-bacnet_runtime=/config/bacnet_runtime.sh
+bacnet_runtime=/config/port/bacnet_runtime.sh
 if [ -f $bacnet_runtime ]; then
     echo Processing $bacnet_runtime
     source $bacnet_runtime

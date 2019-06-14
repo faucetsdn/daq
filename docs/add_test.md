@@ -90,6 +90,20 @@ See `misc/module_config.json` for an example of what this looks like. Without th
 the test will be included into the runtime set of modules but not actually executed. The
 execution behavior can be altered at runtime (through the web UI).
 
+## Test Runtime Data
+
+Runtime information is available to a test module (Docker container) in several
+different places that are dynamically mapped in to the system at runtime:
+* `/tmp`: General information about a specific test run, saved after completion (not really `tmp` now is it?).
+* `/scans`: Network scan of device traffic when the system is first starting up.
+  * `startup.pcap`: Everything before a DHCP address is properly assigned.
+  * `monitor.pcap`: Everything after DHCP, but before actual tests.
+* `/config/device`: Device-specific customizations from `{site_path}/mac_addrs/{device_mac}/aux/`.
+* `/config/port`: Switch-port customizations from `inst/runtime_conf/port-##/`.
+* `/config/type`: Device-type customizations from `{site_path}/device_types/{device_type}/aux/`.
+  * See `misc/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
+  * See `misc/test_site/device_types/rocket/` for an example device type.
+
 ## Test Development
 
 TODO: write note about hold_tests and test development

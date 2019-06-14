@@ -33,6 +33,31 @@ pri.flows
 pri.ofctl
 sec.flows
 sec.ofctl
+port-01 module_config modules
+{
+  "bacext": {
+    "enabled": true
+  },
+  "brute": {
+    "enabled": true
+  },
+  "macoui": {
+    "enabled": true
+  },
+  "nmap": {
+    "enabled": true
+  },
+  "pass": {
+    "enabled": true
+  },
+  "switch": {
+    "enabled": true
+  },
+  "tls": {
+    "enabled": true
+  }
+}
+port-02 module_config modules
 {
   "bacext": {
     "enabled": true
@@ -49,13 +74,31 @@ sec.ofctl
   "nmap": {
     "enabled": true
   },
-  "switch": {
+  "pass": {
     "enabled": true
+  },
+  "switch": {
+    "enabled": false
   },
   "tls": {
     "enabled": true
+  },
+  "typeconf": {
+    "enabled": false
   }
 }
+    SNAKE!         ____
+                .'`_ o `;__,
+       .       .'.'` '---'  '
+       .`-...-'.'
+        `-...-'
+   LIZARD!              )/_
+             _.--..---"-,--c_
+        \L..'           ._O__)_
+,-.     _.+  _  \..--( /
+  `\.-''__.-' \ (     \_
+    `'''       `\__   /\
+                ')
 Redacted docs diff
 No report diff
 Done with tests

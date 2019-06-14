@@ -1,0 +1,13 @@
+{
+  "modules": {
+    "typeconf": {
+      "enabled": false
+    },
+    "switch": {
+      "enabled": true
+    },
+    "pass": {
+      "enabled": true
+    }
+  }
+}

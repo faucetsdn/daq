@@ -1,5 +1,8 @@
 {
   "modules": {
+    "pass": {
+      "enabled": true
+    },
     "nmap": {
       "enabled": true
     },

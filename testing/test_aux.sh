@@ -45,7 +45,12 @@ more inst/run-port-*/nodes/brute*/activate.log | cat
 more inst/run-port-*/nodes/macoui*/activate.log | cat
 more inst/run-port-*/nodes/tls*/activate.log | cat
 ls inst/fail_fail01/ | tee -a $TEST_RESULTS
+echo port-01 module_config modules | tee -a $TEST_RESULTS
+jq .modules inst/run-port-01/nodes/ping01/tmp/module_config.json | tee -a $TEST_RESULTS
+echo port-02 module_config modules | tee -a $TEST_RESULTS
 jq .modules inst/run-port-02/nodes/ping02/tmp/module_config.json | tee -a $TEST_RESULTS
+cat inst/run-port-02/nodes/ping02/tmp/snake.txt | tee -a $TEST_RESULTS
+cat inst/run-port-02/nodes/ping02/tmp/lizard.txt | tee -a $TEST_RESULTS
 
 function redact {
     sed -e 's/\s*%%.*//' \

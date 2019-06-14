@@ -30,7 +30,7 @@ else
     echo RESULT skip base.switch.ping >> $REPORT_FILE
 fi
 
-ping_runtime=/config/ping_runtime.sh
+ping_runtime=/config/port/ping_runtime.sh
 if [ -f $ping_runtime ]; then
     echo Executing $ping_runtime
     source $ping_runtime

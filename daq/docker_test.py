@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import os
 
 from clib import docker_host
 
@@ -44,13 +45,17 @@ class DockerTest():
 
         vol_maps = [params['scan_base'] + ":/scans"]
 
-        conf_base = params.get('conf_base')
-        if conf_base:
-            vol_maps += [conf_base + ":/config"]
+        port_base = params.get('port_base')
+        if port_base and os.path.exists(port_base):
+            vol_maps += [port_base + ":/config/port"]
 
         dev_base = params.get('dev_base')
-        if dev_base:
-            vol_maps += [dev_base + ":/device"]
+        if dev_base and os.path.exists(dev_base):
+            vol_maps += [dev_base + ":/config/device"]
+
+        type_base = params.get('type_base')
+        if type_base and os.path.exists(type_base):
+            vol_maps += [type_base + ":/config/type"]
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)

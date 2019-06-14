@@ -3,11 +3,14 @@
     "brute": {
       "enabled": true
     },
-    "nmap": {
-      "enabled": true
+    "pass": {
+      "enabled": false
     },
     "switch": {
       "enabled": false
+    },
+    "bacext": {
+      "enabled": true
     }
   },
   "process": {
