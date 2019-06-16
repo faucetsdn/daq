@@ -27,7 +27,7 @@ a robust ecosystem of IoT devices. (Details forthcoming.)
 ## System Requirements
 
 Most aspects of DAQ assume a baseline setup consisting of:
-* Linux install: DAQ has been tested against both `Ubuntu 16.04.4 LTS xenial` and
+* Linux install: DAQ has been tested against both `Ubuntu 18.04.2 LTS bionic` and
 `Debian GNU/Linux 9.4 stretch`, YMMV with other platforms.
 * Dedicated network adapters: At the very minimum one dedicated ethernet adapter is
 required. This could either be a separate built-in NIC, or a USB-Ethernet dongle.
