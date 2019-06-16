@@ -271,10 +271,9 @@ function handlePortResult(origin, port, runid, test, result) {
   }
   const element = setGridValue(runid, 'timer', runid);
   const oldtime = element.getAttribute('timer') || 0;
-  if (timestamp && oldtime < timestamp) {
+  if ((timestamp && oldtime < timestamp) || oldtime == 0) {
     element.setAttribute('timer', timestamp);
-    const timestr = new Date(timestamp * 1000).toLocaleString();
-    setGridValue(runid, 'timer', runid, timestr);
+    setGridValue(runid, 'timer', runid, timestamp);
   }
   if (result.report) {
     addReportBucket(origin, runid, runid, result.report);
@@ -381,7 +380,7 @@ function triggerOrigin(db, origin_id) {
 
 function triggerPort(db, origin_id, port_id) {
   const latest = (ref) => {
-    return ref.orderBy('timestamp', 'desc').limit(PORT_ROW_COUNT);
+    return ref.orderBy('updated', 'desc').limit(PORT_ROW_COUNT);
   };
 
   const origin_doc = db.collection('origin').doc(origin_id);
