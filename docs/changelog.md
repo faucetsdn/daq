@@ -1,6 +1,6 @@
 # Changelog
 
-* Next Version
+* 1.0.0
 	* Device and system schema validation in web-ui.
 	* Extended BACnet test module for PIC statements.
 	* TLS security test module for certificate validation.
