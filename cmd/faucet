@@ -25,6 +25,7 @@ fi
 if [ "$1" == "gauge" ]; then
     CONTAINER=daq-gauge
     IMAGE=daq/gauge
+    FAUCET_SOCK=
     shift
 fi
 
@@ -53,9 +54,10 @@ if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; 
     docker rm -f $CONTAINER
 fi
 
-rm -f $INSTDIR/$FAUCET_SOCK
-
-event_sock=/var/log/faucet/$FAUCET_SOCK
+if [ -n "$FAUCET_SOCK" ]; then
+    rm -f $INSTDIR/$FAUCET_SOCK
+    event_sock=/var/log/faucet/$FAUCET_SOCK
+fi
 
 docker_envs="\
         --env FAUCET_CONFIG_STAT_RELOAD=1 \
@@ -72,7 +74,7 @@ fi
 cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $port_opts $IMAGE)
 echo Container $CONTAINER started as $cid
 
-while [ ! -e $INSTDIR/$FAUCET_SOCK ]; do
+while [ -n "$FAUCET_SOCK" -a ! -e $INSTDIR/$FAUCET_SOCK ]; do
     echo Waiting for $INSTDIR/$FAUCET_SOCK to exist...
     sleep 10
 done
