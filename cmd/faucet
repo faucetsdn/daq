@@ -24,8 +24,7 @@ fi
 
 if [ "$1" == "gauge" ]; then
     CONTAINER=daq-gauge
-    IMAGE=faucet/gauge
-    docker pull $IMAGE || true
+    IMAGE=daq/gauge
     shift
 fi
 

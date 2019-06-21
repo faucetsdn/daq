@@ -1,4 +1,4 @@
-## Image name: daq/faucet
+## Image name: daq/gauge
 
 FROM faucet/python3
 
@@ -11,4 +11,4 @@ RUN which faucet
 
 RUN apk add -q tcpdump iptables
 
-CMD ["faucet"]
+CMD ["gauge"]

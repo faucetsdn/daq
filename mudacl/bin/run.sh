@@ -15,4 +15,4 @@ acl_templates=$2
 echo
 echo Executing mudacl generator on $mud_files...
 
-java -jar $MUDACL/build/libs/mudacl-1.0-SNAPSHOT-all.jar $mud_files $acl_templates
+java -jar $MUDACL/build/libs/mudacl-1.0-SNAPSHOT.jar $mud_files $acl_templates

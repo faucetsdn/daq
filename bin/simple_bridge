@@ -1,0 +1,18 @@
+#!/bin/bash -ex
+
+bname=simple
+iface_a=enx00e04c680255
+iface_b=enx00e04c680029
+
+rm -rf inst/faucet/daq-faucet-simple
+mkdir -p inst/faucet/daq-faucet-simple
+
+cp misc/corp_bond.yaml inst/faucet/daq-faucet-simple/faucet.yaml
+
+cmd/faucet simple 6789
+
+sudo ovs-vsctl --if-exists del-br $bname -- add-br $bname -- set bridge $bname other_config:datapath-id=0x111
+sudo ovs-vsctl set-controller $bname tcp:127.0.0.1:6789
+
+sudo ovs-vsctl add-port $bname $iface_a -- set interface $iface_a ofport_request=5
+sudo ovs-vsctl add-port $bname $iface_b -- set interface $iface_b ofport_request=6

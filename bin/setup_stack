@@ -2,14 +2,21 @@
 
 ROOT=$(dirname $0)/..
 cd $ROOT
+local=
 
 if [ -z "$1" ]; then
-    echo $0 [mode]
+    echo $0 '(local)' [mode]
 fi
+
+if [ "$1" == "local" ]; then
+    local=local
+    shift
+else
+    bin/build_hash check
+fi
+
 mode=$1
 shift
-
-#############################################################
 
 function add_br {
     bname=$1
@@ -57,6 +64,7 @@ function add_iface {
     pt=$2
     iface=$3
     sudo ovs-vsctl add-port $br $iface -- set interface $iface ofport_request=$pt
+    sudo ifconfig $iface up
 }
 
 function add_oeth {
@@ -77,6 +85,59 @@ function add_oeth {
 
 echo Configuring mode $mode...
 
+docker kill daq-faucet-1 || true
+docker kill daq-faucet-2 || true
+docker kill daq-faucet-corp || true
+
+add_br corp  0x111 6683
+add_br t1sw1 177 6001 7001
+add_br t2sw1 2352 6001 7001
+add_br t1sw2 178 6002 7002
+add_br t2sw2 1296 6002 7002
+
+upstream1=corp-eth10
+upstream2=corp-eth20
+
+add_oeth t1sw1 28 $upstream1
+
+add_link t1sw1 9 t2sw1 47
+add_link t1sw1 10 t2sw2 47
+
+add_oeth t1sw2 28 $upstream2
+
+add_link t1sw2 9 t2sw1 48
+add_link t1sw2 10 t2sw2 48
+
+if [ $mode == bond ]; then
+    bondif=bond
+    sudo ip link del $bondif || true
+    echo Setting up $bondif interface for $upstream1 and $upstream2
+    sudo ip link add $bondif type bond mode 802.3ad
+    sudo ip link set $bondif up
+    sudo ip link set $upstream1 master $bondif
+    sudo ip link set $upstream2 master $bondif
+    upstream1=$bondif
+    upstream2=
+fi
+
+echo Connecting corp bridge
+add_iface corp 10 $upstream1
+if [ -n "$upstream2" ]; then
+    add_iface corp 20 $upstream2
+fi
+
+for fnum in 1 2 3; do
+    cmd/faux $fnum xdhcp
+    docker exec -ti daq-faux-$fnum ip addr flush faux-eth0
+    docker exec -ti daq-faux-$fnum ifconfig faux-eth0 192.168.0.$fnum/16
+done
+
+echo Connecting faux interfaces
+add_iface t2sw1 1 faux-1
+add_iface t2sw2 1 faux-2
+add_iface corp 1 faux-3
+
+echo Starting faucet instances...
 sudo rm -rf inst/faucet
 mkdir -p inst/faucet/daq-faucet-corp
 cp misc/corp_$mode.yaml inst/faucet/daq-faucet-corp/faucet.yaml
@@ -89,70 +150,12 @@ for index in 1 2; do
     mkdir -p inst/faucet/$controller/
     cp topology/zz-$mode/*.yaml inst/faucet/$controller/
     docker kill $controller || true
-    cmd/faucet $index $((6000 + index))
+    cmd/faucet $local $index $((6000 + index))
     cmd/faucet gauge $index $((7000 + index)) $((9000 + index))
 done
 
-cmd/faux 1 xdhcp
-cmd/faux 2 xdhcp
-cmd/faux 3 xdhcp
-
-docker exec -ti daq-faux-1 ip addr flush faux-eth0
-docker exec -ti daq-faux-1 ifconfig faux-eth0 192.168.0.1/16
-docker exec -ti daq-faux-2 ip addr flush faux-eth0
-docker exec -ti daq-faux-2 ifconfig faux-eth0 192.168.0.2/16
-docker exec -ti daq-faux-3 ip addr flush faux-eth0
-docker exec -ti daq-faux-3 ifconfig faux-eth0 192.168.0.3/16
-
-add_br corp  0x111 6683
-add_br t1sw1 177 6001 7001
-add_br t2sw1 2352 6001 7001
-add_br t1sw2 178 6002 7002
-add_br t2sw2 1296 6002 7002
-
-add_oeth t1sw1 1 corp-eth10
-add_oeth t1sw1 2 corp-eth11
-
-add_link t1sw1 9 t2sw1 49
-add_link t1sw1 10 t2sw2 49
-
-add_oeth t1sw2 1 corp-eth20
-add_oeth t1sw2 2 corp-eth21
-
-add_link t1sw2 9 t2sw2 50
-add_link t1sw2 10 t2sw1 50
-
-sudo ip link del bond1 || true
-if [ $mode == bond ]; then
-    sudo ip link add bond1 type bond mode 802.3ad
-    sudo ip link set bond1 up
-    sudo ip link set corp-eth10 master bond1
-    sudo ip link set corp-eth11 master bond1
-    upstream1=bond1
-else
-    upstream1=corp-eth10
-fi
-sudo ip link set up dev corp-eth10
-sudo ip link set up dev corp-eth11
-sudo ovs-vsctl add-port corp $upstream1 -- set interface $upstream1 ofport_request=10
-
-sudo ip link del bond2 || true
-if [ $mode == bond ]; then
-    sudo ip link add bond2 type bond mode 802.3ad
-    sudo ip link set bond2 up
-    sudo ip link set corp-eth20 master bond2
-    sudo ip link set corp-eth21 master bond2
-    upstream2=bond2
-else
-    upstream2=corp-eth20
-fi
-sudo ip link set up dev corp-eth20
-sudo ip link set up dev corp-eth21
-sudo ovs-vsctl add-port corp $upstream2 -- set interface $upstream2 ofport_request=20
-
-add_iface t2sw1 1 faux-1
-add_iface t2sw2 1 faux-2
-add_iface corp 1 faux-3
+echo Letting system settle...
+sleep 30
 
 echo Starting connection warm-up for 30s...
 docker exec daq-faux-1 ping -q -c 30 192.168.0.2 &
@@ -161,5 +164,12 @@ docker exec daq-faux-3 ping -q -c 30 192.168.0.1 &
 
 echo Waiting for warm-ups to complete...
 wait
+
+echo
+echo Things to try:
+echo docker exec -t daq-faux-1 ping -c 10 192.168.0.2
+echo docker exec -t daq-faux-2 ping -c 10 192.168.0.3
+echo docker exec -t daq-faux-3 ping -c 10 192.168.0.1
+echo
 
 echo Done with stack setup mode $mode.

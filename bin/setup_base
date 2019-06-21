@@ -13,7 +13,16 @@ if [ -z "$AG" ]; then
     AG="sudo apt-get -qqy --no-install-recommends"
 fi
 
-echo AG is $AG
+#Store all additional apt-get arguments passed into this script.
+#These arguments are unchecked 
+AG_ARGS="$@"
+
+#Append all additional apt-get arguments to AG
+if [ ! -z "$AG_ARGS" ];then
+    AG="$AG $AG_ARGS"
+fi
+
+echo AG is $AG 
 
 $AG update
 $AG install realpath || true  # On newer versions this is included elsewhere.

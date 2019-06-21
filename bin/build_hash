@@ -1,8 +1,35 @@
 #!/bin/bash
 
 ROOT=$(realpath $(dirname $0)/..)
-build_files=$ROOT/.build_files
+cd $ROOT
+
+build_hashf=.build_hash
+build_files=.build_files
+build_built=.build_built
+
 faucet_version=$(cd faucet; git rev-list -n 1 HEAD)
 echo "$faucet_version  faucet/HEAD" > $build_files
 find misc/ docker/ subset/ -type f | sort | xargs sha1sum >> $build_files
-cat $build_files | sha256sum | awk '{print $1}'
+build_hash=`cat $build_files | sha256sum | awk '{print $1}'`
+
+if [ "$1" == check ]; then
+    test -f $build_hashf || touch $build_hashf
+    local_hash=$(< $build_hashf)
+    if [ "$build_hash" != "$local_hash" ]; then
+        if [ -f $build_built ]; then
+            echo Output of: diff $build_built $build_files
+            diff $build_built $build_files || true
+            echo
+        fi
+        echo Local build hash does not match, or not found.
+        echo Please run cmd/build.
+        false
+    fi
+elif [ "$1" == write ]; then
+    echo $build_hash > $build_hashf
+elif [ -n "$1" ]; then
+    echo Unknown argument $1
+    false
+else
+    echo $build_hash
+fi

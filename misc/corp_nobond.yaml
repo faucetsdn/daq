@@ -3,12 +3,12 @@ dps:
     dp_id: 273
     interfaces:
       1:
-        native_vlan: 100
+        native_vlan: 171
         unicast_flood: false
         acl_in: traffic_down
     interface_ranges:
       10,20:
-        native_vlan: 100
+        tagged_vlans: [171]
         unicast_flood: false
         acl_in: traffic_up
 acls:
@@ -58,5 +58,5 @@ acls:
       actions:
         allow: 1
 vlans:
-  100:
+  171:
     acl_in: traffic_block
