@@ -55,7 +55,8 @@ if [ "$1" == -f ]; then
 fi
 
 target_version=$(cat misc/FAUCET_VERSION)
-if [ "$target_version" != "$local_version" ]; then
+target_commit=$(cd faucet; git rev-parse $target_version)
+if [ "$target_commit" != "$local_version" ]; then
     echo Local faucet commit is at: $local_version
     echo Mismatch with misc/FAUCET_VERSION: $target_version
     echo Try 'bin/clean_dev && bin/setup_dev' to reset.
