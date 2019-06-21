@@ -1,83 +1,91 @@
 dps:
   us-mtv-900-t1sw2-0-1:
-    dp_id: 0x000000223d5a102d
+    combinatorial_port_flood: true
+    dp_id: 147058200621
     faucet_dp_mac: 0e:00:00:00:01:01
     hardware: GenericTFM
     interfaces:
       9:
         lldp_beacon: {enable: true}
-        receive_lldp: true
+        lldp_peer_mac: 0e:00:00:00:02:01
         native_vlan: 171
+        receive_lldp: true
       10:
         lldp_beacon: {enable: true}
-        receive_lldp: true
+        lldp_peer_mac: 0e:00:00:00:02:02
         native_vlan: 171
+        receive_lldp: true
       28:
         description: Juniper-Uplink-1
-        lacp: 1
-        lacp_peers: [9, 10]
-        tagged_vlans: [171]
+        lacp: 3
+        lacp_passthrough: [9, 10]
         lldp_beacon: {enable: true}
-        receive_lldp: true
-    lldp_beacon: {max_per_interval: 5, send_interval: 5}
-  us-mtv-900-t2sw2-0-1:
-    dp_id: 0x0000e01aea10785c
-    faucet_dp_mac: 0e:00:00:00:02:01
-    hardware: Allied-Telesis
-    interface_ranges:
-      1-46: {description: IoT Host, native_vlan: 171}
-    interfaces:
-      49:
-        lldp_beacon: {enable: true}
-        lldp_failover: 48
-        loop_protect_external: true
-        receive_lldp: true
         native_vlan: 171
-      48:
-        lldp_beacon: {enable: true}
-        loop_protect_external: true
         receive_lldp: true
-        native_vlan: 171
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
   us-mtv-900-t1sw2-0-2:
-    dp_id: 0x000000223d5a0ff1
+    combinatorial_port_flood: true
+    dp_id: 147058200561
     faucet_dp_mac: 0e:00:00:00:01:02
     hardware: GenericTFM
     interfaces:
       9:
         lldp_beacon: {enable: true}
-        receive_lldp: true
+        lldp_peer_mac: 0e:00:00:00:02:01
         native_vlan: 171
+        receive_lldp: true
       10:
         lldp_beacon: {enable: true}
-        receive_lldp: true
+        lldp_peer_mac: 0e:00:00:00:02:02
         native_vlan: 171
+        receive_lldp: true
       28:
         description: Juniper-Uplink-2
-        lacp: 1
-        lacp_peers: [9, 10]
-        tagged_vlans: [171]
+        lacp: 3
+        lacp_passthrough: [9, 10]
         lldp_beacon: {enable: true}
+        native_vlan: 171
+        receive_lldp: true
+    lldp_beacon: {max_per_interval: 5, send_interval: 5}
+  us-mtv-900-t2sw2-0-1:
+    combinatorial_port_flood: true
+    dp_id: 246406200719452
+    faucet_dp_mac: 0e:00:00:00:02:01
+    hardware: Allied-Telesis
+    interface_ranges:
+      1-46: {description: IoT Host, native_vlan: 171}
+    interfaces:
+      47:
+        lldp_beacon: {enable: true}
+        lldp_failover: 48
+        loop_protect_external: true
+        native_vlan: 171
+        receive_lldp: true
+      48:
+        lldp_beacon: {enable: true}
+        loop_protect_external: true
+        native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
   us-mtv-900-t2sw2-0-2:
-    dp_id: 0x0000e01aea1077f2
+    combinatorial_port_flood: true
+    dp_id: 246406200719346
     faucet_dp_mac: 0e:00:00:00:02:02
     hardware: Allied-Telesis
     interface_ranges:
       1-46: {description: IoT Host, native_vlan: 171}
     interfaces:
-      49:
+      47:
         lldp_beacon: {enable: true}
-        lldp_failover: 48
         loop_protect_external: true
-        receive_lldp: true
         native_vlan: 171
+        receive_lldp: true
       48:
         lldp_beacon: {enable: true}
+        lldp_failover: 47
         loop_protect_external: true
-        receive_lldp: true
         native_vlan: 171
+        receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
 version: 2
 vlans:

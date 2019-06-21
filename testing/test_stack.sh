@@ -5,8 +5,8 @@ source testing/test_preamble.sh
 out_dir=out/daq-test_stack
 rm -rf $out_dir
 
-t2sw1p49_pcap=$out_dir/t2sw1-eth49.pcap
-t2sw1p50_pcap=$out_dir/t2sw1-eth50.pcap
+t2sw1p47_pcap=$out_dir/t2sw1-eth47.pcap
+t2sw1p48_pcap=$out_dir/t2sw1-eth48.pcap
 nodes_dir=$out_dir/nodes
 
 mkdir -p $out_dir $nodes_dir
@@ -46,9 +46,9 @@ function test_stack {
     echo Testing stack mode $mode | tee -a $TEST_RESULTS
     bin/setup_stack $mode || exit 1
 
-    echo Capturing pcap to $t2sw1p49_pcap for $cap_length seconds...
-    timeout $cap_length tcpdump -eni t2sw1-eth49 -w $t2sw1p49_pcap &
-    timeout $cap_length tcpdump -eni t2sw1-eth50 -w $t2sw1p50_pcap &
+    echo Capturing pcap to $t2sw1p47_pcap for $cap_length seconds...
+    timeout $cap_length tcpdump -eni t2sw1-eth47 -w $t2sw1p47_pcap &
+    timeout $cap_length tcpdump -eni t2sw1-eth48 -w $t2sw1p48_pcap &
     sleep 5
 
     echo Executing 2nd warm-up
@@ -77,22 +77,22 @@ function test_stack {
     end_time=$(date +%s)
     echo Waited $((end_time - start_time))s.
 
-    bcount49=$(tcpdump -en -r $t2sw1p49_pcap | wc -l) 2>/dev/null
-    bcount50=$(tcpdump -en -r $t2sw1p50_pcap | wc -l) 2>/dev/null
-    bcount_total=$((bcount49 + bcount50))
-    echo pcap $mode count is $bcount49 $bcount50 $bcount_total
-    echo pcap sane $((bcount_total > 100)) $((bcount_total < 150)) | tee -a $TEST_RESULTS
-    echo pcap t2sw1p49
-    tcpdump -en -c 20 -r $t2sw1p49_pcap
-    echo pcap t2sw1p50
-    tcpdump -en -c 20 -r $t2sw1p50_pcap
+    bcount47=$(tcpdump -en -r $t2sw1p47_pcap | wc -l) 2>/dev/null
+    bcount48=$(tcpdump -en -r $t2sw1p48_pcap | wc -l) 2>/dev/null
+    bcount_total=$((bcount47 + bcount48))
+    echo pcap $mode count is $bcount47 $bcount48 $bcount_total
+    echo pcap sane $((bcount_total > 100)) $((bcount_total < 220)) | tee -a $TEST_RESULTS
+    echo pcap t2sw1p47
+    tcpdump -en -c 20 -r $t2sw1p47_pcap
+    echo pcap t2sw1p48
+    tcpdump -en -c 20 -r $t2sw1p48_pcap
     echo pcap end
 
-    telnet49=$(tcpdump -en -r $t2sw1p49_pcap vlan and port 23 | wc -l) 2>/dev/null
-    https49=$(tcpdump -en -r $t2sw1p49_pcap vlan and port 443 | wc -l) 2>/dev/null
-    telnet50=$(tcpdump -en -r $t2sw1p50_pcap vlan and port 23 | wc -l) 2>/dev/null
-    https50=$(tcpdump -en -r $t2sw1p50_pcap vlan and port 443 | wc -l) 2>/dev/null
-    echo $mode telnet $((telnet49 + telnet50)) https $((https49 + https50)) | tee -a $TEST_RESULTS
+    telnet47=$(tcpdump -en -r $t2sw1p47_pcap vlan and port 23 | wc -l) 2>/dev/null
+    https47=$(tcpdump -en -r $t2sw1p47_pcap vlan and port 443 | wc -l) 2>/dev/null
+    telnet48=$(tcpdump -en -r $t2sw1p48_pcap vlan and port 23 | wc -l) 2>/dev/null
+    https48=$(tcpdump -en -r $t2sw1p48_pcap vlan and port 443 | wc -l) 2>/dev/null
+    echo $mode telnet $((telnet47 + telnet48)) https $((https47 + https48)) | tee -a $TEST_RESULTS
 
     cat $nodes_dir/* | tee -a $TEST_RESULTS
 
@@ -102,24 +102,25 @@ function test_stack {
 function test_dot1x {
     bin/setup_dot1x
     echo Checking positive auth
-    docker exec daq-faux-1 wpa_supplicant -B -t -c wpasupplicant.conf -i faux-eth0 -D wired      
+    docker exec daq-faux-1 wpa_supplicant -B -t -c wpasupplicant.conf -i faux-eth0 -D wired
     sleep 15
-    docker exec daq-faux-1 ping -q -c 10 192.168.12.2 2>&1 | awk -F, '/packet loss/{print $1,$2;}' | tee -a $TEST_RESULTS 
+    docker exec daq-faux-1 ping -q -c 10 192.168.12.2 2>&1 | awk -F, '/packet loss/{print $1,$2;}' | tee -a $TEST_RESULTS
     docker exec daq-faux-1 kill -9 $(docker exec daq-faux-1 ps ax | grep wpa_supplicant | awk '{print $1}')
     echo Checking failed auth
-    docker exec daq-faux-1 wpa_supplicant -B -t -c wpasupplicant.conf.wng -i faux-eth0 -D wired      
+    docker exec daq-faux-1 wpa_supplicant -B -t -c wpasupplicant.conf.wng -i faux-eth0 -D wired
     sleep 15
-    docker exec daq-faux-1 ping -q -c 10 192.168.12.2 2>&1 | awk -F, '/packet loss/{print $1,$2;}' | tee -a $TEST_RESULTS 
+    docker exec daq-faux-1 ping -q -c 10 192.168.12.2 2>&1 | awk -F, '/packet loss/{print $1,$2;}' | tee -a $TEST_RESULTS
 }
 
 echo Stacking Tests >> $TEST_RESULTS
-#test_stack nobond
 #bin/net_clean
-test_stack bond
+#test_stack nobond
+
 bin/net_clean
+test_stack bond
 
 echo Dot1x setup >> $TEST_RESULTS
-test_dot1x
 bin/net_clean
+test_dot1x
 
 echo Done with cleanup. Goodby.

@@ -1,9 +1,19 @@
 dps:
   corp:
     dp_id: 273
+    interface_ranges:
+      10,20: {tagged_vlans: [171]}
     interfaces:
-      1: {native_vlan: 100}
-      10: {native_vlan: 100}
-      11: {native_vlan: 100}
-      20: {native_vlan: 100}
-      21: {native_vlan: 100}
+      1: {native_vlan: 171}
+      5:
+        native_vlan: 171
+        acl_in: all_shall_pass
+      6:
+        native_vlan: 171
+        acl_in: all_shall_pass
+acls:
+  all_shall_pass:
+  - rule:
+      actions:
+        output:
+          ports: [5, 6]

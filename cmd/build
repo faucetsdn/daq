@@ -58,7 +58,7 @@ target_version=$(cat misc/FAUCET_VERSION)
 if [ "$target_version" != "$local_version" ]; then
     echo Local faucet commit is at: $local_version
     echo Mismatch with misc/FAUCET_VERSION: $target_version
-    echo Try 'bin/clean_dev && bin/setup_dev' to reset, or use -f.
+    echo Try 'bin/clean_dev && bin/setup_dev' to reset.
     false
 fi
 
@@ -171,5 +171,5 @@ if [ "$do_images" == load ]; then
 fi
 
 echo Updating .build_hash
-bin/build_hash > .build_hash
+bin/build_hash write
 mv -f .build_files .build_built

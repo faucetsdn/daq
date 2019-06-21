@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+bin/build_hash check
+
 TARGET_ROOT=inst/faucet/daq-faucet-faucet
 
 for postfix in 1 2; do
@@ -18,20 +23,41 @@ cmd/faucet gauge faucet2 6658 9308
 sudo ip addr flush ganga
 sudo ip addr add 192.0.2.10/24 dev ganga
 
-sudo ovs-vsctl --if-exists del-br upstream -- add-br upstream  
+sudo ovs-vsctl --if-exists del-br upstream -- add-br upstream
+sudo ip link del daqnw || true
 sudo ip link add daqnw type veth peer name t1bond
 sudo ip link set daqnw up
 sudo ip link set t1bond up
 sudo ovs-vsctl add-port upstream daqnw
 
+sudo ip link del up_bond || true
 sudo ip link add up_bond type bond mode 802.3ad lacp_rate fast
 sudo ip link set up_bond up
+sudo ip link set yamuna down
 sudo ip link set yamuna master up_bond
+sudo ip link set beas down
 sudo ip link set beas master up_bond
 sudo ovs-vsctl add-port upstream up_bond
 
-
 cmd/faux -n :t1bond
 cmd/faux :satlej
-cmd/faux :tapti
 cmd/faux :ravi
+cmd/faux :tapti
+
+echo
+docker exec daq-networking-t1bond ip addr
+echo Waiting for DHCP...
+sleep 15
+echo
+docker exec daq-faux-satlej ip addr show dev satlej
+echo
+docker exec daq-faux-ravi ip addr show dev ravi
+echo
+docker exec daq-faux-tapti ip addr show dev tapti
+echo
+docker exec daq-faux-satlej ping -c 3 google.com
+docker exec daq-faux-ravi ping -c 3 google.com
+docker exec daq-faux-tapti ping -c 3 google.com
+docker exec daq-faux-satlej ping -c 3 daq-faux-tapti
+echo
+echo Done with testing setup.
