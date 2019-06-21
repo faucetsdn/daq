@@ -11,9 +11,19 @@ cd $ROOT
 
 FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
 FAUCETB=${DAQ_FAUCET_BRANCH}
-FAUCETV=$(cat misc/FAUCET_VERSION)
+FAUCETX=$(cat misc/FAUCET_VERSION)
+FAUCETV=${DAQ_FAUCET_VER:-$FAUCETX}
 MININET=https://github.com/mininet/mininet
 MININETV=2.3.0d3
+
+if [ -f .daq.local ]; then
+    echo Loading config from .daq.local
+    source .daq.local
+fi
+
+if [ "$FAUCETX" != "$FAUCETV" ]; then
+    echo $FAUCETV > misc/FAUCET_VERSION
+fi
 
 if [ -z "$AG" ]; then
     AG="sudo apt-get -qqy --no-install-recommends"
