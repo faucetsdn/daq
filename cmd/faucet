@@ -71,3 +71,8 @@ fi
 
 cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $port_opts $IMAGE)
 echo Container $CONTAINER started as $cid
+
+while [ ! -e $INSTDIR/$FAUCET_SOCK ]; do
+    echo Waiting for $INSTDIR/$FAUCET_SOCK to exist...
+    sleep 10
+done
