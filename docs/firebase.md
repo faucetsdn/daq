@@ -5,6 +5,10 @@ of test results.
 
 ## Initial Setup
 
+**TODO**: The system needs to be setup in
+"[Cloud Firestore in Native Mode](https://cloud.google.com/datastore/docs/firestore-or-datastore)",
+and somewhere in here this needs to get described when setting up a new project.
+
 0. There should be a GCP project that can be used to host everything.
 1. Goto the [Firebase Console](https://console.firebase.google.com/) and add a new project.
    * Add the hosting GCP project to link it to this Firebase setup.
