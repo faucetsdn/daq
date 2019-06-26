@@ -157,6 +157,12 @@ done
 echo Letting system settle...
 sleep 30
 
+echo daq-faucet-1
+head inst/faucet/daq-faucet-1/faucet.log
+echo daq-faucet-2
+head inst/faucet/daq-faucet-2/faucet.log
+echo
+
 echo Starting connection warm-up for 30s...
 docker exec daq-faux-1 ping -q -c 30 192.168.0.2 &
 docker exec daq-faux-2 ping -q -c 30 192.168.0.3 &

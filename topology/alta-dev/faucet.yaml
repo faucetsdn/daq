@@ -1,6 +1,5 @@
 dps:
   us-mtv-900-t1sw2-0-1:
-    combinatorial_port_flood: true
     dp_id: 147058200621
     faucet_dp_mac: 0e:00:00:00:01:01
     hardware: GenericTFM
@@ -8,12 +7,12 @@ dps:
       9:
         lldp_beacon: {enable: true}
         lldp_peer_mac: 0e:00:00:00:02:01
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
       10:
         lldp_beacon: {enable: true}
         lldp_peer_mac: 0e:00:00:00:02:02
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
       28:
         description: Juniper-Uplink-1
@@ -23,8 +22,8 @@ dps:
         native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   us-mtv-900-t1sw2-0-2:
-    combinatorial_port_flood: true
     dp_id: 147058200561
     faucet_dp_mac: 0e:00:00:00:01:02
     hardware: GenericTFM
@@ -32,12 +31,12 @@ dps:
       9:
         lldp_beacon: {enable: true}
         lldp_peer_mac: 0e:00:00:00:02:01
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
       10:
         lldp_beacon: {enable: true}
         lldp_peer_mac: 0e:00:00:00:02:02
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
       28:
         description: Juniper-Uplink-2
@@ -47,8 +46,8 @@ dps:
         native_vlan: 171
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   us-mtv-900-t2sw2-0-1:
-    combinatorial_port_flood: true
     dp_id: 246406200719452
     faucet_dp_mac: 0e:00:00:00:02:01
     hardware: Allied-Telesis
@@ -59,16 +58,16 @@ dps:
         lldp_beacon: {enable: true}
         lldp_failover: 48
         loop_protect_external: true
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
       48:
         lldp_beacon: {enable: true}
         loop_protect_external: true
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   us-mtv-900-t2sw2-0-2:
-    combinatorial_port_flood: true
     dp_id: 246406200719346
     faucet_dp_mac: 0e:00:00:00:02:02
     hardware: Allied-Telesis
@@ -78,15 +77,16 @@ dps:
       47:
         lldp_beacon: {enable: true}
         loop_protect_external: true
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
       48:
         lldp_beacon: {enable: true}
         lldp_failover: 47
         loop_protect_external: true
-        native_vlan: 171
+        tagged_vlans: [171]
         receive_lldp: true
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
 version: 2
 vlans:
   171: {description: BOS-IOT}

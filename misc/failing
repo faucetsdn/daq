@@ -1,0 +1,42 @@
+#!/bin/bash -e
+
+if [ -z "$1" ]; then
+   echo $0 [target]
+   false
+fi
+
+TARGET=$1
+shift
+
+TEST="ping -q -c 2 $TARGET"
+
+clear
+
+if $TEST > /dev/null 2>&1 ; then
+    echo `date` Initial state pass.
+fi
+
+then_time=`date +%s`
+
+while true; do
+    echo
+
+    while $TEST > /dev/null 2>&1 ; do
+        sleep 1
+    done
+
+    now_time=`date +%s`
+    echo `date` FAILING ping $TARGET after $((now_time - then_time))s
+    then_time=$now_time
+    sleep 1
+
+    while ! $TEST > /dev/null 2>&1 ; do
+        sleep 1
+    done
+
+    now_time=`date +%s`
+    echo `date` Passing ping $TARGET after $((now_time - then_time))s
+    then_time=$now_time
+
+    sleep 1
+done

@@ -1,6 +1,5 @@
 dps:
   nz-kiwi-t1sw1:
-    combinatorial_port_flood: true
     dp_id: 177
     faucet_dp_mac: 0e:00:00:00:01:01
     hardware: Generic
@@ -23,8 +22,8 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   nz-kiwi-t1sw2:
-    combinatorial_port_flood: true
     dp_id: 178
     faucet_dp_mac: 0e:00:00:00:01:02
     hardware: Generic
@@ -47,8 +46,8 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   nz-kiwi-t2sw1:
-    combinatorial_port_flood: true
     dp_id: 2352
     faucet_dp_mac: 0e:00:00:00:02:01
     hardware: Generic
@@ -67,8 +66,8 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
   nz-kiwi-t2sw2:
-    combinatorial_port_flood: true
     dp_id: 1296
     faucet_dp_mac: 0e:00:00:00:02:02
     hardware: Allied-Telesis
@@ -87,6 +86,7 @@ dps:
         receive_lldp: true
         tagged_vlans: [171]
     lldp_beacon: {max_per_interval: 5, send_interval: 5}
+    use_hard_timeout: true
 include: [uniform.yaml]
 version: 2
 vlans:

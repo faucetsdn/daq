@@ -32,6 +32,7 @@ COPY subset/pentests/brute_server.py pentests/
 COPY subset/security/tlsfaux tlsfaux/
 COPY misc/start_faux bin/
 COPY misc/bacnet_discover bin/
+COPY misc/failing bin/
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
