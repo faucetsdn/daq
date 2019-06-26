@@ -6,10 +6,14 @@ build the executable, and register/update devices.
 
 ## Configuration
 
-* `gcp_creds`: Defines the target project and service account to use for configuration.
+The `local/system.conf` file should have the following parameters (in `x=y` syntax):
+* `gcp_cred`: Defines the target project and service account to use for configuration.
 Can be generated and downloaded from the Cloud IoT Service Account page.
 * `site_path`: Path of site-specific configuration. See example in `misc/test_site`.
 * `schema_path`: Path to metadata schema (for validation).
+
+The target `gcp_cred` service account will need the _Cloud IoT Provisioner_ and _Pub/Sub Publisher_ roles.
+There also needs to be an existing `registrar` topic (or as configured in `cloud_iot_config.json`, below).
 
 ## Theory Of Operation
 
