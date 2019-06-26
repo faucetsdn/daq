@@ -23,7 +23,7 @@ env:
     - DAQ_TEST=many
     - DAQ_TEST=aux
     - DAQ_TEST=topo
-    - DAQ_TEST=stack DAQ_FAUCET_REPO=https://github.com/grafnu/faucet DAQ_FAUCET_VER=ac56df73f144ace083ad68c45bdf27a2d521e6c0
+    - DAQ_TEST=stack DAQ_FAUCET_REPO=https://github.com/grafnu/faucet DAQ_FAUCET_VER=28c3c66d95ccddad6d6da99f3995dbc7d931bede
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/
