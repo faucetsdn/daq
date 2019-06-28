@@ -23,8 +23,11 @@
     "expected": [ "Required", "Recommended" ]
   },
   "tests": {
-    "unknown.fake.test": {
+    "unknown.fake.llama": {
       "required": "gone",
+    },
+    "unknown.fake.monkey": {
+      "required": "pass",
     },
     "base.target.ping": {
       "category": "Connectivity",
