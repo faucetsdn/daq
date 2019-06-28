@@ -7,15 +7,33 @@ echo Aux Tests >> $TEST_RESULTS
 echo mudacl tests | tee -a $TEST_RESULTS
 mudacl/bin/test.sh
 echo Mudacl exit code $? | tee -a $TEST_RESULTS
-validator/bin/test.sh
+validator/bin/test_schema
 echo Validator exit code $? | tee -a $TEST_RESULTS
 
 # Runs lint checks and some similar things
 echo Lint checks | tee -a $TEST_RESULTS
 cmd/inbuild skip
 echo cmd/inbuild exit code $? | tee -a $TEST_RESULTS
+docker logs daq-runner
 
+function make_pubber {
+    device=$1
+    faux=$2
+    fail=$3
+    mkdir -p inst/faux/$faux/local/
+    cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
+    cat <<EOF > inst/faux/$faux/local/pubber.json
+  {
+    "projectId": $project_id,
+    "cloudRegion": $cloud_region,
+    "registryId": $registry_id,
+    "extraField": $fail,
+    "deviceId": "$device"
+  }
+EOF
+}
 
+# Setup an instance test site
 rm -rf inst/test_site && mkdir -p inst/test_site
 cp -a misc/test_site inst/
 
@@ -25,10 +43,37 @@ cat <<EOF >> local/system.conf
 fail_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
-startup_faux_1_opts=brute
-startup_faux_2_opts="nobrute expiredtls"
-startup_faux_3_opts="tls macoui bacnet"
+startup_faux_1_opts="brute"
+startup_faux_2_opts="nobrute expiredtls pubber"
+startup_faux_3_opts="tls macoui bacnet pubber"
 EOF
+
+cloud_file=inst/test_site/cloud_iot_config.json
+cred_file=inst/config/gcp_service_account.json
+mkdir -p inst/config
+if [ -n "$GCP_SERVICE_ACCOUNT" ]; then
+    echo Installing GCP_SERVICE_ACCOUNT to gcp_cred=$cred_file
+    echo "$GCP_SERVICE_ACCOUNT" > $cred_file
+    echo gcp_cred=$cred_file >> local/system.conf
+elif [ -f $cred_file ]; then
+    echo Using previously configured $cred_file
+    echo gcp_cred=$cred_file >> local/system.conf
+fi
+
+if [ -f $cred_file ]; then
+    project_id=`jq .project_id $cred_file`
+    registry_id=`jq .registry_id $cloud_file`
+    cloud_region=`jq .cloud_region $cloud_file`
+    make_pubber AHU-1 daq-faux-2 null
+    make_pubber SNS-4 daq-faux-3 1234
+else
+    echo No GCP_SERVICE_ACCOUNT cred defined.
+    echo This varaiable should be defined in your online travis config.
+fi
+
+more inst/faux/daq-faux-*/local/pubber.json | cat
+
+echo Starting aux test run...
 cmd/run -b -s
 tail -qn 1 inst/run-port-*/nodes/bacext*/tmp/report.txt | tee -a $TEST_RESULTS
 tail -qn 1 inst/run-port-*/nodes/brute*/tmp/report.txt | tee -a $TEST_RESULTS
@@ -51,6 +96,14 @@ echo port-02 module_config modules | tee -a $TEST_RESULTS
 jq .modules inst/run-port-02/nodes/ping02/tmp/module_config.json | tee -a $TEST_RESULTS
 cat inst/run-port-02/nodes/ping02/tmp/snake.txt | tee -a $TEST_RESULTS
 cat inst/run-port-02/nodes/ping02/tmp/lizard.txt | tee -a $TEST_RESULTS
+
+fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
+
+for num in 1 2 3; do
+    echo docker logs daq-faux-$num
+    docker logs daq-faux-$num | head -n 100
+done
+echo done with docker logs
 
 function redact {
     sed -e 's/\s*%%.*//' \

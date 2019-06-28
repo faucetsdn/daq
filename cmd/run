@@ -18,7 +18,6 @@ fi
 echo Starting `date`, run_mode is $run_mode.
 echo Clearing previous state...
 sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
-mkdir -p inst
 sudo chown -f $USER -R inst || true
 
 if [ -n "$build_tests" ]; then
@@ -26,6 +25,14 @@ if [ -n "$build_tests" ]; then
 fi
 
 bin/build_hash check
+
+if [ -f "$gcp_cred" ]; then
+    echo Installing $gcp_cred into inst/config...
+    gcp_target=inst/config/gcp_service_account.json
+    if ! diff $gcp_cred $gcp_target; then
+        cp $gcp_cred inst/config/gcp_service_account.json
+    fi
+fi
 
 if [ "$run_mode" == local ]; then
     cmd/exrun $run_args 2>&1 | tee $cmdrun_log

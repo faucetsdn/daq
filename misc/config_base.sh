@@ -19,6 +19,8 @@ else
         cp $DEFAULT_CONF $LOCAL_SYSTEM
     fi
 
-    echo Loading config from $LOCAL_SYSTEM
-    eval $(python3 daq/configurator.py $LOCAL_SYSTEM $run_args)
+    echo Loading config from $LOCAL_SYSTEM into inst/config/system.conf
+    mkdir -p inst/config
+    python3 daq/configurator.py $LOCAL_SYSTEM $run_args > inst/config/system.conf
+    source inst/config/system.conf
 fi

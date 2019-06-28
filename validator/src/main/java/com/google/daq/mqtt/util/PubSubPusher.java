@@ -41,6 +41,7 @@ public class PubSubPusher {
       registrar_topic = cloudIotConfig.registrar_topic;
       ProjectTopicName topicName =
           ProjectTopicName.of(configuration.project_id, registrar_topic);
+      System.err.println("GCP default credentials point to project " + projectId);
       Preconditions.checkState(projectId.equals(configuration.project_id),
           String.format(PROJECT_MISMATCH_FORMAT, projectId, configuration.project_id));
       publisher = Publisher.newBuilder(topicName).build();

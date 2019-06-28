@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/../..)
 cd $ROOT
 
-TARGET_PREFIX=local/pubber_
+TARGET_PREFIX=local/rsa_
 
 PUBLIC_CERT=${TARGET_PREFIX}cert.pem
 PRIVATE_CERT=${TARGET_PREFIX}private.pem

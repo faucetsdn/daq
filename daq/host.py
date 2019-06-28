@@ -52,6 +52,7 @@ class ConnectedHost:
     _CONTROL_PATH = "control/port-%s"
     _CORE_TESTS = ['pass', 'fail', 'ping']
     _AUX_DIR = "aux/"
+    _CONFIG_DIR = "config/"
 
     def __init__(self, runner, gateway, target, config):
         self.runner = runner
@@ -411,6 +412,9 @@ class ConnectedHost:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, e)
 
+    def _inst_config_path(self):
+        return os.path.abspath(os.path.join(self._INST_DIR, self._CONFIG_DIR))
+
     def _device_aux_path(self):
         path = os.path.join(self._device_base, self._AUX_DIR)
         if not os.path.exists(path):
@@ -425,6 +429,7 @@ class ConnectedHost:
             'target_mac': self.target_mac,
             'gateway_ip': self.gateway.IP(),
             'gateway_mac': self.gateway.MAC(),
+            'inst_base': self._inst_config_path(),
             'port_base': self._port_base,
             'dev_base': self._device_aux_path(),
             'type_base': self._type_aux_path(),

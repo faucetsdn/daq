@@ -98,6 +98,7 @@ different places that are dynamically mapped in to the system at runtime:
 * `/scans`: Network scan of device traffic when the system is first starting up.
   * `startup.pcap`: Everything before a DHCP address is properly assigned.
   * `monitor.pcap`: Everything after DHCP, but before actual tests.
+* `/config/inst`: Global DAQ instance configuration from `inst/config`. Includes processed system.conf settings.
 * `/config/device`: Device-specific customizations from `{site_path}/mac_addrs/{device_mac}/aux/`.
 * `/config/port`: Switch-port customizations from `inst/runtime_conf/port-##/`.
 * `/config/type`: Device-type customizations from `{site_path}/device_types/{device_type}/aux/`.

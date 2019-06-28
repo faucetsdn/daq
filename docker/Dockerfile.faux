@@ -3,7 +3,7 @@
 # Faux device for framework development/testing.
 #
 
-FROM daq/aardvark:latest as bacnet_build
+FROM daq/aardvark:latest as java_build
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
@@ -14,6 +14,9 @@ ENV BACHASH=6abd3cfcfe6cfb95f444638515a0b21f547a1202
 
 RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch \
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
+
+COPY pubber/ pubber/
+RUN pubber/bin/build
 
 FROM daq/aardvark:latest
 
@@ -26,13 +29,18 @@ RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat cur
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
 
-COPY --from=bacnet_build /root/bacnet4j/*.jar bacnet4j/
+COPY misc/start_faux bin/
+
+COPY --from=java_build /root/bacnet4j/*.jar bacnet4j/
+COPY misc/bacnet_discover bin/
+
+COPY --from=java_build /root/pubber/build/libs/*.jar pubber/build/libs/
+COPY pubber/bin/run pubber/bin/
 
 COPY subset/pentests/brute_server.py pentests/
 COPY subset/security/tlsfaux tlsfaux/
-COPY misc/start_faux bin/
-COPY misc/bacnet_discover bin/
-COPY misc/failing bin/
+
+COPY misc/start_faux misc/failing bin/
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump

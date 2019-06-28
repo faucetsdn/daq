@@ -19,7 +19,7 @@ By default would be in local/site/ rather than misc/test_site/.
 |Result|Test|Notes|
 |---|---|---|
 |skip|base.switch.ping||
-|pass|base.target.ping|target |
+|pass|base.target.ping|target|
 |skip|network.brute||
 |pass|security.ports.nmap||
 

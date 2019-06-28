@@ -45,6 +45,10 @@ class DockerTest():
 
         vol_maps = [params['scan_base'] + ":/scans"]
 
+        inst_base = params.get('inst_base')
+        if inst_base and os.path.exists(inst_base):
+            vol_maps += [inst_base + ":/config/inst"]
+
         port_base = params.get('port_base')
         if port_base and os.path.exists(port_base):
             vol_maps += [port_base + ":/config/port"]

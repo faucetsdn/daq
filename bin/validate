@@ -20,9 +20,12 @@ if [ -z "$schema_path" ]; then
   false
 fi
 
-validator/bin/build.sh
+validator/bin/build
 
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
+echo Configured topic is $gcp_topic
+echo Configured schema is $schema_path
+echo
 
-validator/bin/validate.sh $PWD/$schema_path pubsub:$gcp_topic $gcp_ignoreset
+validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic dev

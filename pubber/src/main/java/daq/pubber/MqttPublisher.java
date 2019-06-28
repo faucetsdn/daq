@@ -118,6 +118,10 @@ public class MqttPublisher {
     mqttClientCache.invalidateAll();
   }
 
+  long clientCount() {
+    return mqttClientCache.size();
+  }
+
   private void validateCloudIoTOptions() {
     try {
       checkNotNull(configuration.bridgeHostname, "bridgeHostname");
@@ -303,6 +307,7 @@ public class MqttPublisher {
       expiredCounter.incrementAndGet();
       MqttClient mqttClient = notification.getValue();
       if (mqttClient.isConnected()) {
+        LOG.info("Closing connected MqttClient for " + mqttClient.getClientId());
         mqttClient.disconnect();
         mqttClient.close();
       }

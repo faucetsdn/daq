@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.bugsnag:bugsnag:3.5.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.bugsnag/bugsnag/3.5.1/356b9f0e6b3e5943340c70bba0f027ebd541d59d/bugsnag-3.5.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.bugsnag/bugsnag/3.5.1/9ce038256457bd1460f6b61f646a4bab92b82e3b/bugsnag-3.5.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

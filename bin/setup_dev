@@ -90,7 +90,7 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple \
     pylint cryptography requests netifaces codecov coverage setuptools \
     firebase-admin==2.16.0 google-cloud-pubsub==0.40.0 Jinja2
 
-if [ -z "$DAQ_CONTAINER" ]; then
+if [ "$DAQ_CONTAINER" != travis ]; then
     $PIP install pyyaml==3.12
 fi
 

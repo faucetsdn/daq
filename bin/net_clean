@@ -1,11 +1,20 @@
 #!/bin/bash
 
-echo Cleaning docker...
-for image in daq/faucet daq/faux daq/networking daqf/networking daqf/faux faucet/gauge; do
-    echo Cleaning docker $image...
+echo Cleaning docker images...
+for image in daq/faucet daq/faux daq/gauge daq/networking daqf/networking daqf/faux faucet/gauge; do
+    echo Cleaning docker image $image...
     images=$(docker ps --filter ancestor=$image -q)
     if [ -n "$images" ]; then
         docker kill $images > /dev/null
+    fi
+done
+
+echo Cleaning docker containers...
+containers=`docker ps --format '{{.Names}}'`
+for container in $containers; do
+    if [[ $container == daq-* ]]; then
+        echo Cleaning docker container $container...
+        docker kill $container > /dev/null
     fi
 done
 

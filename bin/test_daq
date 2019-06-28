@@ -46,11 +46,14 @@ echo I am g`whoami`
 
 TEST_SCRIPT=testing/test_$DAQ_TEST.sh
 GOLDEN_FILE=testing/test_$DAQ_TEST.out
-TEST_RESULTS=inst/test_$DAQ_TEST.log
+TEST_RESULTS=inst/test_$DAQ_TEST.out
+GCP_FILE=testing/test_$DAQ_TEST.gcp
+GCP_RESULTS=inst/test_$DAQ_TEST.gcp
 
 echo Running test script $TEST_SCRIPT
 # Combine stderr & stdout b/c travis has problems processing both.
-sudo PATH=$PATH TEST_RESULTS=$TEST_RESULTS DAQ_CODECOV=y $TEST_SCRIPT 2>&1
+sudo PATH=$PATH TEST_RESULTS=$TEST_RESULTS GCP_RESULTS=$GCP_RESULTS \
+     DAQ_CODECOV=y $TEST_SCRIPT 2>&1
 
 if [ -f .coverage ]; then
     codecov_tag=${DAQ_TEST##*/}
@@ -66,4 +69,14 @@ echo
 echo Comparing $GOLDEN_FILE against $TEST_RESULTS
 diff $GOLDEN_FILE $TEST_RESULTS
 echo
+
+if [ -n "$GCP_SERVICE_ACCOUNT" -a -f "$GCP_FILE" ]; then
+    echo Test gcp results $GCP_RESULTS
+    cat $GCP_RESULTS
+    echo
+    echo Comparing $GCP_FILE against $GCP_RESULTS
+    diff $GCP_FILE $GCP_RESULTS
+    echo
+fi
+
 echo Done with tests.

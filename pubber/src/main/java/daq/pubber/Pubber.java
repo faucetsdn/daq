@@ -38,6 +38,7 @@ public class Pubber {
   private static final int CONFIG_WAIT_TIME_MS = 10000;
   private static final int STATE_THROTTLE_MS = 1500;
   private static final String CONFIG_ERROR_STATUS_KEY = "config_error";
+  private static final long CONNECTION_RETRY_DELAY_MS = 10000;
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -59,7 +60,8 @@ public class Pubber {
     }
     Pubber pubber = new Pubber(args[0]);
     pubber.initialize();
-    pubber.synchronizeStart();
+    pubber.startConnection();
+    LOG.info("Done with main");
   }
 
   private Pubber(String configFile) {
@@ -70,7 +72,8 @@ public class Pubber {
     } catch (Exception e) {
       throw new RuntimeException("While reading configuration file " + configurationFile.getAbsolutePath(), e);
     }
-    info("Starting instance for registry " + configuration.registryId);
+    info(String.format("Starting instance for project %s registry %s",
+        configuration.projectId, configuration.registryId));
 
     initializeDevice();
     addPoint(new RandomPoint("superimposition_reading", 0, 100, "Celsius"));
@@ -82,17 +85,26 @@ public class Pubber {
     deviceState.system.make_model = "DAQ_pubber";
     deviceState.system.firmware.version = "v1";
     deviceState.pointset = new PointSetState();
+    devicePoints.extraField = configuration.extraField;
   }
 
-  private void startExecutor() {
-    cancelExecutor();
+  private synchronized void maybeRestartExecutor(int intervalMs) {
+    if (scheduledFuture == null || intervalMs != messageDelayMs.get()) {
+      cancelExecutor();
+      messageDelayMs.set(intervalMs);
+      startExecutor();
+    }
+  }
+
+  private synchronized void startExecutor() {
+    Preconditions.checkState(scheduledFuture == null);
     int delay = messageDelayMs.get();
     LOG.info("Starting executor with send message delay " + delay);
     scheduledFuture = executor
         .scheduleAtFixedRate(this::sendMessages, delay, delay, TimeUnit.MILLISECONDS);
   }
 
-  private void cancelExecutor() {
+  private synchronized void cancelExecutor() {
     if (scheduledFuture != null) {
       scheduledFuture.cancel(false);
       scheduledFuture = null;
@@ -101,7 +113,7 @@ public class Pubber {
 
   private void sendMessages() {
     try {
-      sendDeviceMessage(configuration.gatewayId);
+      sendDeviceMessage(configuration.deviceId);
       updatePoints();
     } catch (Exception e) {
       LOG.error("Fatal error during execution", e);
@@ -123,9 +135,13 @@ public class Pubber {
     }
   }
 
-  private void synchronizeStart() throws InterruptedException {
+  private void startConnection() throws InterruptedException {
+    connect();
     boolean result = configLatch.await(CONFIG_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
     LOG.info("synchronized start config result " + result);
+    if (!result) {
+      mqttPublisher.close();
+    }
   }
 
   private void addPoint(AbstractPoint point) {
@@ -140,11 +156,23 @@ public class Pubber {
   private void initialize() {
     Preconditions.checkState(mqttPublisher == null, "mqttPublisher already defined");
     Preconditions.checkNotNull(configuration.keyFile, "configuration keyFile not defined");
+    Preconditions.checkState(configuration.gatewayId == null, "gatewayId not currently supported");
+    System.err.println("Loading device key file from " + configuration.keyFile);
     configuration.keyBytes = getFileBytes(configuration.keyFile);
     mqttPublisher = new MqttPublisher(configuration, this::reportError);
-    mqttPublisher.registerHandler(configuration.gatewayId, CONFIG_TOPIC,
+    mqttPublisher.registerHandler(configuration.deviceId, CONFIG_TOPIC,
             this::configHandler, Message.Config.class);
-    mqttPublisher.connect(configuration.gatewayId);
+  }
+
+  private void connect() {
+    try {
+      mqttPublisher.connect(configuration.deviceId);
+      LOG.info("Connection complete.");
+    } catch (Exception e) {
+      LOG.error("Connection error", e);
+      LOG.error("Forcing termination");
+      System.exit(-1);
+    }
   }
 
   private void reportError(Exception toReport) {
@@ -152,11 +180,11 @@ public class Pubber {
       LOG.error("Error receiving message: " + toReport);
       Report report = new Report(toReport);
       deviceState.system.statuses.put(CONFIG_ERROR_STATUS_KEY, report);
-      publishStateMessage(configuration.gatewayId);
+      publishStateMessage(configuration.deviceId);
     } else {
       Report previous = deviceState.system.statuses.remove(CONFIG_ERROR_STATUS_KEY);
       if (previous != null) {
-        publishStateMessage(configuration.gatewayId);
+        publishStateMessage(configuration.deviceId);
       }
     }
   }
@@ -168,19 +196,18 @@ public class Pubber {
   private void configHandler(Message.Config config) {
     try {
       info("Received new config " + config);
-      int previous = messageDelayMs.get();
+      final int actualInterval;
       if (config != null) {
         Integer reportInterval = config.system == null ? null : config.system.report_interval_ms;
-        int actualInterval = Integer.max(MIN_REPORT_MS,
+        actualInterval = Integer.max(MIN_REPORT_MS,
             reportInterval == null ? DEFAULT_REPORT_MS : reportInterval);
-        messageDelayMs.set(actualInterval);
         deviceState.system.last_config = config.timestamp;
+      } else {
+        actualInterval = DEFAULT_REPORT_MS;
       }
-      if (scheduledFuture == null || previous != scheduledFuture.getDelay(TimeUnit.MILLISECONDS)) {
-        startExecutor();
-      }
+      maybeRestartExecutor(actualInterval);
       configLatch.countDown();
-      publishStateMessage(configuration.gatewayId);
+      publishStateMessage(configuration.deviceId);
       reportError(null);
     } catch (Exception e) {
       reportError(e);
@@ -197,6 +224,10 @@ public class Pubber {
   }
 
   private void sendDeviceMessage(String deviceId) {
+    if (mqttPublisher.clientCount() == 0) {
+      LOG.error("No connected clients, exiting.");
+      System.exit(-2);
+    }
     info(String.format("Sending test message for %s/%s", configuration.registryId, deviceId));
     mqttPublisher.publish(deviceId, POINTSET_TOPIC, devicePoints);
   }

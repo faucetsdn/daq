@@ -1,0 +1,4 @@
+Running testing/test_aux.sh
+RESULT skip cloud.udmi.pointset No device id.
+RESULT pass cloud.udmi.pointset
+RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted

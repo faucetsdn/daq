@@ -7,7 +7,7 @@
       "enabled": true
     },
     "macoui": {
-     "enabled": true 
+      "enabled": true
     },
     "switch": {
       "enabled": true
@@ -19,6 +19,9 @@
       "enabled": true
     },
     "tls": {
+      "enabled": true
+    },
+    "udmi": {
       "enabled": true
     }
   }

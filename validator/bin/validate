@@ -12,11 +12,11 @@ fi
 
 schema=$1
 target=$2
-ignoreset=$3
+devset=$3
 
 if [ ! -f $jarfile ]; then
     echo Building validator...
-    validator/bin/build.sh
+    validator/bin/build
 fi
 
 echo Executing validator $schema $target...
@@ -38,7 +38,7 @@ rm -rf $schemadir/out
 
 error=0
 absjar=$(realpath $jarfile)
-(cd $schemadir; java -jar $absjar $schemafile $target $ignoreset) || error=$?
+(cd $schemadir; java -jar $absjar $schemafile $target $devset) || error=$?
 
 echo Validation complete, exit $error
 exit $error

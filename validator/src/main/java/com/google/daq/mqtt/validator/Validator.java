@@ -3,6 +3,7 @@ package com.google.daq.mqtt.validator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.cloud.ServiceOptions;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -55,15 +56,17 @@ public class Validator {
   public static void main(String[] args) {
     Validator validator = new Validator();
     try {
-      if (args.length < 2 || args.length > 3) {
-        throw new IllegalArgumentException("Args: [schema] [target] [ignore_csv]?");
+      System.out.println(ServiceOptions.CREDENTIAL_ENV_NAME + "=" +
+          System.getenv(ServiceOptions.CREDENTIAL_ENV_NAME));
+      if (args.length != 3) {
+        throw new IllegalArgumentException("Args: [schema] [target] [inst_name]");
       }
       validator.setSchemaSpec(args[0]);
       String targetSpec = args[1];
-      String ignoreSpec = args.length > 2 ? args[2] : null;
+      String instName = args[2];
       if (targetSpec.startsWith(PUBSUB_PREFIX)) {
         String topicName = targetSpec.substring(PUBSUB_PREFIX.length());
-        validator.validatePubSub(topicName, ignoreSpec);
+        validator.validatePubSub(instName, topicName);
       } else {
         validator.validateFilesOutput(targetSpec);
       }
@@ -80,8 +83,7 @@ public class Validator {
     this.schemaSpec = schemaSpec;
   }
 
-  private void validatePubSub(String topicName, String ignoreSpec) {
-    Set<String> ignoreSubSet = convertIgnoreSet(ignoreSpec);
+  private void validatePubSub(String instName, String topicName) {
     Map<String, Schema> schemaMap = new HashMap<>();
     for (File schemaFile : makeFileList(schemaSpec)) {
       Schema schema = getSchema(schemaFile);
@@ -94,17 +96,16 @@ public class Validator {
       throw new RuntimeException("Missing schema for attribute validation: " + ENVELOPE_SCHEMA_ID);
     }
     dataSink = new FirestoreDataSink();
-    System.out.println("Ignoring subfolders " + ignoreSubSet);
     System.out.println("Results will be uploaded to " + dataSink.getViewUrl());
     OUT_BASE_FILE.mkdirs();
     System.out.println("Also found in such directories as " + OUT_BASE_FILE.getAbsolutePath());
     System.out.println("Connecting to pubsub topic " + topicName);
-    PubSubClient client = new PubSubClient(topicName);
+    PubSubClient client = new PubSubClient(instName, topicName);
     System.out.println("Entering pubsub message loop on " + client.getSubscriptionId());
     while(client.isActive()) {
       try {
         client.processMessage(
-            (message, attributes) -> validateMessage(ignoreSubSet, schemaMap, message, attributes));
+            (message, attributes) -> validateMessage(schemaMap, message, attributes));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -119,8 +120,7 @@ public class Validator {
     return Arrays.stream(ignoreSpec.split(",")).collect(Collectors.toSet());
   }
 
-  private void validateMessage(Set<String> ignoreSubSet,
-      Map<String, Schema> schemaMap, Map<String, Object> message,
+  private void validateMessage(Map<String, Schema> schemaMap, Map<String, Object> message,
       Map<String, String> attributes) {
     try {
       String deviceId = attributes.get("deviceId");
@@ -134,12 +134,10 @@ public class Validator {
       OBJECT_MAPPER.writeValue(messageFile, message);
 
       File errorFile = new File(OUT_BASE_FILE, String.format(ERROR_FILE_FORMAT, schemaId, deviceId));
-      errorFile.delete();
 
       try {
         Preconditions.checkNotNull(deviceId, "Missing deviceId in message");
         if (Strings.isNullOrEmpty(subFolder)
-            || ignoreSubSet.contains(subFolder)
             || !schemaMap.containsKey(schemaId)) {
           throw new IllegalArgumentException(String.format(SCHEMA_SKIP_FORMAT, schemaId, deviceId));
         }

@@ -86,9 +86,9 @@ function described above is not installed properly.
 
 ## Injecting Configuration
 
-The `validator/bin/config.sh` script can be used to inject a configuration message to a device:
+The `validator/bin/config` script can be used to inject a configuration message to a device:
 <pre>
-~/daq$ <b>validator/bin/config.sh GAT-001 schemas/udmi/config.tests/gateway.json</b>
+~/daq$ <b>validator/bin/config GAT-001 schemas/udmi/config.tests/gateway.json</b>
 Configuring gcp-account:us-central1:sensor_hub:GAT-001 from schemas/udmi/config.tests/gateway.json
 messageIds:
 - '301010492284043'

@@ -32,11 +32,12 @@ public class PubSubClient {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .enable(SerializationFeature.INDENT_OUTPUT)
       .setSerializationInclusion(Include.NON_NULL);
-  private static final String SUBSCRIPTION_NAME = "daq-validator";
+  private static final String SUBSCRIPTION_NAME_FORMAT = "daq-validator-%s";
   private static final String
       REFRESH_ERROR_FORMAT = "While refreshing subscription to topic %s subscription %s";
 
   private static final String PROJECT_ID = ServiceOptions.getDefaultProjectId();
+  private static final long SUBSCRIPTION_RACE_DELAY_MS = 10000;
 
   private final AtomicBoolean active = new AtomicBoolean();
   private final BlockingQueue<PubsubMessage> messages = new LinkedBlockingDeque<>();
@@ -48,10 +49,12 @@ public class PubSubClient {
     LoadBalancerRegistry.getDefaultRegistry().register(new PickFirstLoadBalancerProvider());
   }
 
-  public PubSubClient(String topicId) {
+  public PubSubClient(String instName, String topicId) {
     try {
+      String name = String.format(SUBSCRIPTION_NAME_FORMAT, instName);
       ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(
-          PROJECT_ID, SUBSCRIPTION_NAME);
+          PROJECT_ID, name);
+      System.out.println("Connecting to pubsub subscription " + subscriptionName);
       refreshSubscription(ProjectTopicName.of(PROJECT_ID, topicId), subscriptionName);
       subscriber = Subscriber.newBuilder(subscriptionName, new MessageProcessor()).build();
       subscriber.startAsync().awaitRunning();
@@ -114,9 +117,12 @@ public class PubSubClient {
     // Best way to flush the PubSub queue is to turn it off and back on again.
     try (SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create()) {
       if (subscriptionExists(subscriptionAdminClient, topicName, subscriptionName)) {
+        System.out.println("Deleting old subscription " + subscriptionName);
         subscriptionAdminClient.deleteSubscription(subscriptionName);
+        Thread.sleep(SUBSCRIPTION_RACE_DELAY_MS);
       }
 
+      System.out.println("Creating new subscription " + subscriptionName);
       Subscription subscription = subscriptionAdminClient.createSubscription(
           subscriptionName, topicName, PushConfig.getDefaultInstance(), 0);
 

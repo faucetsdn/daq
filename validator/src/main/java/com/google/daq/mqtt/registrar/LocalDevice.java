@@ -56,7 +56,7 @@ public class LocalDevice {
 
   private static final Set<String> allowedFiles = ImmutableSet.of(METADATA_JSON, RSA_PUBLIC_PEM, RSA_PRIVATE_PEM,
       RSA_PRIVATE_PKCS8, PROPERTIES_JSON);
-  private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen.sh %s %s";
+  private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen %s %s";
   public static final String METADATA_SUBFOLDER = "metadata";
 
   private final String deviceId;
@@ -219,7 +219,8 @@ public class LocalDevice {
     String assetName = metadata.system.physical_tag.asset.name;
     Preconditions.checkState(desiredTag.equals(assetName),
         String.format(PHYSICAL_TAG_ERROR, assetName, desiredTag));
-    Preconditions.checkState(expected_site_name.equals(siteName));
+    String errorMessage = "Site name " + siteName + " is not expected " + expected_site_name;
+    Preconditions.checkState(expected_site_name.equals(siteName), errorMessage);
   }
 
   private String makeNumId(Envelope envelope) {

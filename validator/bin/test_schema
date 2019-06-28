@@ -3,8 +3,6 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-bin/build.sh
-
 schema_root=../schemas
 
 errorfile=`mktemp`
@@ -20,20 +18,20 @@ while getopts ":fn" opt; do
             ;;
         n) build=n
            ;;
-        \?) echo "Usage: test.sh [-f] [-n]"
+        \?) echo "Usage: $0 [-f] [-n]"
             exit -1
             ;;
     esac
 done
 
-jarfile=$(realpath build/libs/validator-1.0-SNAPSHOT-all.jar)
-
 outroot=out
 rm -rf $outroot
 
 if [ "$build" == y ]; then
-    bin/build.sh
+    bin/build
 fi
+
+jarfile=$(realpath build/libs/validator-1.0-SNAPSHOT-all.jar)
 
 schemas=$(cd $schema_root && ls)
 if [ -z "$schemas" ]; then

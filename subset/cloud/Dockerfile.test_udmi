@@ -1,0 +1,17 @@
+# Image name: daq/faux
+#
+# Faux device for framework development/testing.
+#
+
+FROM daq/aardvark:latest
+
+RUN $AG update && $AG install openjdk-8-jdk git jq
+
+COPY validator/ validator/
+RUN validator/bin/build
+
+COPY schemas/udmi/ schemas/udmi/
+
+COPY subset/cloud/test_udmi .
+
+CMD ./test_udmi

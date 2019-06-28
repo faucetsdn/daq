@@ -9,7 +9,9 @@ public class Configuration {
   public String cloudRegion;
   public String registryId;
   public String gatewayId;
-  public String keyFile = "local/pubber_private.pkcs8";
+  public String deviceId;
+  public String keyFile = "local/rsa_private.pkcs8";
   public byte[] keyBytes;
   public String algorithm = "RS256";
+  public Object extraField;
 }

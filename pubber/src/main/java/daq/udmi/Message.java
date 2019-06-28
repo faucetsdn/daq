@@ -19,6 +19,7 @@ public class Message {
 
   public static class PointSet extends UdmiBase {
     public Map<String, PointData> points = new HashMap<>();
+    public Object extraField;
   }
 
   public static class System extends UdmiBase {

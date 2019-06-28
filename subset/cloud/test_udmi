@@ -1,0 +1,56 @@
+#!/bin/bash -e
+
+REPORT=/tmp/report.txt
+
+# Necessary to reach gcp. Should be done by framework but this works for now.
+route add default gw $GATEWAY_IP
+
+gcp_cred=/config/inst/gcp_service_account.json
+gcp_topic=target
+schema_path=schemas/udmi
+
+if [ ! -f $gcp_cred ]; then
+    echo Missing $gcp_cred file, skipping udmi validation. | tee -a $REPORT
+    echo RESULT skip cloud.udmi.pointset No credentials. | tee -a $REPORT
+    exit 0
+fi
+
+device_id=`jq -r .device_id /config/device/module_config.json`
+project_id=`jq -r .project_id $gcp_cred`
+service_id=`jq -r .client_email $gcp_cred`
+service_id=${service_id%@*}
+
+if [ "$device_id" == null ]; then
+    echo Device id is null, skipping.
+    echo RESULT skip cloud.udmi.pointset No device id. | tee -a $REPORT
+    exit 0
+fi
+
+export GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred
+export GOOGLE_CLOUD_PROJECT=$project_id
+
+echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
+echo Extracted project $project_id
+echo Extracted service $service_id
+echo Configured topic is $gcp_topic
+echo Configured schema is $schema_path
+echo Target device is $device_id
+echo
+
+timeout 60 validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic $service_id-$HOSTNAME || true
+
+base=schemas/udmi/out/pointset_$device_id
+
+ls -l $base.* || true
+
+if [ -f "$base.out" ]; then
+    result=fail
+    detail=`head -n 1 $base.out`
+elif [ -f "$base.json" ]; then
+    result=pass
+else
+    result=fail
+    detail="No result found"
+fi
+
+echo RESULT $result cloud.udmi.pointset $detail | tee -a $REPORT

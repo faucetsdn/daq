@@ -20,9 +20,9 @@ if [ -z "$schema_path" ]; then
     false
 fi
 
-validator/bin/build.sh
+validator/bin/build
 
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
-validator/bin/registrar.sh $gcp_cred $site_path $schema_path
+validator/bin/registrar $gcp_cred $site_path $schema_path

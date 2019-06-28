@@ -40,17 +40,6 @@ Device metadata (e.g. location).
 * `{site_dir}/devices/{device_id}/rsa_private.pem`:
 Generated private key for device (used on-device).
 
-### Device Properties
-
-* `mode`: Specifies how the device communicates with Cloud IoT.
-  * `direct`: Device communicates directly with Cloud IoT, and requires its own auth key and MQTT channel.
-  * `gateway`: Devie is a gateway that proxies for other devices.
-  * `proxy`: Device is proxied through a gateway, and the `gateway_id` proerty must be set accordingly.
-
-### Device Metadata
-
-* `location`: Location of the device in the building.
-
 ## Sample Output
 
 <pre>

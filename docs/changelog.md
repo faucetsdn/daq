@@ -1,6 +1,8 @@
 # Changelog
 
 * Next Version
+	* UDMI schema validator test module.
+	* Build improvements for various base system configurations.
 	* Firebase web authentication
 * 1.0.0
 	* Device and system schema validation in web-ui.

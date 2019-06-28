@@ -103,7 +103,8 @@ class ReportGenerator:
             shutil.copyfile(self.path, self._alt_path)
 
     def _write_table(self, items):
-        self._writeln(self._TABLE_MARK + self._TABLE_MARK.join(items) + self._TABLE_MARK)
+        stripped_items = map(str.strip, items)
+        self._writeln(self._TABLE_MARK + self._TABLE_MARK.join(stripped_items) + self._TABLE_MARK)
 
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)

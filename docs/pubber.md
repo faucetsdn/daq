@@ -19,12 +19,12 @@ a helper script). You can/should substitute the relevant values in the configura
 Generating a 2048 bit RSA private key
 ............+++
 ......................................+++
-writing new private key to 'local/pubber_private.pem'
+writing new private key to 'local/rsa_private.pem'
 -----
-~/daq$ <b>ls -l local/pubber_*</b>
--rw-r--r-- 1 user primarygroup 1094 Nov 19 18:56 local/pubber_cert.pem
--rw------- 1 user primarygroup 1704 Nov 19 18:56 local/pubber_private.pem
--rw-r--r-- 1 user primarygroup 1216 Nov 19 18:56 local/pubber_private.pkcs8
+~/daq$ <b>ls -l local/rsa_*</b>
+-rw-r--r-- 1 user primarygroup 1094 Nov 19 18:56 local/rsa_cert.pem
+-rw------- 1 user primarygroup 1704 Nov 19 18:56 local/rsa_private.pem
+-rw-r--r-- 1 user primarygroup 1216 Nov 19 18:56 local/rsa_private.pkcs8
 </pre>
 
 After generating the key pair, you'll have to upload/associate the `pubber_cert.pem` public certificate
@@ -41,7 +41,7 @@ The `local/pubber.json` file configures the key cloud parameters needed for oper
   "projectId": "gcp-account",
   "cloudRegion": "us-central1",
   "registryId": "sensor_hub",
-  "gatewayId": "GAT-001"
+  "deviceId": "AHU-1"
 }
 </pre>
 

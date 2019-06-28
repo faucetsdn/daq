@@ -55,6 +55,9 @@ port-01 module_config modules
   },
   "tls": {
     "enabled": true
+  },
+  "udmi": {
+    "enabled": true
   }
 }
 port-02 module_config modules
@@ -85,6 +88,9 @@ port-02 module_config modules
   },
   "typeconf": {
     "enabled": false
+  },
+  "udmi": {
+    "enabled": true
   }
 }
     SNAKE!         ____

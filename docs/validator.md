@@ -13,7 +13,7 @@ available, defined in the `schemas/` subdirectory:
 
 ## Validation Mechanisms
 
-There are several different ways to run the validator depending on your specific objective:
+There are several different ways to run the validator depending on the specific objective:
 * Local File Validation
 * Integration Testing
 * PubSub Stream Validation
@@ -26,7 +26,7 @@ Specifying a directory, rather than a specific schema or input, will run against
 An output file is generated that has details about the schema validation result.
 
 <pre>
-~/daq$ <b>validator/bin/validate.sh schemas/simple/simple.json schemas/simple/simple.tests/example.json</b>
+~/daq$ <b>validator/bin/validate schemas/simple/simple.json schemas/simple/simple.tests/example.json</b>
 Executing validator schemas/simple/simple.json schemas/simple/simple.tests/example.json...
 Running schema simple.json in /home/user/daq/schemas/simple
 Validating example.json against simple.json
@@ -36,12 +36,12 @@ Validation complete, exit 0
 
 ### Integration Testing
 
-The `validator/bin/test.sh` script runs a regression suite of all schemas against all tests.
+The `validator/bin/test` script runs a regression suite of all schemas against all tests.
 This must pass before any PR can be approved. If there is any failure, a bunch of diagnostic
 information will be included about what exactly went wrong.
 
 <pre>
-~/daq/validator$ <b>bin/test.sh</b>
+~/daq/validator$ <b>bin/test</b>
 
 BUILD SUCCESSFUL in 3s
 2 actionable tasks: 2 executed
@@ -108,6 +108,18 @@ Error validating out/pointset_TCE01_01_NE_Controls.json: DeviceId TCE01_01_NE_Co
 Success validating out/logentry_FCU_01_SE_04.json
 <em>&hellip;</em>
 </pre>
+
+## Travis CI Testing
+
+The `test_udmi` test module uses the Registrar and Validator to check that a device is
+properly communicating through Cloud IoT, automated through DAQ.
+* Run the [registrar tool](registrar.md) to properly configure the cloud project.
+* Add GOOGLE_CLOUD_PROJECT credential to Travis, using escaping like `printf "%q" "$(<local/gcp_cred_file.json)"`.
+* `gcp_topic` config to `local/system.conf` as described in this doc.
+* Configure test subsystem with proper cloud endpoint in `{test_site}/cloud_iot_config.json`.
+* Configure the DUT with the proper cloud device credentials (device specific). For _faux_ devices, this means copying
+the assocatied `rsa_private.pkcs8` file to someting like `inst/faux/daq-faux-2/local/` (exact path depends on which faux).
+* Test with `bin/registrar`, `pubber/bin/run`, and `bin/validate` manually, before integrated testing through DAQ.
 
 ### Types and Topics
 

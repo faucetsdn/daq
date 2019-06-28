@@ -6,6 +6,7 @@ local_config=$ROOT/local/system.conf
 postfix=
 intf_mac=9a:02:57:1e:8f:00
 create_local=
+docker_args=
 
 cd $ROOT
 source misc/config_base.sh
@@ -59,16 +60,20 @@ if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; 
     docker rm -f $CONTAINER
 fi
 
-FAUXTMP=$INSTDIR/faux/$CONTAINER/tmp
-sudo rm -rf $FAUXTMP
-sudo mkdir -p $FAUXTMP
+FAUXBASE=$INSTDIR/faux/$CONTAINER
 
-docker_args="-v $FAUXTMP:/tmp"
+FAUXTMP=$FAUXBASE/tmp
+sudo mkdir -p $FAUXTMP
+docker_args+=" -v $FAUXTMP:/tmp"
+
+FAUXLOCAL=$FAUXBASE/local
+sudo mkdir -p $FAUXLOCAL
+docker_args+=" -v $FAUXLOCAL:/root/local"
 
 CONFIG_DIR=$ROOT/${test_config%/}/$CONTAINER
 if [ -d "$CONFIG_DIR" ]; then
     echo Mapping config dir $CONFIG_DIR...
-    docker_args="$docker_args -v $CONFIG_DIR:/config/start"
+    docker_args+=" -v $CONFIG_DIR:/config/start"
 elif [ -n "$test_config" ]; then
     echo Config dir $CONFIG_DIR not found.
 fi
