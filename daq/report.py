@@ -168,7 +168,7 @@ class ReportGenerator:
                 if 'required' in test_info:
                     required_result = test_info['required']
                     total += 1
-                    if self._restuls[test_name][0] == required_result:
+                    if self._results[test_name][0] == required_result:
                         match += 1
             output = 'n/a' if total == 0 else 'PASS' if match == total else '%s/%s' % (match, total)
             self._write_table([category, output])
