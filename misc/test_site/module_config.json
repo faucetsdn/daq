@@ -24,14 +24,14 @@
   },
   "tests": {
     "unknown.fake.test": {
-      "required": true
+      "required": "gone",
     },
     "base.target.ping": {
       "category": "Connectivity",
       "expected": "Required",
     },
     "security.ports.nmap": {
-      "required": true,
+      "required": "pass",
       "category": "Security",
       "expected": "Recommended"
     },

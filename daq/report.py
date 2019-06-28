@@ -160,11 +160,18 @@ class ReportGenerator:
     def _write_category_table(self):
         self._write_table(self._CATEGORY_HEADERS)
         self._write_table([self._TABLE_DIV] * len(self._CATEGORY_HEADERS))
-        results = {}
         for category in self._categories:
-            results[category] = 'pass'
-        for category in self._categories:
-            self._write_table([category, results[category]])
+            total = 0
+            match = 0
+            for test_name in self._results.keys():
+                test_info = self._get_test_info(test_name)
+                if 'required' in test_info:
+                    required_result = test_info['required']
+                    total += 1
+                    if self._restuls[test_name][0] == required_result:
+                        match += 1
+            output = 'n/a' if total == 0 else 'PASS' if match == total else '%s/%s' % (match, total)
+            self._write_table([category, output])
 
     def _write_expected_table(self):
         self._write_table([self._EXPECTED_HEADER] + self._result_headers)
@@ -187,6 +194,9 @@ class ReportGenerator:
             return
         for test_name in self._module_config['tests'].keys():
             test_info = self._get_test_info(test_name)
+            category_name = test_info.get('category', self._DEFAULT_CATEGORY)
+            if not category_name in self._categories:
+                self._categories.append(category_name)
             if test_info.get('required'):
                 self._required_tests.append(test_name)
                 if test_name not in self._results:
