@@ -24,12 +24,13 @@ class ReportGenerator:
     _REPORT_COMPLETE = "Report complete"
     _DEFAULT_HEADER = "# DAQ scan report for device %s"
     _REPORT_TEMPLATE = "report_template.md"
-    _DEFAULT_CATEGORY = 'other'
-    _DEFAULT_EXPECTED = 'other'
+    _DEFAULT_CATEGORY = 'Other'
+    _DEFAULT_EXPECTED = 'Other'
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
     _TABLE_DIV = "---"
     _TABLE_MARK = '|'
+    _CATEGORY_HEADERS = ["Category", "Result" ]
     _EXPECTED_HEADER = "Expected"
     _SUMMARY_HEADERS = ["Result", "Test", "Expected", "Notes"]
 
@@ -59,10 +60,11 @@ class ReportGenerator:
             LOGGER.info('Device report path %s not found', out_path)
             self._alt_path = None
 
-        self._result_headers = self._module_config.get('report',{}).get('results', [])
+        self._result_headers = list(self._module_config.get('report',{}).get('results', []))
         self._results = {}
-        self._expected_headers = self._module_config.get('report',{}).get('expected', [])
+        self._expected_headers = list(self._module_config.get('report',{}).get('expected', []))
         self._expecteds = {}
+        self._categories = list(self._module_config.get('report',{}).get('categories', []))
 
     def _writeln(self, msg=''):
         self._file.write(msg + '\n')
@@ -128,7 +130,11 @@ class ReportGenerator:
         if result not in self._result_headers:
             self._result_headers.append(result)
         test_info = self._get_test_info(test_name)
+
         category_name = test_info.get('category', self._DEFAULT_CATEGORY)
+        if category_name not in self._categories:
+            self._categories.append(category_name)
+
         expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
         if expected_name not in self._expected_headers:
             self._expected_headers.append(expected_name)
@@ -141,6 +147,23 @@ class ReportGenerator:
         self._results[test_name] = [result, test_name, expected_name, extra]
 
     def _write_test_tables(self):
+        self._write_category_table()
+        self._writeln()
+        self._write_expected_table()
+        self._writeln()
+        self._write_result_table()
+        self._writeln()
+
+    def _write_category_table(self):
+        self._write_table(self._CATEGORY_HEADERS)
+        self._write_table([self._TABLE_DIV] * len(self._CATEGORY_HEADERS))
+        results = {}
+        for category in self._categories:
+            results[category] = 'pass'
+        for category in self._categories:
+            self._write_table([category, results[category]])
+
+    def _write_expected_table(self):
         self._write_table([self._EXPECTED_HEADER] + self._result_headers)
         self._write_table([self._TABLE_DIV] * (1 + len(self._result_headers)))
         for exp_name in self._expected_headers:
@@ -149,12 +172,12 @@ class ReportGenerator:
                 expected = self._expecteds.get(exp_name, {})
                 table_row.append(str(expected.get(result, 0)))
             self._write_table(table_row)
-        self._writeln()
+
+    def _write_result_table(self):
         self._write_table(self._SUMMARY_HEADERS)
         self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
         for match in sorted(self._results.keys()):
             self._write_table(self._results[match])
-        self._writeln()
 
     def _get_test_info(self, test_name):
         if 'tests' not in self._module_config:
