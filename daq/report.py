@@ -30,7 +30,8 @@ class ReportGenerator:
     _PRE_END_MARKER = "```"
     _TABLE_DIV = "---"
     _TABLE_MARK = '|'
-    _SUMMARY_HEADERS = ["Result", "Test", "Notes"]
+    _EXPECTED_HEADER = "Expected"
+    _SUMMARY_HEADERS = ["Result", "Test", "Expected", "Notes"]
 
     def __init__(self, config, tmp_base, target_mac, module_config):
         self._config = config
@@ -58,10 +59,12 @@ class ReportGenerator:
             LOGGER.info('Device report path %s not found', out_path)
             self._alt_path = None
 
+        self._result_headers = self._module_config.get('report',{}).get('results', [])
         self._results = {}
+        self._expected_headers = self._module_config.get('report',{}).get('expected', [])
         self._expecteds = {}
 
-    def _writeln(self, msg):
+    def _writeln(self, msg=''):
         self._file.write(msg + '\n')
 
     def _append_file(self, input_path, add_pre=True):
@@ -108,14 +111,11 @@ class ReportGenerator:
             shutil.copyfile(self.path, self._alt_path)
 
     def _write_table(self, items):
-        print(items)
         stripped_items = map(str.strip, items)
         self._writeln(self._TABLE_MARK + self._TABLE_MARK.join(stripped_items) + self._TABLE_MARK)
 
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
-        self._write_table(self._SUMMARY_HEADERS)
-        self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
         for (_, path) in self._reports:
             with open(path) as stream:
                 for line in stream:
@@ -125,9 +125,13 @@ class ReportGenerator:
         self._write_test_tables()
 
     def _accumulate_test(self, test_name, result, extra):
+        if result not in self._result_headers:
+            self._result_headers.append(result)
         test_info = self._get_test_info(test_name)
         category_name = test_info.get('category', self._DEFAULT_CATEGORY)
         expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
+        if expected_name not in self._expected_headers:
+            self._expected_headers.append(expected_name)
         if expected_name not in self._expecteds:
             self._expecteds[expected_name] = {}
         expected = self._expecteds[expected_name]
@@ -137,16 +141,22 @@ class ReportGenerator:
         self._results[test_name] = [result, test_name, expected_name, extra]
 
     def _write_test_tables(self):
-        for exp_name in self._expecteds:
-            for result in self._expecteds[exp_name]:
-                print(exp_name, result)
-            #totals = self._expecteds[expected]
-            #self._write_table(totals.keys())
+        self._write_table([self._EXPECTED_HEADER] + self._result_headers)
+        self._write_table([self._TABLE_DIV] * (1 + len(self._result_headers)))
+        for exp_name in self._expected_headers:
+            table_row = [ exp_name ]
+            for result in self._result_headers:
+                expected = self._expecteds.get(exp_name, {})
+                table_row.append(str(expected.get(result, 0)))
+            self._write_table(table_row)
+        self._writeln()
+        self._write_table(self._SUMMARY_HEADERS)
+        self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
         for match in sorted(self._results.keys()):
             self._write_table(self._results[match])
+        self._writeln()
 
     def _get_test_info(self, test_name):
-        print(test_name, self._module_config)
         if 'tests' not in self._module_config:
             return {}
         return self._module_config['tests'].get(test_name, {})

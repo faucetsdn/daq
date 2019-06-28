@@ -19,20 +19,20 @@
   },
   "report": {
     "results": [ "pass", "fail", "skip" ],
-    "expectations": [ "required", "recommended" ]
+    "expected": [ "Required", "recommended" ]
   },
   "tests": {
     "base.target.ping": {
       "category": "connectivity",
-      "expected": "required",
+      "expected": "Required",
     },
     "security.ports.nmap": {
       "category": "security",
-      "expected": "recommended"
+      "expected": "Recommended"
     },
     "network.brute": {
       "category": "security",
-      "expected": "required"
+      "expected": "Required"
     }
   }
 }

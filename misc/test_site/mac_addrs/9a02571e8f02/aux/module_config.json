@@ -56,8 +56,8 @@
     "operator": "*** Operator Name ***"
   },
   "report": {
-    "expectations": [
-      "required",
+    "expected": [
+      "Required",
       "recommended"
     ],
     "results": [
@@ -69,21 +69,21 @@
   "run_info": {
     "daq_version": "1.0.0",
     "mac_addr": "9a:02:57:1e:8f:02",
-    "run_id": "5d1629ae",
-    "started": "2019-06-28T14:52:30.404Z"
+    "run_id": "5d16402d",
+    "started": "2019-06-28T16:28:29.964Z"
   },
   "tests": {
     "base.target.ping": {
       "category": "connectivity",
-      "expected": "required"
+      "expected": "Required"
     },
     "network.brute": {
       "category": "security",
-      "expected": "required"
+      "expected": "Required"
     },
     "security.ports.nmap": {
       "category": "security",
-      "expected": "recommended"
+      "expected": "Recommended"
     }
   }
 }
