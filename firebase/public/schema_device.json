@@ -54,7 +54,7 @@
         }
       }
     },
-    "ports": {
+    "servers": {
       "type": "object"
     },
     "process": {
