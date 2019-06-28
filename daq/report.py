@@ -30,7 +30,7 @@ class ReportGenerator:
     _PRE_END_MARKER = "```"
     _TABLE_DIV = "---"
     _TABLE_MARK = '|'
-    _CATEGORY_HEADERS = ["Category", "Result" ]
+    _CATEGORY_HEADERS = ["Category", "Result"]
     _EXPECTED_HEADER = "Expected"
     _SUMMARY_HEADERS = ["Result", "Test", "Expected", "Notes"]
     _MISSING_TEST_RESULT = 'gone'
@@ -61,12 +61,11 @@ class ReportGenerator:
             LOGGER.info('Device report path %s not found', out_path)
             self._alt_path = None
 
-        self._result_headers = list(self._module_config.get('report',{}).get('results', []))
+        self._result_headers = list(self._module_config.get('report', {}).get('results', []))
         self._results = {}
-        self._expected_headers = list(self._module_config.get('report',{}).get('expected', []))
+        self._expected_headers = list(self._module_config.get('report', {}).get('expected', []))
         self._expecteds = {}
-        self._categories = list(self._module_config.get('report',{}).get('categories', []))
-        self._required_tests = []
+        self._categories = list(self._module_config.get('report', {}).get('categories', []))
 
     def _writeln(self, msg=''):
         self._file.write(msg + '\n')
@@ -177,7 +176,7 @@ class ReportGenerator:
         self._write_table([self._EXPECTED_HEADER] + self._result_headers)
         self._write_table([self._TABLE_DIV] * (1 + len(self._result_headers)))
         for exp_name in self._expected_headers:
-            table_row = [ exp_name ]
+            table_row = [exp_name]
             for result in self._result_headers:
                 expected = self._expecteds.get(exp_name, {})
                 table_row.append(str(expected.get(result, 0)))
@@ -198,9 +197,7 @@ class ReportGenerator:
             if not category_name in self._categories:
                 self._categories.append(category_name)
             if test_info.get('required'):
-                self._required_tests.append(test_name)
                 if test_name not in self._results:
-                    expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
                     self._accumulate_test(test_name, self._MISSING_TEST_RESULT)
 
     def _get_test_info(self, test_name):
