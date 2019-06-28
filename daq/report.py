@@ -137,9 +137,11 @@ class ReportGenerator:
         self._results[test_name] = [result, test_name, expected_name, extra]
 
     def _write_test_tables(self):
-        for expected in self._expecteds:
-            totals = self._expecteds[expected]
-            self._write_table(totals.keys())
+        for exp_name in self._expecteds:
+            for result in self._expecteds[exp_name]:
+                print(exp_name, result)
+            #totals = self._expecteds[expected]
+            #self._write_table(totals.keys())
         for match in sorted(self._results.keys()):
             self._write_table(self._results[match])
 

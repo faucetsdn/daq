@@ -1,0 +1,64 @@
+{
+  "device_id": "SNS-4",
+  "modules": {
+    "bacext": {
+      "enabled": true
+    },
+    "brute": {
+      "enabled": true
+    },
+    "macoui": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "pass": {
+      "enabled": false
+    },
+    "switch": {
+      "enabled": false
+    },
+    "tls": {
+      "enabled": true
+    },
+    "udmi": {
+      "enabled": true
+    }
+  },
+  "process": {
+    "approver": "*** Approver Name ***",
+    "operator": "*** Operator Name ***"
+  },
+  "report": {
+    "expectations": [
+      "required",
+      "recommended"
+    ],
+    "results": [
+      "pass",
+      "fail",
+      "skip"
+    ]
+  },
+  "run_info": {
+    "daq_version": "1.0.0",
+    "mac_addr": "3c:5a:b4:1e:8f:0a",
+    "run_id": "5d1627e3",
+    "started": "2019-06-28T14:44:51.016Z"
+  },
+  "tests": {
+    "base.target.ping": {
+      "category": "connectivity",
+      "expected": "required"
+    },
+    "network.brute": {
+      "category": "security",
+      "expected": "required"
+    },
+    "security.ports.nmap": {
+      "category": "security",
+      "expected": "recommended"
+    }
+  }
+}

@@ -17,6 +17,10 @@
     "approver": "*** Approver Name ***",
     "operator": "*** Operator Name ***"
   },
+  "report": {
+    "results": [ "pass", "fail", "skip" ],
+    "expectations": [ "required", "recommended" ]
+  },
   "tests": {
     "base.target.ping": {
       "category": "connectivity",

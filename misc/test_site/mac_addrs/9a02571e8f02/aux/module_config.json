@@ -1,0 +1,89 @@
+{
+  "device_id": "AHU-1",
+  "device_info": {
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "make": "*** Make ***",
+    "model": "*** Model ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "type": "*** Type ***",
+    "version": "*** Version ***"
+  },
+  "device_type": "rocket",
+  "modules": {
+    "bacext": {
+      "enabled": true
+    },
+    "brute": {
+      "enabled": true
+    },
+    "foobar": {
+      "enabled": false
+    },
+    "macoui": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "pass": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": false
+    },
+    "tls": {
+      "enabled": true
+    },
+    "typeconf": {
+      "enabled": false
+    },
+    "udmi": {
+      "enabled": true
+    }
+  },
+  "ports": {
+    "tcp": {
+      "443": {
+        "allowed": true,
+        "reason": "Administrative Web-Server"
+      }
+    }
+  },
+  "process": {
+    "approver": "*** Approver Name ***",
+    "operator": "*** Operator Name ***"
+  },
+  "report": {
+    "expectations": [
+      "required",
+      "recommended"
+    ],
+    "results": [
+      "pass",
+      "fail",
+      "skip"
+    ]
+  },
+  "run_info": {
+    "daq_version": "1.0.0",
+    "mac_addr": "9a:02:57:1e:8f:02",
+    "run_id": "5d1629ae",
+    "started": "2019-06-28T14:52:30.404Z"
+  },
+  "tests": {
+    "base.target.ping": {
+      "category": "connectivity",
+      "expected": "required"
+    },
+    "network.brute": {
+      "category": "security",
+      "expected": "required"
+    },
+    "security.ports.nmap": {
+      "category": "security",
+      "expected": "recommended"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "device_datasheets_url": "*** Device Datasheets URL ***",
+  "device_description": "*** Device Description ***",
+  "device_image": "*** Device Image URL ***",
+  "device_info": {
+    "firmware_version": "*** Firmware Version ***",
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "make": "*** Make ***",
+    "model": "*** Model ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "type": "*** Type ***"
+  },
+  "device_manuals_url": "*** Device Manuals URL ***",
+  "modules": {
+    "bacext": {
+      "enabled": true
+    },
+    "brute": {
+      "enabled": true
+    },
+    "macoui": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "pass": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true
+    },
+    "tls": {
+      "enabled": true
+    },
+    "udmi": {
+      "enabled": true
+    }
+  },
+  "process": {
+    "approver": "*** Approver Name ***",
+    "attempt_number": 1,
+    "operator": "*** Operator Name ***"
+  },
+  "report": {
+    "expectations": [
+      "required",
+      "recommended"
+    ],
+    "results": [
+      "pass",
+      "fail",
+      "skip"
+    ]
+  },
+  "run_info": {
+    "daq_version": "1.0.0",
+    "mac_addr": "9a:02:57:1e:8f:01",
+    "run_id": "5d1629cb",
+    "started": "2019-06-28T14:52:59.494Z"
+  },
+  "servers": {
+    "tcp": {
+      "ports": {
+        "10000": {
+          "allowed": true,
+          "reason": "Testing snet-sensor-mgmt"
+        },
+        "443": {
+          "allowed": true,
+          "reason": "Administrative Web-Server"
+        }
+      }
+    }
+  },
+  "tests": {
+    "base.target.ping": {
+      "category": "connectivity",
+      "expected": "required"
+    },
+    "network.brute": {
+      "category": "security",
+      "expected": "required"
+    },
+    "security.ports.nmap": {
+      "category": "security",
+      "expected": "recommended"
+    }
+  }
+}
