@@ -1,4 +1,4 @@
-# Device 9a02571e8f01, 2019-06-28 21:14:56+00:00 to 2019-06-28 21:16:53+00:00
+# Device 9a02571e8f01, 2019-06-28 22:40:21+00:00 to 2019-06-28 22:42:10+00:00
 
 |  Role  |      Name              | Status |
 |--------|------------------------|--------|
@@ -7,7 +7,7 @@
 
 | Test iteration   |                        |
 |------------------|------------------------|
-| Test report date | 2019-06-28T21:14:56.534Z |
+| Test report date | 2019-06-28T22:40:20.660Z |
 | DAQ version      | 1.0.0 |
 | Attempt number   | 1 |
 
@@ -42,14 +42,14 @@
 |Category|Result|
 |---|---|
 |Security|PASS|
-|Other|PASS|
-|Connectivity|PASS|
+|Other|1/2|
+|Connectivity|n/a|
 
 |Expected|pass|fail|skip|gone|
 |---|---|---|---|---|
 |Required|1|1|0|0|
 |Recommended|1|0|0|0|
-|Other|0|2|4|1|
+|Other|0|2|4|2|
 
 |Result|Test|Expected|Notes|
 |---|---|---|---|
@@ -62,16 +62,17 @@
 |pass|security.ports.nmap|Recommended||
 |skip|security.tls.v3|Other||
 |skip|security.x509|Other||
-|gone|unknown.fake.test|Other||
+|gone|unknown.fake.llama|Other||
+|gone|unknown.fake.monkey|Other||
 
 
 ## Module ping
 
 ```
 Baseline ping test report
-%% 38 packets captured.
+%% 39 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.48.164
+RESULT pass base.target.ping target %% 10.20.71.164
 ```
 
 ## Module nmap
