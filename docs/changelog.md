@@ -4,6 +4,7 @@
 	* UDMI schema validator test module.
 	* Build improvements for various base system configurations.
 	* Firebase web authentication
+	* Test module state names update
 * 1.0.0
 	* Device and system schema validation in web-ui.
 	* Extended BACnet test module for PIC statements.

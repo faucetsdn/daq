@@ -185,16 +185,17 @@ function statusUpdate(message, e) {
 }
 
 function getResultStatus(result) {
+  console.log(result)
   if (result.exception) {
-    return 'err';
+    return 'serr';
   }
   if (result.state) {
     return result.state;
   }
   if (Number(result.code)) {
-    return 'fail';
+    return 'merr';
   }
-  return 'unknown';
+  return '????';
 }
 
 function handleOriginResult(origin, port, runid, test, result) {

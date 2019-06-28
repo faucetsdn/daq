@@ -5,6 +5,7 @@ import re
 import time
 
 from clib import tcpdump_helper
+from host import MODE
 
 LOGGER = logging.getLogger('dhcp')
 
@@ -78,13 +79,13 @@ class DhcpMonitor():
         delta = int(time.time()) - self.scan_start
         LOGGER.debug('DHCP monitor %s received reply after %ds: %s/%s',
                      self.name, delta, self.target_ip, self.target_mac)
-        state = 'long' if delta > self.DHCP_THRESHHOLD_SEC else 'pass'
+        mode = MODE.LONG if delta > self.DHCP_THRESHHOLD_SEC else MODE.DONE
         target = {
             'ip': self.target_ip,
             'mac': self.target_mac,
             'delta': delta
         }
-        self.callback(state, target)
+        self.callback(mode, target)
         self.target_ip = None
         self.target_mac = None
         self.scan_start = int(time.time())

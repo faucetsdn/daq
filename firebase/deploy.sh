@@ -10,7 +10,7 @@ if [ -z "$gcp_cred" ]; then
     false
 fi
 
-PROJECT=`jq .project_id $gcp_cred`
+PROJECT=`jq -r .project_id $gcp_cred`
 if [ -z "$PROJECT" ]; then
     echo project_id not extracted from $gcp_cred.
     false
