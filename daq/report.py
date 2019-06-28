@@ -169,13 +169,11 @@ class ReportGenerator:
                 category_name = test_info.get('category', self._DEFAULT_CATEGORY)
                 if category_name == category and 'required' in test_info:
                     required_result = test_info['required']
-                    print('required', test_name, required_result, self._results[test_name][0])
                     total += 1
                     if self._results[test_name][0] == required_result:
                         match += 1
             output = self._NO_REQUIRED if total == 0 else (self._PASS_REQUIRED \
                      if match == total else '%s/%s' % (match, total))
-            print(category, match, total, output)
             self._write_table([category, output])
 
     def _write_expected_table(self):
