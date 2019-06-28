@@ -17,7 +17,7 @@ while ! ifconfig -a | fgrep -q BROADCAST; do
     sleep 1
 done
 
-intf_name=$(ip link | fgrep BROADCAST | sed -rn 's/^[0-9]+: ([-a-z0-9]+).*$/\1/p')
+intf_name=$(ip link | fgrep BROADCAST | sed -rn 's/^[0-9]+: ([-a-zA-Z0-9]+).*$/\1/p')
 if [ -n "$intf_name" ]; then
     echo Local interface is $intf_name
 else
