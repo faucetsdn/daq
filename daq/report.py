@@ -33,6 +33,7 @@ class ReportGenerator:
     _CATEGORY_HEADERS = ["Category", "Result" ]
     _EXPECTED_HEADER = "Expected"
     _SUMMARY_HEADERS = ["Result", "Test", "Expected", "Notes"]
+    _MISSING_TEST_RESULT = 'gone'
 
     def __init__(self, config, tmp_base, target_mac, module_config):
         self._config = config
@@ -65,6 +66,7 @@ class ReportGenerator:
         self._expected_headers = list(self._module_config.get('report',{}).get('expected', []))
         self._expecteds = {}
         self._categories = list(self._module_config.get('report',{}).get('categories', []))
+        self._required_tests = []
 
     def _writeln(self, msg=''):
         self._file.write(msg + '\n')
@@ -124,9 +126,10 @@ class ReportGenerator:
                     match = re.search(self._RESULT_REGEX, line)
                     if match:
                         self._accumulate_test(match.group(2), match.group(1), match.group(3))
+        self._finalize_test_info()
         self._write_test_tables()
 
-    def _accumulate_test(self, test_name, result, extra):
+    def _accumulate_test(self, test_name, result, extra=''):
         if result not in self._result_headers:
             self._result_headers.append(result)
         test_info = self._get_test_info(test_name)
@@ -178,6 +181,17 @@ class ReportGenerator:
         self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
         for match in sorted(self._results.keys()):
             self._write_table(self._results[match])
+
+    def _finalize_test_info(self):
+        if 'tests' not in self._module_config:
+            return
+        for test_name in self._module_config['tests'].keys():
+            test_info = self._get_test_info(test_name)
+            if test_info.get('required'):
+                self._required_tests.append(test_name)
+                if test_name not in self._results:
+                    expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
+                    self._accumulate_test(test_name, self._MISSING_TEST_RESULT)
 
     def _get_test_info(self, test_name):
         if 'tests' not in self._module_config:
