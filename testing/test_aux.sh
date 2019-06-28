@@ -14,7 +14,6 @@ echo Validator exit code $? | tee -a $TEST_RESULTS
 echo Lint checks | tee -a $TEST_RESULTS
 cmd/inbuild skip
 echo cmd/inbuild exit code $? | tee -a $TEST_RESULTS
-docker logs daq-runner
 
 function make_pubber {
     device=$1
