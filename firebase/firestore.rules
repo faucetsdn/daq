@@ -1,7 +1,13 @@
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, create, update, write: if request.auth.uid == userId;
+    }
+    match /permissions/{userId=**} {
+      allow read;
+    }
     match /{document=**} {
-      allow read, write;
+      allow read, write: if get(/databases/$(database)/documents/permissions/$(request.auth.uid)).data.enabled == true
     }
   }
 }

@@ -3,6 +3,7 @@
 import datetime
 import json
 import logging
+import sys
 
 import firebase_admin
 from firebase_admin import credentials
@@ -12,6 +13,8 @@ from google.cloud import pubsub_v1
 from google.cloud import storage
 from google.auth import _default as google_auth
 from grpc import StatusCode
+
+import configurator
 
 LOGGER = logging.getLogger('gcp')
 
@@ -192,3 +195,42 @@ class GcpManager:
         blob = bucket.blob(report_file_name)
         blob.upload_from_filename(report_file_name)
         LOGGER.info('Uploaded test report to %s', report_file_name)
+
+    def register_offenders(self):
+        """Register any offenders: people who are not enabled to use the system"""
+        if not self._firestore:
+            LOGGER.error('Firestore not initialized.')
+            return
+        LOGGER.info('Registering offenders...')
+        users = self._firestore.collection(u'users').get()
+        for user in users:
+            permissions = self._firestore.collection(u'permissions').document(user.id).get()
+            user_email = user.to_dict().get('email')
+            enabled = permissions.to_dict() and permissions.to_dict().get('enabled')
+            if enabled:
+                LOGGER.info('Access already enabled for %s', user_email)
+            elif self._query_user('Enable access for %s? (N/y) ' % user_email):
+                LOGGER.info('Enabling access for %s', user_email)
+                self._firestore.collection(u'permissions').document(user.id).set({
+                    'enabled': True
+                })
+            else:
+                LOGGER.info('Ignoring user %s', user_email)
+
+    def _query_user(self, message):
+        reply = input(message)
+        options = ['y', 'Y', 'yes', 'YES', 'Yes', 'sure']
+        if reply in options:
+            return True
+        return False
+
+
+if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+    CONFIGURATOR = configurator.Configurator()
+    CONFIG = CONFIGURATOR.parse_args(sys.argv)
+    GCP = GcpManager(CONFIG, None)
+    if CONFIG.get('register_offenders'):
+        GCP.register_offenders()
+    else:
+        print('Unknown command mode for gcp module.')

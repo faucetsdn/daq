@@ -1,25 +1,33 @@
 <!DOCTYPE html>
 <head>
-  <script defer src="/__/firebase/4.13.0/firebase-app.js"></script>
-  <script defer src="/__/firebase/4.13.0/firebase-auth.js"></script>
-  <script defer src="/__/firebase/4.13.0/firebase-firestore.js"></script>
-  <script defer src="/__/firebase/4.13.0/firebase-storage.js"></script>
-  <script defer src="/__/firebase/init.js"></script>
+  <script src="/__/firebase/6.2.3/firebase-app.js"></script>
+  <script src="/__/firebase/6.2.3/firebase-auth.js"></script>
+  <script defer src="/__/firebase/6.2.3/firebase-firestore.js"></script>
+  <script defer src="/__/firebase/6.2.3/firebase-storage.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.css" />
   <link rel="stylesheet" href="style.css"/>
+  <script src="firebase_config.js"></script>
+  <script src="auth.js"></script>
   <script src="main.js"></script>
 </head>
 <body>
-  <div id="description" class="daq-text">
-    <a class="description"></a>
-  </div>
-  <div id="module_config"/>
-  <div id="origins"/>
-  <div id="devices"/>
-  <div id="testgrid">
-    <table>
-    </table>
+  <div class="content">
+    <div id="description" class="daq-text"><a class="description"></a></div>
+    <div id="module_config"></div>
+    <div id="origins"></div>
+    <div id="devices"></div>
+    <div id="testgrid">
+      <table>
+      </table>
+    </div>
   </div>
   <div class="daq-text" id="status">Initializing...</div>
   <div class="daq-text" id="update"></div>
+  <div id="auth-body">
+    <div class="auth-main"><div id="firebaseui-auth-container"></div></div>
+    <div class="auth-info">Signed in as <span id="user-name"></span>, <span id="user-email"></span>
+    <span id="sign-out" class="simple-button">Sign Out</span></div>
+  </div>
   <div class="daq-text" id="version"></div>
 </body>

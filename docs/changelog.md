@@ -1,5 +1,7 @@
 # Changelog
 
+* Next Version
+	* Firebase web authentication
 * 1.0.0
 	* Device and system schema validation in web-ui.
 	* Extended BACnet test module for PIC statements.

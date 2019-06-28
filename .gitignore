@@ -4,6 +4,8 @@
 .build_files
 .build_built
 
+firebase/public/firebase_config.js
+
 \#*
 *~
 .pdbrc

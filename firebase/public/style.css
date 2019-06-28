@@ -94,3 +94,29 @@ div {
 #config_body.dirty .save_button {
     opacity: 1;
 }
+
+.simple-button {
+    padding: 5px;
+    background: #ddd;
+    display: inline
+}
+
+#auth-body {
+    margin: 5px;
+}
+
+.auth-info {
+    display: block
+}
+
+.unauthenticated .auth-info {
+    display: none
+}
+
+.unauthenticated .content {
+    display: none
+}
+
+.auth-main {
+    width: 20em;
+}

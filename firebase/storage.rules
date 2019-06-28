@@ -1,7 +1,7 @@
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write;
+    match /{document=**} {
+      allow read: if request.auth.uid != null;
     }
   }
 }

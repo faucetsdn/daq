@@ -25,7 +25,6 @@ var db;
 document.addEventListener('DOMContentLoaded', () => {
   db = firebase.firestore();
   const settings = {
-    timestampsInSnapshots: true
   };
   db.settings(settings);
 });
@@ -285,7 +284,7 @@ function watcherAdd(ref, collection, limit, handler) {
   const target = limit ? limit(base) : base;
   target.onSnapshot((snapshot) => {
     let delay = 100;
-    snapshot.docChanges.forEach((change) => {
+    snapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
         setTimeout(() => handler(ref.collection(collection).doc(change.doc.id), change.doc.id), delay);
         delay = delay + 100;
@@ -489,14 +488,14 @@ function loadEditor(config_doc, element_id, label, onConfigEdit, schema) {
   config_doc.onSnapshot((snapshot) => {
     const firstUpdate = editor.get() == null;
     let snapshot_data = snapshot.data();
-    editor.update(snapshot_data.config);
+    snapshot_data && editor.update(snapshot_data.config);
     if (firstUpdate) {
       editor.expandAll();
     }
     if (onConfigEdit) {
-      setDatedStatus('saved', snapshot_data.saved);
+      setDatedStatus('saved', snapshot_data && snapshot_data.saved);
     } else {
-      setDatedStatus('updated', snapshot_data.updated);
+      setDatedStatus('updated', snapshot_data && snapshot_data.updated);
       const snapshot_config = (snapshot_data && snapshot_data.config && snapshot_data.config.config) || {};
       setDatedStatus('provisional', !snapshot_config.run_info);
     }
@@ -529,7 +528,32 @@ function loadJsonEditors() {
   document.querySelector('#config_body .save_button').onclick = () => pushConfigChange(config_editor, config_doc)
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function authenticated(userData) {
+  if (!userData) {
+    statusUpdate('Authentication failed, please sign in.');
+    return;
+  }
+
+  const perm_doc = db.collection('permissions').doc(userData.uid);
+  const user_doc = db.collection('users').doc(userData.uid);
+  const timestamp = new Date().toJSON();
+  user_doc.set({
+    name: userData.displayName,
+    email: userData.email,
+    updated: timestamp
+  }).then(function() {
+    statusUpdate('User info updated');
+    perm_doc.get().then((doc) => {
+      if (doc.exists && doc.data().enabled) {
+        setupUser();
+      } else {
+        statusUpdate('User not enabled, contact your system administrator.');
+      }
+    });
+  }).catch((e) => statusUpdate('Error updating user info', e));
+}
+
+function setupUser() {
   try {
     if (document.getElementById('config_editor')) {
       loadJsonEditors();
@@ -539,6 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
     statusUpdate('System initialized.');
     setInterval(interval_updater, 1000);
   } catch (e) {
-    statusUpdate('Loading error', e)
+    statusUpdate('Loading error', e);
   }
-});
+}
