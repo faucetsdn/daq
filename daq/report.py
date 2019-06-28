@@ -24,6 +24,8 @@ class ReportGenerator:
     _REPORT_COMPLETE = "Report complete"
     _DEFAULT_HEADER = "# DAQ scan report for device %s"
     _REPORT_TEMPLATE = "report_template.md"
+    _DEFAULT_CATEGORY = 'other'
+    _DEFAULT_EXPECTED = 'other'
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
     _TABLE_DIV = "---"
@@ -55,6 +57,9 @@ class ReportGenerator:
         else:
             LOGGER.info('Device report path %s not found', out_path)
             self._alt_path = None
+
+        self._results = {}
+        self._expecteds = {}
 
     def _writeln(self, msg):
         self._file.write(msg + '\n')
@@ -103,6 +108,7 @@ class ReportGenerator:
             shutil.copyfile(self.path, self._alt_path)
 
     def _write_table(self, items):
+        print(items)
         stripped_items = map(str.strip, items)
         self._writeln(self._TABLE_MARK + self._TABLE_MARK.join(stripped_items) + self._TABLE_MARK)
 
@@ -110,15 +116,38 @@ class ReportGenerator:
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
         self._write_table(self._SUMMARY_HEADERS)
         self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
-        matches = {}
         for (_, path) in self._reports:
             with open(path) as stream:
                 for line in stream:
                     match = re.search(self._RESULT_REGEX, line)
                     if match:
-                        matches[match.group(2)] = [match.group(1), match.group(2), match.group(3)]
-        for match in sorted(matches.keys()):
-            self._write_table(matches[match])
+                        self._accumulate_test(match.group(2), match.group(1), match.group(3))
+        self._write_test_tables()
+
+    def _accumulate_test(self, test_name, result, extra):
+        test_info = self._get_test_info(test_name)
+        category_name = test_info.get('category', self._DEFAULT_CATEGORY)
+        expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
+        if expected_name not in self._expecteds:
+            self._expecteds[expected_name] = {}
+        expected = self._expecteds[expected_name]
+        if result not in expected:
+            expected[result] = 0
+        expected[result] += 1
+        self._results[test_name] = [result, test_name, expected_name, extra]
+
+    def _write_test_tables(self):
+        for expected in self._expecteds:
+            totals = self._expecteds[expected]
+            self._write_table(totals.keys())
+        for match in sorted(self._results.keys()):
+            self._write_table(self._results[match])
+
+    def _get_test_info(self, test_name):
+        print(test_name, self._module_config)
+        if 'tests' not in self._module_config:
+            return {}
+        return self._module_config['tests'].get(test_name, {})
 
     def _copy_test_reports(self):
         for (name, path) in self._reports:

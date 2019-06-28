@@ -16,5 +16,19 @@
   "process": {
     "approver": "*** Approver Name ***",
     "operator": "*** Operator Name ***"
+  },
+  "tests": {
+    "base.target.ping": {
+      "category": "connectivity",
+      "expected": "required",
+    },
+    "security.ports.nmap": {
+      "category": "security",
+      "expected": "recommended"
+    },
+    "network.brute": {
+      "category": "security",
+      "expected": "required"
+    }
   }
 }
