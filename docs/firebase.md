@@ -44,7 +44,7 @@ and somewhere in here this needs to get described when setting up a new project.
    * Enable "Google" sign-in.
 8. Follow the [Firebase CLI setup instructions](https://firebase.google.com/docs/cli/).
 9. Goto the `firebase/` directory.
-   * Run <code>firebase/deploy.sh</code> to deploy firebase to your <em>gcp_cred<em> project.
+   * Run <code>firebase/deploy.sh</code> to deploy firebase to your <em>gcp_cred</em> project.
    * Follow the link to the indicated _Hosting URL_ to see the newly installed pages.
 
 ## Authentication
@@ -107,4 +107,109 @@ The test [Web Application](https://daq-project.firebaseapp.com/) (again, will ha
 should show a list of all accounts with ingested data. If nothing is showing here, or the `accountId` is missing,
 check the web dev console to see if there's any obvious errors.
 
-TODO: Make an additional comment here
+## Configuration Data Flow
+
+The high-level flow for configuration data is shown below. This is not a complete outlay, since
+it doesn't cover all the cases, but it gives a rough indicator of how the flow works. This same
+overall process applies to both the base system configuration as well as device-specific configs.
+Don't take this diagram as gospel, the only true truth comes from the source.
+
+```
++-------+                  +-----+           +-------+ +-----------+           +---------+
+| Disk  |                  | DAQ |           | Test  | | Firebase  |           | WebApp  |
++-------+                  +-----+           +-------+ +-----------+           +---------+
+    |         --------------\ |                  |           |                      |
+    |         | DAQ startup |-|                  |           |                      |
+    |         |-------------| |                  |           |                      |
+    |                         |                  |           |                      |
+    | Raw Config              |                  |           |                      |
+    |------------------------>|                  |           |                      |
+    |                         |                  |           |                      |
+    |    Merged Config (aux/) |                  |           |                      |
+    |<------------------------|                  |           |                      |
+    |                         |                  |           |                      |
+    |                         | Raw & Merged     |           |                      |
+    |                         |----------------------------->|                      |
+    |                         | -------------\   |           |                      |
+    |                         |-| Test Start |   |           |                      |
+    |                         | |------------|   |           |                      |
+    |                         |                  |           |                      |
+    | Merged Config (/config/device/)            |           |                      |
+    |------------------------------------------->|           |                      |
+    |                         |                  |           |                      |
+    |                         | Merged (active)  |           |                      |
+    |                         |----------------------------->|                      |
+    |                         |                  |           |    ----------------\ |
+    |                         |                  |           |    | Page (re)load |-|
+    |                         |                  |           |    |---------------| |
+    |                         |                  |           |                      |
+    |                         |                  |           | Raw & Merged         |
+    |                         |                  |           |--------------------->|
+    |                         |                  |           |                      | ------------\
+    |                         |                  |           |                      |-| JSON Edit |
+    |                         |                  |           |                      | |-----------|
+    |                         |                  |           |                      |
+    |                         |                  |           |                  Raw |
+    |                         |                  |           |<---------------------|
+    |                         |                  |           |                      | -----------------\
+    |                         |                  |           |                      |-| "Saving" state |
+    |                         |                  |           |                      | |----------------|
+    |                         |                  |           |                      |
+    |                         |                  |       Raw |                      |
+    |                         |<-----------------------------|                      |
+    |                         |                  |           |                      |
+    |            Raw & Merged |                  |           |                      |
+    |<------------------------|                  |           |                      |
+    |                         |                  |           |                      |
+    |                         | Merged (next)    |           |                      |
+    |                         |----------------------------->|                      |
+    |                         |                  |           |                      |
+    |                         |                  |           | Merged (next)        |
+    |                         |                  |           |--------------------->|
+    |                         |                  |           |                      | ----------------------\
+    |                         |                  |           |                      |-| "Provisional" state |
+    |                         |                  |           |                      | |---------------------|
+    |                         | -------------\   |           |                      |
+    |                         |-| Test Start |   |           |                      |
+    |                         | |------------|   |           |                      |
+    |                         |                  |           |                      |
+    | Merged Config (/config/device/)            |           |                      |
+    |------------------------------------------->|           |                      |
+    |                         |                  |           |                      |
+    |                         | Merged (active)  |           |                      |
+    |                         |----------------------------->|                      |
+    |                         |                  |           |                      |
+    |                         |                  |           | Merged (active)      |
+    |                         |                  |           |--------------------->|
+    |                         |                  |           |                      | -----------------\
+    |                         |                  |           |                      |-| "Normal" state |
+    |                         |                  |           |                      | |----------------|
+    |                         |                  |           |                      |
+```
+
+Generated with [Text Art Sequence Generator](https://textart.io/sequence) with the contents:
+```
+object Disk DAQ Test Firebase WebApp
+note left of DAQ: DAQ startup
+Disk -> DAQ: Raw Config
+DAQ -> Disk: Merged Config (aux/)
+DAQ -> Firebase: Raw & Merged
+note right of DAQ: Test Start
+Disk -> Test: Merged Config (/config/device/)
+DAQ -> Firebase: Merged (active)
+note left of WebApp: Page (re)load
+Firebase -> WebApp: Raw & Merged
+note right of WebApp: JSON Edit
+WebApp -> Firebase: Raw
+note right of WebApp: "Saving" state
+Firebase -> DAQ: Raw
+DAQ -> Disk: Raw & Merged
+DAQ -> Firebase: Merged (next)
+Firebase -> WebApp: Merged (next)
+note right of WebApp: "Provisional" state
+note right of DAQ: Test Start
+Disk -> Test: Merged Config (/config/device/)
+DAQ -> Firebase: Merged (active)
+Firebase -> WebApp: Merged (active)
+note right of WebApp: "Normal" state
+```
