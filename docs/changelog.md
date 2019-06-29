@@ -1,6 +1,6 @@
 # Changelog
 
-* Next Version
+* 1.0.1
 	* Category and expectation table outputs.
 	* UDMI schema validator test module.
 	* Build improvements for various base system configurations.
