@@ -16,12 +16,23 @@ By default would be in local/site/ rather than misc/test_site/.
 
 ## Report summary
 
-|Result|Test|Notes|
+Overall device result PASS
+
+|Category|Result|
+|---|---|
+|Other|n/a|
+
+|Expectation|skip|pass|
 |---|---|---|
-|skip|base.switch.ping||
-|pass|base.target.ping|target|
-|skip|network.brute||
-|pass|security.ports.nmap||
+|Other|2|2|
+
+|Result|Test|Category|Expectation|Notes|
+|---|---|---|---|---|
+|skip|base.switch.ping|Other|Other||
+|pass|base.target.ping|Other|Other|target|
+|skip|network.brute|Other|Other||
+|pass|security.ports.nmap|Other|Other||
+
 
 ## Module ping
 
@@ -50,10 +61,10 @@ RESULT skip network.brute
 
 Open port tests
 01: ['01:nmap:1']
-|fail|security.ports.nmap||
+|fail|security.ports.nmap|Other|Other||
 RESULT fail security.ports.nmap
 01: []
-|pass|security.ports.nmap||
+|pass|security.ports.nmap|Other|Other||
 RESULT pass security.ports.nmap
 External switch tests
 02: []

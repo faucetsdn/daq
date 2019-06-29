@@ -5,8 +5,10 @@ import logging
 import os
 
 from clib import docker_host
+import wrappers
 
 LOGGER = logging.getLogger('docker')
+
 
 class DockerTest():
     """Class for running docker tests"""
@@ -45,28 +47,21 @@ class DockerTest():
 
         vol_maps = [params['scan_base'] + ":/scans"]
 
-        inst_base = params.get('inst_base')
-        if inst_base and os.path.exists(inst_base):
-            vol_maps += [inst_base + ":/config/inst"]
-
-        port_base = params.get('port_base')
-        if port_base and os.path.exists(port_base):
-            vol_maps += [port_base + ":/config/port"]
-
-        dev_base = params.get('dev_base')
-        if dev_base and os.path.exists(dev_base):
-            vol_maps += [dev_base + ":/config/device"]
-
-        type_base = params.get('type_base')
-        if type_base and os.path.exists(type_base):
-            vol_maps += [type_base + ":/config/type"]
+        self._map_if_exists(vol_maps, params, 'inst')
+        self._map_if_exists(vol_maps, params, 'port')
+        self._map_if_exists(vol_maps, params, 'device')
+        self._map_if_exists(vol_maps, params, 'type')
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
-        host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
-                                    vol_maps=vol_maps, tmpdir=self.tmpdir)
-        self.docker_host = host
+        try:
+            host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
+                                        vol_maps=vol_maps, tmpdir=self.tmpdir)
+            self.docker_host = host
+        except Exception as e:
+            # pylint: disable=no-member
+            raise wrappers.DaqException(e)
         try:
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             host = self.docker_host
@@ -82,6 +77,12 @@ class DockerTest():
             self.runner.remove_host(host)
             raise
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
+
+    def _map_if_exists(self, vol_maps, params, kind):
+        base = params.get('%s_base' % kind)
+        if base and os.path.exists(base):
+            abs_base = os.path.abspath(base)
+            vol_maps += ['%s:/config/%s' % (abs_base, kind)]
 
     def _docker_error(self, e):
         LOGGER.error('Target port %d docker error: %s', self.target_port, e)

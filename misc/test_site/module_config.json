@@ -16,5 +16,31 @@
   "process": {
     "approver": "*** Approver Name ***",
     "operator": "*** Operator Name ***"
+  },
+  "report": {
+    "results": [ "pass", "fail", "skip" ],
+    "categories": [ "Security" ],
+    "expected": [ "Required", "Recommended" ]
+  },
+  "tests": {
+    "unknown.fake.llama": {
+      "required": "gone",
+    },
+    "unknown.fake.monkey": {
+      "required": "pass",
+    },
+    "base.target.ping": {
+      "category": "Connectivity",
+      "expected": "Required",
+    },
+    "security.ports.nmap": {
+      "required": "pass",
+      "category": "Security",
+      "expected": "Recommended"
+    },
+    "network.brute": {
+      "category": "Security",
+      "expected": "Required"
+    }
   }
 }

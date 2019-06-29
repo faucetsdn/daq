@@ -34,6 +34,33 @@ directory).
 for how to "allow" certain ports under the `servers` section.
 * Many other parameters (seen in the examples) are simply passed through to the generated report.
 
+## Test configuration
+
+See `misc/test_site/module_config.json` for an example of line-item test configurations,
+which should look something like:
+```
+{
+  "tests": {
+    "security.ports.nmap": {
+      "required": "pass",
+      "category": "Security",
+      "expected": "Recommended"
+    }
+  }
+}
+```
+
+All fields are optional.
+
+* `required`: The required test result, which normally would be `pass` but could be any other
+test result. The presence of this field means that it must match the actual test result
+in order for the device to pass overall. A _required_ test entry will always be tracked
+in the report, even if no module implements it (using the sekrit `gone` result).
+* `category`: The test category, which is used to accumulate tests into top-level groups. There is
+no semantic meaning to this value.
+* `expected`: The expected state of this test, which is purely informational and again used to bucket
+test results (just in a different way). There is no semantic meaning to this value.
+
 # Web UI
 
 There are also ways to edit both _site_ and _device_ configs directly through the WEB UI. Currently the

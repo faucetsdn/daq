@@ -447,7 +447,7 @@ class ConnectedHost:
             'gateway_mac': self.gateway.MAC(),
             'inst_base': self._inst_config_path(),
             'port_base': self._port_base,
-            'dev_base': self._device_aux_path(),
+            'device_base': self._device_aux_path(),
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }

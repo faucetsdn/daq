@@ -513,6 +513,8 @@ function loadJsonEditors() {
         : `${origin_id} system`;
   document.getElementById('title_origin').innerHTML = subtitle;
 
+  document.getElementById('dashboard_link').href = `index.html?origin=${origin_id}`
+
   const origin_doc = db.collection('origin').doc(origin_id);
   if (device_id) {
     config_doc = origin_doc.collection('device').doc(device_id).collection('config').doc('definition');

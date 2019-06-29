@@ -1,4 +1,4 @@
-# Device 9a02571e8f01, 2019-06-06 14:00:35+00:00
+# Device 9a02571e8f01, 2019-06-29 00:05:28+00:00 to 2019-06-29 00:11:06+00:00
 
 |  Role  |      Name              | Status |
 |--------|------------------------|--------|
@@ -7,8 +7,8 @@
 
 | Test iteration   |                        |
 |------------------|------------------------|
-| Test report date | 2019-06-06T14:00:34.975Z |
-| DAQ version      | 0.9.7 |
+| Test report date | 2019-06-29T00:05:26.271Z |
+| DAQ version      | 1.0.0 |
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -39,25 +39,42 @@
 
 ## Report summary
 
-|Result|Test|Notes|
-|---|---|---|
-|skip|base.switch.ping||
-|pass|base.target.ping|target|
-|skip|cloud.udmi.pointset|No device id.|
-|fail|connection.mac_oui||
-|fail|network.brute||
-|fail|protocol.bacnet.version||
-|pass|security.ports.nmap||
-|skip|security.tls.v3||
-|skip|security.x509||
+Overall device result FAIL
+
+|Category|Result|
+|---|---|
+|Security|PASS|
+|Other|1/2|
+|Connectivity|n/a|
+
+|Expectation|pass|fail|skip|gone|
+|---|---|---|---|---|
+|Required|1|1|0|0|
+|Recommended|1|0|0|0|
+|Other|0|2|4|2|
+
+|Result|Test|Category|Expectation|Notes|
+|---|---|---|---|---|
+|skip|base.switch.ping|Other|Other||
+|pass|base.target.ping|Connectivity|Required|target|
+|skip|cloud.udmi.pointset|Other|Other|No device id.|
+|fail|connection.mac_oui|Other|Other||
+|fail|network.brute|Security|Required||
+|fail|protocol.bacnet.version|Other|Other||
+|pass|security.ports.nmap|Security|Recommended||
+|skip|security.tls.v3|Other|Other||
+|skip|security.x509|Other|Other||
+|gone|unknown.fake.llama|Other|Other||
+|gone|unknown.fake.monkey|Other|Other||
+
 
 ## Module ping
 
 ```
 Baseline ping test report
-%% 82 packets captured.
+%% 42 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.6.38
+RESULT pass base.target.ping target %% 10.20.24.164
 ```
 
 ## Module nmap

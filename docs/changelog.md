@@ -1,6 +1,7 @@
 # Changelog
 
 * Next Version
+	* Category and expectation table outputs.
 	* UDMI schema validator test module.
 	* Build improvements for various base system configurations.
 	* Firebase web authentication

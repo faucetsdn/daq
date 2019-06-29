@@ -43,6 +43,10 @@ div {
     background: #F88;
 }
 
+#testgrid table tr ~ tr td[status=term] {
+    background: #F88;
+}
+
 #testgrid table tr ~ tr td[status=fine] {
     background: #BBF;
 }
