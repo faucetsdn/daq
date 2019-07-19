@@ -3,4 +3,9 @@
 ROOT=$(realpath $(dirname $0)/../..)
 cd $ROOT
 
-java -jar pubber/build/libs/pubber-1.0-SNAPSHOT-all.jar local/pubber.json
+conf_file=local/pubber.json
+
+if [ -f $conf_file ]; then
+    java -jar pubber/build/libs/pubber-1.0-SNAPSHOT-all.jar $conf_file
+else
+    echo Pubber config file not found: $(realpath $conf_file)
