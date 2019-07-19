@@ -6,7 +6,7 @@ REPORT=/tmp/report.txt
 route add default gw $GATEWAY_IP
 
 gcp_cred=/config/inst/gcp_service_account.json
-gcp_topic=target
+gcp_topic=events
 schema_path=schemas/udmi
 
 device_id=`jq -r .device_id /config/device/module_config.json`
@@ -17,15 +17,15 @@ if [ "$device_id" == null ]; then
     exit 0
 fi
 
-project_id=`jq -r .project_id $gcp_cred`
-service_id=`jq -r .client_email $gcp_cred`
-service_id=${service_id%@*}
-
 if [ ! -f $gcp_cred ]; then
     echo Missing $gcp_cred file, skipping udmi validation. | tee -a $REPORT
     echo RESULT skip cloud.udmi.pointset No credentials. | tee -a $REPORT
     exit 0
 fi
+
+project_id=`jq -r .project_id $gcp_cred`
+service_id=`jq -r .client_email $gcp_cred`
+service_id=${service_id%@*}
 
 export GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred
 export GOOGLE_CLOUD_PROJECT=$project_id
