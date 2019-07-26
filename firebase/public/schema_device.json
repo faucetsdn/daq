@@ -39,6 +39,10 @@
       "type": "string",
       "pattern": "^[^*]"
     },
+    "device_type": {
+      "type": "string",
+      "pattern": "^[^*]"
+    },
     "modules": {
       "type": "object",
       "additionalProperties": false,
