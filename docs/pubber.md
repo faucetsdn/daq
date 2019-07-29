@@ -12,6 +12,27 @@ use [Cloud IoT](https://cloud.google.com/iot/docs/). The
 section of the documentation describe how to create a simple device and key-pair (see next section for
 a helper script). You can/should substitute the relevant values in the configuration below for your specific setup.
 
+### Required Pub/Sub topics
+
+**NOTE daq_runner NOT daq-runner (underscore not dash)**
+
+- daq_runner
+- events
+- registrar
+- state
+- target
+
+Your Pub/Sub config should look something like:
+
+<img width="500" alt="Screenshot 2019-07-05 at 12 48 32" src="https://user-images.githubusercontent.com/5684825/60720675-6ba29680-9f23-11e9-814f-25c39f11b3c1.png">
+
+### IoT Core Registry Set up
+
+`events` must be set as the default telemetry topic for the validator to work correctly
+
+TODO: add set up instructions for devices, since registrar isn't run during the aux test  
+TODO: Need devices: AHU-1. AHU-22. GAT-123, SNS-4 
+
 ## Key Generation
 
 <pre>
@@ -31,7 +52,7 @@ After generating the key pair, you'll have to upload/associate the `pubber_cert.
 with the device entry in the cloud console as an _RS256_cert_. (This can be done when the device is
 created, or anytime after.)
 
-## Configuraiton
+## Configuration
 
 The `local/pubber.json` file configures the key cloud parameters needed for operation
 (the actual values in the file shold match your GCP setup):
@@ -61,3 +82,4 @@ The `local/pubber.json` file configures the key cloud parameters needed for oper
 [pool-1-thread-1] INFO daq.pubber.Pubber - Sending test message for sensor_hub/GAT-001
 [pool-1-thread-1] INFO daq.pubber.Pubber - Sending test message for sensor_hub/GAT-001
 </pre>
+
