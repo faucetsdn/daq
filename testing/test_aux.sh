@@ -67,7 +67,7 @@ if [ -f $cred_file ]; then
     make_pubber SNS-4 daq-faux-3 1234
 else
     echo No GCP_SERVICE_ACCOUNT cred defined.
-    echo This varaiable should be defined in your online travis config.
+    echo This variable should be defined in your online travis config.
 fi
 
 more inst/faux/daq-faux-*/local/pubber.json | cat

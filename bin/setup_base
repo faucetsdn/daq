@@ -45,3 +45,13 @@ $AG update
 
 DOCKER_VERSION=${DOCKER_VERSION_BASE}~${distrib}
 $AG install openvswitch-switch openvswitch-common docker-ce${DOCKER_VERSION}
+
+user=$(whoami)
+echo "Current user: $user"
+
+echo Adding your username to the docker group...
+sudo groupadd docker || true
+sudo usermod -aG docker $user
+
+echo Logout and log back in to run tutorials without sudo!
+printf '%d\n' $?
