@@ -8,8 +8,15 @@ if [ -n "$LOCAL_IP" ]; then
     ip addr add $LOCAL_IP dev `hostname`-eth0
     echo Switch test with port $SWITCH_PORT.
     ping -n -c 10 $SWITCH_IP
-    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT
+    POE_ENABLED=`jq -r .modules.switch.poe.enabled /config/device/module_config.json`
+    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED
     cp -r tmp/report.txt /tmp/report.txt
 else
     echo LOCAL_IP not configured, assuming no network switch. | tee /tmp/report.txt
+    echo RESULT skip connection.port_link | tee -a /tmp/report.txt
+    echo RESULT skip connection.port_speed | tee -a /tmp/report.txt
+    echo RESULT skip connection.port_duplex | tee -a /tmp/report.txt
+    echo RESULT skip poe.power | tee -a /tmp/report.txt
+    echo RESULT skip poe.negotiation | tee -a /tmp/report.txt
+    echo RESULT skip poe.support | tee -a /tmp/report.txt
 fi

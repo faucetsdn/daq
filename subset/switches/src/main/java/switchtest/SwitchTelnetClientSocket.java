@@ -250,14 +250,19 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
     int flush = 0;
     int rxQueueCount = 0;
     int rxTempCount = 0;
+    int expectedLength = 1000;
+    int requestFlag = 0;
 
     while (telnetClient.isConnected()) {
       try {
+
         if (rxQueue.isEmpty()) {
           Thread.sleep(100);
           rxQueueCount++;
           if (debug) {
             System.out.println("rxQueue.isEmpty:" + rxQueueCount);
+            System.out.println("expectedLength:" + expectedLength);
+            System.out.println("requestFlag:" + requestFlag);
           }
           if (rxQueueCount > 70) {
             rxQueueCount = 0;
@@ -306,7 +311,7 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
                     + rxGathered);
 
             int position = -1;
-            int expectedLength = 1000;
+
             int charLength = 1;
             int beginPosition = 0;
             System.out.println("count is:" + count);
@@ -315,13 +320,15 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
             int[] loginExpectedLength = {5, 5, 40};
 
             String hostname = interrogator.getHostname();
-            int requestFlag = interrogator.getRequestFlag() - 1;
+            requestFlag = interrogator.getRequestFlag() - 1;
 
-            boolean[] requestFlagIndexOf = {false, false, true, false};
-            String[] requestFlagExpected = {hostname, hostname, "end", hostname};
-            int[] requestFlagExpectedLength = {600, 600, 1000, 290};
-            int[] requestFlagCharLength = {hostname.length() + 1, hostname.length() + 1, 3, -1};
-            int[] requestFlagFlush = {0, 0, 15, 0};
+            boolean[] requestFlagIndexOf = {false, false, false, true, false};
+            String[] requestFlagExpected = {hostname, hostname, hostname, "end", hostname};
+            int[] requestFlagExpectedLength = {600, 600, 50, 1000, 290};
+            int[] requestFlagCharLength = {
+              hostname.length() + 1, hostname.length() + 1, hostname.length() + 1, 3, -1
+            };
+            int[] requestFlagFlush = {0, 0, 0, 15, 0};
 
             // login & enable process
             if (count < 3) {
@@ -418,4 +425,3 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
     }
   }
 }
-

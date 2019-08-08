@@ -4,7 +4,10 @@
       "enabled": false
     },
     "switch": {
-      "enabled": true
+      "enabled": true,
+      "poe":{
+        "enabled": true
+      }
     },
     "pass": {
       "enabled": true
