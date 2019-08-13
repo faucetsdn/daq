@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|1|0|0|
 |Recommended|1|0|0|0|
-|Other|0|2|10|2|
+|Other|0|1|11|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -71,7 +71,7 @@ Overall device result FAIL
 |skip|poe.negotiation|Other|Other||
 |skip|poe.power|Other|Other||
 |skip|poe.support|Other|Other||
-|fail|protocol.bacnet.version|Other|Other||
+|skip|protocol.bacnet.version|Other|Other||
 |pass|security.ports.nmap|Security|Recommended||
 |skip|security.tls.v3|Other|Other||
 |skip|security.x509|Other|Other||
@@ -83,9 +83,9 @@ Overall device result FAIL
 
 ```
 Baseline ping test report
-%% 107 packets captured.
+%% 61 packets captured.
 RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.96.164
+RESULT pass base.target.ping target %% 10.20.92.164
 ```
 
 ## Module nmap
@@ -127,7 +127,7 @@ RESULT fail connection.mac_oui
 ## Module bacext
 
 ```
-RESULT fail protocol.bacnet.version
+RESULT skip protocol.bacnet.version
 ```
 
 ## Module tls

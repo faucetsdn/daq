@@ -18,12 +18,14 @@ public class VersionTest {
   private static LocalDevice localDevice;
   private String localIp = "";
   private String broadcastIp = "";
-
   private String appendixText = "";
   private boolean testPassed = false;
-  private String passedReportText = "RESULT pass protocol.bacnet.version\n";
-  private String failedReportText = "RESULT fail protocol.bacnet.version\n";
+  boolean bacnetSupported = false;
+  private String testName = "protocol.bacnet.version";
+  private String infoReportText = String.format("RESULT info %s", testName);
+  private String skippedReportText = String.format("RESULT skip %s\n", testName);
   private String errorPropertyMessage = "errorClass=Property, errorCode=Unknown property";
+  private String protocolVersionText = "";
 
   public VersionTest(String localIp, String broadcastIp) throws Exception {
     this.localIp = localIp;
@@ -41,11 +43,11 @@ public class VersionTest {
       Thread.sleep(5000);
       System.err.println("Processing...");
       validator = new BacnetValidation(localDevice);
-      boolean bacnetSupported = validator.checkIfBacnetSupported();
+      bacnetSupported = validator.checkIfBacnetSupported();
       if (bacnetSupported) {
         checkDevicesVersionAndGenerateReport();
       } else {
-        appendixText += "Bacnet not supported.\n";
+        appendixText += "Bacnet device not found.\n";
         System.out.println(appendixText);
         generateReport("");
       }
@@ -99,13 +101,15 @@ public class VersionTest {
       // Format the Object List property to be more legible
       if (key.equals("Object list")) {
         formatProperty(property);
-      } else {
-        if (!value.isEmpty() && !value.equals(errorPropertyMessage)) {
           testPassed = true;
-        }
-        // This error is returned if device does not have the property
-        if (value.equals(errorPropertyMessage)) value = "";
-        appendixText += key + " : " + value + "\n";
+      } else {
+          // This error is returned if device does not have the property
+          if (value.equals(errorPropertyMessage)) { value = ""; };
+          appendixText += key + " : " + value + "\n";
+          if (!value.isEmpty()) {
+              testPassed = true;
+          }
+          if (key.equals("Protocol version")) protocolVersionText = " Protocol version: " + value + "\n";
       }
     }
     appendixText += ("\n\n\n");
@@ -131,10 +135,10 @@ public class VersionTest {
   private void generateReport(String deviceMacAddress) {
     Report report = new Report("tmp/" + deviceMacAddress + "_BacnetVersionTestReport.txt");
     Report appendices = new Report("tmp/" + deviceMacAddress + "_BacnetVersionTest_APPENDIX.txt");
-    if (testPassed) {
-      report.writeReport(passedReportText);
+    if (bacnetSupported && testPassed) {
+        report.writeReport(infoReportText + protocolVersionText);
     } else {
-      report.writeReport(failedReportText);
+      report.writeReport(skippedReportText);
     }
     appendices.writeReport(appendixText);
   }
