@@ -54,9 +54,11 @@ sudo groupadd docker || true
 sudo usermod -aG docker $user
 
 DEF_IFACE=`route -n | fgrep UG | awk '{print $8}'`
-echo Allowing docker external access through interface $DEF_IFACE...
-sudo iptables -o docker0 -i $DEF_IFACE -A FORWARD -j ACCEPT
-sudo iptables -i docker0 -o $DEF_IFACE -A FORWARD -j ACCEPT
+if [ -n "$DEF_IFACE" ]; then
+    echo Allowing docker external access through interface $DEF_IFACE...
+    sudo iptables -o docker0 -i $DEF_IFACE -A FORWARD -j ACCEPT
+    sudo iptables -i docker0 -o $DEF_IFACE -A FORWARD -j ACCEPT
+fi
 
 echo Logout and log back in to run tutorials without sudo!
 printf '%d\n' $?

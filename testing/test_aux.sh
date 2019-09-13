@@ -47,27 +47,21 @@ startup_faux_2_opts="nobrute expiredtls pubber"
 startup_faux_3_opts="tls macoui bacnet pubber"
 EOF
 
-cloud_file=inst/test_site/cloud_iot_config.json
-cred_file=inst/config/gcp_service_account.json
-mkdir -p inst/config
-if [ -n "$GCP_SERVICE_ACCOUNT" ]; then
-    echo Installing GCP_SERVICE_ACCOUNT to gcp_cred=$cred_file
-    echo "$GCP_SERVICE_ACCOUNT" > $cred_file
-    echo gcp_cred=$cred_file >> local/system.conf
-elif [ -f $cred_file ]; then
-    echo Using previously configured $cred_file
-    echo gcp_cred=$cred_file >> local/system.conf
-fi
-
 if [ -f $cred_file ]; then
+    echo Using credentials from $cred_file
+    echo gcp_cred=$cred_file >> local/system.conf
     project_id=`jq .project_id $cred_file`
+
+    cloud_file=inst/test_site/cloud_iot_config.json
+    echo Pulling cloud iot details from $cloud_file...
     registry_id=`jq .registry_id $cloud_file`
     cloud_region=`jq .cloud_region $cloud_file`
+
     make_pubber AHU-1 daq-faux-2 null
     make_pubber SNS-4 daq-faux-3 1234
 else
-    echo No GCP_SERVICE_ACCOUNT cred defined.
-    echo This variable should be defined in your online travis config.
+    echo No gcp service account defined, as required for cloud-based tests.
+    echo Please check install/setup documentation to enable.
 fi
 
 more inst/faux/daq-faux-*/local/pubber.json | cat

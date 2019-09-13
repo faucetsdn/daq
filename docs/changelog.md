@@ -1,5 +1,8 @@
 # Changelog
 
+* 1.0.2
+	* Use base64 endcoded GCP cred rather than shell-encoded.
+	* Deprecate GCP_SERVICE_ACCOUNT env for GCP_BASE64_CRED.
 * 1.0.1
 	* Category and expectation table outputs.
 	* UDMI schema validator test module.

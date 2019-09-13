@@ -4,60 +4,53 @@ DAQ currently uses Travis CI for integration testing: https://travis-ci.org/
 
 ## Configuration
 
-### GCP
+### GCP Credential
 
-If you're running cloud tests using pubber, Travis will need to be able to connect to your GCP account via the service account you've set up.  
+To run cloud-based tests, setup the Travis `GCP_BASE64_CRED` env variable with a `base64` encoded
+service account key for your project. It's recommended to use a dedicated key with a nice name
+like `daq-travis`, but not required. Encode the key value as per below, and cut/paste the
+resulting string into the Travis settings page for a `GCP_BASE64_CRED` varaible.
+Note the `-w 0` option is required for proper parsing/formatting, as there can't be any
+newlines in the copied string.
 
-You'll need to add another environment variable to Travis for this to work: 
+<code>
+$ <b>base64 -w 0 local/gcp_service_account.json</b>
+ewoICJ1eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYm9zLWRhcS10ZXN0aW5nIiwKICAicHJpd
+&hellip;
+iOiAiaHR0cHM6Ly93LWRhcS10ZXN0aW5nLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9Cg==
+</code>
 
-- GCP_SERVICE_ACCOUNT
+### Is my Travis set up correctly?
 
-This variable is an string of your GCP account credentials file linked to the service account **with all spaces removed surrounded by single quotes**. If you've set everything up correctly, the json file you downloaded when you created the service account should be in your `local/` directory.
-
-There are infinite ways to stringify JSON Use something like https://www.freeformatter.com/json-escape.html to convert your json object to a string, write a script to do it yourself, or use JSON.stringify in your browser JavaScript console.
-
-Your new JSON string will look something like the below. Remember to *enclose the entire thing with single quotes*
-
-```
-'{"type":"service_account","project_id":"<here be a project id>","private_key_id":"<here be a private key>","private_key":"-----BEGINPRIVATEKEY-----\n<here be a key>\n-----ENDPRIVATEKEY-----\n","client_email":"<here be a sercret email>","client_id":"<here be a client id>","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"<here be another secret>"}'
-```
-
-#### YOUR TRAVIS BUILD MAY ALWAYS FAIL! Unless...
-
-**Note** that, by default, Travis will not use encrypted environment variables when testing against pull requests from foreign github repositories, even if you've forked from another repository that you have full control of via Github. Travis authorization != Github authorization, even if you sign into Travis using Github! This is as it should be.
-
-see the following for more info:
-
-- https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings
-- https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions 
-
-We're working on this...
-
-#### Other Travis caveats
-
-Take note the URL in your browser's address bar when running Travis. You might be on either:
-
-- travis-ci **.com** (this is where the **"build"** step happens)
-- travis-ci **.org** (this is where the **"ci"** step happens)
-
-<img width="800" alt="Screenshot 2019-07-03 at 19 26 42" src="https://user-images.githubusercontent.com/5684825/60616075-962c0c80-9dc8-11e9-9e99-2b649dc23661.png">
-
-
-There seem to be multiple places to add environment variables depending on which TLD you find yourself in. For personal Github accounts, there seems to be both **.com** _and_ **.org** addresses. For organizational Github accounts, only **.org** seems to be available.
-
-
-#### Is my Travis set up correctly?
-
-If Travis is set up correctly, you should see something like:
-
+If Travis is set up correctly, you should see messages at the beginning of the log file:
 ```
 Setting environment variables from repository settings
 $ export DOCKER_USERNAME=[secure]
 $ export DOCKER_PASSWORD=[secure]
-$ export GCP_SERVICE_ACCOUNT=[secure]
+$ export GCP_BASE64_CRED=[secure]
 ```
 
-At the start of your Travis test log.
+Further down there would be more details about the cred itself:
+```
+Running test script testing/test_aux.sh
+Writing test results to inst/test_aux.out and inst/test_aux.gcp
+Decoding GCP_BASE64_CRED to inst/config/gcp_service_account.json
+base64 wc: 1 1 3097
+GCP service account is "daq-travis@daq-testing.iam.gserviceaccount.com"
+```
+
+If the `3097` character count is wildly off, then likely something went wrong with the newlines.
+
+### Travis Build For "External" Pull Requests
+
+Travis will not use encrypted environment variables when testing against pull requests
+from foreign github repositories, even if you've forked from another repository that you
+have full control of via Github. Travis authorization != Github authorization, even if
+you sign into Travis using Github! This is as it should be b/c security. see the following
+for more info:
+
+- https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings
+- https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
 
 If your test is failing from a PR, you'll see something like in a similar log location:
 
@@ -68,3 +61,10 @@ Setting environment variables from .travis.yml
 $ export DOCKER_STARTUP_TIMEOUT_MS=60000
 $ export DAQ_TEST=aux
 ```
+
+### Other Travis Caveats
+
+Take note the URL in your browser's address bar when running Travis. You might be on either
+<code>travis-ci<b>.com</b></code> or <code>travis-ci<b>.org</b></code>. Any particular setup
+may end up across both sites for undertermined reasons. Please consult with your browser's
+exact URL for more clarity.
