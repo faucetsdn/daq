@@ -1,6 +1,8 @@
 # Changelog
 
 * 1.0.2
+	* Update Travis build environment to Bionic (prev. Trusty).
+	* Lock versions of some google pip packages: Firestore hang workaround.
 	* Use base64 endcoded GCP cred rather than shell-encoded.
 	* Deprecate GCP_SERVICE_ACCOUNT env for GCP_BASE64_CRED.
 * 1.0.1

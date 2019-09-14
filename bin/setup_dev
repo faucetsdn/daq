@@ -83,12 +83,17 @@ python3 --version
 
 echo Updating pip...
 $PIP install --upgrade pip
+$PIP -V
 
 echo Installing python dependencies...
 $PIP install wheel
-$PIP install --upgrade --index-url=https://pypi.python.org/simple \
+$PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     pylint cryptography requests netifaces codecov coverage setuptools \
-    firebase-admin==2.16.0 google-cloud-pubsub==0.40.0 Jinja2
+    firebase-admin==2.16.0 \
+    google-cloud-pubsub==0.40.0 \
+    google-api-core==1.13.0 \
+    google-cloud-storage==1.16.1 \
+    google-cloud-firestore==0.32.1
 
 if [ "$DAQ_CONTAINER" != travis ]; then
     $PIP install pyyaml==3.12

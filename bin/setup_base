@@ -61,4 +61,3 @@ if [ -n "$DEF_IFACE" ]; then
 fi
 
 echo Logout and log back in to run tutorials without sudo!
-printf '%d\n' $?

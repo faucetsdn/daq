@@ -18,6 +18,8 @@ if [ -n "$GCP_SERVICE_ACCOUNT" ]; then
   echo Please reconfigure as per docs/integration_testing.md
 fi
 
+lsb_release -a
+
 mkdir -p inst/config
 cred_file=inst/config/gcp_service_account.json
 
