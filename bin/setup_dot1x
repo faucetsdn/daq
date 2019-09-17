@@ -3,14 +3,13 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-sudo rm -rf inst/faucet/faucet_dot1x
-mkdir -p inst/faucet/faucet_dot1x
+mkdir -p inst/faucet/daq-faucet-dot1x
 
-cp misc/faucet_dot1x.yaml inst/faucet/faucet_dot1x/faucet.yaml
+cp misc/faucet_nodot1x.yaml inst/faucet/daq-faucet-dot1x/faucet.yaml
 
 sudo ovs-vsctl del-br br-dot1x || true
 
-docker rm -f faucet_dot1x || true
+docker rm -f daq-faucet-dot1x || true
 docker rm -f daq-ntwk || true
 docker rm -f daq-faux-1 || true
 docker rm -f daq-faux-1 || true
@@ -46,18 +45,19 @@ docker exec daq-ntwk freeradius &
 
 echo "freeradius setup"
 
-cmd/faucet faucet_dot1x 6653
-docker exec faucet_dot1x ip addr flush eth0
+cmd/faucet dot1x 6653
+docker exec daq-faucet-dot1x ip addr flush eth0
 ip_fc=${ip_br}1
-docker exec faucet_dot1x ifconfig eth0 $ip_fc
+docker exec daq-faucet-dot1x ifconfig eth0 $ip_fc
 
 echo  "faucet setup"
 
-pid=$(docker inspect --format="{{ .State.Pid }}" faucet_dot1x)
+pid=$(docker inspect --format="{{ .State.Pid }}" daq-faucet-dot1x)
 sudo ip link add dplane0 type veth peer name dplane-eth0 addr 9a:02:57:1e:8f:2a netns $pid
 sudo ip link set dplane0 up
-docker exec faucet_dot1x ip link set dplane-eth0 up
+docker exec daq-faucet-dot1x ip link set dplane-eth0 up
 
+cp misc/faucet_dot1x.yaml inst/faucet/daq-faucet-dot1x/faucet.yaml
 
 sudo ovs-vsctl --if-exists del-br br-dot1x \
     -- add-br br-dot1x \
