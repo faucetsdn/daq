@@ -92,8 +92,8 @@ docker kill daq-faucet-corp || true
 add_br corp  0x111 6683
 add_br t1sw1 177 6001 7001
 add_br t2sw1 2352 6001 7001
-add_br t1sw2 178 6002 7002
-add_br t2sw2 1296 6002 7002
+add_br t1sw2 178 6001 7001
+add_br t2sw2 1296 6001 7001
 
 upstream1=corp-eth10
 upstream2=corp-eth20
