@@ -1,10 +1,7 @@
 """Orchestrator component for controlling a Faucet SDN"""
 
 import logging
-import http.server
-import socketserver
 import sys
-import threading
 
 import configurator
 import faucet_event_client
@@ -52,6 +49,7 @@ class Forchestrator:
         return False
 
     def get_overview(self, params):
+        """Get an overview of the system"""
         return {
             'hello': 'world',
             'params': params
