@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+SOCK=inst/faucet_event.sock
+
+sudo FAUCET_EVENT_SOCK=$SOCK venv/bin/python daq/forchestrator.py

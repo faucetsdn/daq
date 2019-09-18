@@ -8,7 +8,7 @@ import socket
 import threading
 import time
 
-LOGGER = logging.getLogger('faucet')
+LOGGER = logging.getLogger('fevent')
 
 class FaucetEventClient():
     """A general client interface to the FAUCET event API"""
@@ -30,11 +30,14 @@ class FaucetEventClient():
 
         sock_path = os.getenv('FAUCET_EVENT_SOCK')
 
+        assert sock_path, 'Environment FAUCET_EVENT_SOCK not defined'
+
         self.previous_state = {}
         self.buffer = ''
 
         retries = self.FAUCET_RETRIES
         while not os.path.exists(sock_path):
+            LOGGER.info('Waiting for socket path %s', sock_path)
             assert retries > 0, "Could not find socket path %s" % sock_path
             retries -= 1
             time.sleep(1)
