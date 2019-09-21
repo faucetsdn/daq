@@ -268,7 +268,8 @@ public class SwitchInterrogator implements Runnable {
   boolean debug = true;
   boolean extendedTests = false;
 
-  public SwitchInterrogator(String remoteIpAddress, int interfacePort, boolean deviceConfigPoeEnabled) {
+  public SwitchInterrogator(
+      String remoteIpAddress, int interfacePort, boolean deviceConfigPoeEnabled) {
     this.remoteIpAddress = remoteIpAddress;
     this.interfacePort = interfacePort;
     this.deviceConfigPoeEnabled = deviceConfigPoeEnabled;
@@ -509,7 +510,7 @@ public class SwitchInterrogator implements Runnable {
         counter++;
       }
     }
-    if(counter > 0) {
+    if (counter > 0) {
       counter -= lineIndex;
     }
     for (int i = counter; i > 0; i--) {
@@ -602,8 +603,7 @@ public class SwitchInterrogator implements Runnable {
     try {
       login_report += "\n";
 
-      if (interface_map.get("link_status").equals("UP")
-          && Integer.parseInt(interface_map.get("dropped")) == 0) {
+      if (interface_map.get("link_status").equals("UP")) {
         login_report += "RESULT pass connection.port_link\n";
       } else {
         login_report += "RESULT fail connection.port_link\n";
@@ -635,6 +635,7 @@ public class SwitchInterrogator implements Runnable {
         String current_max_power = power_map.get("max").replaceAll("\\D+", "");
         String current_power = power_map.get("power").replaceAll("\\D+", "");
         String current_PoE_admin = power_map.get("admin");
+        String current_oper = power_map.get("oper");
 
         System.out.println(
             "current_max_power:"
@@ -642,19 +643,28 @@ public class SwitchInterrogator implements Runnable {
                 + "current_power:"
                 + current_power
                 + "current_PoE_admin:"
-                + current_PoE_admin);
+                + current_PoE_admin
+                + "current_oper:"
+                + current_oper);
 
         if (current_max_power.length() > 0
             && current_power.length() > 0
-            && current_PoE_admin.length() > 0) {
+            && current_PoE_admin.length() > 0
+            && current_oper.length() > 0) {
           if (Integer.parseInt(current_max_power) > Integer.parseInt(current_power)
-              && current_PoE_admin.equals("Enabled")) {
+              && !current_oper.equals("Fault")) {
             login_report += "RESULT pass poe.power\n";
-            login_report += "RESULT pass poe.negotiation\n";
-            login_report += "RESULT pass poe.support\n";
           } else {
             login_report += "RESULT fail poe.power\n";
+          }
+          if (current_PoE_admin.equals("Enabled")) {
+            login_report += "RESULT pass poe.negotiation\n";
+          } else {
             login_report += "RESULT fail poe.negotiation\n";
+          }
+          if (!current_oper.equals("Off")) {
+            login_report += "RESULT pass poe.support\n";
+          } else {
             login_report += "RESULT fail poe.support\n";
           }
         } else {

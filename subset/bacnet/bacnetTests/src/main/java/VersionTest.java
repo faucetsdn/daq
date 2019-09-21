@@ -23,7 +23,7 @@ public class VersionTest {
   boolean bacnetSupported = false;
   private String testName = "protocol.bacnet.version";
   private String infoReportText = String.format("RESULT info %s", testName);
-  private String skippedReportText = String.format("RESULT skip %s\n", testName);
+  private String skippedReportText = String.format("RESULT skip %s", testName);
   private String errorPropertyMessage = "errorClass=Property, errorCode=Unknown property";
   private String protocolVersionText = "";
 
@@ -47,7 +47,7 @@ public class VersionTest {
       if (bacnetSupported) {
         checkDevicesVersionAndGenerateReport();
       } else {
-        appendixText += "Bacnet device not found.\n";
+        appendixText += " Bacnet device not found.\n";
         System.out.println(appendixText);
         generateReport("");
       }

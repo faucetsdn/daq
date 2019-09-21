@@ -10,7 +10,7 @@ RUN $AG update && $AG install openjdk-8-jre
 
 RUN $AG update && $AG install openjdk-8-jdk git
 
-ENV BACHASH=6abd3cfcfe6cfb95f444638515a0b21f547a1202
+ENV BACHASH=94a794a756ee0d37c6a2e53e08747ee021415aa8
 
 RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch \
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
@@ -22,9 +22,9 @@ FROM daq/aardvark:latest
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
-
+RUN $AG update && $AG install openjdk-8-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
-    python ifupdown openssl ssh
+    python ifupdown openssl ssh nano
 
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
@@ -39,6 +39,11 @@ COPY pubber/bin/run pubber/bin/
 
 COPY subset/pentests/brute_server.py pentests/
 COPY subset/security/tlsfaux tlsfaux/
+
+COPY subset/bacnet/bacnetTests/ bacnetTests
+COPY subset/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
+COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
+RUN cd bacnetTests && ./gradlew build
 
 COPY misc/start_faux misc/failing bin/
 

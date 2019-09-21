@@ -11,8 +11,8 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2019-06-29 21:30:06+00:00 |
-| Test report end date   | 2019-06-29 21:37:30+00:00 |
+| Test report start date | 2019-07-15 22:55:25+00:00 |
+| Test report end date   | 2019-07-15 23:01:50+00:00 |
 | DAQ version      | 1.0.1 |
 | Attempt number   | 1 |
 
@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|1|0|0|
 |Recommended|1|0|0|0|
-|Other|0|1|11|2|
+|Other|0|1|13|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -71,7 +71,9 @@ Overall device result FAIL
 |skip|poe.negotiation|Other|Other||
 |skip|poe.power|Other|Other||
 |skip|poe.support|Other|Other||
-|skip|protocol.bacnet.version|Other|Other||
+|skip|protocol.bacnet.pic|Other|Other|Bacnet device not found... Pics check cannot be performed.|
+|skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
+|skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap.|
 |pass|security.ports.nmap|Security|Recommended||
 |skip|security.tls.v3|Other|Other||
 |skip|security.x509|Other|Other||
@@ -105,6 +107,22 @@ Login success!
 RESULT fail network.brute
 ```
 
+## Module discover
+
+```
+--------------------
+security.firmware
+--------------------
+Automatic bacnet firmware scan using nmap
+--------------------
+PORT      STATE  SERVICE
+47808/udp closed bacnet
+MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+Firmware test complete
+--------------------
+RESULT skip security.firmware Could not retrieve a firmware version with nmap.
+```
+
 ## Module switch
 
 ```
@@ -127,7 +145,8 @@ RESULT fail connection.mac_oui
 ## Module bacext
 
 ```
-RESULT skip protocol.bacnet.version
+RESULT skip protocol.bacnet.version Bacnet device not found.
+RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.
 ```
 
 ## Module tls

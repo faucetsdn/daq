@@ -1,29 +1,125 @@
 {
   "modules": {
-    "pass": {
+    "bacext": {
       "enabled": true
     },
-    "nmap": {
-      "enabled": true
-    },
-    "macoui": {
-     "enabled": true
-    },
-    "switch": {
+    "bacnet": {
       "enabled": true
     },
     "brute": {
       "enabled": true
     },
-    "bacext": {
+    "macoui": {
       "enabled": true
     },
+    "mudgee": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true,
+      "poe": {
+        "enabled" : true
+      }
+    },
     "tls": {
+      "enabled": true
+    },
+    "discover": {
       "enabled": true
     }
   },
   "process": {
-    "approver": "*** Approver Name ***",
-    "operator": "*** Operator Name ***"
+    "approver": "*** Approver ***",
+    "operator": "*** Operator ***"
+  },
+  "report": {
+    "results": [ "pass", "fail", "skip", "info"  ],
+    "categories": [ "Connection", "DNS", "Security", "Time", "MUD", "TLS", "Access", "Protocol", "PoE", "Information", "BOS", "IoT" ],
+    "expected": [ "Required Pass", "Recommended Pass", "Recommended Info" ]
+  },
+  "tests": {
+    "base.switch.ping": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "base.target.ping": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "cloud.udmi.pointset": {
+      "category": "BOS",
+      "required": "pass",
+      "expected": "Recommended Pass"
+    },
+    "connection.mac_oui": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.port_link": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.port_speed": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.port_duplex": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "poe.power": {
+      "category": "PoE",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "poe.negotiation": {
+      "category": "PoE",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "poe.support": {
+      "category": "PoE",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "network.brute": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "protocol.bacnet.version": {
+      "category": "Protocol",
+      "required": "info",
+      "expected": "Recommended Info"
+    },
+    "security.ports.nmap": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.v3": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.x509": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.firmware": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    }
   }
 }

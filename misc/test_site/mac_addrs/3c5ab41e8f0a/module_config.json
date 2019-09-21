@@ -10,11 +10,14 @@
     "name": "*** Name ***",
     "serial": "*** Serial ***",
     "type": "*** Type ***",
-    "firmware_version": "*** Firmware Version ***"
+    "firmware_version": "?\\xFF\\xFF\\x19,>u\\x08\\x00no"
   },
   "device_manuals_url": "*** Device Manuals URL ***",
   "modules": {
     "pass": {
+      "enabled": true
+    },
+    "switch": {
       "enabled": true
     }
   },
@@ -33,7 +36,7 @@
     }
   },
   "process": {
-     "attempt_number": 1,
+     "attempt_number": 1
   },
   "device_type": "rocket",
   "device_id": "SNS-4"

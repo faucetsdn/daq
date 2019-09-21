@@ -3,6 +3,7 @@
 .build_hash
 .build_files
 .build_built
+.project
 
 firebase/public/firebase_config.js
 

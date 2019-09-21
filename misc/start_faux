@@ -81,8 +81,12 @@ fi
 
 if [ -n "${options[bacnet]}" ]; then
     echo Starting bacnet loop device.
-    java -cp bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar \
-         com.serotonin.bacnet4j.test.LoopDevice $local_ip $broadcast_ip &
+    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+         FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Pass.json"  &
+elif [ -n "${options[bacnetfail]}" ]; then
+    echo Starting bacnet loop device.
+    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+         FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
 if [ -n "${options[discover]}" ]; then

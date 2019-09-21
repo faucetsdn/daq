@@ -14,10 +14,13 @@ local_ip=${parts[1]%/*}
 broadcast_ip=${parts[3]}
 
 version_test_id="bacnet_VERSION"
+pics_test_id="bacnet_PICS"
+verbose_output="false"
 
 echo Scanning bacnet $broadcast_ip from $local_ip
 
-java -jar $JAR $version_test_id $broadcast_ip $local_ip | tee $TMPOUT
+java -jar $JAR $pics_test_id $broadcast_ip $local_ip $verbose_output | tee $TMPOUT
+java -jar $JAR $version_test_id $broadcast_ip $local_ip $verbose_output | tee $TMPOUT
 
 bacnet_runtime=/config/port/bacnet_runtime.sh
 if [ -f $bacnet_runtime ]; then
@@ -33,4 +36,7 @@ else
     fgrep "$TARGET" $TMPOUT
 fi
 
-cat tmp/*Report*.txt >> $REPORT
+cat tmp/*BacnetVersionTestReport.txt >> $REPORT
+cat tmp/*BacnetVersionTest_APPENDIX.txt >> $REPORT
+cat tmp/*BacnetPICSTestReport.txt >> $REPORT
+cat tmp/*BacnetPICSTest_APPENDIX.txt >> $REPORT

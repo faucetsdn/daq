@@ -11,6 +11,9 @@
     },
     "pass": {
       "enabled": true
+    },
+    "discover": {
+      "enabled": true
     }
   }
 }
