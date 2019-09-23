@@ -24,7 +24,9 @@ fi
 
 echo AG is $AG 
 
-$AG update
+# Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
+# Need to remove the || true at the end of the update line. Same as for instance below. Also in bin/setup_dev.
+$AG update || true
 $AG install realpath || true  # On newer versions this is included elsewhere.
 $AG install lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent
 
@@ -39,9 +41,11 @@ echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources
 $retry sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
 
 $retry curl -fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable"
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable" || true
 
-$AG update
+# Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
+# Need to remove the || true at the end of the update line. Same as for instance above. Also in bin/setup_dev.
+$AG update || true
 
 DOCKER_VERSION=${DOCKER_VERSION_BASE}~${distrib}
 $AG install openvswitch-switch openvswitch-common docker-ce${DOCKER_VERSION}
@@ -49,7 +53,7 @@ $AG install openvswitch-switch openvswitch-common docker-ce${DOCKER_VERSION}
 user=$(whoami)
 echo "Current user: $user"
 
-echo Adding your username to the docker group...
+echo Adding username to docker group...
 sudo groupadd docker || true
 sudo usermod -aG docker $user
 
