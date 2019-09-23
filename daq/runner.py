@@ -340,6 +340,10 @@ class DAQRunner:
             self.target_set_error(target_port, e)
 
     def _get_test_list(self, test_file, test_list):
+        no_test = self.config.get('no_test', False)
+        if no_test:
+            LOGGER.warning('Suppressing configured tests because no_test')
+            return test_list
         LOGGER.info('Reading test definition file %s', test_file)
         with open(test_file) as file:
             line = file.readline()

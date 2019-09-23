@@ -67,7 +67,7 @@ class ConnectedHost:
     _FAIL_BASE_FORMAT = "inst/fail_%s"
     _MODULE_CONFIG = "module_config.json"
     _CONTROL_PATH = "control/port-%s"
-    _CORE_TESTS = ['pass', 'fail', 'ping']
+    _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
     _AUX_DIR = "aux/"
     _CONFIG_DIR = "config/"
 
@@ -85,7 +85,6 @@ class ConnectedHost:
         self._port_base = self._get_port_base()
         self._device_base = self._get_device_base(self.target_mac)
         self.state = None
-        self.no_test = config.get('no_test', False)
         self._state_transition(_STATE.READY)
         self.results = {}
         self.dummy = None
@@ -204,11 +203,11 @@ class ConnectedHost:
         self._initialize_config()
         network = self.runner.network
         self._mirror_intf_name = network.create_mirror_interface(self.target_port)
-        if self.no_test:
+        if self.config['test_list']:
+            self._start_run()
+        else:
             assert self.is_holding(), 'state is not holding'
             self.record_result('startup', state=MODE.HOLD)
-        else:
-            self._start_run()
 
     def _start_run(self):
         self._state_transition(_STATE.INIT, _STATE.READY)

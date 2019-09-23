@@ -20,6 +20,7 @@ class FaucetTopology():
     INST_FILE_PREFIX = "inst/"
     BROADCAST_MAC = "ff:ff:ff:ff:ff:ff"
     ARP_DL_TYPE = "0x0806"
+    LLDP_DL_TYPE = "0x88cc"
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
     DP_ACL_FILE_FORMAT = "dp_port_acls.yaml"
     PORT_ACL_FILE_FORMAT = "port_acls/dp_%s_port_%d_acl.yaml"
@@ -276,6 +277,8 @@ class FaucetTopology():
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
 
+        self._add_acl_rule(incoming_acl, allow=1, dl_type=self.LLDP_DL_TYPE)
+
         for target_mac in self._mac_map:
             target = self._mac_map[target_mac]
             mirror_port = self.mirror_port(target['port'])
@@ -288,6 +291,7 @@ class FaucetTopology():
         self._add_acl_rule(incoming_acl, allow=0)
         acls[self.INCOMING_ACL_FORMAT % self.pri_name] = incoming_acl
 
+        self._add_acl_rule(secondary_acl, allow=1, dl_type=self.LLDP_DL_TYPE)
         self._add_acl_rule(secondary_acl, allow=1, vlan_vid=self.DEFAULT_VLAN)
         self._add_acl_rule(secondary_acl, allow=1, out_vlan=self.DEFAULT_VLAN)
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
