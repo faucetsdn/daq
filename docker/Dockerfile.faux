@@ -26,15 +26,8 @@ RUN $AG update && $AG install openjdk-8-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
     python ifupdown openssl ssh nano apache2-utils
 
-COPY subset/bacnet/bacnetTests/ bacnetTests
-COPY subset/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
-COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
-RUN cd bacnetTests && ./gradlew build
-
-#NTP Client
 COPY subset/network/NTPClient NTPClient
 RUN cd NTPClient && ./gradlew build
-
 COPY subset/network/TransportClient TransportClient
 
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
