@@ -5,7 +5,8 @@ arguments = sys.argv
 udp_ip_address = str(arguments[1])
 udp_port = int(arguments[2])
 transport_type = str(arguments[3])
-duration = int(arguments[4])
+duration_seconds = int(arguments[4])
+cycle_seconds = int(arguments[5])
 multicast_ttl = 2
 message = "Fried lizards taste like chicken"
 
@@ -27,8 +28,8 @@ def send_message(message, transport_type):
         client = multicast_setup_socket()
     sent = client.sendto(message, (udp_ip_address, udp_port))
 
-while(duration > 0):
+while(duration_seconds > 0):
     print('{t} to {a}'.format(t=transport_type, a=udp_ip_address))
     send_message(message, transport_type)
-    time.sleep(10)
-    duration -= 10
+    time.sleep(cycle_seconds)
+    duration_seconds -= cycle_seconds
