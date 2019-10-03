@@ -120,6 +120,25 @@ elif [ -n "${options[bacnetfail]}" ]; then
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
+if [ -n "${options[ntp_client]}" ]; then
+    echo Starting ntp client.
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT-all.jar "time.google.com" "123" "3" &
+fi
+
+cip_port=41794
+multicast_group="224.1.1.1"
+duration_seconds=360
+
+if [ -n "${options[broadcast_client]}" ]; then
+    echo Starting broatcast client.
+    python TransportClient/client.py $broadcast_ip $cip_port broadcast $duration_seconds &
+fi
+
+if [ -n "${options[multicast_client]}" ]; then
+    echo Starting multicast client.
+    python TransportClient/client.py $multicast_group $cip_port multicast $duration_seconds &
+fi
+
 if [ -n "${options[discover]}" ]; then
     echo Starting bacnet discover loop.
     bin/bacnet_discover loop &

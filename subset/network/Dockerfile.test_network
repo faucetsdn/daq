@@ -1,0 +1,10 @@
+FROM daq/aardvark:latest
+
+RUN $AG update && $AG install python netcat
+
+COPY qualification/infastructure_excludes.json .
+COPY qualification/device_module_config.json .
+COPY subset/network/network_tests.py .
+COPY subset/network/test_network .
+
+CMD ["./test_network"]

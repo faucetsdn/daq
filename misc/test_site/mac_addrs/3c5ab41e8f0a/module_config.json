@@ -18,7 +18,10 @@
       "enabled": true
     },
     "switch": {
-      "enabled": true
+      "enabled": true,
+      "poe": {
+        "enabled": true
+      }
     }
   },
   "servers": {

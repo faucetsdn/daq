@@ -57,9 +57,10 @@ cat <<EOF >> local/system.conf
 fail_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
-startup_faux_1_opts="brute"
+startup_faux_1_opts="brute broadcast_client"
 startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
-startup_faux_3_opts="tls macoui passwordpass bacnet pubber"
+startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntp_client broadcast_client"
+monitor_scan_sec=300
 EOF
 
 if [ -f $cred_file ]; then
@@ -107,6 +108,7 @@ capture_test_results macoui
 capture_test_results tls
 capture_test_results password
 capture_test_results discover
+capture_test_results network
 
 # Capture peripheral logs
 more inst/run-port-*/scans/dhcp_triggers.txt | cat

@@ -7,9 +7,15 @@
       "enabled": false
     },
     "switch": {
-      "enabled": false
+      "enabled": true,
+      "poe":{
+        "enabled": true
+      }
     },
     "bacext": {
+      "enabled": true
+    },
+    "network": {
       "enabled": true
     }
   },
