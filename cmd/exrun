@@ -77,6 +77,8 @@ if [ -n "$ext_loip" ]; then
     autostart bin/switch_local
 elif [ -n "$ext_ctrl" ]; then
     autostart bin/physical_sec
+else
+    echo No external switch configured.
 fi
 
 export DAQ_SUPPRESS_PHY_SETUP=y
