@@ -73,3 +73,13 @@ directory.
           configuration information (test options, etc...)
           * `report.txt`: Test results _from_ the test module, generated at
           run time and contain all the relevant test results and diagnostics.
+  * If the logs don't provide the necessary information, then a wire-line
+  packet capture may be in order.
+    * Use something like
+    <code>tcpdump -eni <em>XXXXXX</em> -w testing.pcap</code>, where
+    <code><em>XXXXXX</em></code> is the data-plane network interface between
+    the device and DAQ host, while the tests are running.
+    * Filter results for the device's MAC address with something like:
+    <code>tcpdump -en -r testing.pacp ether host <em>de:vi:ce:ma:ca:dr</em></code>.
+    * There is no one-size-fits-all guidance here, because what is expected is
+    extremeley test-specific.
