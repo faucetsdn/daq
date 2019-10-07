@@ -2,7 +2,6 @@
 
 LOCAL_SYSTEM=local/system.conf
 DEFAULT_CONF=${DAQ_CONF:-misc/system_base.conf}
-INST_SYSTEM=inst/config/system.conf
 
 if [ -d venv ]; then
     echo Activating venv
@@ -20,10 +19,8 @@ else
         cp $DEFAULT_CONF $LOCAL_SYSTEM
     fi
 
-    if [ $LOCAL_SYSTEM -nt $INST_SYSTEM ]; then
-        echo Loading config from $LOCAL_SYSTEM into $INST_SYSTEM
-        mkdir -p ${INST_SYSTEM%/*}
-        python3 daq/configurator.py $LOCAL_SYSTEM $run_args > $INST_SYSTEM
-    fi
+    echo Loading config from $LOCAL_SYSTEM into inst/config/system.conf
+    mkdir -p inst/config
+    python3 daq/configurator.py $LOCAL_SYSTEM $run_args > inst/config/system.conf
     source inst/config/system.conf
 fi
