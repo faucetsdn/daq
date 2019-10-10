@@ -4,7 +4,7 @@ mudacl tests
 Mudacl exit code 0
 Validator exit code 0
 Lint checks
-cmd/inbuild exit code 0
+check_style exit code 0
 Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.

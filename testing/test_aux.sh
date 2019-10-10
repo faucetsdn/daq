@@ -15,8 +15,8 @@ echo Validator exit code $? | tee -a $TEST_RESULTS
 
 # Runs lint checks and some similar things
 echo Lint checks | tee -a $TEST_RESULTS
-cmd/inbuild skip
-echo cmd/inbuild exit code $? | tee -a $TEST_RESULTS
+bin/check_style
+echo check_style exit code $? | tee -a $TEST_RESULTS
 
 # Function to create pubber config files (for use in cloud tests)
 
