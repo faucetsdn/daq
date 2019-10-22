@@ -10,7 +10,7 @@
     "version": "*** Version ***",
     "firmware_version": "*** Firmware Version ***"
   },
-  "device_type": "rocket", 
+  "device_type": "rocket",
   "device_id": "AHU-1",
   "modules": {
     "foobar": {

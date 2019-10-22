@@ -9,14 +9,14 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT fail protocol.bacnet.pic
+RESULT skip protocol.bacnet.pic pics.csv not found in device_types/../aux/ directory 
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail network.brute
 RESULT pass network.brute
 RESULT skip network.brute
 RESULT fail connection.mac_oui
-RESULT fail connection.mac_oui
+RESULT pass connection.mac_oui
 RESULT pass connection.mac_oui
 RESULT skip security.tls.v3
 RESULT skip security.x509
@@ -24,13 +24,24 @@ RESULT fail security.tls.v3
 RESULT fail security.x509
 RESULT pass security.tls.v3
 RESULT pass security.x509
+RESULT skip security.passwords.http Device does not have a valid mac address
+RESULT skip security.passwords.https Device does not have a valid mac address
+RESULT skip security.passwords.telnet Device does not have a valid mac address
+RESULT skip security.passwords.ssh Device does not have a valid mac address
+RESULT fail security.passwords.http Default passwords has not been changed
+RESULT fail security.passwords.https Default passwords has not been changed
+RESULT fail security.passwords.telnet Default passwords has not been changed
+RESULT fail security.passwords.ssh Default passwords have not been changed
+RESULT pass security.passwords.http  Default passwords have been changed
+RESULT pass security.passwords.https  Default passwords have been changed
+RESULT pass security.passwords.telnet  Default passwords have been changed
+RESULT pass security.passwords.ssh Default passwords have been changed
 RESULT skip security.firmware Could not retrieve a firmware version with nmap.
-RESULT fail security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no Firmware version does not match
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 2 1
 01: ['01:brute:1']
-02: ['02:discover:1', '02:nmap:1']
-03: []
+02: ['02:nmap:1', '02:ping:1']
+03: ['03:nmap:1']
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
@@ -59,6 +70,9 @@ port-01 module_config modules
   "pass": {
     "enabled": true
   },
+  "password": {
+    "enabled": true
+  },
   "switch": {
     "enabled": true,
     "poe": {
@@ -83,12 +97,6 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
-  "discover": {
-    "enabled": true
-  },
-  "foobar": {
-    "enabled": false
-  },
   "macoui": {
     "enabled": true
   },
@@ -96,36 +104,21 @@ port-02 module_config modules
     "enabled": true
   },
   "pass": {
+    "enabled": false
+  },
+  "password": {
     "enabled": true
   },
   "switch": {
-    "enabled": true,
-    "poe": {
-      "enabled": true
-    }
+    "enabled": false
   },
   "tls": {
     "enabled": true
-  },
-  "typeconf": {
-    "enabled": false
   },
   "udmi": {
     "enabled": true
   }
 }
-    SNAKE!         ____
-                .'`_ o `;__,
-       .       .'.'` '---'  '
-       .`-...-'.'
-        `-...-'
-   LIZARD!              )/_
-             _.--..---"-,--c_
-        \L..'           ._O__)_
-,-.     _.+  _  \..--( /
-  `\.-''__.-' \ (     \_
-    `'''       `\__   /\
-                ')
 Redacted docs diff
 No report diff
 Done with tests

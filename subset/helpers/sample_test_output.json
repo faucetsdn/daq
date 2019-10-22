@@ -1,0 +1,14 @@
+[
+    {
+        "name": "something.test",
+        "description": "informative description",
+        "log": "what happened",
+        "result": "RESULT pass something.test summary goes here"
+    },
+    {
+        "name": "something.else.test",
+        "description": "another informative description",
+        "log": "what happened afterwards, it was bad",
+        "result": "RESULT fail something.else.test summary goes here"
+    }
+]

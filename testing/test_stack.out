@@ -2,8 +2,8 @@ Running testing/test_stack.sh
 Generator tests
 Stacking Tests
 Testing stack mode bond
-(UNKNOWN) [192.168.0.2] 23 (?) : Connection timed out
-(UNKNOWN) [192.168.0.2] 443 (?) : Connection refused
+(UNKNOWN) [192.168.0.2] 23 (telnet) : Connection timed out
+(UNKNOWN) [192.168.0.2] 443 (https) : Connection refused
 pcap sane 1 1
 bond telnet 0 https 2
 daq-faux-1: ping -c 10 192.168.0.2 10

@@ -15,6 +15,9 @@
     "brute": {
       "enabled": true
     },
+    "password": {
+      "enabled": true
+    },
     "bacext": {
       "enabled": true
     },
