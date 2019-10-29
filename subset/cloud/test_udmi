@@ -1,6 +1,11 @@
 #!/bin/bash -e
+source reporting.sh
 
 REPORT=/tmp/report.txt
+TEST_NAME="cloud.udmi.pointset"
+TEST_DESCRIPTION="Validates the payloads from the DUT to a predefined schema"
+TEST_SUMMARY=""
+LOG=/tmp/udmi.log
 
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
@@ -13,13 +18,22 @@ device_id=`jq -r .device_id /config/device/module_config.json`
 
 if [ "$device_id" == null ]; then
     echo Device id is null, skipping.
-    echo RESULT skip cloud.udmi.pointset No device id. | tee -a $REPORT
+    RESULT_AND_SUMMARY="RESULT skip $TEST_NAME No device id"
+    write_out_result $REPORT \
+                     "$TEST_NAME" \
+                     "$TEST_DESCRIPTION" \
+                     "Device id is null, skipping." \
+                     "$RESULT_AND_SUMMARY"
     exit 0
 fi
 
 if [ ! -f $gcp_cred ]; then
-    echo Missing $gcp_cred file, skipping udmi validation. | tee -a $REPORT
-    echo RESULT skip cloud.udmi.pointset No credentials. | tee -a $REPORT
+    RESULT_AND_SUMMARY="RESULT skip $TEST_NAME No credentials."
+    write_out_result $REPORT \
+                     "$TEST_NAME" \
+                     "$TEST_DESCRIPTION" \
+                     "Missing $gcp_cred file, skipping udmi validation." \
+                     "$RESULT_AND_SUMMARY"
     exit 0
 fi
 
@@ -54,4 +68,12 @@ else
     detail="No result found"
 fi
 
-echo RESULT $result cloud.udmi.pointset $detail | tee -a $REPORT
+RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
+
+write_out_result $REPORT \
+                 "$TEST_NAME" \
+                 "$TEST_DESCRIPTION" \
+                 "See activate.log for more details" \
+                 "$RESULT_AND_SUMMARY"
+
+[ "$result" == pass ]

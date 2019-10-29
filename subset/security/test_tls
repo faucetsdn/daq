@@ -1,11 +1,36 @@
 #!/bin/bash -e
+source reporting.sh
+REPORT=/tmp/report.txt
+LOCAL_REPORT=tmp/report.txt
+
+RESULT_LINES=/tmp/result_lines.txt
+MONO_LOG=/tmp/mono-log.txt
+MANIFEST=./module_manifest.json
 
 if [ -n "$TARGET_IP" ]; then
-    echo Collecting TLS cert from target address $TARGET_IP.
+    echo Collecting TLS cert from target address %% $TARGET_IP > $MONO_LOG
+
     java -jar tlstest/build/libs/tlstest.jar $TARGET_IP
-    cp tmp/report.txt /tmp/report.txt
+
+    grep "RESULT" $LOCAL_REPORT >> $RESULT_LINES
+    grep -v "RESULT" $LOCAL_REPORT >> $MONO_LOG
+
+    write_out_monolog $REPORT \
+                      $MANIFEST \
+                      $MONO_LOG \
+                      $RESULT_LINES
+
 else
-    echo TARGET_IP not configured TLS test failed | tee /tmp/report.txt
+    echo "TARGET_IP not configured TLS test failed" > $MONO_LOG
+    cat $MONO_LOG
+
+    write_out_monolog $REPORT \
+                      $MANIFEST \
+                      $MONO_LOG \
+                      $RESULT_LINES
+
 fi
 
+result_lines=( "$(cat $RESULT_LINES)" )
 
+[ $(check_for_fails_in "${result_lines[@]}") == false ]

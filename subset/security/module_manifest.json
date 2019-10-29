@@ -1,0 +1,8 @@
+{
+    "security.tls.v3" : {
+        "desc" : "Verify the device supports TLS 1.2 or above (as a client)"
+    },
+    "security.x509" : {
+        "desc" : "Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile"
+    }
+}

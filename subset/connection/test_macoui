@@ -1,6 +1,30 @@
 #!/bin/bash -e 
+source reporting.sh
 
-echo Using the host hardware address $TARGET_MAC
+REPORT=/tmp/report.txt
+LOCAL_REPORT=report/report.txt
+CONFIG=/config/device/module_config.json
+LOG=/tmp/nmap.log
+RESULT_LINES=/tmp/result_lines.txt
+
+TEST_NAME="connection.mac_oui"
+TEST_DESCRIPTION="Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer"
+REDACTED_LOG=/tmp/macoui.report.log
+
+echo Using the host hardware address $TARGET_MAC | tee -a $REDACTED_LOG
 
 java -jar mac_oui/build/libs/mac_oui-all.jar $TARGET_MAC
-cp report/report.txt /tmp/report.txt
+
+RESULT_AND_SUMMARY="$(grep "RESULT" $LOCAL_REPORT)"
+grep -v "RESULT" $LOCAL_REPORT >> $REDACTED_LOG
+
+write_out_result $REPORT \
+                 "$TEST_NAME" \
+                 "$TEST_DESCRIPTION" \
+                 "$(cat $REDACTED_LOG)" \
+                 "$RESULT_AND_SUMMARY"
+
+result_lines=( "$RESULT_AND_SUMMARY" )
+
+[ $(check_for_fails_in "${result_lines[@]}") == false ]
+

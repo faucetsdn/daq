@@ -165,5 +165,5 @@ else
     echo Runtime config $conf_file not found.
 fi
 
-echo Blocking for all eternety.
+echo Blocking for all eternity.
 tail -f /dev/null

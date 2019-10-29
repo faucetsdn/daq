@@ -1,4 +1,5 @@
 #!/bin/bash -e
+source reporting.sh
 
 JAR=bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar
 TARGET="Object name = BACnet device"
@@ -36,7 +37,31 @@ else
     fgrep "$TARGET" $TMPOUT
 fi
 
-cat tmp/*BacnetVersionTestReport.txt >> $REPORT
-cat tmp/*BacnetVersionTest_APPENDIX.txt >> $REPORT
-cat tmp/*BacnetPICSTestReport.txt >> $REPORT
-cat tmp/*BacnetPICSTest_APPENDIX.txt >> $REPORT
+VERSION_LOG=$(cat tmp/BacnetVersionTest_APPENDIX.txt)
+VERSION_RESULT_AND_SUMMARY=$(cat tmp/BacnetVersionTestReport.txt)
+
+PICS_LOG=$(cat tmp/BacnetPICSTest_APPENDIX.txt)
+PICS_RESULT_AND_SUMMARY=$(cat tmp/BacnetPICSTestReport.txt)
+
+write_out_result $REPORT \
+                 "protocol.bacnet.version" \
+                 "Verify and record version of Bacnet used by the device" \
+                 "$VERSION_LOG" \
+                 "$VERSION_RESULT_AND_SUMMARY"
+
+write_out_result $REPORT \
+                 "protocol.bacnet.pic" \
+                 "Verify BACnet traffic is compliant to the PIC statement" \
+                 "$PICS_LOG" \
+                 "$PICS_RESULT_AND_SUMMARY"
+
+result_lines=( "$VERSION_RESULT_AND_SUMMARY" "$PICS_RESULT_AND_SUMMARY" )
+
+echo "logs:"
+echo "$VERSION_RESULT_AND_SUMMARY"
+echo "$PICS_RESULT_AND_SUMMARY"
+
+echo "result from fail checker:"
+echo $(check_for_fails_in "${result_lines[@]}")
+
+[ $(check_for_fails_in "${result_lines[@]}") == false ]

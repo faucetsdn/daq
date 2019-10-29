@@ -1,0 +1,20 @@
+{
+    "connection.port_link" : {
+        "desc" : "Connect the device to the network switch. Check the device and the switch for the green connection light & no errors"
+    },
+    "connection.port_speed" : {
+        "desc" : "Verify the device auto-negotiates connection speed"
+    },
+    "connection.port_duplex" : {
+        "desc" : "Verify the device supports full duplex"
+    },
+    "poe.power" : {
+        "desc" : "Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at"
+    },
+    "poe.negotiation" : {
+        "desc" : "Verify the device autonegotiates power requirements"
+    },
+    "poe.support" : {
+        "desc" : "Verify if the device supports PoE"
+    }
+}

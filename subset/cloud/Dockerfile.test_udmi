@@ -5,7 +5,7 @@
 
 FROM daq/aardvark:latest
 
-RUN $AG update && $AG install openjdk-8-jdk git jq
+RUN $AG update && $AG install openjdk-8-jdk git
 
 COPY validator/ validator/
 RUN validator/bin/build

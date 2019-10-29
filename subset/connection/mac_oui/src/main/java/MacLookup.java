@@ -22,7 +22,7 @@ public class MacLookup {
       System.out.println(formattedMac + " " + manufacturer);
     } catch (NullPointerException e) {
       System.out.println(e + " could not find the manufacturer");
-      reportHandler.addText("RESULT fail connection.mac_oui");
+      reportHandler.addText("RESULT fail connection.mac_oui Manufacturer prefix not found!");
       reportHandler.writeReport();
     }
   }

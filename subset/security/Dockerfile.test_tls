@@ -5,7 +5,8 @@ RUN $AG update && $AG install openjdk-8-jre
 
 RUN $AG update && $AG install openjdk-8-jdk git
 
-COPY subset/security/ . 
+COPY subset/switches/module_manifest.json .
+COPY subset/security/ .
 
 RUN cd tlstest && ./gradlew build
 

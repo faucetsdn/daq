@@ -60,20 +60,20 @@ Overall device result FAIL
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
-|skip|base.switch.ping|Other|Other||
-|pass|base.target.ping|Connectivity|Required|target|
-|skip|cloud.udmi.pointset|Other|Other|No device id.|
-|fail|connection.mac_oui|Other|Other||
-|skip|connection.port_duplex|Other|Other||
-|skip|connection.port_link|Other|Other||
-|skip|connection.port_speed|Other|Other||
-|fail|network.brute|Security|Required||
-|skip|poe.negotiation|Other|Other||
-|skip|poe.power|Other|Other||
-|skip|poe.support|Other|Other||
-|skip|protocol.bacnet.pic|Other|Other|Bacnet device not found... Pics check cannot be performed.|
+|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|pass|base.target.ping|Connectivity|Required|target reached|
+|skip|cloud.udmi.pointset|Other|Other|No device id|
+|fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
+|skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|connection.port_speed|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|fail|network.brute|Security|Required|Change the default password on the DUT|
+|skip|poe.negotiation|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|poe.power|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|poe.support|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|protocol.bacnet.pic|Other|Other|Bacnet device not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
-|skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap.|
+|skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |skip|security.passwords.http|Other|Other|Device does not have a valid mac address|
 |skip|security.passwords.https|Other|Other|Device does not have a valid mac address|
 |skip|security.passwords.ssh|Other|Other|Device does not have a valid mac address|
@@ -88,27 +88,62 @@ Overall device result FAIL
 ## Module ping
 
 ```
+--------------------
 Baseline ping test report
-%% 64 packets captured.
-RESULT skip base.switch.ping
-RESULT pass base.target.ping target %% 10.20.34.164
+%% 61 packets captured.
+LOCAL_IP not configured, assuming no network switch
+
+Done with basic connectivity tests
+
+--------------------
+base.switch.ping
+--------------------
+Attempt to ping the OpenFlow compatible switch configured in system.conf
+--------------------
+See log above
+--------------------
+RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+
+--------------------
+base.target.ping
+--------------------
+Attempt to ping the Device Under Test
+--------------------
+See log above
+--------------------
+RESULT pass base.target.ping target reached %% 10.20.70.164
+
 ```
 
 ## Module nmap
 
 ```
+--------------------
+security.ports.nmap
+--------------------
+Automatic TCP/UDP port scan using nmap
+--------------------
 Allowing 10000 open tcp snet-sensor-mgmt
 No invalid ports found.
-RESULT pass security.ports.nmap
+--------------------
+RESULT pass security.ports.nmap 
+
 ```
 
 ## Module brute
 
 ```
+--------------------
+network.brute
+--------------------
+Educational test - not to be included in a production environment!
+--------------------
 Username:manager
 Password:friend
 Login success!
-RESULT fail network.brute
+--------------------
+RESULT fail network.brute Change the default password on the DUT
+
 ```
 
 ## Module discover
@@ -122,43 +157,133 @@ Automatic bacnet firmware scan using nmap
 PORT      STATE  SERVICE
 47808/udp closed bacnet
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
-Firmware test complete
 --------------------
-RESULT skip security.firmware Could not retrieve a firmware version with nmap.
+RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
+
 ```
 
 ## Module switch
 
 ```
+--------------------
+connection.port_link
+--------------------
+Connect the device to the network switch. Check the device and the switch for the green connection light & no errors
+--------------------
 LOCAL_IP not configured, assuming no network switch.
-RESULT skip connection.port_link
-RESULT skip connection.port_speed
-RESULT skip connection.port_duplex
-RESULT skip poe.power
-RESULT skip poe.negotiation
-RESULT skip poe.support
+--------------------
+RESULT skip connection.port_link No local IP has been set, check ext_loip in system.conf
+
+--------------------
+connection.port_speed
+--------------------
+Verify the device auto-negotiates connection speed
+--------------------
+LOCAL_IP not configured, assuming no network switch.
+--------------------
+RESULT skip connection.port_speed No local IP has been set, check ext_loip in system.conf
+
+--------------------
+connection.port_duplex
+--------------------
+Verify the device supports full duplex
+--------------------
+LOCAL_IP not configured, assuming no network switch.
+--------------------
+RESULT skip connection.port_duplex No local IP has been set, check ext_loip in system.conf
+
+--------------------
+poe.power
+--------------------
+Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at
+--------------------
+LOCAL_IP not configured, assuming no network switch.
+--------------------
+RESULT skip poe.power No local IP has been set, check ext_loip in system.conf
+
+--------------------
+poe.negotiation
+--------------------
+Verify the device autonegotiates power requirements
+--------------------
+LOCAL_IP not configured, assuming no network switch.
+--------------------
+RESULT skip poe.negotiation No local IP has been set, check ext_loip in system.conf
+
+--------------------
+poe.support
+--------------------
+Verify if the device supports PoE
+--------------------
+LOCAL_IP not configured, assuming no network switch.
+--------------------
+RESULT skip poe.support No local IP has been set, check ext_loip in system.conf
+
 ```
 
 ## Module macoui
 
 ```
+--------------------
+connection.mac_oui
+--------------------
+Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer
+--------------------
+Using the host hardware address 9a:02:57:1e:8f:01
 Mac OUI Test
-RESULT fail connection.mac_oui
+--------------------
+RESULT fail connection.mac_oui Manufacturer prefix not found!
+
 ```
 
 ## Module bacext
 
 ```
+--------------------
+protocol.bacnet.version
+--------------------
+Verify and record version of Bacnet used by the device
+--------------------
+ Bacnet device not found.
+--------------------
 RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.
+
+--------------------
+protocol.bacnet.pic
+--------------------
+Verify BACnet traffic is compliant to the PIC statement
+--------------------
+ Bacnet device not found... Pics check cannot be performed.
+--------------------
+RESULT skip protocol.bacnet.pic Bacnet device not found.
+
 ```
 
 ## Module tls
 
 ```
+--------------------
+Collecting TLS cert from target address %% 10.20.96.164
 IOException unable to connect to server.
+
+--------------------
+security.tls.v3
+--------------------
+Verify the device supports TLS 1.2 or above (as a client)
+--------------------
+See log above
+--------------------
 RESULT skip security.tls.v3
+
+--------------------
+security.x509
+--------------------
+Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
+--------------------
+See log above
+--------------------
 RESULT skip security.x509
+
 ```
 
 ## Module password
@@ -205,7 +330,15 @@ RESULT skip security.passwords.ssh Device does not have a valid mac address
 ## Module udmi
 
 ```
-RESULT skip cloud.udmi.pointset No device id.
+--------------------
+cloud.udmi.pointset
+--------------------
+Validates the payloads from the DUT to a predefined schema
+--------------------
+Device id is null, skipping.
+--------------------
+RESULT skip cloud.udmi.pointset No device id
+
 ```
 
 ## Report complete

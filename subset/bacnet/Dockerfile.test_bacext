@@ -16,8 +16,6 @@ RUN $AG update && $AG install openjdk-8-jre
 
 RUN $AG update && $AG install openjdk-8-jdk git
 
-RUN $AG update && $AG install nano
-
 COPY subset/bacnet/ .
 
 RUN mkdir -p /bacnetTests/libs

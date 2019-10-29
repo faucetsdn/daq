@@ -25,6 +25,8 @@ public class SwitchInterrogator implements Runnable {
   SwitchTelnetClientSocket telnetClientSocket;
   Thread telnetClientSocketThread;
 
+  // TODO: enabled the user to input their own username and password
+
   String username = "manager";
   String password = "friend";
 
@@ -606,7 +608,7 @@ public class SwitchInterrogator implements Runnable {
       if (interface_map.get("link_status").equals("UP")) {
         login_report += "RESULT pass connection.port_link\n";
       } else {
-        login_report += "RESULT fail connection.port_link\n";
+        login_report += "RESULT fail connection.port_link Link is down\n";
       }
 
       if (interface_map.get("current_speed") != null) {
@@ -614,10 +616,10 @@ public class SwitchInterrogator implements Runnable {
             && Integer.parseInt(interface_map.get("current_speed")) >= 10) {
           login_report += "RESULT pass connection.port_speed\n";
         } else {
-          login_report += "RESULT fail connection.port_speed\n";
+          login_report += "RESULT fail connection.port_speed Speed is too slow\n";
         }
       } else {
-        login_report += "RESULT fail connection.port_speed\n";
+        login_report += "RESULT fail connection.port_speed Cannot detect current speed\n";
       }
 
       if (interface_map.get("current_duplex") != null) {
@@ -625,10 +627,10 @@ public class SwitchInterrogator implements Runnable {
             && interface_map.get("current_duplex").equals("full")) {
           login_report += "RESULT pass connection.port_duplex\n";
         } else {
-          login_report += "RESULT fail connection.port_duplex\n";
+          login_report += "RESULT fail connection.port_duplex Incorrect duplex mode set\n";
         }
       } else {
-        login_report += "RESULT fail connection.port_duplex\n";
+        login_report += "RESULT fail connection.port_duplex Cannot detect duplex mode\n";
       }
 
       if (switchSupportsPoe && deviceConfigPoeEnabled) {
@@ -655,27 +657,27 @@ public class SwitchInterrogator implements Runnable {
               && !current_oper.equals("Fault")) {
             login_report += "RESULT pass poe.power\n";
           } else {
-            login_report += "RESULT fail poe.power\n";
+            login_report += "RESULT fail poe.power The DUT is drawing too much current or there is a fault on the line\n";
           }
           if (current_PoE_admin.equals("Enabled")) {
             login_report += "RESULT pass poe.negotiation\n";
           } else {
-            login_report += "RESULT fail poe.negotiation\n";
+            login_report += "RESULT fail poe.negotiation Incorrect privilege for negotiation\n";
           }
           if (!current_oper.equals("Off")) {
             login_report += "RESULT pass poe.support\n";
           } else {
-            login_report += "RESULT fail poe.support\n";
+            login_report += "RESULT fail poe.support The AT switch does not support PoE or it is disabled\n";
           }
         } else {
-          login_report += "RESULT fail poe.power\n";
-          login_report += "RESULT fail poe.negotiation\n";
-          login_report += "RESULT fail poe.support\n";
+          login_report += "RESULT fail poe.power Could not detect any current being drawn\n";
+          login_report += "RESULT fail poe.negotiation Could not detect any current being drawn\n";
+          login_report += "RESULT fail poe.support Could not detect any current being drawn\n";
         }
       } else {
-        login_report += "RESULT skip poe.power\n";
-        login_report += "RESULT skip poe.negotiation\n";
-        login_report += "RESULT skip poe.support\n";
+        login_report += "RESULT skip poe.power The AT switch does not support PoE or this test is disabled\n";
+        login_report += "RESULT skip poe.negotiation The AT switch does not support PoE or this test is disabled\n";
+        login_report += "RESULT skip poe.support The AT switch does not support PoE or this test is disabled\n";
       }
 
       writeReport();

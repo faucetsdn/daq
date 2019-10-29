@@ -28,49 +28,88 @@ Overall device result PASS
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
-|skip|base.switch.ping|Other|Other||
-|pass|base.target.ping|Other|Other|target|
-|skip|network.brute|Other|Other||
+|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|pass|base.target.ping|Other|Other|target reached|
+|skip|network.brute|Other|Other|Port 10000 is not open|
 |pass|security.ports.nmap|Other|Other||
 
 
 ## Module ping
 
 ```
+--------------------
 Baseline ping test report
 
-RESULT skip base.switch.ping
-RESULT pass base.target.ping target
+LOCAL_IP not configured, assuming no network switch
+
+Done with basic connectivity tests
+
+--------------------
+base.switch.ping
+--------------------
+Attempt to ping the OpenFlow compatible switch configured in system.conf
+--------------------
+See log above
+--------------------
+RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+
+--------------------
+base.target.ping
+--------------------
+Attempt to ping the Device Under Test
+--------------------
+See log above
+--------------------
+RESULT pass base.target.ping target reached
+
 ```
 
 ## Module nmap
 
 ```
+--------------------
+security.ports.nmap
+--------------------
+Automatic TCP/UDP port scan using nmap
+--------------------
 No invalid ports found.
-RESULT pass security.ports.nmap
+--------------------
+RESULT pass security.ports.nmap 
+
 ```
 
 ## Module brute
 
 ```
+--------------------
+network.brute
+--------------------
+Educational test - not to be included in a production environment!
+--------------------
 Target port 10000 not open.
-RESULT skip network.brute
+--------------------
+RESULT skip network.brute Port 10000 is not open
+
 ```
 
 ## Report complete
 
 Open port tests
 01: ['01:nmap:1']
-|fail|security.ports.nmap|Other|Other||
-RESULT fail security.ports.nmap
+|fail|security.ports.nmap|Other|Other|Some disallowed ports are open|
+security.ports.nmap
+RESULT fail security.ports.nmap Some disallowed ports are open
 01: []
 |pass|security.ports.nmap|Other|Other||
+security.ports.nmap
 RESULT pass security.ports.nmap
 External switch tests
 02: []
     dp_id: 1
     dp_id: 4886718345
-Switch test with port 2.
+Switch test with port 2
+RESULT pass base.switch.ping target %% 192.0.2.138:2
+Switch test with port 2
 switch ping 2
 Mud profile tests
 result open 01: [] 02: [] 03: []

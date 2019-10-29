@@ -1,8 +1,15 @@
 #!/bin/bash -e
+source reporting.sh
+REPORT=/tmp/report.txt
+LOCAL_REPORT=tmp/report.txt
+MANIFEST=./module_manifest.json
+MONO_LOG=/tmp/monolog.switch.txt
+RESULT_LINES=/tmp/results.switch.txt
 
 # Setup for accessing control plane switch. If LOCAL_IP is defined, which
 # is the intended local address for this node on the control plane then
 # SWITCH_IP will be the IP address of the OpenFlow switch.
+
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
@@ -10,13 +17,55 @@ if [ -n "$LOCAL_IP" ]; then
     ping -n -c 10 $SWITCH_IP
     POE_ENABLED=`jq -r .modules.switch.poe.enabled /config/device/module_config.json`
     java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED
-    cp -r tmp/report.txt /tmp/report.txt
+
+    grep -v "RESULT" $LOCAL_REPORT | tee -a $MONO_LOG
+    grep "RESULT" $LOCAL_REPORT | tee -a $RESULT_LINES
+
+    write_out_monolog $REPORT \
+                      $MANIFEST \
+                      $MONO_LOG \
+                      $RESULT_LINES
+ 
 else
-    echo LOCAL_IP not configured, assuming no network switch. | tee /tmp/report.txt
-    echo RESULT skip connection.port_link | tee -a /tmp/report.txt
-    echo RESULT skip connection.port_speed | tee -a /tmp/report.txt
-    echo RESULT skip connection.port_duplex | tee -a /tmp/report.txt
-    echo RESULT skip poe.power | tee -a /tmp/report.txt
-    echo RESULT skip poe.negotiation | tee -a /tmp/report.txt
-    echo RESULT skip poe.support | tee -a /tmp/report.txt
+
+    SKIP_REASON="LOCAL_IP not configured, assuming no network switch."
+    RESULT="skip"
+    SUMMARY="No local IP has been set, check ext_loip in system.conf"
+
+    write_out_result $REPORT \
+                     "connection.port_link" \
+                     "$(jq -r '.["connection.port_link"].desc' $MANIFEST)" \
+                     "$SKIP_REASON" \
+                     "RESULT $RESULT connection.port_link $SUMMARY"
+
+    write_out_result $REPORT \
+                     "connection.port_speed" \
+                     "$(jq -r '.["connection.port_speed"].desc' $MANIFEST)" \
+                     "$SKIP_REASON" \
+                     "RESULT $RESULT connection.port_speed $SUMMARY"
+
+    write_out_result $REPORT \
+                     "connection.port_duplex" \
+                     "$(jq -r '.["connection.port_duplex"].desc' $MANIFEST)" \
+                     "$SKIP_REASON" \
+                     "RESULT $RESULT connection.port_duplex $SUMMARY"
+
+    write_out_result $REPORT \
+                     "poe.power" \
+                     "$(jq -r '.["poe.power"].desc' $MANIFEST)" \
+                     "$SKIP_REASON" \
+                     "RESULT $RESULT poe.power $SUMMARY"
+
+    write_out_result $REPORT \
+                     "poe.negotiation" \
+                     "$(jq -r '.["poe.negotiation"].desc' $MANIFEST)" \
+                     "$SKIP_REASON" \
+                     "RESULT $RESULT poe.negotiation $SUMMARY"
+
+    write_out_result $REPORT \
+                     "poe.support" \
+                     "$(jq -r '.["poe.support"].desc' $MANIFEST)" \
+                     "$SKIP_REASON" \
+                     "RESULT $RESULT poe.support $SUMMARY"
+
 fi

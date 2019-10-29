@@ -7,15 +7,15 @@ Lint checks
 check_style exit code 0
 Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.
+RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic pics.csv not found in device_types/../aux/ directory 
+RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory 
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
-RESULT fail network.brute
-RESULT pass network.brute
-RESULT skip network.brute
-RESULT fail connection.mac_oui
+RESULT fail network.brute Change the default password on the DUT
+RESULT pass network.brute 
+RESULT skip network.brute Port 10000 is not open
+RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui
 RESULT pass connection.mac_oui
 RESULT skip security.tls.v3
@@ -36,11 +36,11 @@ RESULT pass security.passwords.http  Default passwords have been changed
 RESULT pass security.passwords.https  Default passwords have been changed
 RESULT pass security.passwords.telnet  Default passwords have been changed
 RESULT pass security.passwords.ssh Default passwords have been changed
-RESULT skip security.firmware Could not retrieve a firmware version with nmap.
+RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 2 1
-01: ['01:brute:1']
-02: ['02:nmap:1', '02:ping:1']
+01: ['01:brute:1', '01:macoui:1']
+02: ['02:nmap:1', '02:ping:1', '02:tls:1']
 03: ['03:nmap:1']
 ctrl-br.flows
 ctrl-br.ofctl

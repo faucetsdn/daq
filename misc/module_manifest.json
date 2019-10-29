@@ -1,0 +1,8 @@
+{
+    "base.switch.ping" : {
+        "desc" : "Attempt to ping the OpenFlow compatible switch configured in system.conf"
+    },
+    "base.target.ping" : {
+        "desc" : "Attempt to ping the Device Under Test"
+    }
+}

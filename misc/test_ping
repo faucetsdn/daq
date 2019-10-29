@@ -1,12 +1,17 @@
 #!/bin/bash -e
+source reporting.sh
 
+RESULT_LINES=/tmp/result_lines.txt
+MONO_LOG=/tmp/mono-log.txt
+MANIFEST=./module_manifest.json
 REPORT_FILE=/tmp/report.txt
-echo Baseline ping test report > $REPORT_FILE
+
+echo Baseline ping test report | tee -a $MONO_LOG
 
 # This is a check that the startup.pcap file exists and is proper.
 echo
 ls -l /scans/startup.pcap
-echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $REPORT_FILE
+echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
 tcpdump -en -r /scans/startup.pcap ip
 echo
@@ -19,15 +24,15 @@ echo
 # is the intended local address for this node on the control plane then
 # SWITCH_IP will be the IP address of the OpenFlow switch.
 if [ -n "$LOCAL_IP" ]; then
-    echo Configuring network with local address $LOCAL_IP.
+    echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
     ip addr add $LOCAL_IP dev `hostname`-eth0
-    echo Switch test with port $SWITCH_PORT.
+    echo Switch test with port $SWITCH_PORT | tee -a $MONO_LOG
     status=pass
     ping -n -c 10 $SWITCH_IP || status=fail
-    echo RESULT $status base.switch.ping target $SWITCH_IP:$SWITCH_PORT >> $REPORT_FILE
+    echo RESULT $status base.switch.ping target %% $SWITCH_IP:$SWITCH_PORT | tee -a $RESULT_LINES
 else
-    echo LOCAL_IP not configured, assuming no network switch.
-    echo RESULT skip base.switch.ping >> $REPORT_FILE
+    echo LOCAL_IP not configured, assuming no network switch | tee -a $MONO_LOG
+    echo RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf | tee -a $RESULT_LINES
 fi
 
 ping_runtime=/config/port/ping_runtime.sh
@@ -39,9 +44,24 @@ else
 fi
 
 # First ping might fail b/c of warm-up delays.
+summary=""
 status=pass
 ping -n -c 10 $TARGET_IP || status=fail
-echo RESULT $status base.target.ping target %% $TARGET_IP >> $REPORT_FILE
 
-echo
-echo Done with basic connectivity tests.
+if [ $status == pass ]; then
+    summary="target reached"
+else
+    summary="could not reach target"
+fi
+
+echo RESULT $status base.target.ping $summary %% $TARGET_IP | tee -a $RESULT_LINES
+
+echo | tee -a $MONO_LOG
+echo Done with basic connectivity tests | tee -a $MONO_LOG
+
+write_out_monolog $REPORT_FILE \
+                  $MANIFEST \
+                  $MONO_LOG \
+                  $RESULT_LINES
+
+[ "$status" == pass ]
