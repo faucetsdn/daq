@@ -41,7 +41,7 @@ RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 2 1
 01: ['01:brute:1', '01:macoui:1']
 02: ['02:nmap:1', '02:ping:1', '02:tls:1']
-03: ['03:nmap:1']
+03: ['03:nmap:1', '03:udmi:1']
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
