@@ -25,6 +25,13 @@ fi
 
 docker --version
 
+if ! docker images > /dev/null; then
+    echo
+    echo Docker execution failed, is the docker group setup?
+    echo If this is the first time, try logging out and log back in again.
+    false
+fi
+
 if [ "$DAQ_BUILD" == "in" ]; then
     cmd/inbuild < /dev/null
 elif [ "$DAQ_BUILD" == "skip" ]; then
