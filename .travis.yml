@@ -23,7 +23,6 @@ env:
     - DAQ_TEST=many
     - DAQ_TEST=aux
     - DAQ_TEST=topo
-    - DAQ_TEST=stack DAQ_FAUCET_REPO=https://github.com/faucetsdn/faucet DAQ_FAUCET_VER=fbbb19e29bec66afcb7158a7f17b9c48e07810ed
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/
