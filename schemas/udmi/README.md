@@ -27,6 +27,7 @@ manual operation (aren't automated), and increase the security exposure of the s
 
 UDMI is intended to support a few primary use-cases:
 * _Telemetry Ingestion_: Ingest device data points in a standardized format.
+* _On-Prem Actuation_: Ability to effect on-prem device behavior.
 * _Device Testability_: e.g. Trigger a fake alarm to test reporting mechanims.
 * _Commissioning Tools_: Streamline complete system setup and install.
 * _Operational Diagnostics_: Make it easy for system operators to diagnoe basic faults.
