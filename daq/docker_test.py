@@ -40,10 +40,12 @@ class DockerTest():
                     "GATEWAY_IP=" + params['gateway_ip'],
                     "GATEWAY_MAC=" + params['gateway_mac']]
 
+
         if 'local_ip' in params:
             env_vars += ["LOCAL_IP=" + params['local_ip'],
                          "SWITCH_PORT=" + params['switch_port'],
-                         "SWITCH_IP=" + params['switch_ip']]
+                         "SWITCH_IP=" + params['switch_ip'],
+                         "SWITCH_MODEL=" + params['switch_model']]
 
         vol_maps = [params['scan_base'] + ":/scans"]
 

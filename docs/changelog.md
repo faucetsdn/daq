@@ -1,5 +1,6 @@
 # Changelog
-
+* 1.0.3
+	* Added required switch_model property in system.conf file when using switch tests
 * 1.0.2
 	* Faucet update to 1.9.19, including explicit LLDP stacking acls.
 	* Update Travis build environment to Bionic (prev. Trusty).
