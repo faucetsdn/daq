@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.api.client.util.Base64;
 import com.google.cloud.ServiceOptions;
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.MessageReceiver;
@@ -56,7 +57,6 @@ public class PubSubClient {
       ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(
           PROJECT_ID, name);
       System.out.println("Connecting to pubsub subscription " + subscriptionName);
-      //refreshSubscription(ProjectTopicName.of(PROJECT_ID, topicId), subscriptionName);
       subscriber = Subscriber.newBuilder(subscriptionName, new MessageProcessor()).build();
       subscriber.startAsync().awaitRunning();
       active.set(true);
@@ -80,7 +80,7 @@ public class PubSubClient {
         return;
       }
       Map<String, String> attributes = message.getAttributesMap();
-      String data = message.getData().toStringUtf8();
+      String data = new String(Base64.decodeBase64(message.getData().toByteArray()));
       Map<String, Object> asMap;
       try {
         asMap = OBJECT_MAPPER.readValue(data, TreeMap.class);
