@@ -41,6 +41,7 @@ public class PubSubClient {
 
   private final AtomicBoolean active = new AtomicBoolean();
   private final BlockingQueue<PubsubMessage> messages = new LinkedBlockingDeque<>();
+  private final long startTimeSec = System.currentTimeMillis() / 1000;
 
   private Subscriber subscriber;
 
@@ -55,7 +56,7 @@ public class PubSubClient {
       ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(
           PROJECT_ID, name);
       System.out.println("Connecting to pubsub subscription " + subscriptionName);
-      refreshSubscription(ProjectTopicName.of(PROJECT_ID, topicId), subscriptionName);
+      //refreshSubscription(ProjectTopicName.of(PROJECT_ID, topicId), subscriptionName);
       subscriber = Subscriber.newBuilder(subscriptionName, new MessageProcessor()).build();
       subscriber.startAsync().awaitRunning();
       active.set(true);
@@ -72,6 +73,12 @@ public class PubSubClient {
   public void processMessage(BiConsumer<Map<String, Object>, Map<String, String>> handler) {
     try {
       PubsubMessage message = messages.take();
+      long seconds = message.getPublishTime().getSeconds();
+      if (seconds < startTimeSec) {
+        System.out.println(String.format("Flushing outdated message from %d seconds ago",
+          startTimeSec - seconds));
+        return;
+      }
       Map<String, String> attributes = message.getAttributesMap();
       String data = message.getData().toStringUtf8();
       Map<String, Object> asMap;
