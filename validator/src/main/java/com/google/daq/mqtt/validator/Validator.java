@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -41,7 +43,7 @@ public class Validator {
   private static final String SCHEMA_VALIDATION_FORMAT = "Validating %d schemas";
   private static final String TARGET_VALIDATION_FORMAT = "Validating %d files against %s";
   private static final String PUBSUB_PREFIX = "pubsub:";
-  private static final File OUT_BASE_FILE = new File("out");
+  private static final File OUT_BASE_FILE = new File("validations");
   private static final String ATTRIBUTE_FILE_FORMAT = "%s_%s.attr";
   private static final String MESSAGE_FILE_FORMAT = "%s_%s.json";
   private static final String ERROR_FILE_FORMAT = "%s_%s.out";
@@ -74,12 +76,16 @@ public class Validator {
       System.exit(2);
     } catch (Exception e) {
       e.printStackTrace();
+      System.err.flush();
       System.exit(-1);
     }
     System.exit(0);
   }
 
   private void setSchemaSpec(String schemaSpec) {
+    if (!schemaSpec.endsWith(File.separator)) {
+      schemaSpec = schemaSpec + File.separator;
+    }
     this.schemaSpec = schemaSpec;
   }
 
@@ -226,12 +232,30 @@ public class Validator {
   private Schema getSchema(File schemaFile) {
     try (InputStream schemaStream = new FileInputStream(schemaFile)) {
       JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
-      return SchemaLoader.load(rawSchema);
+      SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).httpClient(new RelativeClient()).build();
+      return loader.load().build();
     } catch (Exception e) {
       throw new RuntimeException("While loading schema " + schemaFile.getAbsolutePath(), e);
     }
   }
 
+  class RelativeClient implements SchemaClient {
+
+    public static final String FILE_URL_PREFIX = "file:";
+
+    @Override
+    public InputStream get(String url) {
+      try {
+        if (!url.startsWith(FILE_URL_PREFIX)) {
+          throw new IllegalStateException("Expected path to start with " + FILE_URL_PREFIX);
+        }
+        String new_url = FILE_URL_PREFIX + schemaSpec + url.substring(FILE_URL_PREFIX.length());
+        return (InputStream) (new URL(new_url)).getContent();
+      } catch (Exception e) {
+        throw new RuntimeException("While loading URL " + url, e);
+      }
+    }
+  }
   private List<File> makeFileList(String spec) {
     File target = new File(spec);
     if (target.isFile()) {

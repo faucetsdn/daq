@@ -34,7 +34,7 @@ fi
 
 echo Running schema $schemafile in $schemadir
 
-rm -rf $schemadir/out
+rm -rf $schemadir/validation
 
 error=0
 absjar=$(realpath $jarfile)
