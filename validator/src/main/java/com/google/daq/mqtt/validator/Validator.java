@@ -12,6 +12,7 @@ import com.google.daq.mqtt.util.ExceptionMap;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
 import com.google.daq.mqtt.util.FirestoreDataSink;
 import com.google.daq.mqtt.util.PubSubClient;
+import com.google.daq.mqtt.validator.ReportingDevice.PointsetMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,8 +22,10 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,20 +55,27 @@ public class Validator {
   private static final String DEVICE_MATCH_FORMAT = "DeviceId %s must match pattern %s";
   private static final String SCHEMA_SKIP_FORMAT = "Unknown schema subFolder '%s' for %s";
   private static final String ENVELOPE_SCHEMA_ID = "envelope";
+  private static final String METADATA_JSON = "metadata.json";
+  private static final String DEVICES_SUBDIR = "devices";
   private FirestoreDataSink dataSink;
   private String schemaSpec;
+  private final Map<String, ReportingDevice> expectedDevices = new HashMap<>();
+  private final Set<String> unexpectedDevices = new HashSet<>();
 
   public static void main(String[] args) {
     Validator validator = new Validator();
     try {
       System.out.println(ServiceOptions.CREDENTIAL_ENV_NAME + "=" +
           System.getenv(ServiceOptions.CREDENTIAL_ENV_NAME));
-      if (args.length != 3) {
-        throw new IllegalArgumentException("Args: [schema] [target] [inst_name]");
+      if (args.length < 3 || args.length > 4) {
+        throw new IllegalArgumentException("Args: schema target inst_name [site]");
       }
       validator.setSchemaSpec(args[0]);
       String targetSpec = args[1];
       String instName = args[2];
+      if (args.length >= 4) {
+        validator.setSiteDir(args[3]);
+      }
       if (targetSpec.startsWith(PUBSUB_PREFIX)) {
         String topicName = targetSpec.substring(PUBSUB_PREFIX.length());
         validator.validatePubSub(instName, topicName);
@@ -80,6 +90,28 @@ public class Validator {
       System.exit(-1);
     }
     System.exit(0);
+  }
+
+  private void setSiteDir(String siteDir) {
+    try {
+      File devicesDir = new File(siteDir, DEVICES_SUBDIR);
+      for (String device : Objects.requireNonNull(devicesDir.list())) {
+        try {
+          File deviceDir = new File(devicesDir, device);
+          File metadataFile = new File(deviceDir, METADATA_JSON);
+          ReportingDevice reportingDevice = new ReportingDevice(device);
+          reportingDevice.setMetadata(
+              OBJECT_MAPPER.readValue(metadataFile, ReportingDevice.Metadata.class));
+          expectedDevices.put(device, reportingDevice);
+        } catch (Exception e) {
+          throw new RuntimeException("While loading device " + device, e);
+        }
+      }
+      System.out.println("Loaded " + expectedDevices.size() + " expected devices");
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "While loading site directory " + new File(siteDir).getAbsolutePath(), e);
+    }
   }
 
   private void setSchemaSpec(String schemaSpec) {
@@ -129,6 +161,7 @@ public class Validator {
   private void validateMessage(Map<String, Schema> schemaMap, Map<String, Object> message,
       Map<String, String> attributes) {
     try {
+      boolean hasError = false;
       String deviceId = attributes.get("deviceId");
       String subFolder = attributes.get("subFolder");
       String schemaId = subFolder;
@@ -150,20 +183,43 @@ public class Validator {
       } catch (Exception e) {
         System.out.println(e.getMessage());
         OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
-        return;
+        hasError = true;
       }
+
       try {
         validateMessage(schemaMap.get(ENVELOPE_SCHEMA_ID), attributes);
         validateDeviceId(deviceId);
       } catch (ExceptionMap | ValidationException e) {
         processViolation(message, attributes, deviceId, ENVELOPE_SCHEMA_ID, attributesFile, errorFile, e);
+        hasError = true;
       }
+
       try {
         validateMessage(schemaMap.get(schemaId), message);
         dataSink.validationResult(deviceId, schemaId, attributes, message, null);
-        System.out.println("Success validating " + messageFile);
       } catch (ExceptionMap | ValidationException e) {
         processViolation(message, attributes, deviceId, schemaId, messageFile, errorFile, e);
+        hasError = true;
+      }
+
+      try {
+        if (expectedDevices.containsKey(deviceId)) {
+          ReportingDevice.PointsetMessage pointsetMessage =
+              OBJECT_MAPPER.convertValue(message, ReportingDevice.PointsetMessage.class);
+          expectedDevices.get(deviceId).validateMetadata(pointsetMessage);
+        } else {
+          System.out.println("Unexpected device " + deviceId);
+          unexpectedDevices.add(deviceId);
+          hasError = true;
+        }
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+        OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
+        hasError = true;
+      }
+
+      if (!hasError) {
+        System.out.println("Success validating device " + deviceId);
       }
     } catch (Exception e){
       e.printStackTrace();
