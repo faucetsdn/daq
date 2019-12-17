@@ -7,7 +7,7 @@
       "enabled": true
     },
     "brute": {
-      "enabled": true
+      "enabled": false
     },
     "macoui": {
       "enabled": true
@@ -29,6 +29,9 @@
     },
     "discover": {
       "enabled": true
+    },
+    "password": {
+      "enabled": true
     }
   },
   "process": {
@@ -38,7 +41,7 @@
   "report": {
     "results": [ "pass", "fail", "skip", "info"  ],
     "categories": [ "Connection", "DNS", "Security", "Time", "MUD", "TLS", "Access", "Protocol", "PoE", "Information", "BOS", "IoT" ],
-    "expected": [ "Required Pass", "Recommended Pass", "Recommended Info" ]
+    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Recommended Pass", "Information" ]
   },
   "tests": {
     "base.switch.ping": {
@@ -79,17 +82,17 @@
     "poe.power": {
       "category": "PoE",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Required Pass for PoE Devices"
     },
     "poe.negotiation": {
       "category": "PoE",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Required Pass for PoE Devices"
     },
     "poe.support": {
       "category": "PoE",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Required Pass for PoE Devices"
     },
     "network.brute": {
       "category": "Security",
@@ -99,7 +102,7 @@
     "protocol.bacnet.version": {
       "category": "Protocol",
       "required": "info",
-      "expected": "Recommended Info"
+      "expected": "Information"
     },
     "security.ports.nmap": {
       "category": "Security",

@@ -40,4 +40,5 @@
 ### Device documentation
 
 [Device datasheets]({{ device_datasheets_url }})
+
 [Device manuals]({{ device_manuals_url }})
