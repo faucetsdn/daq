@@ -80,7 +80,13 @@ public class PubSubClient {
         return;
       }
       Map<String, String> attributes = message.getAttributesMap();
-      String data = new String(Base64.decodeBase64(message.getData().toByteArray()));
+      byte[] rawData = message.getData().toByteArray();
+      final String data;
+      if (rawData[0] == '{') {
+        data = new String(rawData);
+      } else {
+        data = new String(Base64.decodeBase64(rawData));
+      }
       Map<String, Object> asMap;
       try {
         asMap = OBJECT_MAPPER.readValue(data, TreeMap.class);

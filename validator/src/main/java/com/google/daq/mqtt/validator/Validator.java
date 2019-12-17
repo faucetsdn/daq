@@ -8,11 +8,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.daq.mqtt.util.CloudIotConfig;
+import com.google.daq.mqtt.util.ConfigUtil;
 import com.google.daq.mqtt.util.ExceptionMap;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
 import com.google.daq.mqtt.util.FirestoreDataSink;
 import com.google.daq.mqtt.util.PubSubClient;
-import com.google.daq.mqtt.validator.ReportingDevice.PointsetMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,10 +59,15 @@ public class Validator {
   private static final String ENVELOPE_SCHEMA_ID = "envelope";
   private static final String METADATA_JSON = "metadata.json";
   private static final String DEVICES_SUBDIR = "devices";
+  private static final String METADATA_REPORT_JSON = "metadata_report.json";
+  private static final String DEVICE_REGISTRY_ID_KEY = "deviceRegistryId";
   private FirestoreDataSink dataSink;
   private String schemaSpec;
   private final Map<String, ReportingDevice> expectedDevices = new HashMap<>();
-  private final Set<String> unexpectedDevices = new HashSet<>();
+  private final Set<String> extraDevices = new HashSet<>();
+  private final Set<String> missingDevices = new HashSet<>();
+  private final Set<String> processedDevices = new HashSet<>();
+  private CloudIotConfig cloudIotConfig;
 
   public static void main(String[] args) {
     Validator validator = new Validator();
@@ -93,8 +100,15 @@ public class Validator {
   }
 
   private void setSiteDir(String siteDir) {
+    File cloudConfig = new File(siteDir, "cloud_iot_config.json");
     try {
-      File devicesDir = new File(siteDir, DEVICES_SUBDIR);
+      cloudIotConfig = ConfigUtil.readCloudIotConfig(cloudConfig);
+    } catch (Exception e) {
+      throw new RuntimeException("While reading config file " + cloudConfig.getAbsolutePath(), e);
+    }
+
+    File devicesDir = new File(siteDir, DEVICES_SUBDIR);
+    try {
       for (String device : Objects.requireNonNull(devicesDir.list())) {
         try {
           File deviceDir = new File(devicesDir, device);
@@ -107,10 +121,11 @@ public class Validator {
           throw new RuntimeException("While loading device " + device, e);
         }
       }
+      missingDevices.addAll(expectedDevices.keySet());
       System.out.println("Loaded " + expectedDevices.size() + " expected devices");
     } catch (Exception e) {
       throw new RuntimeException(
-          "While loading site directory " + new File(siteDir).getAbsolutePath(), e);
+          "While loading devices directory " + devicesDir.getAbsolutePath(), e);
     }
   }
 
@@ -160,11 +175,22 @@ public class Validator {
 
   private void validateMessage(Map<String, Schema> schemaMap, Map<String, Object> message,
       Map<String, String> attributes) {
+
+    String registryId = attributes.get(DEVICE_REGISTRY_ID_KEY);
+    if (cloudIotConfig != null && !cloudIotConfig.registry_id.equals(registryId)) {
+      // Silently drop messages for different registries.
+      return;
+    }
+
     try {
-      boolean hasError = false;
+      Exception error = null;
       String deviceId = attributes.get("deviceId");
       String subFolder = attributes.get("subFolder");
       String schemaId = subFolder;
+
+      if (!processedDevices.add(deviceId) && !expectedDevices.isEmpty()) {
+        return;
+      }
 
       File attributesFile = new File(OUT_BASE_FILE, String.format(ATTRIBUTE_FILE_FORMAT, schemaId, deviceId));
       OBJECT_MAPPER.writeValue(attributesFile, attributes);
@@ -183,7 +209,7 @@ public class Validator {
       } catch (Exception e) {
         System.out.println(e.getMessage());
         OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
-        hasError = true;
+        error = e;
       }
 
       try {
@@ -191,7 +217,7 @@ public class Validator {
         validateDeviceId(deviceId);
       } catch (ExceptionMap | ValidationException e) {
         processViolation(message, attributes, deviceId, ENVELOPE_SCHEMA_ID, attributesFile, errorFile, e);
-        hasError = true;
+        error = e;
       }
 
       try {
@@ -199,31 +225,68 @@ public class Validator {
         dataSink.validationResult(deviceId, schemaId, attributes, message, null);
       } catch (ExceptionMap | ValidationException e) {
         processViolation(message, attributes, deviceId, schemaId, messageFile, errorFile, e);
-        hasError = true;
+        error = e;
       }
 
+      boolean updated = false;
       try {
-        if (expectedDevices.containsKey(deviceId)) {
+        if (expectedDevices.isEmpty()) {
+          // No devices configured, so don't check metadata.
+          updated = false;
+        } else if (expectedDevices.containsKey(deviceId)) {
           ReportingDevice.PointsetMessage pointsetMessage =
               OBJECT_MAPPER.convertValue(message, ReportingDevice.PointsetMessage.class);
           expectedDevices.get(deviceId).validateMetadata(pointsetMessage);
+          updated = missingDevices.remove(deviceId);
         } else {
-          System.out.println("Unexpected device " + deviceId);
-          unexpectedDevices.add(deviceId);
-          hasError = true;
+          if (extraDevices.add(deviceId)) {
+            updated = true;
+          }
         }
       } catch (Exception e) {
-        System.out.println(e.getMessage());
         OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
-        hasError = true;
+        error = e;
       }
 
-      if (!hasError) {
+      if (error == null) {
         System.out.println("Success validating device " + deviceId);
+      } else if (expectedDevices.containsKey(deviceId)) {
+        expectedDevices.get(deviceId).setError(error);
+        updated = true;
+      }
+
+      if (updated) {
+        writeDeviceMetadataReport();
       }
     } catch (Exception e){
       e.printStackTrace();
     }
+  }
+
+  private void writeDeviceMetadataReport() {
+    File metadataReportFile = new File(OUT_BASE_FILE, METADATA_REPORT_JSON);
+    try {
+      MetadataReport metadataReport = new MetadataReport();
+      metadataReport.updated = new Date();
+      metadataReport.missingDevices = missingDevices;
+      metadataReport.extraDevices = extraDevices;
+      metadataReport.devices = new HashMap<>();
+      for (ReportingDevice deviceInfo : expectedDevices.values()) {
+        if (deviceInfo.hasMetadataDiff()) {
+          metadataReport.devices.put(deviceInfo.getDeviceId(), deviceInfo.getMetadataDiff());
+        }
+      }
+      OBJECT_MAPPER.writeValue(metadataReportFile, metadataReport);
+    } catch (Exception e) {
+      throw new RuntimeException("While generating metadata report file " + metadataReportFile.getAbsolutePath(), e);
+    }
+  }
+
+  public static class MetadataReport {
+    public Date updated;
+    public Set<String> missingDevices;
+    public Set<String> extraDevices;
+    public Map<String, ReportingDevice.MetadataDiff> devices;
   }
 
   private void processViolation(Map<String, Object> message, Map<String, String> attributes,
