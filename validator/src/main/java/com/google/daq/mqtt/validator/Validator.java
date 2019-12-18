@@ -290,10 +290,11 @@ public class Validator {
       metadataReport.missingDevices = missingDevices;
       metadataReport.extraDevices = extraDevices;
       metadataReport.base64Devices = base64Devices;
-      metadataReport.devices = new HashMap<>();
+      metadataReport.expectedDevices = expectedDevices.keySet();
+      metadataReport.deviceErrors = new HashMap<>();
       for (ReportingDevice deviceInfo : expectedDevices.values()) {
         if (deviceInfo.hasMetadataDiff()) {
-          metadataReport.devices.put(deviceInfo.getDeviceId(), deviceInfo.getMetadataDiff());
+          metadataReport.deviceErrors.put(deviceInfo.getDeviceId(), deviceInfo.getMetadataDiff());
         }
       }
       OBJECT_MAPPER.writeValue(metadataReportFile, metadataReport);
@@ -304,10 +305,11 @@ public class Validator {
 
   public static class MetadataReport {
     public Date updated;
+    public Set<String> expectedDevices;
     public Set<String> missingDevices;
     public Set<String> extraDevices;
     public Set<String> base64Devices;
-    public Map<String, ReportingDevice.MetadataDiff> devices;
+    public Map<String, ReportingDevice.MetadataDiff> deviceErrors;
   }
 
   private void processViolation(Map<String, Object> message, Map<String, String> attributes,
