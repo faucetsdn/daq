@@ -3,6 +3,7 @@ package com.google.daq.mqtt.validator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.google.cloud.ServiceOptions;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -21,6 +22,7 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,18 +42,24 @@ import org.json.JSONTokener;
 
 public class Validator {
 
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy hh:mm");
+
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .enable(SerializationFeature.INDENT_OUTPUT)
+      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .setDateFormat(new StdDateFormat())
       .setSerializationInclusion(Include.NON_NULL);
+
   private static final String ERROR_FORMAT_INDENT = "  ";
   private static final String JSON_SUFFIX = ".json";
   private static final String SCHEMA_VALIDATION_FORMAT = "Validating %d schemas";
   private static final String TARGET_VALIDATION_FORMAT = "Validating %d files against %s";
   private static final String PUBSUB_PREFIX = "pubsub:";
   private static final File OUT_BASE_FILE = new File("validations");
-  private static final String ATTRIBUTE_FILE_FORMAT = "%s_%s.attr";
-  private static final String MESSAGE_FILE_FORMAT = "%s_%s.json";
-  private static final String ERROR_FILE_FORMAT = "%s_%s.out";
+  private static final String DEVICE_FILE_FORMAT = "devices/%s";
+  private static final String ATTRIBUTE_FILE_FORMAT = "%s.attr";
+  private static final String MESSAGE_FILE_FORMAT = "%s.json";
+  private static final String ERROR_FILE_FORMAT = "%s.out";
   private static final Pattern DEVICE_ID_PATTERN =
       Pattern.compile("^([a-z][_a-z0-9-]*[a-z0-9]|[A-Z][_A-Z0-9-]*[A-Z0-9])$");
   private static final String DEVICE_MATCH_FORMAT = "DeviceId %s must match pattern %s";
@@ -67,6 +75,7 @@ public class Validator {
   private final Set<String> extraDevices = new HashSet<>();
   private final Set<String> missingDevices = new HashSet<>();
   private final Set<String> processedDevices = new HashSet<>();
+  private final Set<String> base64Devices = new HashSet<>();
   private CloudIotConfig cloudIotConfig;
 
   public static void main(String[] args) {
@@ -188,17 +197,27 @@ public class Validator {
       String subFolder = attributes.get("subFolder");
       String schemaId = subFolder;
 
-      if (!processedDevices.add(deviceId) && !expectedDevices.isEmpty()) {
-        return;
+      if (!expectedDevices.isEmpty()) {
+        if (!processedDevices.add(deviceId)) {
+          return;
+        }
+        System.out.println("Processing device #" + processedDevices.size() + ": " + deviceId);
       }
 
-      File attributesFile = new File(OUT_BASE_FILE, String.format(ATTRIBUTE_FILE_FORMAT, schemaId, deviceId));
+      if (attributes.get("wasBase64").equals("true")) {
+        base64Devices.add(deviceId);
+      }
+
+      File deviceDir = new File(OUT_BASE_FILE, String.format(DEVICE_FILE_FORMAT, deviceId));
+      deviceDir.mkdirs();
+
+      File attributesFile = new File(deviceDir, String.format(ATTRIBUTE_FILE_FORMAT, schemaId));
       OBJECT_MAPPER.writeValue(attributesFile, attributes);
 
-      File messageFile = new File(OUT_BASE_FILE, String.format(MESSAGE_FILE_FORMAT, schemaId, deviceId));
+      File messageFile = new File(deviceDir, String.format(MESSAGE_FILE_FORMAT, schemaId));
       OBJECT_MAPPER.writeValue(messageFile, message);
 
-      File errorFile = new File(OUT_BASE_FILE, String.format(ERROR_FILE_FORMAT, schemaId, deviceId));
+      File errorFile = new File(deviceDir, String.format(ERROR_FILE_FORMAT, schemaId));
 
       try {
         Preconditions.checkNotNull(deviceId, "Missing deviceId in message");
@@ -270,6 +289,7 @@ public class Validator {
       metadataReport.updated = new Date();
       metadataReport.missingDevices = missingDevices;
       metadataReport.extraDevices = extraDevices;
+      metadataReport.base64Devices = base64Devices;
       metadataReport.devices = new HashMap<>();
       for (ReportingDevice deviceInfo : expectedDevices.values()) {
         if (deviceInfo.hasMetadataDiff()) {
@@ -286,6 +306,7 @@ public class Validator {
     public Date updated;
     public Set<String> missingDevices;
     public Set<String> extraDevices;
+    public Set<String> base64Devices;
     public Map<String, ReportingDevice.MetadataDiff> devices;
   }
 

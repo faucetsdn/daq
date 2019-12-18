@@ -19,6 +19,7 @@ import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.Subscription;
 import io.grpc.LoadBalancerRegistry;
 import io.grpc.internal.PickFirstLoadBalancerProvider;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -39,6 +40,7 @@ public class PubSubClient {
 
   private static final String PROJECT_ID = ServiceOptions.getDefaultProjectId();
   private static final long SUBSCRIPTION_RACE_DELAY_MS = 10000;
+  private static final String WAS_BASE_64 = "wasBase64";
 
   private final AtomicBoolean active = new AtomicBoolean();
   private final BlockingQueue<PubsubMessage> messages = new LinkedBlockingDeque<>();
@@ -82,10 +84,11 @@ public class PubSubClient {
       Map<String, String> attributes = message.getAttributesMap();
       byte[] rawData = message.getData().toByteArray();
       final String data;
-      if (rawData[0] == '{') {
-        data = new String(rawData);
-      } else {
+      boolean base64 = rawData[0] != '{';
+      if (base64) {
         data = new String(Base64.decodeBase64(rawData));
+      } else {
+        data = new String(rawData);
       }
       Map<String, Object> asMap;
       try {
@@ -93,6 +96,10 @@ public class PubSubClient {
       } catch (JsonProcessingException e) {
         asMap = new ErrorContainer(e, data);
       }
+
+      attributes = new HashMap<>(attributes);
+      attributes.put(WAS_BASE_64, ""+ base64);
+
       handler.accept(asMap, attributes);
     } catch (Exception e) {
       throw new RuntimeException("Processing pubsub message for " + getSubscriptionId(), e);
