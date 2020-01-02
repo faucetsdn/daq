@@ -6,8 +6,8 @@ echo Base Tests >> $TEST_RESULTS
 
 function redact {
     sed -e 's/\s*%%.*//' \
-        -e 's/2019-.*T.*Z/XXX/' \
-        -e 's/2019-.*00:00/XXX/' \
+        -e 's/\d{4}-.*T.*Z/XXX/' \
+        -e 's/\d{4}-(0|1)\d-(0|1|2|3)\d \d{2}:\d{2}:\d{2}+00:00/XXX/' \
         -e 's/DAQ version.*//'
 }
 

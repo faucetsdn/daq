@@ -1,7 +1,7 @@
 Running testing/test_base.sh
 Base Tests
 01: []
-# Device 9a02571e8f00, XXX
+# Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
 By default would be in local/site/ rather than misc/test_site/.
