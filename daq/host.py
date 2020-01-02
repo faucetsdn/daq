@@ -459,8 +459,6 @@ class ConnectedHost:
             params['local_ip'] = ext_loip % self.test_port
             params['switch_ip'] = self.config['ext_addr']
             params['switch_port'] = str(self.target_port)
-            params['switch_model'] = self.config['switch_model']
-
         LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
         self._set_module_config(test_name, self._loaded_config)
         self.record_result(test_name, state=MODE.EXEC)
@@ -530,7 +528,7 @@ class ConnectedHost:
         """Record a named result for this test"""
         current = gcp.get_timestamp()
         if name != self.test_name:
-            LOGGER.debug('Target port %d report %s start %d',
+            LOGGER.debug('Target port %d report %s start %s',
                          self.target_port, name, current)
             self.test_name = name
             self.test_start = current
