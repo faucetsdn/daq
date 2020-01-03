@@ -216,7 +216,7 @@ public class Binary {
                 encodable = new UnsignedInteger(minimumOffTime);
                 device.addProperty(bacnetObjectType, PropertyIdentifier.minimumOffTime, encodable);
                 break;
-            case "Feeback_Value":
+            case "Feedback_Value":
                 feedbackValue = Integer.parseInt(propertyValue);
                 encodable = new BinaryPV(feedbackValue);
                 device.addProperty(bacnetObjectType, PropertyIdentifier.feedbackValue, encodable);
