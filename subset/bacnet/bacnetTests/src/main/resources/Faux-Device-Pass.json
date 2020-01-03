@@ -144,7 +144,7 @@
             "Event_Algorithm_Inhibit": "false",
             "Minimum_On_Time": "0",
             "Minimum_Off_Time": "0",
-            "Relinquinsh_Default": "0.0",
+            "Relinquish_Default": "0.0",
             "Feedback_Value": "0",
 	    "Polarity": "0",
 	    "Device_Type": "0to1Volts"
@@ -178,7 +178,7 @@
             "Event_Algorithm_Inhibit": "false",
             "Minimum_On_Time": "0",
             "Minimum_Off_Time": "0",
-            "Relinquinsh_Default": "0.0",
+            "Relinquish_Default": "0.0",
             "Feedback_Value": "0"
         }
     }
