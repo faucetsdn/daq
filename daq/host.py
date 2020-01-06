@@ -530,7 +530,7 @@ class ConnectedHost:
         """Record a named result for this test"""
         current = gcp.get_timestamp()
         if name != self.test_name:
-            LOGGER.debug('Target port %d report %s start %d',
+            LOGGER.debug('Target port %d report %s start %s',
                          self.target_port, name, current)
             self.test_name = name
             self.test_start = current

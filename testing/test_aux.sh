@@ -134,14 +134,12 @@ echo done with docker logs
 
 # Remove things that will always (probably) change - like DAQ version/timestamps/IPs
 # from comparison
-# This won't necessarily work in 2020, for example...
 function redact {
-    sed -e 's/\s*%%.*//' \
-        -e 's/2019-.*T.*Z/XXX/' \
-        -e 's/2019-.*00:00/XXX/' \
+    sed -E -e 's/\s*%%.*//' \
+        -e 's/[0-9]{4}-.*T.*Z/XXX/' \
+        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/g' \
         -e 's/DAQ version.*//'
 }
-
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
