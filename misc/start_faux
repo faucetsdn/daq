@@ -162,7 +162,7 @@ if [ -n "${options[pubber]}" ]; then
          ping -c 3 mqtt.googleapis.com
          pubber/bin/run
          sleep 30
-     done) &
+     done) 2>&1  &
 fi
 
 conf_file=/config/start/start_faux.sh
