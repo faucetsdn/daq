@@ -18,7 +18,6 @@ public class SetupTest {
   private static final int addressEndPosition = 6;
   private static final int manufacturerNamePosition = 7;
   Map<String, String> macDevices = new HashMap<String, String>();
-  private InputStream jsonStream = this.getClass().getResourceAsStream("/defaultPasswords.json");
   ReportHandler reportHandler;
   String[] usernames;
   String[] passwords;
@@ -48,20 +47,20 @@ public class SetupTest {
   }
 
   private void getMacAddress() {
-    String formattedMac;
+    String simpleMacAddress = macAddress.replace(":", "");
+    String formattedMac = simpleMacAddress.substring(addressStartPosition, addressEndPosition).toUpperCase();
     try {
-      macAddress = macAddress.replace(":", "");
-      formattedMac = macAddress.substring(addressStartPosition, addressEndPosition).toUpperCase();
       getJsonFile(formattedMac);
     } catch (Exception e) {
       System.err.println(e.getMessage());
       reportHandler.addText(
-          "RESULT skip security.passwords."+ protocol +" Device does not have a valid mac address");
+          "RESULT skip security.passwords."+ protocol +" Could not lookup password info for mac-key " + macAddress);
       reportHandler.writeReport();
     }
   }
 
   public void getJsonFile(String macAddress) {
+    InputStream jsonStream = this.getClass().getResourceAsStream("/defaultPasswords.json");
     JsonObject jsonFileContents =
         gsonController.fromJson(new InputStreamReader(jsonStream), JsonObject.class);
     JsonObject manufacturer = jsonFileContents.getAsJsonObject(macAddress);

@@ -50,6 +50,7 @@ if [ -n "${options[passwordpass]}" ]; then
 fi
 
 if [ -n "${options[passwordfail]}" ]; then
+    set_mac_addr 3c:5a:b4:1e:8f:0b
     set_passwd 'root:default'
     echo "pass\npass\n\n\n\n\n\ny\n" | adduser "admin"
     echo "admin:default" | chpasswd
