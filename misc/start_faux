@@ -155,6 +155,8 @@ fi
 if [ -n "${options[pubber]}" ]; then
     echo Running cloud pubber tool...
     (while date; do
+         echo Starting pubber
+         ip addr
          nslookup mqtt.googleapis.com
          ping -c 3 mqtt.googleapis.com
          pubber/bin/run
