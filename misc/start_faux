@@ -157,6 +157,7 @@ if [ -n "${options[pubber]}" ]; then
     (while date; do
          echo Starting pubber
          ip addr
+         cat /etc/resolv.conf
          nslookup mqtt.googleapis.com
          ping -c 3 mqtt.googleapis.com
          pubber/bin/run
