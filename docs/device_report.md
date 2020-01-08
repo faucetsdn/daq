@@ -74,10 +74,10 @@ Overall device result FAIL
 |skip|protocol.bacnet.pic|Other|Other|Bacnet device not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
-|skip|security.passwords.http|Other|Other|Device does not have a valid mac address|
-|skip|security.passwords.https|Other|Other|Device does not have a valid mac address|
-|skip|security.passwords.ssh|Other|Other|Device does not have a valid mac address|
-|skip|security.passwords.telnet|Other|Other|Device does not have a valid mac address|
+|skip|security.passwords.http|Other|Other|Could not lookup password info for mac-key 9a:02:57:1e:8f:01|
+|skip|security.passwords.https|Other|Other|Could not lookup password info for mac-key 9a:02:57:1e:8f:01|
+|skip|security.passwords.ssh|Other|Other|Could not lookup password info for mac-key 9a:02:57:1e:8f:01|
+|skip|security.passwords.telnet|Other|Other|Could not lookup password info for mac-key 9a:02:57:1e:8f:01|
 |pass|security.ports.nmap|Security|Recommended||
 |skip|security.tls.v3|Other|Other||
 |skip|security.x509|Other|Other||
@@ -296,7 +296,7 @@ Verify all default password have been updated. Ensure new Google provided passwo
 --------------------
 Redacted Log
 --------------------
-RESULT skip security.passwords.http Device does not have a valid mac address
+RESULT skip security.passwords.http Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 
 --------------------
 security.passwords.https
@@ -305,7 +305,7 @@ Verify all default password have been updated. Ensure new Google provided passwo
 --------------------
 Redacted Log
 --------------------
-RESULT skip security.passwords.https Device does not have a valid mac address
+RESULT skip security.passwords.https Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 
 --------------------
 security.passwords.telnet
@@ -314,7 +314,7 @@ Verify all default password have been updated. Ensure new Google provided passwo
 --------------------
 Redacted Log
 --------------------
-RESULT skip security.passwords.telnet Device does not have a valid mac address
+RESULT skip security.passwords.telnet Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 
 --------------------
 security.passwords.ssh
@@ -323,7 +323,7 @@ Verify all default password have been updated. Ensure new Google provided passwo
 --------------------
 Redacted Log
 --------------------
-RESULT skip security.passwords.ssh Device does not have a valid mac address
+RESULT skip security.passwords.ssh Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 
 ```
 
@@ -333,7 +333,7 @@ RESULT skip security.passwords.ssh Device does not have a valid mac address
 --------------------
 cloud.udmi.pointset
 --------------------
-Validates the payloads from the DUT to a predefined schema
+Validates device payload against the UDMI schema
 --------------------
 Device id is null, skipping.
 --------------------
