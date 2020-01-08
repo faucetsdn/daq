@@ -24,10 +24,10 @@ RESULT fail security.tls.v3
 RESULT fail security.x509
 RESULT pass security.tls.v3
 RESULT pass security.x509
-RESULT skip security.passwords.http Device does not have a valid mac address
-RESULT skip security.passwords.https Device does not have a valid mac address
-RESULT skip security.passwords.telnet Device does not have a valid mac address
-RESULT skip security.passwords.ssh Device does not have a valid mac address
+RESULT skip security.passwords.http Could not lookup password info for mac-key 9a:02:57:1e:8f:01
+RESULT skip security.passwords.https Could not lookup password info for mac-key 9a:02:57:1e:8f:01
+RESULT skip security.passwords.telnet Could not lookup password info for mac-key 9a:02:57:1e:8f:01
+RESULT skip security.passwords.ssh Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 RESULT fail security.passwords.http Default passwords has not been changed
 RESULT fail security.passwords.https Default passwords has not been changed
 RESULT fail security.passwords.telnet Default passwords has not been changed
@@ -41,7 +41,7 @@ RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 2 1
 01: ['01:brute:1', '01:macoui:1']
 02: ['02:nmap:1', '02:ping:1', '02:tls:1']
-03: ['03:nmap:1', '03:udmi:1']
+03: ['03:nmap:1']
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
