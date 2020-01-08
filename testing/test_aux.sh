@@ -143,7 +143,6 @@ function redact {
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
-ls -l inst/reports/
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
 (diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \

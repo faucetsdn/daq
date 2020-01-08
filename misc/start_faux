@@ -150,15 +150,7 @@ fi
 
 if [ -n "${options[pubber]}" ]; then
     echo Running cloud pubber tool...
-    (while date; do
-         echo Starting pubber
-         ip addr
-         cat /etc/resolv.conf
-         nslookup mqtt.googleapis.com
-         ping -c 3 mqtt.googleapis.com
-         pubber/bin/run
-         sleep 30
-     done) 2>&1  &
+    (while date; do pubber/bin/run; sleep 30; done) &
 fi
 
 conf_file=/config/start/start_faux.sh

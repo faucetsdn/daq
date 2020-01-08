@@ -3,6 +3,7 @@ source reporting.sh
 
 REPORT=/tmp/report.txt
 TEST_NAME="cloud.udmi.pointset"
+TEST_DESCRIPTION="Validates device payload against the UDMI schema"
 TEST_SUMMARY=""
 LOG=/tmp/udmi.log
 
@@ -14,7 +15,6 @@ gcp_topic=events
 schema_path=schemas/udmi
 
 device_id=`jq -r .device_id /config/device/module_config.json`
-TEST_DESCRIPTION="Validates device payload against the UDMI schema"
 
 if [ "$device_id" == null ]; then
     echo Device id is null, skipping.
