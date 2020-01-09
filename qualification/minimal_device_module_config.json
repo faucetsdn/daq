@@ -1,0 +1,13 @@
+{
+  "device_info": {
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "firmware_version": "*** Firmware Version ***"
+  },
+  "device_type": "*** Device Type ***",
+  "process": {
+     "attempt_number": 1
+  }
+}

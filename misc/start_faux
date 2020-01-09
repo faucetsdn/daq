@@ -25,7 +25,7 @@ else
     exit 1
 fi
 
-set_mac_addrs () {
+set_mac_addr () {
   echo Setting alternate mac $1 on $intf_name
   ip link set addr $1 dev $intf_name
 }
@@ -36,8 +36,7 @@ set_passwd () {
 
 # Setup change-of-mac address for macoui testing.
 if [ -n "${options[macoui]}" ]; then
-    new_mac=3c:5a:b4:1e:8f:0a
-    set_mac_addrs $new_mac
+    set_mac_addr 3c:5a:b4:1e:8f:0a
 fi
 
 if [ -n "${options[passwordpass]}" ]; then
@@ -51,8 +50,7 @@ if [ -n "${options[passwordpass]}" ]; then
 fi
 
 if [ -n "${options[passwordfail]}" ]; then
-    new_mac=3c:5a:b4:1e:8f:0b
-    set_mac_addrs $new_mac
+    set_mac_addr 3c:5a:b4:1e:8f:0b
     set_passwd 'root:default'
     echo "pass\npass\n\n\n\n\n\ny\n" | adduser "admin"
     echo "admin:default" | chpasswd
@@ -61,8 +59,6 @@ if [ -n "${options[passwordfail]}" ]; then
     /usr/sbin/sshd -D &
     service xinetd start
     service ssh start
-
-
 fi
 
 # To capture all the data in/out of the faux device for debugging, uncomment

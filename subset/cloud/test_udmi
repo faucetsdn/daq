@@ -3,7 +3,7 @@ source reporting.sh
 
 REPORT=/tmp/report.txt
 TEST_NAME="cloud.udmi.pointset"
-TEST_DESCRIPTION="Validates the payloads from the DUT to a predefined schema"
+TEST_DESCRIPTION="Validates device payload against the UDMI schema"
 TEST_SUMMARY=""
 LOG=/tmp/udmi.log
 
@@ -75,5 +75,3 @@ write_out_result $REPORT \
                  "$TEST_DESCRIPTION" \
                  "See activate.log for more details" \
                  "$RESULT_AND_SUMMARY"
-
-[ "$result" == pass ]

@@ -28,7 +28,7 @@ echo AG is $AG
 # Need to remove the || true at the end of the update line. Same as for instance below. Also in bin/setup_dev.
 $AG update || true
 $AG install realpath || true  # On newer versions this is included elsewhere.
-$AG install lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent
+$AG install lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent net-tools
 
 retry=bin/retry_cmd
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
@@ -57,7 +57,7 @@ echo Adding username to docker group...
 sudo groupadd docker || true
 sudo usermod -aG docker $user
 
-DEF_IFACE=`route -n | fgrep UG | awk '{print $8}'`
+DEF_IFACE=`sudo route -n | fgrep UG | awk '{print $8}'`
 if [ -n "$DEF_IFACE" ]; then
     echo Allowing docker external access through interface $DEF_IFACE...
     sudo iptables -o docker0 -i $DEF_IFACE -A FORWARD -j ACCEPT

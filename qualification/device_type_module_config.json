@@ -3,17 +3,11 @@
   "device_description": "*** Device Description ***",
   "device_image": "*** Device Image URL ***",
   "device_info": {
-    "guid": "*** GUID ***",
-    "hostname": "*** Network Hostname ***",
     "make": "*** Make ***",
     "model": "*** Model ***",
-    "name": "*** Name ***",
-    "serial": "*** Serial ***",
     "type": "*** Type ***",
-    "firmware_version": "*** Firmware Version ***"
   },
   "device_manuals_url": "*** Device Manuals URL ***",
-  "device_type": "*** Device Type ***",
   "modules": {
     "bacext": {
       "enabled": true

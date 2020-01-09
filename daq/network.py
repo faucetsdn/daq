@@ -153,7 +153,7 @@ class TestNetwork():
         """Initialize network"""
 
         LOGGER.debug("Creating miniet...")
-        self.net = mininet_net.Mininet()
+        self.net = mininet_net.Mininet(ipBase='10.20.0.0/16')
 
         LOGGER.debug("Adding primary...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
