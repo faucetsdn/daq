@@ -73,10 +73,10 @@ public class Validator {
   private String schemaSpec;
   private final Map<String, ReportingDevice> expectedDevices = new HashMap<>();
   private final Set<String> extraDevices = new HashSet<>();
-  private final Set<String> missingDevices = new HashSet<>();
   private final Set<String> processedDevices = new HashSet<>();
   private final Set<String> base64Devices = new HashSet<>();
   private CloudIotConfig cloudIotConfig;
+  public static final File METADATA_REPORT_FILE = new File(OUT_BASE_FILE, METADATA_REPORT_JSON);
 
   public static void main(String[] args) {
     Validator validator = new Validator();
@@ -130,7 +130,6 @@ public class Validator {
           throw new RuntimeException("While loading device " + device, e);
         }
       }
-      missingDevices.addAll(expectedDevices.keySet());
       System.out.println("Loaded " + expectedDevices.size() + " expected devices");
     } catch (Exception e) {
       throw new RuntimeException(
@@ -161,6 +160,7 @@ public class Validator {
     System.out.println("Results will be uploaded to " + dataSink.getViewUrl());
     OUT_BASE_FILE.mkdirs();
     System.out.println("Also found in such directories as " + OUT_BASE_FILE.getAbsolutePath());
+    System.out.println("Generating report file in " + METADATA_REPORT_FILE.getAbsolutePath());
     System.out.println("Connecting to pubsub topic " + topicName);
     PubSubClient client = new PubSubClient(instName, topicName);
     System.out.println("Entering pubsub message loop on " + client.getSubscriptionId());
@@ -248,6 +248,7 @@ public class Validator {
       }
 
       boolean updated = false;
+      final ReportingDevice reportingDevice = expectedDevices.get(deviceId);
       try {
         if (expectedDevices.isEmpty()) {
           // No devices configured, so don't check metadata.
@@ -255,8 +256,8 @@ public class Validator {
         } else if (expectedDevices.containsKey(deviceId)) {
           ReportingDevice.PointsetMessage pointsetMessage =
               OBJECT_MAPPER.convertValue(message, ReportingDevice.PointsetMessage.class);
-          expectedDevices.get(deviceId).validateMetadata(pointsetMessage);
-          updated = missingDevices.remove(deviceId);
+          updated = !reportingDevice.hasBeenValidated();
+          reportingDevice.validateMetadata(pointsetMessage);
         } else {
           if (extraDevices.add(deviceId)) {
             updated = true;
@@ -270,7 +271,7 @@ public class Validator {
       if (error == null) {
         System.out.println("Success validating device " + deviceId);
       } else if (expectedDevices.containsKey(deviceId)) {
-        expectedDevices.get(deviceId).setError(error);
+        reportingDevice.setError(error);
         updated = true;
       }
 
@@ -283,26 +284,28 @@ public class Validator {
   }
 
   private void writeDeviceMetadataReport() {
-    File metadataReportFile = new File(OUT_BASE_FILE, METADATA_REPORT_JSON);
     try {
       MetadataReport metadataReport = new MetadataReport();
       metadataReport.updated = new Date();
-      metadataReport.missingDevices = missingDevices;
+      metadataReport.missingDevices = new HashSet<>();
       metadataReport.extraDevices = extraDevices;
       metadataReport.successfulDevices = new HashSet<>();
       metadataReport.base64Devices = base64Devices;
       metadataReport.expectedDevices = expectedDevices.keySet();
       metadataReport.errorDevices = new HashMap<>();
       for (ReportingDevice deviceInfo : expectedDevices.values()) {
+        String deviceId = deviceInfo.getDeviceId();
         if (deviceInfo.hasMetadataDiff()) {
-          metadataReport.errorDevices.put(deviceInfo.getDeviceId(), deviceInfo.getMetadataDiff());
+          metadataReport.errorDevices.put(deviceId, deviceInfo.getMetadataDiff());
+        } else if (deviceInfo.hasBeenValidated()) {
+          metadataReport.successfulDevices.add(deviceId);
         } else {
-          metadataReport.successfulDevices.add(deviceInfo.getDeviceId());
+          metadataReport.missingDevices.add(deviceId);
         }
       }
-      OBJECT_MAPPER.writeValue(metadataReportFile, metadataReport);
+      OBJECT_MAPPER.writeValue(METADATA_REPORT_FILE, metadataReport);
     } catch (Exception e) {
-      throw new RuntimeException("While generating metadata report file " + metadataReportFile.getAbsolutePath(), e);
+      throw new RuntimeException("While generating metadata report file " + METADATA_REPORT_FILE.getAbsolutePath(), e);
     }
   }
 

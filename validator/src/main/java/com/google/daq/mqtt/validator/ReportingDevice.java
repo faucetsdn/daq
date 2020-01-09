@@ -23,6 +23,10 @@ public class ReportingDevice {
     return deviceId;
   }
 
+  public boolean hasBeenValidated() {
+    return metadataDiff.extraPoints != null;
+  }
+
   public boolean hasMetadataDiff() {
     return metadataDiff.error != null
         || metadataDiff.extraPoints != null
