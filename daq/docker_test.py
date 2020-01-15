@@ -16,7 +16,8 @@ class DockerTest():
     IMAGE_NAME_FORMAT = 'daq/test_%s'
     CONTAINER_PREFIX = 'daq'
 
-    def __init__(self, runner, target_port, tmpdir, test_name):
+    # pylint: disable=too-many-arguments
+    def __init__(self, runner, target_port, tmpdir, test_name, timeout_sec=None):
         self.target_port = target_port
         self.tmpdir = tmpdir
         self.test_name = test_name
@@ -26,6 +27,7 @@ class DockerTest():
         self.docker_host = None
         self.callback = None
         self.start_time = None
+        self.timeout_sec = timeout_sec
 
     def start(self, port, params, callback):
         """Start the docker test"""
@@ -73,7 +75,7 @@ class DockerTest():
             self.docker_log = host.open_log()
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
-                                       error=self._docker_error)
+                                       error=self._docker_error, timeout_sec=self.timeout_sec)
         except:
             host.terminate()
             self.runner.remove_host(host)

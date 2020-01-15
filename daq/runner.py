@@ -61,6 +61,8 @@ class DAQRunner:
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
+        self._dhcp_ready = set()
+        self._dhcp_info = {}
 
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
@@ -165,7 +167,7 @@ class DAQRunner:
                 self._activate_port(port, True)
         else:
             if port in self.port_targets:
-                self.target_set_complete(self.port_targets[port], 'port not active')
+                self.target_set_complete(port, 'port not active')
             if port in self._active_ports:
                 if self._active_ports[port] is not True:
                     self._direct_port_traffic(self._active_ports[port], port, None)
@@ -207,13 +209,13 @@ class DAQRunner:
         self._handle_faucet_events()
         all_idle = True
         # Iterate over copy of list to prevent fail-on-modification.
-        for target_set in list(self.port_targets.values()):
+        for target_port, target_set in copy.copy(self.port_targets).items():
             try:
                 if target_set.is_running():
                     all_idle = False
                     target_set.idle_handler()
                 else:
-                    self.target_set_complete(target_set, 'target set not active')
+                    self.target_set_complete(target_port, 'target set not active')
             except Exception as e:
                 self.target_set_error(target_set.target_port, e)
         if not self.event_trigger:
@@ -259,7 +261,8 @@ class DAQRunner:
 
         try:
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
-                                                   loop_hook=self._loop_hook)
+                                                   loop_hook=self._loop_hook,
+                                                   timeout_sec=20) #Polling rate
             self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events)
             if self.event_trigger:
@@ -329,7 +332,7 @@ class DAQRunner:
             self.port_targets[target_port] = new_host
             self.port_gateways[target_port] = gateway
             LOGGER.info('Target port %d registered %s', target_port, target_mac)
-
+            new_host.register_dhcp_ready_listener(self._dhcp_ready_listener)
             new_host.initialize()
 
             self._direct_port_traffic(target_mac, target_port, target)
@@ -404,12 +407,10 @@ class DAQRunner:
         if exception or not target:
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
-            self._terminate_gateway_set(gateway_set)
+            self._terminate_gateway_set(gateway_set, error=exception)
             return
 
-        target_mac = target['mac']
-        target_ip = target['ip']
-        delta_sec = target['delta']
+        target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
         LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
                     target_ip, gateway_set, state, str(exception), delta_sec)
 
@@ -418,7 +419,16 @@ class DAQRunner:
             return
 
         self._target_mac_ip[target_mac] = target_ip
+        if target_mac in self.mac_targets:
+            self._dhcp_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
+            self._check_and_activate_gateway(self.mac_targets[target_mac])
 
+    def _check_and_activate_gateway(self, host):
+        # Host ready to be activated and DHCP happened
+        if host not in self._dhcp_info or host not in self._dhcp_ready:
+            return
+        state, target, gateway_set = self._dhcp_info[host]
+        target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
         (gateway, ready_devices) = self._should_activate_target(target_mac, target_ip, gateway_set)
 
         if not ready_devices:
@@ -429,6 +439,10 @@ class DAQRunner:
             return
 
         self._activate_gateway(state, gateway, ready_devices, delta_sec)
+
+    def _dhcp_ready_listener(self, host):
+        self._dhcp_ready.add(host)
+        self._check_and_activate_gateway(host)
 
     def _activate_gateway(self, state, gateway, ready_devices, delta_sec):
         gateway.activate()
@@ -477,7 +491,7 @@ class DAQRunner:
 
         return gateway, ready_devices
 
-    def _terminate_gateway_set(self, gateway_set):
+    def _terminate_gateway_set(self, gateway_set, error=False):
         if gateway_set not in self._gateway_sets:
             LOGGER.warning('Gateway set %s not found in %s', gateway_set, self._gateway_sets)
             return
@@ -485,8 +499,9 @@ class DAQRunner:
         gateway = self._device_groups[group_name]
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
+        handler = self.target_set_error if error else self.target_set_complete
         for target_port in ports:
-            self.target_set_complete(self.port_targets[target_port], 'gateway set terminating')
+            handler(target_port, error if error else 'gateway set terminating')
 
     def _find_gateway_set(self, target_port):
         if target_port not in self._gateway_sets:
@@ -525,13 +540,13 @@ class DAQRunner:
         if active:
             target_set = self.port_targets[target_port]
             target_set.record_result(target_set.test_name, exception=err_str)
-            self.target_set_complete(target_set, err_str)
+            self.target_set_complete(target_port, err_str)
         else:
             self._target_set_finalize(target_port, {'exception': {'exception': err_str}}, err_str)
 
-    def target_set_complete(self, target_set, reason):
+    def target_set_complete(self, target_port, reason):
         """Handle completion of a target_set"""
-        target_port = target_set.target_port
+        target_set = self.port_targets[target_port]
         self._target_set_finalize(target_port, target_set.results, reason)
         self._target_set_cancel(target_port)
 

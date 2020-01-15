@@ -93,9 +93,9 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     pylint==2.4.2 cryptography requests netifaces codecov coverage setuptools \
     firebase-admin==2.16.0 \
     google-cloud-pubsub==0.40.0 \
-    google-api-core==1.13.0 \
+    google-api-core==1.15.0 \
     google-cloud-storage==1.16.1 \
-    google-cloud-firestore==0.32.1 \
+    google-cloud-firestore==1.6.0 \
     WeasyPrint==50 \
     pypandoc==1.4
 

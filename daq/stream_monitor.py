@@ -4,26 +4,29 @@ import fcntl
 import logging
 import os
 import select
+from datetime import timedelta, datetime
+import time
+import copy
 
 LOGGER = logging.getLogger('stream')
 
 class StreamMonitor():
     """Monitor set of stream objects"""
 
-    def __init__(self, timeout_ms=None, idle_handler=None, loop_hook=None):
-        self.timeout_ms = timeout_ms
+    def __init__(self, timeout_sec=None, idle_handler=None, loop_hook=None):
+        self.timeout_sec = timeout_sec
         self.idle_handler = idle_handler
         self.loop_hook = loop_hook
         self.poller = select.poll()
         self.callbacks = {}
-        self.dirty = False
 
     def get_fd(self, target):
         """Return the fd from a stream object, or fd directly"""
         return target.fileno() if 'fileno' in dir(target) else target
 
     # pylint: disable=too-many-arguments
-    def monitor(self, name, desc, callback=None, hangup=None, copy_to=None, error=None):
+    def monitor(self, name, desc, callback=None, hangup=None, copy_to=None,
+                error=None, timeout_sec=None):
         """Start monitoring a specific descriptor"""
         fd = self.get_fd(desc)
         assert fd not in self.callbacks, 'Duplicate descriptor fd %d' % fd
@@ -31,8 +34,10 @@ class StreamMonitor():
             assert not callback, 'Both callback and copy_to set'
             self.make_nonblock(desc)
             callback = lambda: self.copy_data(name, desc, copy_to)
-        LOGGER.debug('Monitoring start %s fd %d', name, fd)
-        self.callbacks[fd] = (name, callback, hangup, error)
+        LOGGER.debug('Monitoring start %s fd %d', name, fd, )
+        self.callbacks[fd] = (name, callback, hangup, error,
+                              datetime.fromtimestamp(time.time())
+                              + timedelta(seconds=timeout_sec) if timeout_sec else None)
         self.poller.register(fd, select.POLLHUP | select.POLLIN)
         self.log_monitors()
 
@@ -57,7 +62,6 @@ class StreamMonitor():
         LOGGER.debug('Monitoring forget fd %d', fd)
         del self.callbacks[fd]
         self.poller.unregister(fd)
-        self.dirty = True
         self.log_monitors()
 
     def log_monitors(self):
@@ -130,7 +134,7 @@ class StreamMonitor():
             assert False, "Unknown event type %d on fd %d" % (event, fd)
 
     def event_loop(self):
-        """Main event loop. Returns True if there are still active streams to monitor."""
+        """Main event loop. Returns False if there are no active streams to monitor."""
         while self.callbacks:
             fds = self.poller.poll(0)
             try:
@@ -145,16 +149,18 @@ class StreamMonitor():
                 LOGGER.error('Monitoring exception in callback: %s', e)
                 LOGGER.exception(e)
             self.log_monitors()
-            self.dirty = False
-            fds = self.poller.poll(self.timeout_ms)
+            fds = self.poller.poll(self.timeout_sec * 10e3 if self.timeout_sec else None)
             LOGGER.debug('Monitoring found fds %s', fds)
             if fds:
                 for fd, event in fds:
-                    self.process_poll_result(event, fd)
-                    if self.dirty:
-                        LOGGER.debug('Monitoring set modified, re-issuing poll...')
-                        break
-            else:
-                LOGGER.debug('Monitoring no fds found')
-                return True
+                    if fd in self.callbacks:
+                        self.process_poll_result(event, fd) #Monitoring set could be modified
+            # check for timeouts
+            frozen_callbacks = copy.copy(self.callbacks)
+            for fd in frozen_callbacks:
+                name, _, _, on_error, timeout = frozen_callbacks[fd]
+                if timeout and datetime.fromtimestamp(time.time()) >= timeout:
+                    self.error_handler(fd, TimeoutError("Timed out."), name, on_error)
+                    if fd in self.callbacks:
+                        self.forget(fd)
         return False

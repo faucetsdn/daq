@@ -61,6 +61,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _MONITOR_SCAN_SEC = 30
+    _DEFAULT_TIMEOUT = 350
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
@@ -101,6 +102,7 @@ class ConnectedHost:
         self.target_ip = None
         self._loaded_config = None
         self.reload_config()
+        self._dhcp_listeners = []
         configurator.write_config(self._device_aux_path(), self._MODULE_CONFIG, self._loaded_config)
         assert self._loaded_config, 'config was not loaded'
         self.remaining_tests = self._get_enabled_tests()
@@ -146,6 +148,10 @@ class ConnectedHost:
     def _test_enabled(self, test):
         test_module = self._loaded_config['modules'].get(test)
         return test in self._CORE_TESTS or test_module and test_module.get('enabled', True)
+
+    def _get_test_timeout(self, test):
+        test_module = self._loaded_config['modules'].get(test)
+        return test_module.get('timeout', self._DEFAULT_TIMEOUT) if test_module else None
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -247,6 +253,12 @@ class ConnectedHost:
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
         self.record_result('dhcp', state=MODE.EXEC)
+        _ = list(listener(self) for listener in self._dhcp_listeners)
+
+    def register_dhcp_ready_listener(self, callback):
+        """Registers callback for when the host is ready for activation"""
+        if callback:
+            self._dhcp_listeners.append(callback)
 
     def terminate(self, trigger=True):
         """Terminate this host"""
@@ -452,7 +464,8 @@ class ConnectedHost:
         }
 
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name)
+                                                test_name,
+                                                timeout_sec=self._get_test_timeout(test_name))
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
