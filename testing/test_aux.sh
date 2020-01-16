@@ -48,7 +48,9 @@ rm -rf inst/test_site && mkdir -p inst/test_site
 cp -a misc/test_site inst/
 
 echo Extended tests | tee -a $TEST_RESULTS
+mkdir -p local/site
 cp -r misc/test_site/device_types/rocket local/site/device_types/
+mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r misc/test_site/mac_addrs/* local/site/mac_addrs/
 cp misc/system_all.conf local/system.conf
@@ -118,9 +120,9 @@ jq .modules inst/run-port-01/nodes/ping01/tmp/module_config.json | tee -a $TEST_
 echo port-02 module_config modules | tee -a $TEST_RESULTS
 jq .modules inst/run-port-02/nodes/ping02/tmp/module_config.json | tee -a $TEST_RESULTS
 
-# Add a lovely snake and a lovely lizard into this file for sanity checking
-cat inst/run-port-02/nodes/ping02/tmp/snake.txt | tee -a $TEST_RESULTS
-cat inst/run-port-02/nodes/ping02/tmp/lizard.txt | tee -a $TEST_RESULTS
+# Add a lovely snake and a lizard into this file for testing device/type mappings.
+cat inst/run-port-03/nodes/ping03/tmp/snake.txt | tee -a $TEST_RESULTS
+cat inst/run-port-03/nodes/ping03/tmp/lizard.txt | tee -a $TEST_RESULTS
 
 # Add the results for cloud tests into a different file, since cloud tests may not run if
 # our test environment isn't set up correctly. See bin/test_daq for more insight
