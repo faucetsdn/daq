@@ -16,6 +16,9 @@
   "modules": {
     "pass": {
       "enabled": true
+    },
+    "hold": {
+      "enabled": false
     }
   },
   "servers": {
