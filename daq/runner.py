@@ -401,7 +401,8 @@ class DAQRunner:
 
     def dhcp_notify(self, state, target, gateway_set, exception=None):
         """Handle a DHCP notification"""
-        if exception or not target:
+        if exception:
+            assert not target, 'unexpected exception with target'
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
@@ -410,8 +411,8 @@ class DAQRunner:
         target_mac = target['mac']
         target_ip = target['ip']
         delta_sec = target['delta']
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
-                    target_ip, gateway_set, state, str(exception), delta_sec)
+        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%d)', target_mac,
+                    target_ip, gateway_set, state, delta_sec)
 
         if not target_mac:
             LOGGER.warning('DHCP target mac missing')
