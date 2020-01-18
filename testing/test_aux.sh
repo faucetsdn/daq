@@ -82,10 +82,21 @@ fi
 
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
+# Wait until the hold test has been activated, and then kill dhcp on that gateway.
+MARKER=inst/run-port-03/nodes/hold03/activate.log
+(while [ ! -f $MARKER ]; do
+     echo test_aux.sh waiting for $MARKER
+     sleep 30
+ done
+ ps ax | fgrep tcpdump | fgrep gw03-eth0 | fgrep -v docker | fgrep -v /tmp/
+ pid=$(ps ax | fgrep tcpdump | fgrep gw03-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
+ echo $MARKER found, killing gw03-eth dhcp tcpdump pid $pid
+ kill $pid
+) &
 
 # Run DAQ in single shot mode
 echo Starting aux test run...
-cmd/run -b -s
+cmd/run -b -s -k
 
 # Add just the RESULT lines from all aux tests (from all ports, 3 in this case) into a file
 # These ARE the auxiliary tests

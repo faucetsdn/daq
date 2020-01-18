@@ -14,7 +14,7 @@ FAUCETB=${DAQ_FAUCET_BRANCH}
 FAUCETX=$(cat misc/FAUCET_VERSION)
 FAUCETV=${DAQ_FAUCET_VER:-$FAUCETX}
 MININET=https://github.com/mininet/mininet
-MININETV=2.3.0d3
+MININETV=2.3.0d6
 
 if [ -f .daq.local ]; then
     echo Loading config from .daq.local
@@ -126,6 +126,7 @@ else
         for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
+        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built

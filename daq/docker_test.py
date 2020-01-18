@@ -26,6 +26,7 @@ class DockerTest():
         self.docker_host = None
         self.callback = None
         self.start_time = None
+        self.pipe = None
 
     def start(self, port, params, callback):
         """Start the docker test"""
@@ -67,18 +68,27 @@ class DockerTest():
         try:
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             host = self.docker_host
-            pipe = host.activate(log_name=None)
+            self.pipe = host.activate(log_name=None)
             # Docker tests don't use DHCP, so manually set up DNS.
             host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
-            self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
+            self.runner.monitor_stream(self.host_name, self.pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
                                        error=self._docker_error)
         except:
             host.terminate()
+            self.runner.monitor_forget(self.pipe.stdout)
             self.runner.remove_host(host)
             raise
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
+
+    def terminate(self):
+        """Forcibly terminate this container"""
+        if not self.docker_host:
+            raise Exception("Target port %d test %s already terminated" % (
+                self.target_port, self.test_name))
+        LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
+        return self._docker_finalize()
 
     def _map_if_exists(self, vol_maps, params, kind):
         base = params.get('%s_base' % kind)
@@ -93,10 +103,13 @@ class DockerTest():
         else:
             self.callback(exception=e)
 
-    def _docker_finalize(self):
+    def _docker_finalize(self, forget=True):
         if self.docker_host:
             LOGGER.debug('Target port %d docker finalize', self.target_port)
             self.runner.remove_host(self.docker_host)
+            if forget:
+                self.runner.monitor_forget(self.pipe.stdout)
+                self.pipe = None
             return_code = self.docker_host.terminate()
             self.docker_host = None
             self.docker_log.close()
@@ -106,7 +119,9 @@ class DockerTest():
 
     def _docker_complete(self):
         try:
-            return_code = self._docker_finalize()
+            assert self.pipe, 'complete without active pipe'
+            self.pipe = None
+            return_code = self._docker_finalize(forget=False)
             exception = None
         except Exception as e:
             return_code = -1
