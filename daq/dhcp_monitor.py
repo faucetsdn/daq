@@ -69,7 +69,10 @@ class DhcpMonitor():
             self.dhcp_log = None
         if self.dhcp_traffic:
             if forget:
-                self.runner.monitor_forget(self.dhcp_traffic.stream())
+                try:
+                    self.runner.monitor_forget(self.dhcp_traffic.stream())
+                except Exception as e:
+                    LOGGER.error(e)
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
@@ -98,4 +101,4 @@ class DhcpMonitor():
         if self.dhcp_log:
             self.dhcp_log.write('Monitor error %s\n' % e)
         self.callback('error', None, exception=e)
-        self.cleanup()
+        self.cleanup(forget=False)

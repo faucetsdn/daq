@@ -34,10 +34,10 @@ class StreamMonitor():
             assert not callback, 'Both callback and copy_to set'
             self.make_nonblock(desc)
             callback = lambda: self.copy_data(name, desc, copy_to)
-        LOGGER.debug('Monitoring start %s fd %d', name, fd, )
-        self.callbacks[fd] = (name, callback, hangup, error,
-                              datetime.fromtimestamp(time.time())
-                              + timedelta(seconds=timeout_sec) if timeout_sec else None)
+        LOGGER.debug('Monitoring start %s fd %d', name, fd)
+        timeout = datetime.fromtimestamp(time.time()) + \
+                  timedelta(seconds=timeout_sec) if timeout_sec else None
+        self.callbacks[fd] = (name, callback, hangup, error, timeout)
         self.poller.register(fd, select.POLLHUP | select.POLLIN)
         self.log_monitors()
 
@@ -64,7 +64,7 @@ class StreamMonitor():
         self.poller.unregister(fd)
         self.log_monitors()
 
-    def log_monitors(self):
+    def log_monitors(self, as_info=False):
         """Log all active monitors"""
         log_str = ''
         count = 0
@@ -72,7 +72,10 @@ class StreamMonitor():
             name = self.callbacks[fd][0]
             log_str = log_str + ', %s fd %d' % (name, fd)
             count += 1
-        LOGGER.debug('Monitoring %d fds %s', count, log_str[2:])
+
+        log_func = LOGGER.info if as_info else LOGGER.debug
+        log_func('Monitoring %d fds %s', count, log_str[2:])
+
         return count
 
     def trigger_callback(self, fd):
@@ -113,6 +116,7 @@ class StreamMonitor():
         """Error handler for the given fd"""
         msg = '' if handler else ' (no handler)'
         LOGGER.error('Monitoring error handling %s fd %d%s: %s', name, fd, msg, e)
+        assert fd not in self.callbacks, 'handling fd %d not forgotten' % fd
         if handler:
             try:
                 handler(e)
@@ -153,14 +157,14 @@ class StreamMonitor():
             LOGGER.debug('Monitoring found fds %s', fds)
             if fds:
                 for fd, event in fds:
-                    if fd in self.callbacks:
-                        self.process_poll_result(event, fd) #Monitoring set could be modified
+                    if fd in self.callbacks: # Monitoring set could be modified
+                        self.process_poll_result(event, fd)
             # check for timeouts
             frozen_callbacks = copy.copy(self.callbacks)
             for fd in frozen_callbacks:
                 name, _, _, on_error, timeout = frozen_callbacks[fd]
                 if timeout and datetime.fromtimestamp(time.time()) >= timeout:
-                    self.error_handler(fd, TimeoutError("Timed out."), name, on_error)
                     if fd in self.callbacks:
                         self.forget(fd)
+                    self.error_handler(fd, TimeoutError("Timed out."), name, on_error)
         return False

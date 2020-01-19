@@ -15,7 +15,7 @@ import gcp
 import host as connected_host
 import network
 import stream_monitor
-import wrappers
+from wrappers import DaqException
 
 LOGGER = logging.getLogger('runner')
 
@@ -241,7 +241,7 @@ class DAQRunner:
         self.monitor_forget(self.faucet_events.sock)
         self.faucet_events.disconnect()
         self.faucet_events = None
-        count = self.stream_monitor.log_monitors()
+        count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
 
     def _loop_hook(self):
@@ -262,7 +262,7 @@ class DAQRunner:
         try:
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
                                                    loop_hook=self._loop_hook,
-                                                   timeout_sec=20) #Polling rate
+                                                   timeout_sec=20) # Polling rate
             self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events)
             if self.event_trigger:
@@ -404,15 +404,16 @@ class DAQRunner:
 
     def dhcp_notify(self, state, target, gateway_set, exception=None):
         """Handle a DHCP notification"""
-        if exception or not target:
+        if exception:
+            assert not target, 'unexpected exception with target'
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
-            self._terminate_gateway_set(gateway_set, error=exception)
+            self._terminate_gateway_set(gateway_set)
             return
 
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
-                    target_ip, gateway_set, state, str(exception), delta_sec)
+        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%d)', target_mac,
+                    target_ip, gateway_set, state, delta_sec)
 
         if not target_mac:
             LOGGER.warning('DHCP target mac missing')
@@ -491,7 +492,7 @@ class DAQRunner:
 
         return gateway, ready_devices
 
-    def _terminate_gateway_set(self, gateway_set, error=False):
+    def _terminate_gateway_set(self, gateway_set):
         if gateway_set not in self._gateway_sets:
             LOGGER.warning('Gateway set %s not found in %s', gateway_set, self._gateway_sets)
             return
@@ -499,9 +500,8 @@ class DAQRunner:
         gateway = self._device_groups[group_name]
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
-        handler = self.target_set_error if error else self.target_set_complete
         for target_port in ports:
-            handler(target_port, error if error else 'gateway set terminating')
+            self.target_set_error(target_port, DaqException('terminated'))
 
     def _find_gateway_set(self, target_port):
         if target_port not in self._gateway_sets:
@@ -533,7 +533,7 @@ class DAQRunner:
         active = target_port in self.port_targets
         err_str = str(e)
         # pylint: disable=no-member
-        message = err_str if isinstance(e, wrappers.DaqException) else \
+        message = err_str if isinstance(e, DaqException) else \
                   ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
         LOGGER.error('Target port %d active %s exception: %s', target_port, active, message)
         self._detach_gateway(target_port)
@@ -595,6 +595,8 @@ class DAQRunner:
         LOGGER.info('Remaining target sets: %s', list(self.port_targets.keys()))
 
     def _detach_gateway(self, target_port):
+        if target_port not in self.port_gateways:
+            return
         target_gateway = self.port_gateways[target_port]
         del self.port_gateways[target_port]
         target_mac = self._active_ports[target_port]

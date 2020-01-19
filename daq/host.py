@@ -89,13 +89,14 @@ class ConnectedHost:
         self._state_transition(_STATE.READY)
         self.results = {}
         self.dummy = None
-        self.running_test = None
         self.test_name = None
         self.test_start = None
         self.test_host = None
         self.test_port = None
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
+        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT))
+        self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
         self._tcp_monitor = None
@@ -146,8 +147,13 @@ class ConnectedHost:
         }
 
     def _test_enabled(self, test):
+        fallback_config = {'enabled': test in self._CORE_TESTS}
+        test_config = self._loaded_config['modules'].get(test, fallback_config)
+        return test_config.get('enabled', True)
+
+    def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
-        return test in self._CORE_TESTS or test_module and test_module.get('enabled', True)
+        return test_module.get('timeout', self._default_timeout_sec) if test_module else None
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
@@ -253,31 +259,32 @@ class ConnectedHost:
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
         self.record_result('dhcp', state=MODE.EXEC)
-        _ = list(listener(self) for listener in self._dhcp_listeners)
+        _ = [listener(self) for listener in self._dhcp_listeners]
 
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
-        if callback:
-            self._dhcp_listeners.append(callback)
+        assert callable(callback), "DHCP listener callback is not callable"
+        self._dhcp_listeners.append(callback)
 
     def terminate(self, trigger=True):
         """Terminate this host"""
-        LOGGER.info('Target port %d terminate, trigger %s', self.target_port, trigger)
+        LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
+                    self._host_name(), trigger)
         self._release_config()
         self._state_transition(_STATE.TERM)
         self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        if self.running_test:
+        if self.test_host:
             try:
-                self.running_test.terminate()
-                self.runner.remove_host(self.running_test)
-                self.running_test = None
+                self.test_host.terminate()
+                self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
-            self.runner.target_set_complete(self, 'Target port %d termination' % self.target_port)
+            self.runner.target_set_complete(self.target_port, 'Target port %d termination'
+                                            % self.target_port)
 
     def idle_handler(self):
         """Trigger events from idle state"""
@@ -462,10 +469,9 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-
+        test_timeout = self._get_test_timeout(test_name)
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name,
-                                                timeout_sec=self._get_test_timeout(test_name))
+                                                test_name, timeout_sec=test_timeout)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
