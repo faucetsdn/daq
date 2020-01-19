@@ -150,14 +150,10 @@ class ConnectedHost:
         fallback_config = {'enabled': test in self._CORE_TESTS}
         test_config = self._loaded_config['modules'].get(test, fallback_config)
         return test_config.get('enabled', True)
-
+ 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
         return test_module.get('timeout', self._default_timeout_sec) if test_module else None
-
-    def _get_test_timeout(self, test):
-        test_module = self._loaded_config['modules'].get(test)
-        return test_module.get('timeout', self._DEFAULT_TIMEOUT) if test_module else None
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
