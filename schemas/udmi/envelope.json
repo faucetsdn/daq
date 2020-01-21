@@ -20,12 +20,12 @@
     },
     "subFolder": {
       "enum": [
-        "state",
         "config",
-        "pointset",
+        "discovery",
         "logentry",
-        "discover",
-        "metadata"
+        "metadata",
+        "pointset",
+        "state"
       ]
     }
   },
