@@ -105,16 +105,14 @@ class DockerTest():
         else:
             self.callback(exception=e)
 
-    def _docker_finalize(self, forget=True):
+    def _docker_finalize(self):
         if self.docker_host:
             LOGGER.debug('Target port %d docker finalize', self.target_port)
             self.runner.remove_host(self.docker_host)
-            if forget:
-                try:
-                    self.runner.monitor_forget(self.pipe.stdout)
-                    self.pipe = None
-                except Exception as e:
-                    LOGGER.error(e)
+            # fd is always forgetten prior to error handling in stream monitor
+            if self.pipe and not self.pipe.stdout.closed:
+                self.runner.monitor_forget(self.pipe.stdout)
+                self.pipe = None
             return_code = self.docker_host.terminate()
             self.docker_host = None
             self.docker_log.close()
@@ -126,7 +124,7 @@ class DockerTest():
         try:
             assert self.pipe, 'complete without active pipe'
             self.pipe = None
-            return_code = self._docker_finalize(forget=False)
+            return_code = self._docker_finalize()
             exception = None
         except Exception as e:
             return_code = -1

@@ -37,7 +37,7 @@ class StreamMonitor():
         LOGGER.debug('Monitoring start %s fd %d', name, fd)
         timeout = datetime.fromtimestamp(time.time()) + \
                   timedelta(seconds=timeout_sec) if timeout_sec else None
-        self.callbacks[fd] = (name, callback, hangup, error, timeout)
+        self.callbacks[fd] = (name, callback, hangup, error, timeout, desc)
         self.poller.register(fd, select.POLLHUP | select.POLLIN)
         self.log_monitors()
 
@@ -93,6 +93,7 @@ class StreamMonitor():
                 os.read(fd, 1024)
         except Exception as e:
             if fd in self.callbacks:
+                self.callbacks[fd][5].close()
                 self.forget(fd)
             self.error_handler(fd, e, name, on_error)
 
@@ -101,6 +102,7 @@ class StreamMonitor():
         name = self.callbacks[fd][0]
         callback = self.callbacks[fd][2]
         on_error = self.callbacks[fd][3]
+        self.callbacks[fd][5].close() # close the stream
         try:
             self.forget(fd)
             if callback:
@@ -162,9 +164,10 @@ class StreamMonitor():
             # check for timeouts
             frozen_callbacks = copy.copy(self.callbacks)
             for fd in frozen_callbacks:
-                name, _, _, on_error, timeout = frozen_callbacks[fd]
+                name, _, _, on_error, timeout, _ = frozen_callbacks[fd]
                 if timeout and datetime.fromtimestamp(time.time()) >= timeout:
                     if fd in self.callbacks:
+                        self.callbacks[fd][5].close() # close the stream
                         self.forget(fd)
                     self.error_handler(fd, TimeoutError("Timed out."), name, on_error)
         return False

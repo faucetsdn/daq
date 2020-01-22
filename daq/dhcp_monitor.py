@@ -62,18 +62,15 @@ class DhcpMonitor():
             if match.group(6):
                 self.target_mac = match.group(6)
 
-    def cleanup(self, forget=True):
+    def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
         if self.dhcp_log:
             self.dhcp_log.close()
             self.dhcp_log = None
         if self.dhcp_traffic:
-            if forget:
-                try:
-                    self.runner.monitor_forget(self.dhcp_traffic.stream())
-                except Exception as e:
-                    LOGGER.error(e)
-            self.dhcp_traffic.terminate()
+            if self.dhcp_traffic.stream() and not self.dhcp_traffic.stream().closed:
+                self.runner.monitor_forget(self.dhcp_traffic.stream())
+                self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
     def _dhcp_success(self):
@@ -101,4 +98,4 @@ class DhcpMonitor():
         if self.dhcp_log:
             self.dhcp_log.write('Monitor error %s\n' % e)
         self.callback('error', None, exception=e)
-        self.cleanup(forget=False)
+        self.cleanup()
