@@ -1,6 +1,6 @@
 Validating 1 schemas
-  Validating 1 files against discover.json
-    Against input discover.tests/errors.json
+  Validating 1 files against discovery.json
+    Against input discovery.tests/errors.json
       #: 8 schema violations found
         #/points: 4 schema violations found
           #/points/old_properties/properties: #: 0 subschemas matched instead of one
