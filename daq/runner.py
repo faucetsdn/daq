@@ -269,7 +269,9 @@ class DAQRunner:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
-            self.stream_monitor.event_loop()
+            while self.stream_monitor.event_loop():
+                for host in list(self.mac_targets.values()):
+                    host.check_module_timeout()
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
             LOGGER.exception(e)

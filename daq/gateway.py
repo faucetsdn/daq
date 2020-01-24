@@ -47,8 +47,8 @@ class Gateway():
         """Initialize the gateway host"""
         try:
             self._initialize()
-        except:
-            LOGGER.error('Gateway initialization failed, terminating')
+        except Exception as e:
+            LOGGER.error('Gateway initialization failed, terminating: %s', str(e))
             self.terminate()
             raise
 

@@ -1,5 +1,8 @@
 {
   "modules": {
+    "dhcp": {
+      "timeout": 120
+    },
     "pass": {
       "enabled": true, 
       "timeout": 60
