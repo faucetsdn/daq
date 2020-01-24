@@ -535,8 +535,7 @@ class ConnectedHost:
         if os.path.isfile(report_path):
             self._report.accumulate(self.test_name, report_path)
         self.runner.release_test_port(self.target_port, self.test_port)
-        if exception:
-            self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        self._state_transition(_STATE.NEXT, _STATE.TESTING)
         self._run_next_test()
 
     def _set_module_config(self, loaded_config):
