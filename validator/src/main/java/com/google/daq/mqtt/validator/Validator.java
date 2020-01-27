@@ -405,6 +405,7 @@ public class Validator {
       }
     }
   }
+
   private List<File> makeFileList(String spec) {
     File target = new File(spec);
     if (target.isFile()) {
