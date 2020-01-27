@@ -13,7 +13,7 @@
         1
       ]
     },
-    "name": {
+    "local_id": {
       "type": "string",
       "pattern": "^[A-Z][A-Z0-9]*((_|-)[A-Z0-9]+)*$"
     },
@@ -29,7 +29,7 @@
   "required": [
     "timestamp",
     "version",
-    "name",
+    "local_id",
     "points"
   ],
   "definitions": {
