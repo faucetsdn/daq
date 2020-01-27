@@ -367,12 +367,12 @@ class ConnectedHost:
                 self._tcp_monitor.terminate()
             self._tcp_monitor = None
 
-    def _monitor_error(self, e):
-        LOGGER.error('Target port %d monitor error: %s', self.target_port, e)
+    def _monitor_error(self, exception):
+        LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
         self._monitor_cleanup()
-        self.record_result(self.test_name, exception=e)
+        self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
-        self.runner.target_set_error(self.target_port, e)
+        self.runner.target_set_error(self.target_port, exception)
 
     def _monitor_scan(self):
         self._state_transition(_STATE.MONITOR, _STATE.BASE)
@@ -476,10 +476,14 @@ class ConnectedHost:
             params['switch_port'] = str(self.target_port)
             params['switch_model'] = self.config['switch_model']
 
-        LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
-        self._set_module_config(test_name, self._loaded_config)
-        self.record_result(test_name, state=MODE.EXEC)
-        self.test_host.start(self.test_port, params, self._docker_callback)
+        try:
+            LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
+            self._set_module_config(test_name, self._loaded_config)
+            self.record_result(test_name, state=MODE.EXEC)
+            self.test_host.start(self.test_port, params, self._docker_callback)
+        except:
+            self.test_host = None
+            raise
 
     def _host_name(self):
         return self.test_host.host_name if self.test_host else 'unknown'
@@ -573,14 +577,20 @@ class ConnectedHost:
             'timestamp': current if current else gcp.get_timestamp(),
             'port': (self.target_port if run_info else None)
         }
-        for arg in kwargs:
-            result[arg] = None if kwargs[arg] is None else kwargs[arg]
-        if result.get('exception'):
-            result['exception'] = str(result['exception'])
+        result.update(kwargs)
+        if 'exception' in result:
+            result['exception'] = self._exception_message(result['exception'])
         if name:
             self.results[name] = result
         self._gcp.publish_message('daq_runner', 'test_result', result)
         return result
+
+    def _exception_message(self, exception):
+        if not exception or exception == 'None':
+            return None
+        if isinstance(exception, Exception):
+            return exception.__class__.__name__
+        return str(exception)
 
     def _control_updated(self, control_config):
         LOGGER.info('Updated control config: %s %s', self.target_mac, control_config)

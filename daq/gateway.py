@@ -159,6 +159,8 @@ class Gateway():
         return False
 
     def _dhcp_callback(self, state, target, exception=None):
+        if exception:
+            LOGGER.error('Gateway DHCP exception %s', exception)
         if self._is_target_expected(target) or exception:
             self.runner.dhcp_notify(state, target, self.port_set, exception=exception)
 
