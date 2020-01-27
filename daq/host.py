@@ -88,7 +88,6 @@ class ConnectedHost:
         self._state_transition(_STATE.READY)
         self.results = {}
         self.dummy = None
-        self.running_test = None
         self.test_name = None
         self.test_start = None
         self.test_host = None
@@ -144,8 +143,9 @@ class ConnectedHost:
         }
 
     def _test_enabled(self, test):
-        test_module = self._loaded_config['modules'].get(test)
-        return test in self._CORE_TESTS or test_module and test_module.get('enabled', True)
+        fallback_config = {'enabled': test in self._CORE_TESTS}
+        test_config = self._loaded_config['modules'].get(test, fallback_config)
+        return test_config.get('enabled', True)
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -250,17 +250,17 @@ class ConnectedHost:
 
     def terminate(self, trigger=True):
         """Terminate this host"""
-        LOGGER.info('Target port %d terminate, trigger %s', self.target_port, trigger)
+        LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
+                    self._host_name(), trigger)
         self._release_config()
         self._state_transition(_STATE.TERM)
         self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        if self.running_test:
+        if self.test_host:
             try:
-                self.running_test.terminate()
-                self.runner.remove_host(self.running_test)
-                self.running_test = None
+                self.test_host.terminate()
+                self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)

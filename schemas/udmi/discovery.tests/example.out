@@ -1,4 +1,4 @@
 Validating 1 schemas
-  Validating 1 files against discover.json
+  Validating 1 files against discovery.json
     Against input discover.tests/example.json
       #: required key [deprecated: do not use discovery] not found

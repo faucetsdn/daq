@@ -15,7 +15,7 @@ import gcp
 import host as connected_host
 import network
 import stream_monitor
-import wrappers
+from wrappers import DaqException
 
 LOGGER = logging.getLogger('runner')
 
@@ -239,7 +239,7 @@ class DAQRunner:
         self.monitor_forget(self.faucet_events.sock)
         self.faucet_events.disconnect()
         self.faucet_events = None
-        count = self.stream_monitor.log_monitors()
+        count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
 
     def _loop_hook(self):
@@ -401,7 +401,8 @@ class DAQRunner:
 
     def dhcp_notify(self, state, target, gateway_set, exception=None):
         """Handle a DHCP notification"""
-        if exception or not target:
+        if exception:
+            assert not target, 'unexpected exception with target'
             LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
@@ -410,8 +411,8 @@ class DAQRunner:
         target_mac = target['mac']
         target_ip = target['ip']
         delta_sec = target['delta']
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%s/%d)', target_mac,
-                    target_ip, gateway_set, state, str(exception), delta_sec)
+        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%d)', target_mac,
+                    target_ip, gateway_set, state, delta_sec)
 
         if not target_mac:
             LOGGER.warning('DHCP target mac missing')
@@ -486,7 +487,7 @@ class DAQRunner:
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
-            self.target_set_complete(self.port_targets[target_port], 'gateway set terminating')
+            self.target_set_error(target_port, DaqException('terminated'))
 
     def _find_gateway_set(self, target_port):
         if target_port not in self._gateway_sets:
@@ -518,7 +519,7 @@ class DAQRunner:
         active = target_port in self.port_targets
         err_str = str(e)
         # pylint: disable=no-member
-        message = err_str if isinstance(e, wrappers.DaqException) else \
+        message = err_str if isinstance(e, DaqException) else \
                   ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
         LOGGER.error('Target port %d active %s exception: %s', target_port, active, message)
         self._detach_gateway(target_port)

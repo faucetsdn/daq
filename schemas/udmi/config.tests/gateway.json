@@ -4,6 +4,12 @@
   "system": {
     "max_update_ms": 20000
   },
-  "pointset": {
+  "gateway": {
+    "scan_interval_ms": 10000,
+    "devices": {
+      "AHU-123": {
+        "local_id": "bacnet-327412"
+      }
+    }
   }
 }

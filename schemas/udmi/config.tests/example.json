@@ -5,6 +5,13 @@
     "max_update_ms": 50000,
     "min_loglevel": 500
   },
+  "gateway": {
+    "devices": {
+      "AHU-123": {
+        "local_id": "bacnet-327412"
+      }
+    }
+  },
   "pointset": {
     "points": {
       "return_air_temperature_sensor": {
