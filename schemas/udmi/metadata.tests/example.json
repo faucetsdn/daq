@@ -23,5 +23,9 @@
         "units": "Degrees-Celsius"
       }
     }
+  },
+  "gateway": {
+    "gateway_id": "GAT-12",
+    "local_id": "bacnet-1234"
   }
 }
