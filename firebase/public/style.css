@@ -11,7 +11,7 @@ div {
 }
 
 #testgrid table tr.timeout {
-    display: none;
+    opacity: 0.3;
 }
 
 #testgrid table td {

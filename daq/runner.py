@@ -159,7 +159,8 @@ class DAQRunner:
         if active != (port in self._active_ports):
             LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
             if active:
-                connected_host.ConnectedHost.clear_port(self.gcp, port)
+                site_id = self.config.get('site_id')
+                connected_host.ConnectedHost.clear_port(self.gcp, site_id, port)
         if active:
             if not self._active_ports.get(port):
                 self._activate_port(port, True)

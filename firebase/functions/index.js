@@ -64,17 +64,23 @@ function handle_runner_config(origin, message) {
 function handle_test_result(origin, message) {
   const now = Date.now();
   const timestamp = new Date(now).toJSON();
+  const site_id = message.site_id;
 
-  console.log('test_result', timestamp, origin, message.port, message.runid, message.name);
+  console.log('test_result', timestamp, origin, site_id, message.port, message.runid, message.name);
 
   const origin_doc = db.collection('origin').doc(origin);
   origin_doc.set({'updated': timestamp});
 
   handle_test_result_by_port(now, origin_doc, message);
   handle_test_result_by_device(now, origin_doc, message);
+
+  const site_doc = db.collection('site').doc(site_id);
+  origin_doc.set({'updated': timestamp});
+
+  handle_test_result_by_device(now, site_doc, message);
 }
 
-function handle_rest_result_by_port(now, origin_doc, message) {
+function handle_test_result_by_port(now, origin_doc, message) {
   const expired = new Date(now - EXPIRY_MS).toJSON();
   const port = 'port-' + message.port;
 
@@ -98,8 +104,8 @@ function handle_rest_result_by_port(now, origin_doc, message) {
     });
 }
 
-function handle_rest_result_by_device(now, origin_doc, message) {
-  const device_doc = origin_doc.collection('device').doc(message.device_id);
+function handle_test_result_by_device(now, root_doc, message) {
+  const device_doc = root_doc.collection('device').doc(message.device_id);
 
   if (!message.name) {
     console.log('updating config', message.device_id, message.runid);
