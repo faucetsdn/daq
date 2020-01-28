@@ -68,19 +68,27 @@ class DockerTest():
             raise wrappers.DaqException(e)
         try:
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
-            host = self.docker_host
-            self.pipe = host.activate(log_name=None)
+            pipe = host.activate(log_name=None)
             # Docker tests don't use DHCP, so manually set up DNS.
             host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
-            self.runner.monitor_stream(self.host_name, self.pipe.stdout, copy_to=self.docker_log,
+            if self._should_raise_test_exception('initialize'):
+                raise Exception('Test initialization failure')
+            self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
                                        error=self._docker_error)
-        except:
+            self.pipe = pipe
+            if self._should_raise_test_exception('callback'):
+                # Closing this now will cause error when attempting to write outoput.
+                self.docker_log.close()
+        except Exception as e:
             host.terminate()
-            self.runner.monitor_forget(self.pipe.stdout)
             self.runner.remove_host(host)
-            raise
+            self.docker_host = None
+            if self.pipe:
+                self.runner.monitor_forget(self.pipe.stdout)
+                self.pipe = None
+            raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
     def terminate(self):
@@ -97,27 +105,32 @@ class DockerTest():
             abs_base = os.path.abspath(base)
             vol_maps += ['%s:/config/%s' % (abs_base, kind)]
 
-    def _docker_error(self, e):
-        LOGGER.error('Target port %d docker error: %s', self.target_port, e)
+    def _docker_error(self, exception):
+        LOGGER.error('Target port %d docker error: %s', self.target_port, str(exception))
         if self._docker_finalize() is None:
             LOGGER.warning('Target port %d docker already terminated.', self.target_port)
         else:
-            self.callback(exception=e)
+            self.callback(exception=exception)
 
     def _docker_finalize(self):
         if self.docker_host:
-            LOGGER.debug('Target port %d docker finalize', self.target_port)
+            LOGGER.info('Target port %d docker finalize', self.target_port)
             self.runner.remove_host(self.docker_host)
-            # fd is always forgetten prior to error handling in stream monitor
-            if self.pipe and not self.pipe.stdout.closed:
+            if self.pipe:
                 self.runner.monitor_forget(self.pipe.stdout)
                 self.pipe = None
             return_code = self.docker_host.terminate()
             self.docker_host = None
             self.docker_log.close()
             self.docker_log = None
+            if self._should_raise_test_exception('finalize'):
+                raise Exception('Test finalize failure')
             return return_code
         return None
+
+    def _should_raise_test_exception(self, trigger_value):
+        key = 'ex_%s_%02d' % (self.test_name, self.target_port)
+        return self.runner.config.get(key) == trigger_value
 
     def _docker_complete(self):
         try:

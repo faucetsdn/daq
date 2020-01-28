@@ -68,9 +68,8 @@ class DhcpMonitor():
             self.dhcp_log.close()
             self.dhcp_log = None
         if self.dhcp_traffic:
-            if self.dhcp_traffic.stream() and not self.dhcp_traffic.stream().closed:
-                self.runner.monitor_forget(self.dhcp_traffic.stream())
-                self.dhcp_traffic.terminate()
+            self.runner.monitor_forget(self.dhcp_traffic.stream())
+            self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
     def _dhcp_success(self):
@@ -91,11 +90,12 @@ class DhcpMonitor():
         self.scan_start = int(time.time())
 
     def _dhcp_hangup(self):
+        self.dhcp_traffic = None
         self._dhcp_error(Exception('dhcp hangup'))
 
     def _dhcp_error(self, e):
         LOGGER.error('DHCP monitor %s error: %s', self.name, e)
         if self.dhcp_log:
             self.dhcp_log.write('Monitor error %s\n' % e)
-        self.callback('error', None, exception=e)
         self.cleanup()
+        self.callback('error', None, exception=e)

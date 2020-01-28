@@ -84,13 +84,11 @@ class StreamMonitor():
                 callback()
                 LOGGER.debug('Monitoring callback fd %d (%s) done', fd, name)
             else:
-                LOGGER.debug('Monitoring flush fd %d (%s)', fd, name)
+                LOGGER.debug('Monitoring callback flush fd %d (%s)', fd, name)
                 os.read(fd, 1024)
         except Exception as e:
-            if fd in self.callbacks:
-                self.callbacks[fd][4].close()
-                self.forget(fd)
-            self.error_handler(fd, e, name, on_error)
+            LOGGER.error('Monitoring callback exception (%s): %s', name, str(e))
+            self.error_handler(e, name, on_error)
 
     def trigger_hangup(self, fd, event):
         """Trigger hangup callback for the given fd"""
@@ -101,24 +99,24 @@ class StreamMonitor():
         try:
             self.forget(fd)
             if callback:
-                LOGGER.debug('Monitoring hangup fd %d because %d (%s)', fd, event, name)
+                LOGGER.debug('Monitoring hangup because %d (%s)', event, name)
                 callback()
-                LOGGER.debug('Monitoring hangup fd %d done (%s)', fd, name)
+                LOGGER.debug('Monitoring hangup done (%s)', name)
             else:
-                LOGGER.debug('Monitoring no hangup fd %d because %d (%s)', fd, event, name)
+                LOGGER.debug('Monitoring hangup flush because %d (%s)', event, name)
         except Exception as e:
-            self.error_handler(fd, e, name, on_error)
+            LOGGER.error('Monitoring hangup exception (%s): %s', name, str(e))
+            self.error_handler(e, name, on_error)
 
-    def error_handler(self, fd, e, name, handler):
-        """Error handler for the given fd"""
+    def error_handler(self, e, name, handler):
+        """Call given error handler"""
         msg = '' if handler else ' (no handler)'
-        LOGGER.error('Monitoring error handling %s fd %d%s: %s', name, fd, msg, e)
-        assert fd not in self.callbacks, 'handling fd %d not forgotten' % fd
+        LOGGER.debug('Monitoring error handling %s %s: %s', name, msg, e)
         if handler:
             try:
                 handler(e)
             except Exception as handler_exception:
-                LOGGER.error('Monitoring exception %s fd %d done: %s', name, fd, handler_exception)
+                LOGGER.error('Monitoring exception %s fail: %s', name, handler_exception)
                 LOGGER.exception(handler_exception)
         else:
             LOGGER.exception(e)
