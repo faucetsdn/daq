@@ -528,21 +528,23 @@ class DAQRunner:
             LOGGER.info('Test ping failure: %s', e)
             return False
 
-    def target_set_error(self, target_port, e):
+    def target_set_error(self, target_port, exception):
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
-        err_str = str(e)
-        # pylint: disable=no-member
-        message = err_str if isinstance(e, DaqException) else \
-                  ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
-        LOGGER.error('Target port %d active %s exception: %s', target_port, active, message)
+        LOGGER.error('Target port %d active %s exception: %s', target_port, active, exception)
         self._detach_gateway(target_port)
         if active:
             target_set = self.port_targets[target_port]
-            target_set.record_result(target_set.test_name, exception=err_str)
-            self.target_set_complete(target_port, err_str)
+            target_set.record_result(target_set.test_name, exception=exception)
+            self.target_set_complete(target_port, str(exception))
         else:
-            self._target_set_finalize(target_port, {'exception': {'exception': err_str}}, err_str)
+            stack = ''.join(
+                traceback.format_exception(etype=type(exception), value=exception,
+                                           tb=exception.__traceback__))
+            self._target_set_finalize(target_port,
+                                      {'exception': {'exception': str(exception),
+                                                     'traceback': stack}},
+                                      str(exception))
 
     def target_set_complete(self, target_port, reason):
         """Handle completion of a target_set"""
@@ -616,11 +618,6 @@ class DAQRunner:
         """Forget monitoring a stream"""
         return self.stream_monitor.forget(stream)
 
-    @staticmethod
-    def _extract_exception(result):
-        value = result.get('exception', None)
-        return None if value == 'None' else value
-
     def _combine_results(self):
         results = []
         for result_set_key in self.result_sets:
@@ -634,11 +631,11 @@ class DAQRunner:
         result_set_keys.sort()
         for result_set_key in result_set_keys:
             result = result_sets[result_set_key]
-            exception = self._extract_exception(result)
             code_string = result['code'] if 'code' in result else None
             code = int(code_string) if code_string else 0
             name = result['name'] if 'name' in result else result_set_key
-            status = exception if exception else code if name != 'fail' else not code
+            exp_msg = result.get('exception')
+            status = exp_msg if exp_msg else code if name != 'fail' else not code
             if status != 0:
                 results.append('%02d:%s:%s' % (set_key, name, status))
         return results

@@ -89,41 +89,39 @@ class StreamMonitor():
                 callback()
                 LOGGER.debug('Monitoring callback fd %d (%s) done', fd, name)
             else:
-                LOGGER.debug('Monitoring flush fd %d (%s)', fd, name)
+                LOGGER.debug('Monitoring callback flush fd %d (%s)', fd, name)
                 os.read(fd, 1024)
         except Exception as e:
-            if fd in self.callbacks:
-                self.callbacks[fd][5].close()
-                self.forget(fd)
-            self.error_handler(fd, e, name, on_error)
+            LOGGER.error('Monitoring callback exception (%s): %s', name, str(e))
+            self.error_handler(e, name, on_error)
 
     def trigger_hangup(self, fd, event):
         """Trigger hangup callback for the given fd"""
         name = self.callbacks[fd][0]
         callback = self.callbacks[fd][2]
         on_error = self.callbacks[fd][3]
-        self.callbacks[fd][5].close() # close the stream
+        self.callbacks[fd][5].close()
         try:
             self.forget(fd)
             if callback:
-                LOGGER.debug('Monitoring hangup fd %d because %d (%s)', fd, event, name)
+                LOGGER.debug('Monitoring hangup because %d (%s)', event, name)
                 callback()
-                LOGGER.debug('Monitoring hangup fd %d done (%s)', fd, name)
+                LOGGER.debug('Monitoring hangup done (%s)', name)
             else:
-                LOGGER.debug('Monitoring no hangup fd %d because %d (%s)', fd, event, name)
+                LOGGER.debug('Monitoring hangup flush because %d (%s)', event, name)
         except Exception as e:
-            self.error_handler(fd, e, name, on_error)
+            LOGGER.error('Monitoring hangup exception (%s): %s', name, str(e))
+            self.error_handler(e, name, on_error)
 
-    def error_handler(self, fd, e, name, handler):
-        """Error handler for the given fd"""
+    def error_handler(self, e, name, handler):
+        """Call given error handler"""
         msg = '' if handler else ' (no handler)'
-        LOGGER.error('Monitoring error handling %s fd %d%s: %s', name, fd, msg, e)
-        assert fd not in self.callbacks, 'handling fd %d not forgotten' % fd
+        LOGGER.debug('Monitoring error handling %s %s: %s', name, msg, e)
         if handler:
             try:
                 handler(e)
             except Exception as handler_exception:
-                LOGGER.error('Monitoring exception %s fd %d done: %s', name, fd, handler_exception)
+                LOGGER.error('Monitoring exception %s fail: %s', name, handler_exception)
                 LOGGER.exception(handler_exception)
         else:
             LOGGER.exception(e)
@@ -159,15 +157,14 @@ class StreamMonitor():
             LOGGER.debug('Monitoring found fds %s', fds)
             if fds:
                 for fd, event in fds:
-                    if fd in self.callbacks: # Monitoring set could be modified
+                    if fd in self.callbacks: # Make sure it's still there.
                         self.process_poll_result(event, fd)
-            # check for timeouts
+            # Check for timeouts
             frozen_callbacks = copy.copy(self.callbacks)
             for fd in frozen_callbacks:
                 name, _, _, on_error, timeout, _ = frozen_callbacks[fd]
                 if timeout and datetime.fromtimestamp(time.time()) >= timeout:
-                    if fd in self.callbacks:
-                        self.callbacks[fd][5].close() # close the stream
-                        self.forget(fd)
-                    self.error_handler(fd, TimeoutError("Timed out."), name, on_error)
+                    LOGGER.error('Monitoring timeout fd %d (%s)', fd, name)
+                    e = TimeoutError('Timeout expired')
+                    self.error_handler(e, name, on_error)
         return False
