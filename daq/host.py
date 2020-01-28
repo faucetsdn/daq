@@ -94,7 +94,6 @@ class ConnectedHost:
         self.test_port = None
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
-        self._site_id = config.get('site_id')
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
         self._tcp_monitor = None
@@ -539,13 +538,12 @@ class ConnectedHost:
             self._record_result(name, current, **kwargs)
 
     @staticmethod
-    def clear_port(gcp_instance, site_id, port):
+    def clear_port(gcp_instance, port):
         """Clear a port-based entry without having an instantiated host class"""
         result = {
             'name': 'startup',
             'state': MODE.INIT,
             'runid': ConnectedHost.make_runid(),
-            'site_id': site_id,
             'timestamp': gcp.get_timestamp(),
             'port': port
         }
@@ -556,7 +554,6 @@ class ConnectedHost:
             'name': name,
             'runid': (self.run_id if run_info else None),
             'device_id': self.target_mac,
-            'site_id': self.site_id,
             'started': self.test_start,
             'timestamp': current if current else gcp.get_timestamp(),
             'port': (self.target_port if run_info else None)
