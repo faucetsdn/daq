@@ -103,9 +103,11 @@ class Gateway():
 
     def _scan_finalize(self, forget=True):
         if self._scan_monitor:
+            nclosed = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
+            assert nclosed == forget, 'forget and nclosed mismatch'
             if forget:
                 self.runner.monitor_forget(self._scan_monitor.stream())
-            self._scan_monitor.terminate()
+                self._scan_monitor.terminate()
             self._scan_monitor = None
 
     def allocate_test_port(self):
@@ -159,6 +161,8 @@ class Gateway():
         return False
 
     def _dhcp_callback(self, state, target, exception=None):
+        if exception:
+            LOGGER.error('Gateway DHCP exception %s', exception)
         if self._is_target_expected(target) or exception:
             self.runner.dhcp_notify(state, target, self.port_set, exception=exception)
 

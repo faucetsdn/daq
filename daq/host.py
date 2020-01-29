@@ -61,6 +61,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _MONITOR_SCAN_SEC = 30
+    _DEFAULT_TIMEOUT = 350
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
@@ -94,12 +95,15 @@ class ConnectedHost:
         self.test_port = None
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
+        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT))
+        self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
         self._tcp_monitor = None
         self.target_ip = None
         self._loaded_config = None
         self.reload_config()
+        self._dhcp_listeners = []
         configurator.write_config(self._device_aux_path(), self._MODULE_CONFIG, self._loaded_config)
         assert self._loaded_config, 'config was not loaded'
         self.remaining_tests = self._get_enabled_tests()
@@ -146,6 +150,10 @@ class ConnectedHost:
         fallback_config = {'enabled': test in self._CORE_TESTS}
         test_config = self._loaded_config['modules'].get(test, fallback_config)
         return test_config.get('enabled', True)
+
+    def _get_test_timeout(self, test):
+        test_module = self._loaded_config['modules'].get(test)
+        return test_module.get('timeout_sec', self._default_timeout_sec) if test_module else None
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -247,6 +255,12 @@ class ConnectedHost:
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
         self.record_result('dhcp', state=MODE.EXEC)
+        _ = [listener(self) for listener in self._dhcp_listeners]
+
+    def register_dhcp_ready_listener(self, callback):
+        """Registers callback for when the host is ready for activation"""
+        assert callable(callback), "DHCP listener callback is not callable"
+        self._dhcp_listeners.append(callback)
 
     def terminate(self, trigger=True):
         """Terminate this host"""
@@ -265,7 +279,8 @@ class ConnectedHost:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
-            self.runner.target_set_complete(self, 'Target port %d termination' % self.target_port)
+            self.runner.target_set_complete(self.target_port,
+                                            'Target port %d termination' % self.target_port)
 
     def idle_handler(self):
         """Trigger events from idle state"""
@@ -347,17 +362,19 @@ class ConnectedHost:
     def _monitor_cleanup(self, forget=True):
         if self._tcp_monitor:
             LOGGER.info('Target port %d monitor scan complete', self.target_port)
+            nclosed = self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed
+            assert nclosed == forget, 'forget and nclosed mismatch'
             if forget:
                 self.runner.monitor_forget(self._tcp_monitor.stream())
-            self._tcp_monitor.terminate()
+                self._tcp_monitor.terminate()
             self._tcp_monitor = None
 
-    def _monitor_error(self, e):
-        LOGGER.error('Target port %d monitor error: %s', self.target_port, e)
+    def _monitor_error(self, exception):
+        LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
         self._monitor_cleanup(forget=False)
-        self.record_result(self.test_name, exception=e)
+        self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
-        self.runner.target_set_error(self.target_port, e)
+        self.runner.target_set_error(self.target_port, exception)
 
     def _monitor_scan(self):
         self._state_transition(_STATE.MONITOR, _STATE.BASE)
@@ -450,9 +467,9 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-
+        test_timeout = self._get_test_timeout(test_name)
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name)
+                                                test_name, timeout_sec=test_timeout)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
@@ -461,10 +478,14 @@ class ConnectedHost:
             params['switch_port'] = str(self.target_port)
             params['switch_model'] = self.config['switch_model']
 
-        LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
-        self._set_module_config(test_name, self._loaded_config)
-        self.record_result(test_name, state=MODE.EXEC)
-        self.test_host.start(self.test_port, params, self._docker_callback)
+        try:
+            LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
+            self._set_module_config(test_name, self._loaded_config)
+            self.record_result(test_name, state=MODE.EXEC)
+            self.test_host.start(self.test_port, params, self._docker_callback)
+        except:
+            self.test_host = None
+            raise
 
     def _host_name(self):
         return self.test_host.host_name if self.test_host else 'unknown'
@@ -558,14 +579,20 @@ class ConnectedHost:
             'timestamp': current if current else gcp.get_timestamp(),
             'port': (self.target_port if run_info else None)
         }
-        for arg in kwargs:
-            result[arg] = None if kwargs[arg] is None else kwargs[arg]
-        if result.get('exception'):
-            result['exception'] = str(result['exception'])
+        result.update(kwargs)
+        if 'exception' in result:
+            result['exception'] = self._exception_message(result['exception'])
         if name:
             self.results[name] = result
         self._gcp.publish_message('daq_runner', 'test_result', result)
         return result
+
+    def _exception_message(self, exception):
+        if not exception or exception == 'None':
+            return None
+        if isinstance(exception, Exception):
+            return exception.__class__.__name__
+        return str(exception)
 
     def _control_updated(self, control_config):
         LOGGER.info('Updated control config: %s %s', self.target_mac, control_config)

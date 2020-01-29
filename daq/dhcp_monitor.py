@@ -31,7 +31,7 @@ class DhcpMonitor():
         self.target_mac = None
         self.dhcp_log = None
 
-    def start(self):
+    def start(self, timeout_sec=None):
         """Start monitoring DHCP"""
         LOGGER.info('DHCP monitor %s waiting for replies...', self.name,)
         if self.log_file:
@@ -45,7 +45,7 @@ class DhcpMonitor():
         self.dhcp_traffic = helper
         self.runner.monitor_stream(self.name, self.dhcp_traffic.stream(),
                                    self._dhcp_line, hangup=self._dhcp_hangup,
-                                   error=self._dhcp_error)
+                                   error=self._dhcp_error, timeout_sec=timeout_sec)
 
     def _dhcp_line(self):
         dhcp_line = self.dhcp_traffic.next_line()
@@ -62,14 +62,13 @@ class DhcpMonitor():
             if match.group(6):
                 self.target_mac = match.group(6)
 
-    def cleanup(self, forget=True):
+    def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
         if self.dhcp_log:
             self.dhcp_log.close()
             self.dhcp_log = None
         if self.dhcp_traffic:
-            if forget:
-                self.runner.monitor_forget(self.dhcp_traffic.stream())
+            self.runner.monitor_forget(self.dhcp_traffic.stream())
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
 
@@ -91,11 +90,12 @@ class DhcpMonitor():
         self.scan_start = int(time.time())
 
     def _dhcp_hangup(self):
+        self.dhcp_traffic = None
         self._dhcp_error(Exception('dhcp hangup'))
 
     def _dhcp_error(self, e):
         LOGGER.error('DHCP monitor %s error: %s', self.name, e)
         if self.dhcp_log:
             self.dhcp_log.write('Monitor error %s\n' % e)
-        self.cleanup(forget=False)
+        self.cleanup()
         self.callback('error', None, exception=e)

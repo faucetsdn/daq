@@ -15,6 +15,7 @@ install:
 script:
   - set -e
   - bin/test_daq
+cache: pip
 env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000

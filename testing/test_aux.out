@@ -40,8 +40,8 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 2 1
 01: ['01:brute:1', '01:macoui:1']
-02: ['02:nmap:1', '02:tls:1']
-03: ['03:hold:terminated', '03:nmap:1']
+02: ['02:hold:TimeoutError', '02:nmap:1', '02:tls:1']
+03: ['03:hold:DaqException', '03:nmap:1']
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
@@ -101,7 +101,7 @@ port-02 module_config modules
     "enabled": true
   },
   "hold": {
-    "enabled": false
+    "enabled": true 
   },
   "macoui": {
     "enabled": true
@@ -139,4 +139,7 @@ port-02 module_config modules
                 ')
 Redacted docs diff
 No report diff
+01: ['01:ping:Exception']
+02: ['02:ping:ValueError']
+03: ['03:ping:Exception']
 Done with tests
