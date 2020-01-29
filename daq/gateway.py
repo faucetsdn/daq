@@ -101,9 +101,11 @@ class Gateway():
         self.activated = True
         self._scan_finalize()
 
-    def _scan_finalize(self):
+    def _scan_finalize(self, forget=True):
         if self._scan_monitor:
-            if self._scan_monitor.stream() and not self._scan_monitor.stream().closed:
+            nclosed = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
+            assert nclosed == forget, 'forget and nclosed mismatch'
+            if forget:
                 self.runner.monitor_forget(self._scan_monitor.stream())
                 self._scan_monitor.terminate()
             self._scan_monitor = None
@@ -134,7 +136,7 @@ class Gateway():
 
     def _scan_complete(self):
         LOGGER.info('Gateway %d scan complete', self.port_set)
-        self._scan_finalize()
+        self._scan_finalize(forget=False)
 
     def _scan_error(self, e):
         LOGGER.error('Gateway %d monitor error: %s', self.port_set, e)

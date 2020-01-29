@@ -359,17 +359,19 @@ class ConnectedHost:
             self._monitor_cleanup()
             self._monitor_error(e)
 
-    def _monitor_cleanup(self):
+    def _monitor_cleanup(self, forget=True):
         if self._tcp_monitor:
             LOGGER.info('Target port %d monitor scan complete', self.target_port)
-            if self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed:
+            nclosed = self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed
+            assert nclosed == forget, 'forget and nclosed mismatch'
+            if forget:
                 self.runner.monitor_forget(self._tcp_monitor.stream())
                 self._tcp_monitor.terminate()
             self._tcp_monitor = None
 
     def _monitor_error(self, exception):
         LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
-        self._monitor_cleanup()
+        self._monitor_cleanup(forget=False)
         self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.target_port, exception)
@@ -401,7 +403,7 @@ class ConnectedHost:
 
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
-        self._monitor_cleanup()
+        self._monitor_cleanup(forget=False)
         self.record_result('monitor', state=MODE.DONE)
         self._monitor_continue()
 
