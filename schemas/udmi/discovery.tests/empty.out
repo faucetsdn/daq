@@ -1,6 +1,6 @@
 Validating 1 schemas
-  Validating 1 files against discover.json
-    Against input discover.tests/empty.json
+  Validating 1 files against discovery.json
+    Against input discovery.tests/empty.json
       #: 5 schema violations found
         #: required key [deprecated: do not use discovery] not found
         #: required key [name] not found

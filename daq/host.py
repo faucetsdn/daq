@@ -154,7 +154,7 @@ class ConnectedHost:
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
-        return test_module.get('timeout', self._default_timeout_sec) if test_module else None
+        return test_module.get('timeout_sec', self._default_timeout_sec) if test_module else None
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -299,8 +299,8 @@ class ConnectedHost:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
-            self.runner.target_set_complete(self.target_port, 'Target port %d termination'
-                                            % self.target_port)
+            self.runner.target_set_complete(self.target_port,
+                                            'Target port %d termination' % self.target_port)
 
     def idle_handler(self):
         """Trigger events from idle state"""
@@ -379,17 +379,19 @@ class ConnectedHost:
             self._monitor_cleanup()
             self._monitor_error(e)
 
-    def _monitor_cleanup(self):
+    def _monitor_cleanup(self, forget=True):
         if self._tcp_monitor:
             LOGGER.info('Target port %d monitor scan complete', self.target_port)
-            if self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed:
+            nclosed = self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed
+            assert nclosed == forget, 'forget and nclosed mismatch'
+            if forget:
                 self.runner.monitor_forget(self._tcp_monitor.stream())
                 self._tcp_monitor.terminate()
             self._tcp_monitor = None
 
     def _monitor_error(self, exception):
         LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
-        self._monitor_cleanup()
+        self._monitor_cleanup(forget=False)
         self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.target_port, exception)
@@ -421,7 +423,7 @@ class ConnectedHost:
 
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
-        self._monitor_cleanup()
+        self._monitor_cleanup(forget=False)
         self.record_result('monitor', state=MODE.DONE)
         self._monitor_continue()
 
@@ -577,7 +579,7 @@ class ConnectedHost:
 
     @staticmethod
     def clear_port(gcp_instance, port):
-        """Clear the given port in the ui to a startup init state"""
+        """Clear a port-based entry without having an instantiated host class"""
         result = {
             'name': 'startup',
             'state': MODE.INIT,
