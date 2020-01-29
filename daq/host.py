@@ -560,7 +560,7 @@ class ConnectedHost:
 
     @staticmethod
     def clear_port(gcp_instance, port):
-        """Clear the given port in the ui to a startup init state"""
+        """Clear a port-based entry without having an instantiated host class"""
         result = {
             'name': 'startup',
             'state': MODE.INIT,

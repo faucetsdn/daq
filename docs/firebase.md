@@ -5,13 +5,12 @@ of test results.
 
 ## Initial Setup
 
-**TODO**: The system needs to be setup in
-"[Cloud Firestore in Native Mode](https://cloud.google.com/datastore/docs/firestore-or-datastore)",
-and somewhere in here this needs to get described when setting up a new project.
-
-0. There should be a GCP project that can be used to host everything.
+0. There need a GCP project that can be used to host everything.
 1. Goto the [Firebase Console](https://console.firebase.google.com/) and add a new project.
    * Add the hosting GCP project to link it to this Firebase setup.
+   * Create the Firebase Database (click tab on left), for Cloud Firestore (_Create Database_ button);
+   Set up in _production mode_.
+   * Billing and region need to work, but there is not specific guidance on what you should choose.
 2. Navigate to the
 [Google Cloud Platform (GCP) service accounts page](https://console.cloud.google.com/iam-admin/serviceaccounts?project=daq-project)
    * This is <em>not</em> from the Firebase page: it has to be from the base GCP page.
@@ -27,12 +26,15 @@ and somewhere in here this needs to get described when setting up a new project.
    * There should be something in the top 10-20 startup log lines that look something like:
      <br>`INFO:gcp:Loading gcp credentials from local/daq-testlab-de56aa4b1e47.json`
      <br>`INFO:gcp:Initialized gcp publisher client daq-project:daq-testlab`
+   * Depending on what else is configured, it may or may not do something else after this.
 6. Follow the relevant parts of the
    * https://console.firebase.google.com/
    * Select your project.
    * Select "+ Add app"
    * Select "</>" (Web)
-   * Use a clever nickname and register app.
+   * Use a clever nickname and register app. This will be shared by multiple DAQ instances.
+   * Enable _Firebase Hosting_
+   * Get your [firebase config object](https://support.google.com/firebase/answer/7015592?authuser=0) for a _web app_.
    * Copy the `var firebaseConfig = { ... }` snippet to `local/firebase_config.js`
    * Add an [API Key Restriction](https://cloud.google.com/docs/authentication/api-keys#api_key_restrictions)
    for an _HTTP Referrer_, which will be the https:// address of the daq hosted web addp.
@@ -43,9 +45,11 @@ and somewhere in here this needs to get described when setting up a new project.
    * Select "Sign-in method"
    * Enable "Google" sign-in.
 8. Follow the [Firebase CLI setup instructions](https://firebase.google.com/docs/cli/).
-9. Goto the `firebase/` directory.
-   * Run <code>firebase/deploy.sh</code> to deploy firebase to your <em>gcp_cred</em> project.
+9. Deploy Firebase functions
+   * Go to <code>firebase/functions</code> and run <code>npm install</code>.
+   * In <code>firebase/</code>, run <code>./deploy.sh</code> to deploy to your project.
    * Follow the link to the indicated _Hosting URL_ to see the newly installed pages.
+   * You will likely see an _Authentication failed_ message. See next section for details.
 
 ## Authentication
 

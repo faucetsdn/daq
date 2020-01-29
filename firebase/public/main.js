@@ -15,6 +15,7 @@ const data_state = {};
 let last_result_time_sec = 0;
 
 const origin_id = getQueryParam('origin');
+const site_name = getQueryParam('site');
 const port_id = getQueryParam('port');
 const registry_id = getQueryParam('registry');
 const device_id = getQueryParam('device');
@@ -223,6 +224,23 @@ function handleOriginResult(origin, port, runid, test, result) {
   }
 }
 
+function handleSiteResult(site, device, runid, test, result) {
+  if (result.timestamp > last_result_time_sec) {
+    last_result_time_sec = result.timestamp;
+  }
+  if (!row_timestamps[device] || row_timestamps[device] < result.timestamp) {
+    row_timestamps[device] = result.timestamp;
+  }
+  ensureGridRow(device);
+  ensureGridColumn(test);
+  setGridValue(device, 'device', runid, device)
+  setRowState(device, runid);
+  
+  const status = getResultStatus(result);
+  statusUpdate(`Updating ${device} ${test} run ${runid} with '${status}'.`);
+  setGridValue(device, test, runid, status);
+}
+
 function makeConfigLink(element, info, port, runid) {
   const parts = info.split('/');
   const device_id = parts[0];
@@ -294,11 +312,25 @@ function watcherAdd(ref, collection, limit, handler) {
   }, (e) => console.error(e));
 }
 
+function listSites(db) {
+  const link_group = document.querySelector('#listings .sites');
+  db.collection('sites').get().then((snapshot) => {
+    snapshot.forEach((site_doc) => {
+      site = site_doc.id;
+      const site_link = document.createElement('a');
+      site_link.setAttribute('href', '/?site=' + site);
+      site_link.innerHTML = site;
+      link_group.appendChild(site_link);
+      link_group.appendChild(document.createElement('p'));
+    });
+  }).catch((e) => statusUpdate('registry list error', e));
+}
+
 function listOrigins(db) {
-  const link_group = document.getElementById('origins');
+  const link_group = document.querySelector('#listings .origins');
   db.collection('origin').get().then((snapshot) => {
-    snapshot.forEach((origin) => {
-      origin = origin.id;
+    snapshot.forEach((origin_doc) => {
+      origin = origin_doc.id;
       const origin_link = document.createElement('a');
       origin_link.setAttribute('href', '/?origin=' + origin);
       origin_link.innerHTML = origin;
@@ -308,32 +340,25 @@ function listOrigins(db) {
   }).catch((e) => statusUpdate('origin list error', e));
 }
 
-function listRegistries(db) {
-  db.collection('registry').get().then((snapshot) => {
-    snapshot.forEach((registry) => {
-      listDevices(db, registry.id);
+function listUsers(db) {
+  const link_group = document.querySelector('#listings .users');
+  db.collection('users').get().then((snapshot) => {
+    snapshot.forEach((user_doc) => {
+      const user = user_doc.id;
+      const user_link = document.createElement('a');
+      user_link.innerHTML = user_doc.data().email
+      link_group.appendChild(user_link);
+      link_group.appendChild(document.createElement('p'));
     });
-  }).catch((e) => statusUpdate('registry list error', e));
-}
-
-function listDevices(db, registryId) {
-  const link_group = document.getElementById('devices');
-  db
-    .collection('registry').doc(registryId)
-    .collection('device').get().then((snapshot) => {
-      snapshot.forEach((device) => {
-        const deviceId = device.id;
-        const origin_link = document.createElement('a');
-        origin_link.setAttribute('href', `/?registry=${registryId}&device=${deviceId}`);
-        origin_link.innerHTML = `${registryId}/${deviceId}`
-        link_group.appendChild(origin_link);
-        link_group.appendChild(document.createElement('p'));
-      });
-    }).catch((e) => statusUpdate('registry list error', e));
+  }).catch((e) => statusUpdate('user list error', e));
 }
 
 function dashboardSetup() {
-  if (port_id) {
+  if (site_name) {
+    ensureGridRow('header');
+    ensureGridColumn('device');
+    triggerSite(db, site_name);
+  } else if (port_id) {
     ensureGridRow('header');
     ensureGridColumn('row', port_id);
     triggerPort(db, origin_id, port_id);
@@ -344,8 +369,10 @@ function dashboardSetup() {
   } else if (registry_id && device_id) {
     triggerDevice(db, registry_id, device_id);
   } else {
+    document.getElementById('listings').classList.add('active');
+    listSites(db);
     listOrigins(db);
-    listRegistries(db);
+    listUsers(db);
   }
 
   return origin_id;
@@ -372,6 +399,27 @@ function triggerOrigin(db, origin_id) {
         ref.onSnapshot((result) => {
           // TODO: Handle results going away.
           handleOriginResult(origin_id, port_id, runid_id, test_id, result.data());
+        });
+      });
+    });
+  });
+}
+
+function triggerSite(db, site_name) {
+  const latest = (ref) => {
+    return ref.orderBy('updated', 'desc').limit(1);
+  };
+
+  let ref = db.collection('sites').doc(site_name);
+  watcherAdd(ref, "device", undefined, (ref, device_id) => {
+    console.log('device', device_id);
+    watcherAdd(ref, "runid", latest, (ref, runid_id) => {
+      console.log('runid', runid_id);
+      watcherAdd(ref, "test", undefined, (ref, test_id) => {
+	console.log('test', test_id);
+        ref.onSnapshot((result) => {
+          // TODO: Handle results going away.
+          handleSiteResult(site_name, device_id, runid_id, test_id, result.data());
         });
       });
     });
