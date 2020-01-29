@@ -128,3 +128,11 @@ div {
 .auth-main {
     width: 20em;
 }
+
+#listings {
+    display: none
+}
+
+#listings.active {
+    display: block
+}
