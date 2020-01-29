@@ -68,12 +68,10 @@ port-01 module_config modules
     "enabled": true
   },
   "nmap": {
-    "enabled": true,
-    "timeout": 60
+    "enabled": true
   },
   "pass": {
-    "enabled": true,
-    "timeout": 60
+    "enabled": true
   },
   "password": {
     "enabled": true
@@ -109,12 +107,10 @@ port-02 module_config modules
     "enabled": true
   },
   "nmap": {
-    "enabled": true,
-    "timeout": 60
+    "enabled": true
   },
   "pass": {
-    "enabled": false,
-    "timeout": 60
+    "enabled": false
   },
   "password": {
     "enabled": true

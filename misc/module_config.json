@@ -1,12 +1,10 @@
 {
   "modules": {
     "pass": {
-      "enabled": true, 
-      "timeout": 60
+      "enabled": true
     },
     "nmap": {
-      "enabled": true,
-      "timeout": 60
+      "enabled": true
     },
     "macoui": {
       "enabled": true

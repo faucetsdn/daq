@@ -153,7 +153,7 @@ class ConnectedHost:
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
-        return test_module.get('timeout', self._default_timeout_sec) if test_module else None
+        return test_module.get('timeout_sec', self._default_timeout_sec) if test_module else None
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -279,8 +279,8 @@ class ConnectedHost:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
-            self.runner.target_set_complete(self.target_port, 'Target port %d termination'
-                                            % self.target_port)
+            self.runner.target_set_complete(self.target_port,
+                                            'Target port %d termination' % self.target_port)
 
     def idle_handler(self):
         """Trigger events from idle state"""
