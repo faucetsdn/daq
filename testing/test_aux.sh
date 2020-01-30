@@ -98,6 +98,9 @@ MARKER=inst/run-port-03/nodes/hold03/activate.log
 echo Starting aux test run...
 cmd/run -b -s -k
 
+# Check custom timeout
+cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS
+
 # Add just the RESULT lines from all aux tests (from all ports, 3 in this case) into a file
 # These ARE the auxiliary tests
 capture_aux_test_results bacext all
