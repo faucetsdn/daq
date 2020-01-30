@@ -70,8 +70,7 @@ class ConnectedHost:
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
     _AUX_DIR = "aux/"
     _CONFIG_DIR = "config/"
-
-    _TIMEOUT_EXCEPTION = TimeoutError("timeout")
+    _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
 
     def __init__(self, runner, gateway, target, config):
         self.runner = runner
@@ -275,7 +274,11 @@ class ConnectedHost:
         timeout = datetime.strptime(self.test_start, '%Y-%m-%dT%H:%M:%S.%fZ') + \
                   timedelta(seconds=timeout_sec)
         if  datetime.fromtimestamp(time.time()) >= timeout:
-            self.timeout_handler()
+            if self.timeout_handler:
+                LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
+                # ensure it's called once
+                handler, self.timeout_handler = self.timeout_handler, None
+                handler()
 
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
@@ -520,7 +523,7 @@ class ConnectedHost:
         return os.path.join(self._host_dir_path(), 'tmp')
 
     def _docker_callback(self, return_code=None, exception=None):
-        self.timeout_handler = lambda: None # cancel timeout handling
+        self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
         LOGGER.info('test_host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
