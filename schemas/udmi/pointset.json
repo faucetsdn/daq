@@ -29,6 +29,7 @@
   ],
   "definitions": {
     "point_property_names": {
+      "type": "object",
       "propertyNames": {
         "oneOf": [
           {
