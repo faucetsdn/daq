@@ -6,6 +6,7 @@ Validator exit code 0
 Lint checks
 check_style exit code 0
 Extended tests
+ERROR:host:Monitoring timeout for macoui after 1s
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
@@ -16,7 +17,6 @@ RESULT fail network.brute Change the default password on the DUT
 RESULT pass network.brute 
 RESULT skip network.brute Port 10000 is not open
 RESULT fail connection.mac_oui Manufacturer prefix not found!
-RESULT pass connection.mac_oui
 RESULT pass connection.mac_oui
 RESULT skip security.tls.v3
 RESULT skip security.x509
@@ -40,7 +40,7 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 2 1
 01: ['01:brute:1', '01:macoui:1']
-02: ['02:hold:TimeoutError', '02:nmap:1', '02:tls:1']
+02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1', '02:tls:1']
 03: ['03:hold:DaqException', '03:nmap:1']
 ctrl-br.flows
 ctrl-br.ofctl
@@ -57,6 +57,9 @@ port-01 module_config modules
   },
   "brute": {
     "enabled": true
+  },
+  "dhcp": {
+    "timeout_sec": 120
   },
   "discover": {
     "enabled": true
@@ -100,11 +103,15 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
+  "dhcp": {
+    "timeout_sec": 120
+  },
   "hold": {
     "enabled": true 
   },
   "macoui": {
-    "enabled": true
+    "enabled": true,
+    "timeout_sec": 1
   },
   "nmap": {
     "enabled": true

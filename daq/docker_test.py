@@ -17,7 +17,7 @@ class DockerTest():
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
-    def __init__(self, runner, target_port, tmpdir, test_name, timeout_sec=None):
+    def __init__(self, runner, target_port, tmpdir, test_name):
         self.target_port = target_port
         self.tmpdir = tmpdir
         self.test_name = test_name
@@ -27,7 +27,6 @@ class DockerTest():
         self.docker_host = None
         self.callback = None
         self.start_time = None
-        self.timeout_sec = timeout_sec
         self.pipe = None
 
     def start(self, port, params, callback):
@@ -77,7 +76,7 @@ class DockerTest():
                 raise Exception('Test initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
-                                       error=self._docker_error, timeout_sec=self.timeout_sec)
+                                       error=self._docker_error)
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
                 # Closing this now will cause error when attempting to write outoput.

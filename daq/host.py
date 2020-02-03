@@ -1,10 +1,10 @@
 """Represent a device-under-test"""
 
-import datetime
 import logging
 import os
 import shutil
 import time
+from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
 
@@ -44,7 +44,6 @@ class MODE:
     TERM = 'term'
     LONG = 'long'
     MERR = 'merr'
-    SERR = 'serr'
 
 
 def pre_states():
@@ -71,6 +70,7 @@ class ConnectedHost:
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
     _AUX_DIR = "aux/"
     _CONFIG_DIR = "config/"
+    _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
 
     def __init__(self, runner, gateway, target, config):
         self.runner = runner
@@ -113,7 +113,7 @@ class ConnectedHost:
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
                                               self._loaded_config)
-
+        self.timeout_handler = self._aux_module_timeout_handler
     @staticmethod
     def make_runid():
         """Create a timestamped runid"""
@@ -257,6 +257,29 @@ class ConnectedHost:
         self.record_result('dhcp', state=MODE.EXEC)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
+    def _aux_module_timeout_handler(self):
+        # clean up tcp monitor that could be open
+        self._monitor_error(self._TIMEOUT_EXCEPTION, forget=True)
+
+    def _main_module_timeout_handler(self):
+        self.test_host.terminate()
+        self.test_host = None
+        self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
+
+    def check_module_timeout(self):
+        """Checks module run time for each event loop"""
+        timeout_sec = self._get_test_timeout(self.test_name)
+        if not timeout_sec or not self.test_start:
+            return
+        timeout = gcp.parse_timestamp(self.test_start) + \
+                  timedelta(seconds=timeout_sec)
+        if  datetime.fromtimestamp(time.time()) >= timeout:
+            if self.timeout_handler:
+                LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
+                # ensure it's called once
+                handler, self.timeout_handler = self.timeout_handler, None
+                handler()
+
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
         assert callable(callback), "DHCP listener callback is not callable"
@@ -293,8 +316,8 @@ class ConnectedHost:
         """Check if this host is ready to be triggered"""
         if self.state != _STATE.WAITING:
             return False
-        timedelta = datetime.datetime.now() - self._startup_time
-        if timedelta < datetime.timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
+        delta_t = datetime.now() - self._startup_time
+        if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
         return True
 
@@ -330,7 +353,7 @@ class ConnectedHost:
     def _startup_scan(self):
         assert not self._tcp_monitor, 'tcp_monitor already active'
         startup_file = os.path.join(self.scan_base, 'startup.pcap')
-        self._startup_time = datetime.datetime.now()
+        self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
         network = self.runner.network
         tcp_filter = ''
@@ -369,9 +392,9 @@ class ConnectedHost:
                 self._tcp_monitor.terminate()
             self._tcp_monitor = None
 
-    def _monitor_error(self, exception):
+    def _monitor_error(self, exception, forget=False):
         LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
-        self._monitor_cleanup(forget=False)
+        self._monitor_cleanup(forget=forget)
         self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.target_port, exception)
@@ -431,8 +454,10 @@ class ConnectedHost:
     def _run_next_test(self):
         try:
             if self.remaining_tests:
+                self.timeout_handler = self._main_module_timeout_handler
                 self._docker_test(self.remaining_tests.pop(0))
             else:
+                self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self._report.finalize()
@@ -455,6 +480,8 @@ class ConnectedHost:
         return path
 
     def _docker_test(self, test_name):
+        self.test_name = test_name
+        self.test_start = gcp.get_timestamp()
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
         params = {
             'target_ip': self.target_ip,
@@ -467,9 +494,8 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-        test_timeout = self._get_test_timeout(test_name)
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name, timeout_sec=test_timeout)
+                                                self.test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
@@ -480,7 +506,7 @@ class ConnectedHost:
 
         try:
             LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
-            self._set_module_config(test_name, self._loaded_config)
+            self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
             self.test_host.start(self.test_port, params, self._docker_callback)
         except:
@@ -497,6 +523,7 @@ class ConnectedHost:
         return os.path.join(self._host_dir_path(), 'tmp')
 
     def _docker_callback(self, return_code=None, exception=None):
+        self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
         LOGGER.info('test_host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
@@ -516,19 +543,14 @@ class ConnectedHost:
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
         if os.path.isfile(report_path):
             self._report.accumulate(self.test_name, report_path)
-        self.test_host = None
         self.runner.release_test_port(self.target_port, self.test_port)
-        if exception:
-            self._state_transition(_STATE.ERROR)
-            self.runner.target_set_error(self.target_port, exception)
-        else:
-            self._state_transition(_STATE.NEXT, _STATE.TESTING)
-            self._run_next_test()
+        self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        self._run_next_test()
 
-    def _set_module_config(self, name, loaded_config):
+    def _set_module_config(self, loaded_config):
         tmp_dir = self._host_tmp_path()
         configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
-        self._record_result(name, config=self._loaded_config, state=MODE.CONF)
+        self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
 
     def _merge_run_info(self, config):
         config['run_info'] = {
