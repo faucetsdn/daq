@@ -3,8 +3,8 @@
 source testing/test_preamble.sh
 
 NUM_DEVICES=8
-RUN_LIMIT=10
-NO_DHCP_DEVICES=1
+RUN_LIMIT=12
+NUM_NO_DHCP_DEVICES=1
 echo Many Tests >> $TEST_RESULTS
 
 echo source misc/system.conf > local/system.conf
@@ -20,7 +20,7 @@ ifaces=
 for iface in $(seq 1 $NUM_DEVICES); do
     ifaces=${ifaces},faux-$iface
     xdhcp=""
-    if [[ iface -le $NO_DHCP_DEVICES ]]
+    if [[ iface -le $NUM_NO_DHCP_DEVICES ]]
     then
         xdhcp="xdhcp"
     fi
@@ -36,7 +36,7 @@ results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "dhcp:TimeoutError" inst/result.log | wc -l)
 echo Found $results successful runs.
 # This is broken -- should have many more results available!
-echo Enough results $(($results >= 6 / 10 * $RUN_LIMIT)) | tee -a $TEST_RESULTS
-# $timeouts should strictly equal $NO_DHCP_DEVICES when dhcp step is fixed. 
-echo Enough DHCP timeouts $(($timeouts >= $NO_DHCP_DEVICES)) | tee -a $TEST_RESULTS
+echo Enough results: $(echo "print($results >= 6 / 10 * $RUN_LIMIT)" | python) | tee -a $TEST_RESULTS
+# $timeouts should strictly equal $NUM_NO_DHCP_DEVICES when dhcp step is fixed. 
+echo Enough DHCP timeouts: $(echo "print($timeouts >= $NUM_NO_DHCP_DEVICES)" | python) | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS

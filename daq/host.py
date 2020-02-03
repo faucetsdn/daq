@@ -271,8 +271,8 @@ class ConnectedHost:
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
             return
-        timeout = gcp.parse_timestamp(self.test_start) + \
-                  timedelta(seconds=timeout_sec)
+        delta_sec = timedelta(seconds=timeout_sec)
+        timeout = gcp.parse_timestamp(self.test_start) + delta_sec
         if  datetime.fromtimestamp(time.time()) >= timeout:
             if self.timeout_handler:
                 LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
