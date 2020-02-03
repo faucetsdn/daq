@@ -27,6 +27,7 @@
   },
   "gateway": {
     "gateway_id": "GAT-12",
-    "local_id": "bacnet-1234"
+    "protocol": "bacnet",
+    "local_id": "*82AE98"
   }
 }

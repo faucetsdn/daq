@@ -11,5 +11,5 @@ Validating 1 schemas
           #/points: extraneous key [bad_entity_name_] is not permitted
         #: extraneous key [id] is not permitted
         #: extraneous key [properties] is not permitted
-        #: required key [deprecated: do not use discovery] not found
-        #: required key [name] not found
+        #: required key [local_id] not found
+        #: required key [protocol] not found

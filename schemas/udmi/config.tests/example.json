@@ -8,7 +8,8 @@
   "gateway": {
     "devices": {
       "AHU-123": {
-        "local_id": "bacnet-327412"
+	"protocol": "bacnet",
+        "local_id": "327412"
       }
     }
   },

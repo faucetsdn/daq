@@ -13,9 +13,11 @@
         1
       ]
     },
+    "protocol": {
+      "type": "string"
+    },
     "local_id": {
-      "type": "string",
-      "pattern": "^[A-Z][A-Z0-9]*((_|-)[A-Z0-9]+)*$"
+      "type": "string"
     },
     "points": {
       "additionalProperties": false,
@@ -29,6 +31,7 @@
   "required": [
     "timestamp",
     "version",
+    "protocol",
     "local_id",
     "points"
   ],

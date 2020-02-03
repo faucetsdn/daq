@@ -1,15 +1,32 @@
 {
-  "title": "gateway config snippet",
+  "title": "Gateway Config Snippet",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
+  "required": [
+    "devices"
+  ],
   "properties": {
+    "scan_interval_ms": {
+      "type": "number",
+      "minimum": 1000
+    },
     "devices": {
       "additionalProperties": false,
       "patternProperties": {
-        "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
+	"^[A-Z]{3}-[1-9][0-9]{0,2}$": {
           "additionalProperties": false,
+	  "required": [
+	    "protocol",
+	    "local_id"
+	  ],
           "properties": {
+	    "protocol": {
+	      "type": "string"
+	    },
+	    "local_id": {
+	      "type": "string"
+	    },
             "min_update_ms": {
               "type": "number",
               "minimum": 1000

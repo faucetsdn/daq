@@ -70,6 +70,7 @@ public class Validator {
   private static final String METADATA_REPORT_JSON = "metadata_report.json";
   private static final String DEVICE_REGISTRY_ID_KEY = "deviceRegistryId";
   private FirestoreDataSink dataSink;
+  private File schemaRoot;
   private String schemaSpec;
   private final Map<String, ReportingDevice> expectedDevices = new HashMap<>();
   private final Set<String> extraDevices = new HashSet<>();
@@ -137,16 +138,22 @@ public class Validator {
     }
   }
 
-  private void setSchemaSpec(String schemaSpec) {
-    if (!schemaSpec.endsWith(File.separator)) {
-      schemaSpec = schemaSpec + File.separator;
+  private void setSchemaSpec(String schemaPath) {
+    File schemaFile = new File(schemaPath).getAbsoluteFile();
+    if (schemaFile.isFile()) {
+      schemaRoot = schemaFile.getParentFile();
+      schemaSpec = schemaFile.getName();
+    } else if (schemaFile.isDirectory()) {
+      schemaRoot = schemaFile.getParentFile();
+      schemaSpec = null;
+    } else {
+      throw new RuntimeException("Schema director/file not found: " + schemaFile);
     }
-    this.schemaSpec = schemaSpec;
   }
 
   private void validatePubSub(String instName, String topicName) {
     Map<String, Schema> schemaMap = new HashMap<>();
-    for (File schemaFile : makeFileList(schemaSpec)) {
+    for (File schemaFile : makeFileList(schemaRoot)) {
       Schema schema = getSchema(schemaFile);
       String fullName = schemaFile.getName();
       String schemaName = schemaFile.getName()
@@ -351,7 +358,7 @@ public class Validator {
       try {
         Schema schema = getSchema(schemaFile);
         ExceptionMap validateExceptions = new ExceptionMap(
-            String.format(TARGET_VALIDATION_FORMAT, targetFiles.size(), schemaFile));
+            String.format(TARGET_VALIDATION_FORMAT, targetFiles.size(), schemaFile.getName()));
         for (File targetFile : targetFiles) {
           try {
             System.out.println("Validating " + targetFile.getName() + " against " + schemaFile.getName());
@@ -398,7 +405,7 @@ public class Validator {
         if (!url.startsWith(FILE_URL_PREFIX)) {
           throw new IllegalStateException("Expected path to start with " + FILE_URL_PREFIX);
         }
-        String new_url = FILE_URL_PREFIX + schemaSpec + url.substring(FILE_URL_PREFIX.length());
+        String new_url = FILE_URL_PREFIX + new File(schemaRoot, url.substring(FILE_URL_PREFIX.length()));
         return (InputStream) (new URL(new_url)).getContent();
       } catch (Exception e) {
         throw new RuntimeException("While loading URL " + url, e);
@@ -407,7 +414,10 @@ public class Validator {
   }
 
   private List<File> makeFileList(String spec) {
-    File target = new File(spec);
+    return makeFileList(new File(spec));
+  }
+
+  private List<File> makeFileList(File target) {
     if (target.isFile()) {
       return ImmutableList.of(target);
     }
