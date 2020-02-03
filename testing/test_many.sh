@@ -20,8 +20,7 @@ ifaces=
 for iface in $(seq 1 $NUM_DEVICES); do
     ifaces=${ifaces},faux-$iface
     xdhcp=""
-    if [[ iface -le $NUM_NO_DHCP_DEVICES ]]
-    then
+    if [[ iface -le $NUM_NO_DHCP_DEVICES ]]; then
         xdhcp="xdhcp"
     fi
     echo autostart cmd/faux $iface>> $manystartup
