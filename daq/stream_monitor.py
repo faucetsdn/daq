@@ -95,7 +95,7 @@ class StreamMonitor():
         name = self.callbacks[fd][0]
         callback = self.callbacks[fd][2]
         on_error = self.callbacks[fd][3]
-        self.callbacks[fd][4].close() # close the stream
+        self.callbacks[fd][4].close()
         try:
             self.forget(fd)
             if callback:

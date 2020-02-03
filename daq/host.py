@@ -259,7 +259,7 @@ class ConnectedHost:
 
     def _aux_module_timeout_handler(self):
         # clean up tcp monitor that could be open
-        self._monitor_error(self._TIMEOUT_EXCEPTION)
+        self._monitor_error(self._TIMEOUT_EXCEPTION, forget=True)
 
     def _main_module_timeout_handler(self):
         self.test_host.terminate()
@@ -271,7 +271,7 @@ class ConnectedHost:
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
             return
-        timeout = datetime.strptime(self.test_start, '%Y-%m-%dT%H:%M:%S.%fZ') + \
+        timeout = gcp.parse_timestamp(self.test_start) + \
                   timedelta(seconds=timeout_sec)
         if  datetime.fromtimestamp(time.time()) >= timeout:
             if self.timeout_handler:
@@ -392,9 +392,9 @@ class ConnectedHost:
                 self._tcp_monitor.terminate()
             self._tcp_monitor = None
 
-    def _monitor_error(self, exception):
+    def _monitor_error(self, exception, forget=False):
         LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
-        self._monitor_cleanup(forget=False)
+        self._monitor_cleanup(forget=forget)
         self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.target_port, exception)

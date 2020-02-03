@@ -18,12 +18,14 @@ from grpc import StatusCode
 import configurator
 
 LOGGER = logging.getLogger('gcp')
-
-
+TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
-    return datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    return datetime.datetime.now(datetime.timezone.utc).strftime(TIMESTAMP_FORMAT)[:-3] + 'Z'
 
+def parse_timestamp(timestamp_str):
+    """Parses a timestamp generated from get_timestamp"""
+    return datetime.datetime.strptime(timestamp_str, TIMESTAMP_FORMAT + 'Z')
 
 class GcpManager:
     """Manager class for working with GCP"""
