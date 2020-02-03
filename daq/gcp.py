@@ -3,6 +3,7 @@
 import datetime
 import json
 import logging
+import os
 import sys
 
 import firebase_admin
@@ -44,8 +45,10 @@ class GcpManager:
         # pylint: disable=protected-access
         (self._credentials, self._project) = google_auth._load_credentials_from_file(cred_file)
         self._client_name = self._parse_creds(cred_file)
+        self._site_name = self._get_site_name()
         self._pubber = pubsub_v1.PublisherClient(credentials=self._credentials)
-        LOGGER.info('Initialized gcp pub/sub %s:%s', self._project, self._client_name)
+        LOGGER.info('Initialized gcp pub/sub %s:%s:%s', self._project,
+                    self._client_name, self._site_name)
         self._firestore = self._initialize_firestore(cred_file)
         self._report_bucket_name = self.REPORT_BUCKET_FORMAT % self._project
         self._storage = storage.Client(project=self._project, credentials=self._credentials)
@@ -150,6 +153,11 @@ class GcpManager:
         """Release a config blob and remove it from the live data system"""
         self.register_config(path, None)
 
+    def _get_site_name(self):
+        site_path = self.config['site_path']
+        with open(os.path.join(site_path, 'cloud_iot_config.json')) as config_file:
+            return json.load(config_file)['site_name']
+
     def _parse_creds(self, cred_file):
         """Parse JSON credential file"""
         with open(cred_file) as data_file:
@@ -175,7 +183,8 @@ class GcpManager:
         # pylint: disable=no-member
         topic_path = self._pubber.topic_path(self._project, topic)
         future = self._pubber.publish(topic_path, message_str.encode('utf-8'),
-                                      projectId=self._project, origin=self._client_name)
+                                      projectId=self._project, origin=self._client_name,
+                                      site_name=self._site_name)
         LOGGER.debug('Publish future result %s', future.result())
 
     def _ensure_report_bucket(self):

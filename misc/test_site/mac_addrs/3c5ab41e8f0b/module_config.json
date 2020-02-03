@@ -1,7 +1,7 @@
 {
   "modules": {
     "hold": {
-      "enabled": false
+      "enabled": true
     }
   }
 }
