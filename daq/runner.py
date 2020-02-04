@@ -256,6 +256,10 @@ class DAQRunner:
         for key in target_set_keys:
             self.port_targets[key].terminate()
 
+    def _check_module_timeouts(self):
+        for host in list(self.mac_targets.values()):
+            host.check_module_timeout()
+
     def main_loop(self):
         """Run main loop to execute tests"""
 
@@ -269,7 +273,8 @@ class DAQRunner:
                 self._flush_faucet_events()
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
-            self.stream_monitor.event_loop()
+            while self.stream_monitor.event_loop():
+                self._check_module_timeouts()
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
             LOGGER.exception(e)

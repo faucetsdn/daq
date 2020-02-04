@@ -74,6 +74,8 @@ if [ -n "${options[xdhcp]}" ]; then
     ip link set up dev $intf_name
     ip addr add 10.20.0.5/16 dev $intf_name broadcast 10.20.255.255
     ip addr show $intf_name
+
+    (while true; do ping -c 1 10.20.0.1; sleep 5; done) &
 else
     echo Running dhclient...
     dhclient -v
