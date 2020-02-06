@@ -4,7 +4,8 @@
 # dnsmasq as per documentation (SIGHUP does not reload configuration file).
 lease=$1
 if [ -z $lease ]; then
-    lease="500s"
+    echo "Lease time not defined."
+    exit 1
 fi
 while [ $(cat /etc/dnsmasq.conf | grep dhcp-range=10.20 | wc -l) == 0 ]; do 
     sleep 1
