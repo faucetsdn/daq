@@ -9,7 +9,7 @@ RUN $AG update && $AG install dnsmasq ethtool iptables netcat python freeradius
 
 COPY misc/start_networking .
 
-COPY misc/increase_leasetime .
+COPY misc/change_lease_time .
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump

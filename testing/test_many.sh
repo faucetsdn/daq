@@ -3,8 +3,8 @@
 source testing/test_preamble.sh
 
 NUM_DEVICES=8
-RUN_LIMIT=12
-NUM_NO_DHCP_DEVICES=1
+RUN_LIMIT=20
+NUM_NO_DHCP_DEVICES=2
 echo Many Tests >> $TEST_RESULTS
 
 echo source misc/system.conf > local/system.conf
@@ -23,13 +23,13 @@ for iface in $(seq 1 $NUM_DEVICES); do
     if [[ iface -le $NUM_NO_DHCP_DEVICES ]]; then
         xdhcp="xdhcp"
     fi
-    echo autostart cmd/faux $iface>> $manystartup
+    echo autostart cmd/faux $iface $xdhcp>> $manystartup
 done
 echo intf_names=${ifaces#,} >> local/system.conf
 
 echo DAQ stress test | tee -a $TEST_RESULTS
 # Limit should be ~30, but something is wrong with startup sequence.
-cmd/run run_limit=$RUN_LIMIT settle_sec=0
+cmd/run run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "dhcp:TimeoutError" inst/result.log | wc -l)
