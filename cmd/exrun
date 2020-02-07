@@ -28,7 +28,7 @@ cd $ROOT
 source misc/config_base.sh
 
 while [ -f $INSTLOCK ]; do
-    echo Waiting for $INSTLOCK to dissapear!
+    echo Waiting for $INSTLOCK to disappear!
     sleep 10
 done
 
@@ -71,6 +71,10 @@ function DAQ {
     echo Cleanup $@
     $@ || true
 }
+
+if [ -z `which ifconfig` ]; then
+    export PATH=/sbin:$PATH
+fi
 
 sudo rm -f $cleanup_file
 if [ -n "$ext_loip" ]; then

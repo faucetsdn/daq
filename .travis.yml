@@ -19,6 +19,7 @@ cache: pip
 env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
+    - TEST=1
   matrix:
     - DAQ_TEST=base
     - DAQ_TEST=many

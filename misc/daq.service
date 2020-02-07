@@ -1,0 +1,14 @@
+[Unit]
+Description=DAQ service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+ExecStart=%ROOT%/cmd/run
+
+[Install]
+WantedBy=multi-user.target
