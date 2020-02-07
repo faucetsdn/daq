@@ -17,7 +17,7 @@ java -jar mac_oui/build/libs/mac_oui-all.jar $TARGET_MAC
 
 RESULT_AND_SUMMARY="$(grep "RESULT" $LOCAL_REPORT)"
 grep -v "RESULT" $LOCAL_REPORT >> $REDACTED_LOG
-sleep 1
+sleep 5
 write_out_result $REPORT \
                  "$TEST_NAME" \
                  "$TEST_DESCRIPTION" \
