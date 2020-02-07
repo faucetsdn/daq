@@ -12,10 +12,5 @@ bin/setup_dev
 echo bin/build_daq
 bin/build_daq
 
-if [ -z $TEST ]; then
-    echo bin/install_daq
-    bin/install_daq
-fi
-
 echo Done with setup_daq.
 
