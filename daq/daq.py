@@ -3,19 +3,18 @@
 """Main entry-point for DAQ. Handles command line parsing and other
 misc setup tasks."""
 
-import logging
 import os
 import signal
 import sys
 
 from mininet import log as minilog
-
+import logger
 import runner
 import configurator
 
-ROOT_LOG = logging.getLogger()
-LOGGER = logging.getLogger('daq')
-ALT_LOG = logging.getLogger('mininet')
+ROOT_LOG = logger.get_logger()
+LOGGER = logger.get_logger('daq')
+ALT_LOG = logger.get_logger('mininet')
 
 _PID_FILE = 'inst/daq.pid'
 
@@ -34,7 +33,7 @@ class DAQ:
         daq_env = config.get('daq_loglevel', log_def)
         level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
 
-        logging.basicConfig(level=level)
+        logger.set_config(level=level)
 
         # For some reason this is necessary for travis.ci
         ROOT_LOG.setLevel(level)

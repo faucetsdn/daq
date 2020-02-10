@@ -1,11 +1,12 @@
 """Utility class to monitor a bunch of input streams and trigger events"""
 
 import fcntl
-import logging
 import os
 import select
 
-LOGGER = logging.getLogger('stream')
+import logger
+
+LOGGER = logger.get_logger('stream')
 
 class StreamMonitor():
     """Monitor set of stream objects"""

@@ -2,7 +2,6 @@
 
 import datetime
 import json
-import logging
 import os
 import sys
 
@@ -12,12 +11,14 @@ from firebase_admin import firestore
 
 from google.cloud import pubsub_v1
 from google.cloud import storage
+from google.cloud import logging
 from google.auth import _default as google_auth
 from grpc import StatusCode
 
+import logger
 import configurator
 
-LOGGER = logging.getLogger('gcp')
+LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
@@ -56,7 +57,13 @@ class GcpManager:
         self._storage = storage.Client(project=self._project, credentials=self._credentials)
         self._ensure_report_bucket()
         self._config_callbacks = {}
+        self._logging = logging.Client(credentials=self._credentials, project=self._project)
+
         LOGGER.info('Connection initialized at %s', get_timestamp())
+
+    def get_logging_client(self):
+        """Gets the stackdriver client"""
+        return (self._client_name, self._logging)
 
     def _initialize_firestore(self, cred_file):
         cred = credentials.Certificate(cred_file)
@@ -237,7 +244,7 @@ class GcpManager:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+    logger.set_config(format='%(levelname)s:%(message)s', level="INFO")
     CONFIGURATOR = configurator.Configurator()
     CONFIG = CONFIGURATOR.parse_args(sys.argv)
     GCP = GcpManager(CONFIG, None)

@@ -1,7 +1,6 @@
 """Main test runner for DAQ"""
 
 import copy
-import logging
 import os
 import re
 import threading
@@ -16,8 +15,9 @@ import host as connected_host
 import network
 import stream_monitor
 from wrappers import DaqException
+import logger
 
-LOGGER = logging.getLogger('runner')
+LOGGER = logger.get_logger('runner')
 
 
 class DAQRunner:
@@ -64,6 +64,7 @@ class DAQRunner:
         self._dhcp_ready = set()
         self._dhcp_info = {}
 
+        logger.set_stackdriver_client(self.gcp.get_logging_client())
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
             test_list.append('hold')

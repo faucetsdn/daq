@@ -1,7 +1,6 @@
 """Gateway module for device testing"""
 
 import datetime
-import logging
 import os
 import shutil
 
@@ -9,8 +8,9 @@ from clib import docker_host
 from clib import tcpdump_helper
 
 import dhcp_monitor
+import logger
 
-LOGGER = logging.getLogger('gateway')
+LOGGER = logger.get_logger('gateway')
 
 class Gateway():
     """Gateway collection class for managing testing services"""
