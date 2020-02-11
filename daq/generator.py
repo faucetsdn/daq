@@ -1,14 +1,14 @@
 """Faucet network topology generator"""
 
 import copy
-import logging
 import os
 import sys
 import yaml
 
 from daq import DAQ
+import logger
 
-LOGGER = logging.getLogger('generator')
+LOGGER = logger.get_logger('generator')
 
 class TopologyGenerator():
     """Topology generator for Faucet top-level configs"""

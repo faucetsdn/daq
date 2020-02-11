@@ -1,14 +1,15 @@
 """Faucet-specific topology module"""
 
 import copy
-import logging
 import os
 import time
 import yaml
 
 from gateway import Gateway
 
-LOGGER = logging.getLogger('topology')
+import logger
+
+LOGGER = logger.get_logger('topology')
 
 class FaucetTopology():
     """Topology manager specific to FAUCET configs"""

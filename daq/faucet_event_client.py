@@ -1,14 +1,15 @@
 """Simple client for working with the faucet event socket"""
 
 import json
-import logging
 import os
 import select
 import socket
 import threading
 import time
 
-LOGGER = logging.getLogger('fevent')
+import logger
+
+LOGGER = logger.get_logger('fevent')
 
 class FaucetEventClient():
     """A general client interface to the FAUCET event API"""

@@ -2,13 +2,13 @@
 
 import functools
 import http.server
-import logging
 import socketserver
 import threading
 import urllib
 
+import logger
 
-LOGGER = logging.getLogger('httpserv')
+LOGGER = logger.get_logger('httpserv')
 
 
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):

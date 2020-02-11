@@ -1,8 +1,8 @@
 """Networking module"""
 
-import logging
 import os
 
+import logger
 from topology import FaucetTopology
 
 from mininet import node as mininet_node
@@ -11,7 +11,7 @@ from mininet import link as mininet_link
 from mininet import cli as mininet_cli
 from mininet import util as mininet_util
 
-LOGGER = logging.getLogger('network')
+LOGGER = logger.get_logger('network')
 
 
 class DAQHost(mininet_node.Host):

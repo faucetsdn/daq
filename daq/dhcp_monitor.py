@@ -1,13 +1,13 @@
 """Encapsulate DHCP monitor/startup"""
 
-import logging
 import re
 import time
 
+import logger
 from clib import tcpdump_helper
 from host import MODE
 
-LOGGER = logging.getLogger('dhcp')
+LOGGER = logger.get_logger('dhcp')
 
 class DhcpMonitor():
     """Class to handle DHCP monitoring"""

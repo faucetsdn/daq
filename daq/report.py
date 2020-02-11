@@ -2,7 +2,6 @@
 
 import copy
 import datetime
-import logging
 import os
 import re
 import shutil
@@ -13,7 +12,9 @@ import pytz
 import pypandoc
 import weasyprint
 
-LOGGER = logging.getLogger('report')
+import logger
+
+LOGGER = logger.get_logger('report')
 
 class ReportGenerator:
     """Generate a report for device qualification"""
