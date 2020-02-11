@@ -1,13 +1,14 @@
 """Orchestrator component for controlling a Faucet SDN"""
 
-import logging
 import sys
 
+import logging
 import configurator
 import faucet_event_client
 import http_server
 
-LOGGER = logging.getLogger('forch')
+import logger
+LOGGER = logger.get_logger('forch')
 
 
 class Forchestrator:
@@ -57,7 +58,7 @@ class Forchestrator:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logger.set_config(level=logging.INFO)
     CONFIG = configurator.Configurator().parse_args(sys.argv)
     FORCH = Forchestrator(CONFIG)
     FORCH.initialize()

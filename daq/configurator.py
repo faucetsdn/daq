@@ -4,13 +4,13 @@
 
 import copy
 import json
-import logging
 import os
 import re
 import sys
 import yaml
+import logger
 
-LOGGER = logging.getLogger('config')
+LOGGER = logger.get_logger('config')
 
 FLAG_MAP = {
     'b': 'build_tests',

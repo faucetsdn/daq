@@ -1,6 +1,5 @@
 """Represent a device-under-test"""
 
-import logging
 import os
 import shutil
 import time
@@ -12,8 +11,9 @@ import configurator
 import docker_test
 import gcp
 import report
+import logger
 
-LOGGER = logging.getLogger('host')
+LOGGER = logger.get_logger('host')
 
 
 class _STATE:

@@ -1,13 +1,13 @@
 """Module for running docker-container tests"""
 
 import datetime
-import logging
 import os
 
+import logger
 from clib import docker_host
 import wrappers
 
-LOGGER = logging.getLogger('docker')
+LOGGER = logger.get_logger('docker')
 
 
 class DockerTest():
