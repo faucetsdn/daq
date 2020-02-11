@@ -63,8 +63,9 @@ class DAQRunner:
         self._system_active = False
         self._dhcp_ready = set()
         self._dhcp_info = {}
-
-        logger.set_stackdriver_client(self.gcp.get_logging_client())
+        logging_client = self.gcp.get_logging_client()
+        if logging_client:
+            logger.set_stackdriver_client(logging_client)
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
             test_list.append('hold')

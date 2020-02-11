@@ -63,7 +63,9 @@ class GcpManager:
 
     def get_logging_client(self):
         """Gets the stackdriver client"""
-        return (self._client_name, self._logging)
+        if hasattr(self, "_client_name"):
+            return (self._client_name, self._logging)
+        return None
 
     def _initialize_firestore(self, cred_file):
         cred = credentials.Certificate(cred_file)
