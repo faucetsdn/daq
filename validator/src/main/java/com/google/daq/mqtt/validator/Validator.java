@@ -261,23 +261,22 @@ public class Validator {
 
       boolean updated = false;
       final ReportingDevice reportingDevice = expectedDevices.get(deviceId);
-      try {
-        if (expectedDevices.isEmpty()) {
-          // No devices configured, so don't check metadata.
-          updated = false;
-        } else if (expectedDevices.containsKey(deviceId)) {
+
+      if (expectedDevices.isEmpty()) {
+        // No devices configured, so don't check metadata.
+        updated = false;
+      } else if (expectedDevices.containsKey(deviceId)) {
+        try {
           ReportingDevice.PointsetMessage pointsetMessage =
               OBJECT_MAPPER.convertValue(message, ReportingDevice.PointsetMessage.class);
           updated = !reportingDevice.hasBeenValidated();
           reportingDevice.validateMetadata(pointsetMessage);
-        } else {
-          if (extraDevices.add(deviceId)) {
-            updated = true;
-          }
+        } catch (Exception e) {
+          OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
+          error = e;
         }
-      } catch (Exception e) {
-        OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
-        error = e;
+      } else if (extraDevices.add(deviceId)) {
+        updated = true;
       }
 
       if (error == null) {
