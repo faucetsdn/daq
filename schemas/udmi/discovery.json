@@ -1,7 +1,5 @@
 {
   "title": "Device discovery schema",
-  "$comment": "Discovery is deprecated: do not use.",
-  "$caveat": "Instead, devices should be explicitly pre-registered.",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
@@ -15,9 +13,11 @@
         1
       ]
     },
-    "name": {
-      "type": "string",
-      "pattern": "^[A-Z][A-Z0-9]*((_|-)[A-Z0-9]+)*$"
+    "protocol": {
+      "type": "string"
+    },
+    "local_id": {
+      "type": "string"
     },
     "points": {
       "additionalProperties": false,
@@ -29,10 +29,10 @@
     }
   },
   "required": [
-    "deprecated: do not use discovery",
     "timestamp",
     "version",
-    "name",
+    "protocol",
+    "local_id",
     "points"
   ],
   "definitions": {

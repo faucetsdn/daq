@@ -6,7 +6,9 @@ import com.google.api.services.cloudiot.v1.CloudIotScopes;
 import java.io.File;
 import java.io.FileInputStream;
 
-class ConfigUtil {
+public class ConfigUtil {
+  public static final String CLOUD_IOT_CONFIG_JSON = "cloud_iot_config.json";
+
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static GcpCreds readGcpCreds(File configFile) {
@@ -17,7 +19,7 @@ class ConfigUtil {
     }
   }
 
-  static CloudIotConfig readCloudIotConfig(File configFile) {
+  public static CloudIotConfig readCloudIotConfig(File configFile) {
     try {
       return OBJECT_MAPPER.readValue(configFile, CloudIotConfig.class);
     } catch (Exception e) {

@@ -13,6 +13,7 @@ fi
 schema=$1
 target=$2
 devset=$3
+sitepath=$4
 
 if [ ! -f $jarfile ]; then
     echo Building validator...
@@ -21,24 +22,13 @@ fi
 
 echo Executing validator $schema $target...
 
-schemafile=$(realpath $schema)
-if [ -d $schemafile ]; then
-    schemadir=$schemafile
-    schemafile=.
-else
-    schemadir=$(dirname $schemafile)
-    schemafile=${schemafile#$schemadir/}
-    fulltarget=$(realpath $target)
-    target=${fulltarget#$schemadir/}
-fi
+echo Validating against schema $schemafile into validations/
+rm -rf validations
 
-echo Running schema $schemafile in $schemadir
-
-rm -rf $schemadir/out
+echo java -jar $jarfile $schema $target $devset $sitepath
 
 error=0
-absjar=$(realpath $jarfile)
-(cd $schemadir; java -jar $absjar $schemafile $target $devset) || error=$?
+java -jar $jarfile $schema $target $devset $sitepath || error=$?
 
 echo Validation complete, exit $error
 exit $error
