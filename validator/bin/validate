@@ -5,14 +5,14 @@ cd $ROOT
 
 jarfile=validator/build/libs/validator-1.0-SNAPSHOT-all.jar
 
-if [ -z "$1" -o -z "$2" ]; then
-    echo Usage: $0 [schema] [target]
+if [ "$#" -lt 2 ]; then
+    echo Usage: $0 [schema] [target] [devset] [sitepath]
     false
 fi
 
 schema=$1
 target=$2
-devset=$3
+devset=${3:-$USER}
 sitepath=$4
 
 if [ ! -f $jarfile ]; then

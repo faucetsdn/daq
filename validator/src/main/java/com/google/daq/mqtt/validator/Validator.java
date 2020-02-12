@@ -69,6 +69,7 @@ public class Validator {
   private static final String DEVICES_SUBDIR = "devices";
   private static final String METADATA_REPORT_JSON = "metadata_report.json";
   private static final String DEVICE_REGISTRY_ID_KEY = "deviceRegistryId";
+  private static final String UNKNOWN_SCHEMA_DEFAULT = "unknown";
   private FirestoreDataSink dataSink;
   private File schemaRoot;
   private String schemaSpec;
@@ -201,8 +202,11 @@ public class Validator {
     try {
       Exception error = null;
       String deviceId = attributes.get("deviceId");
-      String subFolder = attributes.get("subFolder");
-      String schemaId = subFolder;
+      String schemaId = attributes.get("subFolder");
+
+      if (Strings.isNullOrEmpty(schemaId)) {
+        schemaId = UNKNOWN_SCHEMA_DEFAULT;
+      }
 
       if (!expectedDevices.isEmpty()) {
         if (!processedDevices.add(deviceId)) {
@@ -228,8 +232,7 @@ public class Validator {
 
       try {
         Preconditions.checkNotNull(deviceId, "Missing deviceId in message");
-        if (Strings.isNullOrEmpty(subFolder)
-            || !schemaMap.containsKey(schemaId)) {
+        if (!schemaMap.containsKey(schemaId)) {
           throw new IllegalArgumentException(String.format(SCHEMA_SKIP_FORMAT, schemaId, deviceId));
         }
       } catch (Exception e) {
@@ -246,12 +249,14 @@ public class Validator {
         error = e;
       }
 
-      try {
-        validateMessage(schemaMap.get(schemaId), message);
-        dataSink.validationResult(deviceId, schemaId, attributes, message, null);
-      } catch (ExceptionMap | ValidationException e) {
-        processViolation(message, attributes, deviceId, schemaId, messageFile, errorFile, e);
-        error = e;
+      if (schemaMap.containsKey(schemaId)) {
+        try {
+          validateMessage(schemaMap.get(schemaId), message);
+          dataSink.validationResult(deviceId, schemaId, attributes, message, null);
+        } catch (ExceptionMap | ValidationException e) {
+          processViolation(message, attributes, deviceId, schemaId, messageFile, errorFile, e);
+          error = e;
+        }
       }
 
       boolean updated = false;
