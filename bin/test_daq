@@ -49,6 +49,7 @@ GOLDEN_FILE=testing/test_$DAQ_TEST.out
 TEST_RESULTS=inst/test_$DAQ_TEST.out
 GCP_FILE=testing/test_$DAQ_TEST.gcp
 GCP_RESULTS=inst/test_$DAQ_TEST.gcp
+CRED_FILE=inst/config/gcp_service_account.json
 
 echo Running test script $TEST_SCRIPT
 # Combine stderr & stdout b/c travis has problems processing both.
@@ -70,13 +71,15 @@ echo Comparing $GOLDEN_FILE against $TEST_RESULTS
 diff -b $GOLDEN_FILE $TEST_RESULTS
 echo
 
-if [ -n "$GCP_SERVICE_ACCOUNT" -a -f "$GCP_FILE" ]; then
+if [ -f "$CRED_FILE" -a -f "$GCP_FILE" ]; then
     echo Test gcp results $GCP_RESULTS
     cat $GCP_RESULTS
     echo
     echo Comparing $GCP_FILE against $GCP_RESULTS
     diff -b $GCP_FILE $GCP_RESULTS
     echo
+else
+    ls -l $CRED_FILE $GCP_FILE $GCP_RESULTS || true
 fi
 
 echo Done with tests.

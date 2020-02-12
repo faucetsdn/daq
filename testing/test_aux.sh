@@ -37,9 +37,8 @@ function make_pubber {
 EOF
 }
 
-function capture_aux_test_results {
+function capture_test_results {
     module_name=$1
-    test_name=$2
     fgrep -h RESULT inst/run-port-*/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
 }
 
@@ -101,14 +100,13 @@ cmd/run -b -s -k
 # Check custom timeout
 cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS
 
-# Add just the RESULT lines from all aux tests (from all ports, 3 in this case) into a file
-# These ARE the auxiliary tests
-capture_aux_test_results bacext all
-capture_aux_test_results brute all
-capture_aux_test_results macoui all
-capture_aux_test_results tls all
-capture_aux_test_results password all
-capture_aux_test_results discover all
+# Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
+capture_test_results bacext
+capture_test_results brute
+capture_test_results macoui
+capture_test_results tls
+capture_test_results password
+capture_test_results discover
 
 # Capture peripheral logs
 more inst/run-port-*/scans/dhcp_triggers.txt | cat
@@ -118,14 +116,7 @@ echo dhcp requests $dhcp_done $dhcp_long | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show the full logs from each test
-more inst/run-port-*/nodes/ping*/activate.log | cat
-more inst/run-port-*/nodes/nmap*/activate.log | cat
-more inst/run-port-*/nodes/brute*/activate.log | cat
-more inst/run-port-*/nodes/macoui*/activate.log | cat
-more inst/run-port-*/nodes/tls*/activate.log | cat
-more inst/run-port-*/nodes/password*/activate.log | cat
-more inst/run-port-*/nodes/discover*/activate.log | cat
-more inst/run-port-*/nodes/bacext*/activate.log | cat
+more inst/run-port-*/nodes/*/activate.log | cat
 ls inst/fail_fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file

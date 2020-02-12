@@ -28,7 +28,7 @@ if [ "$device_id" == null ]; then
 fi
 
 if [ ! -f $gcp_cred ]; then
-    RESULT_AND_SUMMARY="RESULT skip $TEST_NAME No credentials."
+    RESULT_AND_SUMMARY="RESULT skip $TEST_NAME No credentials"
     write_out_result $REPORT \
                      "$TEST_NAME" \
                      "$TEST_DESCRIPTION" \
@@ -54,9 +54,9 @@ echo
 
 timeout 60 validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic $service_id-$HOSTNAME || true
 
-base=schemas/udmi/out/pointset_$device_id
+base=validations/devices/$device_id/pointset
 
-ls -l $base.* || true
+ls -l $base* || true
 
 if [ -f "$base.out" ]; then
     result=fail
