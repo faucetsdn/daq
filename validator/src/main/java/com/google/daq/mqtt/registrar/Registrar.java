@@ -8,20 +8,18 @@ import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
 import com.google.daq.mqtt.util.CloudDeviceSettings;
 import com.google.daq.mqtt.util.CloudIotManager;
+import com.google.daq.mqtt.util.ConfigUtil;
 import com.google.daq.mqtt.util.ExceptionMap;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
 import com.google.daq.mqtt.util.PubSubPusher;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -34,7 +32,6 @@ public class Registrar {
   static final String ENVELOPE_JSON = "envelope.json";
   static final String PROPERTIES_JSON = "properties.json";
 
-  private static final String CLOUD_IOT_CONFIG_JSON = "cloud_iot_config.json";
   private static final String DEVICES_DIR = "devices";
   private static final String ERROR_FORMAT_INDENT = "  ";
   private String gcpCredPath;
@@ -71,7 +68,7 @@ public class Registrar {
   private void setSiteConfigPath(String siteConfigPath) {
     Preconditions.checkNotNull(schemaName, "schemaName not set yet");
     siteConfig = new File(siteConfigPath);
-    cloudIotConfig = new File(siteConfig, CLOUD_IOT_CONFIG_JSON);
+    cloudIotConfig = new File(siteConfig, ConfigUtil.CLOUD_IOT_CONFIG_JSON);
     System.err.println("Reading Cloud IoT config from " + cloudIotConfig.getAbsolutePath());
     cloudIotManager = new CloudIotManager(new File(gcpCredPath), cloudIotConfig, schemaName);
     pubSubPusher = new PubSubPusher(new File(gcpCredPath), cloudIotConfig);

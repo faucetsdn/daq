@@ -1,4 +1,5 @@
 {
+  "device_id": "AHU-1",
   "modules": {
     "hold": {
       "enabled": true
