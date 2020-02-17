@@ -128,10 +128,10 @@ def test_connection_dhcp_long():
 def test_protocol_app_min_send():
     """
     reads module_config json file and adds ports to port_list
-    read infastructure_excludes json file and removes ports from port_list
+    read infastructure_excludes json file and removes ports from port_list (temporarily commented)
     """
     decode_json_config(module_config, 'servers', 'add')
-    decode_json_config(infastructure_excludes, 'excludes', 'remove')
+    #decode_json_config(infastructure_excludes, 'excludes', 'remove')
     print('port_list:')
     app_packets_received = 0
     for port in port_list:
