@@ -22,7 +22,7 @@ dash_break_line = '--------------------\n'
 description_min_send = 'Device sends data at a frequency of less than 5 minutes.'
 description_dhcp_long = 'Device sends ARP request on DHCP lease expiry.'
 description_app_min_send = 'Device sends application packets at a frequency of less than 5 minutes.'
-description_communication_type = 'Device sends unicast, multicast or broadcast packets.'
+description_communication_type = 'Device sends unicast or broadcast packets.'
 description_ntp_support = 'Device sends NTP request packets.'
 
 tcpdump_display_all_packets = 'tcpdump -n src host ' + device_address + ' -r ' + cap_pcap_file
@@ -31,7 +31,6 @@ tcpdump_display_arp_packets = 'tcpdump arp -r ' + cap_pcap_file
 tcpdump_display_ntp_packets = 'tcpdump dst port 123 -r ' + cap_pcap_file
 tcpdump_display_eapol_packets = 'tcpdump port 1812 or port 1813 or port 3799 -r ' + cap_pcap_file
 tcpdump_display_broadcast_packets = 'tcpdump broadcast -r ' + cap_pcap_file
-tcpdump_display_multicast_packets = 'tcpdump multicast -r ' + cap_pcap_file
 
 def write_report(string_to_append):
     with open(report_filename, 'a+') as file_open:
@@ -146,18 +145,14 @@ def test_protocol_app_min_send():
     else:
         return 'fail'
 
-def test_communication_type():
+def test_communication_type_broadcast():
     shell_result = shell_command_with_result(tcpdump_display_broadcast_packets, 0, False)
     broadcast_packets_received = packets_received_count(shell_result)
     if broadcast_packets_received > 0:
         add_summary("Broadcast packets received. ")
-    shell_result = shell_command_with_result(tcpdump_display_multicast_packets, 0, False)
-    multicast_packets_received = packets_received_count(shell_result)
-    if multicast_packets_received > 0:
-        add_summary("Multicast packets received. ")
     shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     all_packets_received = packets_received_count(shell_result)
-    if (all_packets_received - broadcast_packets_received - multicast_packets_received) > 0:
+    if (all_packets_received - broadcast_packets_received) > 0:
         add_summary("Unicast packets received.\n")
     return 'info'
 
@@ -186,9 +181,9 @@ elif test_request == 'connection.dhcp_long':
 elif test_request == 'protocol.app_min_send':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_app_min_send))
     result = test_protocol_app_min_send()
-elif test_request == 'communication.type':
+elif test_request == 'communication.type.broadcast':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_communication_type))
-    result = test_communication_type()
+    result = test_communication_type_broadcast()
 elif test_request == 'network.ntp.support':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support))
     result = test_ntp_support()

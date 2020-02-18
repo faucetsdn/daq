@@ -8,7 +8,7 @@ EXCLUDES=infastructure_excludes.json
 
 python network_tests.py connection.dhcp_long $MONITOR $TARGET_IP
 python network_tests.py connection.min_send $MONITOR $TARGET_IP
-python network_tests.py communication.type $MONITOR $TARGET_IP
+python network_tests.py communication.type.broadcast $MONITOR $TARGET_IP
 python network_tests.py protocol.app_min_send $MONITOR $TARGET_IP $MODULE_CONFIG $EXCLUDES
 python network_tests.py network.ntp.support $MONITOR $TARGET_IP
 
