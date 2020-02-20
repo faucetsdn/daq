@@ -5,7 +5,7 @@ switch_ip="192.168.1.1"
 echo Reset switch at $switch_ip?
 echo Press any key to continue...
 read -p ''
-./ssh_switch
+./erase_switch
 echo Waiting 60s...
 sleep 60
 echo Done
