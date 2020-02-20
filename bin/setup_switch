@@ -1,0 +1,59 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+ctrl_interface=$1
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+if [ -z $ctrl_interface ]; then
+   echo Control interface for switch setup is not defined.
+   exit 1
+fi
+
+if ! ifconfig $ctrl_interface; then
+   exit 1
+fi
+
+
+ctrl_interface_ip="169.254.42.43"
+switch_ip="169.254.42.42"
+
+function interface_setup {
+    cat > $ctrl_interface <<- EOM
+auto $ctrl_interface
+iface $ctrl_interface inet static
+address $ctrl_interface_ip
+netmask 255.255.255.0
+EOM
+    
+    mv $ctrl_interface /etc/network/interfaces.d/
+    systemctl restart networking.service
+    
+    while [ $(ifconfig $ctrl_interface | grep $ctrl_interface_ip | wc -l) -eq 0 ]; do
+        echo Waiting for $ctrl_interface to have ip $ctrl_interface_ip 
+        sleep 5
+    done  
+    
+    while ! ping -c 2 $switch_ip; do
+        echo Could not ping switch at $switch_ip
+    done
+} 
+interface_setup
+
+curl -u manager:friend "https://$switch_ip/fs/flash/af.cfg" -k -X PUT -H 'Content-Type: ' --data-binary @misc/switch_configs/at.cfg
+
+curl -u manager:friend "https://$switch_ip/api/boot/config" -k -H 'content-type: application/json' --data '{"name":"flash:/af.cfg"}'
+
+curl -u manager:friend "https://$switch_ip/api/system" -k -H 'content-type: application/json' --data '{"reboot":"1"}' 
+
+ctrl_interface_ip="192.168.1.10"
+switch_ip="192.168.1.1"
+echo Waiting 90s...
+sleep 90
+interface_setup
+echo Done
+
