@@ -1,0 +1,19 @@
+#!/usr/bin/expect -f
+spawn ssh manager@192.168.1.1
+expect {
+    "Are you sure you want to continue connecting*" {
+	send "yes\r"
+	expect "Password:"
+	send "friend\r"
+    }
+    "Password:" {
+	send "friend\r"
+    }
+}
+expect "awplus>"
+send "enable\r"
+expect "awplus#"
+send "erase factory-default\r"
+expect "Proceed ? (y/n):"
+send "y\r"
+sleep 5
