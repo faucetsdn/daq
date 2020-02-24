@@ -11,8 +11,8 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2019-10-22 09:34:33+00:00 |
-| Test report end date   | 2019-10-22 09:41:18+00:00 |
+| Test report start date | 2020-02-24 16:46:39+00:00 |
+| Test report end date   | 2020-02-24 16:58:24+00:00 |
 | DAQ version      | 1.0.1 |
 | Attempt number   | 1 |
 
@@ -52,25 +52,30 @@ Overall device result FAIL
 |Other|1/2|
 |Connectivity|n/a|
 
-|Expectation|pass|fail|skip|gone|
-|---|---|---|---|---|
-|Required|1|1|0|0|
-|Recommended|1|0|0|0|
-|Other|0|1|17|2|
+|Expectation|pass|fail|skip|info|gone|
+|---|---|---|---|---|---|
+|Required|1|1|0|0|0|
+|Recommended|1|0|0|0|0|
+|Other|2|3|17|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |pass|base.target.ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
+|info|communication.type.broadcast|Other|Other|Broadcast packets received.|
+|pass|connection.dhcp_long|Other|Other|ARP packets received.|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
+|pass|connection.min_send|Other|Other|ARP packets received. Packets received.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |fail|network.brute|Security|Required|Change the default password on the DUT|
+|fail|network.ntp.support|Other|Other||
 |skip|poe.negotiation|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|poe.power|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|poe.support|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|fail|protocol.app_min_send|Other|Other||
 |skip|protocol.bacnet.pic|Other|Other|Bacnet device not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
@@ -90,7 +95,7 @@ Overall device result FAIL
 ```
 --------------------
 Baseline ping test report
-%% 61 packets captured.
+%% 62 packets captured.
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -111,7 +116,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached %% 10.20.70.164
+RESULT pass base.target.ping target reached %% 10.20.92.164
 
 ```
 
@@ -160,6 +165,65 @@ MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 --------------------
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 
+```
+
+## Module network
+
+```
+--------------------
+connection.dhcp_long
+--------------------
+Device sends ARP request on DHCP lease expiry.
+--------------------
+%% 16:46:59.194930 ARP, Request who-has 10.20.0.5 tell daq-faux-1, length 28
+%% 16:46:59.194982 ARP, Reply 10.20.0.5 is-at da:3a:c8:8f:e5:9a (oui Unknown), length 28
+%% 16:47:51.675086 ARP, Request who-has daq-faux-1 tell 10.20.0.5, length 28
+%% 16:47:51.675293 ARP, Request who-has 10.20.0.5 tell daq-faux-1, length 28
+%% 16:47:51.675333 ARP, Reply 10.20.0.5 is-at da:3a:c8:8f:e5:9a (oui Unknown), length 28
+%% 16:47:51.675394 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
+%% 16:51:04.955672 ARP, Request who-has daq-faux-1 tell 10.20.0.5, length 28
+%% 16:51:04.955737 ARP, Request who-has 10.20.0.5 tell daq-faux-1, length 28
+%% 16:51:04.955774 ARP, Reply 10.20.0.5 is-at da:3a:c8:8f:e5:9a (oui Unknown), length 28
+%% 16:51:04.955843 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
+%% packets_count=11
+RESULT pass connection.dhcp_long ARP packets received.
+
+--------------------
+connection.min_send
+--------------------
+Device sends data at a frequency of less than 5 minutes.
+--------------------
+%% 16:46:59.194930 ARP, Request who-has 10.20.0.5 tell 10.20.92.164, length 28
+%% 16:47:07.758013 IP 10.20.92.164.58887 > 10.20.255.255.41794: UDP, length 32
+%% 16:47:27.767392 IP 10.20.92.164.55133 > 10.20.255.255.41794: UDP, length 32
+%% 16:47:46.550874 IP 10.20.92.164.68 > 10.20.0.5.67: BOOTP/DHCP, Request from 9a:02:57:1e:8f:01, length 300
+%% 16:47:47.773591 IP 10.20.92.164.57461 > 10.20.255.255.41794: UDP, length 32
+%% 16:47:51.675293 ARP, Request who-has 10.20.0.5 tell 10.20.92.164, length 28
+%% 16:47:51.675394 ARP, Reply 10.20.92.164 is-at 9a:02:57:1e:8f:01, length 28
+%% 16:48:07.781560 IP 10.20.92.164.36983 > 10.20.255.255.41794: UDP, length 32
+%% 16:48:27.788338 IP 10.20.92.164.48535 > 10.20.255.255.41794: UDP, length 32
+%% 16:48:47.806633 IP 10.20.92.164.49761 > 10.20.255.255.41794: UDP, length 32
+%% packets_count=11
+RESULT pass connection.min_send ARP packets received. Packets received.
+
+--------------------
+communication.type.broadcast
+--------------------
+Device sends unicast or broadcast packets.
+--------------------
+RESULT info communication.type.broadcast Broadcast packets received. 
+--------------------
+protocol.app_min_send
+--------------------
+Device sends application packets at a frequency of less than 5 minutes.
+--------------------
+RESULT fail protocol.app_min_send 
+--------------------
+network.ntp.support
+--------------------
+Device sends NTP request packets.
+--------------------
+RESULT fail network.ntp.support 
 ```
 
 ## Module switch
@@ -263,7 +327,7 @@ RESULT skip protocol.bacnet.pic Bacnet device not found.
 
 ```
 --------------------
-Collecting TLS cert from target address %% 10.20.96.164
+Collecting TLS cert from target address %% 10.20.92.164
 IOException unable to connect to server.
 
 --------------------
