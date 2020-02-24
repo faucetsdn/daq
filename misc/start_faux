@@ -125,12 +125,12 @@ if [ -n "${options[ntp_client]}" ]; then
     java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar "time.google.com" "123" "3" &
 fi
 
-cip_port=41794
 duration_seconds=360
 cycle_seconds=20
 
 if [ -n "${options[broadcast_client]}" ]; then
     echo Starting broatcast client.
+    cip_port=41794
     python TransportClient/client.py $broadcast_ip $cip_port broadcast $duration_seconds $cycle_seconds &
 fi
 
