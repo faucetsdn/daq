@@ -26,12 +26,12 @@ else
 fi
 
 set_mac_addr () {
-  echo Setting alternate mac $1 on $intf_name
-  ip link set addr $1 dev $intf_name
+    echo Setting alternate mac $1 on $intf_name
+    ip link set addr $1 dev $intf_name
 }
 
 set_passwd () {
-  echo $1 | chpasswd
+    echo $1 | chpasswd
 }
 
 # Setup change-of-mac address for macoui testing.
@@ -46,7 +46,6 @@ if [ -n "${options[passwordpass]}" ]; then
     /usr/sbin/sshd -D &
     service xinetd start
     service ssh start
-
 fi
 
 if [ -n "${options[passwordfail]}" ]; then
@@ -125,12 +124,11 @@ if [ -n "${options[ntp_client]}" ]; then
     java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar "time.google.com" "123" "3" &
 fi
 
-duration_seconds=360
-cycle_seconds=20
-
 if [ -n "${options[broadcast_client]}" ]; then
     echo Starting broatcast client.
     cip_port=41794
+    cycle_seconds=20
+    duration_seconds=360
     python TransportClient/client.py $broadcast_ip $cip_port broadcast $duration_seconds $cycle_seconds &
 fi
 
