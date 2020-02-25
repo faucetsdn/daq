@@ -44,7 +44,6 @@ Overall device result PASS
 ```
 --------------------
 Baseline ping test report
-
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -105,10 +104,6 @@ connection.dhcp_long
 --------------------
 Device sends ARP request on DHCP lease expiry.
 --------------------
-
-
-
-
 RESULT pass connection.dhcp_long ARP packets received.
 
 --------------------
