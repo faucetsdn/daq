@@ -14,9 +14,6 @@
     },
     "discover": {
       "enabled": true
-    },
-    "network": {
-      "enabled": true
     }
   }
 }
