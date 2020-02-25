@@ -11,8 +11,8 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2020-02-24 16:46:39+00:00 |
-| Test report end date   | 2020-02-24 16:58:24+00:00 |
+| Test report start date | 2020-02-25 13:56:13+00:00 |
+| Test report end date   | 2020-02-25 14:07:48+00:00 |
 | DAQ version      | 1.0.1 |
 | Attempt number   | 1 |
 
@@ -95,7 +95,7 @@ Overall device result FAIL
 ```
 --------------------
 Baseline ping test report
-%% 62 packets captured.
+%% 57 packets captured.
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -116,7 +116,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached %% 10.20.92.164
+RESULT pass base.target.ping target reached %% 10.20.43.164
 
 ```
 
@@ -175,17 +175,16 @@ connection.dhcp_long
 --------------------
 Device sends ARP request on DHCP lease expiry.
 --------------------
-%% 16:46:59.194930 ARP, Request who-has 10.20.0.5 tell daq-faux-1, length 28
-%% 16:46:59.194982 ARP, Reply 10.20.0.5 is-at da:3a:c8:8f:e5:9a (oui Unknown), length 28
-%% 16:47:51.675086 ARP, Request who-has daq-faux-1 tell 10.20.0.5, length 28
-%% 16:47:51.675293 ARP, Request who-has 10.20.0.5 tell daq-faux-1, length 28
-%% 16:47:51.675333 ARP, Reply 10.20.0.5 is-at da:3a:c8:8f:e5:9a (oui Unknown), length 28
-%% 16:47:51.675394 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
-%% 16:51:04.955672 ARP, Request who-has daq-faux-1 tell 10.20.0.5, length 28
-%% 16:51:04.955737 ARP, Request who-has 10.20.0.5 tell daq-faux-1, length 28
-%% 16:51:04.955774 ARP, Reply 10.20.0.5 is-at da:3a:c8:8f:e5:9a (oui Unknown), length 28
-%% 16:51:04.955843 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
-%% packets_count=11
+%% 13:56:44.587570 ARP, Request who-has 10.20.0.3 tell daq-faux-1, length 28
+%% 13:56:44.587648 ARP, Reply 10.20.0.3 is-at ca:88:ca:5e:06:8b (oui Unknown), length 28
+%% 13:57:13.514327 ARP, Request who-has daq-faux-1 tell 10.20.0.3, length 28
+%% 13:57:13.514590 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
+%% 14:00:55.982710 ARP, Request who-has daq-faux-1 tell 10.20.0.3, length 28
+%% 14:00:55.982982 ARP, Request who-has 10.20.0.3 tell daq-faux-1, length 28
+%% 14:00:55.983035 ARP, Reply 10.20.0.3 is-at ca:88:ca:5e:06:8b (oui Unknown), length 28
+%% 14:00:55.983037 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
+%% 
+%% packets_count=9
 RESULT pass connection.dhcp_long ARP packets received.
 
 --------------------
@@ -193,17 +192,16 @@ connection.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
 --------------------
-%% 16:46:59.194930 ARP, Request who-has 10.20.0.5 tell 10.20.92.164, length 28
-%% 16:47:07.758013 IP 10.20.92.164.58887 > 10.20.255.255.41794: UDP, length 32
-%% 16:47:27.767392 IP 10.20.92.164.55133 > 10.20.255.255.41794: UDP, length 32
-%% 16:47:46.550874 IP 10.20.92.164.68 > 10.20.0.5.67: BOOTP/DHCP, Request from 9a:02:57:1e:8f:01, length 300
-%% 16:47:47.773591 IP 10.20.92.164.57461 > 10.20.255.255.41794: UDP, length 32
-%% 16:47:51.675293 ARP, Request who-has 10.20.0.5 tell 10.20.92.164, length 28
-%% 16:47:51.675394 ARP, Reply 10.20.92.164 is-at 9a:02:57:1e:8f:01, length 28
-%% 16:48:07.781560 IP 10.20.92.164.36983 > 10.20.255.255.41794: UDP, length 32
-%% 16:48:27.788338 IP 10.20.92.164.48535 > 10.20.255.255.41794: UDP, length 32
-%% 16:48:47.806633 IP 10.20.92.164.49761 > 10.20.255.255.41794: UDP, length 32
-%% packets_count=11
+%% 13:56:43.925908 IP 10.20.43.164.50810 > 10.20.255.255.41794: UDP, length 32
+%% 13:56:44.587570 ARP, Request who-has 10.20.0.3 tell 10.20.43.164, length 28
+%% 13:57:03.941786 IP 10.20.43.164.43690 > 10.20.255.255.41794: UDP, length 32
+%% 13:57:08.267933 IP 10.20.43.164.68 > 10.20.0.3.67: BOOTP/DHCP, Request from 9a:02:57:1e:8f:01, length 300
+%% 13:57:13.514590 ARP, Reply 10.20.43.164 is-at 9a:02:57:1e:8f:01, length 28
+%% 13:57:23.961823 IP 10.20.43.164.41983 > 10.20.255.255.41794: UDP, length 32
+%% 13:57:43.982894 IP 10.20.43.164.43358 > 10.20.255.255.41794: UDP, length 32
+%% 13:58:04.003633 IP 10.20.43.164.58288 > 10.20.255.255.41794: UDP, length 32
+%% 13:58:24.024931 IP 10.20.43.164.60332 > 10.20.255.255.41794: UDP, length 32
+%% packets_count=9
 RESULT pass connection.min_send ARP packets received. Packets received.
 
 --------------------
@@ -327,7 +325,7 @@ RESULT skip protocol.bacnet.pic Bacnet device not found.
 
 ```
 --------------------
-Collecting TLS cert from target address %% 10.20.92.164
+Collecting TLS cert from target address %% 10.20.43.164
 IOException unable to connect to server.
 
 --------------------
