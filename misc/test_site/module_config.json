@@ -7,9 +7,12 @@
       "enabled": false
     },
     "switch": {
-      "enabled": false
+      "enabled": true
     },
     "bacext": {
+      "enabled": true
+    },
+    "network": {
       "enabled": true
     }
   },
