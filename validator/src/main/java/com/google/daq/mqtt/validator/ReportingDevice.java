@@ -1,15 +1,16 @@
 package com.google.daq.mqtt.validator;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Joiner;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ReportingDevice {
 
   private final String deviceId;
   private final MetadataDiff metadataDiff = new MetadataDiff();
   private Metadata metadata;
-  private Exception error;
+  private List<Exception> errors = new ArrayList<>();
 
   public ReportingDevice(String deviceId) {
     this.deviceId = deviceId;
@@ -27,10 +28,23 @@ public class ReportingDevice {
     return metadataDiff.extraPoints != null;
   }
 
+  public boolean hasError() {
+    return metadataDiff.errors != null;
+  }
+
   public boolean hasMetadataDiff() {
-    return metadataDiff.error != null
-        || metadataDiff.extraPoints != null
+    return metadataDiff.extraPoints != null
         || metadataDiff.missingPoints != null;
+  }
+
+  public String metadataMessage() {
+    if (metadataDiff.extraPoints != null) {
+      return "Extra points: " + Joiner.on(",").join(metadataDiff.extraPoints);
+    }
+    if (metadataDiff.missingPoints != null) {
+      return "Missing points: " + Joiner.on(",").join(metadataDiff.missingPoints);
+    }
+    return null;
   }
 
   public MetadataDiff getMetadataDiff() {
@@ -44,15 +58,21 @@ public class ReportingDevice {
     metadataDiff.extraPoints.removeAll(expectedPoints);
     metadataDiff.missingPoints = new HashSet<>(expectedPoints);
     metadataDiff.missingPoints.removeAll(deliveredPoints);
+    if (hasMetadataDiff()) {
+      throw new RuntimeException("Metadata validation failed: " + metadataMessage());
+    }
   }
 
-  public void setError(Exception error) {
-    this.metadataDiff.error = error.toString();
-    this.error = error;
+  public void addError(Exception error) {
+    errors.add(error);
+    if (metadataDiff.errors == null) {
+      metadataDiff.errors = new ArrayList<>();
+    }
+    metadataDiff.errors.add(error.toString());
   }
 
   public static class MetadataDiff {
-    public String error;
+    public List<String> errors;
     public Set<String> extraPoints;
     public Set<String> missingPoints;
   }

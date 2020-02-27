@@ -192,16 +192,24 @@ public class Validator {
 
   private void validateMessage(Map<String, Schema> schemaMap, Map<String, Object> message,
       Map<String, String> attributes) {
+    if (validateUpdate(schemaMap, message, attributes)) {
+      writeDeviceMetadataReport();
+    }
+  }
+
+  private boolean validateUpdate(Map<String, Schema> schemaMap, Map<String, Object> message,
+            Map<String, String> attributes) {
 
     String registryId = attributes.get(DEVICE_REGISTRY_ID_KEY);
     if (cloudIotConfig != null && !cloudIotConfig.registry_id.equals(registryId)) {
       // Silently drop messages for different registries.
-      return;
+      return false;
     }
 
     try {
-      Exception error = null;
       String deviceId = attributes.get("deviceId");
+      Preconditions.checkNotNull(deviceId, "Missing deviceId in message");
+
       String schemaId = attributes.get("subFolder");
 
       if (Strings.isNullOrEmpty(schemaId)) {
@@ -210,9 +218,10 @@ public class Validator {
 
       if (!expectedDevices.isEmpty()) {
         if (!processedDevices.add(deviceId)) {
-          return;
+          return false;
         }
-        System.out.println("Processing device #" + processedDevices.size() + ": " + deviceId);
+        System.out.println(String.format("Processing device #%d/%d: %s",
+                processedDevices.size(), expectedDevices.size(), deviceId));
       }
 
       if (attributes.get("wasBase64").equals("true")) {
@@ -230,15 +239,16 @@ public class Validator {
 
       File errorFile = new File(deviceDir, String.format(ERROR_FILE_FORMAT, schemaId));
 
+      final ReportingDevice reportingDevice = getReportingDevice(deviceId);
+
       try {
-        Preconditions.checkNotNull(deviceId, "Missing deviceId in message");
         if (!schemaMap.containsKey(schemaId)) {
           throw new IllegalArgumentException(String.format(SCHEMA_SKIP_FORMAT, schemaId, deviceId));
         }
       } catch (Exception e) {
         System.out.println(e.getMessage());
         OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
-        error = e;
+        reportingDevice.addError(e);
       }
 
       try {
@@ -246,7 +256,7 @@ public class Validator {
         validateDeviceId(deviceId);
       } catch (ExceptionMap | ValidationException e) {
         processViolation(message, attributes, deviceId, ENVELOPE_SCHEMA_ID, attributesFile, errorFile, e);
-        error = e;
+        reportingDevice.addError(e);
       }
 
       if (schemaMap.containsKey(schemaId)) {
@@ -255,12 +265,11 @@ public class Validator {
           dataSink.validationResult(deviceId, schemaId, attributes, message, null);
         } catch (ExceptionMap | ValidationException e) {
           processViolation(message, attributes, deviceId, schemaId, messageFile, errorFile, e);
-          error = e;
+          reportingDevice.addError(e);
         }
       }
 
       boolean updated = false;
-      final ReportingDevice reportingDevice = expectedDevices.get(deviceId);
 
       if (expectedDevices.isEmpty()) {
         // No devices configured, so don't check metadata.
@@ -272,25 +281,30 @@ public class Validator {
           updated = !reportingDevice.hasBeenValidated();
           reportingDevice.validateMetadata(pointsetMessage);
         } catch (Exception e) {
+          System.out.println(e.getMessage());
           OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
-          error = e;
+          reportingDevice.addError(e);
         }
       } else if (extraDevices.add(deviceId)) {
         updated = true;
       }
 
-      if (error == null) {
+      if (!reportingDevice.hasError()) {
         System.out.println("Success validating device " + deviceId);
-      } else if (expectedDevices.containsKey(deviceId)) {
-        reportingDevice.setError(error);
-        updated = true;
       }
 
-      if (updated) {
-        writeDeviceMetadataReport();
-      }
+      return updated;
     } catch (Exception e){
       e.printStackTrace();
+      return false;
+    }
+  }
+
+  private ReportingDevice getReportingDevice(String deviceId) {
+    if (expectedDevices.containsKey(deviceId)) {
+      return expectedDevices.get(deviceId);
+    } else {
+      return new ReportingDevice(deviceId);
     }
   }
 
@@ -306,7 +320,7 @@ public class Validator {
       metadataReport.errorDevices = new HashMap<>();
       for (ReportingDevice deviceInfo : expectedDevices.values()) {
         String deviceId = deviceInfo.getDeviceId();
-        if (deviceInfo.hasMetadataDiff()) {
+        if (deviceInfo.hasMetadataDiff() || deviceInfo.hasError()) {
           metadataReport.errorDevices.put(deviceId, deviceInfo.getMetadataDiff());
         } else if (deviceInfo.hasBeenValidated()) {
           metadataReport.successfulDevices.add(deviceId);
