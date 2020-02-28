@@ -69,7 +69,7 @@ CHECK_EXISTING=$pulled bin/docker_build $inline
 
 echo Updating $DOCKER_IMAGE_LIST...
 docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do
-    echo $image $hash >> $DOCKER_IMAGE_LIST
+    echo $image $hash > $DOCKER_IMAGE_LIST
 done
 
 echo Updating .build_hash

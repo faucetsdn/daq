@@ -16,7 +16,7 @@ sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 sudo chown -f $USER -R inst || true
 
 if [ -n "$build_tests" ]; then
-    cmd/build
+    cmd/build pull
 fi
 
 bin/build_hash check
