@@ -31,13 +31,13 @@ if [ -d faucet ]; then
 fi
 
 if [ -d inst ]; then
-    echo Directory inst/ exists, clean out before test run.
-    false
+    echo Directory inst/ exists, cleaning out before test run.
+    mv inst "inst.$(date)"
 fi
 
 if [ -d local ]; then
-    echo Directory local/ exists, clean out before test run.
-    false
+    echo Directory local/ exists, cleaning out before test run.
+    mv local "local.$(date)"
 fi
 
 mkdir -p local inst
