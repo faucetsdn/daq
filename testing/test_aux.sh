@@ -160,7 +160,7 @@ echo Redacted docs diff | tee -a $TEST_RESULTS
     | tee -a $TEST_RESULTS
 
 # Make sure there's no file pollution from the test run.
-git status --porcelain | tee -a $TEST_RESULTS
+git status --porcelain -u no | tee -a $TEST_RESULTS
 
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
