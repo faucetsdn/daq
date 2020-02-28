@@ -3,6 +3,10 @@
 # Set this so docker build will fail even though piped through tee.
 set -o pipefail
 
+ROOT=$(dirname $0)/..
+cd $ROOT
+source misc/config_base.sh
+
 build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root

@@ -1,13 +1,11 @@
 #!/bin/bash -e
+# The following are expected modes of builds
+# cmd/build <- Builds all docker images
+# cmd/build push <- Pushes images referenced in DOCKER_IMAGES_LIST to docker hub
+# cmd/build pull <- Pull images referenced, then builds the ones that are missing
 
 # Set this so docker build will fail even though piped through tee.
 set -o pipefail
-
-#cmd/build
-#cmd/build inline
-#cmd/build push
-#cmd/build pull
-#cmd/build pull inline
 
 ROOT=$(dirname $0)/..
 

@@ -134,3 +134,4 @@ ENV/
 
 # other
 testing/*dream*
+misc/docker_images.txt
