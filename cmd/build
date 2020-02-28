@@ -35,10 +35,7 @@ elif [ "$1" == pull ]; then
     pulled=y
     cat $DOCKER_IMAGE_LIST | while read image hash other; do
         echo Pulling $image:$hash from dockerhub...
-        (docker pull $image:$hash && found=y)|| echo "Could not pull $image:$hash."
-        if [ -n "$found" ]; then
-            docker tag $image:$hash $image:latest
-        fi
+        (docker pull $image:$hash && docker tag $image:$hash $image:latest) || echo "Could not pull $image:$hash."
     done 
     shift
 fi
@@ -67,9 +64,10 @@ fi
 
 CHECK_EXISTING=$pulled bin/docker_build $inline
 
+rm $DOCKER_IMAGE_LIST || true
 echo Updating $DOCKER_IMAGE_LIST...
 docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do
-    echo $image $hash > $DOCKER_IMAGE_LIST
+    echo $image $hash >> $DOCKER_IMAGE_LIST
 done
 
 echo Updating .build_hash
