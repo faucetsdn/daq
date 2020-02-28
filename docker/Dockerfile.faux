@@ -1,9 +1,9 @@
-# Image name: daq/faux
+# Image name: daqf/faux
 #
 # Faux device for framework development/testing.
 #
 
-FROM daq/aardvark:latest as java_build
+FROM daqf/aardvark:latest as java_build
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
@@ -18,7 +18,7 @@ RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-bran
 COPY pubber/ pubber/
 RUN pubber/bin/build
 
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre

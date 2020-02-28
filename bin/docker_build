@@ -1,0 +1,84 @@
+#!/bin/bash -e
+
+# Set this so docker build will fail even though piped through tee.
+set -o pipefail
+
+build_root=build
+sudo rm -rf $build_root .build_hash .build_files
+mkdir -p $build_root
+
+if [ "$1" == "inline" ]; then
+    inline=y
+fi
+
+if [ -n "$DAQ_TARGETS" ]; then
+    declare -A test_set
+    for target in $(echo $DAQ_TARGETS | sed 's/,/ /'); do
+        echo Enabling target $target
+        test_set[$target]=y
+    done
+fi
+
+build_list_file=$build_root/build_list.txt
+echo > $build_list_file
+(
+    shopt -s nullglob
+
+    function include {
+        echo Including tests from $1
+        target=$1
+        source $1
+    }
+
+    function build {
+        if [ -d $1 ]; then
+            echo Including build files from $1
+            echo $1/Dockerfile.* >> $build_list_file
+        else
+            echo Missing build directory $1
+            false
+        fi
+    }
+
+    function add {
+        true
+    }
+    function remove {
+        true
+    }
+
+    include ${host_tests:-misc/host_tests.conf}
+)
+docker_files=$(<$build_list_file)
+
+for file in $docker_files; do
+    if [ ${file%\~} != ${file} ]; then
+        continue
+    fi
+    module=${file#*/Dockerfile.}
+    logfile=$build_root/docker_build.$module
+    failed=
+    tag=daqf/$module
+    found=$(docker images $tag 2>/dev/null | grep $module) || echo ""
+    if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
+        echo Skipping non-enabled $tag
+    elif [ -n "$CHECK_EXISTING" ] && [ -n "$found" ]; then
+        echo Skipping building existing $tag 
+    else
+        echo Build$ext_msg $file into $tag, log to $logfile...
+        echo docker build -t $tag -f $file . > $logfile
+        if [ -n "$inline" ]; then
+            bin/retry_cmd docker build -t $tag -f $file . 2>&1 | tee -a $logfile || failed=y
+        else
+            bin/retry_cmd docker build -t $tag -f $file . >> $logfile 2>&1 || failed=y
+        fi
+        if [ -n "$failed" ]; then
+            tail $logfile
+            echo Build failed, see $logfile for complete log.
+            false
+        fi
+        hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
+        docker tag $tag:latest $tag:$hash
+        echo Build complete. >> $logfile
+    fi
+done

@@ -13,7 +13,7 @@ LOGGER = logger.get_logger('docker')
 class DockerTest():
     """Class for running docker tests"""
 
-    IMAGE_NAME_FORMAT = 'daq/test_%s'
+    IMAGE_NAME_FORMAT = 'daqf/test_%s'
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments

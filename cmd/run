@@ -10,12 +10,7 @@ cmdrun_log=inst/cmdrun.log
 cd $ROOT
 source misc/config_base.sh
 
-if [ -z "$run_mode" ]; then
-    echo run_mode not defined.
-    false
-fi
-
-echo Starting `date`, run_mode is $run_mode.
+echo Starting `date`
 echo Clearing previous state...
 sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 sudo chown -f $USER -R inst || true
@@ -34,8 +29,4 @@ if [ -f "$gcp_cred" ]; then
     fi
 fi
 
-if [ "$run_mode" == local ]; then
-    cmd/exrun $run_args 2>&1 | tee $cmdrun_log
-else
-    cmd/inrun $run_args 2>&1 | tee $cmdrun_log
-fi
+cmd/exrun $run_args 2>&1 | tee $cmdrun_log

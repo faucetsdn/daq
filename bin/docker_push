@@ -1,43 +1,25 @@
 #!/bin/bash -e
 
-# Travis CI seems to source this script, so it is ignoring the #! above!
 set -e
 
-if [ -n "$DAQ_PUSH" ]; then
-    VERSION=$(cat misc/RELEASE_VERSION)
-    TARGET=$DAQ_PUSH:$VERSION
-    RTAG=release-$VERSION
-
-    echo Doing push to target $TARGET
-
-    head_hash=$(git rev-list -n 1 HEAD)
-    version_hash=$(git rev-list -n 1 $RTAG)
-
-    if [ $head_hash != $version_hash ]; then
-	echo Release head does not match version tag.
-	echo head=$head_hash
-	echo rtag=$version_hash
-	false
-    fi
-		   
+if [ -n "$TARGET" ] && [ -n "$VERSION" ]; then
     found=yes
     echo Checking for existing image $TARGET...
-    curl --silent -f -lSL https://index.docker.io/v1/repositories/$DAQ_PUSH/tags/$VERSION > /dev/null 2>&1 || found=no
+    curl --silent -f -lSL https://index.docker.io/v1/repositories/$TARGET/tags/$VERSION > /dev/null 2>&1 || found=no
     if [ $found == yes ]; then
-	echo Docker image $TARGET already exists.
+	echo Docker image $TARGET:$VERSION already exists.
 	false
     fi
 
-    echo Tagging build as $TARGET
-    docker tag $DAQ_PUSH $TARGET
-
-    echo Logging into docker as $DOCKER_USERNAME...
-    echo "$DOCKER_PASSWORD" | \
-        docker login -u "$DOCKER_USERNAME" --password-stdin
+    if [ -n "$DOCKER_USERNAME" ] && [ -n "$DOCKER_PASSWORD" ]; then
+        echo Logging into docker as $DOCKER_USERNAME...
+        echo "$DOCKER_PASSWORD" | \
+            docker login -u "$DOCKER_USERNAME" --password-stdin
+    fi
 
     echo Pushing $TARGET
-    docker push $TARGET
+    docker push $TARGET:$VERSION
     echo Done with push.
 else
-    echo Skipping push because DAQ_PUSH not set.
+    echo Skipping push because TRAGET and VERSION are not set.
 fi
