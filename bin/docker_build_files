@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+rm build_list.txt 2>/dev/null || true
+build_list_file=build_list.txt 
+echo > $build_list_file 
+( 
+    shopt -s nullglob 
+ 
+    function include { 
+        target=$1 
+        source $1 
+    } 
+ 
+    function build { 
+        if [ -d $1 ]; then 
+            echo $1/Dockerfile.* >> $build_list_file 
+        else 
+            echo Missing build directory $1 
+            false 
+        fi 
+    } 
+ 
+    function add { 
+        true 
+    } 
+    function remove { 
+        true 
+    } 
+ 
+    include ${host_tests:-misc/host_tests.conf} 
+) 
+cat $build_list_file
+rm build_list.txt 

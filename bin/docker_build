@@ -23,38 +23,7 @@ if [ -n "$DAQ_TARGETS" ]; then
     done
 fi
 
-build_list_file=$build_root/build_list.txt
-echo > $build_list_file
-(
-    shopt -s nullglob
-
-    function include {
-        echo Including tests from $1
-        target=$1
-        source $1
-    }
-
-    function build {
-        if [ -d $1 ]; then
-            echo Including build files from $1
-            echo $1/Dockerfile.* >> $build_list_file
-        else
-            echo Missing build directory $1
-            false
-        fi
-    }
-
-    function add {
-        true
-    }
-    function remove {
-        true
-    }
-
-    include ${host_tests:-misc/host_tests.conf}
-)
-docker_files=$(<$build_list_file)
-
+docker_files=$(host_tests=$host_tests bin/docker_build_files)
 for file in $docker_files; do
     if [ ${file%\~} != ${file} ]; then
         continue

@@ -1,13 +1,13 @@
-#!/bin/bash -e
+#!/bin/bash
 
 set -e
 
-if [ -n "$TARGET" ] && [ -n "$VERSION" ]; then
+if [ -n "$DAQ_TARGET" ] && [ -n "$DAQ_VERSION" ]; then
     found=yes
-    echo Checking for existing image $TARGET...
-    curl --silent -f -lSL https://index.docker.io/v1/repositories/$TARGET/tags/$VERSION > /dev/null 2>&1 || found=no
+    echo Checking for existing image $DAQ_TARGET...
+    curl --silent -f -lSL https://index.docker.io/v1/repositories/$DAQ_TARGET/tags/$DAQ_VERSION > /dev/null 2>&1 || found=no
     if [ $found == yes ]; then
-	    echo Docker image $TARGET:$VERSION already exists.
+	    echo Docker image $DAQ_TARGET:$DAQ_VERSION already exists.
     	exit 0
     fi
 
@@ -17,8 +17,8 @@ if [ -n "$TARGET" ] && [ -n "$VERSION" ]; then
             docker login -u "$DOCKER_USERNAME" --password-stdin
     fi
 
-    echo Pushing $TARGET
-    docker push $TARGET:$VERSION
+    echo Pushing $DAQ_TARGET
+    docker push $DAQ_TARGET:$DAQ_VERSION
     echo Done with push.
 else
     echo Skipping push because TRAGET and VERSION are not set.
