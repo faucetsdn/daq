@@ -33,7 +33,6 @@ elif [ "$1" == pull ]; then
     declare -A test_set
     for target in $(host_tests=$host_tests bin/docker_build_files); do
         target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
-        echo $target
         test_set[$target]=y
     done
     cat $DOCKER_IMAGE_LIST | while read image hash other; do
