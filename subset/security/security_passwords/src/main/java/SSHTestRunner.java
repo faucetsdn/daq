@@ -1,24 +1,22 @@
-import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import java.util.*;
 
-public class RunSshTest implements Runnable {
+public class SSHTestRunner implements Runnable {
+
   private ReportHandler reportHandler;
   private Session session;
-  Channel channel;
   private JSch jsch = new JSch();
-  private ArrayList<String>  usernames = new ArrayList<String>();
-  private ArrayList<String> passwords = new ArrayList<String>();
+  private ArrayList<String>  usernames;
+  private ArrayList<String> passwords;
   private String hostAddress;
   private int port;
   private boolean testFinished = false;
   private int passwordIndex = 0;
   private int usernameIndex = 0;
-  private int attempts = -1;
 
-  public RunSshTest(
+  public SSHTestRunner(
       ArrayList<String> usernames,
       ArrayList<String> passwords,
       String hostAddress,
@@ -41,7 +39,6 @@ public class RunSshTest implements Runnable {
         testFinished = true;
         reportHandler.addText("RESULT pass security.passwords.ssh Default password has been changed");
       } else {
-        attempts++;
         try {
           session = jsch.getSession(usernames.get(usernameIndex), hostAddress, port);
           session.setPassword(passwords.get(passwordIndex));

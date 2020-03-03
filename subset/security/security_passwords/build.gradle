@@ -22,7 +22,7 @@ sourceCompatibility = 1.8
 
 
 apply plugin: 'application'
-mainClassName = 'Main'
+mainClassName = 'PasswordTest'
 
 repositories {
     mavenCentral()
@@ -37,7 +37,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Main-Class': 'Main'
+                'PasswordTest-Class': 'PasswordTest'
         )
     }
 }
