@@ -10,9 +10,16 @@ source misc/config_base.sh
 build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
+check_existing=
+
+if [ "$1" == "check-existing" ]; then
+    check_existing=y
+    shift
+fi
 
 if [ "$1" == "inline" ]; then
     inline=y
+    shift
 fi
 
 if [ -n "$DAQ_TARGETS" ]; then
@@ -35,7 +42,7 @@ for file in $docker_files; do
     found=$(docker images $tag 2>/dev/null | grep $module) || echo ""
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
-    elif [ -n "$CHECK_EXISTING" ] && [ -n "$found" ]; then
+    elif [ -n "$check_existing" ] && [ -n "$found" ]; then
         echo Skipping building existing $tag 
     else
         echo Build$ext_msg $file into $tag, log to $logfile...

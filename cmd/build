@@ -13,10 +13,27 @@ ROOT=$(dirname $0)/..
 inline=
 copydirs="bin cmd misc faucet mininet docker daq subset"
 DOCKER_IMAGE_LIST=misc/docker_images.txt
-CHECK_EXISTING=y
+check_existing="check-existing"
 
 cd $ROOT
 source misc/config_base.sh
+host_tests=$host_tests bin/docker_build_files
+function pull_images {
+    declare -A test_set
+    for target in $(host_tests=$host_tests bin/docker_build_files); do
+        target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
+        test_set[$target]=y
+    done
+    cat $DOCKER_IMAGE_LIST | while read image hash other; do
+        if [ -z "${test_set[$image]}" ]; then
+            echo Skipping $image pull 
+            continue
+        fi 
+        echo Pulling $image:$hash from dockerhub...
+        (docker pull $image:$hash && docker tag $image:$hash $image:latest) || echo "Could not pull $image:$hash."
+    done 
+}
+
 if [ "$1" == push ]; then
     cat $DOCKER_IMAGE_LIST | while read image hash other; do
         found=$(docker images $image | awk '{print $3}' | grep $hash) || echo ""
@@ -30,26 +47,14 @@ if [ "$1" == push ]; then
     echo Done with docker build push.
     exit 0
 elif [ "$1" == pull ]; then
-    declare -A test_set
-    for target in $(host_tests=$host_tests bin/docker_build_files); do
-        target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
-        test_set[$target]=y
-    done
-    cat $DOCKER_IMAGE_LIST | while read image hash other; do
-        if [ -z "${test_set[$image]}" ]; then
-            echo Skipping $image pull 
-            continue
-        fi 
-        echo Pulling $image:$hash from dockerhub...
-        (docker pull $image:$hash && docker tag $image:$hash $image:latest) || echo "Could not pull $image:$hash."
+    pull_images
     echo Updating .build_hash
     bin/build_hash write
     mv -f .build_files .build_built
-    done 
     echo Done with docker build pull.
     exit 0
 elif [ "$1" == build-all ]; then
-    CHECK_EXISTING=""
+    check_existing=""
     shift
 fi
 
@@ -75,7 +80,11 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-CHECK_EXISTING=$CHECK_EXISTING bin/docker_build $inline
+if [ -n "$check_existing" ]; then
+    pull_images
+fi
+
+bin/docker_build $check_existing $inline
 
 rm $DOCKER_IMAGE_LIST || true
 echo Updating $DOCKER_IMAGE_LIST...
