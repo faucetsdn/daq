@@ -99,34 +99,16 @@ public class SetupTest {
 
   private void createConsoleCommand(ArrayList<String> usernameList, ArrayList<String> passwordList) {
 
-    String command;
-    command = "ncrack ";
+    StringBuilder str = new StringBuilder("ncrack ");
 
     if (protocol.equals("https") || protocol.equals("http")) {
-      command += domain + " ";
+      str.append(domain + " ");
     }
 
-    command += protocol + "://";
-    command += hostAddress + ":";
-    command += port + " ";
-    command += "--user ";
-
-    StringBuilder str = new StringBuilder(command);
-
-    for (String username : usernameList) {
-      if (usernameList.indexOf(username) != (usernameList.size() - 1)) {
-        str.append(username + ",");
-      } else {
-        str.append(username + " --pass ");
-      }
-    }
-    for (String password : passwordList) {
-      if (passwordList.indexOf(password) != (passwordList.size() - 1)) {
-        str.append(password + ",");
-      } else {
-        str.append(password + " ");
-      }
-    }
+    str.append(protocol + "://" + hostAddress + ":" + port);
+    str.append(" --user " + String.join(",", usernameList));
+    str.append(" --pass " + String.join(",", passwordList)); 
+    str.append(" -g to=3m,at=30 -T5"); // For timeout and aggressiveness
 
     String finalCommand = str.toString();
     RunTest runnable = new RunTest(reportHandler);
