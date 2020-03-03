@@ -13,7 +13,6 @@ public class PasswordTest {
   private String macAddress;
   private String domain;
 
-  private ReportHandler reportHandler;
   private ArrayList<String> usernameList;
   private ArrayList<String> passwordList;
   private String usernameListString;
@@ -30,8 +29,6 @@ public class PasswordTest {
       domain = args[4];
     }
 
-    reportHandler = new ReportHandler(protocol);
-
     final TestSetup testSetup = new TestSetup(host, protocol, port, macAddress, domain);
     usernameList = testSetup.getUsernameList();
     passwordList = testSetup.getPasswordList();
@@ -42,9 +39,8 @@ public class PasswordTest {
   private void runPasswordTest() {
     try {
       if (protocol.equals("ssh")) {
-        SSHTestRunner sshTestRunner = new SSHTestRunner(usernameList, passwordList, host, port, reportHandler);
-        Thread sshThread = new Thread(sshTestRunner);
-        sshThread.start();
+        SSHTestRunner sshTestRunner = new SSHTestRunner(usernameList, passwordList, host, protocol, port, macAddress);
+        sshTestRunner.StartTest();
       }
       else {
         final boolean areAllPortsOpen = NmapPortChecker.checkAllPortsOpen(host);
@@ -60,27 +56,20 @@ public class PasswordTest {
           );
 
           if (isDiscoveredCredentials) {
-            reportHandler.addText("RESULT fail security.passwords." + protocol
-                + " Default passwords have not been changed");
-            reportHandler.writeReport();
+            ReportHandler.writeReportMessage("fail", protocol, port, macAddress);
           } else {
-            reportHandler.addText("RESULT pass security.passwords." + protocol
-                + "  Default passwords have been changed");
-            reportHandler.writeReport();
+            ReportHandler.writeReportMessage("pass", protocol, port, macAddress);
           }
         }
         else {
-          reportHandler.addText("RESULT skip security.passwords." + protocol
-              + " Ports are not open!");
-          reportHandler.writeReport();
+          ReportHandler.writeReportMessage("skip_noport", protocol, port, macAddress);
         }
       }
     }
     catch (Exception e) {
       System.err.println(e.getMessage());
-      reportHandler.addText(
-          "RESULT skip security.passwords."+ protocol +" Could not lookup password info for mac-key " + macAddress);
-      reportHandler.writeReport();
+      // TODO: Move this elsewhere...
+      ReportHandler.writeReportMessage("skip_mac", protocol, port, macAddress);
     }
   }
 

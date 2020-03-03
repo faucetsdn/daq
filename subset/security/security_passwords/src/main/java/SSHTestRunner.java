@@ -3,15 +3,16 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import java.util.*;
 
-public class SSHTestRunner implements Runnable {
+public class SSHTestRunner {
 
-  private ReportHandler reportHandler;
   private Session session;
   private JSch jsch = new JSch();
   private ArrayList<String>  usernames;
   private ArrayList<String> passwords;
   private String hostAddress;
   private int port;
+  private String mac;
+  private String protocol;
   private boolean testFinished = false;
   private int passwordIndex = 0;
   private int usernameIndex = 0;
@@ -20,13 +21,16 @@ public class SSHTestRunner implements Runnable {
       ArrayList<String> usernames,
       ArrayList<String> passwords,
       String hostAddress,
+      String protocol,
       String port,
-      ReportHandler reportHandler) {
+      String mac
+  ) {
     this.usernames = usernames;
     this.passwords = passwords;
     this.hostAddress = hostAddress;
     this.port = Integer.parseInt(port);
-    this.reportHandler = reportHandler;
+    this.protocol = protocol;
+    this.mac = mac;
   }
 
   public void StartTest() {
@@ -37,7 +41,7 @@ public class SSHTestRunner implements Runnable {
       }
       if (usernameIndex > usernames.size() - 1) {
         testFinished = true;
-        reportHandler.addText("RESULT pass security.passwords.ssh Default password has been changed");
+        ReportHandler.writeReportMessage("pass", protocol, String.valueOf(port), mac);
       } else {
         try {
           session = jsch.getSession(usernames.get(usernameIndex), hostAddress, port);
@@ -47,13 +51,11 @@ public class SSHTestRunner implements Runnable {
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
             session.connect();
-            reportHandler.addText(
-                "RESULT fail security.passwords.ssh Default password has not been changed");
+            ReportHandler.writeReportMessage("fail", protocol, String.valueOf(port), mac);
             testFinished = true;
           } catch (JSchException e) {
             if (e.toString().contains("Connection refused")) {
-              reportHandler.addText(
-                  "RESULT skip security.passwords.ssh SSH is not enabled on selected device");
+              ReportHandler.writeReportMessage("skip_noport", protocol, String.valueOf(port), mac);
               testFinished = true;
               break;
             } else {
@@ -65,12 +67,6 @@ public class SSHTestRunner implements Runnable {
         }
       }
     }
-    reportHandler.writeReport();
     session.disconnect();
-  }
-
-  @Override
-  public void run() {
-    StartTest();
   }
 }

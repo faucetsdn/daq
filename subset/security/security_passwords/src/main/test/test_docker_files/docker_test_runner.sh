@@ -12,6 +12,5 @@ fi
 
 echo ~~~~~~~~~~~~~~~~~~~~~~~ Running password test ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 docker run --name "password_test_container" password_test
-echo Started password_test container...
 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo
