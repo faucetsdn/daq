@@ -25,7 +25,7 @@ if [ "$1" == push ]; then
             continue
         fi
         echo Push $image:$hash to dockerhub...
-        TARGET="$image" VERSION="$hash" ./bin/docker_push  
+        ./bin/docker_push $image $hash 
     done 
     echo Done with docker build push.
     exit 0

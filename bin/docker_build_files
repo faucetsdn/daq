@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-rm build_list.txt 2>/dev/null || true
+rm -f build_list.txt 
 build_list_file=build_list.txt 
 echo > $build_list_file 
 ( 
@@ -30,4 +30,4 @@ echo > $build_list_file
     include ${host_tests:-misc/host_tests.conf} 
 ) 
 cat $build_list_file
-rm build_list.txt 
+rm -f build_list.txt 
