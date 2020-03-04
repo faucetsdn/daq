@@ -17,7 +17,7 @@ cp misc/system_base.conf local/system.conf
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp misc/report_template.md inst/tmp_site/
 
-cmd/run -s site_path=inst/tmp_site
+cmd/run -b -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
