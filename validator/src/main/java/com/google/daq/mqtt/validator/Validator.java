@@ -9,36 +9,21 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.daq.mqtt.util.CloudIotConfig;
-import com.google.daq.mqtt.util.ConfigUtil;
-import com.google.daq.mqtt.util.ExceptionMap;
+import com.google.daq.mqtt.util.*;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
-import com.google.daq.mqtt.util.FirestoreDataSink;
-import com.google.daq.mqtt.util.PubSubClient;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import java.io.*;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Validator {
 
@@ -73,10 +58,10 @@ public class Validator {
   private FirestoreDataSink dataSink;
   private File schemaRoot;
   private String schemaSpec;
-  private final Map<String, ReportingDevice> expectedDevices = new HashMap<>();
-  private final Set<String> extraDevices = new HashSet<>();
-  private final Set<String> processedDevices = new HashSet<>();
-  private final Set<String> base64Devices = new HashSet<>();
+  private final Map<String, ReportingDevice> expectedDevices = new TreeMap<>();
+  private final Set<String> extraDevices = new TreeSet<>();
+  private final Set<String> processedDevices = new TreeSet<>();
+  private final Set<String> base64Devices = new TreeSet<>();
   private CloudIotConfig cloudIotConfig;
   public static final File METADATA_REPORT_FILE = new File(OUT_BASE_FILE, METADATA_REPORT_JSON);
 
@@ -153,7 +138,7 @@ public class Validator {
   }
 
   private void validatePubSub(String instName, String topicName) {
-    Map<String, Schema> schemaMap = new HashMap<>();
+    Map<String, Schema> schemaMap = new TreeMap<>();
     for (File schemaFile : makeFileList(schemaRoot)) {
       Schema schema = getSchema(schemaFile);
       String fullName = schemaFile.getName();
@@ -312,12 +297,12 @@ public class Validator {
     try {
       MetadataReport metadataReport = new MetadataReport();
       metadataReport.updated = new Date();
-      metadataReport.missingDevices = new HashSet<>();
+      metadataReport.missingDevices = new TreeSet<>();
       metadataReport.extraDevices = extraDevices;
-      metadataReport.successfulDevices = new HashSet<>();
+      metadataReport.successfulDevices = new TreeSet<>();
       metadataReport.base64Devices = base64Devices;
       metadataReport.expectedDevices = expectedDevices.keySet();
-      metadataReport.errorDevices = new HashMap<>();
+      metadataReport.errorDevices = new TreeMap<>();
       for (ReportingDevice deviceInfo : expectedDevices.values()) {
         String deviceId = deviceInfo.getDeviceId();
         if (deviceInfo.hasMetadataDiff() || deviceInfo.hasError()) {
