@@ -1,8 +1,5 @@
 {
   "modules": {
-    "brute": {
-      "enabled": true
-    },
     "pass": {
       "enabled": false
     },
@@ -40,10 +37,6 @@
       "required": "pass",
       "category": "Security",
       "expected": "Recommended"
-    },
-    "network.brute": {
-      "category": "Security",
-      "expected": "Required"
     }
   }
 }

@@ -21,7 +21,7 @@
       "ports": {
         "443": {
           "allowed": true,
-          "reason": "Administrative Web-Server"
+          "description": "Administrative Secure Web-Server"
         }
       }
     }
