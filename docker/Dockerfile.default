@@ -1,8 +1,8 @@
-# Image name: daq/default
+# Image name: daqf/default
 #
 # Default image used for mininet docker hosts.
 #
 
-FROM daq/aardvark
+FROM daqf/aardvark
 
 CMD echo hello daq

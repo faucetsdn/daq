@@ -57,7 +57,7 @@ class Gateway():
         host_port = self._switch_port(self.GATEWAY_OFFSET)
         LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
-        cls = docker_host.make_docker_host('daq/networking', prefix='daq', network='bridge')
+        cls = docker_host.make_docker_host('daqf/networking', prefix='daq', network='bridge')
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
         host.activate()
         self.host = host

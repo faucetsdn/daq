@@ -29,7 +29,7 @@ docker exec daq-faux-2 ifconfig faux-eth0 192.168.12.2/16
 
 echo "set IPs for faux"
 
-docker run -d --privileged --name daq-ntwk --hostname daq-ntwk daq/networking
+docker run -d --privileged --name daq-ntwk --hostname daq-ntwk daqf/networking
 echo "daq up"
 docker exec  daq-ntwk ip addr flush eth0
 echo "ip flushed"

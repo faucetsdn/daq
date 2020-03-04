@@ -68,7 +68,7 @@ Schemas are broken down into several top-level sub-schemas that are invoked for
 different aspects of device management:
 * Device _state_ ([example](state.tests/example.json)), sent from device to cloud,
 defined by [<em>state.json</em>](state.json). There is one current _state_ per device,
-which is considered sicky until a new state message is sent.
+which is considered sticky until a new state message is sent.
 is comprised of several subsections (e.g. _system_ or _pointset_) that describe the
 relevant sub-state components.
 * Device _config_ ([example](config.tests/example.json)), passed from cloud to device,

@@ -1,4 +1,4 @@
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 # Do this alone first so it can be re-used by other build files.
 RUN $AG update && $AG install openjdk-8-jre

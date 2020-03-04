@@ -154,3 +154,20 @@ else
         (cd faucet; git reset --hard $FAUCETV)
     fi
 fi
+
+echo -n "DAQ commit "
+git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
+echo
+
+echo -n "Last FAUCET commit "
+(cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+echo
+
+docker --version
+
+if ! docker images > /dev/null; then
+    echo
+    echo Docker execution failed, is the docker group setup?
+    echo If this is the first time, try logging out and log back in again.
+    false
+fi

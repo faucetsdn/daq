@@ -1,51 +1,68 @@
 #!/bin/bash -e
+# The following are expected modes of builds
+# cmd/build <- Pull images referenced, then builds the ones that are missing 
+# cmd/build push <- Pushes images referenced in DOCKER_IMAGES_LIST to docker hub
+# cmd/build pull <- Pulls images referenced in DOCKER_IMAGES_LIST to docker hub
+# cmd/build build-all <- Builds all docker images 
 
 # Set this so docker build will fail even though piped through tee.
 set -o pipefail
 
 ROOT=$(dirname $0)/..
 
-build_root=build
-in_container=$DAQ_CONTAINER
-build_args=
-do_images=
-ext_msg=
 inline=
 copydirs="bin cmd misc faucet mininet docker daq subset"
-load_mark=/root/load_complete
+DOCKER_IMAGE_LIST=misc/docker_images.txt
+check_existing="check-existing"
 
 cd $ROOT
-DONT_MAKE_LOCAL=y
 source misc/config_base.sh
+host_tests=$host_tests bin/docker_build_files
+function pull_images {
+    declare -A test_set
+    for target in $(host_tests=$host_tests bin/docker_build_files); do
+        target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
+        test_set[$target]=y
+    done
+    cat $DOCKER_IMAGE_LIST | while read image hash other; do
+        if [ -z "${test_set[$image]}" ]; then
+            echo Skipping $image pull 
+            continue
+        fi 
+        echo Pulling $image:$hash from dockerhub...
+        (docker pull $image:$hash && docker tag $image:$hash $image:latest) || echo "Could not pull $image:$hash."
+    done 
+}
 
-if [ "$1" == skip ]; then
-    do_images=skip
+if [ "$1" == push ]; then
+    cat $DOCKER_IMAGE_LIST | while read image hash other; do
+        found=$(docker images $image | awk '{print $3}' | grep $hash) || echo ""
+        if [ -z "$found" ]; then
+            echo $image:$hash not found locally...
+            continue
+        fi
+        echo Push $image:$hash to dockerhub...
+        ./bin/docker_push $image $hash 
+    done 
+    echo Done with docker build push.
+    exit 0
+elif [ "$1" == pull ]; then
+    pull_images
+    echo Updating .build_hash
+    bin/build_hash write
+    mv -f .build_files .build_built
+    echo Done with docker build pull.
+    exit 0
+elif [ "$1" == build-all ]; then
+    check_existing=""
     shift
-elif [ "$1" == save ]; then
-    do_images=save
-    ext_msg=/save
-    shift
-elif [ "$1" == load ]; then
-    do_images=load
-    shift
-    if [ -f $load_mark ]; then
-        echo Images already loaded, blocking indefinitely.
-        tail -f /dev/null
-    fi
 fi
 
 if [ "$1" == inline ]; then
-    inline=y
+    inline="inline"
     shift
 fi
 
-if [ -n "$DAQ_TARGETS" ]; then
-    declare -A test_set
-    for target in $(echo $DAQ_TARGETS | sed 's/,/ /'); do
-        echo Enabling target $target
-        test_set[$target]=y
-    done
-fi
 
 local_version=$(cd faucet; git rev-list -n 1 HEAD)
 if [ "$1" == -f ]; then
@@ -63,113 +80,17 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-if [ -n "$in_container" ]; then
-    # Run in container for pylint versioning.
-    echo Running style checks...
-    bin/check_style
-
-    echo 'DOCKER_OPTS="-s vfs -D -l debug"' > /etc/default/docker
-    service docker start
-    sleep 3
-    echo Importing current local version of daq...
-    ROOT=/root/daq
-    rm -rf $ROOT
-    mkdir -p $ROOT
-    cd /daq
-    for subdir in $copydirs; do
-        echo Copying subdir $subdir...
-        cp -a $subdir $ROOT/
-    done
-    cd $ROOT
-    if [ "$do_images" != load ]; then
-        rm -rf build
-    fi
-    echo Now running in `pwd`
+if [ -n "$check_existing" ]; then
+    pull_images
 fi
 
-sudo rm -rf $build_root .build_hash .build_files
-mkdir -p $build_root
+bin/docker_build $check_existing $inline
 
-build_list_file=$build_root/build_list.txt
-echo > $build_list_file
-(
-    shopt -s nullglob
-
-    function include {
-        echo Including tests from $1
-        target=$1
-        source $1
-    }
-
-    function build {
-        if [ -d $1 ]; then
-            echo Including build files from $1
-            echo $1/Dockerfile.* >> $build_list_file
-        else
-            echo Missing build directory $1
-            false
-        fi
-    }
-
-    function add {
-        true
-    }
-    function remove {
-        true
-    }
-
-    include ${host_tests:-misc/host_tests.conf}
-)
-docker_files=$(<$build_list_file)
-
-for file in $docker_files; do
-    if [ ${file%\~} != ${file} ]; then
-        continue
-    fi
-    module=${file#*/Dockerfile.}
-    if [ "$module" == base -a -n "$in_container" ]; then
-        echo Skipping base build in container.
-        continue
-    fi
-    logfile=$build_root/docker_build.$module
-    failed=
-    tag=daq/$module
-    if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
-        echo Skipping non-enabled $tag
-    elif [ "$do_images" == skip ]; then
-        echo Skipping in-container build of $tag
-    elif [ "$do_images" == load ]; then
-        docker load -i /daq/$build_root/docker_image.$module
-    else
-        echo Build$ext_msg $file into $tag, log to $logfile...
-        echo docker build -t $tag $build_args -f $file . > $logfile
-        if [ -n "$inline" ]; then
-            bin/retry_cmd docker build -t $tag $build_args -f $file . 2>&1 | tee -a $logfile || failed=y
-        else
-            bin/retry_cmd docker build -t $tag $build_args -f $file . >> $logfile 2>&1 || failed=y
-        fi
-        if [ -n "$failed" ]; then
-            tail $logfile
-            echo Build failed, see $logfile for complete log.
-            false
-        fi
-        echo Build complete. >> $logfile
-        if [ "$do_images" == save ]; then
-            docker save $tag > $build_root/docker_image.$module
-        fi
-    fi
+rm $DOCKER_IMAGE_LIST || true
+echo Updating $DOCKER_IMAGE_LIST...
+docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do
+    echo $image $hash >> $DOCKER_IMAGE_LIST
 done
-
-if [ -n "$in_container" ]; then
-    service docker stop
-    sleep 2
-    rm -fr /var/lib/docker/runtimes
-    rm -fr faucet/.git
-fi
-
-if [ "$do_images" == load ]; then
-    touch $load_mark
-fi
 
 echo Updating .build_hash
 bin/build_hash write
