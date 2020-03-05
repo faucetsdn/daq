@@ -13,8 +13,8 @@
     }
   },
   "pointset": {
-    "rate_limit_ms": 2000,
-    "update_interval_ms": 50000,
+    "sample_limit_sec": 2,
+    "sample_rate_sec": 500,
     "points": {
       "return_air_temperature_sensor": {
         "force_value": 21.1
