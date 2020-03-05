@@ -38,7 +38,22 @@ RESULT pass security.passwords.telnet  Default passwords have been changed
 RESULT pass security.passwords.ssh Default passwords have been changed
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
-dhcp requests 2 1
+RESULT pass connection.dhcp_long ARP packets received.
+RESULT pass connection.min_send ARP packets received. Packets received.
+RESULT info communication.type.broadcast Broadcast packets received. 
+RESULT fail protocol.app_min_send 
+RESULT fail network.ntp.support 
+RESULT pass connection.dhcp_long ARP packets received.
+RESULT fail connection.min_send ARP packets received. 
+RESULT info communication.type.broadcast Unicast packets received.
+RESULT fail protocol.app_min_send 
+RESULT fail network.ntp.support 
+RESULT pass connection.dhcp_long ARP packets received.
+RESULT pass connection.min_send ARP packets received. Packets received.
+RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
+RESULT pass protocol.app_min_send Application packets received.
+RESULT pass network.ntp.support NTP packets received.
+dhcp requests 2 3
 01: ['01:brute:1', '01:macoui:1']
 02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1', '02:tls:1']
 03: ['03:hold:DaqException', '03:nmap:1']
@@ -68,6 +83,9 @@ port-01 module_config modules
     "enabled": false
   },
   "macoui": {
+    "enabled": true
+  },
+  "network": {
     "enabled": true
   },
   "nmap": {
@@ -107,11 +125,14 @@ port-02 module_config modules
     "timeout_sec": 120
   },
   "hold": {
-    "enabled": true 
+    "enabled": true
   },
   "macoui": {
     "enabled": true,
     "timeout_sec": 1
+  },
+  "network": {
+    "enabled": true
   },
   "nmap": {
     "enabled": true
@@ -123,7 +144,7 @@ port-02 module_config modules
     "enabled": true
   },
   "switch": {
-    "enabled": false
+    "enabled": true
   },
   "tls": {
     "enabled": true
@@ -146,6 +167,7 @@ port-02 module_config modules
                 ')
 Redacted docs diff
 No report diff
+ M misc/docker_images.txt
 01: ['01:ping:Exception']
 02: ['02:ping:ValueError']
 03: ['03:ping:Exception']

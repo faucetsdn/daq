@@ -36,6 +36,8 @@ UDMI is intended to support a few primary use-cases:
 * _Credential Exchange_: Bootstrap higher-layer authentication to restricted resources.
 * _Firmware Updates_: Initiate, monitor, and track firmware updates across an entire fleet
 of devices.
+* _On-Prem Discovery_: Enumerate and on-prem devices to aid setup or anomaly detection.
+* _Gateway Proxy_: Proxy data/connection for non-UDMI devices, allowing adaptation to legacy systems.
 
 All these situations are conceptually about _management_ of devices, which is conceptually
 different than the _control_ or _operation_. These concepts are similar to the _management_,
@@ -68,7 +70,7 @@ Schemas are broken down into several top-level sub-schemas that are invoked for
 different aspects of device management:
 * Device _state_ ([example](state.tests/example.json)), sent from device to cloud,
 defined by [<em>state.json</em>](state.json). There is one current _state_ per device,
-which is considered sicky until a new state message is sent.
+which is considered sticky until a new state message is sent.
 is comprised of several subsections (e.g. _system_ or _pointset_) that describe the
 relevant sub-state components.
 * Device _config_ ([example](config.tests/example.json)), passed from cloud to device,

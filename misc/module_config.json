@@ -29,6 +29,9 @@
     },
     "udmi": {
       "enabled": true
+    },
+    "network": {
+      "enabled": true
     }
   }
 }

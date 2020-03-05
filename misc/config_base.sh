@@ -8,19 +8,13 @@ if [ -d venv ]; then
     source venv/bin/activate
 fi
 
-run_mode=$(cat misc/RELEASE_VERSION)
-
-if [ ! -f "$LOCAL_SYSTEM" -a "$DONT_MAKE_LOCAL" ]; then
-    echo Skipping $LOCAL_SYSTEM install b/c no-local mode.
-else
-    if [ ! -f "$LOCAL_SYSTEM" ]; then
-        echo No $LOCAL_SYSTEM found, copying defaults from $DEFAULT_CONF...
-        mkdir -p local
-        cp $DEFAULT_CONF $LOCAL_SYSTEM
-    fi
-
-    echo Loading config from $LOCAL_SYSTEM into inst/config/system.conf
-    mkdir -p inst/config
-    python3 daq/configurator.py $LOCAL_SYSTEM $run_args > inst/config/system.conf
-    source inst/config/system.conf
+if [ ! -f "$LOCAL_SYSTEM" ]; then
+    echo No $LOCAL_SYSTEM found, copying defaults from $DEFAULT_CONF...
+    mkdir -p local
+    cp $DEFAULT_CONF $LOCAL_SYSTEM
 fi
+
+echo Loading config from $LOCAL_SYSTEM into inst/config/system.conf
+mkdir -p inst/config
+python3 daq/configurator.py $LOCAL_SYSTEM $run_args > inst/config/system.conf
+source inst/config/system.conf

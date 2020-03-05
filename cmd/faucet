@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
-IMAGE=daq/faucet
+IMAGE=daqf/faucet
 FAUCET_SOCK=faucet_event.sock
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
@@ -24,7 +24,7 @@ fi
 
 if [ "$1" == "gauge" ]; then
     CONTAINER=daq-gauge
-    IMAGE=daq/gauge
+    IMAGE=daqf/gauge
     FAUCET_SOCK=
     shift
 fi

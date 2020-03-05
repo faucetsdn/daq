@@ -1,9 +1,9 @@
-# Image name: daq/faux
+# Image name: daqf/faux
 #
 # Faux device for framework development/testing.
 #
 
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install openjdk-8-jdk git
 

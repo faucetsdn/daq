@@ -28,7 +28,7 @@ echo AG is $AG
 # Need to remove the || true at the end of the update line. Same as for instance below. Also in bin/setup_dev.
 $AG update || true
 $AG install realpath || true  # On newer versions this is included elsewhere.
-$AG install lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent net-tools
+$AG install expect lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent net-tools
 
 retry=bin/retry_cmd
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
