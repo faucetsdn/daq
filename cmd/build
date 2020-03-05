@@ -1,6 +1,7 @@
 #!/bin/bash -e
 # The following are expected modes of builds
-# cmd/build <- Pull images referenced, then builds the ones that are missing 
+# cmd/build <- defaults to build-all
+# cmd/build check <- Pull images referenced, then builds the ones that are missing
 # cmd/build push <- Pushes images referenced in DOCKER_IMAGES_LIST to docker hub
 # cmd/build pull <- Pulls images referenced in DOCKER_IMAGES_LIST to docker hub
 # cmd/build build-all <- Builds all docker images 
@@ -13,7 +14,7 @@ ROOT=$(dirname $0)/..
 inline=
 copydirs="bin cmd misc faucet mininet docker daq subset"
 DOCKER_IMAGE_LIST=misc/docker_images.txt
-check_existing="check-existing"
+check_existing=
 
 cd $ROOT
 source misc/config_base.sh
@@ -53,6 +54,9 @@ elif [ "$1" == pull ]; then
     mv -f .build_files .build_built
     echo Done with docker build pull.
     exit 0
+elif [ "$1" == check ]; then
+    check_existing=check-existing
+    shift
 elif [ "$1" == build-all ]; then
     check_existing=""
     shift
