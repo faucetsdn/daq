@@ -4,34 +4,18 @@ The _Pubber_ reference client is a sample implementation of a client-side 'devic
 the [UDMI Schema](../schemas/udmi/README.md). It's not intended to be any sort of production-worthy
 code or library, rather just a proof-of-concept of what needs to happen.
 
-## Cloud Setup
+## Build Pubber
 
-To use Pubber, there needs to be a cloud-side device entry configured in a GCP project configured to
-use [Cloud IoT](https://cloud.google.com/iot/docs/). The
-[Creating or Editing a Device](https://cloud.google.com/iot/docs/how-tos/devices#creating_or_editing_a_device)
-section of the documentation describe how to create a simple device and key-pair (see next section for
-a helper script). You can/should substitute the relevant values in the configuration below for your specific setup.
+<pre>
+~/daq$ <b>pubber/bin/build</b>
+Running in /home/peringknife/daq/pubber
 
-### Required Pub/Sub topics
+> Task :compileJava
+&hellip;
 
-**NOTE daq_runner NOT daq-runner (underscore not dash)**
-
-- daq_runner
-- events
-- registrar
-- state
-- target
-
-Your Pub/Sub config should look something like:
-
-<img width="500" alt="Screenshot 2019-07-05 at 12 48 32" src="https://user-images.githubusercontent.com/5684825/60720675-6ba29680-9f23-11e9-814f-25c39f11b3c1.png">
-
-### IoT Core Registry Set up
-
-`events` must be set as the default telemetry topic for the validator to work correctly
-
-TODO: add set up instructions for devices, since registrar isn't run during the aux test  
-TODO: Need devices: AHU-1. AHU-22. GAT-123, SNS-4 
+BUILD SUCCESSFUL in 2s
+2 actionable tasks: 1 executed, 1 up-to-date
+</pre>
 
 ## Key Generation
 
@@ -83,3 +67,15 @@ The `local/pubber.json` file configures the key cloud parameters needed for oper
 [pool-1-thread-1] INFO daq.pubber.Pubber - Sending test message for sensor_hub/GAT-001
 </pre>
 
+
+## Cloud Setup
+
+To use Pubber, there needs to be a cloud-side device entry configured in a GCP project configured to
+use [Cloud IoT](https://cloud.google.com/iot/docs/). The
+[Creating or Editing a Device](https://cloud.google.com/iot/docs/how-tos/devices#creating_or_editing_a_device)
+section of the documentation describe how to create a simple device and key-pair (see next section for
+a helper script). You can/should substitute the relevant values in the configuration below for your
+specific setup. The relevant bits of configuration are the information in the <code>local/pubber.json</code>
+file (see above), and the generated public key (also see above).
+
+Alternatively, you can use the [registrar tool](registrar.md) to automate device registration.
