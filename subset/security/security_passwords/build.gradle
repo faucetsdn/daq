@@ -12,24 +12,19 @@ apply plugin: 'java-library'
 apply plugin: 'java'
 apply plugin: 'application'
 
-
 group 'com.redstone'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
-
-
-
 apply plugin: 'application'
-mainClassName = 'PasswordTest'
+mainClassName = 'TestPassword'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile group: 'com.jcraft', name: 'jsch', version: '0.1.44-1'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
@@ -37,7 +32,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'PasswordTest-Class': 'PasswordTest'
+                'TestPassword-Class': 'TestPassword'
         )
     }
 }

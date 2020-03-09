@@ -2,7 +2,7 @@
 
 # Quick script to fire up test server for local device testing.
 
-STATE_OPTION=$1
+RESULT=$1
 
 set_password () {
     echo $1 | chpasswd
@@ -39,16 +39,16 @@ switch_off_all_servers () {
     service nginx stop
 }
 
-# PASS State means: All servers on, tls certificates valid, passwords changed from default.
-if [ "$STATE_OPTION" == "pass" ]; then
+# PASS result means: All servers on, tls certificates valid, passwords changed from default.
+if [ "$RESULT" == "pass" ]; then
     set_password 'root:pass'
     htpasswd -b -c /etc/nginx/.htpasswd admin fail
     set_up_telnet
     set_up_ssh
     set_up_valid_certificates
 
-# FAIL state means: All servers on, tls certificates invalid, passwors not changed from default.
-elif [ "$STATE_OPTION" == "fail" ]; then
+# FAIL result means: All servers on, tls certificates invalid, passwors not changed from default.
+elif [ "$RESULT" == "fail" ]; then
     set_password 'root:default'
     echo "pass\npass\n\n\n\n\n\ny\n" | adduser "admin"
     echo "admin:default" | chpasswd
@@ -57,8 +57,8 @@ elif [ "$STATE_OPTION" == "fail" ]; then
     set_up_ssh
     set_up_invalid_certificates
 
-# SKIP state means: All servers off, tls certificates not generated.
-elif [ "$STATE_OPTION" == "skip" ]; then
+# SKIP result means: All servers off, tls certificates not generated.
+elif [ "$RESULT" == "skip" ]; then
     switch_off_all_servers
 fi
 

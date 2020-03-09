@@ -5,20 +5,25 @@
 TARGET_IP_FAUX_1=$1
 TARGET_IP_FAUX_2=$2
 TARGET_IP_FAUX_3=$3
-TARGET_MAC=$4
+
+TARGET_MAC_FAUX_1=$4
+TARGET_MAC_FAUX_2=$5
+TARGET_MAC_FAUX_3=$6
 
 run_password_test_all_protocols () {
   echo Running on http
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 http 80 $TARGET_MAC nginx-site
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 http 80 $2 nginx-site &
 
   echo Running on https
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 https 443 $TARGET_MAC nginx-site
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 https 443 $2 nginx-site &
 
   echo Running on telnet
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 telnet 23 $TARGET_MAC nginx-site
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 telnet 23 $2 nginx-site &
 
   echo Running on ssh
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 ssh 22 $TARGET_MAC nginx-site
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 ssh 22 $2 nginx-site &
+
+  wait
 }
 
 display_report () {
@@ -28,24 +33,35 @@ display_report () {
   cat ./reports/ssh_report.txt
 }
 
+display_log () {
+  cat ./reports/http_log.txt
+  cat ./reports/https_log.txt
+  cat ./reports/telnet_log.txt
+  cat ./reports/ssh_log.txt
+}
+
 echo Starting password test run...
 
 echo ~~~~~~~~~~~~~~~~~~~ Running password test on device: $TARGET_IP_FAUX_1 ~~~~~~~~~~~~~~~~~~~~~
-run_password_test_all_protocols $TARGET_IP_FAUX_1
+run_password_test_all_protocols $TARGET_IP_FAUX_1 $TARGET_MAC_FAUX_1
 display_report
 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo
 
 echo ~~~~~~~~~~~~~~~~~~~ Running password test on device: $TARGET_IP_FAUX_2 ~~~~~~~~~~~~~~~~~~~~~
-run_password_test_all_protocols $TARGET_IP_FAUX_2
+run_password_test_all_protocols $TARGET_IP_FAUX_2 $TARGET_MAC_FAUX_2
 display_report
 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo
 
 echo ~~~~~~~~~~~~~~~~~~~ Running password test on device: $TARGET_IP_FAUX_3 ~~~~~~~~~~~~~~~~~~~~~
-run_password_test_all_protocols $TARGET_IP_FAUX_3
+run_password_test_all_protocols $TARGET_IP_FAUX_3 $TARGET_MAC_FAUX_3
 display_report
 echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 echo
 
 echo Done running password tests...
+
+# Keep the container from exiting.
+echo Blocking for all eternity.
+tail -f /dev/null
