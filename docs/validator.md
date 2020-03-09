@@ -78,7 +78,7 @@ there should be something like:
 <pre>
 ~/daq$ <b>fgrep gcp_ local/system.conf</b>
 gcp_cred=local/gcp-project-ce6716521378.json
-gcp_topic=telemetry_topic
+gcp_topic=telemetry
 schema_path=schemas/abacab/
 </pre>
 
@@ -98,7 +98,7 @@ Running schema . in /home/user/daq/validator/schemas/abacab
 Ignoring subfolders []
 Results will be uploaded to https://console.cloud.google.com/firestore/data/registries/?project=gcp-project
 Also found in such directories as /home/user/daq/validator/schemas/abacab/out
-Connecting to pubsub topic telemetry_topic
+Connecting to pubsub topic telemetry
 Entering pubsub message loop on projects/gcp-project/subscriptions/daq-validator
 Success validating out/pointset_FCU_09_INT_NE_07.json
 Success validating out/pointset_FCU_07_EXT_SW_06.json
@@ -108,6 +108,23 @@ Error validating out/pointset_TCE01_01_NE_Controls.json: DeviceId TCE01_01_NE_Co
 Success validating out/logentry_FCU_01_SE_04.json
 <em>&hellip;</em>
 </pre>
+
+## Site Validation
+
+Following on from individual-device validation, it is possible to validate against an entire building model
+This is a WIP provisional feature. But, roughly speaking, it looks like this:
+
+<pre>
+~/daq$ export GOOGLE_APPLICATION_CREDENTIALS=local/essential-monkey.json
+~/daq$ <b>validator/bin/validate schemas/udmi pubsub:<i>topic</i> <i>dev</i> <i>site_model/<i/></b>
+</pre>
+
+* `schemas/udmi` is the schema to validate against.
+* `pubsub:topic` points to the pub-sub topic stream to validate.
+* `dev` is an arbitrary designator for running different clients against the same project.
+* `site_model/` is a directory containing the requisite building model.
+
+Output from a site validation run will be in `validations/metadata_report.json`.
 
 ## Travis CI Testing
 

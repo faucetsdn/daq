@@ -5,12 +5,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.1"
+        classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
     }
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.1'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'java'
     id 'maven'
 }
@@ -35,6 +35,8 @@ repositories {
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-simple', version:'1.7.5'
     compile 'io.jsonwebtoken:jjwt:0.7.0'
+    compile 'javax.xml.bind:jaxb-api:2.3.1'
+    compile 'com.sun.xml.bind:jaxb-impl:2.3.2'
     compile 'com.google.guava:guava:22.0'
     compile 'com.google.cloud:google-cloud-logging:1.7.0'
     compile('com.google.api-client:google-api-client:1.22.0') {
