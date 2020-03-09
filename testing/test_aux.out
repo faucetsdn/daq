@@ -2,58 +2,31 @@ Running testing/test_aux.sh
 Aux Tests
 mudacl tests
 Mudacl exit code 0
-Validator exit code 1
+Validator exit code 0
 Lint checks
 check_style exit code 0
 Extended tests
-RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic Bacnet device not found.
-RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory
-RESULT info protocol.bacnet.version Protocol version: 1
-RESULT pass protocol.bacnet.pic
-RESULT fail connection.mac_oui Manufacturer prefix not found!
-RESULT pass connection.mac_oui
-RESULT pass connection.mac_oui
-RESULT skip security.tls.v3
-RESULT skip security.x509
-RESULT fail security.tls.v3
-RESULT fail security.x509
-RESULT pass security.tls.v3
-RESULT pass security.x509
-RESULT skip security.passwords.http Could not lookup password info for mac-key 9a:02:57:1e:8f:01
-RESULT skip security.passwords.https Could not lookup password info for mac-key 9a:02:57:1e:8f:01
-RESULT skip security.passwords.telnet Could not lookup password info for mac-key 9a:02:57:1e:8f:01
-RESULT skip security.passwords.ssh Could not lookup password info for mac-key 9a:02:57:1e:8f:01
-RESULT fail security.passwords.http Default passwords has not been changed
-RESULT fail security.passwords.https Default passwords has not been changed
-RESULT fail security.passwords.telnet Default passwords has not been changed
-RESULT fail security.passwords.ssh Default passwords have not been changed
-RESULT pass security.passwords.http  Default passwords have been changed
-RESULT pass security.passwords.https  Default passwords have been changed
-RESULT pass security.passwords.telnet  Default passwords have been changed
-RESULT pass security.passwords.ssh Default passwords have been changed
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass connection.dhcp_long ARP packets received.
 RESULT pass connection.min_send ARP packets received. Packets received.
-RESULT info communication.type.broadcast Broadcast packets received.
-RESULT fail protocol.app_min_send
-RESULT fail network.ntp.support
+RESULT info communication.type.broadcast Broadcast packets received. 
+RESULT fail protocol.app_min_send 
+RESULT fail network.ntp.support 
 RESULT pass connection.dhcp_long ARP packets received.
-RESULT fail connection.min_send ARP packets received.
+RESULT fail connection.min_send ARP packets received. 
 RESULT info communication.type.broadcast Unicast packets received.
-RESULT fail protocol.app_min_send
-RESULT fail network.ntp.support
+RESULT fail protocol.app_min_send 
+RESULT fail network.ntp.support 
 RESULT pass connection.dhcp_long ARP packets received.
 RESULT pass connection.min_send ARP packets received. Packets received.
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass protocol.app_min_send Application packets received.
 RESULT pass network.ntp.support NTP packets received.
 dhcp requests 2 2
-01: ['01:macoui:1', '01:nmap:1']
-02: ['02:nmap:1', '02:tls:1']
-03: ['03:hold:DaqException']
+01: ['01:nmap:1', '01:switch:DaqException']
+02: ['02:nmap:1', '02:switch:DaqException']
+03: ['03:nmap:1', '03:switch:DaqException']
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
@@ -122,10 +95,11 @@ port-02 module_config modules
     "timeout_sec": 120
   },
   "hold": {
-    "enabled": false
+    "enabled": true
   },
   "macoui": {
-    "enabled": true
+    "enabled": false,
+    "timeout_sec": 1
   },
   "network": {
     "enabled": true
@@ -163,7 +137,11 @@ port-02 module_config modules
                 ')
 Redacted docs diff
 No report diff
-01: ['01:ping:Exception']
-02: ['02:nmap:1', '02:ping:ValueError']
-03: ['03:nmap:1', '03:ping:Exception']
+ M misc/docker_images.txt
+ M misc/test_site/module_config.json
+ M testing/test_aux.sh
+ M testing/test_base.out
+01: ['01:nmap:1', '01:switch:DaqException']
+02: ['02:nmap:1', '02:switch:DaqException']
+03: ['03:nmap:1', '03:switch:DaqException']
 Done with tests

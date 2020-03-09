@@ -31,6 +31,7 @@ if [ -n "$DAQ_TARGETS" ]; then
 fi
 
 docker_files=$(host_tests=$host_tests bin/docker_build_files)
+echo $docker_files
 for file in $docker_files; do
     if [ ${file%\~} != ${file} ]; then
         continue
@@ -43,7 +44,7 @@ for file in $docker_files; do
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
     elif [ -n "$check_existing" ] && [ -n "$found" ]; then
-        echo Skipping building existing $tag 
+        echo Skipping building existing $tag
     else
         echo Build$ext_msg $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile

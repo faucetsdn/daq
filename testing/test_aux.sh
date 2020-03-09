@@ -106,7 +106,6 @@ cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TE
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
-capture_test_results brute
 capture_test_results macoui
 capture_test_results tls
 capture_test_results password

@@ -9,6 +9,9 @@
     "bacext": {
       "enabled": true
     },
+    "hold": {
+      "enabled": false
+    },
     "network": {
       "enabled": true
     }

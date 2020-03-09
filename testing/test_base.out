@@ -1,6 +1,6 @@
 Running testing/test_base.sh
 Base Tests
-01: ['01:nmap:1']
+01: []
 # Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
@@ -24,7 +24,7 @@ Overall device result PASS
 
 |Expectation|skip|pass|fail|info|
 |---|---|---|---|---|
-|Other|1|2|3|1|
+|Other|1|3|3|1|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -35,6 +35,7 @@ Overall device result PASS
 |fail|connection.min_send|Other|Other|ARP packets received.|
 |fail|network.ntp.support|Other|Other||
 |fail|protocol.app_min_send|Other|Other||
+|pass|security.ports.nmap|Other|Other||
 
 
 ## Module ping
@@ -67,6 +68,20 @@ RESULT pass base.target.ping target reached
 
 ```
 
+## Module nmap
+
+```
+--------------------
+security.ports.nmap
+--------------------
+Automatic TCP/UDP port scan using nmap
+--------------------
+No invalid ports found.
+--------------------
+RESULT pass security.ports.nmap 
+
+```
+
 ## Module network
 
 ```
@@ -86,34 +101,41 @@ connection.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
 --------------------
-RESULT fail connection.min_send ARP packets received.
+RESULT fail connection.min_send ARP packets received. 
 --------------------
 communication.type.broadcast
 --------------------
 Device sends unicast or broadcast packets.
 --------------------
 RESULT info communication.type.broadcast Unicast packets received.
+
 --------------------
 protocol.app_min_send
 --------------------
 Device sends application packets at a frequency of less than 5 minutes.
 --------------------
-RESULT fail protocol.app_min_send
+RESULT fail protocol.app_min_send 
 --------------------
 network.ntp.support
 --------------------
 Device sends NTP request packets.
 --------------------
-RESULT fail network.ntp.support
+RESULT fail network.ntp.support 
 ```
 
 ## Report complete
 
 Open port tests
 01: ['01:nmap:1']
-01: ['01:nmap:1']
+|fail|security.ports.nmap|Other|Other|Some disallowed ports are open|
+security.ports.nmap
+RESULT fail security.ports.nmap Some disallowed ports are open
+01: []
+|pass|security.ports.nmap|Other|Other||
+security.ports.nmap
+RESULT pass security.ports.nmap 
 External switch tests
-02: ['02:nmap:1']
+02: []
     dp_id: 1
     dp_id: 4886718345
 Switch test with port 2
