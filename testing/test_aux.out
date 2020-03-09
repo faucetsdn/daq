@@ -30,7 +30,7 @@ RESULT skip security.passwords.telnet Could not lookup password info for mac-key
 RESULT skip security.passwords.ssh Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 RESULT fail security.passwords.http Default password has not been changed
 RESULT fail security.passwords.https Default password has not been changed
-RESULT pass security.passwords.telnet Default password has been changed
+RESULT fail security.passwords.telnet Default password has not been changed
 RESULT fail security.passwords.ssh Default password has not been changed
 RESULT pass security.passwords.http Default password has been changed
 RESULT pass security.passwords.https Default password has been changed
