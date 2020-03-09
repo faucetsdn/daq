@@ -101,12 +101,12 @@ def test_connection_min_send():
     arp_shell_result = shell_command_with_result(tcpdump_display_arp_packets, 0, False)
     arp_packets_received = packets_received_count(arp_shell_result)
     if arp_packets_received > 0:
-        add_summary("ARP packets received. ")
+        add_summary("ARP packets received.")
     shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     all_packets_received = packets_received_count(shell_result)
     app_packets_received = all_packets_received - arp_packets_received
     if app_packets_received > 0:
-        add_summary("Other packets received. ")
+        add_summary("Other packets received.")
     print('min_send_packets', arp_packets_received, all_packets_received)
     add_packet_info_to_report(shell_result)
     return 'pass' if app_packets_received > 0 else 'fail'
@@ -115,7 +115,7 @@ def test_connection_dhcp_long():
     shell_result = shell_command_with_result(tcpdump_display_arp_packets, 0, False)
     arp_packets_received = packets_received_count(shell_result)
     if arp_packets_received > 0:
-        add_summary("ARP packets received. ")
+        add_summary("ARP packets received.")
         add_packet_info_to_report(shell_result)
         return 'pass'
     else:
@@ -141,7 +141,7 @@ def test_protocol_app_min_send():
             print(e)
     print('app_packets_received', app_packets_received)
     if app_packets_received > 0:
-        add_summary("Application packets received. ")
+        add_summary("Application packets received.")
         return 'pass'
     else:
         return 'fail'
@@ -150,18 +150,18 @@ def test_communication_type_broadcast():
     shell_result = shell_command_with_result(tcpdump_display_broadcast_packets, 0, False)
     broadcast_packets_received = packets_received_count(shell_result)
     if broadcast_packets_received > 0:
-        add_summary("Broadcast packets received. ")
+        add_summary("Broadcast packets received.")
     shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     all_packets_received = packets_received_count(shell_result)
     if (all_packets_received - broadcast_packets_received) > 0:
-        add_summary("Unicast packets received. ")
+        add_summary("Unicast packets received.")
     return 'info'
 
 def test_ntp_support():
     shell_result = shell_command_with_result(tcpdump_display_ntp_packets, 0, False)
     ntp_packets_received = packets_received_count(shell_result)
     if ntp_packets_received > 0:
-        add_summary("NTP packets received. ")
+        add_summary("NTP packets received.")
         add_packet_info_to_report(shell_result)
         return 'pass'
     else:
@@ -169,7 +169,7 @@ def test_ntp_support():
 
 def add_summary(text):
     global summary_text
-    summary_text += text
+    summary_text = summary_text + " " + text if summary_text else text
 
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
