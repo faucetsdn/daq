@@ -36,6 +36,8 @@ UDMI is intended to support a few primary use-cases:
 * _Credential Exchange_: Bootstrap higher-layer authentication to restricted resources.
 * _Firmware Updates_: Initiate, monitor, and track firmware updates across an entire fleet
 of devices.
+* _On-Prem Discovery_: Enumerate and on-prem devices to aid setup or anomaly detection.
+* _Gateway Proxy_: Proxy data/connection for non-UDMI devices, allowing adaptation to legacy systems.
 
 All these situations are conceptually about _management_ of devices, which is conceptually
 different than the _control_ or _operation_. These concepts are similar to the _management_,

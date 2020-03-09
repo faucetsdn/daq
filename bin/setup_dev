@@ -98,6 +98,7 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-cloud-storage==1.16.1 \
     google-cloud-firestore==1.6.0 \
     google-cloud-logging==1.14.0 \
+    cairocffi==1.0.2 \
     WeasyPrint==50 \
     pypandoc==1.4
 
