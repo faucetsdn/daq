@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Runs the password test on all protocols, for each of the faux devices.
+# Runs the password test on all protocols asynchronously and stores logs in /tmp files.
 
 TARGET_IP_FAUX_1=$1
 TARGET_IP_FAUX_2=$2
@@ -12,18 +12,16 @@ TARGET_MAC_FAUX_3=$6
 
 run_password_test_all_protocols () {
   echo Running on http
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 http 80 $2 nginx-site &
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 http 80 $2 nginx-site
 
   echo Running on https
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 https 443 $2 nginx-site &
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 https 443 $2 nginx-site
 
   echo Running on telnet
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 telnet 23 $2 nginx-site &
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 telnet 23 $2 nginx-site
 
   echo Running on ssh
-  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 ssh 22 $2 nginx-site &
-
-  wait
+  java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 ssh 22 $2 nginx-site
 }
 
 display_report () {
@@ -31,13 +29,6 @@ display_report () {
   cat ./reports/https_report.txt
   cat ./reports/telnet_report.txt
   cat ./reports/ssh_report.txt
-}
-
-display_log () {
-  cat ./reports/http_log.txt
-  cat ./reports/https_log.txt
-  cat ./reports/telnet_log.txt
-  cat ./reports/ssh_log.txt
 }
 
 echo Starting password test run...
