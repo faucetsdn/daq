@@ -23,11 +23,11 @@ public class RunTest {
       }
       if (foundCredentials) {
         reportHandler.addText(
-            "RESULT fail security.passwords." + protocol + " Default passwords has not been changed");
+            "RESULT fail security.passwords." + protocol + " Default password has not been changed");
         reportHandler.writeReport();
       } else {
         reportHandler.addText(
-            "RESULT pass security.passwords."+ protocol +"  Default passwords have been changed");
+            "RESULT pass security.passwords."+ protocol +" Default password has been changed");
         reportHandler.writeReport();
       }
     } catch (IOException e) {

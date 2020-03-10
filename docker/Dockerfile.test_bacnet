@@ -1,4 +1,4 @@
-FROM daq/aardvark:latest as bacnet_build
+FROM daqf/aardvark:latest as bacnet_build
 
 # Do this alone first so it can be re-used by other build files.
 RUN $AG update && $AG install openjdk-8-jre
@@ -10,7 +10,7 @@ ENV BACHASH=94a794a756ee0d37c6a2e53e08747ee021415aa8
 RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch \
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
 
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install openjdk-8-jre
 

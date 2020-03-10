@@ -1,0 +1,11 @@
+#!/bin/bash -e
+CUR=$(dirname $0)
+cd $CUR
+switch_ip="192.168.1.1"
+echo Reset switch at $switch_ip?
+echo Press any key to continue...
+read -p ''
+./erase_switch
+echo Waiting 60s...
+sleep 60
+echo Done

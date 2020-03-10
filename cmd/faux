@@ -14,12 +14,12 @@ source misc/config_base.sh
 # If the argument is -n then create a networking container
 if [ "$1" == "-n" ]; then
     container_prefix=daq-networking
-    image=daq/networking
+    image=daqf/networking
     net_opt=
     shift
 else
     container_prefix=daq-faux
-    image=daq/faux
+    image=daqf/faux
     net_opt=--net=none
 fi
 

@@ -29,7 +29,7 @@ echo intf_names=${ifaces#,} >> local/system.conf
 
 echo DAQ stress test | tee -a $TEST_RESULTS
 # Limit should be ~30, but something is wrong with startup sequence.
-cmd/run run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
+cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "dhcp:TimeoutError" inst/result.log | wc -l)
