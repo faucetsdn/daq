@@ -80,7 +80,6 @@ Device sends ARP request on DHCP lease expiry.
 
 
 RESULT pass connection.dhcp_long ARP packets received.
-
 --------------------
 connection.min_send
 --------------------
@@ -93,7 +92,6 @@ communication.type.broadcast
 Device sends unicast or broadcast packets.
 --------------------
 RESULT info communication.type.broadcast Unicast packets received.
-
 --------------------
 protocol.app_min_send
 --------------------

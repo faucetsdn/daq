@@ -12,7 +12,6 @@ set -o pipefail
 ROOT=$(dirname $0)/..
 
 inline=
-copydirs="bin cmd misc faucet mininet docker daq subset"
 DOCKER_IMAGE_LIST=misc/docker_images.txt
 check_existing=
 

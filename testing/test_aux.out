@@ -35,17 +35,17 @@ RESULT pass security.passwords.ssh Default passwords have been changed
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass connection.dhcp_long ARP packets received.
-RESULT pass connection.min_send ARP packets received. Packets received.
-RESULT info communication.type.broadcast Broadcast packets received. 
+RESULT pass connection.min_send ARP packets received. Other packets received.
+RESULT info communication.type.broadcast Broadcast packets received.
 RESULT fail protocol.app_min_send 
 RESULT fail network.ntp.support 
 RESULT pass connection.dhcp_long ARP packets received.
-RESULT fail connection.min_send ARP packets received. 
+RESULT pass connection.min_send ARP packets received. Other packets received.
 RESULT info communication.type.broadcast Unicast packets received.
 RESULT fail protocol.app_min_send 
 RESULT fail network.ntp.support 
 RESULT pass connection.dhcp_long ARP packets received.
-RESULT pass connection.min_send ARP packets received. Packets received.
+RESULT pass connection.min_send ARP packets received. Other packets received.
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass protocol.app_min_send Application packets received.
 RESULT pass network.ntp.support NTP packets received.

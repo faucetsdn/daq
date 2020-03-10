@@ -122,11 +122,9 @@ parsed `config` message.
 
 ### Config Message
 
-* `max_update_ms`: Maximum time betwen telemetry updates. The system should proactively send an
-update (e.g. _pointset_, _logentry_, _discovery_ message) often enough to make sure it happens
-before this time. Typically, this means that the entire necessary data set can be sent
-perodically at this interval.
-* `min_update_ms`: Minimum time between point updates. Updates that happen faster than this time
+* `sample_rate_sec`: Sampling rate for the system, which should proactively send an
+update (e.g. _pointset_, _logentry_, _discovery_ message) at this interval.
+* `sample_limit_sec`: Minimum time between sample updates. Updates that happen faster than this time
 (e.g. due to _cov_ events) should be coalessed so that only the most recent update is sent.
 * `force_value`: Override value for a point to be used during diagnostics and diagnosis. Should
 override any operational values, but not override alarm conditions.

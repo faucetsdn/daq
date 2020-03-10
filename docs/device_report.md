@@ -66,7 +66,7 @@ Overall device result FAIL
 |info|communication.type.broadcast|Other|Other|Broadcast packets received.|
 |pass|connection.dhcp_long|Other|Other|ARP packets received.|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
-|pass|connection.min_send|Other|Other|ARP packets received. Packets received.|
+|pass|connection.min_send|Other|Other|ARP packets received. Other packets received.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check ext_loip in system.conf|
@@ -174,12 +174,12 @@ Device sends ARP request on DHCP lease expiry.
 %% 09:56:43.085921 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
 %% packets_count=11
 RESULT pass connection.dhcp_long ARP packets received.
-
 --------------------
 connection.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
 --------------------
+
 %% 09:52:19.405468 ARP, Reply 10.20.99.164 is-at 9a:02:57:1e:8f:01, length 28
 %% 09:52:34.459488 IP 10.20.99.164.45311 > 10.20.255.255.41794: UDP, length 32
 %% 09:52:54.478559 IP 10.20.99.164.50101 > 10.20.255.255.41794: UDP, length 32
@@ -198,7 +198,7 @@ communication.type.broadcast
 --------------------
 Device sends unicast or broadcast packets.
 --------------------
-RESULT info communication.type.broadcast Broadcast packets received. 
+RESULT info communication.type.broadcast Broadcast packets received.
 --------------------
 protocol.app_min_send
 --------------------
