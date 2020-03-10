@@ -3,7 +3,7 @@
 REPORT=/tmp/report.txt
 
 MONITOR=/scans/monitor.pcap
-MODULE_CONFIG=device_module_config.json
+MODULE_CONFIG=/config/device/module_config.json
 EXCLUDES=infastructure_excludes.json
 
 python network_tests.py connection.dhcp_long $MONITOR $TARGET_IP
