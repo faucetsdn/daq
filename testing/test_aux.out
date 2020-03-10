@@ -6,16 +6,12 @@ Validator exit code 0
 Lint checks
 check_style exit code 0
 Extended tests
-ERROR:host:Monitoring timeout for macoui after 1s
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory 
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
-RESULT fail network.brute Change the default password on the DUT
-RESULT pass network.brute 
-RESULT skip network.brute Port 10000 is not open
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui
 RESULT skip security.tls.v3
@@ -30,7 +26,7 @@ RESULT skip security.passwords.telnet Could not lookup password info for mac-key
 RESULT skip security.passwords.ssh Could not lookup password info for mac-key 9a:02:57:1e:8f:01
 RESULT fail security.passwords.http Default passwords has not been changed
 RESULT fail security.passwords.https Default passwords has not been changed
-RESULT pass security.passwords.telnet  Default passwords have been changed
+RESULT fail security.passwords.telnet Default passwords has not been changed
 RESULT fail security.passwords.ssh Default passwords have not been changed
 RESULT pass security.passwords.http  Default passwords have been changed
 RESULT pass security.passwords.https  Default passwords have been changed
@@ -54,9 +50,9 @@ RESULT info communication.type.broadcast Broadcast packets received. Unicast pac
 RESULT pass protocol.app_min_send Application packets received.
 RESULT pass network.ntp.support NTP packets received.
 dhcp requests 2 2
-01: ['01:nmap:1', '01:switch:DaqException']
-02: ['02:nmap:1', '02:switch:DaqException']
-03: ['03:nmap:1', '03:switch:DaqException']
+01: ['01:macoui:1', '01:nmap:1']
+02: ['02:hold:TimeoutError', '02:nmap:1', '02:tls:1']
+03: []
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
@@ -168,7 +164,8 @@ port-02 module_config modules
 Redacted docs diff
 No report diff
  M misc/docker_images.txt
+ M testing/test_base.out
 01: ['01:ping:Exception']
 02: ['02:ping:ValueError']
-03: ['03:ping:Exception']
+03: ['03:nmap:1', '03:ping:Exception']
 Done with tests
