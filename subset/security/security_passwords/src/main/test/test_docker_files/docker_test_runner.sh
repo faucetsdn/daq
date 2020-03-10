@@ -7,7 +7,7 @@
 echo Running password test...
 
 if [ "$1" != "true" ]; then
-  docker container rm "password_test_container"
+    docker container rm "password_test_container"
 fi
 
 echo ~~~~~~~~~~~~~~~~~~~~~~~ Running password test ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class TestPassword {
 
-  private static int REQUIRED_PARAMETERS = 5; // TODO remove this
+  private static int REQUIRED_PARAMETERS = 5;
   private static String HELP_STRING = "Usage: target_ip protocol(http(s)/ssh/telnet) target_port target_mac domain";
 
   private String host;
@@ -23,12 +23,6 @@ public class TestPassword {
       port = args[2];
       macAddress = args[3];
       domain = args[4];
-
-//        host = "172.17.0.3";
-//        protocol = "telnet";
-//        port = "23";
-//        macAddress = "02:42:ac:11:00:02";
-//        domain = "nginx-site";
     }
   }
 

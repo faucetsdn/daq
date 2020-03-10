@@ -7,9 +7,9 @@
 echo Running docker containers...
 
 if [ "$1" != "true" ]; then
-  docker container rm "faux_pass_container"
-  docker container rm "faux_fail_container"
-  docker container rm "faux_skip_container"
+    docker container rm "faux_pass_container"
+    docker container rm "faux_fail_container"
+    docker container rm "faux_skip_container"
 fi
 
 echo ~~~~~~~~~~~~~~~~~~~~~~~ Running faux_pass ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
