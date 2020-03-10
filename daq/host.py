@@ -48,7 +48,7 @@ class MODE:
 
 def pre_states():
     """Return pre-test states for basic operation"""
-    return ['startup', 'sanity', 'ip', 'base', 'monitor']
+    return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
 
 def post_states():
@@ -170,9 +170,7 @@ class ConnectedHost:
         return dev_path
 
     def _get_static_ip(self):
-        if 'static_ip' in self._loaded_config:
-            return self._loaded_config['static_ip']
-        return None
+        return self._loaded_config.get('static_ip')
 
     def _type_path(self):
         dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
@@ -250,7 +248,7 @@ class ConnectedHost:
         return self.state == _STATE.READY
 
     def notify_activate(self):
-        """Return True if ready to be activated in response to a ip notification."""
+        """Return True if ready to be activated in response to an ip notification."""
         if self.state == _STATE.READY:
             self._record_result('startup', state=MODE.HOLD)
         return self.state == _STATE.WAITING
@@ -347,7 +345,7 @@ class ConnectedHost:
             return False
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
-        self.record_result('ip', ip=target_ip, state=state, exception=exception)
+        self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
         if exception:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, exception)

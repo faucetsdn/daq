@@ -1,6 +1,6 @@
 {
   "modules": {
-    "ip": {
+    "ipaddr": {
       "timeout_sec": 120
     },
     "pass": {
