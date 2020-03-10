@@ -39,7 +39,7 @@ for file in $docker_files; do
     logfile=$build_root/docker_build.$module
     failed=
     tag=daqf/$module
-    found=$(docker images $tag 2>/dev/null | grep $module) || echo ""
+    found=$(docker images $tag 2>/dev/null | grep $module) || true
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
     elif [ -n "$check_existing" ] && [ -n "$found" ]; then
