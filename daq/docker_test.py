@@ -17,7 +17,7 @@ class DockerTest():
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
-    def __init__(self, runner, target_port, tmpdir, test_name):
+    def __init__(self, runner, target_port, tmpdir, test_name, env_vars=None):
         self.target_port = target_port
         self.tmpdir = tmpdir
         self.test_name = test_name
@@ -28,6 +28,7 @@ class DockerTest():
         self.callback = None
         self.start_time = None
         self.pipe = None
+        self.env_vars = env_vars or []
 
     def start(self, port, params, callback):
         """Start the docker test"""
@@ -36,12 +37,11 @@ class DockerTest():
         self.start_time = datetime.datetime.now()
         self.callback = callback
 
-        env_vars = ["TARGET_NAME=" + self.host_name,
-                    "TARGET_IP=" + params['target_ip'],
-                    "TARGET_MAC=" + params['target_mac'],
-                    "GATEWAY_IP=" + params['gateway_ip'],
-                    "GATEWAY_MAC=" + params['gateway_mac']]
-
+        env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
+                                    "TARGET_IP=" + params['target_ip'],
+                                    "TARGET_MAC=" + params['target_mac'],
+                                    "GATEWAY_IP=" + params['gateway_ip'],
+                                    "GATEWAY_MAC=" + params['gateway_mac']]
 
         if 'local_ip' in params:
             env_vars += ["LOCAL_IP=" + params['local_ip'],
@@ -50,7 +50,6 @@ class DockerTest():
                          "SWITCH_MODEL=" + params['switch_model']]
 
         vol_maps = [params['scan_base'] + ":/scans"]
-
         self._map_if_exists(vol_maps, params, 'inst')
         self._map_if_exists(vol_maps, params, 'port')
         self._map_if_exists(vol_maps, params, 'device')

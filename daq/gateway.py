@@ -164,7 +164,7 @@ class Gateway():
         if exception:
             LOGGER.error('Gateway DHCP exception %s', exception)
         if self._is_target_expected(target) or exception:
-            self.runner.dhcp_notify(state, target, self.port_set, exception=exception)
+            self.runner.ip_notify(state, target, self.port_set, exception=exception)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)

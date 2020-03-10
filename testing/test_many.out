@@ -3,4 +3,5 @@ Many Tests
 DAQ stress test
 Enough results: True
 Enough DHCP timeouts: True
+Enough static ips: True
 Done with tests

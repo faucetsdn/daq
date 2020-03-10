@@ -1,6 +1,6 @@
 {
   "modules": {
-    "dhcp": {
+    "ip": {
       "timeout_sec": 120
     },
     "pass": {

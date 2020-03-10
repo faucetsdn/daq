@@ -73,7 +73,7 @@ port-01 module_config modules
   "brute": {
     "enabled": true
   },
-  "dhcp": {
+  "ip": {
     "timeout_sec": 120
   },
   "discover": {
@@ -121,7 +121,7 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
-  "dhcp": {
+  "ip": {
     "timeout_sec": 120
   },
   "hold": {

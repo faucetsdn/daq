@@ -216,9 +216,9 @@ INFO:runner:DHCP notify 9a:02:57:1e:8f:01 is 10.20.12.38 on gw01 (pass/None/54)
 INFO:runner:DHCP device 9a:02:57:1e:8f:01 ignoring spurious notify
 INFO:runner:DHCP notify 9a:02:57:1e:8f:02 is 10.20.84.39 on gw02 (pass/None/40)
 INFO:runner:DHCP device 9a:02:57:1e:8f:02 ignoring spurious notify
-INFO:host:Target port 1 waiting for dhcp as 9a:02:57:1e:8f:01
-INFO:host:Target port 2 waiting for dhcp as 9a:02:57:1e:8f:02
-INFO:host:Target port 3 waiting for dhcp as 9a:02:57:1e:8f:03
+INFO:host:Target port 1 waiting for ip as 9a:02:57:1e:8f:01
+INFO:host:Target port 2 waiting for ip as 9a:02:57:1e:8f:02
+INFO:host:Target port 3 waiting for ip as 9a:02:57:1e:8f:03
 INFO:runner:DHCP notify 9a:02:57:1e:8f:03 is 10.20.23.40 on gw03 (pass/None/41)
 INFO:gateway:Ready target 9a:02:57:1e:8f:03 from gateway group 9a02571e8f03
 INFO:runner:DHCP activating target 9a:02:57:1e:8f:03
