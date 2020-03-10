@@ -73,14 +73,14 @@ port-01 module_config modules
   "brute": {
     "enabled": true
   },
-  "ip": {
-    "timeout_sec": 120
-  },
   "discover": {
     "enabled": true
   },
   "hold": {
     "enabled": false
+  },
+  "ip": {
+    "timeout_sec": 120
   },
   "macoui": {
     "enabled": true
@@ -121,11 +121,11 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
-  "ip": {
-    "timeout_sec": 120
-  },
   "hold": {
     "enabled": true
+  },
+  "ip": {
+    "timeout_sec": 120
   },
   "macoui": {
     "enabled": true,
