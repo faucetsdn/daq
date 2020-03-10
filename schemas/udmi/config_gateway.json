@@ -7,9 +7,9 @@
     "devices"
   ],
   "properties": {
-    "scan_interval_ms": {
+    "scan_interval_sec": {
       "type": "number",
-      "minimum": 1000
+      "minimum": 0
     },
     "devices": {
       "additionalProperties": false,
@@ -27,10 +27,6 @@
 	    "local_id": {
 	      "type": "string"
 	    },
-            "min_update_ms": {
-              "type": "number",
-              "minimum": 1000
-            },
             "force_value": {
               "type": ["number", "string", "boolean"]
             }
