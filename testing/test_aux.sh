@@ -166,6 +166,8 @@ echo Redacted docs diff | tee -a $TEST_RESULTS
 # Make sure there's no file pollution from the test run.
 git status --porcelain | tee -a $TEST_RESULTS
 
+cp inst/reports/report_9a02571e8f01_*.md docs/device_report.md
+
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
 cmd/run -s ex_ping_01=initialize ex_ping_02=callback ex_ping_03=finalize
