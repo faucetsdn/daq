@@ -8,39 +8,32 @@ REPORT_FILE=/tmp/report.txt
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
+ls -l 
 if [ ! -f /scans/startup.pcap ]; then
-    echo RESULT fail base.pcap.packets startup.pcap not found | tee -a $RESULT_LINES
-    echo RESULT fail base.pcap.request startup.pcap not found | tee -a $RESULT_LINES
-    echo RESULT fail base.pcap.ack startup.pcap not found | tee -a $RESULT_LINES
-    status=fail
-else 
-    echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
+    exit 1
+fi
+
+echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
+echo
+
+STATIC_IP=`jq -r .static_ip /config/device/module_config.json`
+
+if [ -n "$STATIC_IP" ]; then
+    echo RESULT skip base.startup.request static ip| tee -a $RESULT_LINES
+    echo RESULT skip base.startup.ack static ip| tee -a $RESULT_LINES
+else
+    req=pass
+    ack=pass
+    # This is a check that the startup.pcap file exists and is proper.
     echo
-
-    if [ $(tcpdump -n -r /scans/startup.pcap | wc -l) -gt 0 ]; then
-        echo RESULT pass base.pcap.packets found packets in startup.pcap | tee -a $RESULT_LINES
-    else
-        echo RESULT fail base.pcap.packets no packets in startup.pcap | tee -a $RESULT_LINES
+    tcpdump -en -r /scans/startup.pcap ip
+    echo
+    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
+    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail
+    echo RESULT $req base.startup.request | tee -a $RESULT_LINES
+    echo RESULT $ack base.startup.ack| tee -a $RESULT_LINES
+    if [ $req = "fail" ] || [ $ack = "fail" ]; then
         status=fail
-    fi
-
-    if [ -n "$STATIC_IP" ]; then
-        echo RESULT skip base.pcap.request static ip| tee -a $RESULT_LINES
-        echo RESULT skip base.pcap.ack static ip| tee -a $RESULT_LINES
-    else
-        req=pass
-        ack=pass
-        # This is a check that the startup.pcap file exists and is proper.
-        echo
-        tcpdump -en -r /scans/startup.pcap ip
-        echo
-        tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
-        tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail
-        echo RESULT $req base.pcap.request | tee -a $RESULT_LINES
-        echo RESULT $ack base.pcap.ack| tee -a $RESULT_LINES
-        if [ $req = "fail" ] || [ $ack = "fail" ]; then
-            status=fail
-        fi
     fi
 fi
 

@@ -31,7 +31,7 @@ for iface in $(seq 1 $NUM_DEVICES); do
         if [[ $iface -gt $NUM_TIMEOUT_DEVICES ]]; then
             #Install site specific configs for xdhcp ips
             mkdir -p local/site/mac_addrs/$intf_mac
-            cat <<EOF >> local/site/mac_addrs/$intf_mac/module_config.json
+            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
         "static_ip": "$ip"
     }
@@ -47,7 +47,7 @@ echo DAQ stress test | tee -a $TEST_RESULTS
 cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
-timeouts=$(fgrep "ip:TimeoutError" inst/result.log | wc -l)
+timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
 static_ips=$(fgrep done/-1 inst/cmdrun.log | wc -l)
 echo Found $results successful runs.
 # This is broken -- should have many more results available!

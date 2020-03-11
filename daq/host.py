@@ -257,10 +257,11 @@ class ConnectedHost:
         LOGGER.info('Target port %d waiting for ip as %s', self.target_port, self.target_mac)
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
-        self.record_result('ip', state=MODE.EXEC)
+        self.record_result('ipaddr', state=MODE.EXEC)
         static_ip = self._get_static_ip()
         _ = [listener(self) for listener in self._dhcp_listeners]
         if static_ip:
+            time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.DONE, {
                 'mac': self.target_mac,
                 'ip': static_ip,
@@ -504,10 +505,8 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-        static_ip = self._get_static_ip() or ''
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                self.test_name,
-                                                env_vars=['STATIC_IP=' + static_ip])
+                                                self.test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
