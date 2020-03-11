@@ -3,7 +3,6 @@
 import os
 import shutil
 import time
-import traceback
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -288,7 +287,6 @@ class ConnectedHost:
 
     def terminate(self, trigger=True):
         """Terminate this host"""
-        traceback.print_stack()
         LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
                     self._host_name(), trigger)
         self._release_config()
@@ -296,16 +294,18 @@ class ConnectedHost:
         self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        if self.test_host:
+        test_host = self.test_host
+        self.test_host = None
+        if trigger:
+            self.runner.target_set_complete(self.target_port,
+                                            'Target port %d termination: %s' % (
+                                                self.target_port, test_host))
+        if trigger and test_host:
             try:
                 self.test_host.terminate()
-                self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
-        if trigger:
-            self.runner.target_set_complete(self.target_port,
-                                            'Target port %d termination' % self.target_port)
 
     def idle_handler(self):
         """Trigger events from idle state"""
