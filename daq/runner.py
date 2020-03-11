@@ -256,7 +256,7 @@ class DAQRunner:
     def _terminate(self):
         target_set_keys = list(self.port_targets.keys())
         for key in target_set_keys:
-            self.port_targets[key].terminate()
+            self.port_targets[key].terminate('_terminate')
 
     def _check_module_timeouts(self):
         for host in list(self.mac_targets.values()):
@@ -592,7 +592,7 @@ class DAQRunner:
                 target_gateway.result_linger = True
             else:
                 self._direct_port_traffic(target_mac, target_port, None)
-                target_host.terminate(trigger=False)
+                target_host.terminate('_target_set_cancel', trigger=False)
                 if target_gateway:
                     self._detach_gateway(target_port)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:

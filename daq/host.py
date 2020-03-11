@@ -285,10 +285,10 @@ class ConnectedHost:
         assert callable(callback), "DHCP listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
-    def terminate(self, trigger=True):
+    def terminate(self, reason, trigger=True):
         """Terminate this host"""
-        LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
-                    self._host_name(), trigger)
+        LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
+                    self._host_name(), trigger, reason)
         self._release_config()
         self._state_transition(_STATE.TERM)
         self.record_result(self.test_name, state=MODE.TERM)
