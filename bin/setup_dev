@@ -13,7 +13,7 @@ FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
 FAUCETX=$(cat misc/FAUCET_VERSION)
 FAUCETV=${DAQ_FAUCET_VER:-$FAUCETX}
 
-FORCHR=${DAQ_FORCH_REPO:-https://github.com/faucetsdn/faucet}
+FORCHR=${DAQ_FORCH_REPO:-https://github.com/faucetsdn/forch}
 FORCHB=${DAQ_FORCH_BRANCH}
 FORCHX=$(cat misc/FORCH_VERSION)
 FORCHV=${DAQ_FORCH_VER:-$FORCHX}
