@@ -35,7 +35,7 @@ function pull_images {
 }
 
 if [ "$1" == push ]; then
-    cp inst/$DOCKER_IMAGES_LIST misc/$DOCKER_IMAGES_LIST
+    cp inst/$DOCKER_IMAGE_LIST misc/$DOCKER_IMAGE_LIST
     cat misc/$DOCKER_IMAGE_LIST | while read image hash other; do
         found=$(docker images $image | awk '{print $3}' | grep $hash) || echo ""
         if [ -z "$found" ]; then
