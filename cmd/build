@@ -1,9 +1,10 @@
 #!/bin/bash -e
 # The following are expected modes of builds
 # cmd/build <- defaults to build-all
-# cmd/build check <- Pull images referenced, then builds the ones that are missing
-# cmd/build push <- Pushes images referenced in DOCKER_IMAGES_LIST to docker hub
-# cmd/build pull <- Pulls images referenced in DOCKER_IMAGES_LIST to docker hub
+# cmd/build check <- Check if the built images are updated.
+# cmd/build push <- Pushes images to docker hub
+# cmd/build pull <- Pulls images from docker hub
+# cmd/build build <- Builds missing docker images
 # cmd/build build-all <- Builds all docker images 
 
 # Set this so docker build will fail even though piped through tee.
@@ -12,8 +13,7 @@ set -o pipefail
 ROOT=$(dirname $0)/..
 
 inline=
-DOCKER_IMAGE_LIST=misc/docker_images.txt
-check_existing=
+DOCKER_IMAGE_LIST=docker_images.txt
 
 cd $ROOT
 source misc/config_base.sh
@@ -24,7 +24,7 @@ function pull_images {
         target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
         test_set[$target]=y
     done
-    cat $DOCKER_IMAGE_LIST | while read image hash other; do
+    cat misc/$DOCKER_IMAGE_LIST | while read image hash other; do
         if [ -z "${test_set[$image]}" ]; then
             echo Skipping $image pull 
             continue
@@ -35,7 +35,8 @@ function pull_images {
 }
 
 if [ "$1" == push ]; then
-    cat $DOCKER_IMAGE_LIST | while read image hash other; do
+    cp inst/$DOCKER_IMAGES_LIST misc/$DOCKER_IMAGES_LIST
+    cat misc/$DOCKER_IMAGE_LIST | while read image hash other; do
         found=$(docker images $image | awk '{print $3}' | grep $hash) || echo ""
         if [ -z "$found" ]; then
             echo $image:$hash not found locally...
@@ -54,10 +55,11 @@ elif [ "$1" == pull ]; then
     echo Done with docker build pull.
     exit 0
 elif [ "$1" == check ]; then
-    check_existing=check-existing
     shift
+    bin/build_hash check
+    exit 0
 elif [ "$1" == build-all ]; then
-    check_existing=""
+    build_all=build-all
     shift
 fi
 
@@ -83,17 +85,14 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-if [ -n "$check_existing" ]; then
-    pull_images
-fi
+bin/docker_build $build_all $inline
 
-bin/docker_build $check_existing $inline
-
-rm $DOCKER_IMAGE_LIST || true
-echo Updating $DOCKER_IMAGE_LIST...
+rm inst/$DOCKER_IMAGE_LIST || true
+echo Updating inst/$DOCKER_IMAGE_LIST...
 docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do
-    echo $image $hash >> $DOCKER_IMAGE_LIST
+    echo $image $hash >> inst/$DOCKER_IMAGE_LIST
 done
+echo Push images to update misc/$DOCKER_IMAGE_LIST
 
 echo Updating .build_hash
 bin/build_hash write
