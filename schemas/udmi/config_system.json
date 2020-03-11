@@ -4,10 +4,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "max_update_ms": {
-      "type": "number",
-      "minimum": 10000
-    },
     "min_loglevel": {
       "type": "number",
       "minimum": 100,

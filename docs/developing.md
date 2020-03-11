@@ -73,6 +73,4 @@ local tests, to guard against any local filesystem changes.
 Lint checks are performed as part of the `testing/test_aux.sh` script. They are extra
 tricky because they are typically very sensitive to the exact version of every package
 installed, so they're somewhat unreliable except when run through a pristine environment
-on Travis. An error output of `cmd/inbuild exit code 1` in the logs indicates that
-something went wrong with the lint checks, but it can sometimes happen locally when
-there is no problem on Travis (and Travis wins).
+on Travis. 

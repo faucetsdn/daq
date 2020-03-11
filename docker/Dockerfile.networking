@@ -1,9 +1,9 @@
-# Image name: daq/networking
+# Image name: daqf/networking
 #
 # Image used for host networking services (DNS, DHCP, etc...)
 #
 
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install dnsmasq ethtool iptables netcat python freeradius
 

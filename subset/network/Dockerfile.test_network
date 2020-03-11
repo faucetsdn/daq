@@ -1,8 +1,7 @@
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install python netcat
 
-COPY qualification/device_module_config.json .
 COPY subset/network/network_tests.py .
 COPY subset/network/test_network .
 

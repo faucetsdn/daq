@@ -71,7 +71,7 @@ Updating .build_hash
 
 `cmd/run` and `cmd/build` have some internal checks that attempt to make sure the built Docker images are
 current with the existing filesystem setup. This is only a hint and optimization. If there are consistent
-messages about the build hash being out of date, and it's not clear why, then the folowing steps will help
+messages about the build hash being out of date, and it's not clear why, then the following steps will help
 clarify what file is changed that is triggering the warning.
 
 <pre>
