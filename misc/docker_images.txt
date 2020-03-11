@@ -13,10 +13,10 @@ daqf/test_fail 4991b03e538d
 daqf/test_hold 99c40ad18330
 daqf/test_macoui 300d3d673bca
 daqf/test_mudgee 00471c70afe6
-daqf/test_network c5c76a57c71b
+daqf/test_network a8cb8828192b
 daqf/test_nmap 47535fc9bea5
 daqf/test_pass dfd84ab4e28f
-daqf/test_password a8a162ba00a7
+daqf/test_password 88de3681fc50
 daqf/test_ping a6c7c51d7c7e
 daqf/test_switch 63273c1fa98e
 daqf/test_tls f901a479ebff
