@@ -37,7 +37,7 @@ RESULT pass connection.min_send ARP packets received. Other packets received.
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass protocol.app_min_send Application packets received.
 RESULT pass network.ntp.support NTP packets received.
-dhcp requests 2 2
+dhcp requests 2 3
 01: ['01:macoui:1', '01:nmap:1']
 02: ['02:hold:TimeoutError', '02:nmap:1', '02:tls:1']
 03: []
