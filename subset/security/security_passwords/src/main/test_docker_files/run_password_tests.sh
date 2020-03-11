@@ -11,24 +11,17 @@ TARGET_MAC_FAUX_2=$5
 TARGET_MAC_FAUX_3=$6
 
 run_password_test_all_protocols () {
-    echo Running on http
     java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 http 80 $2 nginx-site
-
-    echo Running on https
     java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 https 443 $2 nginx-site
-
-    echo Running on telnet
     java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 telnet 23 $2 nginx-site
-
-    echo Running on ssh
     java -jar security_passwords/build/libs/security_passwords-1.0-SNAPSHOT-all.jar $1 ssh 22 $2 nginx-site
 }
 
 display_report () {
-    cat ./reports/http_report.txt
-    cat ./reports/https_report.txt
-    cat ./reports/telnet_report.txt
-    cat ./reports/ssh_report.txt
+    cat ./reports/http_result.txt
+    cat ./reports/https_result.txt
+    cat ./reports/telnet_result.txt
+    cat ./reports/ssh_result.txt
 }
 
 echo Starting password test run...

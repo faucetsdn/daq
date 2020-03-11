@@ -1,7 +1,7 @@
 # Dockerfile for running the corresponding faux device.
 # Make sure when building this image, the working directory specified in command is DAQ folder.
 
-FROM daq/aardvark:latest
+FROM daqf/aardvark:latest
 
 # Initial dependencies
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat\
@@ -28,4 +28,4 @@ COPY subset/security/nginx-site /var/www/nginx-site
 COPY subset/security .
 
 # Run the pass test
-CMD ["security_passwords/src/main/test/test_docker_files/setup_servers.sh", "pass"]
+CMD ["security_passwords/src/main/test_docker_files/setup_servers.sh", "skip"]

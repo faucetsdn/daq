@@ -1,6 +1,4 @@
-/** Creates and runs commands to run brute force tools, Ncrack/Hydra.
- * Ncrack is used for HTTP, HTTPS
- * Hydra is used for SSH (Ncrack currently runs into issues with SSH), and telnet (Is faster on Hydra).*/
+/* Runs pentesting tools ncrack and hydra to crack the passwords of the device. */
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,40 +6,44 @@ import java.io.InputStreamReader;
 
 public class BruteForceTester {
 
-  private static String NCRACK_COMMAND_STRING = "ncrack %s %s://%s:%s -U %s -P %s";
-  private static String HYDRA_COMMAND_STRING = "hydra -L %s -P %s %s %s -s %s";
+  private static final String SSH = "ssh";
+  private static final String TELNET = "telnet";
+  private static final String HYDRA_SUCCESS_MESSAGE = "successfully completed";
+  private static final String NCRACK_SUCCESS_MESSAGE = "Discovered credentials";
+  private static final String NCRACK_COMMAND = "ncrack %s %s://%s:%s -U %s -P %s";
+  private static final String HYDRA_COMMAND = "hydra -L %s -P %s %s %s -s %s";
 
-  private static String getCommandToRun(
+  private static String getCommand(
       final String domain,
       final String protocol,
       final String host,
       final String port,
-      final String usernamesFile,
+      final String usersFile,
       final String passwordsFile
   ) {
-    if (protocol.equals("ssh") || protocol.equals("telnet")) {
-      return String.format(HYDRA_COMMAND_STRING, usernamesFile, passwordsFile, host, protocol, port);
+    if (protocol.equals(SSH) || protocol.equals(TELNET)) {
+      return String.format(HYDRA_COMMAND, usersFile, passwordsFile, host, protocol, port);
     }
     else {
-      return String.format(NCRACK_COMMAND_STRING, domain, protocol, host, port, usernamesFile, passwordsFile);
+      return String.format(NCRACK_COMMAND, domain, protocol, host, port, usersFile, passwordsFile);
     }
   }
 
-  private static BufferedReader runCommandAndGetOutputReader(final String commandToRun) throws IOException {
+  private static BufferedReader runCommandGetReader(final String commandToRun) throws IOException {
     final Process process = Runtime.getRuntime().exec(commandToRun);
     return new BufferedReader(new InputStreamReader(process.getInputStream()));
   }
 
   private static boolean lineIndicatesCredentialsFound(final String protocol, final String line) {
-    if (protocol.equals("ssh") || protocol.equals("telnet")) {
-      return line.contains("successfully completed");
+    if (protocol.equals(SSH) || protocol.equals(TELNET)) {
+      return line.contains(HYDRA_SUCCESS_MESSAGE);
     }
     else {
-      return line.contains("Discovered credentials");
+      return line.contains(NCRACK_SUCCESS_MESSAGE);
     }
   }
 
-  public static String startTest(
+  public static String start(
       final String domain,
       final String protocol,
       final String host,
@@ -49,17 +51,17 @@ public class BruteForceTester {
       final String usernamesFile,
       final String passwordsFile
   ) throws IOException {
-    final String commandToRun = getCommandToRun(domain, protocol, host, port, usernamesFile, passwordsFile);
-    final BufferedReader outputReader = runCommandAndGetOutputReader(commandToRun);
+    final String command = getCommand(domain, protocol, host, port, usernamesFile, passwordsFile);
+    final BufferedReader outputReader = runCommandGetReader(command);
 
-    System.out.println(commandToRun);
-    String result = ReportHandler.RESULT_PASS;
+    ReportHandler.printMessage(command);
+    String result = ReportHandler.PASS;
     String currentLine;
 
     while ((currentLine = outputReader.readLine()) != null) {
-      System.out.println(currentLine);
+      ReportHandler.printMessage(currentLine);
       if (lineIndicatesCredentialsFound(protocol, currentLine)) {
-        result = ReportHandler.RESULT_FAIL;
+        result = ReportHandler.FAIL;
       }
     }
 
