@@ -167,7 +167,6 @@ port-02 module_config modules
                 ')
 Redacted docs diff
 No report diff
- M misc/docker_images.txt
 01: ['01:ping:Exception']
 02: ['02:ping:ValueError']
 03: ['03:ping:Exception']
