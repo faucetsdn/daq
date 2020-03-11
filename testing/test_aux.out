@@ -53,7 +53,7 @@ RESULT pass connection.min_send ARP packets received. Other packets received.
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass protocol.app_min_send Application packets received.
 RESULT pass network.ntp.support NTP packets received.
-dhcp requests 2 3
+dhcp requests 1 1 1 1
 01: ['01:brute:1', '01:macoui:1']
 02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1', '02:tls:1']
 03: ['03:hold:DaqException', '03:nmap:1']
@@ -167,7 +167,6 @@ port-02 module_config modules
                 ')
 Redacted docs diff
 No report diff
- M misc/docker_images.txt
 01: ['01:ping:Exception']
 02: ['02:ping:ValueError']
 03: ['03:ping:Exception']
