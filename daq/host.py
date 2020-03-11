@@ -3,6 +3,7 @@
 import os
 import shutil
 import time
+import traceback
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -287,6 +288,7 @@ class ConnectedHost:
 
     def terminate(self, trigger=True):
         """Terminate this host"""
+        traceback.print_stack()
         LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
                     self._host_name(), trigger)
         self._release_config()
@@ -356,7 +358,7 @@ class ConnectedHost:
         self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
         network = self.runner.network
-        tcp_filter = ''
+        tcp_filter = '-Z root'
         LOGGER.debug('Target port %d startup scan intf %s filter %s output in %s',
                      self.target_port, self._mirror_intf_name, tcp_filter, startup_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
@@ -525,7 +527,7 @@ class ConnectedHost:
     def _docker_callback(self, return_code=None, exception=None):
         self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
-        LOGGER.info('test_host callback %s/%s was %s with %s',
+        LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
         failed = return_code or exception
         if failed and self._fail_hook:
