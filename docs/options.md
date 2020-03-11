@@ -5,6 +5,7 @@
 Basic arguments can either be specified with the short form (`-s`)
 on the command line, or with the more verbose long-form (`single_shot=true`).
 
+* `-b`, `build_tests`: Build/pull images as needed.
 * `-c`, `use_console`: Escape to console rather than exit.
 * `-d`, `debug_mode`: Shorthand for enabling debug mode options.
 * `-e`, `event_trigger`: Wait for port up trigger to start.
