@@ -1,11 +1,15 @@
 #!/bin/bash -e
-# The following are expected modes of builds
-# cmd/build <- defaults to build-all
-# cmd/build check <- Check if the built images are updated.
-# cmd/build push <- Pushes images to docker hub
-# cmd/build pull <- Pulls images from docker hub
-# cmd/build build <- Builds missing docker images
-# cmd/build build-all <- Builds all docker images 
+
+if [ "$1" == help ]; then
+ echo The following are expected modes of builds:
+ echo $0 : defaults to build-all
+ echo $0 check : Check if the built images are updated.
+ echo $0 push : Pushes images to docker hub
+ echo $0 pull : Pulls images from docker hub
+ echo $0 build : Builds missing docker images
+ echo $0 build-all : Builds all docker images
+ exit 0
+fi
 
 # Set this so docker build will fail even though piped through tee.
 set -o pipefail
