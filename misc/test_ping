@@ -8,10 +8,8 @@ REPORT_FILE=/tmp/report.txt
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
-ls -l 
-if [ ! -f /scans/startup.pcap ]; then
-    exit 1
-fi
+# This is a check that the startup.pcap file exists and is proper.
+tcpdump -en -r /scans/startup.pcap ip
 
 echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
@@ -19,14 +17,11 @@ echo
 STATIC_IP=`jq -r .static_ip /config/device/module_config.json`
 
 if [ -n "$STATIC_IP" ]; then
-    echo RESULT skip base.startup.request static ip| tee -a $RESULT_LINES
-    echo RESULT skip base.startup.ack static ip| tee -a $RESULT_LINES
+    echo RESULT skip base.startup.request static ip | tee -a $RESULT_LINES
+    echo RESULT skip base.startup.ack static ip | tee -a $RESULT_LINES
 else
     req=pass
     ack=pass
-    # This is a check that the startup.pcap file exists and is proper.
-    echo
-    tcpdump -en -r /scans/startup.pcap ip
     echo
     tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
     tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail

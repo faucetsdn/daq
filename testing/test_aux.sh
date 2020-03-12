@@ -111,7 +111,7 @@ capture_test_results discover
 capture_test_results network
 
 # Capture peripheral logs
-ore inst/run-port-*/scans/ip_triggers.txt | cat
+more inst/run-port-*/scans/ip_triggers.txt | cat
 dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
 dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
