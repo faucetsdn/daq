@@ -100,7 +100,7 @@ class DockerTest():
             raise Exception("Target port %d test %s already terminated %s" % (
                 self.target_port, self.test_name, expected))
         if not expected:
-            return
+            return None
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 
