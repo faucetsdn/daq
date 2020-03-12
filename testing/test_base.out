@@ -1,124 +1,12 @@
 Running testing/test_base.sh
 Base Tests
-01: ['01:nmap:1']
-# Device 9a02571e8f00, XXX to XXX
-
-Sample device description.
-By default would be in local/site/ rather than misc/test_site/.
-
-```
-\|/          (__)
-     `\------(oo)
-       ||    (__)
-       ||w--||     \|/
-   \|/
-```
-
-## Report summary
-
-Overall device result PASS
-
-|Category|Result|
-|---|---|
-|Other|n/a|
-
-|Expectation|skip|pass|fail|info|
-|---|---|---|---|---|
-|Other|1|2|3|1|
-
-|Result|Test|Category|Expectation|Notes|
-|---|---|---|---|---|
-|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|pass|base.target.ping|Other|Other|target reached|
-|info|communication.type.broadcast|Other|Other|Unicast packets received.|
-|pass|connection.dhcp_long|Other|Other|ARP packets received.|
-|fail|connection.min_send|Other|Other|ARP packets received.|
-|fail|network.ntp.support|Other|Other||
-|fail|protocol.app_min_send|Other|Other||
-
-
-## Module ping
-
-```
---------------------
-Baseline ping test report
-
-LOCAL_IP not configured, assuming no network switch
-
-Done with basic connectivity tests
-
---------------------
-base.switch.ping
---------------------
-Attempt to ping the OpenFlow compatible switch configured in system.conf
---------------------
-See log above
---------------------
-RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
-
---------------------
-base.target.ping
---------------------
-Attempt to ping the Device Under Test
---------------------
-See log above
---------------------
-RESULT pass base.target.ping target reached
-
-```
-
-## Module network
-
-```
---------------------
-connection.dhcp_long
---------------------
-Device sends ARP request on DHCP lease expiry.
---------------------
-
-
-
-
-RESULT pass connection.dhcp_long ARP packets received.
---------------------
-connection.min_send
---------------------
-Device sends data at a frequency of less than 5 minutes.
---------------------
-RESULT fail connection.min_send ARP packets received. 
---------------------
-communication.type.broadcast
---------------------
-Device sends unicast or broadcast packets.
---------------------
-RESULT info communication.type.broadcast Unicast packets received.
---------------------
-protocol.app_min_send
---------------------
-Device sends application packets at a frequency of less than 5 minutes.
---------------------
-RESULT fail protocol.app_min_send 
---------------------
-network.ntp.support
---------------------
-Device sends NTP request packets.
---------------------
-RESULT fail network.ntp.support 
-```
-
-## Report complete
-
 Open port tests
 01: ['01:nmap:1']
 01: ['01:nmap:1']
 External switch tests
-02: ['02:nmap:1']
     dp_id: 1
     dp_id: 4886718345
-Switch test with port 2
-RESULT pass base.switch.ping target %% 192.0.2.138:2
-Switch test with port 2
-switch ping 2
+switch ping 0
 Mud profile tests
 result open 01: [] 02: [] 03: []
 device open 1 1 1
@@ -126,13 +14,13 @@ cntrlr open 1 1 1
 result base 01: [] 02: ['02:ping:1'] 03: []
 device base 1 1 0
 cntrlr base 1 1 0
-result todev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
+result todev
 device todev 0 0 0
 cntrlr todev 0 0 0
 result frdev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device frdev 1 0 0
 cntrlr frdev 1 0 0
-result none 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
+result none
 device none 0 0 0
 cntrlr none 0 0 0
 result star 01: [] 02: ['02:ping:1'] 03: []
