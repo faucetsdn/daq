@@ -34,6 +34,9 @@ required. This could either be a separate built-in NIC, or a USB-Ethernet dongle
 * (Optional) OpenFlow-compatible hardware switch, described in the
 [Network Topologies](docs/topologies.md) overview.
 
+## Quick Start
+Please reference [here](docs/quickstart.md)
+
 ## Folder Structure
 
 The top-level DAQ folders correspond to the following structure:
