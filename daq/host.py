@@ -294,18 +294,18 @@ class ConnectedHost:
         self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        test_host = self.test_host
-        self.test_host = None
-        if trigger:
-            self.runner.target_set_complete(self.target_port,
-                                            'Target port %d termination: %s' % (
-                                                self.target_port, test_host))
-        if trigger and test_host:
+        if test_host:
+            LOGGER.info('TAPTAP: %s' % self._host_name())
             try:
                 self.test_host.terminate()
+                self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
+        if trigger:
+            self.runner.target_set_complete(self.target_port,
+                                            'Target port %d termination: %s' % (
+                                                self.target_port, self.test_host))
 
     def idle_handler(self):
         """Trigger events from idle state"""
