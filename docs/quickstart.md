@@ -3,7 +3,7 @@ To get up and going with the DAQ basics, all you need to do is...
 ## Install
 (starting with a vanilla Debian Linux install)
 <pre>
-# git clone http://github.com/faucetsdn/daq.git
+$ git clone http://github.com/faucetsdn/daq.git
 &hellip;
 $ cd daq
 $ bin/setup_daq
@@ -15,8 +15,8 @@ Be a good person and logout then log back in again... and then...
 
 ## Build Required Docker Images
 <pre>
-cd daq
-cmd/build
+$ cd daq
+$ cmd/build
 </pre>
 
 ## (Optional) Physical Switch Setup
