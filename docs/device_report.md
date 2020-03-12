@@ -11,8 +11,8 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2020-03-11 22:02:27+00:00 |
-| Test report end date   | 2020-03-11 22:14:28+00:00 |
+| Test report start date | 2020-03-12 11:52:22+00:00 |
+| Test report end date   | 2020-03-12 12:04:10+00:00 |
 | DAQ version      | 1.0.1 |
 | Attempt number   | 1 |
 
@@ -115,7 +115,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached %% 10.20.94.164
+RESULT pass base.target.ping target reached %% 10.20.49.164
 
 ```
 
@@ -162,31 +162,33 @@ connection.dhcp_long
 --------------------
 Device sends ARP request on DHCP lease expiry.
 --------------------
-%% 22:03:10.449356 ARP, Request who-has 10.20.0.1 tell daq-faux-1, length 28
-%% 22:03:10.449574 ARP, Reply 10.20.0.1 is-at 1a:57:c7:70:c4:be (oui Unknown), length 28
-%% 22:07:30.800652 ARP, Request who-has 10.20.0.1 tell daq-faux-1, length 28
-%% 22:07:30.800748 ARP, Request who-has daq-faux-1 tell 10.20.0.1, length 28
-%% 22:07:30.800757 ARP, Reply 10.20.0.1 is-at 1a:57:c7:70:c4:be (oui Unknown), length 28
-%% 22:07:30.800814 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
+%% 11:52:54.678081 ARP, Request who-has 10.20.0.3 tell daq-faux-1, length 28
+%% 11:52:54.678148 ARP, Reply 10.20.0.3 is-at 42:3a:60:5a:d8:de (oui Unknown), length 28
+%% 11:53:34.105109 ARP, Request who-has daq-faux-1 tell 10.20.0.3, length 28
+%% 11:53:34.105960 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
+%% 11:56:52.759497 ARP, Request who-has daq-faux-1 tell 10.20.0.3, length 28
+%% 11:56:52.759723 ARP, Request who-has 10.20.0.3 tell daq-faux-1, length 28
+%% 11:56:52.759739 ARP, Reply 10.20.0.3 is-at 42:3a:60:5a:d8:de (oui Unknown), length 28
+%% 11:56:52.759913 ARP, Reply daq-faux-1 is-at 9a:02:57:1e:8f:01 (oui Unknown), length 28
 %% 
-%% packets_count=481
+%% packets_count=642
 RESULT pass connection.dhcp_long ARP packets received.
 --------------------
 connection.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
 --------------------
-%% 22:03:10.449356 ARP, Request who-has 10.20.0.1 tell 10.20.94.164, length 28
-%% 22:03:27.421151 IP 10.20.94.164.36605 > 10.20.255.255.41794: UDP, length 32
-%% 22:03:37.152791 IP 10.20.94.164.68 > 10.20.0.1.67: BOOTP/DHCP, Request from 9a:02:57:1e:8f:01, length 300
-%% 22:03:47.440775 IP 10.20.94.164.46814 > 10.20.255.255.41794: UDP, length 32
-%% 22:04:07.460531 IP 10.20.94.164.46300 > 10.20.255.255.41794: UDP, length 32
-%% 22:04:27.481947 IP 10.20.94.164.58720 > 10.20.255.255.41794: UDP, length 32
-%% 22:04:47.493715 IP 10.20.94.164.58259 > 10.20.255.255.41794: UDP, length 32
-%% 22:05:07.512608 IP 10.20.94.164.52009 > 10.20.255.255.41794: UDP, length 32
-%% 22:05:27.516575 IP 10.20.94.164.35583 > 10.20.255.255.41794: UDP, length 32
-%% 22:05:47.519055 IP 10.20.94.164.45091 > 10.20.255.255.41794: UDP, length 32
-%% packets_count=1503
+%% 11:52:54.678081 ARP, Request who-has 10.20.0.3 tell 10.20.49.164, length 28
+%% 11:52:56.648907 IP 10.20.49.164.57101 > 10.20.255.255.41794: UDP, length 32
+%% 11:53:16.664106 IP 10.20.49.164.41002 > 10.20.255.255.41794: UDP, length 32
+%% 11:53:29.025084 IP 10.20.49.164.68 > 10.20.0.3.67: BOOTP/DHCP, Request from 9a:02:57:1e:8f:01, length 300
+%% 11:53:34.105960 ARP, Reply 10.20.49.164 is-at 9a:02:57:1e:8f:01, length 28
+%% 11:53:36.679908 IP 10.20.49.164.43323 > 10.20.255.255.41794: UDP, length 32
+%% 11:53:56.692956 IP 10.20.49.164.47064 > 10.20.255.255.41794: UDP, length 32
+%% 11:54:16.700164 IP 10.20.49.164.47137 > 10.20.255.255.41794: UDP, length 32
+%% 11:54:36.719300 IP 10.20.49.164.50298 > 10.20.255.255.41794: UDP, length 32
+%% 11:54:56.732386 IP 10.20.49.164.56336 > 10.20.255.255.41794: UDP, length 32
+%% packets_count=1654
 RESULT pass connection.min_send ARP packets received. Other packets received.
 --------------------
 communication.type.broadcast
@@ -311,7 +313,7 @@ RESULT skip protocol.bacnet.pic Bacnet device not found.
 
 ```
 --------------------
-Collecting TLS cert from target address %% 10.20.94.164
+Collecting TLS cert from target address %% 10.20.49.164
 IOException unable to connect to server.
 
 --------------------
@@ -342,19 +344,19 @@ security.passwords.http
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.94.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
+%% [STARTING WITH IP:10.20.49.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
 %% Starting NMAP check...
 %% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-11 22:14 UTC
-%% Nmap scan report for daq-faux-1 (10.20.94.164)
-%% Host is up (0.000029s latency).
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-12 12:04 UTC
+%% Nmap scan report for daq-faux-1 (10.20.49.164)
+%% Host is up (0.000022s latency).
 %% Not shown: 999 closed ports
 %% PORT      STATE SERVICE
 %% 10000/tcp open  snet-sensor-mgmt
 %% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 %% 
-%% Nmap done: 1 IP address (1 host up) scanned in 3.21 seconds
-%% nmap 10.20.94.164
+%% Nmap done: 1 IP address (1 host up) scanned in 3.44 seconds
+%% nmap 10.20.49.164
 %% Done.
 --------------------
 RESULT skip security.passwords.http Port 80 is not open on target device.
@@ -364,19 +366,19 @@ security.passwords.https
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.94.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
+%% [STARTING WITH IP:10.20.49.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
 %% Starting NMAP check...
 %% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-11 22:14 UTC
-%% Nmap scan report for daq-faux-1 (10.20.94.164)
-%% Host is up (0.000032s latency).
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-12 12:04 UTC
+%% Nmap scan report for daq-faux-1 (10.20.49.164)
+%% Host is up (0.000020s latency).
 %% Not shown: 999 closed ports
 %% PORT      STATE SERVICE
 %% 10000/tcp open  snet-sensor-mgmt
 %% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 %% 
-%% Nmap done: 1 IP address (1 host up) scanned in 1.91 seconds
-%% nmap 10.20.94.164
+%% Nmap done: 1 IP address (1 host up) scanned in 2.03 seconds
+%% nmap 10.20.49.164
 %% Done.
 --------------------
 RESULT skip security.passwords.https Port 443 is not open on target device.
@@ -386,19 +388,19 @@ security.passwords.telnet
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.94.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
+%% [STARTING WITH IP:10.20.49.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
 %% Starting NMAP check...
 %% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-11 22:14 UTC
-%% Nmap scan report for daq-faux-1 (10.20.94.164)
-%% Host is up (0.000048s latency).
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-12 12:04 UTC
+%% Nmap scan report for daq-faux-1 (10.20.49.164)
+%% Host is up (0.000070s latency).
 %% Not shown: 999 closed ports
 %% PORT      STATE SERVICE
 %% 10000/tcp open  snet-sensor-mgmt
 %% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 %% 
-%% Nmap done: 1 IP address (1 host up) scanned in 1.79 seconds
-%% nmap 10.20.94.164
+%% Nmap done: 1 IP address (1 host up) scanned in 3.86 seconds
+%% nmap 10.20.49.164
 %% Done.
 --------------------
 RESULT skip security.passwords.telnet Port 23 is not open on target device.
@@ -408,19 +410,19 @@ security.passwords.ssh
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.94.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
+%% [STARTING WITH IP:10.20.49.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
 %% Starting NMAP check...
 %% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-11 22:14 UTC
-%% Nmap scan report for daq-faux-1 (10.20.94.164)
-%% Host is up (0.000036s latency).
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-12 12:04 UTC
+%% Nmap scan report for daq-faux-1 (10.20.49.164)
+%% Host is up (0.000044s latency).
 %% Not shown: 999 closed ports
 %% PORT      STATE SERVICE
 %% 10000/tcp open  snet-sensor-mgmt
 %% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 %% 
-%% Nmap done: 1 IP address (1 host up) scanned in 2.96 seconds
-%% nmap 10.20.94.164
+%% Nmap done: 1 IP address (1 host up) scanned in 2.15 seconds
+%% nmap 10.20.49.164
 %% Done.
 --------------------
 RESULT skip security.passwords.ssh Port 22 is not open on target device.
