@@ -139,6 +139,7 @@ class DockerTest():
         return self.runner.config.get(key) == trigger_value
 
     def _docker_complete(self):
+        LOGGER.warning('docker_host %s complete' % self.target_port)
         try:
             assert self.pipe, 'complete without active pipe'
             self.pipe = None

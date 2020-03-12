@@ -297,7 +297,8 @@ class ConnectedHost:
         if self.test_host:
             LOGGER.info('TAPTAP: %s' % self._host_name())
             try:
-                self.test_host.terminate()
+                if trigger:
+                    self.test_host.terminate()
                 self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
