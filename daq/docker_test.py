@@ -24,7 +24,7 @@ class DockerTest():
         self.runner = runner
         self.host_name = '%s%02d' % (test_name, self.target_port)
         self.docker_log = None
-        LOGGER.warning('docker_host initialized')
+        LOGGER.warning('docker_host %s initialized' % self.target_port)
         self.docker_host = None
         self.callback = None
         self.start_time = None
@@ -63,7 +63,7 @@ class DockerTest():
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
-            LOGGER.warning('docker_host assigned')
+            LOGGER.warning('docker_host %s assigned' % self.target_port)
             self.docker_host = host
         except Exception as e:
             # pylint: disable=no-member
@@ -86,7 +86,7 @@ class DockerTest():
         except Exception as e:
             host.terminate()
             self.runner.remove_host(host)
-            LOGGER.warning('docker_host None start')
+            LOGGER.warning('docker_host %s start' % self.target_port)
             self.docker_host = None
             if self.pipe:
                 self.runner.monitor_forget(self.pipe.stdout)
@@ -96,7 +96,7 @@ class DockerTest():
 
     def terminate(self):
         """Forcibly terminate this container"""
-        LOGGER.warning('docker_host already terminated')
+        LOGGER.warning('docker_host %s already terminated' % self.target_port)
         if not self.docker_host:
             raise Exception("Target port %d test %s already terminated" % (
                 self.target_port, self.test_name))
@@ -117,8 +117,8 @@ class DockerTest():
             self.callback(exception=exception)
 
     def _docker_finalize(self):
-        LOGGER.warning('docker_host already finalized')
         if not self.docker_host:
+            LOGGER.warning('docker_host %s already finalized' % self.target_port)
             return None
         LOGGER.info('Target port %d docker finalize', self.target_port)
         self.runner.remove_host(self.docker_host)
@@ -126,7 +126,7 @@ class DockerTest():
             self.runner.monitor_forget(self.pipe.stdout)
             self.pipe = None
         return_code = self.docker_host.terminate()
-        LOGGER.warning('docker_host None finalize')
+        LOGGER.warning('docker_host %s finalize' % self.target_port)
         self.docker_host = None
         self.docker_log.close()
         self.docker_log = None
