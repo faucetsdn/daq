@@ -94,12 +94,13 @@ class DockerTest():
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def terminate(self):
+    def terminate(self, expected=True):
         """Forcibly terminate this container"""
-        LOGGER.warning('docker_host %s already terminated' % self.target_port)
-        if not self.docker_host:
-            raise Exception("Target port %d test %s already terminated" % (
-                self.target_port, self.test_name))
+        if bool(self.docker_host) != expected:
+            raise Exception("Target port %d test %s already terminated %s" % (
+                self.target_port, self.test_name, expected))
+        if not expected:
+            return
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 
