@@ -6,6 +6,7 @@ Validator exit code 0
 Lint checks
 check_style exit code 0
 Extended tests
+ERROR:host:Monitoring timeout for macoui after 1s
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
@@ -24,7 +25,7 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 1 1
 01: ['01:macoui:1', '01:nmap:1']
-02: ['02:hold:TimeoutError', '02:nmap:1', '02:tls:1']
+02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1', '02:tls:1']
 03: []
 ctrl-br.flows
 ctrl-br.ofctl
@@ -97,7 +98,7 @@ port-02 module_config modules
     "enabled": true
   },
   "macoui": {
-    "enabled": false,
+    "enabled": true,
     "timeout_sec": 1
   },
   "network": {
