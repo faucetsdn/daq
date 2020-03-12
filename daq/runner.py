@@ -508,6 +508,7 @@ class DAQRunner:
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
+            self.port_targets[target_port].terminate('_gateway_terminate')
             self.target_set_error(target_port, DaqException('terminated'))
 
     def _find_gateway_set(self, target_port):
