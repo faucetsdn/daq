@@ -1,12 +1,63 @@
 Running testing/test_base.sh
 Base Tests
+01: ['01:nmap:1']
+# Device 9a02571e8f00, XXX to XXX
+Sample device description.
+By default would be in local/site/ rather than misc/test_site/.
+```
+\|/          (__)
+     `\------(oo)
+       ||    (__)
+       ||w--||     \|/
+   \|/
+```
+## Report summary
+Overall device result PASS
+|Category|Result|
+|---|---|
+|Other|n/a|
+|Expectation|skip|pass|
+|---|---|---|
+|Other|1|1|
+|Result|Test|Category|Expectation|Notes|
+|---|---|---|---|---|
+|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|pass|base.target.ping|Other|Other|target reached|
+## Module ping
+```
+--------------------
+Baseline ping test report
+LOCAL_IP not configured, assuming no network switch
+Done with basic connectivity tests
+--------------------
+base.switch.ping
+--------------------
+Attempt to ping the OpenFlow compatible switch configured in system.conf
+--------------------
+See log above
+--------------------
+RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+--------------------
+base.target.ping
+--------------------
+Attempt to ping the Device Under Test
+--------------------
+See log above
+--------------------
+RESULT pass base.target.ping target reached
+```
+## Report complete
 Open port tests
 01: ['01:nmap:1']
 01: ['01:nmap:1']
 External switch tests
+02: ['02:nmap:1']
     dp_id: 1
     dp_id: 4886718345
-switch ping 0
+Switch test with port 2
+RESULT pass base.switch.ping target %% 192.0.2.138:2
+Switch test with port 2
+switch ping 2
 Mud profile tests
 result open 01: [] 02: [] 03: []
 device open 1 1 1
@@ -14,13 +65,13 @@ cntrlr open 1 1 1
 result base 01: [] 02: ['02:ping:1'] 03: []
 device base 1 1 0
 cntrlr base 1 1 0
-result todev
+result todev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device todev 0 0 0
 cntrlr todev 0 0 0
 result frdev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device frdev 1 0 0
 cntrlr frdev 1 0 0
-result none
+result none 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device none 0 0 0
 cntrlr none 0 0 0
 result star 01: [] 02: ['02:ping:1'] 03: []

@@ -9,7 +9,7 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory 
+RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
@@ -22,7 +22,7 @@ RESULT pass security.tls.v3
 RESULT pass security.x509
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
-dhcp requests 2 3
+dhcp requests 1 1 1 1
 01: ['01:macoui:1', '01:nmap:1']
 02: ['02:hold:TimeoutError', '02:nmap:1', '02:tls:1']
 03: []
@@ -136,8 +136,7 @@ port-02 module_config modules
                 ')
 Redacted docs diff
 No report diff
- M docs/device_report.md
- M misc/docker_images.txt
- M misc/host_tests.conf
- M subset/network/build.conf
+01: ['01:ping:Exception']
+02: ['02:nmap:1', '02:ping:ValueError']
+03: ['03:nmap:1', '03:ping:Exception']
 Done with tests
