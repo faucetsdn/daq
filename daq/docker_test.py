@@ -24,6 +24,7 @@ class DockerTest():
         self.runner = runner
         self.host_name = '%s%02d' % (test_name, self.target_port)
         self.docker_log = None
+        LOGGER.warning('docker_host initialized')
         self.docker_host = None
         self.callback = None
         self.start_time = None
@@ -62,6 +63,7 @@ class DockerTest():
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
+            LOGGER.warning('docker_host assigned')
             self.docker_host = host
         except Exception as e:
             # pylint: disable=no-member
@@ -94,6 +96,7 @@ class DockerTest():
 
     def terminate(self):
         """Forcibly terminate this container"""
+        LOGGER.warning('docker_host already terminated')
         if not self.docker_host:
             raise Exception("Target port %d test %s already terminated" % (
                 self.target_port, self.test_name))
