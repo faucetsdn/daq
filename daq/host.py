@@ -294,7 +294,7 @@ class ConnectedHost:
         self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        if test_host:
+        if self.test_host:
             LOGGER.info('TAPTAP: %s' % self._host_name())
             try:
                 self.test_host.terminate()
