@@ -51,8 +51,8 @@ timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
 static_ips=$(fgrep done/-1 inst/cmdrun.log | wc -l)
 echo Found $results successful runs.
 # This is broken -- should have many more results available!
-echo Enough results: $(echo "print($results >= 6 / 10 * $RUN_LIMIT)" | python) | tee -a $TEST_RESULTS
+echo Enough results: $((results >= 6*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
 # $timeouts should strictly equal $NUM_TIMEOUT_DEVICES when dhcp step is fixed. 
-echo Enough DHCP timeouts: $(echo "print($timeouts >= $NUM_TIMEOUT_DEVICES)" | python) | tee -a $TEST_RESULTS
-echo Enough static ips: $(echo "print($static_ips >= ($NUM_NO_DHCP_DEVICES - $NUM_TIMEOUT_DEVICES))" | python) | tee -a $TEST_RESULTS
+echo Enough DHCP timeouts: $((timeouts >= NUM_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
+echo Enough static ips: $((static_ips >= (NUM_NO_DHCP_DEVICES - NUM_TIMEOUT_DEVICES))) | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
