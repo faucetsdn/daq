@@ -295,7 +295,6 @@ class ConnectedHost:
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
         if self.test_host:
-            LOGGER.info('TAPTAP: %s' % self._host_name())
             try:
                 self.test_host.terminate(expected=trigger)
                 self.test_host = None
@@ -358,7 +357,7 @@ class ConnectedHost:
         self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
         network = self.runner.network
-        tcp_filter = '-Z root'
+        tcp_filter = ''
         LOGGER.debug('Target port %d startup scan intf %s filter %s output in %s',
                      self.target_port, self._mirror_intf_name, tcp_filter, startup_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
