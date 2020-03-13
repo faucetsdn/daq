@@ -26,7 +26,6 @@ RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 1 1
 01: ['01:macoui:1', '01:nmap:1']
 02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1', '02:tls:1']
-03: ['03:exception:terminated']
 03: []
 ctrl-br.flows
 ctrl-br.ofctl
