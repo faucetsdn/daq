@@ -17,18 +17,18 @@ echo
 STATIC_IP=`jq -r .static_ip /config/device/module_config.json`
 
 if [ -n "$STATIC_IP" ]; then
-    echo RESULT skip base.startup.request static ip | tee -a $RESULT_LINES
-    echo RESULT skip base.startup.ack static ip | tee -a $RESULT_LINES
+    echo RESULT skip base.startup.dhcp static ip | tee -a $RESULT_LINES
 else
     req=pass
     ack=pass
     echo
     tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
-    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail
-    echo RESULT $req base.startup.request | tee -a $RESULT_LINES
-    echo RESULT $ack base.startup.ack| tee -a $RESULT_LINES
+    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
     if [ $req = "fail" ] || [ $ack = "fail" ]; then
         status=fail
+        echo RESULT fail base.startup.dhcp missing dhcp packets| tee -a $RESULT_LINES
+    else
+        echo RESULT pass base.startup.dhcp | tee -a $RESULT_LINES
     fi
 fi
 
