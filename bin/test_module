@@ -27,16 +27,29 @@ if [ -n "$build" ]; then
     DAQ_TARGETS=faux,$container bin/docker_build build-all
 fi
 
+bname=daq-bridge-$module
+echo Configuring OVS bridge $bname
+sudo ovs-vsctl --if-exists del-br $bname -- add-br $bname
+
 cmd/faux @$module xdhcp $@
 faux_intf=faux-$module
 faux_ip=10.20.0.5
+sudo ovs-vsctl add-port $bname $faux_intf
+
+mkdir -p $module_dir/tmp
+docker_args+=" -v $module_dir/tmp:/tmp"
 
 mkdir -p $module_dir/scans
-echo Capturing fake startup.pcap...
-sudo timeout 3s tcpdump -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
-
-docker_args+=" --env TARGET_IP=$faux_ip"
 docker_args+=" -v $module_dir/scans:/scans"
+echo Capturing fake startup.pcap...
+sudo tcpdump -c 3 -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
+
+mkdir -p $module_dir/config
+docker_args+=" --env TARGET_IP=$faux_ip"
+docker_args+=" -v $module_dir/config:/config/inst"
+docker_args+=" -v $module_dir/config:/config/port"
+docker_args+=" -v $module_dir/config:/config/device"
+docker_args+=" -v $module_dir/config:/config/type"
 
 docker rm -f $container || true
 cid=$(
@@ -52,14 +65,28 @@ module_intf=daq-$module
 echo Removing old interface $module_intf
 sudo ip link del $module_intf 2>/dev/null || true
 echo Adding new interface to $pid...
-sudo ip link add $module_intf type veth peer name $module_intf netns $pid
+sudo ip link add $module_intf type veth peer name eth0 netns $pid
 sudo ip link set $module_intf up
 sudo ip link show $module_intf
-docker exec $container ip link set up dev $module_intf
-docker exec $container ip addr add 10.20.0.1/16 dev $module_intf broadcast 10.20.255.255
-docker exec $container ip addr show $module_intf
+sudo ovs-vsctl add-port $bname $module_intf
+docker exec $container ip link set up dev eth0
+docker exec $container ip addr add 10.20.0.1/16 dev eth0 broadcast 10.20.255.255
+docker exec $container ip addr show eth0
 
 run_cmd=$(docker inspect "--format={{json .Config}}" $image | jq -r '(.Cmd | join(" "))')
-echo Running module command $run_cmd
+echo
+echo
+echo %%%%%%%%%%%%%% Running module command $run_cmd %%%%%%%%%%%%%%%
+failed=
+docker exec $container $run_cmd || failed=yes
 
-docker exec $container $run_cmd
+if [ -n "$failed" ]; then
+    echo
+    echo Module execution failed.
+    false
+fi
+
+echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
+echo
+echo Module test results:
+cat inst/module/$module/tmp/result_lines.txt
