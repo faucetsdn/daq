@@ -296,10 +296,10 @@ class ConnectedHost:
         assert callable(callback), "ip listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
-    def terminate(self, trigger=True):
+    def terminate(self, reason, trigger=True):
         """Terminate this host"""
-        LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
-                    self._host_name(), trigger)
+        LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
+                    self._host_name(), trigger, reason)
         self._release_config()
         self._state_transition(_STATE.TERM)
         self.record_result(self.test_name, state=MODE.TERM)
@@ -307,14 +307,15 @@ class ConnectedHost:
         self.runner.network.delete_mirror_interface(self.target_port)
         if self.test_host:
             try:
-                self.test_host.terminate()
+                self.test_host.terminate(expected=trigger)
                 self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
             self.runner.target_set_complete(self.target_port,
-                                            'Target port %d termination' % self.target_port)
+                                            'Target port %d termination: %s' % (
+                                                self.target_port, self.test_host))
 
     def idle_handler(self):
         """Trigger events from idle state"""
@@ -536,7 +537,7 @@ class ConnectedHost:
     def _docker_callback(self, return_code=None, exception=None):
         self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
-        LOGGER.info('test_host callback %s/%s was %s with %s',
+        LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
         failed = return_code or exception
         if failed and self._fail_hook:

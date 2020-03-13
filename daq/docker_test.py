@@ -90,11 +90,13 @@ class DockerTest():
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def terminate(self):
+    def terminate(self, expected=True):
         """Forcibly terminate this container"""
-        if not self.docker_host:
-            raise Exception("Target port %d test %s already terminated" % (
-                self.target_port, self.test_name))
+        if bool(self.docker_host) != expected:
+            raise Exception("Target port %d test %s already terminated %s" % (
+                self.target_port, self.test_name, expected))
+        if not expected:
+            return None
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 
@@ -112,20 +114,19 @@ class DockerTest():
             self.callback(exception=exception)
 
     def _docker_finalize(self):
-        if self.docker_host:
-            LOGGER.info('Target port %d docker finalize', self.target_port)
-            self.runner.remove_host(self.docker_host)
-            if self.pipe:
-                self.runner.monitor_forget(self.pipe.stdout)
-                self.pipe = None
-            return_code = self.docker_host.terminate()
-            self.docker_host = None
-            self.docker_log.close()
-            self.docker_log = None
-            if self._should_raise_test_exception('finalize'):
-                raise Exception('Test finalize failure')
-            return return_code
-        return None
+        assert self.docker_host, 'docker host %s already finalized' % self.target_port
+        LOGGER.info('Target port %d docker finalize', self.target_port)
+        self.runner.remove_host(self.docker_host)
+        if self.pipe:
+            self.runner.monitor_forget(self.pipe.stdout)
+            self.pipe = None
+        return_code = self.docker_host.terminate()
+        self.docker_host = None
+        self.docker_log.close()
+        self.docker_log = None
+        if self._should_raise_test_exception('finalize'):
+            raise Exception('Test finalize failure')
+        return return_code
 
     def _should_raise_test_exception(self, trigger_value):
         key = 'ex_%s_%02d' % (self.test_name, self.target_port)

@@ -10,9 +10,14 @@ ROOT=$(dirname $0)/..
 cd $ROOT
 
 FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
-FAUCETB=${DAQ_FAUCET_BRANCH}
 FAUCETX=$(cat misc/FAUCET_VERSION)
 FAUCETV=${DAQ_FAUCET_VER:-$FAUCETX}
+
+FORCHR=${DAQ_FORCH_REPO:-https://github.com/faucetsdn/forch}
+FORCHB=${DAQ_FORCH_BRANCH}
+FORCHX=$(cat misc/FORCH_VERSION)
+FORCHV=${DAQ_FORCH_VER:-$FORCHX}
+
 MININET=https://github.com/mininet/mininet
 MININETV=2.3.0d6
 
@@ -23,6 +28,10 @@ fi
 
 if [ "$FAUCETX" != "$FAUCETV" ]; then
     echo $FAUCETV > misc/FAUCET_VERSION
+fi
+
+if [ "$FORCHX" != "$FORCHV" ]; then
+    echo $FORCHV > misc/FORCH_VERSION
 fi
 
 if [ -z "$AG" ]; then
@@ -62,8 +71,8 @@ $AG install \
     ca-certificates sudo net-tools tcpdump build-essential \
     isc-dhcp-client network-manager netcat gnupg2 strace \
     python3 python3-pkg-resources python3-setuptools python3-dev \
-    python3-pip python emacs-nox python3-venv libffi-dev \
-    python3-cairocffi jq pandoc
+    python3-pip python emacs-nox python3-venv \
+    libffi-dev python3-cairocffi jq pandoc
 
 # Jump through some hoops for mininet, which still has some python2 deps.
 $AG install python-pip
@@ -138,23 +147,28 @@ fi
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
 
-if [ -d faucet ]; then
-    echo faucet already installed, faucet version $(cd faucet; git rev-list -n 1 HEAD)
-elif [ -z "$FAUCETV" ]; then
+if [ -z "$FAUCETV" ]; then
     echo No faucet version found, skipping.
 else
-    echo Cloning $FAUCETR...
-    git clone $FAUCETR faucet
-    if [ -n "$FAUCETB" ]; then
-        echo Switching to branch $FAUCETB...
-        (cd faucet; git checkout $FAUCETB --)
-        (cd faucet; git rev-list -n 1 HEAD) > misc/FAUCET_VERSION
-        (cd faucet; git status)
-        echo Updated faucet version to $(cat misc/FAUCET_VERSION)
-    else
-        echo Forcing faucet version $FAUCETV
-        (cd faucet; git reset --hard $FAUCETV)
+    if [ ! -d faucet ]; then
+	echo Cloning $FAUCETR...
+	git clone $FAUCETR faucet
     fi
+
+    echo Setting faucet version $FAUCETV
+    (cd faucet; git checkout $FAUCETV)
+fi
+
+if [ -z "$FORCHV" ]; then
+    echo No forch version found, skipping.
+else
+    if [ ! -d forch ]; then
+	echo Cloning $FORCHR...
+	git clone $FORCHR forch
+    fi
+
+    echo Setting forch version $FORCHV
+    (cd forch; git checkout $FORCHV)
 fi
 
 echo -n "DAQ commit "
@@ -163,6 +177,10 @@ echo
 
 echo -n "Last FAUCET commit "
 (cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+echo
+
+echo -n "Last FORCH commit "
+(cd forch; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 echo
 
 docker --version

@@ -6,9 +6,6 @@
     "bacnet": {
       "enabled": true
     },
-    "brute": {
-      "enabled": false
-    },
     "macoui": {
       "enabled": true
     },
@@ -93,11 +90,6 @@
       "category": "PoE",
       "required": "pass",
       "expected": "Required Pass for PoE Devices"
-    },
-    "network.brute": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass"
     },
     "protocol.bacnet.version": {
       "category": "Protocol",
