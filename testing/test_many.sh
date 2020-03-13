@@ -28,12 +28,22 @@ for iface in $(seq 1 $NUM_DEVICES); do
         ip="10.20.0.$((iface+5))"
         intf_mac="9a02571e8f0$iface"
         xdhcp="xdhcp=$ip"
+        mkdir -p local/site/mac_addrs/$intf_mac
         if [[ $iface -gt $NUM_TIMEOUT_DEVICES ]]; then
             #Install site specific configs for xdhcp ips
-            mkdir -p local/site/mac_addrs/$intf_mac
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
         "static_ip": "$ip"
+    }
+EOF
+        else
+            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+    {
+        "modules": {
+            "ipaddr": {
+              "timeout_sec": 320 
+            }
+        }
     }
 EOF
         fi
