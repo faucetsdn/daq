@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 if [ -z "$1" ]; then
     echo $0 module test-args
@@ -17,7 +17,7 @@ ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
 image=daqf/test_$module
-container=test_$module
+container=daq-$module
 docker_args=
 net_opt=--net=none
 module_dir=$ROOT/inst/module/$module
@@ -28,12 +28,12 @@ if [ -n "$build" ]; then
 fi
 
 cmd/faux @$module xdhcp $@
-faux_iface=faux-$module
+faux_intf=faux-$module
 faux_ip=10.20.0.5
 
 mkdir -p $module_dir/scans
 echo Capturing fake startup.pcap...
-sudo timeout 3s tcpdump -eni $faux_iface -Z root -w $module_dir/scans/startup.pcap || true
+sudo timeout 3s tcpdump -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
 
 docker_args+=" --env TARGET_IP=$faux_ip"
 docker_args+=" -v $module_dir/scans:/scans"
@@ -47,7 +47,19 @@ cid=$(
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 echo Docker $image $container $cid $pid
 
-sleep 5
+echo Configuring test container network...
+module_intf=daq-$module
+echo Removing old interface $module_intf
+sudo ip link del $module_intf 2>/dev/null || true
+echo Adding new interface to $pid...
+sudo ip link add $module_intf type veth peer name $module_intf netns $pid
+sudo ip link set $module_intf up
+sudo ip link show $module_intf
+docker exec $container ip link set up dev $module_intf
+docker exec $container ip addr add 10.20.0.1/16 dev $module_intf broadcast 10.20.255.255
+docker exec $container ip addr show $module_intf
 
-echo %%% Docker container logs
-docker logs $container
+run_cmd=$(docker inspect "--format={{json .Config}}" $image | jq -r '(.Cmd | join(" "))')
+echo Running module command $run_cmd
+
+docker exec $container $run_cmd
