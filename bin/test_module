@@ -16,7 +16,8 @@ shift
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-image=daqf/test_$module
+target=test_$module
+image=daqf/$target
 container=daq-$module
 docker_args=
 net_opt=--net=none
@@ -24,7 +25,7 @@ module_dir=$ROOT/inst/module/$module
 rm -rf $module_dir
 
 if [ -n "$build" ]; then
-    DAQ_TARGETS=faux,$container bin/docker_build build-all
+    DAQ_TARGETS=faux,$target bin/docker_build build-all
 fi
 
 bname=daq-bridge-$module
