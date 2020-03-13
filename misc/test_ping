@@ -63,3 +63,5 @@ write_out_monolog $REPORT_FILE \
                   $MANIFEST \
                   $MONO_LOG \
                   $RESULT_LINES
+
+[ "$status" == pass ]
