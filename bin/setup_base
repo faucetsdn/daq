@@ -14,7 +14,7 @@ if [ -z "$AG" ]; then
 fi
 
 #Store all additional apt-get arguments passed into this script.
-#These arguments are unchecked 
+#These arguments are unchecked
 AG_ARGS="$@"
 
 #Append all additional apt-get arguments to AG
@@ -22,7 +22,7 @@ if [ ! -z "$AG_ARGS" ];then
     AG="$AG $AG_ARGS"
 fi
 
-echo AG is $AG 
+echo AG is $AG
 
 # Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
 # Need to remove the || true at the end of the update line. Same as for instance below. Also in bin/setup_dev.
