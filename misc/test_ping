@@ -13,11 +13,11 @@ echo
 ls -l /scans/startup.pcap
 echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
-tcpdump -en -r /scans/startup.pcap ip
+#tcpdump -en -r /scans/startup.pcap ip
 echo
-tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
+#tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
 echo
-tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
+#tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
 echo
 
 # Setup for accessing control plane switch. If LOCAL_IP is defined, which
@@ -63,5 +63,3 @@ write_out_monolog $REPORT_FILE \
                   $MANIFEST \
                   $MONO_LOG \
                   $RESULT_LINES
-
-[ "$status" == pass ]
