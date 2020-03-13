@@ -54,8 +54,8 @@ docker_args+=" -v $module_dir/config:/config/type"
 docker rm -f $container || true
 cid=$(
     docker run -d --privileged --name $container --hostname $container \
-	   --entrypoint env $net_opt $docker_args $image \
-	   tail -f /dev/null
+        --entrypoint env $net_opt $docker_args $image \
+        tail -f /dev/null
     )
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 echo Docker $image $container $cid $pid
