@@ -30,5 +30,3 @@ else
                       $RESULT_LINES
 
 fi
-
-result_lines=( "$(cat $RESULT_LINES)" )
