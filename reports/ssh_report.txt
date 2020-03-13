@@ -1,1 +1,0 @@
-RESULT fail security.passwords.ssh Default passwords have not been changed.

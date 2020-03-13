@@ -57,9 +57,6 @@ elif [ -n "${options[passwordfail]}" ]; then
     /usr/sbin/sshd -D &
     service xinetd start
     service ssh start
-else
-    service ssh stop
-    service xinetd stop
 fi
 
 # To capture all the data in/out of the faux device for debugging, uncomment
@@ -163,8 +160,6 @@ elif [ -n "${options[expiredtls]}" ]; then
     echo Starting expired tls server on port 443 https.
     mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
     service nginx start
-else
-    service nginx stop
 fi
 
 if [ -n "${options[pubber]}" ]; then
