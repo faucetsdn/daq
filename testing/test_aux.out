@@ -56,7 +56,8 @@ RESULT pass network.ntp.support NTP packets received.
 dhcp requests 1 1 1 1
 01: ['01:brute:1', '01:macoui:1']
 02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1', '02:tls:1']
-03: ['03:hold:DaqException', '03:nmap:1']
+03: ['03:exception:terminated']
+03: ['03:nmap:1']
 ctrl-br.flows
 ctrl-br.ofctl
 ext-ovs.flows
