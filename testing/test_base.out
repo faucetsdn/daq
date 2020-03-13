@@ -1,6 +1,6 @@
 Running testing/test_base.sh
 Base Tests
-01: []
+01: ['01:nmap:1']
 # Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
@@ -22,21 +22,14 @@ Overall device result PASS
 |---|---|
 |Other|n/a|
 
-|Expectation|skip|pass|fail|info|
-|---|---|---|---|---|
-|Other|2|3|3|1|
+|Expectation|skip|pass|
+|---|---|---|
+|Other|1|1|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |pass|base.target.ping|Other|Other|target reached|
-|info|communication.type.broadcast|Other|Other|Unicast packets received.|
-|pass|connection.dhcp_long|Other|Other|ARP packets received.|
-|fail|connection.min_send|Other|Other|ARP packets received.|
-|skip|network.brute|Other|Other|Port 10000 is not open|
-|fail|network.ntp.support|Other|Other||
-|fail|protocol.app_min_send|Other|Other||
-|pass|security.ports.nmap|Other|Other||
 
 
 ## Module ping
@@ -44,6 +37,7 @@ Overall device result PASS
 ```
 --------------------
 Baseline ping test report
+
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -68,82 +62,13 @@ RESULT pass base.target.ping target reached
 
 ```
 
-## Module nmap
-
-```
---------------------
-security.ports.nmap
---------------------
-Automatic TCP/UDP port scan using nmap
---------------------
-No invalid ports found.
---------------------
-RESULT pass security.ports.nmap 
-
-```
-
-## Module brute
-
-```
---------------------
-network.brute
---------------------
-Educational test - not to be included in a production environment!
---------------------
-Target port 10000 not open.
---------------------
-RESULT skip network.brute Port 10000 is not open
-
-```
-
-## Module network
-
-```
---------------------
-connection.dhcp_long
---------------------
-Device sends ARP request on DHCP lease expiry.
---------------------
-RESULT pass connection.dhcp_long ARP packets received.
---------------------
-connection.min_send
---------------------
-Device sends data at a frequency of less than 5 minutes.
---------------------
-RESULT fail connection.min_send ARP packets received. 
---------------------
-communication.type.broadcast
---------------------
-Device sends unicast or broadcast packets.
---------------------
-RESULT info communication.type.broadcast Unicast packets received.
---------------------
-protocol.app_min_send
---------------------
-Device sends application packets at a frequency of less than 5 minutes.
---------------------
-RESULT fail protocol.app_min_send 
---------------------
-network.ntp.support
---------------------
-Device sends NTP request packets.
---------------------
-RESULT fail network.ntp.support 
-```
-
 ## Report complete
 
 Open port tests
 01: ['01:nmap:1']
-|fail|security.ports.nmap|Other|Other|Some disallowed ports are open|
-security.ports.nmap
-RESULT fail security.ports.nmap Some disallowed ports are open
-01: []
-|pass|security.ports.nmap|Other|Other||
-security.ports.nmap
-RESULT pass security.ports.nmap 
+01: ['01:nmap:1']
 External switch tests
-02: []
+02: ['02:nmap:1']
     dp_id: 1
     dp_id: 4886718345
 Switch test with port 2
