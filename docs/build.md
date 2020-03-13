@@ -46,7 +46,7 @@ appending `bin/test_daq` to a `sudo` line of shell environment settings, e.g. as
 ## Incremental Builds
 
 The environment variable `DAQ_TARGETS` is a CSV-field that can be used to only build specific targets. E.g.
-to just build the `ping` tests use the short form `DAQ_TARGETS=test_ping cmd_build`. Using a more sticky
+to just build the `ping` tests use the short form `DAQ_TARGETS=test_ping cmd/build`. Using a more sticky
 exported varaible, for `ping` and `nmap`, would look something like:
 <pre>
 ~/daq$ <b>export DAQ_TARGETS=test_ping,test_nmap</b>
