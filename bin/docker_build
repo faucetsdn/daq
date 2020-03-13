@@ -43,8 +43,10 @@ for file in $docker_files; do
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
     elif [ -z "$build_all" ] && [ -n "$found" ]; then
-        echo Skipping building existing $tag 
+        unset test_set[$module]
+        echo Skipping existing $tag
     else
+        unset test_set[$module]
         echo Build$ext_msg $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
         if [ -n "$inline" ]; then
@@ -62,3 +64,10 @@ for file in $docker_files; do
         echo Build complete. >> $logfile
     fi
 done
+
+if [ -n "$DAQ_TARGETS" ]; then
+    for module in "${!test_set[@]}"; do
+        echo Could not find specified test module to build: $module
+        false
+    done
+fi
