@@ -115,7 +115,7 @@ class DockerTest():
             self.callback(exception=exception)
 
     def _docker_finalize(self):
-        assert not self.docker_host, 'docker host %s already finalized' % self.target_port
+        assert self.docker_host, 'docker host %s already finalized' % self.target_port
         LOGGER.info('Target port %d docker finalize', self.target_port)
         self.runner.remove_host(self.docker_host)
         if self.pipe:
