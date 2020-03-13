@@ -14,7 +14,7 @@ if [ -z "$AG" ]; then
 fi
 
 #Store all additional apt-get arguments passed into this script.
-#These arguments are unchecked 
+#These arguments are unchecked
 AG_ARGS="$@"
 
 #Append all additional apt-get arguments to AG
@@ -22,7 +22,7 @@ if [ ! -z "$AG_ARGS" ];then
     AG="$AG $AG_ARGS"
 fi
 
-echo AG is $AG 
+echo AG is $AG
 
 # Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
 # Need to remove the || true at the end of the update line. Same as for instance below. Also in bin/setup_dev.
@@ -40,7 +40,7 @@ echo Installing for $distrib $release
 echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources.list.d/wand.list
 $retry sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
 
-$retry curl -fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key add -
+$retry curl -4fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distrib $release stable" || true
 
 # Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17

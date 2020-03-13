@@ -27,10 +27,6 @@
         "443": {
           "allowed": true,
           "reason": "Administrative Web-Server"
-        },
-        "10000": {
-          "allowed": true,
-          "reason": "Testing snet-sensor-mgmt"
         }
       }
     }

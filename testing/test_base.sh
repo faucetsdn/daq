@@ -5,11 +5,13 @@ source testing/test_preamble.sh
 echo Base Tests >> $TEST_RESULTS
 
 function redact {
-    sed -E -e '/^%%.*/d' \
+    sed -E -e "s/ \{1,\}$//" \
         -e 's/\s*%%.*//' \
         -e 's/[0-9]{4}-.*T.*Z/XXX/' \
+        -e 's/[a-zA-Z]{3} [a-zA-Z]{3} [0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
         -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/g' \
-        -e 's/DAQ version.*//'
+        -e 's/DAQ version.*//' \
+        -e 's/[0-9].[0-9]{2} seconds/XXX/'
 }
 
 cp misc/system_base.conf local/system.conf
