@@ -1,12 +1,14 @@
 #!/bin/bash -e
 
+build=y
+
 if [ -z "$1" ]; then
     echo $0 module test-args
     false
 fi
 
-if [ "$1" == -b ]; then
-    build=y
+if [ "$1" == -n ]; then
+    build=
     shift
 fi
 
