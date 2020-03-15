@@ -8,7 +8,7 @@ configured. It should work properly for the majority of situations, but will not
 
 In order to find the appropriate containers, the system needs to be configured such that the build
 path has access to the module in question. Typically, this can be configured using something like
-```$ cp misc/system_all.conf local/system.conf```, and a new module can/should be enabled by
+<pre>$ cp misc/system_all.conf local/system.conf</pre>, and a new module can/should be enabled by
 including it in the misc/system_all.conf file. An error message like
 ```Could not find specified test module to build: test_xxx``` indicates that the target module is
 not available on the path.
@@ -60,19 +60,19 @@ implemented along with test module behavior.
 
 <pre>
 ~/daq$ bin/test_module tls
-&hellp;
+&hellip;
 RESULT skip security.x509
 </pre>
 
 <pre>
 ~/daq$ bin/test_module -n tls tls
-&hellp;
+&hellip;
 RESULT pass security.x509
 </pre>
 
 <pre>
 ~/daq$ bin/test_module -n tls expiredtls
-&hellp;
+&hellip;
 RESULT fail security.x509
 </pre>
 
@@ -82,4 +82,4 @@ Continuous testing of module-specific builds is handled through the `testing/tes
 script (as invoked by Travis). Execution results are compared against the
 `testing/test_modules.out` file. To add a new test, add a few lines to the top of the test script
 and expected results to the output file. Every test module is required to be continously tested
-somewhere, either as part of the `test_modules.sh` path or elsewhere.
+somewhere, either as part of `test_modules.sh` or elsewhere.
