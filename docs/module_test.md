@@ -8,9 +8,10 @@ configured. It should work properly for the majority of situations, but will not
 
 In order to find the appropriate containers, the system needs to be configured such that the build
 path has access to the module in question. Typically, this can be configured using something like
-`$ cp misc/system_all.conf local/system.conf`, and a new module can/should be enabled by including
-it in the misc/system_all.conf file. An error message like `Could not find specified test module to
-build: test_xxx` indicates that the target module is not available on the path.
+```$ cp misc/system_all.conf local/system.conf```, and a new module can/should be enabled by
+including it in the misc/system_all.conf file. An error message like
+```Could not find specified test module to build: test_xxx``` indicates that the target module is
+not available on the path.
 
 ## Test Execution
 
@@ -25,14 +26,6 @@ Loading config from local/system.conf into inst/config/system.conf
 Enabling target faux
 Enabling target test_tls
 Skipping non-enabled daqf/aardvark
-Skipping non-enabled daqf/default
-Skipping non-enabled daqf/faucet
-Build docker/Dockerfile.faux into daqf/faux, log to build/docker_build.faux...
-Skipping non-enabled daqf/gauge
-Skipping non-enabled daqf/networking
-Skipping non-enabled daqf/switch
-Skipping non-enabled daqf/test_bacnet
-Skipping non-enabled daqf/test_fail
 &hellip;
 Skipping non-enabled daqf/test_bacext
 Skipping non-enabled daqf/test_password
@@ -41,7 +34,6 @@ Skipping non-enabled daqf/test_udmi
 Configuring OVS bridge daq-bridge-tls
 Activating venv
 &hellip;
-
 %%%%%%%%%%%%%% Running module command ./test_tls %%%%%%%%%%%%%%%
 report:IOException unable to connect to server.
 RESULT skip security.tls.v3
@@ -66,17 +58,23 @@ Arguments to the test command specify different faux target options to test agai
 correct operation in different scenarios. The required faux behaviors will of course need to be
 implemented along with test module behavior.
 
-```~/daq$ bin/test_module tls
+<pre>
+~/daq$ bin/test_module tls
 &hellp;
-RESULT skip security.x509```
+RESULT skip security.x509
+</pre>
 
-```~/daq$ bin/test_module -n tls tls
+<pre>
+~/daq$ bin/test_module -n tls tls
 &hellp;
-RESULT pass security.x509```
+RESULT pass security.x509
+</pre>
 
-```~/daq$ bin/test_module -n tls expiredtls
+<pre>
+~/daq$ bin/test_module -n tls expiredtls
 &hellp;
-RESULT fail security.x509```
+RESULT fail security.x509
+</pre>
 
 ## Continous Testing
 
