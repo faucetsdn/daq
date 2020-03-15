@@ -1,13 +1,22 @@
 # Module Test
 
-Docker test modules can be tested individually to validate basic functionality.
+Docker test modules can be tested individually to validate basic functionality. The `test_module`
+script sets up a basic network, faux container, and then runs a test module appropriately
+configured. It should work properly for the majority of situations, but will not work for all cases.
 
 ## Basic Setup
 
-The requisite test containers need to be available, and
-```$ cp misc/system_all.conf local/system.conf```
+In order to find the appropriate containers, the system needs to be configured such that the build
+path has access to the module in question. Typically, this can be configured using something like
+`$ cp misc/system_all.conf local/system.conf`, and a new module can/should be enabled by including
+it in the misc/system_all.conf file. An error message like `Could not find specified test module to
+build: test_xxx` indicates that the target module is not available on the path.
 
 ## Test Execution
+
+A test can be executed using the `test_module` command, which accepts the module name (e.g. `tls`)
+and optional faux arguments to test against. The `-n` option can be given before the test name to
+skip the build step.
 
 <pre>
 ~/daq$ bin/test_module tls
@@ -46,24 +55,33 @@ IOException unable to connect to server.
 
 Killed containers daq-tls daq-faux-tls
 
-Module test results:
+echo %%%%%%%%%%%%%% Module test results: test_tls %%%%%%%%%%%%%%%
 RESULT skip security.tls.v3
 RESULT skip security.x509
 </pre>
 
-## Development Target
+## Test target faux device options.
 
-In order to test various conditions, the faux container needs to be instrumented to support the
-necessary test cases.
+Arguments to the test command specify different faux target options to test against to verify
+correct operation in different scenarios. The required faux behaviors will of course need to be
+implemented along with test module behavior.
 
-E.g., to test the tls module against an expired certificate, the system can be run like
+```~/daq$ bin/test_module tls
+&hellp;
+RESULT skip security.x509```
 
-```bin/test_modules tls expiredtls```
+```~/daq$ bin/test_module -n tls tls
+&hellp;
+RESULT pass security.x509```
 
-(requiring, of course, that the faux module is set up appropriately).
+```~/daq$ bin/test_module -n tls expiredtls
+&hellp;
+RESULT fail security.x509```
 
 ## Continous Testing
 
-Continuous testing should be setup in the `testing/test_modules.sh` script. Adding an entry in
-there, and updating `testing/test_modules.out` to match, will ensure that the container is
-tested appropriately.
+Continuous testing of module-specific builds is handled through the `testing/test_modules.sh`
+script (as invoked by Travis). Execution results are compared against the
+`testing/test_modules.out` file. To add a new test, add a few lines to the top of the test script
+and expected results to the output file. Every test module is required to be continously tested
+somewhere, either as part of the `test_modules.sh` path or elsewhere.
