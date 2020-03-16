@@ -1,12 +1,14 @@
 #!/bin/bash -e
 
+build=y
+
 if [ -z "$1" ]; then
     echo $0 module test-args
     false
 fi
 
-if [ "$1" == -b ]; then
-    build=y
+if [ "$1" == -n ]; then
+    build=
     shift
 fi
 
@@ -68,11 +70,9 @@ sudo ip link del $module_intf 2>/dev/null || true
 echo Adding new interface to $pid...
 sudo ip link add $module_intf type veth peer name eth0 netns $pid
 sudo ip link set $module_intf up
-sudo ip link show $module_intf
 sudo ovs-vsctl add-port $bname $module_intf
 docker exec $container ip link set up dev eth0
 docker exec $container ip addr add 10.20.0.1/16 dev eth0 broadcast 10.20.255.255
-docker exec $container ip addr show eth0
 
 run_cmd=$(docker inspect "--format={{json .Config}}" $image | jq -r '(.Cmd | join(" "))')
 echo
@@ -89,5 +89,5 @@ fi
 
 echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
 echo
-echo Module test results:
+echo %%%%%%%%%%%%%% Module test results: $target %%%%%%%%%%%%%%%
 cat inst/module/$module/tmp/result_lines.txt
