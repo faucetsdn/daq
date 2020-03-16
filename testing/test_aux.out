@@ -55,14 +55,14 @@ port-01 module_config modules
   "brute": {
     "enabled": true
   },
-  "dhcp": {
-    "timeout_sec": 120
-  },
   "discover": {
     "enabled": true
   },
   "hold": {
     "enabled": false
+  },
+  "ipaddr": {
+    "timeout_sec": 120
   },
   "macoui": {
     "enabled": true
@@ -103,11 +103,11 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
-  "dhcp": {
-    "timeout_sec": 120
-  },
   "hold": {
     "enabled": true
+  },
+  "ipaddr": {
+    "timeout_sec": 120
   },
   "macoui": {
     "enabled": true,
@@ -150,6 +150,6 @@ port-02 module_config modules
 Redacted docs diff
 No report diff
 01: ['01:ping:Exception']
-02: ['02:nmap:1', '02:ping:ValueError']
-03: ['03:nmap:1', '03:ping:Exception']
+02: ['02:ping:ValueError']
+03: ['03:ping:Exception']
 Done with tests

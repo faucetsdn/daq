@@ -4,7 +4,13 @@ echo Starting faux device at `date` with $*
 
 declare -A options
 for option in $*; do
-    options[$option]=$option
+    if [[ $option == *"="* ]]; then
+        k=$(echo $option | cut -d'=' -f1)
+        v=$(echo $option | cut -d'=' -f2)
+        options[$k]=$v
+    else
+        options[$option]=$option
+    fi
 done
 
 # Disable docker's built-in resolv mechanism and install standard resolvconf.
@@ -70,7 +76,12 @@ ip addr show $intf_name
 if [ -n "${options[xdhcp]}" ]; then
     echo Assigning static ip address...
     ip link set up dev $intf_name
-    ip addr add 10.20.0.5/16 dev $intf_name broadcast 10.20.255.255
+    # specified ip
+    if [ "${options[xdhcp]}" !=  xdhcp ]; then
+        ip addr add "${options[xdhcp]}/16" dev $intf_name broadcast 10.20.255.255
+    else
+        ip addr add 10.20.0.5/16 dev $intf_name broadcast 10.20.255.255
+    fi
     ip addr show $intf_name
 
     (while true; do ping -c 1 10.20.0.1; sleep 5; done) &

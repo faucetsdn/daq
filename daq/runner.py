@@ -62,7 +62,7 @@ class DAQRunner:
         self.result_log = self._open_result_log()
         self._system_active = False
         self._dhcp_ready = set()
-        self._dhcp_info = {}
+        self._ip_info = {}
         logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client)
@@ -334,7 +334,7 @@ class DAQRunner:
 
         try:
             self.run_count += 1
-            new_host = connected_host.ConnectedHost(self, gateway.host, target, self.config)
+            new_host = connected_host.ConnectedHost(self, gateway, target, self.config)
             self.mac_targets[target_mac] = new_host
             self.port_targets[target_port] = new_host
             self.port_gateways[target_port] = gateway
@@ -409,33 +409,33 @@ class DAQRunner:
             raise
         return gateway
 
-    def dhcp_notify(self, state, target, gateway_set, exception=None):
-        """Handle a DHCP notification"""
+    def ip_notify(self, state, target, gateway_set, exception=None):
+        """Handle a DHCP / Static IP notification"""
         if exception:
             assert not target, 'unexpected exception with target'
-            LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
+            LOGGER.error('IP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
             return
 
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%d)', target_mac,
+        LOGGER.info('IP notify %s is %s on gw%02d (%s/%d)', target_mac,
                     target_ip, gateway_set, state, delta_sec)
 
         if not target_mac:
-            LOGGER.warning('DHCP target mac missing')
+            LOGGER.warning('IP target mac missing')
             return
 
         self._target_mac_ip[target_mac] = target_ip
         if target_mac in self.mac_targets:
-            self._dhcp_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
+            self._ip_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
             self._check_and_activate_gateway(self.mac_targets[target_mac])
 
     def _check_and_activate_gateway(self, host):
-        # Host ready to be activated and DHCP happened
-        if host not in self._dhcp_info or host not in self._dhcp_ready:
+        # Host ready to be activated and DHCP happened / Static IP
+        if host not in self._ip_info or host not in self._dhcp_ready:
             return
-        state, target, gateway_set = self._dhcp_info[host]
+        state, target, gateway_set = self._ip_info[host]
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
         (gateway, ready_devices) = self._should_activate_target(target_mac, target_ip, gateway_set)
 
@@ -458,7 +458,7 @@ class DAQRunner:
             state = 'group'
             delta_sec = -1
         for ready_mac in ready_devices:
-            LOGGER.info('DHCP activating target %s', ready_mac)
+            LOGGER.info('IP activating target %s', ready_mac)
             ready_host = self.mac_targets[ready_mac]
             ready_ip = self._target_mac_ip[ready_mac]
             triggered = ready_host.trigger(state, target_ip=ready_ip, delta_sec=delta_sec)
