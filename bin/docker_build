@@ -42,9 +42,9 @@ for file in $docker_files; do
     found=$(docker images $tag 2>/dev/null | grep $module) || true
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
-    elif [ -z "$build_all" ] && [ -n "$found" ]; then
+    elif [ -z "$DAQ_TARGETS" -a -z "$build_all" -a -n "$found" ]; then
         unset test_set[$module]
-        echo Skipping existing $tag
+        echo Skipping building existing $tag 
     else
         unset test_set[$module]
         echo Build$ext_msg $file into $tag, log to $logfile...
