@@ -27,7 +27,7 @@ module_dir=$ROOT/inst/module/$module
 rm -rf $module_dir
 
 if [ -n "$build" ]; then
-    DAQ_TARGETS=faux,$target bin/docker_build build-all
+    DAQ_TARGETS=faux,$target bin/docker_build force
 fi
 
 bname=daq-bridge-$module
