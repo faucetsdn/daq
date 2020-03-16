@@ -138,6 +138,6 @@ port-02 module_config modules
 Redacted docs diff
 No report diff
 01: ['01:ping:Exception']
-02: ['02:nmap:1', '02:ping:ValueError']
-03: ['03:nmap:1', '03:ping:Exception']
+02: ['02:ping:ValueError']
+03: ['03:ping:Exception']
 Done with tests
