@@ -5,20 +5,32 @@ RESULT_LINES=/tmp/result_lines.txt
 MONO_LOG=/tmp/mono-log.txt
 MANIFEST=./module_manifest.json
 REPORT_FILE=/tmp/report.txt
+status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
-
 # This is a check that the startup.pcap file exists and is proper.
-echo
-ls -l /scans/startup.pcap
+tcpdump -en -r /scans/startup.pcap ip
+
 echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
-tcpdump -en -r /scans/startup.pcap ip
-echo
-tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request"
-echo
-tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK"
-echo
+
+STATIC_IP=`jq -r .static_ip /config/device/module_config.json`
+
+if [ -n "$STATIC_IP" ]; then
+    echo RESULT skip base.startup.dhcp static ip | tee -a $RESULT_LINES
+else
+    req=pass
+    ack=pass
+    echo
+    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
+    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
+    if [ $req = "fail" ] || [ $ack = "fail" ]; then
+        status=fail
+        echo RESULT fail base.startup.dhcp missing dhcp packets| tee -a $RESULT_LINES
+    else
+        echo RESULT pass base.startup.dhcp | tee -a $RESULT_LINES
+    fi
+fi
 
 # Setup for accessing control plane switch. If LOCAL_IP is defined, which
 # is the intended local address for this node on the control plane then
@@ -27,9 +39,9 @@ if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
     ip addr add $LOCAL_IP dev `hostname`-eth0
     echo Switch test with port $SWITCH_PORT | tee -a $MONO_LOG
-    status=pass
-    ping -n -c 10 $SWITCH_IP || status=fail
-    echo RESULT $status base.switch.ping target %% $SWITCH_IP:$SWITCH_PORT | tee -a $RESULT_LINES
+    local_status=pass
+    ping -n -c 10 $SWITCH_IP || (local_status=fail && status=fail)
+    echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$SWITCH_PORT | tee -a $RESULT_LINES
 else
     echo LOCAL_IP not configured, assuming no network switch | tee -a $MONO_LOG
     echo RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf | tee -a $RESULT_LINES
@@ -45,16 +57,16 @@ fi
 
 # First ping might fail b/c of warm-up delays.
 summary=""
-status=pass
-ping -n -c 10 $TARGET_IP || status=fail
+local_status=pass
+ping -n -c 10 $TARGET_IP || (local_status=fail && status=fail)
 
-if [ $status == pass ]; then
+if [ $local_status == pass ]; then
     summary="target reached"
 else
     summary="could not reach target"
 fi
 
-echo RESULT $status base.target.ping $summary %% $TARGET_IP | tee -a $RESULT_LINES
+echo RESULT $local_status base.target.ping $summary %% $TARGET_IP | tee -a $RESULT_LINES
 
 echo | tee -a $MONO_LOG
 echo Done with basic connectivity tests | tee -a $MONO_LOG

@@ -1,6 +1,7 @@
 Running testing/test_many.sh
 Many Tests
 DAQ stress test
-Enough results: True
-Enough DHCP timeouts: True
+Enough results: 1
+Enough DHCP timeouts: 1
+Enough static ips: 1
 Done with tests

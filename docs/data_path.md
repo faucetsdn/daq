@@ -77,7 +77,7 @@ Some useful files.
 
 <pre>
 ~/daq$ <b>find inst/gw01/ -type f</b>
-inst/gw01/dhcp_monitor.txt
+inst/gw01/ip_monitor.txt
 inst/gw01/nodes/gw01/tmp/dnsmasq.log
 inst/gw01/nodes/gw01/tmp/startup.pcap
 inst/gw01/nodes/gw01/activate.log
