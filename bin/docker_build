@@ -10,10 +10,10 @@ source misc/config_base.sh
 build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
-build_all=
+force=
 
-if [ "$1" == "build-all" ]; then
-    build_all=y
+if [ "$1" == "force" ]; then
+    force=y
     shift
 fi
 
@@ -42,7 +42,7 @@ for file in $docker_files; do
     found=$(docker images $tag 2>/dev/null | grep $module) || true
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
-    elif [ -z "$DAQ_TARGETS" -a -z "$build_all" -a -n "$found" ]; then
+    elif [ -z "$DAQ_TARGETS" -a -z "$force" -a -n "$found" ]; then
         unset test_set[$module]
         echo Skipping building existing $tag 
     else
