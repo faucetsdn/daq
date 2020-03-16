@@ -1,0 +1,14 @@
+Running testing/test_modules.sh
+Base Tests
+Testing ping
+Module execution failed.
+Testing tls
+RESULT skip security.tls.v3
+RESULT skip security.x509
+Testing tls tls
+RESULT pass security.tls.v3
+RESULT pass security.x509
+Testing tls expiredtls
+RESULT fail security.tls.v3
+RESULT fail security.x509
+Testing complete.

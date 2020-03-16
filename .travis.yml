@@ -24,6 +24,7 @@ env:
     - DAQ_TEST=many
     - DAQ_TEST=aux
     - DAQ_TEST=topo
+    - DAQ_TEST=modules
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/

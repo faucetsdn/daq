@@ -45,6 +45,7 @@ if [ -n "${options[macoui]}" ]; then
     set_mac_addr 3c:5a:b4:1e:8f:0a
 fi
 
+# test_password faux device setup
 if [ -n "${options[passwordpass]}" ]; then
     set_passwd 'root:pass'
     htpasswd -b -c /etc/nginx/.htpasswd admin fail
@@ -52,9 +53,7 @@ if [ -n "${options[passwordpass]}" ]; then
     /usr/sbin/sshd -D &
     service xinetd start
     service ssh start
-fi
-
-if [ -n "${options[passwordfail]}" ]; then
+elif [ -n "${options[passwordfail]}" ]; then
     set_mac_addr 3c:5a:b4:1e:8f:0b
     set_passwd 'root:default'
     echo "pass\npass\n\n\n\n\n\ny\n" | adduser "admin"
@@ -161,6 +160,7 @@ elif [ -n "${options[nobrute]}" ]; then
     (python pentests/brute_server.py good 10000; echo Brute done.) &
 fi
 
+# test_tls faux device setup
 if [ -n "${options[tls]}" ]; then
     echo Generating tls certs.
     python tlsfaux/generate_certs.py
