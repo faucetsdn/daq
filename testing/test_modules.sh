@@ -16,11 +16,11 @@ tls tls
 tls expiredtls
 EOF
 
-DAQ_TARGETS=faux bin/docker_build build-all
+DAQ_TARGETS=faux bin/docker_build force
 
 cat $TEST_LIST | while read module args; do
     if ! docker inspect daqf/test_$module:latest > /dev/null; then
-	DAQ_TARGETS=test_$module bin/docker_build build-all
+	DAQ_TARGETS=test_$module bin/docker_build force
     fi
     echo
     echo Testing $module $args | tee -a $TEST_RESULTS
