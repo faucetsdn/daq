@@ -34,12 +34,12 @@ check_bacnet 01 04 1 1 1 1
 check_bacnet 02 03 0 1 1 1
 check_bacnet 02 04 1 1 1 1
 check_bacnet 03 01 1 1 1 1
+run_test 4
 
 echo %%%% faucet.yaml
 cat inst/faucet.yaml
 echo %%%% system.yaml
 cat local/system.conf
 echo %%%%
-run_test 4
 
 echo Done with tests | tee -a $TEST_RESULTS
