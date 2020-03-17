@@ -1,5 +1,6 @@
 """Simple client for working with the faucet event socket"""
 
+
 import json
 import os
 import select
