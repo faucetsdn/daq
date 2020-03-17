@@ -23,7 +23,8 @@ image=daqf/$target
 container=daq-$module
 docker_args=
 net_opt=--net=none
-module_dir=$ROOT/inst/module/$module
+module_dir=$ROOT/inst/modules/$module/run
+config_dir=$ROOT/inst/modules/$module/config
 rm -rf $module_dir
 
 if [ -n "$build" ]; then
@@ -47,12 +48,13 @@ docker_args+=" -v $module_dir/scans:/scans"
 echo Capturing fake startup.pcap...
 sudo tcpdump -c 3 -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
 
-mkdir -p $module_dir/config
 docker_args+=" --env TARGET_IP=$faux_ip"
-docker_args+=" -v $module_dir/config:/config/inst"
-docker_args+=" -v $module_dir/config:/config/port"
-docker_args+=" -v $module_dir/config:/config/device"
-docker_args+=" -v $module_dir/config:/config/type"
+
+mkdir -p $config_dir
+docker_args+=" -v $config_dir:/config/inst"
+docker_args+=" -v $config_dir:/config/port"
+docker_args+=" -v $config_dir:/config/device"
+docker_args+=" -v $config_dir:/config/type"
 
 docker rm -f $container || true
 cid=$(
@@ -90,4 +92,4 @@ fi
 echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
 echo
 echo %%%%%%%%%%%%%% Module test results: $target %%%%%%%%%%%%%%%
-cat inst/module/$module/tmp/result_lines.txt
+cat inst/modules/$module/run/tmp/result_lines.txt
