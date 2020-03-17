@@ -49,15 +49,15 @@ COPY subset/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
 COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
 RUN cd bacnetTests && ./gradlew build
 
-# Telnet dependancy
+# Telnet dependency
 RUN $AG update && $AG install -y telnetd
 RUN $AG update && $AG install xinetd
 
-# SSH dependancy
+# SSH dependency
 COPY subset/security/ssh_additions.config ssh_additions.config
 RUN cat ssh_additions.config >> /etc/ssh/sshd_config
 
-# HTTP/HTTPS dependancy
+# HTTP/HTTPS dependency
 RUN $AG update && $AG install nginx
 COPY /subset/security/nginxpass.conf /root/nginx/
 COPY /subset/security/nginxfail.conf /root/nginx/

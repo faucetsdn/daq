@@ -24,13 +24,25 @@
   "servers": {
     "tcp": {
       "ports": {
+        "23": {
+          "allowed": false,
+          "description": "Telnet Server"
+        },
+        "80": {
+          "allowed": false,
+          "description": "Administrative Insecure Web-Server"
+        },
         "443": {
           "allowed": true,
-          "reason": "Administrative Web-Server"
-        },
-        "10000": {
-          "allowed": true,
-          "reason": "Testing snet-sensor-mgmt"
+          "description": "Administrative Secure Web-Server"
+        }
+      }
+    },
+    "udp": {
+      "ports": {
+        "47808": {
+          "allowed": false,
+          "description": "BACnet protocol"
         }
       }
     }

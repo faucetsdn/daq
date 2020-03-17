@@ -2,12 +2,12 @@
 
 if [ "$1" == help ]; then
  echo The following are expected modes of builds:
- echo $0 : defaults to build-all
+ echo $0 : defaults to build
  echo $0 check : Check if the built images are updated.
  echo $0 push : Pushes images to docker hub
  echo $0 pull : Pulls images from docker hub
  echo $0 build : Builds missing docker images
- echo $0 build-all : Builds all docker images
+ echo $0 force : Builds all docker images
  exit 0
 fi
 
@@ -63,8 +63,8 @@ elif [ "$1" == check ]; then
     shift
     bin/build_hash check
     exit 0
-elif [ "$1" == build-all ]; then
-    build_all=build-all
+elif [ "$1" == force ]; then
+    force=force
     shift
 fi
 
@@ -90,7 +90,7 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-bin/docker_build $build_all $inline
+bin/docker_build $force $inline
 
 rm inst/$DOCKER_IMAGE_LIST || true
 echo Updating inst/$DOCKER_IMAGE_LIST...

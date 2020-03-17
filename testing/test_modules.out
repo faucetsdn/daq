@@ -1,0 +1,16 @@
+Running testing/test_modules.sh
+Base Tests
+Testing ping
+RESULT skip base.startup.dhcp Using static ip 10.20.0.5
+RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+RESULT pass base.target.ping target reached %% 10.20.0.5
+Testing tls
+RESULT skip security.tls.v3
+RESULT skip security.x509
+Testing tls tls
+RESULT pass security.tls.v3
+RESULT pass security.x509
+Testing tls expiredtls
+RESULT fail security.tls.v3
+RESULT fail security.x509
+Testing complete.
