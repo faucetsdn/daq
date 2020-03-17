@@ -11,10 +11,10 @@ import logger
 
 LOGGER = logger.get_logger('topology')
 
-
-class FaucetTopology:
+class FaucetTopology():
     """Topology manager specific to FAUCET configs"""
 
+    OUTPUT_NETWORK_FILE = "inst/faucet.yaml"
     MAC_PREFIX = "@mac:"
     DNS_PREFIX = "@dns:"
     CTL_PREFIX = "@ctrl:"
@@ -37,24 +37,22 @@ class FaucetTopology:
     PRI_STACK_PORT = 1
     DEFAULT_VLAN = 10
 
-    def __init__(self, config):
+    def __init__(self, config, pri):
         self.config = config
-        self.pri = None
-        self.pri_name = None
+        self.pri = pri
+        self.pri_name = pri.name
         self.sec_port = int(config.get('sec_port', "7"), 0)
         self.sec_name = 'sec'
         self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
         self._settle_sec = int(config.get('settle_sec', self._NETWORK_SETTLE_SEC))
         self._device_specs = self._load_device_specs()
         self._mac_map = {}
-        self.topology = None
+        self.topology = self._make_base_network_topology()
 
-    def initialize(self, pri):
+    def initialize(self):
         """Initialize this topology"""
         LOGGER.debug("Converting existing network topology...")
-        self.pri = pri
-        self.pri_name = pri.name
-        self.topology = self._make_base_network_topology()
+        self._write_network_topology()
         self._generate_acls()
 
     def start(self):
@@ -236,7 +234,6 @@ class FaucetTopology:
         return sec_dp
 
     def _make_base_network_topology(self):
-        assert self.pri, 'pri dataplane not configured'
         dps = {}
         dps['pri'] = self._make_pri_topology()
         dps['sec'] = self._make_sec_topology()
@@ -255,9 +252,10 @@ class FaucetTopology:
             }
         }
 
-    def get_network_topology(self):
-        """Return the current faucet network topology"""
-        return copy.deepcopy(self.topology)
+    def _write_network_topology(self):
+        LOGGER.info('Writing network config to %s', self.OUTPUT_NETWORK_FILE)
+        with open(self.OUTPUT_NETWORK_FILE, "w") as output_stream:
+            yaml.safe_dump(self.topology, stream=output_stream)
 
     def _generate_acls(self):
         self._generate_main_acls()
