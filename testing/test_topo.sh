@@ -12,6 +12,7 @@ MAC_BASE=9a:02:57:1e:8f
 source testing/test_utils.sh
 
 generate open 3
+cmd/build
 check_socket 01 02 1 1
 check_socket 02 01 1 1
 check_bacnet 01 02 1 1 1 1

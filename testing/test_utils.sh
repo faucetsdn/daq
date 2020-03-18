@@ -124,7 +124,7 @@ function run_test {
         cmd_file=$conf_dir/ping_runtime.sh
         test -d $conf_dir || (mkdir -p $conf_dir; echo sleep 30 >> $cmd_file)
     done
-    cmd/run -b -s
+    timeout 5m cmd/run -s
     fgrep :ping: inst/result.log | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
