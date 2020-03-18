@@ -4,15 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-# Test the mudacl config and the test_schema to make sure they
-# make sense for tests that use them
-
-echo mudacl tests | tee -a $TEST_RESULTS
-mudacl/bin/test.sh
-echo Mudacl exit code $? | tee -a $TEST_RESULTS
-validator/bin/test_schema
-echo Validator exit code $? | tee -a $TEST_RESULTS
-
 # Runs lint checks and some similar things
 echo Lint checks | tee -a $TEST_RESULTS
 bin/check_style
