@@ -302,7 +302,9 @@ class DAQRunner:
         if not self._system_active:
             LOGGER.warning('Target port %d ignored, system not active', target_port)
             self._system_waiting += 1
-            assert self._system_waiting < 10, 'System activate count limit exceeded'
+            if self._system_waiting > 10:
+                self.shutdown()
+                raise Exception('System waiting time limit exceeded')
             return False
 
         if target_port in self.port_targets:
