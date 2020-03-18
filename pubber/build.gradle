@@ -5,12 +5,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.4"
     }
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
     id 'java'
     id 'maven'
 }

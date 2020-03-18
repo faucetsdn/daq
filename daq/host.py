@@ -48,7 +48,7 @@ class MODE:
 
 def pre_states():
     """Return pre-test states for basic operation"""
-    return ['startup', 'sanity', 'dhcp', 'base', 'monitor']
+    return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
 
 def post_states():
@@ -84,7 +84,7 @@ class ConnectedHost:
         self.run_id = self.make_runid()
         self.scan_base = os.path.abspath(os.path.join(self.devdir, 'scans'))
         self._port_base = self._get_port_base()
-        self._device_base = self._get_device_base(self.target_mac)
+        self._device_base = self._get_device_base()
         self.state = None
         self._state_transition(_STATE.READY)
         self.results = {}
@@ -158,16 +158,19 @@ class ConnectedHost:
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
 
-    def _get_device_base(self, target_mac):
+    def _get_device_base(self):
         """Get the base config path for a host device"""
         site_path = self.config.get('site_path')
         if not site_path:
             return None
-        clean_mac = target_mac.replace(':', '')
+        clean_mac = self.target_mac.replace(':', '')
         dev_path = os.path.abspath(os.path.join(site_path, 'mac_addrs', clean_mac))
         if not os.path.isdir(dev_path):
             self._create_device_dir(dev_path)
         return dev_path
+
+    def _get_static_ip(self):
+        return self._loaded_config.get('static_ip')
 
     def _type_path(self):
         dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
@@ -245,17 +248,25 @@ class ConnectedHost:
         return self.state == _STATE.READY
 
     def notify_activate(self):
-        """Return True if ready to be activated in response to a DHCP notification."""
+        """Return True if ready to be activated in response to an ip notification."""
         if self.state == _STATE.READY:
             self._record_result('startup', state=MODE.HOLD)
         return self.state == _STATE.WAITING
 
     def _prepare(self):
-        LOGGER.info('Target port %d waiting for dhcp as %s', self.target_port, self.target_mac)
+        LOGGER.info('Target port %d waiting for ip as %s', self.target_port, self.target_mac)
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
-        self.record_result('dhcp', state=MODE.EXEC)
+        self.record_result('ipaddr', state=MODE.EXEC)
+        static_ip = self._get_static_ip()
         _ = [listener(self) for listener in self._dhcp_listeners]
+        if static_ip:
+            time.sleep(self._STARTUP_MIN_TIME_SEC)
+            self.runner.ip_notify(MODE.DONE, {
+                'mac': self.target_mac,
+                'ip': static_ip,
+                'delta': -1
+            }, self.gateway.port_set)
 
     def _aux_module_timeout_handler(self):
         # clean up tcp monitor that could be open
@@ -282,7 +293,7 @@ class ConnectedHost:
 
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
-        assert callable(callback), "DHCP listener callback is not callable"
+        assert callable(callback), "ip listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
     def terminate(self, reason, trigger=True):
@@ -322,9 +333,9 @@ class ConnectedHost:
             return False
         return True
 
-    def trigger(self, state, target_ip=None, exception=None, delta_sec=-1):
-        """Handle completion of DHCP subtask"""
-        trigger_path = os.path.join(self.scan_base, 'dhcp_triggers.txt')
+    def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
+        """Handle completion of ip subtask"""
+        trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
         with open(trigger_path, 'a') as output_stream:
             output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
         if self.target_ip:
@@ -336,7 +347,7 @@ class ConnectedHost:
             return False
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
-        self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
+        self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
         if exception:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, exception)
@@ -437,11 +448,11 @@ class ConnectedHost:
 
     def _base_tests(self):
         self.record_result('base', state=MODE.EXEC)
-        if not self._ping_test(self.gateway, self.target_ip):
+        if not self._ping_test(self.gateway.host, self.target_ip):
             LOGGER.debug('Target port %d warmup ping failed', self.target_port)
         try:
-            success1 = self._ping_test(self.gateway, self.target_ip), 'simple ping failed'
-            success2 = self._ping_test(self.gateway, self.target_ip,
+            success1 = self._ping_test(self.gateway.host, self.target_ip), 'simple ping failed'
+            success2 = self._ping_test(self.gateway.host, self.target_ip,
                                        src_addr=self.fake_target), 'target ping failed'
             if not success1 or not success2:
                 return False
@@ -487,8 +498,8 @@ class ConnectedHost:
         params = {
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
-            'gateway_ip': self.gateway.IP(),
-            'gateway_mac': self.gateway.MAC(),
+            'gateway_ip': self.gateway.host.IP(),
+            'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
             'port_base': self._port_base,
             'device_base': self._device_aux_path(),
