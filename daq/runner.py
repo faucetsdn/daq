@@ -139,11 +139,11 @@ class DAQRunner:
     def _handle_faucet_events(self):
         while self.faucet_events:
             event = self.faucet_events.next_event()
-            LOGGER.info('Faucet event %s', event)
             if not event:
                 break
             (dpid, port, active) = self.faucet_events.as_port_state(event)
             if dpid and port:
+                LOGGER.info('port_state: %s', event)
                 self._handle_port_state(dpid, port, active)
             (dpid, port, target_mac) = self.faucet_events.as_port_learn(event)
             if dpid and port:
