@@ -12,10 +12,10 @@
     "node": "8"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "^0.25.0",
-    "firebase-admin": "^7.0.0",
-    "firebase-functions": "^2.0.0",
-    "extend": "^3.0.2"
+    "@google-cloud/pubsub": "0.25.0",
+    "firebase-admin": "7.0.0",
+    "firebase-functions": "2.3.1",
+    "extend": "3.0.2"
   },
   "private": true
 }
