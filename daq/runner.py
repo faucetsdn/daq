@@ -61,6 +61,7 @@ class DAQRunner:
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
+        self._system_wait = 0
         self._dhcp_ready = set()
         self._ip_info = {}
         logging_client = self.gcp.get_logging_client()
@@ -300,6 +301,13 @@ class DAQRunner:
 
         if not self._system_active:
             LOGGER.warning('Target port %d ignored, system not active', target_port)
+            self._system_wait += 1
+            if self._system_wait > 10:
+                os.system('ovs_ofctl show pri > ofctl_show_pri.txt')
+                os.system('ovs_ofctl show sec > ofctl_show_sec.txt')
+                os.system('ip link > ip_link.txt')
+                self.shutdown()
+                raise Exception('exceeded retries')
             return False
 
         if target_port in self.port_targets:
