@@ -1,5 +1,7 @@
 #!/bin/bash
 
+bin/compile_ovs
+
 source testing/test_preamble.sh
 
 echo Topology Tests >> $TEST_RESULTS

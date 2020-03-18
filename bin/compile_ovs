@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+ovs-vsctl --version
+
+version=`ovs-vsctl --version | fgrep ovs-vsctl`
+target='ovs-vsctl (Open vSwitch) 2.12.0'
+
+if [ "$version" == "$target" ]; then
+  echo OVS install already matches target $target, skipping compile.
+  exit 0
+fi
+
+if [ -d ovs ]; then
+  echo Subdirectory ovs already exists.
+  false
+fi
+
+sudo apt-get install python3-sphinx
+
+git clone https://github.com/openvswitch/ovs.git
+
+cd ovs
+
+git checkout v2.12.0
+
+./boot.sh
+
+./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
+
+make
+
+echo Installing ovs as root...
+sudo make install
