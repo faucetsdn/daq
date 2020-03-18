@@ -303,6 +303,8 @@ class DAQRunner:
             LOGGER.warning('Target port %d ignored, system not active', target_port)
             self._system_waiting += 1
             if self._system_waiting > 10:
+                os.system('ovs-ofctl show pri > ofctl_pri.txt')
+                os.system('ovs-ofctl show sec > ofctl_sec.txt')
                 self.shutdown()
                 raise Exception('System waiting time limit exceeded')
             return False
