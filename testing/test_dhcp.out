@@ -1,0 +1,8 @@
+Running testing/test_dhcp.sh
+DHCP Tests
+DAQ stress test
+Enough results: 1
+Device 1 enough long ip triggers? 1
+Device 2 enough long ip triggers? 1
+Device 3 enough long ip triggers? 1
+Done with tests

@@ -1,0 +1,30 @@
+#!/bin/bash -e
+#
+# Dynamically change the DHCP response time, requires killing and restarting
+# dnsmasq as per documentation (SIGHUP does not reload configuration file).
+mac_addr=$1
+response_time_sec=$2
+if [ -z "$mac_addr" ]; then
+    echo "Usage: ./change_dhcp_response_time mac_addr [response_time_sec]"
+    exit 1
+fi
+
+dhcp_option="dhcp-host=$mac_addr,ignore"
+
+echo $dhcp_option >> /etc/dnsmasq.conf
+while [ -z $(cat /var/run/dnsmasq.pid) ]; do
+    sleep 1
+done
+
+function restart_dnsmasq() {
+    if [ -n "$response_time_sec" ]; then
+        sleep $response_time_sec
+        sed -i s/$dhcp_option// /etc/dnsmasq.conf
+    fi
+    
+    kill $(cat /var/run/dnsmasq.pid) || true
+    rm -f /var/run/dnsmasq.pid
+    dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp
+}
+
+restart_dnsmasq &

@@ -50,7 +50,6 @@ def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
-
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
@@ -114,6 +113,8 @@ class ConnectedHost:
         self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
                                               self._loaded_config)
         self.timeout_handler = self._aux_module_timeout_handler
+        self.ipaddr_handler = lambda: None
+
     @staticmethod
     def make_runid():
         """Create a timestamped runid"""
@@ -149,7 +150,7 @@ class ConnectedHost:
     def _test_enabled(self, test):
         fallback_config = {'enabled': test in self._CORE_TESTS}
         test_config = self._loaded_config['modules'].get(test, fallback_config)
-        return test_config.get('enabled', True)
+        return test_config['enabled']
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
@@ -259,14 +260,23 @@ class ConnectedHost:
         self.record_result('sanity', state=MODE.DONE)
         self.record_result('ipaddr', state=MODE.EXEC)
         static_ip = self._get_static_ip()
-        _ = [listener(self) for listener in self._dhcp_listeners]
         if static_ip:
+            LOGGER.info('Target port %d using static ip', self.target_port)
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.DONE, {
                 'mac': self.target_mac,
                 'ip': static_ip,
                 'delta': -1
             }, self.gateway.port_set)
+        else:
+            dhcp_mode = self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
+            LOGGER.info('Target port %d using %s DHCP mode', self.target_port,
+                        dhcp_mode or 'normal')
+            # enables dhcp response for this device
+            wait_time = self.runner.config.get("long_dhcp_response_sec") \
+                if dhcp_mode == 'long_response' else 0
+            self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
+        _ = [listener(self) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):
         # clean up tcp monitor that could be open
@@ -467,7 +477,10 @@ class ConnectedHost:
         try:
             if self.remaining_tests:
                 self.timeout_handler = self._main_module_timeout_handler
-                self._docker_test(self.remaining_tests.pop(0))
+                self.test_name = self.remaining_tests.pop(0)
+                self.test_start = gcp.get_timestamp()
+                self._state_transition(_STATE.TESTING, _STATE.NEXT)
+                self._docker_test(self.test_name)
             else:
                 self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
@@ -492,9 +505,6 @@ class ConnectedHost:
         return path
 
     def _docker_test(self, test_name):
-        self.test_name = test_name
-        self.test_start = gcp.get_timestamp()
-        self._state_transition(_STATE.TESTING, _STATE.NEXT)
         params = {
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
@@ -507,7 +517,7 @@ class ConnectedHost:
             'scan_base': self.scan_base
         }
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                self.test_name)
+                                                test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
@@ -517,7 +527,7 @@ class ConnectedHost:
             params['switch_model'] = self.config['switch_model']
 
         try:
-            LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
+            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
             self.test_host.start(self.test_port, params, self._docker_callback)
