@@ -61,6 +61,7 @@ class DAQRunner:
         self.run_limit = int(config.get('run_limit', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
+        self._system_waiting = 0
         self._dhcp_ready = set()
         self._ip_info = {}
         logging_client = self.gcp.get_logging_client()
@@ -300,6 +301,9 @@ class DAQRunner:
 
         if not self._system_active:
             LOGGER.warning('Target port %d ignored, system not active', target_port)
+            self._system_waiting += 1
+            if self._system_waiting > 10:
+                self.shutdown()
             return False
 
         if target_port in self.port_targets:
