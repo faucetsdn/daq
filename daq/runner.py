@@ -139,7 +139,7 @@ class DAQRunner:
     def _handle_faucet_events(self):
         while self.faucet_events:
             event = self.faucet_events.next_event()
-            LOGGER.debug('Faucet event %s', event)
+            LOGGER.info('Faucet event %s', event)
             if not event:
                 break
             (dpid, port, active) = self.faucet_events.as_port_state(event)
