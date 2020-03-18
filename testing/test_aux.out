@@ -1,8 +1,5 @@
 Running testing/test_aux.sh
 Aux Tests
-mudacl tests
-Mudacl exit code 0
-Validator exit code 0
 Lint checks
 check_style exit code 0
 Extended tests
