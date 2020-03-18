@@ -1,7 +1,5 @@
 #!/bin/bash
 
-bin/compile_ovs
-
 source testing/test_preamble.sh
 
 echo Topology Tests >> $TEST_RESULTS
@@ -43,6 +41,9 @@ echo %%%% faucet.yaml
 cat inst/faucet.yaml
 echo %%%% system.yaml
 cat local/system.conf
+echo %%%% ovs
+sudo ovs-vsctl show pri
+sudo ovs-vsctl show sec
 echo %%%%
 
 echo Done with tests | tee -a $TEST_RESULTS
