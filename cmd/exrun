@@ -7,7 +7,6 @@ MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
 INSTLOCK=$INSTDIR/startup.lock
 LOCALDIR=$ROOT/local
-FAUCET_CONF=faucet.yaml
 FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
@@ -55,7 +54,7 @@ fi
 export PYTHONPATH=$FORCH:$FAUCET:$MININET
 
 mkdir -p $INSTDIR
-rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG $cleanup_file
+rm -f $INSTDIR/faucet* $cleanup_file
 
 docker ps > /dev/null 2>&1 || service docker start
 
