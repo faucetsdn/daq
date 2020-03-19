@@ -52,7 +52,7 @@ for i in $(seq 1 $NUM_LONG_DHCP_DEVICES); do
     intf_mac="9a:02:57:1e:8f:0$i"
     ip_triggers=$(egrep -i "IP activating target $intf_mac" inst/cmdrun.log | wc -l)
     long_ip_triggers=$(egrep -i "IP notify.*gw0$i \(long/" inst/cmdrun.log | wc -l)
-    echo "Device $i enough long ip triggers? $((ip_triggers == long_ip_triggers && long_ip_triggers > 1))" | tee -a $TEST_RESULTS
+    echo "Device $i enough long ip triggers? $((ip_triggers <= long_ip_triggers && long_ip_triggers > 1))" | tee -a $TEST_RESULTS
 done
 
 # This is broken -- should have many more results available!
