@@ -58,6 +58,7 @@ if [ "$1" == push ]; then
     done
     echo Updating misc/$DOCKER_IMAGE_LIST for version $NEWVER
     cp inst/$DOCKER_IMAGE_LIST misc/$DOCKER_IMAGE_LIST
+    cp inst/$DOCKER_IMAGE_VER misc/$DOCKER_IMAGE_VER
     echo Done with docker build push.
     exit 0
 elif [ "$1" == pull ]; then
