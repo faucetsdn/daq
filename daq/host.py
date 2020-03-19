@@ -113,8 +113,6 @@ class ConnectedHost:
         self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
                                               self._loaded_config)
         self.timeout_handler = self._aux_module_timeout_handler
-        self.ipaddr_handler = lambda: None
-
     @staticmethod
     def make_runid():
         """Create a timestamped runid"""
@@ -477,10 +475,7 @@ class ConnectedHost:
         try:
             if self.remaining_tests:
                 self.timeout_handler = self._main_module_timeout_handler
-                self.test_name = self.remaining_tests.pop(0)
-                self.test_start = gcp.get_timestamp()
-                self._state_transition(_STATE.TESTING, _STATE.NEXT)
-                self._docker_test(self.test_name)
+                self._docker_test(self.remaining_tests.pop(0))
             else:
                 self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
@@ -505,6 +500,9 @@ class ConnectedHost:
         return path
 
     def _docker_test(self, test_name):
+        self.test_name = test_name
+        self.test_start = gcp.get_timestamp()
+        self._state_transition(_STATE.TESTING, _STATE.NEXT)
         params = {
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
