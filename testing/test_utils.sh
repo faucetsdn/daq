@@ -2,7 +2,7 @@
 
 # Create system.conf and startup file for arbitrary number of faux virtual devices.
 function generate {
-  echo source misc/system.conf > local/system.conf
+    echo source misc/system.conf > local/system.conf
 
   type=$1
   faux_num=$2
@@ -12,6 +12,7 @@ function generate {
   # Clean out in case there's an error
   rm -rf inst/run-port-*
   rm -rf inst/runtime_conf
+  rm -f inst/faucet*
 
   topostartup=inst/startup_topo.cmd
   rm -f $topostartup
