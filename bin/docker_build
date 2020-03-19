@@ -10,10 +10,10 @@ source misc/config_base.sh
 build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
-check_existing=
+force=
 
-if [ "$1" == "check-existing" ]; then
-    check_existing=y
+if [ "$1" == "force" ]; then
+    force=y
     shift
 fi
 
@@ -42,9 +42,11 @@ for file in $docker_files; do
     found=$(docker images $tag 2>/dev/null | grep $module) || true
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         echo Skipping non-enabled $tag
-    elif [ -n "$check_existing" ] && [ -n "$found" ]; then
+    elif [ -z "$DAQ_TARGETS" -a -z "$force" -a -n "$found" ]; then
+        unset test_set[$module]
         echo Skipping building existing $tag 
     else
+        unset test_set[$module]
         echo Build$ext_msg $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
         if [ -n "$inline" ]; then
@@ -62,3 +64,10 @@ for file in $docker_files; do
         echo Build complete. >> $logfile
     fi
 done
+
+if [ -n "$DAQ_TARGETS" ]; then
+    for module in "${!test_set[@]}"; do
+        echo Could not find specified test module to build: $module
+        false
+    done
+fi

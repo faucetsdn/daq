@@ -17,10 +17,7 @@ update them in the future).
 <code>$ <b>cmd/clean</b></code> # Clean up docker images that may be lingering.
 
 Sadly, there's no easy way to know when you need to run what when, since they simply address
-different dependencies.
-
-To run in development mode (not a container), use <code>cmd/run <b>local</b> ...</code>,
-or set `run_mode=local` in the `local/system.conf` file.
+different dependencies. See `cmd/build help` for more details on different image build options.
 
 ## Tests, Tests, and More Tests
 
@@ -46,7 +43,7 @@ appending `bin/test_daq` to a `sudo` line of shell environment settings, e.g. as
 ## Incremental Builds
 
 The environment variable `DAQ_TARGETS` is a CSV-field that can be used to only build specific targets. E.g.
-to just build the `ping` tests use the short form `DAQ_TARGETS=test_ping cmd_build`. Using a more sticky
+to just build the `ping` tests use the short form `DAQ_TARGETS=test_ping cmd/build`. Using a more sticky
 exported varaible, for `ping` and `nmap`, would look something like:
 <pre>
 ~/daq$ <b>export DAQ_TARGETS=test_ping,test_nmap</b>

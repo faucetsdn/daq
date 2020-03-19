@@ -21,9 +21,6 @@
     "bacnet": {
       "enabled": true
     },
-    "brute": {
-      "enabled": false
-    },
     "macoui": {
       "enabled": true
     },
@@ -54,55 +51,68 @@
       "ports": {
         "20": {
           "allowed": false,
-          "reason": "File Transfer Protocol (FTP) Server Data Transfer"
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
         },
         "21": {
           "allowed": false,
-          "reason": "File Transfer Protocol (FTP) Server Data Transfer"
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
         },
         "22": {
           "allowed": true,
-          "reason": "Secure Shell (SSH) server"
+          "description": "Secure Shell (SSH) server",
+          "reason": ""
         },
         "23": {
           "allowed": false,
-          "reason": "Telnet Server"
+          "description": "Telnet Server",
+          "reason": ""
         },
         "25": {
           "allowed": false,
-          "reason": "Simple Mail Transfer Protocol (SMTP) Server"
+          "description": "Simple Mail Transfer Protocol (SMTP) Server",
+          "reason": ""
         },
         "80": {
           "allowed": false,
-          "reason": "Administrative Insecure Web-Server"
+          "description": "Administrative Insecure Web-Server",
+          "reason": ""
         },
         "110": {
           "allowed": false,
-          "reason": "Post Office Protocol v3 (POP3) Server"
+          "description": "Post Office Protocol v3 (POP3) Server",
+          "reason": ""
         },
         "143": {
           "allowed": false,
-          "reason": "Internet Message Access Protocol (IMAP) Server"
+          "description": "Internet Message Access Protocol (IMAP) Server",
+          "reason": ""
         },
         "161": {
           "allowed": false,
-          "reason": "Simple Network Management Protocol (SNMP)"
+          "reason": "Simple Network Management Protocol (SNMP)",
+          "reason": ""
         },
         "162": {
           "allowed": false,
-          "reason": "Simple Network Management Protocol (SNMP) Trap"
+          "description": "Simple Network Management Protocol (SNMP) Trap",
+          "reason": ""
         },
         "443": {
           "allowed": true,
-          "reason": "Administrative Secure Web-Server"
+          "description": "Administrative Secure Web-Server",
+          "reason": ""
         },
         "5800": {
           "allowed": false,
-          "reason": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol Over HTTP"
+          "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol Over HTTP",
+          "reason": ""
         },
         "5500": {
           "allowed": false,
-          "reason": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol"
+          "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol",
+          "reason": ""
         }
       }
     },
@@ -110,23 +120,28 @@
       "ports": {
         "69": {
           "allowed": false,
-          "reason": "Trivial File Transfer Protocol (TFTP) Server"
+          "description": "Trivial File Transfer Protocol (TFTP) Server",
+          "reason": ""
         },
         "123": {
           "allowed": true,
-          "reason": "Network Time Protocol (NTP) Server"
+          "description": "Network Time Protocol (NTP) Server",
+          "reason": ""
         },
         "161": {
           "allowed": false,
-          "reason": "Simple Network Management Protocol (SNMP)"
+          "description": "Simple Network Management Protocol (SNMP)",
+          "reason": ""
         },
         "162": {
           "allowed": false,
-          "reason": "Simple Network Management Protocol (SNMP) Trap"
+          "description": "Simple Network Management Protocol (SNMP) Trap",
+          "reason": ""
         },
         "47808": {
           "allowed": false,
-          "reason": "BACnet protocol"
+          "description": "BACnet protocol",
+          "reason": ""
         }
       }
     }

@@ -4,15 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-# Test the mudacl config and the test_schema to make sure they
-# make sense for tests that use them
-
-echo mudacl tests | tee -a $TEST_RESULTS
-mudacl/bin/test.sh
-echo Mudacl exit code $? | tee -a $TEST_RESULTS
-validator/bin/test_schema
-echo Validator exit code $? | tee -a $TEST_RESULTS
-
 # Runs lint checks and some similar things
 echo Lint checks | tee -a $TEST_RESULTS
 bin/check_style
@@ -103,7 +94,6 @@ cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TE
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
-capture_test_results brute
 capture_test_results macoui
 capture_test_results tls
 capture_test_results password
@@ -111,10 +101,11 @@ capture_test_results discover
 capture_test_results network
 
 # Capture peripheral logs
-more inst/run-port-*/scans/dhcp_triggers.txt | cat
-dhcp_done=$(fgrep done inst/run-port-01/scans/dhcp_triggers.txt | wc -l)
-dhcp_long=$(fgrep long inst/run-port-01/scans/dhcp_triggers.txt | wc -l)
-echo dhcp requests $dhcp_done $dhcp_long | tee -a $TEST_RESULTS
+more inst/run-port-*/scans/ip_triggers.txt | cat
+dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
+dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
+echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
+     $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show the full logs from each test
@@ -144,15 +135,19 @@ echo done with docker logs
 # Remove things that will always (probably) change - like DAQ version/timestamps/IPs
 # from comparison
 function redact {
-    sed -E -e '/^%%.*/d' \
+    sed -E -e "s/ \{1,\}$//" \
         -e 's/\s*%%.*//' \
         -e 's/[0-9]{4}-.*T.*Z/XXX/' \
-        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/g' \
-        -e 's/DAQ version.*//'
+        -e 's/[a-zA-Z]{3} [a-zA-Z]{3} [0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
+        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/' \
+        -e 's/DAQ version.*//' \
+        -e 's/[0-9].[0-9]{2} seconds/XXX/' \
+        -e 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/XXX/'
 }
 
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
+cp inst/reports/report_9a02571e8f01_*.md out/
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
