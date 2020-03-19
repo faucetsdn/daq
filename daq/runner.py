@@ -330,6 +330,10 @@ class DAQRunner:
             'port_set': gateway.port_set,
             'mac': target_mac
         }
+
+        # Stops all DHCP response initially
+        # Selectively enables dhcp response at ipaddr stage based on dhcp mode
+        gateway.execute_script('change_dhcp_response_time', target_mac, -1)
         gateway.attach_target(target_port, target)
 
         try:

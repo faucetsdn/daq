@@ -25,6 +25,7 @@ env:
     - DAQ_TEST=aux
     - DAQ_TEST=topo
     - DAQ_TEST=modules
+    - DAQ_TEST=dhcp
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/

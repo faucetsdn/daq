@@ -50,7 +50,6 @@ def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
-
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
@@ -172,6 +171,9 @@ class ConnectedHost:
     def _get_static_ip(self):
         return self._loaded_config.get('static_ip')
 
+    def _get_dhcp_mode(self):
+        return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
+
     def _type_path(self):
         dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
         device_type = dev_config.get('device_type')
@@ -259,14 +261,23 @@ class ConnectedHost:
         self.record_result('sanity', state=MODE.DONE)
         self.record_result('ipaddr', state=MODE.EXEC)
         static_ip = self._get_static_ip()
-        _ = [listener(self) for listener in self._dhcp_listeners]
         if static_ip:
+            LOGGER.info('Target port %d using static ip', self.target_port)
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.DONE, {
                 'mac': self.target_mac,
                 'ip': static_ip,
                 'delta': -1
             }, self.gateway.port_set)
+        else:
+            dhcp_mode = self._get_dhcp_mode()
+            LOGGER.info('Target port %d using %s DHCP mode', self.target_port,
+                        dhcp_mode or 'normal')
+            # enables dhcp response for this device
+            wait_time = self.runner.config.get("long_dhcp_response_sec") \
+                if dhcp_mode == 'long_response' else 0
+            self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
+        _ = [listener(self) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):
         # clean up tcp monitor that could be open
@@ -507,7 +518,7 @@ class ConnectedHost:
             'scan_base': self.scan_base
         }
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                self.test_name)
+                                                test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
@@ -517,7 +528,7 @@ class ConnectedHost:
             params['switch_model'] = self.config['switch_model']
 
         try:
-            LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
+            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
             self.test_host.start(self.test_port, params, self._docker_callback)
