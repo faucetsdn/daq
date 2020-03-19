@@ -46,15 +46,15 @@ check_bacnet 02 04 1 1 1 1
 check_bacnet 03 01 1 1 1 1
 run_test 4
 
-echo %%% faucet.yaml
-cat inst/faucet.yaml
-echo %%% faucet log
-cat inst/faucet.log
-echo %%% ovs-ofctl
-cat ofctl_show_pri.txt
-cat ofctl_show_sec.txt
-echo %%% ip link
-cat ip_link.txt
-echo %%%
+#echo %%% faucet.yaml
+#cat inst/faucet.yaml
+#echo %%% faucet log
+#cat inst/faucet.log
+#echo %%% ovs-ofctl
+#cat ofctl_show_pri.txt
+#cat ofctl_show_sec.txt
+#echo %%% ip link
+#cat ip_link.txt
+#echo %%%
 
 echo Done with tests | tee -a $TEST_RESULTS
