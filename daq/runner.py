@@ -305,11 +305,11 @@ class DAQRunner:
             if self._system_wait > 10:
                 LOGGER.error('Wait count exceeded')
                 self._system_wait = 0
-                os.system('ovs-ofctl show pri > ofctl_show_pri.txt')
-                os.system('ovs-ofctl show sec > ofctl_show_sec.txt')
-                os.system('ip link > ip_link.txt')
+                #os.system('ovs-ofctl show pri > ofctl_show_pri.txt')
+                #os.system('ovs-ofctl show sec > ofctl_show_sec.txt')
+                #os.system('ip link > ip_link.txt')
                 self.shutdown()
-                raise Exception('exceeded retries')
+                raise Exception('exceeded system wait retries')
             return False
 
         if target_port in self.port_targets:

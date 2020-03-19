@@ -141,7 +141,6 @@ class FaucetEventClient():
                 self.buffer = remainder
             try:
                 event = json.loads(line)
-                LOGGER.info('raw_event %s', event)
             except Exception as e:
                 LOGGER.info('Error (%s) parsing\n%s*\nwith\n%s*', str(e), line, remainder)
             event = self._filter_faucet_event(event)
