@@ -64,7 +64,7 @@ if [ "$1" == push ]; then
 elif [ "$1" == pull ]; then
     REPO_VER=$(< inst/$DOCKER_IMAGE_VER)
     if [ "$VERSION" != "$REPO_VER" ]; then
-	echo Tagged version $TAGGED_VER does not match repo version $REPO_VER
+	echo Tagged version $VERSION does not match repo version $REPO_VER from inst/$DOCKER_IMAGE_VER
 	false
     fi
     echo Pulling images for version $VERSION
