@@ -74,7 +74,8 @@ elif [ "$1" == check ]; then
 elif [ "$1" == force ]; then
     if [ -n "$2" ]; then
 	echo Setting build version to $2
-	echo $2 > inst/$DOCKER_IMAGE_VER
+	BUILD_IMAGE_VER=$2
+	shift
     fi
     force=force
     shift
@@ -82,6 +83,10 @@ fi
 
 rm -f inst/$DOCKER_IMAGE_LIST
 rm -f inst/$DOCKER_IMAGE_VER
+
+if [ -n "$BUILD_IMAGE_VER" ]; then
+    echo $BUILD_IMAGE_VER > inst/$DOCKER_IMAGE_VER
+fi
 
 if [ "$1" == inline ]; then
     inline="inline"
