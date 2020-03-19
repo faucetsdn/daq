@@ -62,6 +62,12 @@ if [ "$1" == push ]; then
     echo Done with docker build push.
     exit 0
 elif [ "$1" == pull ]; then
+    REPO_VER=$(< inst/$DOCKER_IMAGE_VER)
+    if [ "$VERSION" != "$REPO_VER" ]; then
+	echo Tagged version $TAGGED_VER does not match repo version $REPO_VER
+	false
+    fi
+    echo Pulling images for version $VERSION
     pull_images
     echo Updating .build_hash
     bin/build_hash write
