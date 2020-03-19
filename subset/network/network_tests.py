@@ -173,7 +173,7 @@ def add_summary(text):
 
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
-if test_request == 'connection.min_send':
+if test_request == 'connection.communication.min_send':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_min_send))
     result = test_connection_min_send()
 elif test_request == 'connection.dhcp_long':

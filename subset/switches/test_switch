@@ -35,19 +35,19 @@ else
 
     write_out_result $REPORT \
                      "connection.port_link" \
-                     "$(jq -r '.["connection.port_link"].desc' $MANIFEST)" \
+                     "$(jq -r '.["connection.switch.port_link"].desc' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.port_link $SUMMARY"
 
     write_out_result $REPORT \
                      "connection.port_speed" \
-                     "$(jq -r '.["connection.port_speed"].desc' $MANIFEST)" \
+                     "$(jq -r '.["connection.switch.port_speed"].desc' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.port_speed $SUMMARY"
 
     write_out_result $REPORT \
                      "connection.port_duplex" \
-                     "$(jq -r '.["connection.port_duplex"].desc' $MANIFEST)" \
+                     "$(jq -r '.["connection.switch.port_duplex"].desc' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.port_duplex $SUMMARY"
 
