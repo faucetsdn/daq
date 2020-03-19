@@ -148,7 +148,7 @@ class ConnectedHost:
     def _test_enabled(self, test):
         fallback_config = {'enabled': test in self._CORE_TESTS}
         test_config = self._loaded_config['modules'].get(test, fallback_config)
-        return test_config['enabled']
+        return test_config.get('enabled', True)
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
@@ -170,6 +170,9 @@ class ConnectedHost:
 
     def _get_static_ip(self):
         return self._loaded_config.get('static_ip')
+
+    def _get_dhcp_mode(self):
+        return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
 
     def _type_path(self):
         dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
@@ -267,7 +270,7 @@ class ConnectedHost:
                 'delta': -1
             }, self.gateway.port_set)
         else:
-            dhcp_mode = self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
+            dhcp_mode = self._get_dhcp_mode()
             LOGGER.info('Target port %d using %s DHCP mode', self.target_port,
                         dhcp_mode or 'normal')
             # enables dhcp response for this device

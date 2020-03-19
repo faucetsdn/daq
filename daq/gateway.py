@@ -61,7 +61,7 @@ class Gateway():
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
         host.activate()
         self.host = host
-        self.execute_script('change_lease_time', self.runner.config.get("initial_dhcp_lease_time"))
+        self.execute_script('change_lease_time', self.runner.config.get('initial_dhcp_lease_time'))
         LOGGER.info("Added networking host %s on port %d at %s", host_name, host_port, host.IP())
 
         dummy_name = 'dummy%02d' % self.port_set
@@ -111,7 +111,7 @@ class Gateway():
             self._scan_monitor = None
 
     def execute_script(self, action, *args):
-        """Generic function for executing dhcp scripts on gateway"""
+        """Generic function for executing scripts on gateway"""
         self.host.cmd(('./%s' + len(args) * ' %s') % (action, *args))
 
     def allocate_test_port(self):
