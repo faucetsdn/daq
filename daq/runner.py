@@ -303,8 +303,8 @@ class DAQRunner:
             LOGGER.warning('Target port %d ignored, system not active', target_port)
             self._system_wait += 1
             if self._system_wait > 10:
-                os.system('ovs_ofctl show pri > ofctl_show_pri.txt')
-                os.system('ovs_ofctl show sec > ofctl_show_sec.txt')
+                os.system('ovs-ofctl show pri > ofctl_show_pri.txt')
+                os.system('ovs-ofctl show sec > ofctl_show_sec.txt')
                 os.system('ip link > ip_link.txt')
                 self.shutdown()
                 raise Exception('exceeded retries')
