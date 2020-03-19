@@ -1,8 +1,8 @@
 daqf/aardvark 2c8c7f8d8a99
 daqf/default d8e45accec57
-daqf/faucet 03b3a1ae6ab2
-daqf/faux 13625e6fdec9
-daqf/gauge 5e94d22d069c
+daqf/faucet 85447a27bea6
+daqf/faux ae3f1a0ae587
+daqf/gauge 0a7c15a5a439
 daqf/networking c806890e7969
 daqf/switch cfa515908496
 daqf/test_bacext ddcb78f086f8
@@ -17,7 +17,7 @@ daqf/test_network c291ea662c88
 daqf/test_nmap 604aa264acb7
 daqf/test_pass 453bee0be97a
 daqf/test_password 54530edea2a9
-daqf/test_ping 947c339a265d
+daqf/test_ping b85b71fb1f42
 daqf/test_switch 9ffaf13cd8b4
 daqf/test_tls b4e2de335bfe
 daqf/test_udmi f7b010f98ed4

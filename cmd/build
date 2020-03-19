@@ -21,9 +21,6 @@ inline=
 DOCKER_IMAGE_LIST=docker_images.txt
 DOCKER_IMAGE_VER=docker_images.ver
 
-# Clear out version to enforce build flow.
-rm -f inst/$DOCKER_IMAGE_VER
-
 cd $ROOT
 source misc/config_base.sh
 host_tests=$host_tests bin/docker_build_files
@@ -84,6 +81,7 @@ elif [ "$1" == force ]; then
 fi
 
 rm -f inst/$DOCKER_IMAGE_LIST
+rm -f inst/$DOCKER_IMAGE_VER
 
 if [ "$1" == inline ]; then
     inline="inline"
