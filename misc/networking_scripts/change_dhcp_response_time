@@ -5,7 +5,7 @@
 # (SIGHUP does not reload configuration file).
 mac_addr=$1
 response_time_sec=$2
-if [ -z "$mac_addr" ] || [ -z "$response_time_sec" ]; then
+if [ -z "$mac_addr" -o -z "$response_time_sec" ]; then
     echo "Usage: ./change_dhcp_response_time mac_addr response_time_sec"
     exit 1
 fi
