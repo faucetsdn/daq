@@ -19,7 +19,7 @@ if [ -n "$build_tests" ]; then
     release_tag=`git describe --dirty || echo unknown`
     # If the current commit is a release tag, then pull images.
     echo Processing release tag $release_tag
-    if [ "$release_tag" != unknown -a ! "$release_tag" =~ -.*- ]; then
+    if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
 	build_mode=pull
     fi
     cmd/build $build_mode
