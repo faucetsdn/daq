@@ -20,7 +20,7 @@ echo $dhcp_option >> /etc/dnsmasq.conf
 
 function restart_dnsmasq() {
     kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
-    dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp
+    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
 }
 
 function wait_and_restart_dnsmasq() {
