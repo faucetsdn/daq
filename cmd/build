@@ -15,7 +15,7 @@ fi
 set -o pipefail
 
 ROOT=$(dirname $0)/..
-VERSION=`git describe || true`
+VERSION=`git describe || echo unknown`
 
 inline=
 DOCKER_IMAGE_LIST=docker_images.txt
