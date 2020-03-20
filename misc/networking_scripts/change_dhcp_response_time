@@ -33,4 +33,3 @@ function wait_and_restart_dnsmasq() {
 }
 
 wait_and_restart_dnsmasq &
-sleep 5
