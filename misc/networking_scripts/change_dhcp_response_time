@@ -19,6 +19,9 @@ sed -i s/$dhcp_option// /etc/dnsmasq.conf
 echo $dhcp_option >> /etc/dnsmasq.conf
 
 function restart_dnsmasq() {
+    while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
+        sleep 1
+    done
     kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
     dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
 }
@@ -32,4 +35,4 @@ function wait_and_restart_dnsmasq() {
     fi
 }
 
-wait_and_restart_dnsmasq &
+wait_and_restart_dnsmasq & 
