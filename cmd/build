@@ -90,7 +90,7 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-$DAQ_BUILD_RETRY bin/docker_build $force $inline
+bin/docker_build $force $inline
 
 rm inst/$DOCKER_IMAGE_LIST || true
 echo Updating inst/$DOCKER_IMAGE_LIST...
