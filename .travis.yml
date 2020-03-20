@@ -24,6 +24,7 @@ env:
     - DAQ_TEST=dhcp TEST=1
     - DAQ_TEST=dhcp TEST=2
     - DAQ_TEST=dhcp TEST=3
+    - DAQ_TEST=dhcp TEST=4
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/
