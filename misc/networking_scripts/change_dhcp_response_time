@@ -10,12 +10,14 @@ if [ -z "$mac_addr" -o -z "$response_time_sec" ]; then
     exit 1
 fi
 
-dhcp_option="dhcp-host=$mac_addr,ignore"
 
-echo $dhcp_option >> /etc/dnsmasq.conf
 while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
     sleep 1
 done
+
+dhcp_option="dhcp-host=$mac_addr,ignore"
+sed -i s/$dhcp_option// /etc/dnsmasq.conf
+echo $dhcp_option >> /etc/dnsmasq.conf
 
 function restart_dnsmasq() {
     kill $(ps aux | grep dnsmasq | awk '{print $2}') || true
