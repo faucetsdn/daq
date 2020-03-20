@@ -16,9 +16,9 @@ sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 sudo chown -f $USER -R inst || true
 
 if [ -n "$build_tests" ]; then
-    release_tag=`git describe --dirty`
+    release_tag=`git describe --dirty || true`
     # If the current commit is a release tag, then pull images.
-    if [[ ! $release_tag =~ -.*- ]]; then
+    if [[ ! "$release_tag" =~ -.*- ]]; then
 	build_mode=pull
     fi
     cmd/build $build_mode
