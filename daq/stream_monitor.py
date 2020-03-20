@@ -8,7 +8,7 @@ import logger
 
 LOGGER = logger.get_logger('stream')
 
-class StreamMonitor():
+class StreamMonitor:
     """Monitor set of stream objects"""
 
     def __init__(self, timeout_sec=None, idle_handler=None, loop_hook=None):
