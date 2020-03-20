@@ -84,10 +84,10 @@ class DhcpMonitor():
             'mac': self.target_mac,
             'delta': delta
         }
-        self.scan_start = int(time.time())
         self.callback(mode, target)
         self.target_ip = None
         self.target_mac = None
+        self.scan_start = int(time.time())
 
     def _dhcp_hangup(self):
         self.dhcp_traffic = None
