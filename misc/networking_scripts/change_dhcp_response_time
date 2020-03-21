@@ -15,20 +15,17 @@ while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
 done
 
 dhcp_option="dhcp-host=$mac_addr,ignore"
-sed -i s/$dhcp_option// /etc/dnsmasq.conf
 echo $dhcp_option >> /etc/dnsmasq.conf
 
 function restart_dnsmasq() {
-    while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
-        sleep 1
-    done
     kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
     dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
+    sleep 5
 }
 
 function wait_and_restart_dnsmasq() {
     restart_dnsmasq
-    if [ "$response_time_sec" != -1 ]; then
+    if [ "$response_time_sec" != "-1" ]; then
         sleep $response_time_sec
         sed -i s/$dhcp_option// /etc/dnsmasq.conf
         restart_dnsmasq
