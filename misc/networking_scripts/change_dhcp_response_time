@@ -23,7 +23,6 @@ function restart_dnsmasq() {
 }
 
 function wait_and_restart_dnsmasq() {
-    restart_dnsmasq &
     if [ "$response_time_sec" != "-1" ]; then
         sleep $response_time_sec
         sed -i s/$dhcp_option// /etc/dnsmasq.conf
@@ -31,4 +30,5 @@ function wait_and_restart_dnsmasq() {
     fi
 }
 
+restart_dnsmasq
 wait_and_restart_dnsmasq & 
