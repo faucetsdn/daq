@@ -10,7 +10,7 @@ import wrappers
 LOGGER = logger.get_logger('docker')
 
 
-class DockerTest():
+class DockerTest:
     """Class for running docker tests"""
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'

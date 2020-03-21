@@ -7,7 +7,6 @@ MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
 INSTLOCK=$INSTDIR/startup.lock
 LOCALDIR=$ROOT/local
-FAUCET_CONF=faucet.yaml
 FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
@@ -33,7 +32,18 @@ while [ -f $INSTLOCK ]; do
 done
 
 FAUCET=$(realpath $ROOT/faucet)
+FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
+
+if [ ! -d $FAUCET ]; then
+    echo Faucet directory $FAUCET not found.
+    false
+fi
+
+if [ ! -d $FORCH ]; then
+    echo Forch directory $FORCH not found.
+    false
+fi
 
 echo Release version $DAQ_VERSION
 
@@ -41,15 +51,10 @@ if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
-export PYTHONPATH=$FAUCET:$MININET
-
-if [ ! -d $FAUCET ]; then
-    echo Faucet directory $FAUCET not found.
-    false
-fi
+export PYTHONPATH=$FORCH:$FAUCET:$MININET
 
 mkdir -p $INSTDIR
-rm -f $FAUCET_EVENT_SOCK $FAUCET_LOG $cleanup_file
+rm -f $INSTDIR/faucet* $cleanup_file
 
 docker ps > /dev/null 2>&1 || service docker start
 
