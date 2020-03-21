@@ -18,4 +18,4 @@ while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
     sleep 1
 done
 kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
-dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
+dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &

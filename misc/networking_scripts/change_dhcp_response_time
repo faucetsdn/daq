@@ -20,15 +20,14 @@ echo $dhcp_option >> /etc/dnsmasq.conf
 function restart_dnsmasq() {
     kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
     dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
-    sleep 5
 }
 
 function wait_and_restart_dnsmasq() {
-    restart_dnsmasq
+    restart_dnsmasq &
     if [ "$response_time_sec" != "-1" ]; then
         sleep $response_time_sec
         sed -i s/$dhcp_option// /etc/dnsmasq.conf
-        restart_dnsmasq
+        restart_dnsmasq &
     fi
 }
 
