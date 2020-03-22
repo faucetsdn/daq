@@ -35,4 +35,11 @@ if [ -f "$gcp_cred" ]; then
     fi
 fi
 
+if ! docker images > /dev/null; then
+    echo
+    echo Docker execution failed, is the docker group setup?
+    echo If this is the first time, try logging out and log back in again.
+    false
+fi
+
 cmd/exrun $run_args 2>&1 | tee $cmdrun_log
