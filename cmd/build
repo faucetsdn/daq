@@ -2,11 +2,11 @@
 
 if [ "$1" == help ]; then
  echo The following are expected modes of builds:
- echo $0 : defaults to build
+ echo $0 : defaults to force
  echo $0 check : Check if the built images are updated.
  echo $0 push : Pushes images to docker hub
  echo $0 pull : Pulls images from docker hub
- echo $0 build : Builds missing docker images
+ echo $0 build : Builds only missing docker images
  echo $0 force : Builds all docker images
  exit 0
 fi
@@ -16,6 +16,7 @@ set -o pipefail
 
 ROOT=$(dirname $0)/..
 
+force=force
 inline=
 DOCKER_IMAGE_LIST=docker_images.txt
 
@@ -63,8 +64,8 @@ elif [ "$1" == check ]; then
     shift
     bin/build_hash check
     exit 0
-elif [ "$1" == force ]; then
-    force=force
+elif [ "$1" == build ]; then
+    force=
     shift
 fi
 

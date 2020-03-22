@@ -12,7 +12,7 @@ FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
-export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
+export DAQ_VERSION=$(git describe --dirty)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
 run_args="$@"
@@ -36,14 +36,19 @@ FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
 
 if [ ! -d $FAUCET ]; then
-    echo Faucet directory $FAUCET not found.
+    echo Faucet directory $FAUCET not found, try running bin/setup_dev.
     false
 fi
 
 if [ ! -d $FORCH ]; then
-    echo Forch directory $FORCH not found.
+    echo Forch directory $FORCH not found, try running bin/setup_dev.
     false
 fi
+
+(cd $FAUCET; git checkout $(< $ROOT/misc/FAUCET_VERSION)) || \
+    echo Could not update faucet, try 'bin/clean_dev && bin/setup_dev' to reset.
+(cd $FORCH; git checkout $(< $ROOT/misc/FORCH_VERSION)) || \
+    echo Could not update forch, try 'bin/clean_dev && bin/setup_dev' to reset.
 
 echo Release version $DAQ_VERSION
 
