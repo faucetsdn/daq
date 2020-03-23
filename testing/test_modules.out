@@ -20,4 +20,4 @@ RESULT fail security.tls.v1_2
 RESULT fail security.tls.v1_2.x509
 RESULT fail security.tls.v1_3
 RESULT fail security.tls.v1_3.x509
-Testing complete
+Testing complete.
