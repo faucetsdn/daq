@@ -20,12 +20,11 @@ env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   matrix:
-    - DAQ_TEST=base
     - DAQ_TEST=many
-    - DAQ_TEST=aux
-    - DAQ_TEST=topo
-    - DAQ_TEST=modules
-    - DAQ_TEST=dhcp
+    - DAQ_TEST=dhcp TEST=1
+    - DAQ_TEST=dhcp TEST=2
+    - DAQ_TEST=dhcp TEST=3
+    - DAQ_TEST=dhcp TEST=4
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/

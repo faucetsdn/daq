@@ -10,6 +10,8 @@ if [ -z "$mac_addr" -o -z "$response_time_sec" ]; then
     exit 1
 fi
 
+sed -i s/dhcp-host=\\*,ignore// /etc/dnsmasq.conf
+
 dhcp_option="dhcp-host=$mac_addr,ignore"
 echo $dhcp_option >> /etc/dnsmasq.conf
 
