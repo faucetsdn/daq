@@ -5,15 +5,15 @@ checksum=$(md5sum $config_file | awk '{print $1}')
 
 while true; do
     new_checksum=$(md5sum $config_file | awk '{print $1}')
-    if [ $checksum -eq $new_checksum ]; then
+    if [ $checksum == $new_checksum ]; then
         sleep 1
         continue
     fi 
     checksum=$new_checksum
     while [ -z $(cat /var/run/dnsmasq.pid) ]; do
-	sleep 1
+	    sleep 1
     done
     kill $(cat /var/run/dnsmasq.pid) || true
     rm -f /var/run/dnsmasq.pid
-    dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp
+    dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp &
 done
