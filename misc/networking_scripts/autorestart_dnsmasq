@@ -1,0 +1,18 @@
+#!/bin/bash -e
+# Continuously monitors dnsmasq config and restarts dnsmasq when config is changed 
+config_file='/etc/dnsmasq.conf'
+checksum=$(md5sum $config_file | awk '{print $1}')
+
+while true; do
+    new_checksum=$(md5sum $config_file | awk '{print $1}')
+    if [ $checksum -eq $new_checksum ]; then
+        sleep 1
+        continue
+    fi 
+    checksum=$new_checksum
+    while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
+        sleep 1
+    done
+    kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
+    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
+done

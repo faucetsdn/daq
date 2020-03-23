@@ -17,18 +17,11 @@ done
 dhcp_option="dhcp-host=$mac_addr,ignore"
 echo $dhcp_option >> /etc/dnsmasq.conf
 
-function restart_dnsmasq() {
-    kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
-    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp
-}
-
-function wait_and_restart_dnsmasq() {
+function wait_and_change_conf() {
     if [ "$response_time_sec" != "-1" ]; then
         sleep $response_time_sec
         sed -i s/$dhcp_option// /etc/dnsmasq.conf
-        restart_dnsmasq &
     fi
 }
 
-restart_dnsmasq
-wait_and_restart_dnsmasq & 
+wait_and_change_conf & 

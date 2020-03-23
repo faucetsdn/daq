@@ -14,8 +14,3 @@ original=$(cat /etc/dnsmasq.conf | grep dhcp-range=10.20 | head -1)
 new="$(echo $original | cut -d',' -f 1,2),$lease"
 sed -i s/$original/$new/ /etc/dnsmasq.conf
 
-while [ $(ps aux | grep dnsmasq | wc -l) -eq 1 ]; do
-    sleep 1
-done
-kill -9 $(ps aux | grep dnsmasq | awk '{print $2}') || true
-dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
