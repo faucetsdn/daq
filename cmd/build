@@ -79,10 +79,9 @@ elif [ "$1" == check ]; then
     shift
     bin/build_hash check
     exit 0
-<<<<<<< HEAD
 elif [ "$1" == build ]; then
     force=
-=======
+    shift
 elif [ "$1" == force ]; then
     if [ -n "$2" ]; then
 	echo Setting build version to $2
@@ -90,8 +89,12 @@ elif [ "$1" == force ]; then
 	shift
     fi
     force=force
->>>>>>> master
     shift
+elif [ "$1" == "" ]; then
+    echo Defaulting to force build
+else
+    echo Unknown command $1
+    false
 fi
 
 rm -f inst/$DOCKER_IMAGE_LIST
