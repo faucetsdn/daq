@@ -13,7 +13,7 @@ checksum=$(md5sum $config_file | awk '{print $1}')
 while true; do
     new_checksum=$(md5sum $config_file | awk '{print $1}')
     if [ $checksum == $new_checksum ]; then
-        sleep 1
+        sleep 5
         continue
     fi 
     checksum=$new_checksum

@@ -22,4 +22,5 @@ function wait_and_change_conf() {
     fi
 }
 
-wait_and_change_conf & 
+wait_and_change_conf &
+sleep 5
