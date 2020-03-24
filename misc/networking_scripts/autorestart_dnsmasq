@@ -1,0 +1,26 @@
+#!/bin/bash -e
+# Continuously monitors dnsmasq config and restarts dnsmasq when config is changed 
+config_file='/etc/dnsmasq.conf'
+
+# Wait until there's at least one DHCP device
+while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
+    sleep 1
+done
+dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
+
+checksum=$(md5sum $config_file | awk '{print $1}')
+
+while true; do
+    new_checksum=$(md5sum $config_file | awk '{print $1}')
+    if [ $checksum == $new_checksum ]; then
+        sleep 1
+        continue
+    fi 
+    checksum=$new_checksum
+    while [ -z $(cat /var/run/dnsmasq.pid) ]; do
+	    sleep 1
+    done
+    kill $(cat /var/run/dnsmasq.pid) || true
+    rm -f /var/run/dnsmasq.pid
+    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
+done
