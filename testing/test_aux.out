@@ -73,7 +73,7 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-    "timeout_sec": 120
+    "timeout_sec": 200 
   },
   "macoui": {
     "enabled": true
@@ -118,7 +118,7 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
-    "timeout_sec": 120
+    "timeout_sec": 200
   },
   "macoui": {
     "enabled": true,
