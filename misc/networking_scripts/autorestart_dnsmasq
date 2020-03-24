@@ -6,7 +6,7 @@ config_file='/etc/dnsmasq.conf'
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
     sleep 1
 done
-dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp &
+dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 
 checksum=$(md5sum $config_file | awk '{print $1}')
 
@@ -22,5 +22,5 @@ while true; do
     done
     kill $(cat /var/run/dnsmasq.pid) || true
     rm -f /var/run/dnsmasq.pid
-    dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp &
+    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 done
