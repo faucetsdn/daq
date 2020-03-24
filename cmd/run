@@ -16,7 +16,13 @@ sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 sudo chown -f $USER -R inst || true
 
 if [ -n "$build_tests" ]; then
-    cmd/build
+    release_tag=`git describe --dirty || echo unknown`
+    # If the current commit is a release tag, then pull images.
+    echo Processing release tag $release_tag
+    if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
+	build_mode=pull
+    fi
+    cmd/build $build_mode
 fi
 
 bin/build_hash check
