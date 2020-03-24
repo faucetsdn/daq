@@ -1,7 +1,7 @@
 {
   "modules": {
     "ipaddr": {
-      "timeout_sec": 200
+      "timeout_sec": 250
     },
     "pass": {
       "enabled": true
