@@ -55,6 +55,7 @@ echo Capturing fake startup.pcap...
 sudo tcpdump -c 3 -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
 
 docker_args+=" --env TARGET_IP=$faux_ip"
+docker_args+=" --env TARGET_MAC=01:02:03:04:05:06"
 
 mkdir -p $config_dir
 docker_args+=" -v $config_dir:/config/inst"
@@ -102,4 +103,4 @@ fi
 echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
 echo
 echo %%%%%%%%%%%%%% Module test results: $target %%%%%%%%%%%%%%%
-cat inst/modules/$module/run/tmp/result_lines.txt
+fgrep RESULT inst/modules/$module/run/tmp/report.txt
