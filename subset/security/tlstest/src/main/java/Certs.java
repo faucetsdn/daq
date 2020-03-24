@@ -40,24 +40,6 @@ public class Certs {
     return pass;
   }
 
-  //  private boolean testTLS10() throws Exception {
-  //    boolean pass = testTLS("1");
-  //    passX509(pass, "1");
-  //    return pass;
-  //  }
-  //
-  //  private boolean testTLS12() throws Exception {
-  //    boolean pass = testTLS("1.2");
-  //    passX509(pass, "1.2");
-  //    return pass;
-  //  }
-  //
-  //  private boolean testTLS13() throws Exception {
-  //    boolean pass = testTLS("1.3");
-  //    passX509(pass, "1.3");
-  //    return pass;
-  //  }
-
   private boolean testTLS(String tlsVersion) throws Exception {
     SSLSocket socket;
     try {
