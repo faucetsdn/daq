@@ -6,21 +6,20 @@ config_file='/etc/dnsmasq.conf'
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
     sleep 1
 done
-dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
-
 checksum=$(md5sum $config_file | awk '{print $1}')
+dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 
 while true; do
     new_checksum=$(md5sum $config_file | awk '{print $1}')
     if [ $checksum == $new_checksum ]; then
-        sleep 1
+        sleep 2
         continue
     fi 
-    checksum=$new_checksum
     while [ -z $(cat /var/run/dnsmasq.pid) ]; do
 	    sleep 1
     done
     kill $(cat /var/run/dnsmasq.pid) || true
     rm -f /var/run/dnsmasq.pid
+    checksum=$(md5sum $config_file | awk '{print $1}')
     dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 done
