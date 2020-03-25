@@ -53,12 +53,12 @@ for i in $(seq 1 $NUM_LONG_DHCP_DEVICES); do
     long_ip_triggers=$(egrep -i "IP notify.*gw0$i \(long/" inst/cmdrun.log | wc -l)
     echo Found $ip_triggers ip triggers and $long_ip_triggers long ip responses. 
     echo "Device $i enough long ip triggers? $((ip_triggers <= long_ip_triggers && long_ip_triggers > 1))" | tee -a $TEST_RESULTS
-    if [ $ip_triggers -gt $long_ip_triggers ]; then
+    #if [ $ip_triggers -gt $long_ip_triggers ]; then
         find inst/gw0$i/nodes
         cat inst/gw0$i/nodes/gw0$i/tmp/dnsmasq.log   
         cat inst/gw0$i/nodes/gw0$i/activate.log
         echo "========================================================"
-    fi
+    #fi
 done
 
 
