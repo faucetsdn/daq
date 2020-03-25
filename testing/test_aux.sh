@@ -90,9 +90,11 @@ trap cleanup_marker EXIT
  kill $pid
 ) &
 
-# Run DAQ in single shot mode
+echo Build all container images...
+cmd/build inline
+
 echo Starting aux test run...
-cmd/run -b -s -k
+cmd/run -s -k
 
 # Check custom timeout
 cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS

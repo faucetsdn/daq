@@ -2,7 +2,8 @@
 
 if [ "$1" == help ]; then
  echo The following are expected modes of builds:
- echo $0 : defaults to force
+ echo $0 : defaults to force build
+ echo $0 inline : builds missing containers, with results shown inline
  echo $0 check : Check if the built images are updated.
  echo $0 push : Pushes images to docker hub
  echo $0 pull : Pulls images from docker hub
@@ -90,6 +91,9 @@ elif [ "$1" == force ]; then
     fi
     force=force
     shift
+elif [ "$1" == inline ]; then
+    inline="inline"
+    shift
 elif [ "$1" == "" ]; then
     echo Defaulting to force build
 else
@@ -103,12 +107,6 @@ rm -f inst/$DOCKER_IMAGE_VER
 if [ -n "$BUILD_IMAGE_VER" ]; then
     echo $BUILD_IMAGE_VER > inst/$DOCKER_IMAGE_VER
 fi
-
-if [ "$1" == inline ]; then
-    inline="inline"
-    shift
-fi
-
 
 local_version=$(cd faucet; git rev-list -n 1 HEAD)
 if [ "$1" == -f ]; then
