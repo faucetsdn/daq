@@ -7,6 +7,6 @@
   "author": "Google LLC",
   "license": "Apache-2.0",
   "dependencies": {
-    "@google-cloud/pubsub": "0.32.1"
+    "@google-cloud/pubsub": "1.6.0"
   }
 }
