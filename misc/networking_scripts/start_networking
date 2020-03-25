@@ -50,6 +50,7 @@ echo Starting dnsmasq at $(date)
 dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 
 while true; do
+    echo Checking config at $(date)
     new_checksum=$(md5sum $config_file | awk '{print $1}')
     if [ $checksum == $new_checksum ]; then
         sleep 2
