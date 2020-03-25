@@ -4,7 +4,7 @@ LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_IF=eth0
 
 echo Starting networking for $LOCAL_IF and $EXT_IF
-
+echo $(date)
 while ! ifconfig -a | fgrep -q $LOCAL_IF; do
     echo Waiting for interface $LOCAL_IF to exist...
     sleep 1
@@ -32,13 +32,14 @@ fi
 
 echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
 
-echo Blocking for all eternity.
+echo Blocking for all eternity. $(date)
 
 config_file='/etc/dnsmasq.conf'
 echo dhcp-host before ignore 
 
 # Wait until there's at least one DHCP device
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
+    echo $(date)
     tail -10 $config_file
     sleep 1
 done
