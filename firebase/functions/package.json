@@ -12,7 +12,7 @@
     "node": "8"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "0.32.1",
+    "@google-cloud/pubsub": "1.6.0",
     "firebase-admin": "7.4.0",
     "firebase-functions": "3.3.0",
     "extend": "3.0.2"
