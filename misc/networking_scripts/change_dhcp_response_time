@@ -10,8 +10,6 @@ if [ -z "$mac_addr" -o -z "$response_time_sec" ]; then
     exit 1
 fi
 
-dhcp_option="dhcp-host=$mac_addr,ignore"
-flock /etc/dnsmasq.conf echo $dhcp_option >> /etc/dnsmasq.conf
 if [ $(cat /etc/dnsmasq.conf | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; then 
     flock /etc/dnsmasq.conf sed -i s/dhcp-host=\\*,ignore// /etc/dnsmasq.conf
 fi
@@ -23,4 +21,12 @@ function wait_and_change_conf() {
     fi
 }
 
-wait_and_change_conf &
+dhcp_option="dhcp-host=$mac_addr,ignore"
+
+if [ $response_time_sec == "0" ]; then
+    flock /etc/dnsmasq.conf  sed -i s/$dhcp_option// /etc/dnsmasq.conf
+else 
+    flock /etc/dnsmasq.conf echo $dhcp_option >> /etc/dnsmasq.conf
+    wait_and_change_conf &
+fi
+
