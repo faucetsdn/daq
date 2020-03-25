@@ -75,6 +75,11 @@ more inst/faux/daq-faux-*/local/pubber.json | cat
 
 # Wait until the hold test has been activated, and then kill dhcp on that gateway.
 MARKER=inst/run-port-03/nodes/hold03/activate.log
+function cleanup_marker {
+    mkdir -p ${MARKER%/*}
+    touch $MARKER
+}
+trap cleanup_marker EXIT
 (while [ ! -f $MARKER ]; do
      echo test_aux.sh waiting for $MARKER
      sleep 30
