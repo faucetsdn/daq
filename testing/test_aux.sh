@@ -151,7 +151,7 @@ function redact {
         -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/' \
         -e 's/DAQ version.*//' \
         -e 's/[0-9].[0-9]{2} seconds/XXX/' \
-        -e 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/XXX/'
+        -e 's/\b(\d{1,3}\.){3}\d{1,3}\b/XXX/'
 }
 
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
