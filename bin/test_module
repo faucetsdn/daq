@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 build=y
+cmd_exec=
 
 if [ -z "$1" ]; then
     echo $0 module test-args
@@ -9,6 +10,11 @@ fi
 
 if [ "$1" == -n ]; then
     build=
+    shift
+fi
+
+if [ "$1" == -e ]; then
+    cmd_exec=y
     shift
 fi
 
@@ -49,6 +55,7 @@ echo Capturing fake startup.pcap...
 sudo tcpdump -c 3 -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
 
 docker_args+=" --env TARGET_IP=$faux_ip"
+docker_args+=" --env TARGET_MAC=01:02:03:04:05:06"
 
 mkdir -p $config_dir
 docker_args+=" -v $config_dir:/config/inst"
@@ -81,7 +88,11 @@ echo
 echo
 echo %%%%%%%%%%%%%% Running module command $run_cmd %%%%%%%%%%%%%%%
 failed=
-docker exec $container $run_cmd || failed=yes
+if [ -z "$cmd_exec" ]; then
+    docker exec $container $run_cmd || failed=yes
+else
+    docker exec -ti $container bash || failed=yes
+fi
 
 if [ -n "$failed" ]; then
     echo
@@ -92,4 +103,4 @@ fi
 echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
 echo
 echo %%%%%%%%%%%%%% Module test results: $target %%%%%%%%%%%%%%%
-cat inst/modules/$module/run/tmp/result_lines.txt
+fgrep RESULT inst/modules/$module/run/tmp/report.txt
