@@ -33,4 +33,4 @@ fi
 echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
 
 echo Blocking for all eternity.
-./autorestart_dnsmasq
+./autorestart_dnsmasq > /tmp/dnsmasq-restart.log
