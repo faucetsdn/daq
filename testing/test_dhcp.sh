@@ -55,7 +55,9 @@ for i in $(seq 1 $NUM_LONG_DHCP_DEVICES); do
     echo "Device $i enough long ip triggers? $((ip_triggers <= long_ip_triggers && long_ip_triggers > 1))" | tee -a $TEST_RESULTS
     #if [ $ip_triggers -gt $long_ip_triggers ]; then
         find inst/gw0$i/nodes
-        cat inst/gw0$i/nodes/gw0$i/tmp/dnsmasq.log   
+        cat inst/gw0$i/nodes/gw0$i/tmp/dnsmasq.log
+	echo TAP
+        ls -l inst/gw0$i/nodes/gw0$i/activate.log
         cat inst/gw0$i/nodes/gw0$i/activate.log
         echo "========================================================"
     #fi

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_IF=eth0
