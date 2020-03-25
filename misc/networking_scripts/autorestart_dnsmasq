@@ -12,7 +12,7 @@ dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 while true; do
     new_checksum=$(md5sum $config_file | awk '{print $1}')
     if [ $checksum == $new_checksum ]; then
-        sleep 1
+        sleep 2
         continue
     fi 
     while [ -z $(cat /var/run/dnsmasq.pid) ]; do
