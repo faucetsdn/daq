@@ -112,8 +112,6 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-cloud-firestore==1.6.0 \
     google-cloud-logging==1.14.0
 
-#$PIP install --upgrade --ignore-installed pyyaml
-
 $PIP freeze
 
 if [ -d mininet ]; then
