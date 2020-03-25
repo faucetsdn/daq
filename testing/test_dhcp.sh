@@ -6,7 +6,7 @@ source testing/test_preamble.sh
 NUM_DEVICES=8
 RUN_LIMIT=20
 # num of timeout devices need to be less or equal to num dhcp devices 
-NUM_LONG_DHCP_DEVICES=2
+NUM_LONG_DHCP_DEVICES=3
 echo DHCP Tests >> $TEST_RESULTS
 
 echo source misc/system.conf > local/system.conf
