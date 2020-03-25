@@ -35,6 +35,7 @@ echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
 echo Blocking for all eternity.
 
 config_file='/etc/dnsmasq.conf'
+echo dhcp-host before ignore 
 
 # Wait until there's at least one DHCP device
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
