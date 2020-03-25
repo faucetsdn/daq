@@ -42,13 +42,16 @@ public class AlliedTelesisX230 extends SwitchInterrogator {
   protected String[] show_stack_data;
 
   public AlliedTelesisX230(
-      String remoteIpAddress, int interfacePort, boolean deviceConfigPoeEnabled) {
+      String remoteIpAddress,
+      int interfacePort,
+      boolean deviceConfigPoeEnabled,
+      String user,
+      String password) {
     super(remoteIpAddress, interfacePort, deviceConfigPoeEnabled);
     telnetClientSocket =
         new AlliedSwitchTelnetClientSocket(remoteIpAddress, remotePort, this, debug);
-    // TODO: enabled the user to input their own username and password
-    this.username = "manager";
-    this.password = "friend";
+    this.username = user == null ? "manager" : user;
+    this.password = password == null ? "friend" : password;
     // Adjust commands to active switch configuration
     command[interfacePos] = command[interfacePos] + interfacePort;
     command[platformPos] = command[platformPos] + interfacePort;

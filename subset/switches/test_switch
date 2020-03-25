@@ -17,7 +17,7 @@ if [ -n "$LOCAL_IP" ]; then
     echo Switch test with port $SWITCH_PORT.
     ping -n -c 10 $SWITCH_IP
     POE_ENABLED=`jq -r .modules.switch.poe.enabled /config/device/module_config.json`
-    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED $SWITCH_MODEL
+    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
 
     grep -v "RESULT" $LOCAL_REPORT | tee -a $MONO_LOG
     grep "RESULT" $LOCAL_REPORT | tee -a $RESULT_LINES

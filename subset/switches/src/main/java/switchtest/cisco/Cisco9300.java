@@ -31,13 +31,17 @@ public class Cisco9300 extends SwitchInterrogator {
 
   String consolePromptEndingLogin = ">";
 
-  public Cisco9300(String remoteIpAddress, int interfacePort, boolean deviceConfigPoeEnabled) {
+  public Cisco9300(
+      String remoteIpAddress,
+      int interfacePort,
+      boolean deviceConfigPoeEnabled,
+      String user,
+      String password) {
     super(remoteIpAddress, interfacePort, deviceConfigPoeEnabled);
     telnetClientSocket =
         new CiscoSwitchTelnetClientSocket(remoteIpAddress, remotePort, this, debug);
-    // TODO: enabled the user to input their own username and password
-    this.username = "admin";
-    this.password = "password";
+    this.username = user == null ? "admin" : user;
+    this.password = password == null ? "password" : password;
   }
 
   /** Generic Cisco Switch command to retrieve the Status of an interface. */
