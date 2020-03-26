@@ -2,7 +2,6 @@
 # Continuously monitors dnsmasq config and restarts dnsmasq when config is changed 
 config_file='/etc/dnsmasq.conf'
 
-
 # Wait until there's at least one DHCP device
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
     sleep 1
