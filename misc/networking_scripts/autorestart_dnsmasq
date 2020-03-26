@@ -13,7 +13,6 @@ echo Starting dnsmasq at $(date)
 dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
 
 while true; do
-    echo Checking $config_file
     new_checksum=$(md5sum $config_file | awk '{print $1}')
     if [ $checksum == $new_checksum ]; then
         sleep 2
@@ -23,8 +22,7 @@ while true; do
     while [ -z $(cat /var/run/dnsmasq.pid) ]; do
 	    sleep 1
     done
-    echo Current dnsmasq PID found. Retarting dnsmasq at $(date) with config
-    tail -20 $config_file
+    tail -10 $config_file
     kill $(cat /var/run/dnsmasq.pid) || true
     rm -f /var/run/dnsmasq.pid
     checksum=$(md5sum $config_file | awk '{print $1}')
