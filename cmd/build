@@ -128,3 +128,6 @@ echo Push images to update misc/$DOCKER_IMAGE_LIST
 echo Updating .build_hash
 bin/build_hash write
 mv -f .build_files .build_built
+
+echo TAP
+docker images
