@@ -5,7 +5,7 @@ source testing/test_preamble.sh
 # num of devices need to less than 10
 NUM_DEVICES=8
 RUN_LIMIT=20
-NUM_LONG_DHCP_DEVICES=1
+NUM_LONG_DHCP_DEVICES=3
 echo DHCP Tests >> $TEST_RESULTS
 
 echo source misc/system.conf > local/system.conf
@@ -53,6 +53,14 @@ for i in $(seq 1 $NUM_LONG_DHCP_DEVICES); do
     long_ip_triggers=$(egrep -i "IP notify.*gw0$i \(long/" inst/cmdrun.log | wc -l)
     echo Found $ip_triggers ip triggers and $long_ip_triggers long ip responses. 
     echo "Device $i enough long ip triggers? $((ip_triggers <= long_ip_triggers && long_ip_triggers > 1))" | tee -a $TEST_RESULTS
+    if [ $ip_triggers -gt $long_ip_triggers ]; then
+        find inst/gw0$i/nodes
+        cat inst/gw0$i/nodes/gw0$i/tmp/dnsmasq.log
+	echo TAP
+        ls -l inst/gw0$i/nodes/gw0$i/activate.log
+        cat inst/gw0$i/nodes/gw0$i/activate.log
+        echo "========================================================"
+    fi
 done
 
 # This is broken -- should have many more results available!
