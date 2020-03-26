@@ -5,7 +5,6 @@ import os
 
 import logger
 from clib import docker_host
-from mininet.util import quietRun
 import wrappers
 
 LOGGER = logger.get_logger('docker')

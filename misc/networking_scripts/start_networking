@@ -1,9 +1,9 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_IF=eth0
 
-echo Starting networking for $LOCAL_IF and $EXT_IF at $(date)
+echo Starting networking for $LOCAL_IF and $EXT_IF
 while ! ifconfig -a | fgrep -q $LOCAL_IF; do
     echo Waiting for interface $LOCAL_IF to exist...
     sleep 1
@@ -32,5 +32,4 @@ fi
 echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
 
 echo Blocking for all eternity.
-
 ./autorestart_dnsmasq
