@@ -87,7 +87,7 @@ if [ -n "$DAQ_CONTAINER" ]; then
 else
     # Fix permissions in case they have wandered...
     test -f venv && sudo chown `stat . -c %u:%g` -R venv/
-    python3 -m venv venv
+    python$PVERSION -m venv venv
     source venv/bin/activate
 fi
 
