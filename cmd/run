@@ -16,7 +16,13 @@ sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 sudo chown -f $USER -R inst || true
 
 if [ -n "$build_tests" ]; then
-    cmd/build
+    release_tag=`git describe --dirty || echo unknown`
+    # If the current commit is a release tag, then pull images.
+    echo Processing release tag $release_tag
+    if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
+	build_mode=pull
+    fi
+    cmd/build $build_mode
 fi
 
 bin/build_hash check
@@ -27,6 +33,13 @@ if [ -f "$gcp_cred" ]; then
     if ! diff $gcp_cred $gcp_target; then
         cp $gcp_cred inst/config/gcp_service_account.json
     fi
+fi
+
+if ! docker images > /dev/null; then
+    echo
+    echo Docker execution failed, is the docker group setup?
+    echo If this is the first time, try logging out and log back in again.
+    false
 fi
 
 cmd/exrun $run_args 2>&1 | tee $cmdrun_log
