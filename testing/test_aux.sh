@@ -4,15 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-# Test the mudacl config and the test_schema to make sure they
-# make sense for tests that use them
-
-echo mudacl tests | tee -a $TEST_RESULTS
-mudacl/bin/test.sh
-echo Mudacl exit code $? | tee -a $TEST_RESULTS
-validator/bin/test_schema
-echo Validator exit code $? | tee -a $TEST_RESULTS
-
 # Runs lint checks and some similar things
 echo Lint checks | tee -a $TEST_RESULTS
 bin/check_style
@@ -84,6 +75,11 @@ more inst/faux/daq-faux-*/local/pubber.json | cat
 
 # Wait until the hold test has been activated, and then kill dhcp on that gateway.
 MARKER=inst/run-port-03/nodes/hold03/activate.log
+function cleanup_marker {
+    mkdir -p ${MARKER%/*}
+    touch $MARKER
+}
+trap cleanup_marker EXIT
 (while [ ! -f $MARKER ]; do
      echo test_aux.sh waiting for $MARKER
      sleep 30
@@ -94,9 +90,11 @@ MARKER=inst/run-port-03/nodes/hold03/activate.log
  kill $pid
 ) &
 
-# Run DAQ in single shot mode
+echo Build all container images...
+cmd/build inline
+
 echo Starting aux test run...
-cmd/run -b -s -k
+cmd/run -s -k
 
 # Check custom timeout
 cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS

@@ -1,8 +1,5 @@
 Running testing/test_aux.sh
 Aux Tests
-mudacl tests
-Mudacl exit code 0
-Validator exit code 0
 Lint checks
 check_style exit code 0
 Extended tests
@@ -62,7 +59,7 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-    "timeout_sec": 120
+    "timeout_sec": 300
   },
   "macoui": {
     "enabled": true
@@ -107,7 +104,7 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
-    "timeout_sec": 120
+    "timeout_sec": 300
   },
   "macoui": {
     "enabled": true,
