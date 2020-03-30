@@ -8,11 +8,6 @@
 #
 # Docker versions after this introduced a bug that would prevent "service docker start" from working.
 DOCKER_VERSION_BASE="=18.06.1~ce~3-0"
-GLINUX=
-if [ "$1" == "glinux" ]; then
-     GLINUX="glinux"
-     shift
-fi
 
 if [ -z "$AG" ]; then
     AG="sudo apt-get -qqy --no-install-recommends"
@@ -42,7 +37,7 @@ DOCKER_VERSION=${DOCKER_VERSION_BASE}~${distrib}
 
 echo Installing for $distrib $release
 
-if [ -n "$GLINUX" ]; then 
+if [ $release == "rodete" ]; then 
      $retry bin/setup_glinux 
 else
      $retry curl -4fsSL https://download.docker.com/linux/$distrib/gpg | sudo apt-key add -
