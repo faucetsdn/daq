@@ -15,7 +15,9 @@ By deisgn, this schema is intended to be:
 RPC mechanism.
 
 See the associated [UDMI Tech Stack](TECH_STACK.md) for details about transport mechanism
-outside of the core schema definition.
+outside of the core schema definition. For questions and discussion pertaining to this topic,
+please join/monitor the
+[daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email list 
 
 ## Use Cases
 
