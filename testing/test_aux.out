@@ -59,11 +59,7 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-<<<<<<< HEAD
-    "timeout_sec": 200 
-=======
     "timeout_sec": 300
->>>>>>> 9b89cafbd4f8b6e6838813f460ee8e28cf3452c2
   },
   "macoui": {
     "enabled": true
