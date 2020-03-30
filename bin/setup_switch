@@ -33,7 +33,7 @@ EOM
     mv $ctrl_interface /etc/network/interfaces.d/
     ip addr add $ctrl_interface_ip dev $ctrl_interface
     systemctl restart networking.service
-        
+
     while [ $(ifconfig $ctrl_interface | grep $ctrl_interface_ip | wc -l) -eq 0 ]; do
         echo Waiting for $ctrl_interface to have ip $ctrl_interface_ip 
         sleep 5
