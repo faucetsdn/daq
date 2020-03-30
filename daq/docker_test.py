@@ -58,6 +58,9 @@ class DockerTest:
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
+        # Work around an instability in the faucet/clib/docker library, b/152520627.
+        if getattr(cls, 'pullImage'):
+            setattr(cls, 'pullImage', lambda x: True)
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
