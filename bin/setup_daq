@@ -4,9 +4,9 @@ ROOT=$(dirname $0)/..
 cd $ROOT
 
 echo bin/setup_base
-bin/setup_base
+bin/setup_base $@
 
 echo bin/setup_dev
-bin/setup_dev
+bin/setup_dev $@
 
 echo Done with setup_daq.

@@ -31,8 +31,9 @@ netmask 255.255.255.0
 EOM
     
     mv $ctrl_interface /etc/network/interfaces.d/
+    ip addr add $ctrl_interface_ip dev $ctrl_interface
     systemctl restart networking.service
-    
+        
     while [ $(ifconfig $ctrl_interface | grep $ctrl_interface_ip | wc -l) -eq 0 ]; do
         echo Waiting for $ctrl_interface to have ip $ctrl_interface_ip 
         sleep 5
@@ -52,8 +53,8 @@ curl -u manager:friend "https://$switch_ip/api/system" -k -H 'content-type: appl
 
 ctrl_interface_ip="192.168.1.10"
 switch_ip="192.168.1.1"
-echo Waiting 90s...
-sleep 90
+echo Waiting 120s...
+sleep 120
 interface_setup
 echo Done
 
