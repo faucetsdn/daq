@@ -10,6 +10,7 @@ from mininet import net as mininet_net
 from mininet import link as mininet_link
 from mininet import cli as mininet_cli
 from mininet import util as mininet_util
+from forch import faucetizer
 
 LOGGER = logger.get_logger('network')
 
@@ -19,7 +20,7 @@ class DAQHost(mininet_node.Host):
     # pylint: disable=too-few-public-methods
 
 
-class DummyNode():
+class DummyNode:
     """Dummy node used to handle shadow devices"""
     # pylint: disable=invalid-name
     def addIntf(self, node, port=None):
@@ -29,13 +30,14 @@ class DummyNode():
         """No-op for running a command"""
 
 
-class TestNetwork():
+class TestNetwork:
     """Test network manager"""
 
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
     DEFAULT_OF_PORT = 6653
     _CTRL_PRI_IFACE = 'ctrl-pri'
+    OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
 
     def __init__(self, config):
         self.config = config
@@ -47,7 +49,8 @@ class TestNetwork():
         self.ext_intf = None
         self.ext_ofpt = int(config.get('ext_ofpt', self.DEFAULT_OF_PORT))
         self.switch_links = {}
-        self.topology = None
+        self.topology = FaucetTopology(self.config)
+        self.faucitizer = faucetizer.Faucetizer(None, None)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -65,9 +68,9 @@ class TestNetwork():
             if self.net.built:
                 host.configDefault()
                 self._switch_attach(self.pri, switch_link.intf1)
-        except:
+        except Exception as e:
             host.terminate()
-            raise
+            raise e
         return host
 
     def get_host_interface(self, host):
@@ -159,9 +162,12 @@ class TestNetwork():
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
 
         LOGGER.info("Activating faucet topology...")
-        self.topology = FaucetTopology(self.config, self.pri)
-        self.topology.initialize()
+        self.topology.initialize(self.pri)
         self.topology.start()
+
+        LOGGER.info("Initializing faucitizer...")
+        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
+        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)

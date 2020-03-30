@@ -12,13 +12,5 @@ while [ $(cat /etc/dnsmasq.conf | grep dhcp-range=10.20 | wc -l) == 0 ]; do
 done
 original=$(cat /etc/dnsmasq.conf | grep dhcp-range=10.20 | head -1)
 new="$(echo $original | cut -d',' -f 1,2),$lease"
-sed -i s/$original/$new/ /etc/dnsmasq.conf
+flock /etc/dnsmasq.conf sed -i s/$original/$new/ /etc/dnsmasq.conf
 
-while [ -z $(cat /var/run/dnsmasq.pid) ]; do
-    sleep 1
-done
-
-kill $(cat /var/run/dnsmasq.pid)
-rm /var/run/dnsmasq.pid
-
-dnsmasq --bind-dynamic --log-facility=/tmp/dnsmasq.log --log-dhcp

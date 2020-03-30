@@ -18,6 +18,9 @@ EOF
 
 DAQ_TARGETS=faux bin/docker_build force
 
+mkdir -p inst/modules/ping/config
+echo '{"static_ip": "10.20.0.5"}' > inst/modules/ping/config/module_config.json
+
 cat $TEST_LIST | while read module args; do
     if ! docker inspect daqf/test_$module:latest > /dev/null; then
 	DAQ_TARGETS=test_$module bin/docker_build force
@@ -25,7 +28,7 @@ cat $TEST_LIST | while read module args; do
     echo
     echo Testing $module $args | tee -a $TEST_RESULTS
     if bin/test_module -n $module $args; then
-        cat inst/module/$module/tmp/result_lines.txt >> $TEST_RESULTS
+        cat inst/modules/$module/run/tmp/result_lines.txt >> $TEST_RESULTS
     else
         echo Module execution failed. >> $TEST_RESULTS
     fi
