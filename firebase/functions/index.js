@@ -31,7 +31,7 @@ function deleteRun(port, port_doc, runid) {
 exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) => {
   const message = event.json;
   const origin = event.attributes.origin;
-  const site_name = event.attributes.site_name;
+  const site_name = event.attributes.site_name || 'unknown';
   const message_type = message.type;
   const payload = message.payload;
 
