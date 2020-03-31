@@ -85,6 +85,7 @@ public class ReportingDevice {
   public static class Metadata {
     public Integer version;
     public String timestamp;
+    public String hash;
     public Object system;
     public PointSet pointset;
   }
