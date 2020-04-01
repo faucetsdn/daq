@@ -205,15 +205,18 @@ class GcpManager:
             LOGGER.info('Creating storage bucket %s', bucket_name)
             self._storage.create_bucket(bucket_name)
 
-    def upload_report(self, report_file_name):
+    def upload_file(self, file_name, destination_file_name=None):
         """Uploads a report to a storage bucket."""
         if not self._storage:
-            LOGGER.info('Ignoring report upload: not configured')
+            LOGGER.info('Ignoring %s upload: not configured' % file_name)
             return
         bucket = self._storage.get_bucket(self._report_bucket_name)
-        blob = bucket.blob(report_file_name)
-        blob.upload_from_filename(report_file_name)
-        LOGGER.info('Uploaded test report to %s', report_file_name)
+        base_name = os.path.basename(file_name)
+        destination_file_name = os.path.join(self._client_name or "other", destination_file_name or file_name) 
+        blob = bucket.blob(destination_file_name)
+        blob.upload_from_filename(file_name)
+        LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
+        return destination_file_name
 
     def register_offenders(self):
         """Register any offenders: people who are not enabled to use the system"""
