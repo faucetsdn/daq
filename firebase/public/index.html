@@ -7,6 +7,7 @@
   <script src="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.css" />
   <link rel="stylesheet" href="style.css"/>
+  <script src="deploy_version.js"></script>
   <script src="firebase_config.js"></script>
   <script src="auth.js"></script>
   <script src="main.js"></script>
@@ -36,4 +37,8 @@
     <span id="sign-out" class="simple-button">Sign Out</span></div>
   </div>
   <div class="daq-text" id="version"></div>
+  <div class="daq-text">Deployed version <span id="deploy-version"></span></div>
 </body>
+<script>
+  document.getElementById('deploy-version').innerHTML = daq_deploy_version;
+</script>
