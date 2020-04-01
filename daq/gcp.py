@@ -211,12 +211,11 @@ class GcpManager:
             LOGGER.info('Ignoring %s upload: not configured' % file_name)
             return
         bucket = self._storage.get_bucket(self._report_bucket_name)
-        base_name = os.path.basename(file_name)
-        destination_file_name = os.path.join(self._client_name or "other", destination_file_name or file_name) 
+        destination_file_name = os.path.join(self._client_name or "other",
+                                             destination_file_name or file_name)
         blob = bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
         LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
-        return destination_file_name
 
     def register_offenders(self):
         """Register any offenders: people who are not enabled to use the system"""

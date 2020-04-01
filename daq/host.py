@@ -113,6 +113,7 @@ class ConnectedHost:
         self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
                                               self._loaded_config)
         self._trigger_path = None
+        self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
     @staticmethod
     def make_runid():
@@ -176,9 +177,9 @@ class ConnectedHost:
         return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
 
     def _get_unique_upload_path(self, file_name):
-        basename = os.path.basename(file_name) 
+        basename = os.path.basename(file_name)
         unique_name = "%s-%s.%s" % (self.target_port, self.test_name, basename) \
-            if self.test_name else basename 
+            if self.test_name else basename
         return  os.path.join(self.run_id, unique_name)
 
     def _type_path(self):
@@ -324,7 +325,8 @@ class ConnectedHost:
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
         if self._trigger_path:
-            self._gcp.upload_file(self._trigger_path, self._get_unique_upload_path(self._trigger_path))
+            self._gcp.upload_file(self._trigger_path,
+                                  self._get_unique_upload_path(self._trigger_path))
         if self.test_host:
             try:
                 self.test_host.terminate(expected=trigger)
@@ -393,7 +395,8 @@ class ConnectedHost:
                      self.target_port, self._mirror_intf_name, tcp_filter, self._startup_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
-                                              timeout=None, pcap_out=self._startup_file, blocking=False)
+                                              timeout=None, pcap_out=self._startup_file,
+                                              blocking=False)
         self._tcp_monitor = helper
         hangup = lambda: self._monitor_error(Exception('startup scan hangup'))
         self.runner.monitor_stream('tcpdump', self._tcp_monitor.stream(),
@@ -418,7 +421,8 @@ class ConnectedHost:
             LOGGER.info('Target port %d monitor scan complete', self.target_port)
             nclosed = self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed
             assert nclosed == forget, 'forget and nclosed mismatch'
-            self._gcp.upload_file(self._startup_file, self._get_unique_upload_path(self._startup_file))
+            self._gcp.upload_file(self._startup_file,
+                                  self._get_unique_upload_path(self._startup_file))
             if forget:
                 self.runner.monitor_forget(self._tcp_monitor.stream())
                 self._tcp_monitor.terminate()
@@ -494,7 +498,8 @@ class ConnectedHost:
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self._report.finalize()
                 self.test_name = None
-                self._gcp.upload_file(self._report.path, self._get_unique_upload_path(self._report.path))
+                self._gcp.upload_file(self._report.path,
+                                      self._get_unique_upload_path(self._report.path))
                 self.record_result('finish', state=MODE.FINE, report=self._report.path)
                 self._report = None
                 self.record_result(None)
@@ -587,9 +592,9 @@ class ConnectedHost:
         tmp_dir = self._host_tmp_path()
         configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
         self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
-        full_path = os.path.join(tmp_dir, self._MODULE_CONFIG) 
+        full_path = os.path.join(tmp_dir, self._MODULE_CONFIG)
         self._gcp.upload_file(full_path, self._get_unique_upload_path(full_path))
- 
+
     def _merge_run_info(self, config):
         config['run_info'] = {
             'run_id': self.run_id,
