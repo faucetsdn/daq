@@ -27,6 +27,7 @@ env:
     - DAQ_TEST=topo TEST=2
     - DAQ_TEST=topo TEST=3
     - DAQ_TEST=topo TEST=4
+    - DAQ_TEST=topo TEST=5
 branches:
   except:
   - /^release-\d+\.\d+(\.\d+)?$/
