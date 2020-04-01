@@ -314,6 +314,11 @@ class FaucetTopology:
     def _write_main_acls(self, pri_acls):
         filename = self.INST_FILE_PREFIX + self.DP_ACL_FILE_FORMAT
         LOGGER.debug('Writing updated pri acls to %s', filename)
+        self._write_acl_file(filename, pri_acls)
+
+    def _write_acl_file(self, filename, pri_acls):
+        directory = os.path.dirname(filename)
+        os.makedirs(directory, exist_ok=True)
         with open(filename, "w") as output_stream:
             yaml.safe_dump(pri_acls, stream=output_stream)
 
@@ -379,11 +384,7 @@ class FaucetTopology:
     def _write_empty_include(self, filename):
         # Workaround for faucet issue: https://github.com/faucetsdn/faucet/issues/2952
         LOGGER.debug("Writing empty acl file %s", filename)
-        port_acl = {
-            'acls': {}
-        }
-        with open(filename, "w") as output_stream:
-            yaml.safe_dump(port_acl, stream=output_stream)
+        self._write_acl_file(filename, {'acls': {}})
 
     def _write_port_acl(self, port, rules, filename):
         LOGGER.debug("Writing port acl file %s", filename)

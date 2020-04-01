@@ -165,7 +165,11 @@ class GcpManager:
 
     def _get_site_name(self):
         site_path = self.config['site_path']
-        with open(os.path.join(site_path, 'cloud_iot_config.json')) as config_file:
+        cloud_config = os.path.join(site_path, 'cloud_iot_config.json')
+        if not os.path.isfile(cloud_config):
+            LOGGER.warning('Site cloud config file %s not found', cloud_config)
+            return ""  # Can't use None because attributes need to be a string.
+        with open(cloud_config) as config_file:
             return json.load(config_file)['site_name']
 
     def _parse_creds(self, cred_file):
