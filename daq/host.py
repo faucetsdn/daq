@@ -177,10 +177,10 @@ class ConnectedHost:
         return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
 
     def _get_unique_upload_path(self, file_name):
-        basename = os.path.basename(file_name)
-        unique_name = "%s-%s.%s" % (self.target_port, self.test_name, basename) \
-            if self.test_name else basename
-        return  os.path.join(self.run_id, unique_name)
+        unique_name = os.path.basename(file_name)
+        if self.test_name:
+            unique_name = "%s-%s.%s" % (self.target_port, self.test_name, unique_name)
+        return os.path.join(self.run_id, unique_name)
 
     def _type_path(self):
         dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
