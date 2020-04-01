@@ -59,7 +59,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _MONITOR_SCAN_SEC = 30
-    _DEFAULT_TIMEOUT = 350
+    _DEFAULT_TIMEOUT_SEC = 350
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
@@ -89,12 +89,12 @@ class ConnectedHost:
         self.results = {}
         self.dummy = None
         self.test_name = None
-        self.test_start = None
+        self.test_start = gcp.get_timestamp()
         self.test_host = None
         self.test_port = None
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
-        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT))
+        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT_SEC))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
@@ -154,7 +154,9 @@ class ConnectedHost:
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
-        return test_module.get('timeout_sec', self._default_timeout_sec) if test_module else None
+        if not test_module:
+            return self._default_timeout_sec
+        return test_module.get('timeout_sec', self._default_timeout_sec)
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -174,7 +176,7 @@ class ConnectedHost:
         return self._loaded_config.get('static_ip')
 
     def _get_dhcp_mode(self):
-        return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode')
+        return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', 'normal')
 
     def _get_unique_upload_path(self, file_name):
         base = os.path.basename(file_name)
@@ -271,15 +273,14 @@ class ConnectedHost:
         if static_ip:
             LOGGER.info('Target port %d using static ip', self.target_port)
             time.sleep(self._STARTUP_MIN_TIME_SEC)
-            self.runner.ip_notify(MODE.DONE, {
+            self.runner.ip_notify(MODE.NOPE, {
                 'mac': self.target_mac,
                 'ip': static_ip,
                 'delta': -1
             }, self.gateway.port_set)
         else:
             dhcp_mode = self._get_dhcp_mode()
-            LOGGER.info('Target port %d using %s DHCP mode', self.target_port,
-                        dhcp_mode or 'normal')
+            LOGGER.info('Target port %d using %s DHCP mode', self.target_port, dhcp_mode)
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
                 if dhcp_mode == 'long_response' else 0
@@ -300,9 +301,9 @@ class ConnectedHost:
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
             return
-        delta_sec = timedelta(seconds=timeout_sec)
-        timeout = gcp.parse_timestamp(self.test_start) + delta_sec
-        if  datetime.fromtimestamp(time.time()) >= timeout:
+        timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)
+        nowtime = gcp.parse_timestamp(gcp.get_timestamp())
+        if nowtime >= timeout:
             if self.timeout_handler:
                 LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
                 # ensure it's called once

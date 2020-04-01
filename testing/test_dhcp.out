@@ -1,8 +1,9 @@
 Running testing/test_dhcp.sh
 DHCP Tests
-DAQ stress test
-Enough results: 1
-Device 1 enough long ip triggers? 1
-Device 2 enough long ip triggers? 1
-Device 3 enough long ip triggers? 1
+01: []
+03: []
+02: ['02:ipaddr:TimeoutError']
+Device 1 ip triggers: 1 0
+Device 2 ip triggers: 0 0
+Device 3 ip triggers: 0 1
 Done with tests
