@@ -130,6 +130,5 @@ function run_test {
     cat inst/run-port-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
     more inst/run-port-*/nodes/ping*/activate.log | cat
     more inst/gw0*/nodes/gw0*/activate.log | cat
-    echo ********************************** DHCP log *******************************
     more inst/gw0*/dhcp_monitor.txt | cat
 }
