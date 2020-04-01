@@ -165,7 +165,11 @@ class GcpManager:
 
     def _get_site_name(self):
         site_path = self.config['site_path']
-        with open(os.path.join(site_path, 'cloud_iot_config.json')) as config_file:
+        cloud_config = os.path.join(site_path, 'cloud_iot_config.json')
+        if not os.path.isfile(cloud_config):
+            LOGGER.warning('Site cloud config file %s not found', cloud_config)
+            return ""  # Can't use None because attributes need to be a string.
+        with open(cloud_config) as config_file:
             return json.load(config_file)['site_name']
 
     def _parse_creds(self, cred_file):
@@ -205,15 +209,17 @@ class GcpManager:
             LOGGER.info('Creating storage bucket %s', bucket_name)
             self._storage.create_bucket(bucket_name)
 
-    def upload_report(self, report_file_name):
+    def upload_file(self, file_name, destination_file_name=None):
         """Uploads a report to a storage bucket."""
         if not self._storage:
-            LOGGER.info('Ignoring report upload: not configured')
+            LOGGER.info('Ignoring %s upload: not configured' % file_name)
             return
         bucket = self._storage.get_bucket(self._report_bucket_name)
-        blob = bucket.blob(report_file_name)
-        blob.upload_from_filename(report_file_name)
-        LOGGER.info('Uploaded test report to %s', report_file_name)
+        destination_file_name = os.path.join(self._client_name or "other",
+                                             destination_file_name or file_name)
+        blob = bucket.blob(destination_file_name)
+        blob.upload_from_filename(file_name)
+        LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
 
     def register_offenders(self):
         """Register any offenders: people who are not enabled to use the system"""
