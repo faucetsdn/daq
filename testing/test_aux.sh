@@ -96,9 +96,6 @@ cmd/build inline
 echo Starting aux test run...
 cmd/run -s -k
 
-# Check custom timeout
-cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS
-
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
 capture_test_results macoui

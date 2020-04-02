@@ -35,39 +35,38 @@ else
 
     write_out_result $REPORT \
                      "connection.port_link" \
-                     "$(jq -r '.["connection.port_link"].desc' $MANIFEST)" \
+                     "$(jq -r '.["connection.port_link"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.port_link $SUMMARY"
 
     write_out_result $REPORT \
                      "connection.port_speed" \
-                     "$(jq -r '.["connection.port_speed"].desc' $MANIFEST)" \
+                     "$(jq -r '.["connection.port_speed"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.port_speed $SUMMARY"
 
     write_out_result $REPORT \
                      "connection.port_duplex" \
-                     "$(jq -r '.["connection.port_duplex"].desc' $MANIFEST)" \
+                     "$(jq -r '.["connection.port_duplex"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.port_duplex $SUMMARY"
 
     write_out_result $REPORT \
                      "poe.power" \
-                     "$(jq -r '.["poe.power"].desc' $MANIFEST)" \
+                     "$(jq -r '.["poe.power"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT poe.power $SUMMARY"
 
     write_out_result $REPORT \
                      "poe.negotiation" \
-                     "$(jq -r '.["poe.negotiation"].desc' $MANIFEST)" \
+                     "$(jq -r '.["poe.negotiation"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT poe.negotiation $SUMMARY"
 
     write_out_result $REPORT \
                      "poe.support" \
-                     "$(jq -r '.["poe.support"].desc' $MANIFEST)" \
+                     "$(jq -r '.["poe.support"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT poe.support $SUMMARY"
 
 fi
-
