@@ -30,7 +30,7 @@ cat $TEST_LIST | while read module args; do
     if bin/test_module -n $module $args; then
         cat inst/modules/$module/run/tmp/result_lines.txt >> $TEST_RESULTS
     else
-        echo Module execution failed. >> $TEST_RESULTS
+        echo Module $module execution failed. >> $TEST_RESULTS
     fi
 done
 

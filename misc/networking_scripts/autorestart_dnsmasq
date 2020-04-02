@@ -21,7 +21,7 @@ while true; do
 	    sleep 1
     done
     tail -10 $config_file
-    kill $(cat /var/run/dnsmasq.pid) || true
+    kill -9 $(cat /var/run/dnsmasq.pid) || true
     rm -f /var/run/dnsmasq.pid
     checksum=$(md5sum $config_file | awk '{print $1}')
     dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
