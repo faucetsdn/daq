@@ -13,9 +13,13 @@
     "physical_tag": {
       "asset": {
         "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
-        "name": "US-SFO-XYY_AHU"
+        "name": "US-SFO-XYY_AHU-1_extention11-optional"
       }
     }
+  },
+  "localnet": {
+    "protocol": "bacnet",
+    "local_id": "0x82eecd"
   },
   "pointset": {
     "points": {
@@ -23,10 +27,5 @@
         "units": "Degrees-Celsius"
       }
     }
-  },
-  "gateway": {
-    "gateway_id": "GAT-12",
-    "protocol": "bacnet",
-    "local_id": "*82AE98"
   }
 }

@@ -5,8 +5,7 @@
   "additionalProperties": false,
   "required": [
     "timestamp",
-    "version",
-    "system"
+    "version"
   ],
   "properties": {
     "timestamp": {
@@ -23,6 +22,9 @@
     },
     "gateway": {
       "$ref": "file:config_gateway.json#"
+    },
+    "localnet": {
+      "$ref": "file:config_localnet.json#"
     },
     "pointset": {
       "$ref": "file:config_pointset.json#"

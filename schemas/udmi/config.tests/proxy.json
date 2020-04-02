@@ -4,6 +4,10 @@
   "system": {
     "min_loglevel": 500
   },
+  "localnet": {
+    "protocol": "bacnet",
+    "local_id": "0x78ce1900"
+  },
   "pointset": {
     "sample_limit_sec": 2,
     "sample_rate_sec": 500,

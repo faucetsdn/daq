@@ -28,6 +28,9 @@
     "gateway": {
       "$ref": "file:metadata_gateway.json#"
     },
+    "localnet": {
+      "$ref": "file:metadata_localnet.json#"
+    },
     "pointset": {
       "$ref": "file:metadata_pointset.json#"
     }

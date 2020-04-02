@@ -4,20 +4,24 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
-    "gateway_id": {
-      "type": "string",
-      "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
-    },
-    "protocol": {
-      "type": "string"
-    },
-    "local_id": {
-      "type": "string"
+    "protocols": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
+          "additionalProperties": false,
+          "properties": {
+            "local_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "local_id"
+          ]
+        }
+      }
     }
   },
   "required": [
-    "gateway_id",
-    "protocol",
-    "local_id"
+    "protocols"
   ]
 }

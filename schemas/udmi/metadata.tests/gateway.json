@@ -13,7 +13,7 @@
     "physical_tag": {
       "asset": {
         "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
-        "name": "US-SFO-XYY_AHU-1_extention11-optional"
+        "name": "US-SFO-XYY_AHU-32"
       }
     }
   },
@@ -21,6 +21,13 @@
     "points": {
       "return_air_temperature_sensor": {
         "units": "Degrees-Celsius"
+      }
+    }
+  },
+  "gateway": {
+    "protocols": {
+      "bacnet": {
+        "local_id": "0x991132ec"
       }
     }
   }
