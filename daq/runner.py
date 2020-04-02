@@ -275,7 +275,7 @@ class DAQRunner:
         try:
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
                                                    loop_hook=self._loop_hook,
-                                                   timeout_sec=20) # Polling rate
+                                                   timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events)
             if self.event_trigger:

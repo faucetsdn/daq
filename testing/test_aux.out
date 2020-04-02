@@ -3,7 +3,6 @@ Aux Tests
 Lint checks
 check_style exit code 0
 Extended tests
-ERROR:host:Monitoring timeout for macoui after 1s
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
