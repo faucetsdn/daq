@@ -46,7 +46,9 @@ class DAQRunner:
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
-        self.version = os.environ['DAQ_VERSION']
+        self._daq_version = os.environ['DAQ_VERSION']
+        self._lsb_release = os.environ['DAQ_LSB_RELEASE']
+        self._sys_uname = os.environ['DAQ_SYS_UNAME']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
         self._linger_exit = 0
@@ -71,6 +73,9 @@ class DAQRunner:
             test_list.append('hold')
         config['test_list'] = test_list
         LOGGER.info('Configured with tests %s', config['test_list'])
+        LOGGER.info('DAQ version %s' % self._daq_version)
+        LOGGER.info('LSB release %s' % self._lsb_release)
+        LOGGER.info('system uname %s' % self._sys_uname)
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
@@ -91,7 +96,9 @@ class DAQRunner:
             'states': self._get_states(),
             'ports': list(self._active_ports.keys()),
             'description': self.description,
-            'version': self.version,
+            'version': self._daq_version,
+            'lsb': self._lsb_release,
+            'uname': self._sys_uname,
             'timestamp': int(time.time()),
         })
 
