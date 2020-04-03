@@ -91,16 +91,23 @@ class DAQRunner:
         return states + connected_host.post_states()
 
     def _send_heartbeat(self):
-        self.gcp.publish_message('daq_runner', 'heartbeat', {
+        message = {
             'name': 'status',
             'states': self._get_states(),
             'ports': list(self._active_ports.keys()),
             'description': self.description,
+            'timestamp': int(time.time()),
+        }
+        message.update(self.get_run_info())
+        self.gcp.publish_message('daq_runner', 'heartbeat', message)
+
+    def get_run_info(self):
+        """Return basic run info dict"""
+        return {
             'version': self._daq_version,
             'lsb': self._lsb_release,
-            'uname': self._sys_uname,
-            'timestamp': int(time.time()),
-        })
+            'uname': self._sys_uname
+        }
 
     def initialize(self):
         """Initialize DAQ instance"""
