@@ -5,10 +5,13 @@ or traditional devices that do not communicate directly to the cloud using
 the [UDMI specification](../README.md). For example, an older BacNET based
 system could use a gateway to translate on-prem communications into UDMI.
 
-See the
+The
 [Google Clout IoT Core Gateway Documentation](https://cloud.google.com/iot/docs/how-tos/gateways)
-for an overview of how gateways work. This document details specifically how
-this manifests itself using UDMI. Conceptually, there are two types of
+for an overview of the cloud-side implementation of a gateway. UDMI, then,
+specifies an additional layer of specification around the associated
+message formats.
+
+Conceptually, there are two types of
 entities involved: the _gateway device_, and the _proxied device_. Both of
 these are 'devices' in the sense that they have an entry in a cloud registry
 and have device-level UDMI data, but they have fundamentally different roles.
@@ -24,14 +27,12 @@ The general sequence of events for gateway operation is:
 at install time to properly (manually) setup the device.
 2. On startup, the gateway connects to the cloud and receives a configuration
 block that details which _proxy devices_ the gateway should proxy for.
-3. logentry events are used to indicate general progress and activity from
-the gateway.
 4. Gateway 'attaches' (Cloud IoT terminology) to the proxied devices,
-receiving a configuration block for each proxied device.
-5. Any attch errors are indicated in the gateway status block.
-6. The proxy device configuration block specifies any local connection
+receiving a configuration block for each proxied device. Any attch errors are
+indicated in the gateway _status_ block and sent along as a _logentry_ event.
+5. The proxy device _config_ block specifies any local connection
 parameters for the proxied device, e.g. the BacNET device id.
-7. The gateway proxies communication to/from the device, translating between
+6. The gateway proxies communication to/from the device, translating between
 native (e.g. BacNET) communications and UDMI-based messages.
 
 ### config
@@ -69,6 +70,11 @@ operation. E.g., if a gateway device has a unique MAC address used for
 local communications, it would be indicated here.
 
 ## Proxy Device Operation
+
+Proxy devices are those that have a logical cloud device entry (in a registry),
+and are associated (bound) to a particular gateway. On-prem, the device
+itself talks a local protocol (e.g. BacNET), but does not have a direct
+cloud connection.
 
 ### config
 
