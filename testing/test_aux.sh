@@ -141,8 +141,7 @@ cat docs/device_report.md | redact > out/redacted_docs.md
 cp inst/reports/report_9a02571e8f01_*.md out/
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 
-echo Redacted doc:
-cat out/redacted_docs.md
+fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
 echo Redacted doc diff | tee -a $TEST_RESULTS
 (diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \
