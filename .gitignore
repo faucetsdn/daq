@@ -6,6 +6,7 @@
 .project
 
 firebase/public/firebase_config.js
+firebase/public/deploy_version.js
 
 validations/
 
@@ -135,3 +136,4 @@ ENV/
 
 # other
 testing/*dream*
+*.swp

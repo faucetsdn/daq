@@ -37,5 +37,9 @@ fi
 
 cd firebase
 
+version=`git describe --dirty`
+echo Deploying version $version to $PROJECT
+echo "const daq_deploy_version = '$version';" > public/deploy_version.js
+
 echo firebase deploy --project $PROJECT
 firebase deploy --project $PROJECT

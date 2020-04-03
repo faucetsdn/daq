@@ -67,7 +67,7 @@ function write_out_monolog() {
 
     for test_name in "${_TEST_ARR[@]}";
         do
-            test_desc="$(jq --arg tn "$test_name" -r '.[$tn].desc' $_MANIFEST)"
+            test_desc="$(jq --arg tn "$test_name" -r '.[$tn].description' $_MANIFEST)"
 
             write_out_result $_REPORT \
                             "$test_name" \

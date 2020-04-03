@@ -390,7 +390,7 @@ function triggerOrigin(db, origin_id) {
     const description = document.querySelector('#description .description');
     description.innerHTML = message.description;
     description.href = `config.html?origin=${origin_id}`;
-    const version = `DAQ v${message.version}`;
+    const version = `DAQ runtime version ${message.version}`;
     document.querySelector('#version').innerHTML = version
   });
   watcherAdd(ref, "port", undefined, (ref, port_id) => {

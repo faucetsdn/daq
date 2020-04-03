@@ -1,0 +1,43 @@
+#!/bin/bash -e
+#
+# gLinux specific setup 
+#
+#
+sudo apt remove docker-engine docker-runc docker-containerd
+
+sudo glinux-add-repo docker-ce-"$(lsb_release -cs)"
+sudo apt update
+sudo apt install docker-ce
+
+if [ $? != 0 ]; then 
+     echo "Docker installaion failed. Delete previous docker installation and images? (Y/N):"
+     read text
+     if [ $text == "Y" -o $text == "y" ]; then
+         sudo rm -rf /var/lib/docker
+         sudo apt install docker-ce
+     else
+         false
+     fi
+fi
+
+sudo service docker stop
+sudo ip link set docker0 down
+sudo ip link del docker0
+
+# Update Docker daemon config file:
+# * move Docker's storage location for more space.
+# * avoid conflicts between the Docker bridge and Corp IPs
+# * turn on the debug mode, if you don't want that you could set that to false
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "data-root": "/usr/local/google/docker",
+  "bip": "192.168.9.1/24",
+  "storage-driver": "overlay2",
+  "debug": true,
+  "registry-mirrors": ["https://mirror.gcr.io"]
+}
+EOF
+
+sudo service docker start
+sudo addgroup docker || true
+sudo adduser $USER docker || true

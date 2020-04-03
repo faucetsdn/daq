@@ -96,9 +96,6 @@ cmd/build inline
 echo Starting aux test run...
 cmd/run -s -k
 
-# Check custom timeout
-cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS
-
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
 capture_test_results macoui
@@ -145,7 +142,7 @@ function redact {
     sed -E -e "s/ \{1,\}$//" \
         -e 's/\s*%%.*//' \
         -e 's/[0-9]{4}-.*T.*Z/XXX/' \
-        -e 's/[a-zA-Z]{3} [a-zA-Z]{3} [0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
+        -e 's/[a-zA-Z]{3} [a-zA-Z]{3}\s+[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
         -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/' \
         -e 's/DAQ version.*//' \
         -e 's/[0-9].[0-9]{2} seconds/XXX/' \
