@@ -599,9 +599,9 @@ class ConnectedHost:
         config['run_info'] = {
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
-            'daq_version': self.runner.version,
             'started': gcp.get_timestamp()
         }
+        config['run_info'].update(self.runner.get_run_info())
 
     def _load_module_config(self, run_info=True):
         config = self.runner.get_base_config()
