@@ -136,19 +136,6 @@ for num in 1 2 3; do
 done
 echo done with docker logs
 
-# Remove things that will always (probably) change - like DAQ version/timestamps/IPs
-# from comparison
-function redact {
-    sed -E -e "s/ \{1,\}$//" \
-        -e 's/\s*%%.*//' \
-        -e 's/[0-9]{4}-.*T.*Z/XXX/' \
-        -e 's/[a-zA-Z]{3} [a-zA-Z]{3}\s+[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
-        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/' \
-        -e 's/DAQ version.*//' \
-        -e 's/[0-9].[0-9]{2} seconds/XXX/' \
-        -e 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/XXX/'
-}
-
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
 cp inst/reports/report_9a02571e8f01_*.md out/

@@ -36,3 +36,18 @@ fi
 if [ -f $cred_file ]; then
   echo GCP service account is `jq .client_email $cred_file`
 fi
+
+# Remove things that will always (probably) change - like DAQ version/timestamps/IPs
+# from comparison
+
+function redact {
+    sed -E -e "s/ \{1,\}$//" \
+        -e 's/\s*%%.*//' \
+        -e 's/[0-9]{4}-.*T.*Z/XXX/' \
+        -e 's/[a-zA-Z]{3} [a-zA-Z]{3}\s+[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
+        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/g' \
+        -e 's/[0-9]+\.[0-9]{2} seconds/XXX/' \
+        -e 's/DAQ version.*//' \
+        -e 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/XXX/'
+        -e 's/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/X.X.X.X/'
+}
