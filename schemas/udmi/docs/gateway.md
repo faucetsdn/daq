@@ -36,7 +36,8 @@ native (e.g. BacNET) communications and UDMI-based messages.
 
 ### config
 
-The gateway config block simply specifies the list of target proxy devices.
+The (gateway config block)[../config.tests/gateway.json]
+simply specifies the list of target proxy devices.
 On a config update, the gateway is responsible for handling any change in
 this list (added or removed devices). The details of proxied devices are
 kept to a minimum here (IDs only) to avoid overflowing the allowed block
@@ -45,14 +46,16 @@ size in cases where there are a large number of devices.
 ### state
 
 Any attach errors, e.g. the gateway can not successfully attach to the target
-device, should be reported here, and a logentry message used to detail the
+device, should be reported in the (gateway state)[../state.tests/gateway.json]
+and a _logentry_ message used to detail the
 nature of the problem. If the gateway can attach successfully, any other
 errors, e.g. the inability to communicate with the device over the local
 network, should be indicated as part of the proxy device status block.
 
-### logentry
+### telemetry
 
-Telemety from the gateway would primarily consist of logentry messages, which
+Telemety from the gateway would primarily consist of standard _logentry_
+messages, which
 provide a running comentary about gateway operation. Specificaly, if there
 is an error attaching, then there should be appropriate logging to help
 diagnose the problem.
@@ -67,6 +70,35 @@ local communications, it would be indicated here.
 ## Proxy Device Operation
 
 ### config
+
+Config blocks for proxy devices contain a special _localnet_ section that
+specifies information required by the gateway to contact the local device.
+E.g., the fact that a device is 'BacNET' and also the device's BacNET object
+ID. Based on this, the gateway can communicate with the target device and proxy
+all other messages.
+
+Additionally, the gateway is responsible for proxying all other supported
+operations of the config bundle. E.g., if a _pointset_ 'force_value" parameter
+is specified, the gateway would need to convert that into the local protocol
+and trigger the required functionality.
+
 ### state
+
+There is no gateway-specific _state_ information, but similarly to _config_ the
+gateway is responsible for proxying all relevant state from the local device
+into the proxied device's state block. E.g., if the device is in an alarm
+state, then the gateway would have to transform that from the local format
+into the appropriate UDMI message.
+
 ### telemetry
+
+Telemetry is handled similarly, with the gateway responsible for proxying data
+from local devices through to UDMI. In many cases, this would be translating
+specific device points into a _pointset_ message.
+
 ### metadata
+
+A device's metadata in a _localnet_ section describes the presence of the
+device on a local network. This can/should be used for initial programming
+and configuration of the device, or to validate proper device configuration.
+The gateway implementation itself would not directly deal with this block.
