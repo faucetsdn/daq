@@ -6,6 +6,7 @@ import re
 import threading
 import time
 import traceback
+import uuid
 
 import configurator
 import faucet_event_client
@@ -16,7 +17,6 @@ import network
 import stream_monitor
 from wrappers import DaqException
 import logger
-import uuid
 
 LOGGER = logger.get_logger('runner')
 
@@ -69,7 +69,8 @@ class DAQRunner:
         logging_client = self.gcp.get_logging_client()
         self._daq_run_id = uuid.uuid4()
         if logging_client:
-            logger.set_stackdriver_client(logging_client, labels={"daq_run_id": str(self._daq_run_id)})
+            logger.set_stackdriver_client(logging_client,
+                                          labels={"daq_run_id": str(self._daq_run_id)})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
             test_list.append('hold')
