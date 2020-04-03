@@ -6,6 +6,7 @@ import re
 import threading
 import time
 import traceback
+import uuid
 
 import configurator
 import faucet_event_client
@@ -66,13 +67,16 @@ class DAQRunner:
         self._dhcp_ready = set()
         self._ip_info = {}
         logging_client = self.gcp.get_logging_client()
+        self._daq_run_id = uuid.uuid4()
         if logging_client:
-            logger.set_stackdriver_client(logging_client)
+            logger.set_stackdriver_client(logging_client,
+                                          labels={"daq_run_id": str(self._daq_run_id)})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
             test_list.append('hold')
         config['test_list'] = test_list
-        LOGGER.info('Configured with tests %s', config['test_list'])
+        LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
+        LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
         LOGGER.info('DAQ version %s' % self._daq_version)
         LOGGER.info('LSB release %s' % self._lsb_release)
         LOGGER.info('system uname %s' % self._sys_uname)
@@ -106,7 +110,8 @@ class DAQRunner:
         return {
             'version': self._daq_version,
             'lsb': self._lsb_release,
-            'uname': self._sys_uname
+            'uname': self._sys_uname,
+            'daq_run_id': str(self._daq_run_id)
         }
 
     def initialize(self):
