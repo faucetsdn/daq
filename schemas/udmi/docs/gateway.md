@@ -2,8 +2,8 @@
 
 The _gateway_ functionality is used for systems that have legacy, heritage,
 or traditional devices that do not communicate directly to the cloud using
-UDMI. For example, an older BacNET based system could use a gateway to
-translate on-prem communications into UDMI.
+the [UDMI specification](../README.md). For example, an older BacNET based
+system could use a gateway to translate on-prem communications into UDMI.
 
 See the
 [Google Clout IoT Core Gateway Documentation](https://cloud.google.com/iot/docs/how-tos/gateways)
@@ -54,15 +54,16 @@ network, should be indicated as part of the proxy device status block.
 
 ### telemetry
 
-Telemety from the gateway would primarily consist of standard _logentry_
-messages, which
+Telemety from the gateway would primarily consist of standard
+[_logentry_](../logentry.tests/logentry.json) messages, which
 provide a running comentary about gateway operation. Specificaly, if there
 is an error attaching, then there should be appropriate logging to help
 diagnose the problem.
 
 ### metadata
 
-The gateway metadata block specifies any information necessary either for the
+The gateway [metadata block](../metadata.tests/gateway.json) specifies
+any information necessary either for the
 initial (manual) configuration of the device or ongoing validation of
 operation. E.g., if a gateway device has a unique MAC address used for
 local communications, it would be indicated here.
@@ -71,7 +72,8 @@ local communications, it would be indicated here.
 
 ### config
 
-Config blocks for proxy devices contain a special _localnet_ section that
+[Proxy device config blocks](../config.tests/proxy.json) contain a special
+_localnet_ section that
 specifies information required by the gateway to contact the local device.
 E.g., the fact that a device is 'BacNET' and also the device's BacNET object
 ID. Based on this, the gateway can communicate with the target device and proxy
@@ -94,11 +96,12 @@ into the appropriate UDMI message.
 
 Telemetry is handled similarly, with the gateway responsible for proxying data
 from local devices through to UDMI. In many cases, this would be translating
-specific device points into a _pointset_ message.
+specific device points into a [_pointset_ message](../pointset.tests/example.json).
 
 ### metadata
 
-A device's metadata in a _localnet_ section describes the presence of the
+A [proxy device metadata section](../metadata.tests/proxy.json) describes
+_localnet_ with the presence of the
 device on a local network. This can/should be used for initial programming
 and configuration of the device, or to validate proper device configuration.
 The gateway implementation itself would not directly deal with this block.
