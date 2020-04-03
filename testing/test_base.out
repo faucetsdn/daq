@@ -71,7 +71,7 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT --host-timeout=4m --open -p1-1024 -oG /tmp/nmap.log X.X.X.X
+# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(1024;1-1024) UDP(0;) SCTP(0;) PROTOCOLS(0;)
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
