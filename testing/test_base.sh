@@ -14,6 +14,8 @@ bin/mudacl
 
 cmd/run -b -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
+
+echo Redacted report for 9a02571e8f00:
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Test block for open-port failures.
