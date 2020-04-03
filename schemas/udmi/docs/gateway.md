@@ -6,7 +6,7 @@ UDMI. For example, an older BacNET based system could use a gateway to
 translate on-prem communications into UDMI.
 
 See the
-(Google Clout IoT Core Gateway Documentation)[https://cloud.google.com/iot/docs/how-tos/gateways]
+[Google Clout IoT Core Gateway Documentation](https://cloud.google.com/iot/docs/how-tos/gateways)
 for an overview of how gateways work. This document details specifically how
 this manifests itself using UDMI. Conceptually, there are two types of
 entities involved: the _gateway device_, and the _proxied device_. Both of
@@ -36,7 +36,7 @@ native (e.g. BacNET) communications and UDMI-based messages.
 
 ### config
 
-The (gateway config block)[../config.tests/gateway.json]
+The [gateway config block](../config.tests/gateway.json)
 simply specifies the list of target proxy devices.
 On a config update, the gateway is responsible for handling any change in
 this list (added or removed devices). The details of proxied devices are
@@ -46,7 +46,7 @@ size in cases where there are a large number of devices.
 ### state
 
 Any attach errors, e.g. the gateway can not successfully attach to the target
-device, should be reported in the (gateway state)[../state.tests/gateway.json]
+device, should be reported in the [gateway state](../state.tests/gateway.json)
 and a _logentry_ message used to detail the
 nature of the problem. If the gateway can attach successfully, any other
 errors, e.g. the inability to communicate with the device over the local
