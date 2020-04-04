@@ -83,7 +83,7 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 ## Report complete
 
 Open port tests
-01: ['01:nmap:1']
+01: []
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23

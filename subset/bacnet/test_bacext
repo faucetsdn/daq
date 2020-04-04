@@ -60,8 +60,3 @@ result_lines=( "$VERSION_RESULT_AND_SUMMARY" "$PICS_RESULT_AND_SUMMARY" )
 echo "logs:"
 echo "$VERSION_RESULT_AND_SUMMARY"
 echo "$PICS_RESULT_AND_SUMMARY"
-
-echo "result from fail checker:"
-echo $(check_for_fails_in "${result_lines[@]}")
-
-[ $(check_for_fails_in "${result_lines[@]}") == false ]
