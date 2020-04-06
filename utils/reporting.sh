@@ -28,26 +28,6 @@ $RESULT_AND_SUMMARY
 END
 }
 
-# check_for_fails_in
-# Input is an array of variables (not files!) containing text
-# All inputs EXCEPT $REPORT are variables (not files)
-# Intended for use by test running bash scripts to return a non-zero
-# exit code if any test in a module fails
-# This way, the firebase dashboard shows 'red' if there has been a failure
-# in any test
-
-function check_for_fails_in() {
-    local arr=("$@")
-    local __result="false"
-    for log in "${arr[@]}";
-        do
-            if grep -q 'RESULT fail' <<< $log; then
-                __result="true"
-            fi
-        done
-    echo $__result
-}
-
 # write_out_monolog
 # For tests that have one long log output,
 # print the log first, then the results. Results
@@ -67,7 +47,7 @@ function write_out_monolog() {
 
     for test_name in "${_TEST_ARR[@]}";
         do
-            test_desc="$(jq --arg tn "$test_name" -r '.[$tn].desc' $_MANIFEST)"
+            test_desc="$(jq --arg tn "$test_name" -r '.[$tn].description' $_MANIFEST)"
 
             write_out_result $_REPORT \
                             "$test_name" \

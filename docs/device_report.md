@@ -122,7 +122,7 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated Mon Mar 16 11:53:22 2020 as: nmap -v -n -Pn -T5 -sU -sT --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.73.164
+# Nmap 7.60 scan initiated Mon Mar 16 11:53:22 2020 as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.73.164
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
 Host: 10.20.73.164 ()	Status: Up
 Host: 10.20.73.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
