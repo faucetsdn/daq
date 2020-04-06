@@ -216,7 +216,7 @@ class GcpManager:
             LOGGER.info('Ignoring %s upload: not configured' % file_name)
             return
         bucket = self._storage.get_bucket(self._report_bucket_name)
-        destination_file_name = os.path.join(self._client_name or "other",
+        destination_file_name = os.path.join('origin', self._client_name or "other",
                                              destination_file_name or file_name)
         blob = bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
