@@ -6,10 +6,12 @@ from google.cloud.logging.handlers import CloudLoggingHandler
 
 LOGGERS = {}
 
-def set_stackdriver_client(client):
+def set_stackdriver_client(client, labels=None):
     """Sets stackdriver client"""
     stackdriver_client_name, stackdriver_client = client
-    stackdriver_handler = CloudLoggingHandler(stackdriver_client, name=stackdriver_client_name)
+    stackdriver_handler = CloudLoggingHandler(stackdriver_client,
+                                              name=stackdriver_client_name,
+                                              labels=labels)
     for name, logger in LOGGERS.items():
         # filters out root logger
         if name:

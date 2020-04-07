@@ -75,6 +75,11 @@ more inst/faux/daq-faux-*/local/pubber.json | cat
 
 # Wait until the hold test has been activated, and then kill dhcp on that gateway.
 MARKER=inst/run-port-03/nodes/hold03/activate.log
+function cleanup_marker {
+    mkdir -p ${MARKER%/*}
+    touch $MARKER
+}
+trap cleanup_marker EXIT
 (while [ ! -f $MARKER ]; do
      echo test_aux.sh waiting for $MARKER
      sleep 30
@@ -85,12 +90,11 @@ MARKER=inst/run-port-03/nodes/hold03/activate.log
  kill $pid
 ) &
 
-# Run DAQ in single shot mode
-echo Starting aux test run...
-cmd/run -b -s -k
+echo Build all container images...
+cmd/build inline
 
-# Check custom timeout
-cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS
+echo Starting aux test run...
+cmd/run -s -k
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
@@ -132,23 +136,12 @@ for num in 1 2 3; do
 done
 echo done with docker logs
 
-# Remove things that will always (probably) change - like DAQ version/timestamps/IPs
-# from comparison
-function redact {
-    sed -E -e "s/ \{1,\}$//" \
-        -e 's/\s*%%.*//' \
-        -e 's/[0-9]{4}-.*T.*Z/XXX/' \
-        -e 's/[a-zA-Z]{3} [a-zA-Z]{3} [0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
-        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/' \
-        -e 's/DAQ version.*//' \
-        -e 's/[0-9].[0-9]{2} seconds/XXX/' \
-        -e 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/XXX/'
-}
-
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
 cp inst/reports/report_9a02571e8f01_*.md out/
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
+
+fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
 (diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \

@@ -20,6 +20,9 @@ MAC_BASE=9a:02:57:1e:8f
 
 source testing/test_utils.sh
 
+echo Creating MUD templates...
+bin/mudacl
+
 generate open 3
 cmd/build
 check_socket 01 02 1 1

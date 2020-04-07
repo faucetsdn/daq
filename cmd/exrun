@@ -12,7 +12,10 @@ FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
-export DAQ_VERSION=$(cat $MISCDIR/RELEASE_VERSION)
+export DAQ_VERSION=$(git describe --dirty)
+LSB_RAW=$(lsb_release -a)
+export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
+export DAQ_SYS_UNAME=$(uname -a)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
 run_args="$@"
@@ -36,14 +39,19 @@ FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
 
 if [ ! -d $FAUCET ]; then
-    echo Faucet directory $FAUCET not found.
+    echo Faucet directory $FAUCET not found, try running bin/setup_dev.
     false
 fi
 
 if [ ! -d $FORCH ]; then
-    echo Forch directory $FORCH not found.
+    echo Forch directory $FORCH not found, try running bin/setup_dev.
     false
 fi
+
+(cd $FAUCET; git checkout $(< $ROOT/misc/FAUCET_VERSION)) || \
+    echo Could not update faucet, try 'bin/clean_dev && bin/setup_dev' to reset.
+(cd $FORCH; git checkout $(< $ROOT/misc/FORCH_VERSION)) || \
+    echo Could not update forch, try 'bin/clean_dev && bin/setup_dev' to reset.
 
 echo Release version $DAQ_VERSION
 
@@ -60,9 +68,6 @@ docker ps > /dev/null 2>&1 || service docker start
 
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
-
-echo Creating mudacl templates...
-bin/mudacl
 
 function autostart {
     tmp=`mktemp`

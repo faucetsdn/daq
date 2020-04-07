@@ -1,53 +1,66 @@
 # Firebase setup instructions for DAQ.
 
 DAQ uses a simple Firebase-hosted web page to provide a dynamic dashboard
-of test results.
+of test results. There's three parts, which are needed at different stages
+of deployment/updates.
+
+1. _Initial setup_ (for deploying a new GCP project)
+2. _Code deploy_ (to deploy a new or updated version of the code)
+3. _Authentication_ (to authenticate any new users to the web page)
+
+After this setup, or if using an already existing setup with a new DAQ install,
+follow the [service account setup instructions](service.md).
 
 ## Initial Setup
 
-0. There need a GCP project that can be used to host everything.
+Note that these instructions keep changing everytime the web-flow for Firebase changes...
+it's neigh impossible to keep everything synchronized. The basic steps are always the
+same, but just the details and ordering shifts now and then. Don't panic.
+
+0. Identify a GCP project that you can to host the system. Acquire a new one if necessary.
 1. Goto the [Firebase Console](https://console.firebase.google.com/) and add a new project.
    * Add the hosting GCP project to link it to this Firebase setup.
-   * Create the Firebase Database (click tab on left), for Cloud Firestore (_Create Database_ button);
-   Set up in _production mode_.
-   * Billing and region need to work, but there is not specific guidance on what you should choose.
-2. Navigate to the
-[Google Cloud Platform (GCP) service accounts page](https://console.cloud.google.com/iam-admin/serviceaccounts?project=daq-project)
-   * This is <em>not</em> from the Firebase page: it has to be from the base GCP page.
-   * Create a new service account with a semi-meaningful name like `daq-testlab`.
-   * Add the _Pub/Sub Admin_, _Storage Admin_, _Cloud Datastore User_, _Logs Writer_, and _Firebase Admin_ roles.
-   * Furnish a new private key.
-4. Install the downloaded key into the DAQ install.
-   * Copy the download JSON key file to the `local/` directory.
-   * Edit `local/system.conf` to specify the `gcp_cred` setting to point to the downloaded file
-     (with a path relative to the `daq` install directory), e.g.
-     `gcp_cred=local/daq-testlab-de56aa4b1e47.json`.
-5. (Re)Start DAQ (`cmd/run`).
-   * There should be something in the top 10-20 startup log lines that look something like:
-     <br>`INFO:gcp:Loading gcp credentials from local/daq-testlab-de56aa4b1e47.json`
-     <br>`INFO:gcp:Initialized gcp publisher client daq-project:daq-testlab`
-   * Depending on what else is configured, it may or may not do something else after this.
-6. Follow the relevant parts of the
+   * Chose an appropriate billing option. The _Blaze_ plan should be fine.
+   * Disable Google Analytics, unless you also want to setup an account for that.
+   * Continue on to add Firebase to your GCP project.
+1. Enable a native mode database
    * https://console.firebase.google.com/
    * Select your project.
-   * Select "+ Add app"
-   * Select "</>" (Web)
-   * Use a clever nickname and register app. This will be shared by multiple DAQ instances.
+   * Select `Database` from the options on the left.
+   * Create Database -- you do _not_ want the realtime data base or datastore mode.
+   * Create it in production mode.
+2. Add a web-app to the Firebase project.
+   * https://console.firebase.google.com/
+   * Select your project.
+   * Select "+ Add app" (or this may be auto-selected for you).
+   * Select "</>" (Web) to add a new web-app.
+   * Use a clever nickname and register app. Not sure if/how/when this matters.
    * Enable _Firebase Hosting_
-   * Get your [firebase config object](https://support.google.com/firebase/answer/7015592?authuser=0) for a _web app_.
-   * Copy the `var firebaseConfig = { ... }` snippet to `local/firebase_config.js`
-   * Add an [API Key Restriction](https://cloud.google.com/docs/authentication/api-keys#api_key_restrictions)
-   for an _HTTP Referrer_, which will be the https:// address of the daq hosted web addp.
-7. Enable Google sign-in from 
+   * Skip the part about adding the Firebase SDK.
+   * Follow the instructions for installing the Firebase CLI.
+   * Ignore the bit about "Deploy to Firebase Hosting" for now.
+3. Get your [firebase config object](https://support.google.com/firebase/answer/7015592?authuser=0) for a _web app_.
+   * Copy the `const firebaseConfig = { ... }` snippet to `local/firebase_config.js`
+4. Add an API key restriction:
+   * Go to [API Key Restriction](https://cloud.google.com/docs/authentication/api-keys#api_key_restrictions)
+   * There should be an _API Keys_ as a _Browser key (auto creatd by Firebase)_
+   * Edit this, and add an _HTTP Referrer_, which will be the https:// address of the daq hosted web app: `https://your-project-name.firebaseapp.com/*`
+5. Enable Google sign-in from
    * https://console.firebase.google.com/
    * Select your project.
    * Select "Authentication"
    * Select "Sign-in method"
    * Enable "Google" sign-in.
-8. Follow the [Firebase CLI setup instructions](https://firebase.google.com/docs/cli/).
-9. Deploy Firebase functions
+
+## Deploy Firebase Code
+
+1. Install Firebase function dependencies.
+   * Make sure `npm` is installed.
    * Go to <code>firebase/functions</code> and run <code>npm install</code>.
-   * In <code>firebase/</code>, run <code>./deploy.sh</code> to deploy to your project.
+2. Enable appengine on GCP
+    * Go to [GCP AppEngine console](https://cloud.google.com/appengine)
+    * Enable!
+3. In <code>firebase/</code>, run <code>./deploy.sh</code> to deploy to your project.
    * Follow the link to the indicated _Hosting URL_ to see the newly installed pages.
    * You will likely see an _Authentication failed_ message. See next section for details.
 
@@ -56,7 +69,7 @@ of test results.
 Firestore rules are enforced requiring enabled user login to access data and reports. There's
 two phases to this process:
 * Web-app needs to be configured and deployed with appropriate web-app credentials (see above).
-* Users need to access the assigned web-app, and sign in. Initially, they will not be 'enabled'.
+* Users need to access the assigned web-app, and sign in. Initially, they will be denied access.
 * The system administrator will need to run `bin/user_enable` any time there is a new user.
 
 ## Datapath Debugging

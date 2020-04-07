@@ -58,6 +58,9 @@ class Gateway():
         LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
         cls = docker_host.make_docker_host('daqf/networking', prefix='daq', network='bridge')
+        # Work around an instability in the faucet/clib/docker library, b/152520627.
+        if getattr(cls, 'pullImage'):
+            setattr(cls, 'pullImage', lambda x: True)
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
         host.activate()
         self.host = host

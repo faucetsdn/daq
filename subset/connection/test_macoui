@@ -23,8 +23,3 @@ write_out_result $REPORT \
                  "$TEST_DESCRIPTION" \
                  "$(cat $REDACTED_LOG)" \
                  "$RESULT_AND_SUMMARY"
-
-result_lines=( "$RESULT_AND_SUMMARY" )
-
-[ $(check_for_fails_in "${result_lines[@]}") == false ]
-
