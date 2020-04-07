@@ -123,11 +123,14 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-Allowing 10000 open tcp snet-sensor-mgmt
-No invalid ports found.
+# Nmap 7.60 scan initiated Mon Mar 16 11:53:22 2020 as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.73.164
+# Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
+Host: 10.20.73.164 ()	Status: Up
+Host: 10.20.73.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
+# Nmap done at Mon Mar 16 11:53:23 2020 -- 1 IP address (1 host up) scanned in 0.98 seconds
+Failing 47808 open|filtered udp bacnet
 --------------------
-RESULT pass security.ports.nmap 
-
+RESULT fail security.ports.nmap Some disallowed ports are open: 47808
 ```
 
 ## Module brute
