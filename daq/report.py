@@ -163,8 +163,8 @@ class ReportGenerator:
 
     def _write_md_report(self):
         """Generate the markdown report to be copied into /inst and /local"""
-        with open(self.path, "w") as f:
-            self._file = f
+        with open(self.path, "w") as _file:
+            self._file = _file
             self._append_report_header()
             self._write_test_summary()
             self._copy_test_reports()
@@ -265,9 +265,9 @@ class ReportGenerator:
     def _write_result_table(self):
         self._write_table(self._SUMMARY_HEADERS)
         self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
-        for match in sorted(self._results.keys()):
-            cols = ["result", "test_name", "category", "expected", "result_description"]
-            row = map(lambda key: self._results[match][key], cols)
+        for _, result in sorted(self._results.items()):
+            row = [result["result"], result["test_name"], result["category"],\
+                    result["expected"], result["result_description"]]
             self._write_table(row)
 
     def _find_missing_test_results(self):

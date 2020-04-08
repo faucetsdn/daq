@@ -578,8 +578,8 @@ class ConnectedHost:
             os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
         state = MODE.MERR if failed else MODE.DONE
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
-
-        self._report.accumulate(self.test_name, {ResultType.EXCEPTION: exception})
+        if exception:
+            self._report.accumulate(self.test_name, {ResultType.EXCEPTION: str(exception)})
         self._report.accumulate(self.test_name, {ResultType.RETURN_CODE: return_code})
         self._report.accumulate(self.test_name, {ResultType.MODULE_CONFIG: self._loaded_config})
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
