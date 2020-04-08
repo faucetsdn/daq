@@ -585,8 +585,8 @@ class ConnectedHost:
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
         activation_log_path = os.path.join(self._host_dir_path(), 'activate.log')
         module_config_path = os.path.join(self._host_tmp_path(), self._MODULE_CONFIG)
-        for result_type, path in ((ResultType.REPORT_PATH, report_path), \
-                                  (ResultType.ACTIVATION_LOG_PATH, activation_log_path), \
+        for result_type, path in ((ResultType.REPORT_PATH, report_path),
+                                  (ResultType.ACTIVATION_LOG_PATH, activation_log_path),
                                   (ResultType.MODULE_CONFIG_PATH, module_config_path)):
             if os.path.isfile(path):
                 self._report.accumulate(self.test_name, {result_type: path})
