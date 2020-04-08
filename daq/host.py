@@ -3,14 +3,15 @@
 import os
 import shutil
 import time
+import json
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
+from report import ResultType, ReportGenerator
 
 import configurator
 import docker_test
 import gcp
-import report
 import logger
 
 LOGGER = logger.get_logger('host')
@@ -110,8 +111,8 @@ class ConnectedHost:
 
         self.record_result('startup', state=MODE.PREP)
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
-        self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
-                                              self._loaded_config)
+        self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
+                                       self._loaded_config)
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
@@ -497,9 +498,14 @@ class ConnectedHost:
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self._report.finalize()
+                json_path = self._report.path + ".json"
+                with open(json_path, 'w') as json_file:
+                    json.dump(self._report.get_all_results(), json_file)
                 self.test_name = None
                 self._gcp.upload_file(self._report.path,
                                       self._get_unique_upload_path(self._report.path))
+                self._gcp.upload_file(json_path,
+                                      self._get_unique_upload_path(json_path))
                 self.record_result('finish', state=MODE.FINE, report=self._report.path)
                 self._report = None
                 self.record_result(None)
@@ -573,17 +579,18 @@ class ConnectedHost:
         state = MODE.MERR if failed else MODE.DONE
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
 
-        result_path = os.path.join(self._host_dir_path(), 'return_code.txt')
-        try:
-            with open(result_path, 'a') as output_stream:
-                output_stream.write(str(return_code) + '\n')
-            self._gcp.upload_file(result_path, self._get_unique_upload_path(result_path))
-        except Exception as e:
-            LOGGER.error('While writing result code: %s', e)
+        self._report.accumulate(self.test_name, {ResultType.EXCEPTION: exception})
+        self._report.accumulate(self.test_name, {ResultType.RETURN_CODE: return_code})
+        self._report.accumulate(self.test_name, {ResultType.MODULE_CONFIG: self._loaded_config})
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
-        if os.path.isfile(report_path):
-            self._report.accumulate(self.test_name, report_path)
-            self._gcp.upload_file(report_path, self._get_unique_upload_path(report_path))
+        activation_log_path = os.path.join(self._host_dir_path(), 'activate.log')
+        module_config_path = os.path.join(self._host_tmp_path(), self._MODULE_CONFIG)
+        for result_type, path in ((ResultType.REPORT_PATH, report_path), \
+                                  (ResultType.ACTIVATION_LOG_PATH, activation_log_path), \
+                                  (ResultType.MODULE_CONFIG_PATH, module_config_path)):
+            if os.path.isfile(path):
+                self._report.accumulate(self.test_name, {result_type: path})
+                self._gcp.upload_file(path, self._get_unique_upload_path(path))
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
         self._run_next_test()
@@ -592,8 +599,6 @@ class ConnectedHost:
         tmp_dir = self._host_tmp_path()
         configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
         self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
-        full_path = os.path.join(tmp_dir, self._MODULE_CONFIG)
-        self._gcp.upload_file(full_path, self._get_unique_upload_path(full_path))
 
     def _merge_run_info(self, config):
         config['run_info'] = {
