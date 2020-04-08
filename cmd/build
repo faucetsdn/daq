@@ -16,7 +16,7 @@ fi
 set -o pipefail
 
 ROOT=$(dirname $0)/..
-VERSION=`git describe || echo unknown`
+TAG_VER=`git describe || echo unknown`
 
 force=force
 inline=
@@ -27,6 +27,7 @@ cd $ROOT
 source misc/config_base.sh
 host_tests=$host_tests bin/docker_build_files
 function pull_images {
+    TAG=$1
     declare -A test_set
     for target in $(host_tests=$host_tests bin/docker_build_files); do
         target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
@@ -37,8 +38,8 @@ function pull_images {
             echo Skipping $image pull 
             continue
         fi 
-        echo Pulling $image:$VERSION from dockerhub...
-        (docker pull $image:$VERSION && docker tag $image:$VERSION $image:latest) || echo "Could not pull $image:$VERSION."
+        echo Pulling $image:$TAG from dockerhub...
+        (docker pull $image:$TAG && docker tag $image:$TAG $image:latest) || echo "Could not pull $image:$VERSION."
     done 
 }
 
@@ -65,12 +66,14 @@ if [ "$1" == push ]; then
     exit 0
 elif [ "$1" == pull ]; then
     REPO_VER=$(< misc/$DOCKER_IMAGE_VER)
-    if [ "$VERSION" != "$REPO_VER" ]; then
-	echo Tagged version $VERSION does not match repo version $REPO_VER from misc/$DOCKER_IMAGE_VER
+    REPO_HASH=`git rev-list -n 1 $REPO_VER`
+    TAG_HASH=`git rev-list -n $TAG_VER`
+    if [ "$TAG_HASH" != "$REPO_HASH" ]; then
+	echo Tagged version $TAG_VER does not match misc/$DOCKER_IMAGE_VER $REPO_VER
 	false
     fi
-    echo Pulling images for version $VERSION
-    pull_images
+    echo Pulling images for version $REPO_VER
+    pull_images $REPO_VER
     echo Updating .build_hash
     bin/build_hash write
     mv -f .build_files .build_built
