@@ -92,6 +92,12 @@ trap cleanup_marker EXIT
 
 echo Build all container images...
 cmd/build inline
+<<<<<<< HEAD
+=======
+
+echo Starting aux test run...
+cmd/run -s -k
+>>>>>>> origin/master
 
 echo Starting aux test run...
 cmd/run -s -k

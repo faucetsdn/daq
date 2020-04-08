@@ -1,4 +1,5 @@
 # Changelog
+<<<<<<< HEAD
 
 * 1.1.0
   * Fixing version to python 3.7, requires recent version of debian
@@ -17,6 +18,11 @@
   * Convert to base64 encoded credentials for cloud-based tests
   * Poe switch test capability
   * Added switch_model property in system.conf for using switch tests
+=======
+* 1.1.0
+	* Added required switch_model property in system.conf file when using switch tests
+	*
+>>>>>>> origin/master
 * 1.0.2
 	* Faucet update to 1.9.19, including explicit LLDP stacking acls.
 	* Update Travis build environment to Bionic (prev. Trusty).
