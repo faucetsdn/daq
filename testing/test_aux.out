@@ -3,7 +3,6 @@ Aux Tests
 Lint checks
 check_style exit code 0
 Extended tests
-ERROR:host:Monitoring timeout for macoui after 1s
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
@@ -47,8 +46,8 @@ RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 1 1
-01: ['01:macoui:1', '01:nmap:1']
-02: ['02:hold:TimeoutError', '02:macoui:TimeoutError', '02:nmap:1']
+01: []
+02: ['02:hold:TimeoutError', '02:macoui:TimeoutError']
 03: []
 ctrl-br.flows
 ctrl-br.ofctl
@@ -73,7 +72,7 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-    "timeout_sec": 200 
+    "timeout_sec": 300
   },
   "macoui": {
     "enabled": true
@@ -118,7 +117,7 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
-    "timeout_sec": 200
+    "timeout_sec": 300
   },
   "macoui": {
     "enabled": true,
@@ -158,6 +157,8 @@ port-02 module_config modules
   `\.-''__.-' \ (     \_
     `'''       `\__   /\
                 ')
+Host: X.X.X.X ()	Status: Up
+Host: X.X.X.X ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
 01: ['01:ping:Exception']

@@ -11,8 +11,8 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2019-10-22 09:34:33+00:00 |
-| Test report end date   | 2019-10-22 09:41:18+00:00 |
+| Test report start date | 2020-03-16 11:41:45+00:00 |
+| Test report end date   | 2020-03-16 11:53:59+00:00 |
 | DAQ version      | 1.0.1 |
 | Attempt number   | 1 |
 
@@ -48,14 +48,14 @@ Overall device result FAIL
 
 |Category|Result|
 |---|---|
-|Security|PASS|
+|Security|0/1|
 |Other|1/2|
 |Connectivity|n/a|
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required|1|1|0|0|
-|Recommended|1|0|0|0|
+|Required|1|0|0|0|
+|Recommended|0|1|0|0|
 |Other|0|1|17|2|
 
 |Result|Test|Category|Expectation|Notes|
@@ -67,18 +67,17 @@ Overall device result FAIL
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|fail|network.brute|Security|Required|Change the default password on the DUT|
 |skip|poe.negotiation|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|poe.power|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|poe.support|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|protocol.bacnet.pic|Other|Other|Bacnet device not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
-|skip|security.passwords.http|Other|Other|Device does not have a valid mac address|
-|skip|security.passwords.https|Other|Other|Device does not have a valid mac address|
-|skip|security.passwords.ssh|Other|Other|Device does not have a valid mac address|
-|skip|security.passwords.telnet|Other|Other|Device does not have a valid mac address|
-|pass|security.ports.nmap|Security|Recommended||
+|skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
+|skip|security.passwords.https|Other|Other|Port 443 is not open on target device.|
+|skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
+|skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
+|fail|security.ports.nmap|Security|Recommended|Some disallowed ports are open: 47808|
 |skip|security.tls.v3|Other|Other||
 |skip|security.x509|Other|Other||
 |gone|unknown.fake.llama|Other|Other||
@@ -90,7 +89,7 @@ Overall device result FAIL
 ```
 --------------------
 Baseline ping test report
-%% 61 packets captured.
+%% 113 packets captured.
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -111,7 +110,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached %% 10.20.70.164
+RESULT pass base.target.ping target reached %% 10.20.73.164
 
 ```
 
@@ -131,21 +130,6 @@ Host: 10.20.73.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: c
 Failing 47808 open|filtered udp bacnet
 --------------------
 RESULT fail security.ports.nmap Some disallowed ports are open: 47808
-```
-
-## Module brute
-
-```
---------------------
-network.brute
---------------------
-Educational test - not to be included in a production environment!
---------------------
-Username:manager
-Password:friend
-Login success!
---------------------
-RESULT fail network.brute Change the default password on the DUT
 
 ```
 
@@ -266,62 +250,26 @@ RESULT skip protocol.bacnet.pic Bacnet device not found.
 
 ```
 --------------------
-Collecting TLS cert from target address %% 10.20.96.164
-SSLHandshakeException: Unable to complete handshake
+Collecting TLS cert from target address %% 10.20.73.164
+IOException unable to connect to server.
 
 --------------------
-security.tls.v1
+security.tls.v3
 --------------------
-Verify the device supports TLS 1.0 (as a client)
+Verify the device supports TLS 1.2 or above (as a client)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1
+RESULT skip security.tls.v3
 
 --------------------
-security.tls.v1.x509
+security.x509
 --------------------
 Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1.x509
-
---------------------
-security.tls.v1.2
---------------------
-Verify the device supports TLS 1.2 (as a client)
---------------------
-See log above
---------------------
-RESULT skip security.tls.v1_2
-
---------------------
-security.tls.v2.x509
---------------------
-Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
---------------------
-See log above
---------------------
-RESULT skip security.tls.v2.x509
-
---------------------
-security.tls.v1.3
---------------------
-Verify the device supports TLS 1.3 (as a client)
---------------------
-See log above
---------------------
-RESULT skip security.tls.v1_3
-
---------------------
-security.tls.v3.x509
---------------------
-Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
---------------------
-See log above
---------------------
-RESULT skip security.tls.v3.x509
+RESULT skip security.x509
 
 ```
 
@@ -331,38 +279,90 @@ RESULT skip security.tls.v3.x509
 --------------------
 security.passwords.http
 --------------------
-Verify all default password have been updated. Ensure new Google provided passwords are set
+Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-Redacted Log
+%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
+%% Starting NMAP check...
+%% 
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
+%% Nmap scan report for daq-faux-1 (10.20.73.164)
+%% Host is up (0.000060s latency).
+%% Not shown: 999 closed ports
+%% PORT      STATE SERVICE
+%% 10000/tcp open  snet-sensor-mgmt
+%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+%% 
+%% Nmap done: 1 IP address (1 host up) scanned in 3.34 seconds
+%% nmap 10.20.73.164
+%% Done.
 --------------------
-RESULT skip security.passwords.http Device does not have a valid mac address
+RESULT skip security.passwords.http Port 80 is not open on target device.
 
 --------------------
 security.passwords.https
 --------------------
-Verify all default password have been updated. Ensure new Google provided passwords are set
+Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-Redacted Log
+%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
+%% Starting NMAP check...
+%% 
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
+%% Nmap scan report for daq-faux-1 (10.20.73.164)
+%% Host is up (0.000049s latency).
+%% Not shown: 999 closed ports
+%% PORT      STATE SERVICE
+%% 10000/tcp open  snet-sensor-mgmt
+%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+%% 
+%% Nmap done: 1 IP address (1 host up) scanned in 3.06 seconds
+%% nmap 10.20.73.164
+%% Done.
 --------------------
-RESULT skip security.passwords.https Device does not have a valid mac address
+RESULT skip security.passwords.https Port 443 is not open on target device.
 
 --------------------
 security.passwords.telnet
 --------------------
-Verify all default password have been updated. Ensure new Google provided passwords are set
+Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-Redacted Log
+%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
+%% Starting NMAP check...
+%% 
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
+%% Nmap scan report for daq-faux-1 (10.20.73.164)
+%% Host is up (0.00016s latency).
+%% Not shown: 999 closed ports
+%% PORT      STATE SERVICE
+%% 10000/tcp open  snet-sensor-mgmt
+%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+%% 
+%% Nmap done: 1 IP address (1 host up) scanned in 3.46 seconds
+%% nmap 10.20.73.164
+%% Done.
 --------------------
-RESULT skip security.passwords.telnet Device does not have a valid mac address
+RESULT skip security.passwords.telnet Port 23 is not open on target device.
 
 --------------------
 security.passwords.ssh
 --------------------
-Verify all default password have been updated. Ensure new Google provided passwords are set
+Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-Redacted Log
+%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
+%% Starting NMAP check...
+%% 
+%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
+%% Nmap scan report for daq-faux-1 (10.20.73.164)
+%% Host is up (0.000024s latency).
+%% Not shown: 999 closed ports
+%% PORT      STATE SERVICE
+%% 10000/tcp open  snet-sensor-mgmt
+%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+%% 
+%% Nmap done: 1 IP address (1 host up) scanned in 3.51 seconds
+%% nmap 10.20.73.164
+%% Done.
 --------------------
-RESULT skip security.passwords.ssh Device does not have a valid mac address
+RESULT skip security.passwords.ssh Port 22 is not open on target device.
 
 ```
 
@@ -372,7 +372,7 @@ RESULT skip security.passwords.ssh Device does not have a valid mac address
 --------------------
 cloud.udmi.pointset
 --------------------
-Validates the payloads from the DUT to a predefined schema
+Validates device payload against the UDMI schema
 --------------------
 Device id is null, skipping.
 --------------------
