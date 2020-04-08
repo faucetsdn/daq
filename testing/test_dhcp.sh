@@ -2,13 +2,6 @@
 
 source testing/test_preamble.sh
 
-<<<<<<< HEAD
-=======
-# num of devices need to less than 10
-NUM_DEVICES=8
-RUN_LIMIT=20
-NUM_LONG_DHCP_DEVICES=1
->>>>>>> origin/master
 echo DHCP Tests >> $TEST_RESULTS
 
 cp misc/system_multi.conf local/system.conf
