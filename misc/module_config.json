@@ -1,7 +1,7 @@
 {
   "modules": {
-    "dhcp": {
-      "timeout_sec": 120
+    "ipaddr": {
+      "timeout_sec": 300
     },
     "pass": {
       "enabled": true

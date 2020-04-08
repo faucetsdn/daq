@@ -1,8 +1,5 @@
 {
   "modules": {
-    "brute": {
-      "enabled": true
-    },
     "pass": {
       "enabled": false
     },
@@ -11,6 +8,9 @@
     },
     "bacext": {
       "enabled": true
+    },
+    "hold": {
+      "enabled": false
     },
     "network": {
       "enabled": true
@@ -40,10 +40,6 @@
       "required": "pass",
       "category": "Security",
       "expected": "Recommended"
-    },
-    "network.brute": {
-      "category": "Security",
-      "expected": "Required"
     }
   }
 }

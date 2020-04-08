@@ -58,10 +58,13 @@ class Gateway():
         LOGGER.info('Initializing gateway %s as %s/%d', self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
         cls = docker_host.make_docker_host('daqf/networking', prefix='daq', network='bridge')
+        # Work around an instability in the faucet/clib/docker library, b/152520627.
+        if getattr(cls, 'pullImage'):
+            setattr(cls, 'pullImage', lambda x: True)
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
         host.activate()
         self.host = host
-        self.host.cmd('./change_lease_time %s' % self.runner.config.get("initial_dhcp_lease_time"))
+        self.execute_script('change_lease_time', self.runner.config.get('initial_dhcp_lease_time'))
         LOGGER.info("Added networking host %s on port %d at %s", host_name, host_port, host.IP())
 
         dummy_name = 'dummy%02d' % self.port_set
@@ -97,7 +100,7 @@ class Gateway():
 
     def activate(self):
         """Mark this gateway as activated once all hosts are present"""
-        self.host.cmd('./change_lease_time %s' % self.runner.config.get("dhcp_lease_time"))
+        self.execute_script('change_lease_time', self.runner.config.get("dhcp_lease_time"))
         self.activated = True
         self._scan_finalize()
 
@@ -109,6 +112,10 @@ class Gateway():
                 self.runner.monitor_forget(self._scan_monitor.stream())
                 self._scan_monitor.terminate()
             self._scan_monitor = None
+
+    def execute_script(self, action, *args):
+        """Generic function for executing scripts on gateway"""
+        self.host.cmd(('./%s' + len(args) * ' %s') % (action, *args))
 
     def allocate_test_port(self):
         """Get the test port to use for this gateway setup"""
@@ -164,7 +171,7 @@ class Gateway():
         if exception:
             LOGGER.error('Gateway DHCP exception %s', exception)
         if self._is_target_expected(target) or exception:
-            self.runner.dhcp_notify(state, target, self.port_set, exception=exception)
+            self.runner.ip_notify(state, target, self.port_set, exception=exception)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)

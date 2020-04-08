@@ -4,21 +4,18 @@ source testing/test_preamble.sh
 
 echo Base Tests >> $TEST_RESULTS
 
-function redact {
-    sed -E -e '/^%%.*/d' \
-        -e 's/\s*%%.*//' \
-        -e 's/[0-9]{4}-.*T.*Z/XXX/' \
-        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/g' \
-        -e 's/DAQ version.*//'
-}
-
 cp misc/system_base.conf local/system.conf
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp misc/report_template.md inst/tmp_site/
 
+echo Creating MUD templates...
+bin/mudacl
+
 cmd/run -b -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
+
+echo Redacted report for 9a02571e8f00:
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Test block for open-port failures.

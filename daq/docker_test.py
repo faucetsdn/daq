@@ -10,14 +10,14 @@ import wrappers
 LOGGER = logger.get_logger('docker')
 
 
-class DockerTest():
+class DockerTest:
     """Class for running docker tests"""
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
-    def __init__(self, runner, target_port, tmpdir, test_name):
+    def __init__(self, runner, target_port, tmpdir, test_name, env_vars=None):
         self.target_port = target_port
         self.tmpdir = tmpdir
         self.test_name = test_name
@@ -28,6 +28,7 @@ class DockerTest():
         self.callback = None
         self.start_time = None
         self.pipe = None
+        self.env_vars = env_vars or []
 
     def start(self, port, params, callback):
         """Start the docker test"""
@@ -36,12 +37,11 @@ class DockerTest():
         self.start_time = datetime.datetime.now()
         self.callback = callback
 
-        env_vars = ["TARGET_NAME=" + self.host_name,
-                    "TARGET_IP=" + params['target_ip'],
-                    "TARGET_MAC=" + params['target_mac'],
-                    "GATEWAY_IP=" + params['gateway_ip'],
-                    "GATEWAY_MAC=" + params['gateway_mac']]
-
+        env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
+                                    "TARGET_IP=" + params['target_ip'],
+                                    "TARGET_MAC=" + params['target_mac'],
+                                    "GATEWAY_IP=" + params['gateway_ip'],
+                                    "GATEWAY_MAC=" + params['gateway_mac']]
 
         if 'local_ip' in params:
             env_vars += ["LOCAL_IP=" + params['local_ip'],
@@ -50,7 +50,6 @@ class DockerTest():
                          "SWITCH_MODEL=" + params['switch_model']]
 
         vol_maps = [params['scan_base'] + ":/scans"]
-
         self._map_if_exists(vol_maps, params, 'inst')
         self._map_if_exists(vol_maps, params, 'port')
         self._map_if_exists(vol_maps, params, 'device')
@@ -59,6 +58,9 @@ class DockerTest():
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
+        # Work around an instability in the faucet/clib/docker library, b/152520627.
+        if getattr(cls, 'pullImage'):
+            setattr(cls, 'pullImage', lambda x: True)
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
@@ -91,11 +93,13 @@ class DockerTest():
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def terminate(self):
+    def terminate(self, expected=True):
         """Forcibly terminate this container"""
-        if not self.docker_host:
-            raise Exception("Target port %d test %s already terminated" % (
-                self.target_port, self.test_name))
+        if bool(self.docker_host) != expected:
+            raise Exception("Target port %d test %s already terminated %s" % (
+                self.target_port, self.test_name, expected))
+        if not expected:
+            return None
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 
@@ -113,20 +117,19 @@ class DockerTest():
             self.callback(exception=exception)
 
     def _docker_finalize(self):
-        if self.docker_host:
-            LOGGER.info('Target port %d docker finalize', self.target_port)
-            self.runner.remove_host(self.docker_host)
-            if self.pipe:
-                self.runner.monitor_forget(self.pipe.stdout)
-                self.pipe = None
-            return_code = self.docker_host.terminate()
-            self.docker_host = None
-            self.docker_log.close()
-            self.docker_log = None
-            if self._should_raise_test_exception('finalize'):
-                raise Exception('Test finalize failure')
-            return return_code
-        return None
+        assert self.docker_host, 'docker host %s already finalized' % self.target_port
+        LOGGER.info('Target port %d docker finalize', self.target_port)
+        self.runner.remove_host(self.docker_host)
+        if self.pipe:
+            self.runner.monitor_forget(self.pipe.stdout)
+            self.pipe = None
+        return_code = self.docker_host.terminate()
+        self.docker_host = None
+        self.docker_log.close()
+        self.docker_log = None
+        if self._should_raise_test_exception('finalize'):
+            raise Exception('Test finalize failure')
+        return return_code
 
     def _should_raise_test_exception(self, trigger_value):
         key = 'ex_%s_%02d' % (self.test_name, self.target_port)

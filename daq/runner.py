@@ -6,6 +6,7 @@ import re
 import threading
 import time
 import traceback
+import uuid
 
 import configurator
 import faucet_event_client
@@ -46,7 +47,9 @@ class DAQRunner:
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
-        self.version = os.environ['DAQ_VERSION']
+        self._daq_version = os.environ['DAQ_VERSION']
+        self._lsb_release = os.environ['DAQ_LSB_RELEASE']
+        self._sys_uname = os.environ['DAQ_SYS_UNAME']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
         self._linger_exit = 0
@@ -62,15 +65,21 @@ class DAQRunner:
         self.result_log = self._open_result_log()
         self._system_active = False
         self._dhcp_ready = set()
-        self._dhcp_info = {}
+        self._ip_info = {}
         logging_client = self.gcp.get_logging_client()
+        self._daq_run_id = uuid.uuid4()
         if logging_client:
-            logger.set_stackdriver_client(logging_client)
+            logger.set_stackdriver_client(logging_client,
+                                          labels={"daq_run_id": str(self._daq_run_id)})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
             test_list.append('hold')
         config['test_list'] = test_list
-        LOGGER.info('Configured with tests %s', config['test_list'])
+        LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
+        LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
+        LOGGER.info('DAQ version %s' % self._daq_version)
+        LOGGER.info('LSB release %s' % self._lsb_release)
+        LOGGER.info('system uname %s' % self._sys_uname)
 
     def _flush_faucet_events(self):
         LOGGER.info('Flushing faucet event queue...')
@@ -86,14 +95,24 @@ class DAQRunner:
         return states + connected_host.post_states()
 
     def _send_heartbeat(self):
-        self.gcp.publish_message('daq_runner', 'heartbeat', {
+        message = {
             'name': 'status',
             'states': self._get_states(),
             'ports': list(self._active_ports.keys()),
             'description': self.description,
-            'version': self.version,
             'timestamp': int(time.time()),
-        })
+        }
+        message.update(self.get_run_info())
+        self.gcp.publish_message('daq_runner', 'heartbeat', message)
+
+    def get_run_info(self):
+        """Return basic run info dict"""
+        return {
+            'version': self._daq_version,
+            'lsb': self._lsb_release,
+            'uname': self._sys_uname,
+            'daq_run_id': str(self._daq_run_id)
+        }
 
     def initialize(self):
         """Initialize DAQ instance"""
@@ -138,11 +157,11 @@ class DAQRunner:
     def _handle_faucet_events(self):
         while self.faucet_events:
             event = self.faucet_events.next_event()
-            LOGGER.debug('Faucet event %s', event)
             if not event:
                 break
             (dpid, port, active) = self.faucet_events.as_port_state(event)
             if dpid and port:
+                LOGGER.debug('port_state: %s %s', dpid, port)
                 self._handle_port_state(dpid, port, active)
             (dpid, port, target_mac) = self.faucet_events.as_port_learn(event)
             if dpid and port:
@@ -256,7 +275,7 @@ class DAQRunner:
     def _terminate(self):
         target_set_keys = list(self.port_targets.keys())
         for key in target_set_keys:
-            self.port_targets[key].terminate()
+            self.port_targets[key].terminate('_terminate')
 
     def _check_module_timeouts(self):
         for host in list(self.mac_targets.values()):
@@ -268,7 +287,7 @@ class DAQRunner:
         try:
             monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
                                                    loop_hook=self._loop_hook,
-                                                   timeout_sec=20) # Polling rate
+                                                   timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
             self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events)
             if self.event_trigger:
@@ -330,11 +349,15 @@ class DAQRunner:
             'port_set': gateway.port_set,
             'mac': target_mac
         }
+
+        # Stops all DHCP response initially
+        # Selectively enables dhcp response at ipaddr stage based on dhcp mode
+        gateway.execute_script('change_dhcp_response_time', target_mac, -1)
         gateway.attach_target(target_port, target)
 
         try:
             self.run_count += 1
-            new_host = connected_host.ConnectedHost(self, gateway.host, target, self.config)
+            new_host = connected_host.ConnectedHost(self, gateway, target, self.config)
             self.mac_targets[target_mac] = new_host
             self.port_targets[target_port] = new_host
             self.port_gateways[target_port] = gateway
@@ -409,33 +432,33 @@ class DAQRunner:
             raise
         return gateway
 
-    def dhcp_notify(self, state, target, gateway_set, exception=None):
-        """Handle a DHCP notification"""
+    def ip_notify(self, state, target, gateway_set, exception=None):
+        """Handle a DHCP / Static IP notification"""
         if exception:
             assert not target, 'unexpected exception with target'
-            LOGGER.error('DHCP exception for gw%02d: %s', gateway_set, exception)
+            LOGGER.error('IP exception for gw%02d: %s', gateway_set, exception)
             LOGGER.exception(exception)
             self._terminate_gateway_set(gateway_set)
             return
 
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('DHCP notify %s is %s on gw%02d (%s/%d)', target_mac,
+        LOGGER.info('IP notify %s is %s on gw%02d (%s/%d)', target_mac,
                     target_ip, gateway_set, state, delta_sec)
 
         if not target_mac:
-            LOGGER.warning('DHCP target mac missing')
+            LOGGER.warning('IP target mac missing')
             return
 
         self._target_mac_ip[target_mac] = target_ip
         if target_mac in self.mac_targets:
-            self._dhcp_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
+            self._ip_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
             self._check_and_activate_gateway(self.mac_targets[target_mac])
 
     def _check_and_activate_gateway(self, host):
-        # Host ready to be activated and DHCP happened
-        if host not in self._dhcp_info or host not in self._dhcp_ready:
+        # Host ready to be activated and DHCP happened / Static IP
+        if host not in self._ip_info or host not in self._dhcp_ready:
             return
-        state, target, gateway_set = self._dhcp_info[host]
+        state, target, gateway_set = self._ip_info[host]
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
         (gateway, ready_devices) = self._should_activate_target(target_mac, target_ip, gateway_set)
 
@@ -458,7 +481,7 @@ class DAQRunner:
             state = 'group'
             delta_sec = -1
         for ready_mac in ready_devices:
-            LOGGER.info('DHCP activating target %s', ready_mac)
+            LOGGER.info('IP activating target %s', ready_mac)
             ready_host = self.mac_targets[ready_mac]
             ready_ip = self._target_mac_ip[ready_mac]
             triggered = ready_host.trigger(state, target_ip=ready_ip, delta_sec=delta_sec)
@@ -508,6 +531,7 @@ class DAQRunner:
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
+            self.port_targets[target_port].terminate('_gateway_terminate')
             self.target_set_error(target_port, DaqException('terminated'))
 
     def _find_gateway_set(self, target_port):
@@ -592,7 +616,7 @@ class DAQRunner:
                 target_gateway.result_linger = True
             else:
                 self._direct_port_traffic(target_mac, target_port, None)
-                target_host.terminate(trigger=False)
+                target_host.terminate('_target_set_cancel', trigger=False)
                 if target_gateway:
                     self._detach_gateway(target_port)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:

@@ -3,14 +3,15 @@
 import os
 import shutil
 import time
+import json
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
+from report import ResultType, ReportGenerator
 
 import configurator
 import docker_test
 import gcp
-import report
 import logger
 
 LOGGER = logger.get_logger('host')
@@ -48,8 +49,7 @@ class MODE:
 
 def pre_states():
     """Return pre-test states for basic operation"""
-    return ['startup', 'sanity', 'dhcp', 'base', 'monitor']
-
+    return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
 def post_states():
     """Return post-test states for recording finalization"""
@@ -60,7 +60,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _MONITOR_SCAN_SEC = 30
-    _DEFAULT_TIMEOUT = 350
+    _DEFAULT_TIMEOUT_SEC = 350
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
@@ -84,18 +84,18 @@ class ConnectedHost:
         self.run_id = self.make_runid()
         self.scan_base = os.path.abspath(os.path.join(self.devdir, 'scans'))
         self._port_base = self._get_port_base()
-        self._device_base = self._get_device_base(self.target_mac)
+        self._device_base = self._get_device_base()
         self.state = None
         self._state_transition(_STATE.READY)
         self.results = {}
         self.dummy = None
         self.test_name = None
-        self.test_start = None
+        self.test_start = gcp.get_timestamp()
         self.test_host = None
         self.test_port = None
         self._startup_time = None
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
-        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT))
+        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT_SEC))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
@@ -111,8 +111,10 @@ class ConnectedHost:
 
         self.record_result('startup', state=MODE.PREP)
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
-        self._report = report.ReportGenerator(config, self._INST_DIR, self.target_mac,
-                                              self._loaded_config)
+        self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
+                                       self._loaded_config)
+        self._trigger_path = None
+        self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
     @staticmethod
     def make_runid():
@@ -153,21 +155,34 @@ class ConnectedHost:
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
-        return test_module.get('timeout_sec', self._default_timeout_sec) if test_module else None
+        if not test_module:
+            return self._default_timeout_sec
+        return test_module.get('timeout_sec', self._default_timeout_sec)
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
 
-    def _get_device_base(self, target_mac):
+    def _get_device_base(self):
         """Get the base config path for a host device"""
         site_path = self.config.get('site_path')
         if not site_path:
             return None
-        clean_mac = target_mac.replace(':', '')
+        clean_mac = self.target_mac.replace(':', '')
         dev_path = os.path.abspath(os.path.join(site_path, 'mac_addrs', clean_mac))
         if not os.path.isdir(dev_path):
             self._create_device_dir(dev_path)
         return dev_path
+
+    def _get_static_ip(self):
+        return self._loaded_config.get('static_ip')
+
+    def _get_dhcp_mode(self):
+        return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', 'normal')
+
+    def _get_unique_upload_path(self, file_name):
+        base = os.path.basename(file_name)
+        partial = os.path.join('tests', self.test_name, base) if self.test_name else base
+        return os.path.join('run_id', self.run_id, partial)
 
     def _type_path(self):
         dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
@@ -245,16 +260,32 @@ class ConnectedHost:
         return self.state == _STATE.READY
 
     def notify_activate(self):
-        """Return True if ready to be activated in response to a DHCP notification."""
+        """Return True if ready to be activated in response to an ip notification."""
         if self.state == _STATE.READY:
             self._record_result('startup', state=MODE.HOLD)
         return self.state == _STATE.WAITING
 
     def _prepare(self):
-        LOGGER.info('Target port %d waiting for dhcp as %s', self.target_port, self.target_mac)
+        LOGGER.info('Target port %d waiting for ip as %s', self.target_port, self.target_mac)
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
-        self.record_result('dhcp', state=MODE.EXEC)
+        self.record_result('ipaddr', state=MODE.EXEC)
+        static_ip = self._get_static_ip()
+        if static_ip:
+            LOGGER.info('Target port %d using static ip', self.target_port)
+            time.sleep(self._STARTUP_MIN_TIME_SEC)
+            self.runner.ip_notify(MODE.NOPE, {
+                'mac': self.target_mac,
+                'ip': static_ip,
+                'delta': -1
+            }, self.gateway.port_set)
+        else:
+            dhcp_mode = self._get_dhcp_mode()
+            LOGGER.info('Target port %d using %s DHCP mode', self.target_port, dhcp_mode)
+            # enables dhcp response for this device
+            wait_time = self.runner.config.get("long_dhcp_response_sec") \
+                if dhcp_mode == 'long_response' else 0
+            self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):
@@ -271,9 +302,9 @@ class ConnectedHost:
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
             return
-        delta_sec = timedelta(seconds=timeout_sec)
-        timeout = gcp.parse_timestamp(self.test_start) + delta_sec
-        if  datetime.fromtimestamp(time.time()) >= timeout:
+        timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)
+        nowtime = gcp.parse_timestamp(gcp.get_timestamp())
+        if nowtime >= timeout:
             if self.timeout_handler:
                 LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
                 # ensure it's called once
@@ -282,28 +313,32 @@ class ConnectedHost:
 
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
-        assert callable(callback), "DHCP listener callback is not callable"
+        assert callable(callback), "ip listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
-    def terminate(self, trigger=True):
+    def terminate(self, reason, trigger=True):
         """Terminate this host"""
-        LOGGER.info('Target port %d terminate, running %s, trigger %s', self.target_port,
-                    self._host_name(), trigger)
+        LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
+                    self._host_name(), trigger, reason)
         self._release_config()
         self._state_transition(_STATE.TERM)
         self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
+        if self._trigger_path:
+            self._gcp.upload_file(self._trigger_path,
+                                  self._get_unique_upload_path(self._trigger_path))
         if self.test_host:
             try:
-                self.test_host.terminate()
+                self.test_host.terminate(expected=trigger)
                 self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
         if trigger:
             self.runner.target_set_complete(self.target_port,
-                                            'Target port %d termination' % self.target_port)
+                                            'Target port %d termination: %s' % (
+                                                self.target_port, self.test_host))
 
     def idle_handler(self):
         """Trigger events from idle state"""
@@ -321,10 +356,10 @@ class ConnectedHost:
             return False
         return True
 
-    def trigger(self, state, target_ip=None, exception=None, delta_sec=-1):
-        """Handle completion of DHCP subtask"""
-        trigger_path = os.path.join(self.scan_base, 'dhcp_triggers.txt')
-        with open(trigger_path, 'a') as output_stream:
+    def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
+        """Handle completion of ip subtask"""
+        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
+        with open(self._trigger_path, 'a') as output_stream:
             output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
         if self.target_ip:
             LOGGER.debug('Target port %d already triggered', self.target_port)
@@ -335,7 +370,7 @@ class ConnectedHost:
             return False
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
-        self.record_result('dhcp', ip=target_ip, state=state, exception=exception)
+        self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
         if exception:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, exception)
@@ -352,22 +387,22 @@ class ConnectedHost:
 
     def _startup_scan(self):
         assert not self._tcp_monitor, 'tcp_monitor already active'
-        startup_file = os.path.join(self.scan_base, 'startup.pcap')
+        self._startup_file = os.path.join(self.scan_base, 'startup.pcap')
         self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
         network = self.runner.network
         tcp_filter = ''
         LOGGER.debug('Target port %d startup scan intf %s filter %s output in %s',
-                     self.target_port, self._mirror_intf_name, tcp_filter, startup_file)
+                     self.target_port, self._mirror_intf_name, tcp_filter, self._startup_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
-                                              timeout=None, pcap_out=startup_file, blocking=False)
+                                              timeout=None, pcap_out=self._startup_file,
+                                              blocking=False)
         self._tcp_monitor = helper
         hangup = lambda: self._monitor_error(Exception('startup scan hangup'))
         self.runner.monitor_stream('tcpdump', self._tcp_monitor.stream(),
                                    self._tcp_monitor.next_line,
                                    hangup=hangup, error=self._monitor_error)
-
     def _base_start(self):
         try:
             success = self._base_tests()
@@ -387,6 +422,8 @@ class ConnectedHost:
             LOGGER.info('Target port %d monitor scan complete', self.target_port)
             nclosed = self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed
             assert nclosed == forget, 'forget and nclosed mismatch'
+            self._gcp.upload_file(self._startup_file,
+                                  self._get_unique_upload_path(self._startup_file))
             if forget:
                 self.runner.monitor_forget(self._tcp_monitor.stream())
                 self._tcp_monitor.terminate()
@@ -436,11 +473,11 @@ class ConnectedHost:
 
     def _base_tests(self):
         self.record_result('base', state=MODE.EXEC)
-        if not self._ping_test(self.gateway, self.target_ip):
+        if not self._ping_test(self.gateway.host, self.target_ip):
             LOGGER.debug('Target port %d warmup ping failed', self.target_port)
         try:
-            success1 = self._ping_test(self.gateway, self.target_ip), 'simple ping failed'
-            success2 = self._ping_test(self.gateway, self.target_ip,
+            success1 = self._ping_test(self.gateway.host, self.target_ip), 'simple ping failed'
+            success2 = self._ping_test(self.gateway.host, self.target_ip,
                                        src_addr=self.fake_target), 'target ping failed'
             if not success1 or not success2:
                 return False
@@ -461,7 +498,14 @@ class ConnectedHost:
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self._report.finalize()
-                self._gcp.upload_report(self._report.path)
+                json_path = self._report.path + ".json"
+                with open(json_path, 'w') as json_file:
+                    json.dump(self._report.get_all_results(), json_file)
+                self.test_name = None
+                self._gcp.upload_file(self._report.path,
+                                      self._get_unique_upload_path(self._report.path))
+                self._gcp.upload_file(json_path,
+                                      self._get_unique_upload_path(json_path))
                 self.record_result('finish', state=MODE.FINE, report=self._report.path)
                 self._report = None
                 self.record_result(None)
@@ -486,8 +530,8 @@ class ConnectedHost:
         params = {
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
-            'gateway_ip': self.gateway.IP(),
-            'gateway_mac': self.gateway.MAC(),
+            'gateway_ip': self.gateway.host.IP(),
+            'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
             'port_base': self._port_base,
             'device_base': self._device_aux_path(),
@@ -495,7 +539,7 @@ class ConnectedHost:
             'scan_base': self.scan_base
         }
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                self.test_name)
+                                                test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
         if 'ext_loip' in self.config:
             ext_loip = self.config['ext_loip'].replace('@', '%d')
@@ -505,7 +549,7 @@ class ConnectedHost:
             params['switch_model'] = self.config['switch_model']
 
         try:
-            LOGGER.debug('test_host start %s/%s', self.test_name, self._host_name())
+            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
             self.test_host.start(self.test_port, params, self._docker_callback)
@@ -525,7 +569,7 @@ class ConnectedHost:
     def _docker_callback(self, return_code=None, exception=None):
         self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
-        LOGGER.info('test_host callback %s/%s was %s with %s',
+        LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
         failed = return_code or exception
         if failed and self._fail_hook:
@@ -534,15 +578,19 @@ class ConnectedHost:
             os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
         state = MODE.MERR if failed else MODE.DONE
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
-        result_path = os.path.join(self._host_dir_path(), 'return_code.txt')
-        try:
-            with open(result_path, 'a') as output_stream:
-                output_stream.write(str(return_code) + '\n')
-        except Exception as e:
-            LOGGER.error('While writing result code: %s', e)
+        if exception:
+            self._report.accumulate(self.test_name, {ResultType.EXCEPTION: str(exception)})
+        self._report.accumulate(self.test_name, {ResultType.RETURN_CODE: return_code})
+        self._report.accumulate(self.test_name, {ResultType.MODULE_CONFIG: self._loaded_config})
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
-        if os.path.isfile(report_path):
-            self._report.accumulate(self.test_name, report_path)
+        activation_log_path = os.path.join(self._host_dir_path(), 'activate.log')
+        module_config_path = os.path.join(self._host_tmp_path(), self._MODULE_CONFIG)
+        for result_type, path in ((ResultType.REPORT_PATH, report_path),
+                                  (ResultType.ACTIVATION_LOG_PATH, activation_log_path),
+                                  (ResultType.MODULE_CONFIG_PATH, module_config_path)):
+            if os.path.isfile(path):
+                self._report.accumulate(self.test_name, {result_type: path})
+                self._gcp.upload_file(path, self._get_unique_upload_path(path))
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
         self._run_next_test()
@@ -556,9 +604,9 @@ class ConnectedHost:
         config['run_info'] = {
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
-            'daq_version': self.runner.version,
             'started': gcp.get_timestamp()
         }
+        config['run_info'].update(self.runner.get_run_info())
 
     def _load_module_config(self, run_info=True):
         config = self.runner.get_base_config()

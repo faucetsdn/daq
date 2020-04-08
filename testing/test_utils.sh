@@ -124,9 +124,11 @@ function run_test {
         cmd_file=$conf_dir/ping_runtime.sh
         test -d $conf_dir || (mkdir -p $conf_dir; echo sleep 30 >> $cmd_file)
     done
-    cmd/run -b -s
+    cmd/run -s
     fgrep :ping: inst/result.log | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
     more inst/run-port-*/nodes/ping*/activate.log | cat
+    more inst/gw0*/nodes/gw0*/activate.log | cat
+    more inst/gw0*/dhcp_monitor.txt | cat
 }

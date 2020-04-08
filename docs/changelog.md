@@ -1,6 +1,27 @@
 # Changelog
-* 1.0.3
-	* Added required switch_model property in system.conf file when using switch tests
+
+* 1.1.0
+  * Fixing version to python 3.7, requires recent version of debian
+  * Log and display more version info into GCP project
+  * Don't abbreviate description in test module manifest
+  * Overhaul of DHCP tests and test capabilities
+  * Save all configs and many run logs to GCP
+  * Update UDMI metadata validator to include site summary report
+  * Use dockerhub docker images for tagged releases
+  * Capability for specifying static_ips for devices
+  * Individual module test capability (run docker test without daq)
+  * Runtime logs to GCP stackdriver
+  * Add basic site-indexed device-centric console
+  * Create PDF reports
+  * Device report output reformatting
+  * Convert to base64 encoded credentials for cloud-based tests
+  * Poe switch test capability
+  * Added switch_model property in system.conf for using switch tests
+  * Support for Cisco Catalyst 9300 series network switches in the switch test
+  * Passwords test module for checking devices against a default set of passwords
+  * BACnet firmware discovery test
+  * Addition of port configuration for running nmap for port scanning
+  * Updated to faucet 1.9.36 and forch 0.33
 * 1.0.2
 	* Faucet update to 1.9.19, including explicit LLDP stacking acls.
 	* Update Travis build environment to Bionic (prev. Trusty).
