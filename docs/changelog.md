@@ -17,6 +17,11 @@
   * Convert to base64 encoded credentials for cloud-based tests
   * Poe switch test capability
   * Added switch_model property in system.conf for using switch tests
+  * Support for Cisco Catalyst 9300 series network switches in the switch test
+  * Passwords test module for checking devices against a default set of passwords
+  * BACnet firmware discovery test
+  * Addition of port configuration for running nmap for port scanning
+  * Updated to faucet 1.9.36 and forch 0.33
 * 1.0.2
 	* Faucet update to 1.9.19, including explicit LLDP stacking acls.
 	* Update Travis build environment to Bionic (prev. Trusty).
