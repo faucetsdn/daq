@@ -33,7 +33,7 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 1 1
 01: []
-02: ['02:hold:TimeoutError', '02:macoui:TimeoutError']
+02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
 ctrl-br.flows
 ctrl-br.ofctl
