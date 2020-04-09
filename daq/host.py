@@ -59,8 +59,6 @@ def post_states():
 class ConnectedHost:
     """Class managing a device-under-test"""
 
-    _MONITOR_SCAN_SEC = 30
-    _DEFAULT_TIMEOUT_SEC = 350
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
@@ -94,12 +92,12 @@ class ConnectedHost:
         self.test_host = None
         self.test_port = None
         self._startup_time = None
-        self._monitor_scan_sec = int(config.get('monitor_scan_sec', self._MONITOR_SCAN_SEC))
-        _default_timeout_sec = int(config.get('default_timeout_sec', self._DEFAULT_TIMEOUT_SEC))
+        self._monitor_scan_sec = int(config.get('monitor_scan_sec', 0))
+        _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
-        self._tcp_monitor = None
+        self._monitor_ref = None
         self.target_ip = None
         self._loaded_config = None
         self.reload_config()
@@ -155,6 +153,8 @@ class ConnectedHost:
 
     def _get_test_timeout(self, test):
         test_module = self._loaded_config['modules'].get(test)
+        if test == 'hold':
+            return None
         if not test_module:
             return self._default_timeout_sec
         return test_module.get('timeout_sec', self._default_timeout_sec)
@@ -386,23 +386,27 @@ class ConnectedHost:
         return self.runner.ping_test(src, dst, src_addr=src_addr)
 
     def _startup_scan(self):
-        assert not self._tcp_monitor, 'tcp_monitor already active'
         self._startup_file = os.path.join(self.scan_base, 'startup.pcap')
         self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
+        self._tcpdump_scan(self._startup_file)
+
+    def _tcpdump_scan(self, output_file):
+        assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
-        LOGGER.debug('Target port %d startup scan intf %s filter %s output in %s',
-                     self.target_port, self._mirror_intf_name, tcp_filter, self._startup_file)
+        LOGGER.info('Target port %d scan intf %s filter %s output in %s',
+                     self.target_port, self._mirror_intf_name, tcp_filter, output_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
-                                              timeout=None, pcap_out=self._startup_file,
+                                              timeout=None, pcap_out=output_file,
                                               blocking=False)
-        self._tcp_monitor = helper
-        hangup = lambda: self._monitor_error(Exception('startup scan hangup'))
-        self.runner.monitor_stream('tcpdump', self._tcp_monitor.stream(),
-                                   self._tcp_monitor.next_line,
+        self._monitor_ref = helper
+        hangup = lambda: self._monitor_error(Exception('tcpdump scan hangup'))
+        self.runner.monitor_stream('tcpdump', self._monitor_ref.stream(),
+                                   self._monitor_ref.next_line,
                                    hangup=hangup, error=self._monitor_error)
+
     def _base_start(self):
         try:
             success = self._base_tests()
@@ -418,16 +422,16 @@ class ConnectedHost:
             self._monitor_error(e)
 
     def _monitor_cleanup(self, forget=True):
-        if self._tcp_monitor:
+        if self._monitor_ref:
             LOGGER.info('Target port %d monitor scan complete', self.target_port)
-            nclosed = self._tcp_monitor.stream() and not self._tcp_monitor.stream().closed
+            nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
             assert nclosed == forget, 'forget and nclosed mismatch'
             self._gcp.upload_file(self._startup_file,
                                   self._get_unique_upload_path(self._startup_file))
             if forget:
-                self.runner.monitor_forget(self._tcp_monitor.stream())
-                self._tcp_monitor.terminate()
-            self._tcp_monitor = None
+                self.runner.monitor_forget(self._monitor_ref.stream())
+                self._monitor_ref.terminate()
+            self._monitor_ref = None
 
     def _monitor_error(self, exception, forget=False):
         LOGGER.error('Target port %d monitor error: %s', self.target_port, exception)
@@ -446,20 +450,7 @@ class ConnectedHost:
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         LOGGER.info('Target port %d background scan for %ds',
                     self.target_port, self._monitor_scan_sec)
-        network = self.runner.network
-        tcp_filter = ''
-        intf_name = self._mirror_intf_name
-        assert not self._tcp_monitor, 'tcp_monitor already active'
-        LOGGER.debug('Target port %d background scan intf %s filter %s output in %s',
-                     self.target_port, intf_name, tcp_filter, monitor_file)
-        helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
-                                              intf_name=intf_name,
-                                              timeout=self._monitor_scan_sec,
-                                              pcap_out=monitor_file, blocking=False)
-        self._tcp_monitor = helper
-        self.runner.monitor_stream('tcpdump', self._tcp_monitor.stream(),
-                                   self._tcp_monitor.next_line, hangup=self._monitor_complete,
-                                   error=self._monitor_error)
+        self._tcpdump_scan(self, monitor_file)
 
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
