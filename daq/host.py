@@ -451,7 +451,7 @@ class ConnectedHost:
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         LOGGER.info('Target port %d background scan for %ds',
                     self.target_port, self._monitor_scan_sec)
-        self._tcpdump_scan(self, monitor_file, timeout=self._monitor_scan_sec)
+        self._tcpdump_scan(monitor_file, timeout=self._monitor_scan_sec)
 
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
