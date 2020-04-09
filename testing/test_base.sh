@@ -50,11 +50,11 @@ ls -l inst/gw*/nodes/gw*/tmp/startup.pcap
 echo Mud profile tests | tee -a $TEST_RESULTS
 cp misc/system_muddy.conf local/system.conf
 
-device_traffic="tcpdump -en -r inst/run-port-01/scans/monitor.pcap vlan and port 47808"
+device_traffic="tcpdump -en -r inst/run-port-01/scans/monitor.pcap port 47808"
 device_bcast="$device_traffic and ether broadcast"
 device_ucast="$device_traffic and ether dst 9a:02:57:1e:8f:02"
 device_xcast="$device_traffic and ether host 9a:02:57:1e:8f:03"
-cntrlr_traffic="tcpdump -en -r inst/run-port-02/scans/monitor.pcap vlan and port 47808"
+cntrlr_traffic="tcpdump -en -r inst/run-port-02/scans/monitor.pcap port 47808"
 cntrlr_bcast="$cntrlr_traffic and ether broadcast"
 cntrlr_ucast="$cntrlr_traffic and ether dst 9a:02:57:1e:8f:01"
 cntrlr_xcast="$cntrlr_traffic and ether host 9a:02:57:1e:8f:03"
