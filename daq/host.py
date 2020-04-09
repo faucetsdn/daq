@@ -457,7 +457,7 @@ class ConnectedHost:
 
     def _monitor_timeout(self, timeout):
         duration = datetime.now() - self._monitor_start
-        if not timeout or duration < timeout:
+        if not timeout or duration < timedelta(seconds=timeout):
             self._monitor_error(Exception('tcpdump scan hangup'))
             return
         self._monitor_complete()
