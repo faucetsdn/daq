@@ -402,7 +402,8 @@ class ConnectedHost:
                                               timeout=timeout, pcap_out=output_file,
                                               blocking=False)
         self._monitor_ref = helper
-        hangup = lambda: self._monitor_error(Exception('tcpdump scan hangup'))
+        hangup = self._monitor_complete if timeout else (
+            lambda: self._monitor_error(Exception('tcpdump scan hangup')))
         self.runner.monitor_stream('tcpdump', self._monitor_ref.stream(),
                                    self._monitor_ref.next_line,
                                    hangup=hangup, error=self._monitor_error)
