@@ -391,15 +391,15 @@ class ConnectedHost:
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
         self._tcpdump_scan(self._startup_file)
 
-    def _tcpdump_scan(self, output_file):
+    def _tcpdump_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
-        LOGGER.info('Target port %d scan intf %s filter %s output in %s',
-                     self.target_port, self._mirror_intf_name, tcp_filter, output_file)
+        LOGGER.info('Target port %d scan intf %s for %s filter %s output in %s',
+                     self.target_port, self._mirror_intf_name, timeout, tcp_filter, output_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
-                                              timeout=None, pcap_out=output_file,
+                                              timeout=timeout, pcap_out=output_file,
                                               blocking=False)
         self._monitor_ref = helper
         hangup = lambda: self._monitor_error(Exception('tcpdump scan hangup'))
@@ -450,7 +450,7 @@ class ConnectedHost:
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         LOGGER.info('Target port %d background scan for %ds',
                     self.target_port, self._monitor_scan_sec)
-        self._tcpdump_scan(self, monitor_file)
+        self._tcpdump_scan(self, monitor_file, timeout=self._monitor_scan_sec)
 
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
