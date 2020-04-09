@@ -1,5 +1,6 @@
 """Represent a device-under-test"""
 
+import functools
 import os
 import shutil
 import time
@@ -98,6 +99,7 @@ class ConnectedHost:
         self._fail_hook = config.get('fail_hook')
         self._mirror_intf_name = None
         self._monitor_ref = None
+        self._monitor_start = None
         self.target_ip = None
         self._loaded_config = None
         self.reload_config()
@@ -396,17 +398,17 @@ class ConnectedHost:
         network = self.runner.network
         tcp_filter = ''
         LOGGER.info('Target port %d scan intf %s for %s filter %s output in %s',
-                     self.target_port, self._mirror_intf_name, timeout, tcp_filter, output_file)
+                    self.target_port, self._mirror_intf_name, timeout, tcp_filter, output_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
                                               timeout=timeout, pcap_out=output_file,
                                               blocking=False)
         self._monitor_ref = helper
-        hangup = self._monitor_complete if timeout else (
-            lambda: self._monitor_error(Exception('tcpdump scan hangup')))
+        self._monitor_start = datetime.now()
         self.runner.monitor_stream('tcpdump', self._monitor_ref.stream(),
-                                   self._monitor_ref.next_line,
-                                   hangup=hangup, error=self._monitor_error)
+                                   self._monitor_ref.next_line, error=self._monitor_error,
+                                   hangup=functools.partial(self._monitor_timeout, timeout))
+
 
     def _base_start(self):
         try:
@@ -452,6 +454,13 @@ class ConnectedHost:
         LOGGER.info('Target port %d background scan for %ds',
                     self.target_port, self._monitor_scan_sec)
         self._tcpdump_scan(monitor_file, timeout=self._monitor_scan_sec)
+
+    def _monitor_timeout(self, timeout):
+        duration = datetime.now() - self._monitor_start
+        if not timeout or duration < timeout:
+            self._monitor_error(Exception('tcpdump scan hangup'))
+            return
+        self._monitor_complete()
 
     def _monitor_complete(self):
         LOGGER.info('Target port %d scan complete', self.target_port)
