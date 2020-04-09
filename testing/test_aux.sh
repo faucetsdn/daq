@@ -94,7 +94,7 @@ echo Build all container images...
 cmd/build inline
 
 echo Starting aux test run...
-cmd/run -s -k
+cmd/run -s
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
