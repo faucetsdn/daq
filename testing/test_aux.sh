@@ -160,6 +160,6 @@ cmd/run -k -s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
-#more inst/run-port-*/nodes/*/activate.log | cat
+more inst/run-port-*/nodes/*/activate.log | cat
 
 echo Done with tests | tee -a $TEST_RESULTS

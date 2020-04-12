@@ -73,6 +73,7 @@ class DAQRunner:
                                           labels={"daq_run_id": str(self._daq_run_id)})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
+            LOGGER.info('Appending test_hold to master test list')
             test_list.append('hold')
         config['test_list'] = test_list
         LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
