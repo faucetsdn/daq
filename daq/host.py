@@ -283,10 +283,11 @@ class ConnectedHost:
             }, self.gateway.port_set)
         else:
             dhcp_mode = self._get_dhcp_mode()
-            LOGGER.info('Target port %d using %s DHCP mode', self.target_port, dhcp_mode)
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
                 if dhcp_mode == 'long_response' else 0
+            LOGGER.info('Target port %d using %s DHCP mode, wait %s',
+                        self.target_port, dhcp_mode, wait_time)
             self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
@@ -391,9 +392,9 @@ class ConnectedHost:
         self._startup_file = os.path.join(self.scan_base, 'startup.pcap')
         self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
-        self._tcpdump_scan(self._startup_file)
+        self._monitor_scan(self._startup_file)
 
-    def _tcpdump_scan(self, output_file, timeout=None):
+    def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
@@ -409,7 +410,6 @@ class ConnectedHost:
                                    self._monitor_ref.next_line, error=self._monitor_error,
                                    hangup=functools.partial(self._monitor_timeout, timeout))
 
-
     def _base_start(self):
         try:
             success = self._base_tests()
@@ -419,7 +419,7 @@ class ConnectedHost:
                 self._state_transition(_STATE.ERROR)
                 return
             LOGGER.info('Target port %d done with base.', self.target_port)
-            self._monitor_scan()
+            self._background_scan()
         except Exception as e:
             self._monitor_cleanup()
             self._monitor_error(e)
@@ -443,7 +443,7 @@ class ConnectedHost:
         self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.target_port, exception)
 
-    def _monitor_scan(self):
+    def _background_scan(self):
         self._state_transition(_STATE.MONITOR, _STATE.BASE)
         if not self._monitor_scan_sec:
             LOGGER.info('Target port %d skipping background scan', self.target_port)
@@ -453,7 +453,7 @@ class ConnectedHost:
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
         LOGGER.info('Target port %d background scan for %ds',
                     self.target_port, self._monitor_scan_sec)
-        self._tcpdump_scan(monitor_file, timeout=self._monitor_scan_sec)
+        self._monitor_scan(monitor_file, timeout=self._monitor_scan_sec)
 
     def _monitor_timeout(self, timeout):
         duration = datetime.now() - self._monitor_start
@@ -553,6 +553,7 @@ class ConnectedHost:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
+            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
             self.test_host.start(self.test_port, params, self._docker_callback)
         except:
             self.test_host = None
@@ -572,6 +573,7 @@ class ConnectedHost:
         host_name = self._host_name()
         LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
+        self._monitor_cleanup()
         failed = return_code or exception
         if failed and self._fail_hook:
             fail_file = self._FAIL_BASE_FORMAT % host_name

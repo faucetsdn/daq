@@ -563,6 +563,7 @@ class DAQRunner:
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
         LOGGER.error('Target port %d active %s exception: %s', target_port, active, exception)
+        LOGGER.exception(exception)
         self._detach_gateway(target_port)
         if active:
             target_set = self.port_targets[target_port]

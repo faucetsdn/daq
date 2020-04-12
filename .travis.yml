@@ -1,4 +1,4 @@
-sudo: required
+os: linux
 dist: bionic
 services:
   - docker
@@ -18,17 +18,8 @@ install:
 script:
   - set -e
   - bin/test_daq
-cache: pip
 env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
-  matrix:
-    - DAQ_TEST=base
-    - DAQ_TEST=many
+  jobs:
     - DAQ_TEST=aux
-    - DAQ_TEST=topo
-    - DAQ_TEST=modules
-    - DAQ_TEST=dhcp
-branches:
-  except:
-  - /^release-\d+\.\d+(\.\d+)?$/

@@ -46,12 +46,12 @@ cp -r misc/test_site/mac_addrs/* local/site/mac_addrs/
 cp misc/system_all.conf local/system.conf
 cat <<EOF >> local/system.conf
 fail_hook=misc/dump_network.sh
-test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
 startup_faux_1_opts="brute broadcast_client"
 startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
 startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntp_client broadcast_client"
-monitor_scan_sec=300
+long_dhcp_response_sec=0
+monitor_scan_sec=0
 EOF
 
 if [ -f $cred_file ]; then
@@ -73,8 +73,8 @@ fi
 
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
-# Wait until the hold test has been activated, and then kill dhcp on that gateway.
-MARKER=inst/run-port-03/nodes/hold03/activate.log
+# Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
+MARKER=inst/run-port-02/nodes/ping02/activateX.log
 function cleanup_marker {
     mkdir -p ${MARKER%/*}
     touch $MARKER
@@ -112,22 +112,15 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
      $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
+more inst/gw*/nodes/gw*/activate.log | cat
+
 # Show the full logs from each test
 more inst/run-port-*/nodes/*/activate.log | cat
+more inst/run-port-*/nodes/*/tmp/report.txt | cat
 ls inst/fail_fail01/ | tee -a $TEST_RESULTS
 
-# Add the port-01 and port-02 module config into the file
-echo port-01 module_config modules | tee -a $TEST_RESULTS
-jq .modules inst/run-port-01/nodes/ping01/tmp/module_config.json | tee -a $TEST_RESULTS
-echo port-02 module_config modules | tee -a $TEST_RESULTS
-jq .modules inst/run-port-02/nodes/ping02/tmp/module_config.json | tee -a $TEST_RESULTS
-
-# Add a lovely snake and a lizard into this file for testing device/type mappings.
-cat inst/run-port-03/nodes/ping03/tmp/snake.txt | tee -a $TEST_RESULTS
-cat inst/run-port-03/nodes/ping03/tmp/lizard.txt | tee -a $TEST_RESULTS
-
 # Add the results for cloud tests into a different file, since cloud tests may not run if
-# our test environment isn't set up correctly. See bin/test_daq for more insight
+# our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
 for num in 1 2 3; do
@@ -143,12 +136,7 @@ cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 
 fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
-echo Redacted docs diff | tee -a $TEST_RESULTS
-(diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \
-    | tee -a $TEST_RESULTS
-
-# Make sure there's no file pollution from the test run.
-git status --porcelain | tee -a $TEST_RESULTS
+more inst/fail_*/* | cat
 
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
