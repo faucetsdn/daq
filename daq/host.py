@@ -492,8 +492,8 @@ class ConnectedHost:
     def _run_next_test(self):
         try:
             if self.remaining_tests:
-                LOGGER.info('Target port %d executing tests %s',
-                            self.target_port, self.remaining_tests)
+                LOGGER.debug('Target port %d executing tests %s',
+                             self.target_port, self.remaining_tests)
                 self.timeout_handler = self._main_module_timeout_handler
                 self._docker_test(self.remaining_tests.pop(0))
             else:

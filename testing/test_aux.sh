@@ -124,18 +124,14 @@ fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
 cat <<EOF >> local/system.conf
-ex_hold_01=initialize
-ex_ping_02=finalize
+ex_ping_01=finalize
+ex_hold_02=initialize
 ex_ping_03=callback
 EOF
 
-
-# Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
-MARKER2=inst/run-port-02/nodes/hold02/activate.log
-MARKER3=inst/run-port-03/nodes/hold03/activate.log
 function cleanup_marker {
-    mkdir -p ${MARKER2%/*}
-    touch $MARKER2 $MARKER3
+    mkdir -p ${MARKER%/*}
+    touch $MARKER
 }
 trap cleanup_marker EXIT
 
@@ -153,8 +149,9 @@ function monitor_marker {
     kill $pid
 }
 
-monitor_marker gw02 $MARKER2 &
-monitor_marker gw03 $MARKER3 &
+# Check that killing the dhcp monitor aborts the run.
+MARKER=inst/run-port-03/nodes/hold03/activate.log
+monitor_marker gw03 $MARKER &
 
 cmd/run -k -s
 
