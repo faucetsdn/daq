@@ -73,23 +73,6 @@ fi
 
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
-# Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
-MARKER=inst/run-port-02/nodes/ping02/activateX.log
-function cleanup_marker {
-    mkdir -p ${MARKER%/*}
-    touch $MARKER
-}
-trap cleanup_marker EXIT
-(while [ ! -f $MARKER ]; do
-     echo test_aux.sh waiting for $MARKER
-     sleep 30
- done
- ps ax | fgrep tcpdump | fgrep gw03-eth0 | fgrep -v docker | fgrep -v /tmp/
- pid=$(ps ax | fgrep tcpdump | fgrep gw03-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
- echo $MARKER found, killing gw03-eth dhcp tcpdump pid $pid
- kill $pid
-) &
-
 echo Build all container images...
 cmd/build inline
 
@@ -140,7 +123,31 @@ more inst/fail_*/* | cat
 
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
-cmd/run -s ex_ping_01=initialize ex_ping_02=callback ex_ping_03=finalize
+cat <<EOF >> local/system.conf
+ex_hold_01=initialize
+ex_ping_02=callback
+ex_hold_03=finalize
+EOF
+
+# Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
+MARKER=inst/run-port-02/nodes/hold02/activate.log
+function cleanup_marker {
+    mkdir -p ${MARKER%/*}
+    touch $MARKER
+}
+trap cleanup_marker EXIT
+(while [ ! -f $MARKER ]; do
+     echo test_aux.sh waiting for $MARKER
+     sleep 10
+ done
+ ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/
+ pid=$(ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
+ echo $MARKER found, killing gw02-eth dhcp tcpdump pid $pid
+ kill $pid
+) &
+
+cmd/run -k -s
+
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 more inst/run-port-*/nodes/*/activate.log | cat
 
