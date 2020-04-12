@@ -126,25 +126,32 @@ cp misc/system_multi.conf local/system.conf
 cat <<EOF >> local/system.conf
 ex_hold_01=initialize
 ex_ping_02=finalize
-ex_hold_03=callback
+ex_ping_03=callback
 EOF
 
 # Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
-MARKER=inst/run-port-02/nodes/hold02/activate.log
+MARKER2=inst/run-port-02/nodes/hold02/activate.log
+MARKER3=inst/run-port-03/nodes/hold03/activate.log
 function cleanup_marker {
-    mkdir -p ${MARKER%/*}
-    touch $MARKER
+    mkdir -p ${MARKER2%/*}
+    touch $MARKER2 $MARKER3
 }
 trap cleanup_marker EXIT
-(while [ ! -f $MARKER ]; do
-     echo test_aux.sh waiting for $MARKER
-     sleep 10
- done
- ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/
- pid=$(ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
- echo $MARKER found, killing gw02-eth dhcp tcpdump pid $pid
- kill $pid
-) &
+
+function monitor_marker {
+    MARKER=$1
+    while [ ! -f $MARKER ]; do
+        echo test_aux.sh waiting for $MARKER
+        sleep 10
+    done
+    ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/
+    pid=$(ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
+    echo $MARKER found, killing gw02-eth dhcp tcpdump pid $pid
+    kill $pid
+}
+
+monitor_marker $MARKER2
+monitor_marker $MARKER3
 
 cmd/run -k -s
 
