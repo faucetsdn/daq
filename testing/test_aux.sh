@@ -42,7 +42,7 @@ mkdir -p local/site
 cp -r misc/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
-cp -r misc/test_site/mac_addrs/* local/site/mac_addrs/
+cp -r misc/test_site/mac_addrs local/site/
 cp misc/system_all.conf local/system.conf
 cat <<EOF >> local/system.conf
 fail_hook=misc/dump_network.sh
