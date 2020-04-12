@@ -95,11 +95,11 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
      $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
-more inst/gw*/nodes/gw*/activate.log | cat
-
 # Show the full logs from each test
-more inst/run-port-*/nodes/*/activate.log | cat
-more inst/run-port-*/nodes/*/tmp/report.txt | cat
+#more inst/gw*/nodes/gw*/activate.log | cat
+#more inst/run-port-*/nodes/*/activate.log | cat
+#more inst/run-port-*/nodes/*/tmp/report.txt | cat
+
 ls inst/fail_fail01/ | tee -a $TEST_RESULTS
 
 # Add the results for cloud tests into a different file, since cloud tests may not run if
@@ -119,7 +119,7 @@ cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 
 fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
-more inst/fail_*/* | cat
+#more inst/fail_*/* | cat
 
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
@@ -128,6 +128,7 @@ ex_hold_01=initialize
 ex_ping_02=finalize
 ex_ping_03=callback
 EOF
+
 
 # Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
 MARKER2=inst/run-port-02/nodes/hold02/activate.log
@@ -140,9 +141,10 @@ trap cleanup_marker EXIT
 
 function monitor_marker {
     MARKER=$1
+    rm -f $MARKER
     while [ ! -f $MARKER ]; do
         echo test_aux.sh waiting for $MARKER
-        sleep 10
+        sleep 60
     done
     ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/
     pid=$(ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
@@ -150,13 +152,13 @@ function monitor_marker {
     kill $pid
 }
 
-monitor_marker $MARKER2
-monitor_marker $MARKER3
+monitor_marker $MARKER2 &
+monitor_marker $MARKER3 &
 
 cmd/run -k -s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
-more inst/run-port-*/nodes/*/activate.log | cat
+#more inst/run-port-*/nodes/*/activate.log | cat
 
 echo Done with tests | tee -a $TEST_RESULTS
