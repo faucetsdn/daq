@@ -76,7 +76,7 @@ diff -b $GOLDEN_FILE $TEST_RESULTS || exit_code=1
 echo
 
 if [ -f "$CRED_FILE" -a -f "$GCP_FILE" ]; then
-    echo Test gcp results $GCP_RESULTS
+    echo Test gcp results $GCP_RESULTS:
     cat $GCP_RESULTS
     echo
     echo Comparing $GCP_FILE against $GCP_RESULTS
@@ -84,7 +84,5 @@ if [ -f "$CRED_FILE" -a -f "$GCP_FILE" ]; then
     echo
 fi
 
-sleep 30
 echo Done with tests.
-sleep 30
 exit $exit_code

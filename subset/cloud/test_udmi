@@ -10,15 +10,10 @@ LOG=/tmp/udmi.log
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
 
-echo TAP
-
 route -n
 ping -c 2 172.217.164.106 || true
 arp -n
-
 ip addr
-
-env
 
 gcp_cred=/config/inst/gcp_service_account.json
 gcp_topic=events
