@@ -142,5 +142,6 @@ more inst/fail_*/* | cat
 cp misc/system_multi.conf local/system.conf
 cmd/run -s ex_ping_01=initialize ex_ping_02=callback ex_ping_03=finalize
 cat inst/result.log | sort | tee -a $TEST_RESULTS
+more inst/run-port-*/nodes/*/activate.log | cat
 
 echo Done with tests | tee -a $TEST_RESULTS
