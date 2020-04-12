@@ -125,8 +125,8 @@ more inst/fail_*/* | cat
 cp misc/system_multi.conf local/system.conf
 cat <<EOF >> local/system.conf
 ex_hold_01=initialize
-ex_ping_02=callback
-ex_hold_03=finalize
+ex_ping_02=finalize
+ex_hold_03=callback
 EOF
 
 # Wait until the stalled ping test has been activated, and then kill dhcp on that gateway.
@@ -149,6 +149,7 @@ trap cleanup_marker EXIT
 cmd/run -k -s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
+find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
 more inst/run-port-*/nodes/*/activate.log | cat
 
 echo Done with tests | tee -a $TEST_RESULTS
