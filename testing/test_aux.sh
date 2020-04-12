@@ -140,20 +140,21 @@ function cleanup_marker {
 trap cleanup_marker EXIT
 
 function monitor_marker {
-    MARKER=$1
+    GW=$1
+    MARKER=$2
     rm -f $MARKER
     while [ ! -f $MARKER ]; do
         echo test_aux.sh waiting for $MARKER
         sleep 60
     done
-    ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/
-    pid=$(ps ax | fgrep tcpdump | fgrep gw02-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
-    echo $MARKER found, killing gw02-eth dhcp tcpdump pid $pid
+    ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/
+    pid=$(ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
+    echo $MARKER found, killing $GW-eth dhcp tcpdump pid $pid
     kill $pid
 }
 
-monitor_marker $MARKER2 &
-monitor_marker $MARKER3 &
+monitor_marker gw02 $MARKER2 &
+monitor_marker gw03 $MARKER3 &
 
 cmd/run -k -s
 
