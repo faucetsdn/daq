@@ -5,8 +5,6 @@ RESULT skip base.startup.dhcp Using static ip 10.20.0.5
 RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
 RESULT pass base.target.ping target reached %% 10.20.0.5
 Testing tls
-Module execution failed.
-Testing tls
 RESULT skip security.tls.v1
 RESULT fail security.tls.v1.x509
 RESULT skip security.tls.v1_2
