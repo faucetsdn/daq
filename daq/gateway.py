@@ -64,7 +64,7 @@ class Gateway():
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
         host.activate()
         self.host = host
-        self.execute_script('change_lease_time', self.runner.config.get('initial_dhcp_lease_time'))
+        self._change_lease_time(self.runner.config.get('initial_dhcp_lease_time'))
         LOGGER.info("Added networking host %s on port %d at %s", host_name, host_port, host.IP())
 
         dummy_name = 'dummy%02d' % self.port_set
@@ -100,9 +100,13 @@ class Gateway():
 
     def activate(self):
         """Mark this gateway as activated once all hosts are present"""
-        self.execute_script('change_lease_time', self.runner.config.get("dhcp_lease_time"))
+        self._change_lease_time(self.runner.config.get("dhcp_lease_time"))
         self.activated = True
         self._scan_finalize()
+
+    def _change_lease_time(self, lease_time):
+        LOGGER.info('Gateway %s change lease time to %s', self.port_set, lease_time)
+        self.execute_script('change_lease_time', lease_time)
 
     def _scan_finalize(self, forget=True):
         if self._scan_monitor:

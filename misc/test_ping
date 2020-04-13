@@ -79,4 +79,5 @@ write_out_monolog $REPORT_FILE \
                   $MONO_LOG \
                   $RESULT_LINES
 
+echo Critical module status is $status
 [ "$status" == pass ]

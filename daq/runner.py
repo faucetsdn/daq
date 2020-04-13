@@ -73,6 +73,7 @@ class DAQRunner:
                                           labels={"daq_run_id": str(self._daq_run_id)})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
+            LOGGER.info('Appending test_hold to master test list')
             test_list.append('hold')
         config['test_list'] = test_list
         LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
@@ -563,6 +564,7 @@ class DAQRunner:
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
         LOGGER.error('Target port %d active %s exception: %s', target_port, active, exception)
+        LOGGER.exception(exception)
         self._detach_gateway(target_port)
         if active:
             target_set = self.port_targets[target_port]
