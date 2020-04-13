@@ -137,3 +137,4 @@ ENV/
 # other
 testing/*dream*
 *.swp
+*.swo
