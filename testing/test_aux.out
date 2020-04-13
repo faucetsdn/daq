@@ -46,8 +46,99 @@ pri.ofctl
 route.txt
 sec.flows
 sec.ofctl
+port-01 module_config modules
+{
+  "bacext": {
+    "enabled": true
+  },
+  "brute": {
+    "enabled": true
+  },
+  "discover": {
+    "enabled": true
+  },
+  "hold": {
+    "enabled": false
+  },
+  "ipaddr": {
+    "timeout_sec": 300
+  },
+  "macoui": {
+    "enabled": true
+  },
+  "network": {
+    "enabled": true
+  },
+  "nmap": {
+    "enabled": true
+  },
+  "pass": {
+    "enabled": true
+  },
+  "password": {
+    "enabled": true
+  },
+  "switch": {
+    "enabled": true,
+    "poe": {
+      "enabled": true
+    }
+  },
+  "tls": {
+    "enabled": true
+  },
+  "typeconf": {
+    "enabled": false
+  },
+  "udmi": {
+    "enabled": true
+  }
+}
+port-02 module_config modules
+{
+  "bacext": {
+    "enabled": true
+  },
+  "brute": {
+    "enabled": true
+  },
+  "hold": {
+    "enabled": true
+  },
+  "ipaddr": {
+    "timeout_sec": 300
+  },
+  "macoui": {
+    "enabled": true,
+    "timeout_sec": 1
+  },
+  "network": {
+    "enabled": true
+  },
+  "nmap": {
+    "enabled": true
+  },
+  "pass": {
+    "enabled": false
+  },
+  "password": {
+    "enabled": true
+  },
+  "switch": {
+    "enabled": true
+  },
+  "tls": {
+    "enabled": true
+  },
+  "udmi": {
+    "enabled": true
+  }
+}
 Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
+Redacted docs diff
+No report diff
+?? ovs_vsctl.txt
 01: ['01:ping:Exception']
 02: ['02:hold:Exception']
 03: ['03:exception:terminated']
