@@ -11,4 +11,3 @@ COPY subset/security/ .
 RUN cd tlstest && ./gradlew build
 
 CMD ["./test_tls"]
-
