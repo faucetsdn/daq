@@ -73,11 +73,6 @@ fi
 
 ip addr show $intf_name
 
-if [ -n "${options[fail]}" ]; then
-    echo This device destined to fail.
-    exit 1
-fi
-
 if [ -n "${options[xdhcp]}" ]; then
     echo Assigning static ip address...
     ip link set up dev $intf_name
