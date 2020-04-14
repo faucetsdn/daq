@@ -53,6 +53,6 @@ function write_out_monolog() {
                             "$test_name" \
                             "$test_desc" \
                             "See log above" \
-                            "$(grep "RESULT.*$test_name" $_RESULT_LINES)"
+                            "$(grep "^RESULT.*$test_name\$" $_RESULT_LINES)"
         done
 }
