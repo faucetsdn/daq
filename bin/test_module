@@ -32,16 +32,18 @@ net_opt=--net=none
 module_dir=$ROOT/inst/modules/$module/run
 config_dir=$ROOT/inst/modules/$module/config
 rm -rf $module_dir
+faux_build=
 
 if [ -n "$build" ]; then
-    DAQ_TARGETS=faux,$target bin/docker_build force
+    DAQ_TARGETS=$target bin/docker_build force
+    faux_build=-b
 fi
 
 bname=daq-bridge-$module
 echo Configuring OVS bridge $bname
 sudo ovs-vsctl --if-exists del-br $bname -- add-br $bname
 
-cmd/faux @$module xdhcp $@
+cmd/faux $faux_build @$module $@ xdhcp
 faux_intf=faux-$module
 faux_ip=10.20.0.5
 sudo ovs-vsctl add-port $bname $faux_intf
