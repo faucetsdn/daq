@@ -11,18 +11,10 @@ doesn't break in unexpected ways.
 
 ## Faux Device & Internal Switch
 
-For continuous integration testing, a simulated _faux device_ is used, as represented
-by the `docker/Dockerfile.faux` and `misc/start_faux` files. This provides a reasonable
-emulation of any feature (e.g. bad DHCP client) that needs to be tested by the framework
-at some point. This is manifested by the [_emulation_ topology](topologies.md) that is
-the simplest system model.
-
-Unless there's a specific reason it can't be done (e.g. hardware requirements), all tests
-should have a _pass_ and _fail_ condition in the faux device, so that the basics of any
-test can be validated. E.g., for DHCP, it can be configured to do DHCP properly, to have
-an excessively long lease renew time, or not to DHCP at all. Although tests ultimately
-run againt physical hardware (the device under test), it's a core software engineering
-foundation to have a solid integration test environment.
+For continuous integration testing, a [simulated _faux device_](faux.md) is used
+to provide a reasonable emulation of any feature (e.g. bad DHCP client)
+that needs to be tested by the framework at some point. This is manifested
+by the [_emulation_ topology](topologies.md) that is the simplest system model.
 
 Similarly, for most simulation uses it's better to run using an internal OVS switch with
 the Faux devices, removing the dependency on physical infrastruture. The system ultimately
