@@ -103,4 +103,4 @@ fi
 echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
 echo
 echo %%%%%%%%%%%%%% Module test results: $target %%%%%%%%%%%%%%%
-fgrep RESULT inst/modules/$module/run/tmp/report.txt
+cat inst/modules/$module/run/tmp/report.txt

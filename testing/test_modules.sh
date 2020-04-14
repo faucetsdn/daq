@@ -28,7 +28,7 @@ cat $TEST_LIST | while read module args; do
     echo
     echo Testing $module $args | tee -a $TEST_RESULTS
     if bin/test_module -n $module $args; then
-        cat inst/modules/$module/run/tmp/result_lines.txt >> $TEST_RESULTS
+        fgrep RESULT inst/modules/$module/run/tmp/result_lines.txt >> $TEST_RESULTS
     else
         echo Module $module execution failed. >> $TEST_RESULTS
     fi
