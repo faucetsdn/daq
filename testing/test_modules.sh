@@ -14,9 +14,10 @@ ping
 tls
 tls tls
 tls expiredtls
+tls alt tls
 EOF
 
-DAQ_TARGETS=faux bin/docker_build force
+DAQ_TARGETS=faux1,faux2 bin/docker_build force
 
 mkdir -p inst/modules/ping/config
 echo '{"static_ip": "10.20.0.5"}' > inst/modules/ping/config/module_config.json
