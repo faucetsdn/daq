@@ -11,10 +11,9 @@ TEST_LIST=/tmp/module_tests.txt
 
 cat > $TEST_LIST <<EOF
 ping
-tls
-tls tls
-tls expiredtls
+tls alt
 tls alt tls
+tls alt expiredtls
 EOF
 
 DAQ_TARGETS=faux1,faux2 bin/docker_build force
