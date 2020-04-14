@@ -11,7 +11,6 @@ import logger
 
 LOGGER = logger.get_logger('topology')
 
-
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
 
@@ -25,7 +24,7 @@ class FaucetTopology:
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
     DP_ACL_FILE_FORMAT = "dp_port_acls.yaml"
     PORT_ACL_FILE_FORMAT = "port_acls/dp_%s_port_%d_acl.yaml"
-    TEMPLATE_FILE_FORMAT = "inst/acl_templates/template_%s_acl.yaml"
+    TEMPLATE_FILE_FORMAT = INST_FILE_PREFIX + "acl_templates/template_%s_acl.yaml"
     FROM_ACL_KEY_FORMAT = "@from:template_%s_acl"
     TO_ACL_KEY_FORMAT = "@to:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
@@ -33,9 +32,10 @@ class FaucetTopology:
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
+    _VLAN_BASE = 1000
     _NETWORK_SETTLE_SEC = 5
     PRI_STACK_PORT = 1
-    DEFAULT_VLAN = 10
+    _NO_VLAN = "0x0000/0x1000"
 
     def __init__(self, config):
         self.config = config
@@ -46,7 +46,7 @@ class FaucetTopology:
         self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
         self._settle_sec = int(config.get('settle_sec', self._NETWORK_SETTLE_SEC))
         self._device_specs = self._load_device_specs()
-        self._mac_map = {}
+        self._port_targets = {}
         self.topology = None
 
     def initialize(self, pri):
@@ -101,15 +101,18 @@ class FaucetTopology:
         return device_intfs
 
     def direct_port_traffic(self, target_mac, port_no, target):
-        """Direct traffic from a given mac to specified port set"""
-        if target is None and target_mac in self._mac_map:
-            del self._mac_map[target_mac]
-        elif target is not None and target_mac not in self._mac_map:
-            self._mac_map[target_mac] = target
+        """Direct traffic from a port to specified port set"""
+        if target is None and port_no in self._port_targets:
+            del self._port_targets[port_no]
+        elif target is not None and port_no not in self._port_targets:
+            self._port_targets[port_no] = target
         else:
-            LOGGER.debug('Ignoring no-change in port status for %s on %d', target_mac, port_no)
+            assert self._port_targets[port_no] == target
+            LOGGER.debug('Ignoring no-change in port status for %s', port_no)
             return
         self._generate_acls()
+        port_set = target['port_set'] if target else None
+        self._update_port_vlan(port_no, port_set)
         if self._settle_sec:
             LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
             time.sleep(self._settle_sec)
@@ -148,14 +151,21 @@ class FaucetTopology:
     def _make_switch_interface(self):
         interface = {}
         interface['name'] = 'local_switch'
-        interface['native_vlan'] = self.DEFAULT_VLAN
+        interface['native_vlan'] = 1012
         return interface
 
     def _make_gw_interface(self, port_set):
         interface = {}
         interface['acl_in'] = self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)
-        interface['native_vlan'] = self.DEFAULT_VLAN
+        interface['native_vlan'] = self._port_set_vlan(port_set)
         return interface
+
+    def _update_port_vlan(self, port_no, port_set):
+        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
+        interface['native_vlan'] = self._port_set_vlan(port_set)
+
+    def _port_set_vlan(self, port_set=None):
+        return self._VLAN_BASE + (port_set if port_set else 0)
 
     def _make_pri_stack_interface(self):
         interface = {}
@@ -177,17 +187,10 @@ class FaucetTopology:
             self._append_augmented_rule(rules, self._make_default_allow_rule())
         return rules
 
-    def _make_default_acls(self):
-        acls = {}
-        for port in range(1, self.sec_port):
-            acl_name = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
-            acls[acl_name] = self._make_default_acl_rules()
-        return acls
-
-    def _make_sec_port_interface(self, port):
+    def _make_sec_port_interface(self, port_no):
         interface = {}
-        interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
-        interface['native_vlan'] = self.DEFAULT_VLAN
+        interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port_no)
+        interface['native_vlan'] = self._port_set_vlan()
         return interface
 
     def _make_pri_interfaces(self):
@@ -209,16 +212,11 @@ class FaucetTopology:
         return interfaces
 
     def _make_acl_include(self):
-        return [self.DP_ACL_FILE_FORMAT]
-
-    def _make_acl_include_optional(self):
-        include_optional = []
+        includes = [self.DP_ACL_FILE_FORMAT]
         for port in range(1, self.sec_port):
             base_name = self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
-            include_optional += [base_name]
-            filename = self.INST_FILE_PREFIX + base_name
-            self._write_empty_include(filename)
-        return include_optional
+            includes += [base_name]
+        return includes
 
     def _make_pri_topology(self):
         pri_dp = {}
@@ -242,10 +240,8 @@ class FaucetTopology:
         dps['sec'] = self._make_sec_topology()
         topology = {}
         topology['dps'] = dps
-        topology['acls'] = self._make_default_acls()
         topology['vlans'] = self._make_vlan_description(10)
         topology['include'] = self._make_acl_include()
-        topology['include-optional'] = self._make_acl_include_optional()
         return topology
 
     def _make_vlan_description(self, vlan_id):
@@ -271,6 +267,37 @@ class FaucetTopology:
     def _get_bcast_ports(self, port_set):
         return [1, self._SWITCH_LOCAL_PORT] + self._get_gw_ports(port_set)
 
+    def _generate_port_target_acls(self, portset_acls):
+        port_set_mirrors = {}
+        for target in self._port_targets.values():
+            port_no = target['port']
+            port_set = target['port_set']
+            target_mac = target['mac']
+            mirror_port = self.mirror_port(port_no)
+            port_set_mirrors.setdefault(port_set, []).append((target_mac, mirror_port))
+            self._add_acl_rule(portset_acls[port_set], dl_dst=target_mac,
+                               ports=[mirror_port], allow=1)
+            LOGGER.debug("mirror %s to %s for %s set %s",
+                         target_mac, mirror_port, port_no, port_set)
+        return port_set_mirrors
+
+    def _generate_mirror_acls(self, port_set_mirrors, incoming_acl, portset_acls):
+        for port_set in port_set_mirrors:
+            mirror_tuples = port_set_mirrors[port_set]
+            mirror_ports = [tuple[1] for tuple in mirror_tuples]
+            vlan = self._port_set_vlan(port_set)
+            LOGGER.debug("mirroring vlan %s to %s", vlan, mirror_ports)
+            for src_mac, src_mirror in mirror_tuples:
+                self._add_acl_rule(incoming_acl, dl_src=src_mac, dl_dst=self.BROADCAST_MAC,
+                                   vlan_vid=self._NO_VLAN, ports=copy.copy(mirror_ports))
+                for dst_mac, dst_mirror in mirror_tuples:
+                    if dst_mac != src_mac:
+                        self._add_acl_rule(incoming_acl, dl_src=src_mac, dl_dst=dst_mac,
+                                           vlan_vid=self._NO_VLAN, ports=[src_mirror, dst_mirror])
+
+            self._add_acl_rule(portset_acls[port_set], dl_dst=self.BROADCAST_MAC,
+                               ports=copy.copy(mirror_ports), allow=1)
+
     def _generate_main_acls(self):
         incoming_acl = []
         portset_acls = {}
@@ -280,30 +307,18 @@ class FaucetTopology:
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
 
-        self._add_acl_rule(incoming_acl, allow=1, dl_type=self.LLDP_DL_TYPE)
+        port_set_mirrors = self._generate_port_target_acls(portset_acls)
 
-        for target_mac in self._mac_map:
-            target = self._mac_map[target_mac]
-            mirror_port = self.mirror_port(target['port'])
-            port_set = target['port_set']
-            gw_out = self._get_gw_ports(port_set) + [mirror_port]
-            self._add_acl_rule(incoming_acl, dl_src=target_mac, ports=gw_out)
-            out_ports = [1, mirror_port]
-            self._add_acl_rule(portset_acls[port_set], dl_dst=target_mac, ports=out_ports, allow=1)
+        self._generate_mirror_acls(port_set_mirrors, incoming_acl, portset_acls)
 
-        self._add_acl_rule(incoming_acl, allow=0)
+        self._add_acl_rule(incoming_acl, allow=1)
         acls[self.INCOMING_ACL_FORMAT % self.pri_name] = incoming_acl
 
-        self._add_acl_rule(secondary_acl, allow=1, dl_type=self.LLDP_DL_TYPE)
-        self._add_acl_rule(secondary_acl, allow=1, vlan_vid=self.DEFAULT_VLAN)
-        self._add_acl_rule(secondary_acl, allow=1, out_vlan=self.DEFAULT_VLAN)
+        self._add_acl_rule(secondary_acl, allow=1)
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
             portset_acl = portset_acls[port_set]
-            self._add_acl_rule(portset_acl, dl_type=self.ARP_DL_TYPE, allow=1)
-            self._add_acl_rule(portset_acl, dl_dst=self.BROADCAST_MAC,
-                               ports=self._get_bcast_ports(port_set))
             self._add_acl_rule(portset_acl, allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acl
 
@@ -328,7 +343,7 @@ class FaucetTopology:
             assert not keyword in target, 'duplicate acl rule keyword %s' % keyword
             target[keyword] = origin[source_keyword]
 
-    def _add_acl_rule(self, acl, **kwargs):
+    def _make_acl_rule(self, **kwargs):
         in_vlan = {}
         if 'in_vlan' in kwargs:
             in_vlan['pop_vlans'] = True
@@ -357,34 +372,38 @@ class FaucetTopology:
         rule = {}
         rule['rule'] = subrule
 
-        acl.append(rule)
+        return rule
+
+    def _add_acl_rule(self, acl, **kwargs):
+        acl.append(self._make_acl_rule(**kwargs))
+
+    def _prepend_acl_rule(self, acl, **kwargs):
+        acl.insert(0, self._make_acl_rule(**kwargs))
 
     def _generate_port_acls(self):
         for port in range(1, self.sec_port):
-            self._generate_port_acl(port=port)
+            self._generate_port_acl(port)
 
-    def _generate_port_acl(self, port=None):
+    def _generate_port_acl(self, port):
         target_mac = None
         rules = []
-        if self._device_specs:
-            for check_mac in self._mac_map:
-                if self._mac_map[check_mac]['port'] == port:
-                    target_mac = check_mac
-                    self._add_acl_port_rules(rules, target_mac, port)
+
+        if self._device_specs and port in self._port_targets:
+            target = self._port_targets[port]
+            target_mac = target['mac']
+            self._add_acl_port_rules(rules, target_mac, port)
+
+        LOGGER.debug('match port %s to mac %s', port, target_mac)
 
         filename = self.INST_FILE_PREFIX + self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
             self._write_port_acl(port, rules, filename)
-        elif os.path.isfile(filename):
-            self._write_empty_include(filename)
-        return target_mac
+        else:
+            self._write_port_acl(port, self._make_default_acl_rules(), filename)
 
-    def _write_empty_include(self, filename):
-        # Workaround for faucet issue: https://github.com/faucetsdn/faucet/issues/2952
-        LOGGER.debug("Writing empty acl file %s", filename)
-        self._write_acl_file(filename, {'acls': {}})
+        return target_mac
 
     def _write_port_acl(self, port, rules, filename):
         LOGGER.debug("Writing port acl file %s", filename)
@@ -393,6 +412,8 @@ class FaucetTopology:
         acls[acl_name] = rules
         port_acl = {}
         port_acl['acls'] = acls
+        directory = os.path.dirname(filename)
+        os.makedirs(directory, exist_ok=True)
         with open(filename, "w") as output_stream:
             yaml.safe_dump(port_acl, stream=output_stream)
 
@@ -454,7 +475,7 @@ class FaucetTopology:
         actions = acls['rule']['actions']
         assert not 'output' in actions, 'output actions explicitly defined'
         if actions['allow']:
-            out_ports = ports + [self.sec_port] if ports else [self.sec_port]
+            out_ports = (ports + [self.sec_port]) if ports else [self.sec_port]
             actions['output'] = {'ports': out_ports}
             if dl_dst:
                 acls['rule']['dl_dst'] = dl_dst
@@ -509,13 +530,14 @@ class FaucetTopology:
         target_ports = []
         for target_mac in target_macs:
             if self._allow_target_mac(target_mac, src_rule, controller):
-                target = self._mac_map[target_mac]
-                target_ports.append(target)
+                LOGGER.debug('allow_target %s', target_mac)
+                for port_target in self._port_targets.values():
+                    if port_target['mac'] == target_mac:
+                        LOGGER.debug('allow_target %s on %s', target_mac, port_target['port'])
+                        target_ports.append(port_target)
         return target_ports
 
     def _allow_target_mac(self, target_mac, src_rule, controller):
-        if not target_mac in self._mac_map:
-            return False
         device_type = self._get_device_type(target_mac)
         template_acl = self._get_acl_template(device_type)
         if not template_acl:
