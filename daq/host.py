@@ -304,10 +304,11 @@ class ConnectedHost:
             }, self.gateway.port_set)
         else:
             dhcp_mode = self._get_dhcp_mode()
-            LOGGER.info('Target port %d using %s DHCP mode', self.target_port, dhcp_mode)
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
                 if dhcp_mode == 'long_response' else 0
+            LOGGER.info('Target port %d using %s DHCP mode, wait %s',
+                        self.target_port, dhcp_mode, wait_time)
             self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
@@ -443,14 +444,14 @@ class ConnectedHost:
         self._startup_file = os.path.join(self.scan_base, 'startup.pcap')
         self._startup_time = datetime.now()
         LOGGER.info('Target port %d startup pcap capture', self.target_port)
-        self._tcpdump_scan(self._startup_file)
+        self._monitor_scan(self._startup_file)
 
-    def _tcpdump_scan(self, output_file, timeout=None):
+    def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
-        LOGGER.info('Target port %d scan intf %s for %s filter %s output in %s',
-                    self.target_port, self._mirror_intf_name, timeout, tcp_filter, output_file)
+        LOGGER.info('Target port %d pcap intf %s for %ss output in %s',
+                    self.target_port, self._mirror_intf_name, timeout, output_file)
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
                                               timeout=timeout, pcap_out=output_file,
@@ -470,14 +471,14 @@ class ConnectedHost:
                 self._state_transition(_STATE.ERROR)
                 return
             LOGGER.info('Target port %d done with base.', self.target_port)
-            self._monitor_scan()
+            self._background_scan()
         except Exception as e:
             self._monitor_cleanup()
             self._monitor_error(e)
 
     def _monitor_cleanup(self, forget=True):
         if self._monitor_ref:
-            LOGGER.info('Target port %d monitor scan complete', self.target_port)
+            LOGGER.info('Target port %d network pcap complete', self.target_port)
             nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
             assert nclosed == forget, 'forget and nclosed mismatch'
             self._gcp.upload_file(self._startup_file,
@@ -494,27 +495,27 @@ class ConnectedHost:
         self._state_transition(_STATE.ERROR)
         self.runner.target_set_error(self.target_port, exception)
 
-    def _monitor_scan(self):
+    def _background_scan(self):
         self._state_transition(_STATE.MONITOR, _STATE.BASE)
         if not self._monitor_scan_sec:
-            LOGGER.info('Target port %d skipping background scan', self.target_port)
+            LOGGER.info('Target port %d skipping background pcap', self.target_port)
             self._monitor_continue()
             return
         self.record_result('monitor', time=self._monitor_scan_sec, state=MODE.EXEC)
         monitor_file = os.path.join(self.scan_base, 'monitor.pcap')
-        LOGGER.info('Target port %d background scan for %ds',
+        LOGGER.info('Target port %d background pcap for %ds',
                     self.target_port, self._monitor_scan_sec)
-        self._tcpdump_scan(monitor_file, timeout=self._monitor_scan_sec)
+        self._monitor_scan(monitor_file, timeout=self._monitor_scan_sec)
 
     def _monitor_timeout(self, timeout):
         duration = datetime.now() - self._monitor_start
         if not timeout or duration < timedelta(seconds=timeout):
-            self._monitor_error(Exception('tcpdump scan hangup'))
+            self._monitor_error(Exception('tcpdump pcap hangup'))
             return
         self._monitor_complete()
 
     def _monitor_complete(self):
-        LOGGER.info('Target port %d scan complete', self.target_port)
+        LOGGER.info('Target port %d pcap complete', self.target_port)
         self._monitor_cleanup(forget=False)
         self.record_result('monitor', state=MODE.DONE)
         self._monitor_continue()
@@ -563,6 +564,8 @@ class ConnectedHost:
     def _run_next_test(self):
         try:
             if self.remaining_tests:
+                LOGGER.debug('Target port %d executing tests %s',
+                             self.target_port, self.remaining_tests)
                 self.timeout_handler = self._main_module_timeout_handler
                 self._docker_test(self.remaining_tests.pop(0))
             else:
@@ -616,6 +619,7 @@ class ConnectedHost:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
+            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
             self.test_host.start(self.test_port, params, self._docker_callback)
         except:
             self.test_host = None
@@ -643,6 +647,7 @@ class ConnectedHost:
         host_name = self._host_name()
         LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
+        self._monitor_cleanup()
         failed = return_code or exception
         if failed:
             if self._fail_hook:

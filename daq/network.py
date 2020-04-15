@@ -187,7 +187,10 @@ class TestNetwork:
     def direct_port_traffic(self, target_mac, port, target):
         """Direct traffic for a given mac to target port"""
         LOGGER.info('Directing traffic for %s on port %s: %s', target_mac, port, bool(target))
+        # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_port_traffic(target_mac, port, target)
+        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
+        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()

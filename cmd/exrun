@@ -95,6 +95,12 @@ else
     echo No external switch configured.
 fi
 
+# Kill any gateways so that they don't prematurely assign an IP address.
+gwids=$(docker ps --format '{{ .Image }} {{ .Names }}' | fgrep daqf/networking | awk '{print $2}') || true
+for gwid in $gwids; do
+    docker kill $gwid
+done
+
 export DAQ_SUPPRESS_PHY_SETUP=y
 
 if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then

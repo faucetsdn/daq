@@ -1,28 +1,37 @@
 #!/bin/bash -e
 # Continuously monitors dnsmasq config and restarts dnsmasq when config is changed 
+
 config_file='/etc/dnsmasq.conf'
 
-# Wait until there's at least one DHCP device
+PID_FILE=/var/run/dnsmasq.pid
+
+echo Waiting for first DHCP device...
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
     sleep 1
 done
-checksum=$(md5sum $config_file | awk '{print $1}')
-echo Starting dnsmasq at $(date)
-dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
+
+echo Device found, starting dnsmasq loop...
 
 while true; do
-    new_checksum=$(md5sum $config_file | awk '{print $1}')
-    if [ $checksum == $new_checksum ]; then
+    new_checksum=$(md5sum $config_file)
+    if [ "$checksum" == "$new_checksum" ]; then
         sleep 2
         continue
-    fi 
-    echo Config changed. Retarting dnsmasq at $(date)
-    while [ -z $(cat /var/run/dnsmasq.pid) ]; do
-	    sleep 1
-    done
+    fi
+    echo Config changed. Retarting dnsmasq at $(date)..
+    echo %%%%%%%%% $config_file tail:
     tail -10 $config_file
-    kill -9 $(cat /var/run/dnsmasq.pid) || true
-    rm -f /var/run/dnsmasq.pid
-    checksum=$(md5sum $config_file | awk '{print $1}')
+    echo %%%%%%%%%
+    if [ -f $PID_FILE ]; then
+        kill -9 $(cat $PID_FILE) || true
+        rm -f $PID_FILE
+    fi
+    checksum=$new_checksum
+    echo Starting dnsmasq at $(date)
     dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
+    while [ ! -f $PID_FILE ]; do
+        echo Waiting for $PID_FILE...
+        sleep 2
+    done
+    ip addr
 done
