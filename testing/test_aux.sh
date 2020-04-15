@@ -98,7 +98,7 @@ sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show the full logs from each test
 #more inst/gw*/nodes/gw*/activate.log | cat
-#more inst/run-port-*/nodes/*/activate.log | cat
+more inst/run-port-*/nodes/*/activate.log | cat
 #more inst/run-port-*/nodes/*/tmp/report.txt | cat
 ls inst/finish/fail01/ | tee -a $TEST_RESULTS
 
