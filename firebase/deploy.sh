@@ -25,9 +25,7 @@ echo Firestore address: https://console.cloud.google.com/firestore/data/?project
 echo Application host : https://$PROJECT.firebaseapp.com
 echo
 
-if [ -f firebase/public/$CFILE ]; then
-    echo Using existing firebase/public/$CFILE
-elif [ -f local/$CFILE ]; then
+if [ -f local/$CFILE ]; then
     echo Copying local/$CFILE to firebase/public/
     cp local/$CFILE firebase/public/
 else

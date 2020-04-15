@@ -53,16 +53,25 @@ done
 echo intf_names=${ifaces#,} >> local/system.conf
 
 echo DAQ stress test | tee -a $TEST_RESULTS
-# Limit should be ~30, but something is wrong with startup sequence.
+
 cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
+
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
-static_ips=$(fgrep done/-1 inst/cmdrun.log | wc -l)
-echo Found $results successful runs.
+
+cat inst/run-port-*/scans/ip_triggers.txt
+static_ips=$(fgrep nope inst/run-port-*/scans/ip_triggers.txt | wc -l)
+
+more inst/run-port-*/nodes/ping*/activate.log | cat
+
+echo Found $results clean runs, $timeouts timeouts, and $static_ips static_ips.
+
 # This is broken -- should have many more results available!
 echo Enough results: $((results >= 6*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
+
 # $timeouts should strictly equal $NUM_TIMEOUT_DEVICES when dhcp step is fixed. 
 echo Enough DHCP timeouts: $((timeouts >= NUM_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 echo Enough static ips: $((static_ips >= (NUM_NO_DHCP_DEVICES - NUM_TIMEOUT_DEVICES))) | tee -a $TEST_RESULTS
+
 echo Done with tests | tee -a $TEST_RESULTS
