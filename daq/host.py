@@ -320,13 +320,32 @@ class ConnectedHost:
         self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
+    def _check_module_timeout(self, test_name, test_start):
+        timeout_sec = self._get_test_timeout(test_name)
+        if not timeout_sec or not test_start:
+            return
+        timeout = gcp.parse_timestamp(test_start) + timedelta(seconds=timeout_sec)
+        nowtime = gcp.parse_timestamp(gcp.get_timestamp())
+        if nowtime >= timeout:
+            if self.timeout_handler:
+                LOGGER.error('Monitoring timeout for %s after %ds', test_name, timeout_sec)
+                # ensure it's called once
+                handler, self.timeout_handler = self.timeout_handler, None
+                handler()
+
     def heartbeat(self):
         """Checks module run time for each event loop"""
         if self._active_deferrable_checks is not None:
+            self.timeout_handler = self._aux_module_timeout_handler
             for check in self._active_deferrable_checks:
                 name, handler = check["name"], check["verify"]
                 self.test_name = name
-                self.record_result(name, state=MODE.EXEC)
+                # Several checks are happening each heartbeat so
+                # Timeout case needs to be handled separately
+                if "test_start" not in check:
+                    self.record_result(name, state=MODE.EXEC)
+                    check["test_start"] = gcp.get_timestamp()
+                self._check_module_timeout(self.test_name, check["test_start"])
                 try:
                     result = handler(self)
                     if result is not None:
@@ -341,17 +360,8 @@ class ConnectedHost:
                 self._active_deferrable_checks = None
                 self._tests_complete()
                 return
-        timeout_sec = self._get_test_timeout(self.test_name)
-        if not timeout_sec or not self.test_start:
-            return
-        timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)
-        nowtime = gcp.parse_timestamp(gcp.get_timestamp())
-        if nowtime >= timeout:
-            if self.timeout_handler:
-                LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
-                # ensure it's called once
-                handler, self.timeout_handler = self.timeout_handler, None
-                handler()
+        else:
+            self._check_module_timeout(self.test_name, self.test_start)
 
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
@@ -620,22 +630,27 @@ class ConnectedHost:
     def _host_tmp_path(self):
         return os.path.join(self._host_dir_path(), 'tmp')
 
+    def _exists_new_ip_assignment(self, timestamp):
+        test_start = gcp.parse_timestamp(timestamp)
+        b_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) < test_start
+        a_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) >= test_start
+        before, after = list(filter(b_fn, self.all_ips)), list(filter(a_fn, self.all_ips))
+        return len(after) > 0 and after[-1]["ip"] != before[-1]["ip"]
+
+
     def _docker_callback(self, return_code=None, exception=None):
         self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
         LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
         failed = return_code or exception
-        if failed and self._fail_hook:
-            fail_file = self._FAIL_BASE_FORMAT % host_name
-            LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
-            os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
+        if failed:
+            if self._fail_hook:
+                fail_file = self._FAIL_BASE_FORMAT % host_name
+                LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
+                os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
             # Check if new ip was assigned during test run and retry
-            test_start = gcp.parse_timestamp(self.test_start)
-            b_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) < test_start
-            a_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) >= test_start
-            before, after = list(filter(b_fn, self.all_ips)), list(filter(a_fn, self.all_ips))
-            if len(after) > 0 and after[-1]["ip"] != before[-1]["ip"]:
+            if self._exists_new_ip_assignment(self.test_start):
                 self.remaining_tests.insert(0, self.test_name)
                 self._run_next_test()
                 return
