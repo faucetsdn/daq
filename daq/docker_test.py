@@ -75,12 +75,14 @@ class DockerTest:
             host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
             if self._should_raise_test_exception('initialize'):
-                raise Exception('Test initialization failure')
+                LOGGER.error('Target port %d inducing initialization failure', self.target_port)
+                raise Exception('induced initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
                                        error=self._docker_error)
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
+                LOGGER.error('Target port %d will induce callback failure', self.target_port)
                 # Closing this now will cause error when attempting to write outoput.
                 self.docker_log.close()
         except Exception as e:
@@ -128,7 +130,8 @@ class DockerTest:
         self.docker_log.close()
         self.docker_log = None
         if self._should_raise_test_exception('finalize'):
-            raise Exception('Test finalize failure')
+            LOGGER.error('Target port %d inducing finalize failure', self.target_port)
+            raise Exception('induced finalize failure')
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):
