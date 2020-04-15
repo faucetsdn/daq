@@ -1,6 +1,6 @@
 # DAQ Developers Guide
 
-## Integration Testing
+## Testing Overview
 
 In order to guarantee the integrity of the DAQ framework itself, a suite of
 _integration tests_ is used that encompasses the core python code as well as general
@@ -8,6 +8,11 @@ execution of the main test modules. This is different than the _device tests_ wh
 are run against a target device. The main purpose of the integration is to catch
 unintended consequences of any code change, and to make sure that existing code
 doesn't break in unexpected ways.
+
+One of the integration tests is the [module test](module_test.md), which lets you
+test an individual Docker module without running the entire test framewwork. This
+capability is paramount for module development sicne it greatly reduces overall
+development time.
 
 ## Faux Device & Internal Switch
 
@@ -46,10 +51,10 @@ the triggering line from the `.out` difference should be there as well (search f
 ## Local Integration Tests
 
 Tests can be run locally with something like `sudo testing/test_aux.sh`, and the output
-will be generated into, e.g., `out/test_aux.sh`, that can be compared against the
-corresponding golden `.out` file. Running tests locally is not always 100% exactly the
-same as running things in a real (against physical devices on a physical switch) or
-CI environment, but in most cases it provides a workable method.
+will be generated into, e.g., `out/test_aux.out`, that can be compared against the
+corresponding golden `.out` file, e.g., `misc/test_aux.out`. Running tests locally is
+not always 100% exactly the same as running things in a real (against physical devices
+on a physical switch) or CI environment, but in most cases it provides a workable method.
 
 It is recommended to start from a clear DAQ configuration by running `rm -rf local`
 from the main DAQ folder before running the local integration tests.
@@ -60,9 +65,27 @@ just copy the `out/` file to `testing/`, but care must be taken that only expect
 changes are included with a new PR. Ultimately the Travis CI tests must pass, not the
 local tests, to guard against any local filesystem changes.
 
+## Aux Golden Device Report
+
+The `testing/test_aux.sh` integration test generates a sample device report and
+compares it against the 'golden' device report in `docs/device_report.md`. This
+provides the 'end user' validation that a generated report is correct. Before
+comparison, the files are automatically redacted to make transitory differences
+not a cause for failure. Some of the items that will be redacted include, but are
+not limited to:
+* Anything after a %%
+* Dates & Timestamps
+* DAQ Version
+* IP Addresses
+
+One easy way to generate a new golden report file is to run the aux test locally, as
+described in the next section, and use the report file geneated in the `out/` directory
+as the new golden file (i.e., copy it from `out/report_9a02571e8f01_???.md` to
+`docs/device_report.md`.
+
 ## Lint Checks
 
 Lint checks are performed as part of the `testing/test_aux.sh` script. They are extra
 tricky because they are typically very sensitive to the exact version of every package
 installed, so they're somewhat unreliable except when run through a pristine environment
-on Travis. 
+on Travis.

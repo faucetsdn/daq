@@ -33,7 +33,7 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 0 1
 01: []
-02: ['02:macoui:TimeoutError']
+02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
 arp.txt
 dp_sec_port_1_acl.yaml
@@ -134,6 +134,18 @@ port-02 module_config modules
     "enabled": true
   }
 }
+    SNAKE!         ____
+                .'`_ o `;__,
+       .       .'.'` '---'  '
+       .`-...-'.'
+        `-...-'
+   LIZARD!              )/_
+             _.--..---"-,--c_
+        \L..'           ._O__)_
+,-.     _.+  _  \..--( /
+  `\.-''__.-' \ (     \_
+    `'''       `\__   /\
+                ')
 Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
