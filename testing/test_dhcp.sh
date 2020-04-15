@@ -22,6 +22,9 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     "ipaddr": {
       "timeout_sec": 320,
       "dhcp_mode": "long_response"
+    },
+    "ipchange": {
+      "enabled": true
     }
   }
 }
@@ -38,7 +41,7 @@ for iface in $(seq 1 3); do
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
-    echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
+    echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0)) $(((ip_triggers + long_triggers) >= 2))" | tee -a $TEST_RESULTS
 done
 
 echo Done with tests | tee -a $TEST_RESULTS

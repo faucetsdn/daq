@@ -3,6 +3,9 @@
     "ipaddr": {
       "timeout_sec": 300
     },
+    "ipchange": {
+      "enabled": false
+    },
     "pass": {
       "enabled": true
     },

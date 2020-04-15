@@ -92,7 +92,7 @@ class DAQRunner:
 
     def _get_states(self):
         states = connected_host.pre_states() + self.config['test_list']
-        return states + connected_host.post_states()
+        return states + connected_host.deferrable_check_states() + connected_host.post_states()
 
     def _send_heartbeat(self):
         message = {
@@ -277,9 +277,10 @@ class DAQRunner:
         for key in target_set_keys:
             self.port_targets[key].terminate('_terminate')
 
-    def _check_module_timeouts(self):
+    def _module_heartbeat(self):
+        # Should probably be converted to a separate thread to timeout any blocking fn calls
         for host in list(self.mac_targets.values()):
-            host.check_module_timeout()
+            host.heartbeat()
 
     def main_loop(self):
         """Run main loop to execute tests"""
@@ -295,7 +296,7 @@ class DAQRunner:
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
             while self.stream_monitor.event_loop():
-                self._check_module_timeouts()
+                self._module_heartbeat()
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
             LOGGER.exception(e)

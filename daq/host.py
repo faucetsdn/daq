@@ -5,6 +5,7 @@ import os
 import shutil
 import time
 import json
+import copy
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -47,15 +48,30 @@ class MODE:
     LONG = 'long'
     MERR = 'merr'
 
+def _ip_change_verify(host):
+    if len(host.all_ips) <= 1:
+        return None
+    return len(set(map(lambda ip: ip["ip"], host.all_ips))) > 1
+
+_DEFERRALBE_CHECKS = [
+    {
+        "name": "ipchange",
+        "action": lambda host: host.gateway.execute_script('new_ip', host.target_mac),
+        "verify": _ip_change_verify
+    }
+]
 
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
+def deferrable_check_states():
+    """Return additional test states that run after docker tests"""
+    return list(map(lambda state: state["name"], _DEFERRALBE_CHECKS))
+
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
-
 
 class ConnectedHost:
     """Class managing a device-under-test"""
@@ -101,6 +117,7 @@ class ConnectedHost:
         self._monitor_ref = None
         self._monitor_start = None
         self.target_ip = None
+        self.all_ips = []
         self._loaded_config = None
         self.reload_config()
         self._dhcp_listeners = []
@@ -116,6 +133,10 @@ class ConnectedHost:
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
+        self._deferrable_checks = list(filter(lambda check: self._test_enabled(check["name"]),\
+                                              _DEFERRALBE_CHECKS))
+        self._active_deferrable_checks = None
+
     @staticmethod
     def make_runid():
         """Create a timestamped runid"""
@@ -299,8 +320,27 @@ class ConnectedHost:
         self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
-    def check_module_timeout(self):
+    def heartbeat(self):
         """Checks module run time for each event loop"""
+        if self._active_deferrable_checks is not None:
+            for check in self._active_deferrable_checks:
+                name, handler = check["name"], check["verify"]
+                self.test_name = name
+                self.record_result(name, state=MODE.EXEC)
+                try:
+                    result = handler(self)
+                    if result is not None:
+                        self.record_result(name, state=(MODE.DONE if result else MODE.MERR))
+                        check["done"] = True
+                except Exception as e:
+                    self.record_result(name, exception=e)
+                    self._report.accumulate(self.test_name, {ResultType.EXCEPTION: str(e)})
+            self._active_deferrable_checks = list(filter(lambda check: "done" not in check, \
+                                                         self._active_deferrable_checks))
+            if not self._active_deferrable_checks:
+                self._active_deferrable_checks = None
+                self._tests_complete()
+                return
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
             return
@@ -363,13 +403,15 @@ class ConnectedHost:
         self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
         with open(self._trigger_path, 'a') as output_stream:
             output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        self.all_ips.append({"ip": target_ip, "timestamp": gcp.get_timestamp()})
         if self.target_ip:
-            LOGGER.debug('Target port %d already triggered', self.target_port)
-            assert self.target_ip == target_ip, "target_ip mismatch"
+            LOGGER.debug('Target port %d already triggered' % self.target_port)
+            self.target_ip = target_ip
             return True
         if not self.trigger_ready():
             LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
             return False
+
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
@@ -408,7 +450,6 @@ class ConnectedHost:
         self.runner.monitor_stream('tcpdump', self._monitor_ref.stream(),
                                    self._monitor_ref.next_line, error=self._monitor_error,
                                    hangup=functools.partial(self._monitor_timeout, timeout))
-
 
     def _base_start(self):
         try:
@@ -470,7 +511,11 @@ class ConnectedHost:
 
     def _monitor_continue(self):
         self._state_transition(_STATE.NEXT, _STATE.MONITOR)
+        self._execute_deferrable_check_actions()
         self._run_next_test()
+
+    def _execute_deferrable_check_actions(self):
+        return [handler["action"](self) for handler in self._deferrable_checks]
 
     def _base_tests(self):
         self.record_result('base', state=MODE.EXEC)
@@ -489,6 +534,22 @@ class ConnectedHost:
         self.record_result('base', state=MODE.DONE)
         return True
 
+    def _tests_complete(self):
+        LOGGER.info('Target port %d no more tests remaining', self.target_port)
+        self._state_transition(_STATE.DONE, _STATE.NEXT)
+        self._report.finalize()
+        json_path = self._report.path + ".json"
+        with open(json_path, 'w') as json_file:
+            json.dump(self._report.get_all_results(), json_file)
+        self.test_name = None
+        self._gcp.upload_file(self._report.path,
+                              self._get_unique_upload_path(self._report.path))
+        self._gcp.upload_file(json_path,
+                              self._get_unique_upload_path(json_path))
+        self.record_result('finish', state=MODE.FINE, report=self._report.path)
+        self._report = None
+        self.record_result(None)
+
     def _run_next_test(self):
         try:
             if self.remaining_tests:
@@ -496,20 +557,12 @@ class ConnectedHost:
                 self._docker_test(self.remaining_tests.pop(0))
             else:
                 self.timeout_handler = self._aux_module_timeout_handler
-                LOGGER.info('Target port %d no more tests remaining', self.target_port)
-                self._state_transition(_STATE.DONE, _STATE.NEXT)
-                self._report.finalize()
-                json_path = self._report.path + ".json"
-                with open(json_path, 'w') as json_file:
-                    json.dump(self._report.get_all_results(), json_file)
-                self.test_name = None
-                self._gcp.upload_file(self._report.path,
-                                      self._get_unique_upload_path(self._report.path))
-                self._gcp.upload_file(json_path,
-                                      self._get_unique_upload_path(json_path))
-                self.record_result('finish', state=MODE.FINE, report=self._report.path)
-                self._report = None
-                self.record_result(None)
+                if self._deferrable_checks:
+                    self._active_deferrable_checks = copy.deepcopy(self._deferrable_checks)
+                    LOGGER.info("Target port %d final checks %s running", self.target_port,\
+                                list(map(lambda check: check["name"], self._deferrable_checks)))
+                else:
+                    self._tests_complete()
         except Exception as e:
             LOGGER.error('Target port %d start error: %s', self.target_port, e)
             self._state_transition(_STATE.ERROR)
@@ -577,6 +630,15 @@ class ConnectedHost:
             fail_file = self._FAIL_BASE_FORMAT % host_name
             LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
             os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
+            # Check if new ip was assigned during test run and retry
+            test_start = gcp.parse_timestamp(self.test_start)
+            b_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) < test_start
+            a_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) >= test_start
+            before, after = list(filter(b_fn, self.all_ips)), list(filter(a_fn, self.all_ips))
+            if len(after) > 0 and after[-1]["ip"] != before[-1]["ip"]:
+                self.remaining_tests.insert(0, self.test_name)
+                self._run_next_test()
+                return
         state = MODE.MERR if failed else MODE.DONE
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
         if exception:
