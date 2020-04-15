@@ -46,6 +46,7 @@ cp -r misc/test_site/mac_addrs local/site/
 cp misc/system_all.conf local/system.conf
 cat <<EOF >> local/system.conf
 fail_hook=misc/dump_network.sh
+test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
 startup_faux_1_opts="brute broadcast_client"
 startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
