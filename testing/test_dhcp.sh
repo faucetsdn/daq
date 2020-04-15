@@ -41,7 +41,11 @@ for iface in $(seq 1 3); do
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
-    echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0)) $(((ip_triggers + long_triggers) >= 2))" | tee -a $TEST_RESULTS
+    if [ $iface == 3 ]; then
+        echo "Device $iface ip triggers: $((long_triggers > 0)) $(((ip_triggers + long_triggers) >= 2))" | tee -a $TEST_RESULTS
+    else
+      echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
+    fi
 done
 
 echo Done with tests | tee -a $TEST_RESULTS
