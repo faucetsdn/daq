@@ -78,8 +78,12 @@ Overall device result FAIL
 |skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
 |fail|security.ports.nmap|Security|Recommended|Some disallowed ports are open: 47808|
-|skip|security.tls.v3|Other|Other||
-|skip|security.x509|Other|Other||
+|skip|security.tls.v1|Other|Other||
+|fail|security.tls.v1.x509|Other|Other||
+|skip|security.tls.v1_2|Other|Other||
+|fail|security.tls.v1_2.x509|Other|Other||
+|skip|security.tls.v1_3|Other|Other||
+|fail|security.tls.v1_3.x509|Other|Other||
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -287,7 +291,7 @@ Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure 
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1_2_x509
+RESULT skip security.tls.v1_2.x509
 
 --------------------
 security.tls.v1_3
