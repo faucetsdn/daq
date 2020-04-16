@@ -43,7 +43,6 @@ fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
 fgrep -i switch inst/run-port-02/nodes/ping02/activate.log | tee -a $TEST_RESULTS
 count=$(fgrep icmp_seq=5 inst/run-port-02/nodes/ping02/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
-ls -l inst/gw*/nodes/gw*/tmp/startup.pcap
 
 # Test various configurations of mud files.
 
