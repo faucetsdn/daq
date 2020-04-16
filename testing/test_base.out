@@ -23,12 +23,13 @@ Overall device result PASS
 |---|---|
 |Other|n/a|
 
-|Expectation|skip|pass|
+|Expectation|pass|skip|
 |---|---|---|
-|Other|1|2|
+|Other|3|1|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
+|pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |pass|base.target.ping|Other|Other|target reached|
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
@@ -43,6 +44,15 @@ Baseline ping test report
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
+
+--------------------
+base.startup.dhcp
+--------------------
+Check the base DHCP startup exchange
+--------------------
+See log above
+--------------------
+RESULT pass base.startup.dhcp
 
 --------------------
 base.switch.ping

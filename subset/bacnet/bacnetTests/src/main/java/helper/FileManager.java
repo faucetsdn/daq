@@ -18,7 +18,7 @@ public class FileManager {
                     String fileName = listFiles[i].getName();
                     if (fileName.contains(csvName)
                             && fileName.endsWith(csvExtension)) {
-                        System.out.println("pics.csv file found in /config/type.");
+                        System.out.println("pics.csv file found in " + csvFolder);
                         setFilePath(fileName);
                         return true;
                     }

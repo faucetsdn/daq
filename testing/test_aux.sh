@@ -45,7 +45,7 @@ cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types
 cp -r misc/test_site/mac_addrs local/site/
 cp misc/system_all.conf local/system.conf
 cat <<EOF >> local/system.conf
-fail_hook=misc/dump_network.sh
+finish_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
 startup_faux_1_opts="brute broadcast_client"
@@ -98,9 +98,9 @@ sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show the full logs from each test
 #more inst/gw*/nodes/gw*/activate.log | cat
-#more inst/run-port-*/nodes/*/activate.log | cat
+more inst/run-port-*/nodes/*/activate.log | cat
 #more inst/run-port-*/nodes/*/tmp/report.txt | cat
-ls inst/fail_fail01/ | tee -a $TEST_RESULTS
+ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file
 echo port-01 module_config modules | tee -a $TEST_RESULTS
@@ -168,10 +168,13 @@ function monitor_marker {
 MARKER=inst/run-port-03/nodes/hold03/activate.log
 monitor_marker gw03 $MARKER &
 
-cmd/run -k -s
+cmd/run -k -s finish_hook=misc/dump_network.sh
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
 more inst/run-port-*/nodes/nmap*/activate.log | cat
+more inst/run-port-*/finish/nmap*/* | cat
+
+tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
 echo Done with tests | tee -a $TEST_RESULTS

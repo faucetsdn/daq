@@ -294,6 +294,8 @@ class FaucetTopology:
                     if dst_mac != src_mac:
                         self._add_acl_rule(incoming_acl, dl_src=src_mac, dl_dst=dst_mac,
                                            vlan_vid=self._NO_VLAN, ports=[src_mirror, dst_mirror])
+                self._add_acl_rule(incoming_acl, dl_src=src_mac,
+                                   vlan_vid=self._NO_VLAN, ports=[src_mirror])
 
             self._add_acl_rule(portset_acls[port_set], dl_dst=self.BROADCAST_MAC,
                                ports=copy.copy(mirror_ports), allow=1)

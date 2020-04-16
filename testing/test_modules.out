@@ -25,4 +25,10 @@ RESULT fail security.tls.v1_2
 RESULT fail security.tls.v1_2.x509
 RESULT fail security.tls.v1_3
 RESULT fail security.tls.v1_3.x509
+Testing nmap
+RESULT pass security.ports.nmap Only allowed ports found open.
+Testing nmap bacnet
+RESULT pass security.ports.nmap Only allowed ports found open.
+Testing nmap telnet
+RESULT fail security.ports.nmap Some disallowed ports are open:
 Testing complete.

@@ -6,7 +6,7 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory
+RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device type directory
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
@@ -50,10 +50,13 @@ dhcp requests 1 1 0 1
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
 arp.txt
+dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
 dp_sec_port_2_acl.yaml
 dp_sec_port_3_acl.yaml
+faucet.log
 faucet.yaml
+finish.out
 ip_addr.txt
 pri.flows
 pri.ofctl
@@ -161,7 +164,7 @@ port-02 module_config modules
     `'''       `\__   /\
                 ')
 Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
 ?? ovs_vsctl.txt
