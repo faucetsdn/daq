@@ -13,6 +13,9 @@ export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(git describe --dirty)
+LSB_RAW=$(lsb_release -a)
+export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
+export DAQ_SYS_UNAME=$(uname -a)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
 run_args="$@"
@@ -91,6 +94,12 @@ elif [ -n "$ext_ctrl" ]; then
 else
     echo No external switch configured.
 fi
+
+# Kill any gateways so that they don't prematurely assign an IP address.
+gwids=$(docker ps --format '{{ .Image }} {{ .Names }}' | fgrep daqf/networking | awk '{print $2}') || true
+for gwid in $gwids; do
+    docker kill $gwid
+done
 
 export DAQ_SUPPRESS_PHY_SETUP=y
 
