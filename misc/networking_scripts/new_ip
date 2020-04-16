@@ -12,9 +12,6 @@ function get_next_ip() {
     cur_ip=$1
     prefix=$(echo $cur_ip | cut -d '.' -f 1,2)
     subnet=$(echo $cur_ip | cut -d '.' -f 3)
-    echo $prefix
-    echo $subnet
-    echo $cur_ip
     new_subnet=$((($subnet + 1) % 256))
     postfix=$(echo $cur_ip | cut -d '.' -f 4)
     new_ip=$prefix.$new_subnet.$postfix
