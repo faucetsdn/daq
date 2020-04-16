@@ -63,7 +63,6 @@ class ConnectedHost:
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
-    _FINISH_BASE_FORMAT = "inst/finish/%s/"
     _MODULE_CONFIG = "module_config.json"
     _CONTROL_PATH = "control/port-%s"
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
@@ -572,7 +571,7 @@ class ConnectedHost:
 
     def _finish_hook(self):
         if self._finish_hook_script:
-            finish_dir = self._FINISH_BASE_FORMAT % self._host_name()
+            finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
             LOGGER.warning('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)

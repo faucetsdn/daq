@@ -100,7 +100,7 @@ sort inst/result.log | tee -a $TEST_RESULTS
 #more inst/gw*/nodes/gw*/activate.log | cat
 more inst/run-port-*/nodes/*/activate.log | cat
 #more inst/run-port-*/nodes/*/tmp/report.txt | cat
-ls inst/finish/fail01/ | tee -a $TEST_RESULTS
+ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file
 echo port-01 module_config modules | tee -a $TEST_RESULTS
@@ -173,7 +173,7 @@ cmd/run -k -s finish_hook=misc/dump_network.sh
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
 more inst/run-port-*/nodes/nmap*/activate.log | cat
-more inst/finish/nmap*/* | cat
+more inst/run-port-*/finish/nmap*/* | cat
 
 tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
