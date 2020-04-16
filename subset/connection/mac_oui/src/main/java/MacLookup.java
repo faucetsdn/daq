@@ -24,6 +24,7 @@ public class MacLookup {
       System.out.println(e + " could not find the manufacturer");
       reportHandler.addText("RESULT fail connection.mac_oui Manufacturer prefix not found!");
       reportHandler.writeReport();
+      System.out.println(formattedMac + " unknown");
     }
   }
 }
