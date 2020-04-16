@@ -4,7 +4,7 @@
 LEASES_FILE=/var/lib/misc/dnsmasq.leases
 mac_addr=$1
 if [ -z "$mac_addr" ]; then
-    echo "Usage: ./new_ip mac_addr"
+    echo "Usage: new_ip mac_addr"
     exit 1
 fi
 

@@ -63,9 +63,6 @@ port-01 module_config modules
   "ipaddr": {
     "timeout_sec": 300
   },
-  "ipchange": {
-    "enabled": false
-  },
   "macoui": {
     "enabled": true
   },
@@ -110,9 +107,6 @@ port-02 module_config modules
   },
   "ipaddr": {
     "timeout_sec": 300
-  },
-  "ipchange": {
-    "enabled": false
   },
   "macoui": {
     "enabled": true,

@@ -93,7 +93,7 @@ class DAQRunner:
 
     def _get_states(self):
         states = connected_host.pre_states() + self.config['test_list']
-        return states + connected_host.deferrable_check_states() + connected_host.post_states()
+        return states + + connected_host.post_states()
 
     def _send_heartbeat(self):
         message = {

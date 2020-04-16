@@ -5,7 +5,6 @@ import os
 import shutil
 import time
 import json
-import copy
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -48,30 +47,14 @@ class MODE:
     LONG = 'long'
     MERR = 'merr'
 
-def _ip_change_verify(host):
-    if len(host.all_ips) <= 1:
-        return None
-    return len(set(map(lambda ip: ip["ip"], host.all_ips))) > 1
-
-_DEFERRABLE_CHECKS = [
-    {
-        "name": "ipchange",
-        "action": lambda host: host.gateway.execute_script('new_ip', host.target_mac),
-        "verify": _ip_change_verify
-    }
-]
-
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
 
-def deferrable_check_states():
-    """Return additional test states that run after docker tests"""
-    return list(map(lambda state: state["name"], _DEFERRABLE_CHECKS))
-
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
+
 
 class ConnectedHost:
     """Class managing a device-under-test"""
@@ -79,7 +62,6 @@ class ConnectedHost:
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
-    _FAIL_BASE_FORMAT = "inst/fail_%s"
     _MODULE_CONFIG = "module_config.json"
     _CONTROL_PATH = "control/port-%s"
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
@@ -112,12 +94,11 @@ class ConnectedHost:
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', 0))
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
-        self._fail_hook = config.get('fail_hook')
+        self._finish_hook_script = config.get('finish_hook')
         self._mirror_intf_name = None
         self._monitor_ref = None
         self._monitor_start = None
         self.target_ip = None
-        self.all_ips = []
         self._loaded_config = None
         self.reload_config()
         self._dhcp_listeners = []
@@ -133,9 +114,7 @@ class ConnectedHost:
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
-        self._deferrable_checks = list(filter(lambda check: self._test_enabled(check["name"]),\
-                                              _DEFERRABLE_CHECKS))
-        self._active_deferrable_checks = None
+        self._all_ips = []
 
     @staticmethod
     def make_runid():
@@ -310,6 +289,8 @@ class ConnectedHost:
             LOGGER.info('Target port %d using %s DHCP mode, wait %s',
                         self.target_port, dhcp_mode, wait_time)
             self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
+            if dhcp_mode == "ip_change":
+                self.gateway.execute_script('new_ip', self.target_mac)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):
@@ -321,48 +302,19 @@ class ConnectedHost:
         self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
-    def _check_module_timeout(self, test_name, test_start):
-        timeout_sec = self._get_test_timeout(test_name)
-        if not timeout_sec or not test_start:
+    def heartbeat(self):
+        """Checks module run time for each event loop"""
+        timeout_sec = self._get_test_timeout(self.test_name)
+        if not timeout_sec or not self.test_start:
             return
-        timeout = gcp.parse_timestamp(test_start) + timedelta(seconds=timeout_sec)
+        timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)
         nowtime = gcp.parse_timestamp(gcp.get_timestamp())
         if nowtime >= timeout:
             if self.timeout_handler:
-                LOGGER.error('Monitoring timeout for %s after %ds', test_name, timeout_sec)
+                LOGGER.error('Monitoring timeout for %s after %ds', self.test_name, timeout_sec)
                 # ensure it's called once
                 handler, self.timeout_handler = self.timeout_handler, None
                 handler()
-
-    def heartbeat(self):
-        """Checks module run time for each event loop"""
-        if self._active_deferrable_checks is not None:
-            self.timeout_handler = self._aux_module_timeout_handler
-            for check in self._active_deferrable_checks:
-                name, handler = check["name"], check["verify"]
-                self.test_name = name
-                # Several checks are happening each heartbeat so
-                # Timeout case needs to be handled separately
-                if "test_start" not in check:
-                    self.record_result(name, state=MODE.EXEC)
-                    check["test_start"] = gcp.get_timestamp()
-                self._check_module_timeout(self.test_name, check["test_start"])
-                try:
-                    result = handler(self)
-                    if result is not None:
-                        self.record_result(name, state=(MODE.DONE if result else MODE.MERR))
-                        check["done"] = True
-                except Exception as e:
-                    self.record_result(name, exception=e)
-                    self._report.accumulate(self.test_name, {ResultType.EXCEPTION: str(e)})
-            self._active_deferrable_checks = list(filter(lambda check: "done" not in check, \
-                                                         self._active_deferrable_checks))
-            if not self._active_deferrable_checks:
-                self._active_deferrable_checks = None
-                self._tests_complete()
-                return
-        else:
-            self._check_module_timeout(self.test_name, self.test_start)
 
     def register_dhcp_ready_listener(self, callback):
         """Registers callback for when the host is ready for activation"""
@@ -407,6 +359,8 @@ class ConnectedHost:
         delta_t = datetime.now() - self._startup_time
         if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
+        if self._get_dhcp_mode() == "ip_change":
+            return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
@@ -414,15 +368,14 @@ class ConnectedHost:
         self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
         with open(self._trigger_path, 'a') as output_stream:
             output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
-        self.all_ips.append({"ip": target_ip, "timestamp": gcp.get_timestamp()})
-        if self.target_ip:
-            LOGGER.debug('Target port %d already triggered' % self.target_port)
-            self.target_ip = target_ip
-            return True
+        self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
         if not self.trigger_ready():
             LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
             return False
-
+        if self.target_ip:
+            LOGGER.debug('Target port %d already triggered', self.target_port)
+            assert self.target_ip == target_ip, "target_ip mismatch"
+            return True
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
@@ -522,11 +475,7 @@ class ConnectedHost:
 
     def _monitor_continue(self):
         self._state_transition(_STATE.NEXT, _STATE.MONITOR)
-        self._execute_deferrable_check_actions()
         self._run_next_test()
-
-    def _execute_deferrable_check_actions(self):
-        return [handler["action"](self) for handler in self._deferrable_checks]
 
     def _base_tests(self):
         self.record_result('base', state=MODE.EXEC)
@@ -545,22 +494,6 @@ class ConnectedHost:
         self.record_result('base', state=MODE.DONE)
         return True
 
-    def _tests_complete(self):
-        LOGGER.info('Target port %d no more tests remaining', self.target_port)
-        self._state_transition(_STATE.DONE, _STATE.NEXT)
-        self._report.finalize()
-        json_path = self._report.path + ".json"
-        with open(json_path, 'w') as json_file:
-            json.dump(self._report.get_all_results(), json_file)
-        self.test_name = None
-        self._gcp.upload_file(self._report.path,
-                              self._get_unique_upload_path(self._report.path))
-        self._gcp.upload_file(json_path,
-                              self._get_unique_upload_path(json_path))
-        self.record_result('finish', state=MODE.FINE, report=self._report.path)
-        self._report = None
-        self.record_result(None)
-
     def _run_next_test(self):
         try:
             if self.remaining_tests:
@@ -570,12 +503,20 @@ class ConnectedHost:
                 self._docker_test(self.remaining_tests.pop(0))
             else:
                 self.timeout_handler = self._aux_module_timeout_handler
-                if self._deferrable_checks:
-                    self._active_deferrable_checks = copy.deepcopy(self._deferrable_checks)
-                    LOGGER.info("Target port %d final checks %s running", self.target_port,\
-                                list(map(lambda check: check["name"], self._deferrable_checks)))
-                else:
-                    self._tests_complete()
+                LOGGER.info('Target port %d no more tests remaining', self.target_port)
+                self._state_transition(_STATE.DONE, _STATE.NEXT)
+                self._report.finalize()
+                json_path = self._report.path + ".json"
+                with open(json_path, 'w') as json_file:
+                    json.dump(self._report.get_all_results(), json_file)
+                self.test_name = None
+                self._gcp.upload_file(self._report.path,
+                                      self._get_unique_upload_path(self._report.path))
+                self._gcp.upload_file(json_path,
+                                      self._get_unique_upload_path(json_path))
+                self.record_result('finish', state=MODE.FINE, report=self._report.path)
+                self._report = None
+                self.record_result(None)
         except Exception as e:
             LOGGER.error('Target port %d start error: %s', self.target_port, e)
             self._state_transition(_STATE.ERROR)
@@ -634,13 +575,14 @@ class ConnectedHost:
     def _host_tmp_path(self):
         return os.path.join(self._host_dir_path(), 'tmp')
 
-    def _exists_new_ip_assignment(self, timestamp):
-        test_start = gcp.parse_timestamp(timestamp)
-        b_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) < test_start
-        a_fn = lambda ip: gcp.parse_timestamp(ip["timestamp"]) >= test_start
-        before, after = list(filter(b_fn, self.all_ips)), list(filter(a_fn, self.all_ips))
-        return len(after) > 0 and after[-1]["ip"] != before[-1]["ip"]
-
+    def _finish_hook(self):
+        if self._finish_hook_script:
+            finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
+            shutil.rmtree(finish_dir, ignore_errors=True)
+            os.makedirs(finish_dir)
+            LOGGER.warning('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
+            os.system('%s %s 2>&1 > %s/finish.out' %
+                      (self._finish_hook_script, finish_dir, finish_dir))
 
     def _docker_callback(self, return_code=None, exception=None):
         self.timeout_handler = None # cancel timeout handling
@@ -649,16 +591,6 @@ class ConnectedHost:
                     self.test_name, host_name, return_code, exception)
         self._monitor_cleanup()
         failed = return_code or exception
-        if failed:
-            if self._fail_hook:
-                fail_file = self._FAIL_BASE_FORMAT % host_name
-                LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
-                os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
-            # Check if new ip was assigned during test run and retry
-            if self._exists_new_ip_assignment(self.test_start):
-                self.remaining_tests.insert(0, self.test_name)
-                self._run_next_test()
-                return
         state = MODE.MERR if failed else MODE.DONE
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
         if exception:
