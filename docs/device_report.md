@@ -290,7 +290,7 @@ null
 --------------------
 See log above
 --------------------
-RESULT fail security.tls.v1_2.x509
+RESULT skip security.tls.v1_2.x509
 
 --------------------
 security.tls.v1_3
