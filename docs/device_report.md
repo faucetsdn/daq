@@ -48,18 +48,19 @@ Overall device result FAIL
 
 |Category|Result|
 |---|---|
-|Security|0/1|
+|Security|PASS|
 |Other|1/2|
 |Connectivity|n/a|
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
 |Required|1|0|0|0|
-|Recommended|0|1|0|0|
-|Other|0|1|17|2|
+|Recommended|1|0|0|0|
+|Other|1|1|17|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
+|pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |pass|base.target.ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
@@ -77,7 +78,7 @@ Overall device result FAIL
 |skip|security.passwords.https|Other|Other|Port 443 is not open on target device.|
 |skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
-|fail|security.ports.nmap|Security|Recommended|Some disallowed ports are open: 47808|
+|pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
 |skip|security.tls.v3|Other|Other||
 |skip|security.x509|Other|Other||
 |gone|unknown.fake.llama|Other|Other||
@@ -93,6 +94,15 @@ Baseline ping test report
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
+
+--------------------
+base.startup.dhcp
+--------------------
+Check the base DHCP startup exchange
+--------------------
+See log above
+--------------------
+RESULT pass base.startup.dhcp
 
 --------------------
 base.switch.ping
@@ -127,9 +137,9 @@ Automatic TCP/UDP port scan using nmap
 Host: 10.20.73.164 ()	Status: Up
 Host: 10.20.73.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
 # Nmap done at Mon Mar 16 11:53:23 2020 -- 1 IP address (1 host up) scanned in 0.98 seconds
-Failing 47808 open|filtered udp bacnet
+No invalid ports found.
 --------------------
-RESULT fail security.ports.nmap Some disallowed ports are open: 47808
+RESULT pass security.ports.nmap Only allowed ports found open.
 
 ```
 

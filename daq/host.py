@@ -63,7 +63,6 @@ class ConnectedHost:
     _STARTUP_MIN_TIME_SEC = 5
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
-    _FAIL_BASE_FORMAT = "inst/fail_%s"
     _MODULE_CONFIG = "module_config.json"
     _CONTROL_PATH = "control/port-%s"
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
@@ -96,7 +95,7 @@ class ConnectedHost:
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', 0))
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
-        self._fail_hook = config.get('fail_hook')
+        self._finish_hook_script = config.get('finish_hook')
         self._mirror_intf_name = None
         self._monitor_ref = None
         self._monitor_start = None
@@ -556,7 +555,7 @@ class ConnectedHost:
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self.test_host.start(self.test_port, params, self._docker_callback)
+            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
         except:
             self.test_host = None
             raise
@@ -570,6 +569,15 @@ class ConnectedHost:
     def _host_tmp_path(self):
         return os.path.join(self._host_dir_path(), 'tmp')
 
+    def _finish_hook(self):
+        if self._finish_hook_script:
+            finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
+            shutil.rmtree(finish_dir, ignore_errors=True)
+            os.makedirs(finish_dir)
+            LOGGER.warning('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
+            os.system('%s %s 2>&1 > %s/finish.out' %
+                      (self._finish_hook_script, finish_dir, finish_dir))
+
     def _docker_callback(self, return_code=None, exception=None):
         self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
@@ -577,10 +585,6 @@ class ConnectedHost:
                     self.test_name, host_name, return_code, exception)
         self._monitor_cleanup()
         failed = return_code or exception
-        if failed and self._fail_hook:
-            fail_file = self._FAIL_BASE_FORMAT % host_name
-            LOGGER.warning('Executing fail_hook: %s %s', self._fail_hook, fail_file)
-            os.system('%s %s 2>&1 > %s.out' % (self._fail_hook, fail_file, fail_file))
         state = MODE.MERR if failed else MODE.DONE
         self.record_result(self.test_name, state=state, code=return_code, exception=exception)
         if exception:
