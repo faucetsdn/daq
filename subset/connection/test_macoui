@@ -17,14 +17,14 @@ java -jar mac_oui/build/libs/mac_oui-all.jar $TARGET_MAC
 
 RESULT_AND_SUMMARY="$(grep "RESULT" $LOCAL_REPORT)"
 grep -v "RESULT" $LOCAL_REPORT >> $REDACTED_LOG
-sleep 5
+
+# For testing module timeout.
+sleep 10
+
+TEST_RESULT=$(cat $REDACTED_LOG)
+
 write_out_result $REPORT \
                  "$TEST_NAME" \
                  "$TEST_DESCRIPTION" \
-                 "$(cat $REDACTED_LOG)" \
+                 "$TEST_RESULT" \
                  "$RESULT_AND_SUMMARY"
-
-result_lines=( "$RESULT_AND_SUMMARY" )
-
-[ $(check_for_fails_in "${result_lines[@]}") == false ]
-

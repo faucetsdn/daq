@@ -63,23 +63,26 @@ if [ -f .coverage ]; then
     codecov -F $codecov_tag
 fi
 
+ls -l $CRED_FILE $GCP_FILE $GCP_RESULTS || true
+ls -l $GOLDEN_FILE $TEST_RESULTS || true
+
+exit_code=0
 echo
 echo Test results $TEST_RESULTS
 cat $TEST_RESULTS
 echo
 echo Comparing $GOLDEN_FILE against $TEST_RESULTS
-diff -b $GOLDEN_FILE $TEST_RESULTS
+diff -b $GOLDEN_FILE $TEST_RESULTS || exit_code=1
 echo
 
 if [ -f "$CRED_FILE" -a -f "$GCP_FILE" ]; then
-    echo Test gcp results $GCP_RESULTS
+    echo Test gcp results $GCP_RESULTS:
     cat $GCP_RESULTS
     echo
     echo Comparing $GCP_FILE against $GCP_RESULTS
-    diff -b $GCP_FILE $GCP_RESULTS
+    diff -b $GCP_FILE $GCP_RESULTS || exit_code=1
     echo
-else
-    ls -l $CRED_FILE $GCP_FILE $GCP_RESULTS || true
 fi
 
 echo Done with tests.
+exit $exit_code

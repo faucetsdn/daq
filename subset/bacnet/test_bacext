@@ -1,6 +1,7 @@
 #!/bin/bash -e
 source reporting.sh
 
+
 JAR=bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar
 TARGET="Object name = BACnet device"
 TMPOUT=`tempfile`
@@ -8,6 +9,8 @@ REPORT=/tmp/report.txt
 
 # Pick the one not-lo inet v4 address.
 line=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
+
+ls -l /config/type/ || true
 
 read -r -a parts <<< "$line"
 
@@ -60,8 +63,3 @@ result_lines=( "$VERSION_RESULT_AND_SUMMARY" "$PICS_RESULT_AND_SUMMARY" )
 echo "logs:"
 echo "$VERSION_RESULT_AND_SUMMARY"
 echo "$PICS_RESULT_AND_SUMMARY"
-
-echo "result from fail checker:"
-echo $(check_for_fails_in "${result_lines[@]}")
-
-[ $(check_for_fails_in "${result_lines[@]}") == false ]
