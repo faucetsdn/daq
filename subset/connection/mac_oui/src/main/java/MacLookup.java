@@ -17,7 +17,8 @@ public class MacLookup {
     System.out.println(formattedMac);
     try {
       String manufacturer = macDevices.get(formattedMac).toString();
-      reportHandler.addText("RESULT pass connection.mac_oui");
+      reportHandler.addText("RESULT pass connection.mac_oui Manufacturer: "
+              + manufacturer + " found for address " + macAddress);
       reportHandler.writeReport();
       System.out.println(formattedMac + " " + manufacturer);
     } catch (NullPointerException e) {
