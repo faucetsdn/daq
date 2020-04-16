@@ -6,27 +6,25 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. 
+RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device type directory
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui
+RESULT skip security.tls.v1
+RESULT fail security.tls.v1.x509
+RESULT skip security.tls.v1_2
+RESULT fail security.tls.v1_2.x509
+RESULT skip security.tls.v1_3
+RESULT fail security.tls.v1_3.x509
 RESULT fail security.tls.v1
 RESULT fail security.tls.v1.x509
 RESULT fail security.tls.v1_2
 RESULT fail security.tls.v1_2.x509
 RESULT fail security.tls.v1_3
 RESULT fail security.tls.v1_3.x509
-RESULT fail security.tls.v1_2
-RESULT fail security.tls.v1_2.x509
-RESULT fail security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
 RESULT pass security.tls.v1
 RESULT pass security.tls.v1.x509
-RESULT pass security.tls.v1_2
-RESULT pass security.tls.v1_2.x509
-RESULT fail security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
 RESULT pass security.tls.v1_2
 RESULT pass security.tls.v1_2.x509
 RESULT fail security.tls.v1_3
@@ -45,7 +43,7 @@ RESULT pass security.passwords.telnet Default passwords have been changed.
 RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
-dhcp requests 1 1 1 1
+dhcp requests 1 1 0 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
