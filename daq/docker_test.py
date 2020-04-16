@@ -112,6 +112,7 @@ class DockerTest:
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             vol_maps += ['%s:/config/%s' % (abs_base, kind)]
+            LOGGER.info('Target port %d mapping %s to /config/%s', self.target_port, abs_base, kind)
 
     def _docker_error(self, exception):
         LOGGER.error('Target port %d docker error: %s', self.target_port, str(exception))
