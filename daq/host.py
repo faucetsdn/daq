@@ -53,7 +53,7 @@ def _ip_change_verify(host):
         return None
     return len(set(map(lambda ip: ip["ip"], host.all_ips))) > 1
 
-_DEFERRALBE_CHECKS = [
+_DEFERRABLE_CHECKS = [
     {
         "name": "ipchange",
         "action": lambda host: host.gateway.execute_script('new_ip', host.target_mac),
@@ -67,7 +67,7 @@ def pre_states():
 
 def deferrable_check_states():
     """Return additional test states that run after docker tests"""
-    return list(map(lambda state: state["name"], _DEFERRALBE_CHECKS))
+    return list(map(lambda state: state["name"], _DEFERRABLE_CHECKS))
 
 def post_states():
     """Return post-test states for recording finalization"""
@@ -134,7 +134,7 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._deferrable_checks = list(filter(lambda check: self._test_enabled(check["name"]),\
-                                              _DEFERRALBE_CHECKS))
+                                              _DEFERRABLE_CHECKS))
         self._active_deferrable_checks = None
 
     @staticmethod
