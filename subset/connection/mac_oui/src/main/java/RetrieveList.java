@@ -15,7 +15,16 @@ public class RetrieveList {
   }
 
   public void startTest() {
-    readLocalFile();
+    try {
+      // Read the mac prefixes from the svn nmap
+      readFileFromUrlAndUpdateMac("https://svn.nmap.org/nmap/nmap-mac-prefixes");
+    } catch (IOException e){
+      System.out.println(e);
+      System.err.println("Can not read remote file. Reading local file.");
+      // Read the local file
+      readLocalFile();
+    }
+    // Map the mac prefixes
     MacLookup macLookup = new MacLookup(macDevices, macAddress);
     // Start the manufacturer lookup test
     macLookup.startTest();
