@@ -29,6 +29,7 @@
       "bacnet": {
         "local_id": "0x991132ec"
       }
-    }
+    },
+    "proxy_ids": [ "AHU-123", "SMS-9" ]
   }
 }

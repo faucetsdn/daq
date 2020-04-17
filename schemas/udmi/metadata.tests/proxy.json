@@ -18,8 +18,11 @@
     }
   },
   "localnet": {
-    "protocol": "bacnet",
-    "local_id": "0x82eecd"
+    "protocols": {
+      "bacnet": {
+        "local_id": "0x82eecd"
+      }
+    }
   },
   "pointset": {
     "points": {
