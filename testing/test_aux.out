@@ -5,8 +5,6 @@ check_style exit code 0
 Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
-RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
@@ -45,14 +43,20 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 0 1
 01: []
-02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
+02: ['02:bacext:1', '02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
-ctrl-br.flows
-ctrl-br.ofctl
-ext-ovs.flows
-ext-ovs.ofctl
+arp.txt
+dp_port_acls.yaml
+dp_sec_port_1_acl.yaml
+dp_sec_port_2_acl.yaml
+dp_sec_port_3_acl.yaml
+faucet.log
+faucet.yaml
+finish.out
+ip_addr.txt
 pri.flows
 pri.ofctl
+route.txt
 sec.flows
 sec.ofctl
 port-01 module_config modules
@@ -155,8 +159,8 @@ port-02 module_config modules
   `\.-''__.-' \ (     \_
     `'''       `\__   /\
                 ')
-Host: X.X.X.X ()        Status: Up
-Host: X.X.X.X ()        Ports: 47808/closed/udp//bacnet///      Ignored State: closed (3)
+Host: X.X.X.X ()	Status: Up
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
 ?? ovs_vsctl.txt
