@@ -6,6 +6,8 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
+RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device type directory
+RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui
@@ -43,7 +45,7 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 0 1
 01: []
-02: ['02:bacext:1', '02:macoui:TimeoutError', '02:ping:TimeoutError']
+02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
 arp.txt
 dp_port_acls.yaml
