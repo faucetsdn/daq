@@ -20,15 +20,12 @@
         }
       }
     },
-    "proxy_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
-      }
+    "gateway_id": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
     }
   },
   "required": [
-    "proxy_ids"
+    "gateway_id"
   ]
 }

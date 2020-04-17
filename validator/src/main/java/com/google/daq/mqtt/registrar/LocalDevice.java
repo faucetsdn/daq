@@ -193,7 +193,7 @@ public class LocalDevice {
       settings = new CloudDeviceSettings();
       settings.credential = loadCredential();
       settings.metadata = metadataString();
-      //settings.gatewayId = metadata.gateway.proxy_ids;
+      settings.proxyDevices = proxyDevices;
       return settings;
     } catch (Exception e) {
       throw new RuntimeException("While getting settings for device " + deviceId, e);
@@ -275,8 +275,8 @@ public class LocalDevice {
   }
 
   public void setProxyDevices(List<LocalDevice> proxyDevices) {
-    System.out.println(String.format("Gateway %s proxy for %s", deviceId,
-        Joiner.on(", ").join(proxyDevices)));
+    System.err.println(String.format("Gateway %s proxy for: %s", deviceId, Joiner.on(", ")
+            .join(proxyDevices.stream().map(LocalDevice::getDeviceId).toArray())));
     if (settings != null) {
       throw new RuntimeException("Settings already finalized");
     }

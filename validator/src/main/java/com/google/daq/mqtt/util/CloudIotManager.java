@@ -123,13 +123,19 @@ public class CloudIotManager {
     metadataMap.put(SCHEMA_KEY, schemaName);
     return new Device()
         .setId(deviceId)
-        .setGatewayConfig(getGatewayConfig())
+        .setGatewayConfig(getGatewayConfig(settings))
         .setCredentials(ImmutableList.of(settings.credential))
         .setMetadata(metadataMap);
   }
 
-  private GatewayConfig getGatewayConfig() {
-    return null;
+  private GatewayConfig getGatewayConfig(CloudDeviceSettings settings) {
+    if (settings.proxyDevices == null) {
+      return null;
+    }
+    GatewayConfig gwConfig = new GatewayConfig();
+    gwConfig.setGatewayType("GATEWAY");
+    gwConfig.setGatewayAuthMethod("DEVICE_AUTH_TOKEN_ONLY");
+    return gwConfig;
   }
 
   private void createDevice(String deviceId, CloudDeviceSettings settings) throws IOException {
