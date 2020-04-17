@@ -1,5 +1,6 @@
 Running testing/test_base.sh
 Base Tests
+%%%%%%%%%%%%%%%%%%%%%% Base tests
 01: []
 # Device 9a02571e8f00, XXX to XXX
 
@@ -22,12 +23,13 @@ Overall device result PASS
 |---|---|
 |Other|n/a|
 
-|Expectation|skip|pass|
+|Expectation|pass|skip|
 |---|---|---|
-|Other|1|2|
+|Other|3|1|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
+|pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |pass|base.target.ping|Other|Other|target reached|
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
@@ -42,6 +44,15 @@ Baseline ping test report
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
+
+--------------------
+base.startup.dhcp
+--------------------
+Check the base DHCP startup exchange
+--------------------
+See log above
+--------------------
+RESULT pass base.startup.dhcp
 
 --------------------
 base.switch.ping
@@ -82,16 +93,17 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 
 ## Report complete
 
-Open port tests
+%%%%%%%%%%%%%%%%%%%%%% Telnet fail
 01: []
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
+%%%%%%%%%%%%%%%%%%%%%% Default MUD
 01: []
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 security.ports.nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
-External switch tests
+%%%%%%%%%%%%%%%%%%%%%% External switch tests
 02: []
     dp_id: 1
     dp_id: 4886718345
@@ -99,23 +111,23 @@ Switch test with port 2
 RESULT pass base.switch.ping target %% 192.0.2.138:2
 Switch test with port 2
 switch ping 2
-Mud profile tests
+%%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 01: [] 02: [] 03: []
 device open 1 1 1
 cntrlr open 1 1 1
-result base 01: [] 02: ['02:ping:1'] 03: []
+result base 01: [] 02: [] 03: []
 device base 1 1 0
 cntrlr base 1 1 0
 result todev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device todev 0 0 0
 cntrlr todev 0 0 0
-result frdev 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
+result frdev 01: [] 02: ['02:ping:1'] 03: []
 device frdev 1 0 0
 cntrlr frdev 1 0 0
 result none 01: ['01:ping:1'] 02: ['02:ping:1'] 03: []
 device none 0 0 0
 cntrlr none 0 0 0
-result star 01: [] 02: ['02:ping:1'] 03: []
+result star 01: [] 02: [] 03: []
 device star 1 1 1
 cntrlr star 1 1 0
-Done with tests
+%%%%%%%%%%%%%%%%%%%%%% Done with tests

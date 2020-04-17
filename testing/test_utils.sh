@@ -36,6 +36,7 @@ function generate {
   # Don't use default monitor scan to get both src/dst traffic.
   echo monitor_scan_sec=0 >> local/system.conf
   echo port_debounce_sec=0 >> local/system.conf
+  echo dhcp_response_sec=0 >> local/system.conf
 }
 
 function check_setup {
@@ -49,16 +50,16 @@ function check_setup {
     mkdir -p $conf_dir
 
     cat >> $cmd_file <<EOF
-timeout 30 tcpdump -eni \$HOSTNAME-eth0 -w /tmp/eth0.pcap || true
+sleep 30
 function test_bacnet {
-    bacnet_base="tcpdump -en -r /tmp/eth0.pcap port 47808"
+    bacnet_base="tcpdump -en -r /scans/test_ping.pcap port 47808"
     echo \$((\$(\$bacnet_base and \$@ | wc -l ) > 0))
 }
 function test_tcp {
     src_mac=$MAC_BASE:$(printf %02x $src_dev)
     dst_mac=$MAC_BASE:\$(printf %02x \$1)
     # Check for TCP ACKs, since that means the network is allowing it.
-    tcp_base="tcpdump -en -r /tmp/eth0.pcap tcp and ether dst \$src_mac"
+    tcp_base="tcpdump -en -r /scans/test_ping.pcap tcp and ether dst \$src_mac"
     filter="ether src \$dst_mac and src port \$2"
     echo \$((\$(\$tcp_base and \$filter | wc -l ) > 0))
 }
@@ -125,7 +126,6 @@ function run_test {
         test -d $conf_dir || (mkdir -p $conf_dir; echo sleep 30 >> $cmd_file)
     done
     cmd/run -s
-    fgrep :ping: inst/result.log | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
     cat inst/run-port-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
     more inst/run-port-*/nodes/ping*/activate.log | cat

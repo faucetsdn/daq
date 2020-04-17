@@ -7,20 +7,23 @@ postfix=
 intf_mac=9a:02:57:1e:8f:00
 create_local=
 docker_args=
+networking=
+alt_faux=
+image=daqf/faux1
+build=
 
 cd $ROOT
 source misc/config_base.sh
 
 # If the argument is -n then create a networking container
 if [ "$1" == "-n" ]; then
-    container_prefix=daq-networking
-    image=daqf/networking
-    net_opt=
+    networking=$1
     shift
-else
-    container_prefix=daq-faux
-    image=daqf/faux
-    net_opt=--net=none
+fi
+
+if [ "$1" == "-b" ]; then
+    build=$1
+    shift
 fi
 
 # If the argument is :lo, then create a local IP address.
@@ -49,6 +52,24 @@ if [ $# -gt 0 -a $(($1)) -gt 0 ]; then
     postfix=-$port_num
     intf_mac=9a:02:57:1e:8f:0$port_num
     shift
+fi
+
+if [ "$1" == "alt" ]; then
+    image=daqf/faux2
+    shift
+fi
+
+if [ -n "$networking" ]; then
+    container_prefix=daq-networking
+    image=daqf/networking
+    net_opt=
+else
+    container_prefix=daq-faux
+    net_opt=--net=none
+fi
+
+if [ -n "$build" ]; then
+    DAQ_TARGETS=${image#daqf/} bin/docker_build force
 fi
 
 FAUX_ARGS="$*"

@@ -41,7 +41,8 @@ for file in $docker_files; do
     tag=daqf/$module
     found=$(docker images $tag 2>/dev/null | grep $module) || true
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
-        echo Skipping non-enabled $tag
+        #echo Skipping non-enabled $tag
+        true
     elif [ -z "$DAQ_TARGETS" -a -z "$force" -a -n "$found" ]; then
         unset test_set[$module]
         echo Skipping building existing $tag 
