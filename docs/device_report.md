@@ -431,4 +431,3 @@ RESULT skip cloud.udmi.pointset No device id
 
 ## Report complete
 
-
