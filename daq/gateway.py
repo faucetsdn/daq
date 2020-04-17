@@ -121,6 +121,9 @@ class Gateway():
         """Generic function for executing scripts on gateway"""
         self.host.cmd(('./%s' + len(args) * ' %s') % (action, *args))
 
+    def request_new_ip(self, mac)
+        self.execute_script('new_ip', mac)
+
     def allocate_test_port(self):
         """Get the test port to use for this gateway setup"""
         test_port = self._switch_port(self.TEST_OFFSET_START)

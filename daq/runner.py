@@ -93,7 +93,7 @@ class DAQRunner:
 
     def _get_states(self):
         states = connected_host.pre_states() + self.config['test_list']
-        return states + + connected_host.post_states()
+        return states + connected_host.post_states()
 
     def _send_heartbeat(self):
         message = {
@@ -454,6 +454,7 @@ class DAQRunner:
         self._target_mac_ip[target_mac] = target_ip
         if target_mac in self.mac_targets:
             self._ip_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
+            self.mac_targets[target_mac].ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(self.mac_targets[target_mac])
 
     def _check_and_activate_gateway(self, host):
@@ -514,12 +515,9 @@ class DAQRunner:
             LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
             return gateway, False
 
-        ready_trigger = True
-        for ready_mac in ready_devices:
-            ready_host = self.mac_targets[ready_mac]
-            ready_trigger = ready_trigger and ready_host.trigger_ready()
+        ready_trigger = all(map(lambda mac: self.mac_targets[mac].trigger_ready(), ready_devices))
         if not ready_trigger:
-            LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
+            LOGGER.info('DHCP device group %s not ready to trigger', group_name)
             return gateway, False
 
         return gateway, ready_devices

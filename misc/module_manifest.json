@@ -1,4 +1,7 @@
 {
+    "base.startup.dhcp" : {
+        "description" : "Check the base DHCP startup exchange"
+    },
     "base.switch.ping" : {
         "description" : "Attempt to ping the OpenFlow compatible switch configured in system.conf"
     },

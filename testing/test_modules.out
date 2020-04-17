@@ -13,4 +13,10 @@ RESULT pass security.x509
 Testing tls alt expiredtls
 RESULT fail security.tls.v3
 RESULT fail security.x509
+Testing nmap
+RESULT pass security.ports.nmap Only allowed ports found open.
+Testing nmap bacnet
+RESULT pass security.ports.nmap Only allowed ports found open.
+Testing nmap telnet
+RESULT fail security.ports.nmap Some disallowed ports are open:
 Testing complete.

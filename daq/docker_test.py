@@ -29,13 +29,15 @@ class DockerTest:
         self.start_time = None
         self.pipe = None
         self.env_vars = env_vars or []
+        self._finish_hook = None
 
-    def start(self, port, params, callback):
+    def start(self, port, params, callback, finish_hook):
         """Start the docker test"""
         LOGGER.debug('Target port %d starting docker test %s', self.target_port, self.test_name)
 
         self.start_time = datetime.datetime.now()
         self.callback = callback
+        self._finish_hook = finish_hook
 
         env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
                                     "TARGET_IP=" + params['target_ip'],
@@ -110,6 +112,7 @@ class DockerTest:
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             vol_maps += ['%s:/config/%s' % (abs_base, kind)]
+            LOGGER.info('Target port %d mapping %s to /config/%s', self.target_port, abs_base, kind)
 
     def _docker_error(self, exception):
         LOGGER.error('Target port %d docker error: %s', self.target_port, str(exception))
@@ -121,6 +124,8 @@ class DockerTest:
     def _docker_finalize(self):
         assert self.docker_host, 'docker host %s already finalized' % self.target_port
         LOGGER.info('Target port %d docker finalize', self.target_port)
+        if self._finish_hook:
+            self._finish_hook()
         self.runner.remove_host(self.docker_host)
         if self.pipe:
             self.runner.monitor_forget(self.pipe.stdout)

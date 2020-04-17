@@ -289,8 +289,6 @@ class ConnectedHost:
             LOGGER.info('Target port %d using %s DHCP mode, wait %s',
                         self.target_port, dhcp_mode, wait_time)
             self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
-            if dhcp_mode == "ip_change":
-                self.gateway.execute_script('new_ip', self.target_mac)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):
@@ -352,6 +350,15 @@ class ConnectedHost:
         elif self.state == _STATE.BASE:
             self._base_start()
 
+    def ip_notify(self, target_ip, state=MODE.DONE, delta_sec=-1):
+        """Handle completion of ip subtask"""
+        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
+        with open(self._trigger_path, 'a') as output_stream:
+            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
+        if self._get_dhcp_mode() == "ip_change" and len(self._all_ips) == 1:
+            self.gateway.request_new_ip(self.target_mac)
+
     def trigger_ready(self):
         """Check if this host is ready to be triggered"""
         if self.state != _STATE.WAITING:
@@ -364,13 +371,9 @@ class ConnectedHost:
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
-        """Handle completion of ip subtask"""
-        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
-        with open(self._trigger_path, 'a') as output_stream:
-            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
-        self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
-        if not self.trigger_ready():
-            LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
+        """Handle device trigger"""
+        if not self.target_ip and not self.trigger_ready():
+            LOGGER.warn('Target port %d ignoring premature trigger', self.target_port)
             return False
         if self.target_ip:
             LOGGER.debug('Target port %d already triggered', self.target_port)
@@ -561,7 +564,7 @@ class ConnectedHost:
             self._set_module_config(self._loaded_config)
             self.record_result(test_name, state=MODE.EXEC)
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self.test_host.start(self.test_port, params, self._docker_callback)
+            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
         except:
             self.test_host = None
             raise
