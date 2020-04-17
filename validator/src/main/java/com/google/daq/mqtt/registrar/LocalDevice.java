@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -26,10 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
 import org.apache.commons.io.IOUtils;
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
@@ -68,6 +67,7 @@ public class LocalDevice {
   private String deviceNumId;
 
   private CloudDeviceSettings settings;
+  private List<LocalDevice> proxyDevices;
 
   LocalDevice(File devicesDir, String deviceId, Map<String, Schema> schemas) {
     try {
@@ -272,6 +272,15 @@ public class LocalDevice {
 
   public void setDeviceNumId(String numId) {
     deviceNumId = numId;
+  }
+
+  public void setProxyDevices(List<LocalDevice> proxyDevices) {
+    System.out.println(String.format("Gateway %s proxy for %s", deviceId,
+        Joiner.on(", ").join(proxyDevices)));
+    if (settings != null) {
+      throw new RuntimeException("Settings already finalized");
+    }
+    this.proxyDevices = proxyDevices;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {

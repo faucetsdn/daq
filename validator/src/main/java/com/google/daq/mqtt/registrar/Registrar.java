@@ -168,16 +168,7 @@ public class Registrar {
     Map<String, List<LocalDevice>> gatewayDevices = localDevices.values().stream()
         .filter(LocalDevice::hasGateway)
         .collect(groupingBy(LocalDevice::getGatewayId));
-    gatewayDevices.keySet().forEach();
-
-    for (Map.Entry<String, LocalDevice> localDevice : localDevices.entrySet()) {
-      String gatewayId = localDevice.getValue().getGatewayId();
-      if (localDevice.getKey().equals(gatewayId)) {
-        gateways.add(gatewayId);
-      } else if (gatewayId != null) {
-        // is proxy
-      }
-    }
+    gatewayDevices.forEach((key, value) -> localDevices.get(key).setProxyDevices(value));
   }
 
   private void validateFiles(Map<String, LocalDevice> localDevices) {

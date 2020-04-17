@@ -129,6 +129,7 @@ public class CloudIotManager {
   }
 
   private GatewayConfig getGatewayConfig() {
+    return null;
   }
 
   private void createDevice(String deviceId, CloudDeviceSettings settings) throws IOException {
