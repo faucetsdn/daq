@@ -13,7 +13,7 @@ public class ReportHandler {
   public final static String SKIP_NOMAC = "skip_mac";
   public final static String SKIP_NOMAC_NOPORT = "skip_nomac_noport";
 
-  private final static String PRINT_MESSAGE_STRING = "%%%% %s";
+  private final static String PRINT_MESSAGE_STRING = "%s";
   private final static String UNABLE_TO_WRITE_REPORT_MESSAGE = "Unable to write message.";
   private final static String REPORT_FILE_PATH = "reports/%s_result.txt";
 
