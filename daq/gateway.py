@@ -122,6 +122,7 @@ class Gateway():
         self.host.cmd(('./%s' + len(args) * ' %s') % (action, *args))
 
     def request_new_ip(self, mac):
+        """Requests a new ip for the device"""
         self.execute_script('new_ip', mac)
 
     def allocate_test_port(self):
