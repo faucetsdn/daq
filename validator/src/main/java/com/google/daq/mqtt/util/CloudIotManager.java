@@ -12,6 +12,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudiot.v1.CloudIot;
 import com.google.api.services.cloudiot.v1.model.Device;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
+import com.google.api.services.cloudiot.v1.model.GatewayConfig;
 import com.google.api.services.cloudiot.v1.model.PublicKeyCredential;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -89,13 +90,13 @@ public class CloudIotManager {
       Preconditions.checkNotNull(cloudIotService, "CloudIoT service not initialized");
       Preconditions.checkNotNull(deviceMap, "deviceMap not initialized");
       Device device = deviceMap.get(deviceId);
-      if (device == null) {
+      boolean isNewDevice = device == null;
+      if (isNewDevice) {
         createDevice(deviceId, settings);
-        return true;
       } else {
         updateDevice(deviceId, settings, device);
       }
-      return false;
+      return isNewDevice;
     } catch (Exception e) {
       throw new RuntimeException("While registering device " + deviceId, e);
     }
@@ -122,8 +123,12 @@ public class CloudIotManager {
     metadataMap.put(SCHEMA_KEY, schemaName);
     return new Device()
         .setId(deviceId)
+        .setGatewayConfig(getGatewayConfig())
         .setCredentials(ImmutableList.of(settings.credential))
         .setMetadata(metadataMap);
+  }
+
+  private GatewayConfig getGatewayConfig() {
   }
 
   private void createDevice(String deviceId, CloudDeviceSettings settings) throws IOException {

@@ -29,7 +29,6 @@
     }
   },
   "required": [
-    "protocols",
     "proxy_ids"
   ]
 }

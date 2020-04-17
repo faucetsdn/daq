@@ -62,8 +62,8 @@ public class LocalDevice {
   private final String deviceId;
   private final Map<String, Schema> schemas;
   private final File deviceDir;
-  private final Metadata metadata;
-  private final Properties properties;
+  private final UdmiSchema.Metadata metadata;
+  private final UdmiSchema.Properties properties;
 
   private String deviceNumId;
 
@@ -103,7 +103,7 @@ public class LocalDevice {
     }
   }
 
-  private Properties readProperties() {
+  private UdmiSchema.Properties readProperties() {
     File propertiesFile = new File(deviceDir, PROPERTIES_JSON);
     try (InputStream targetStream = new FileInputStream(propertiesFile)) {
       schemas.get(PROPERTIES_JSON).validate(new JSONObject(new JSONTokener(targetStream)));
@@ -111,13 +111,13 @@ public class LocalDevice {
       throw new RuntimeException("Processing input " + propertiesFile, e);
     }
     try {
-      return OBJECT_MAPPER.readValue(propertiesFile, Properties.class);
+      return OBJECT_MAPPER.readValue(propertiesFile, UdmiSchema.Properties.class);
     } catch (Exception e) {
       throw new RuntimeException("While reading "+ propertiesFile.getAbsolutePath(), e);
     }
   }
 
-  private Metadata readMetadata() {
+  private UdmiSchema.Metadata readMetadata() {
     File metadataFile = new File(deviceDir, METADATA_JSON);
     try (InputStream targetStream = new FileInputStream(metadataFile)) {
       schemas.get(METADATA_JSON).validate(new JSONObject(new JSONTokener(targetStream)));
@@ -125,7 +125,7 @@ public class LocalDevice {
       throw new RuntimeException("Processing input " + metadataFile, e1);
     }
     try {
-      return OBJECT_MAPPER.readValue(metadataFile, Metadata.class);
+      return OBJECT_MAPPER.readValue(metadataFile, UdmiSchema.Metadata.class);
     } catch (Exception e) {
       throw new RuntimeException("While reading "+ metadataFile.getAbsolutePath(), e);
     }
@@ -170,6 +170,20 @@ public class LocalDevice {
     }
   }
 
+  boolean isGateway() {
+    return metadata.gateway != null &&
+        deviceId.equals(metadata.gateway.gateway_id);
+  }
+
+  boolean hasGateway() {
+    return metadata.gateway != null &&
+        !deviceId.equals(metadata.gateway.gateway_id);
+  }
+
+  String getGatewayId() {
+    return hasGateway() ? metadata.gateway.gateway_id : null;
+  }
+
   CloudDeviceSettings getSettings() {
     try {
       if (settings != null) {
@@ -179,6 +193,7 @@ public class LocalDevice {
       settings = new CloudDeviceSettings();
       settings.credential = loadCredential();
       settings.metadata = metadataString();
+      //settings.gatewayId = metadata.gateway.proxy_ids;
       return settings;
     } catch (Exception e) {
       throw new RuntimeException("While getting settings for device " + deviceId, e);
@@ -195,7 +210,7 @@ public class LocalDevice {
 
   public void validate(String registryId, String siteName) {
     try {
-      Envelope envelope = new Envelope();
+      UdmiSchema.Envelope envelope = new UdmiSchema.Envelope();
       envelope.deviceId = deviceId;
       envelope.deviceRegistryId = registryId;
       // Don't use actual project id because it should be abstracted away.
@@ -223,7 +238,7 @@ public class LocalDevice {
     Preconditions.checkState(expected_site_name.equals(siteName), errorMessage);
   }
 
-  private String makeNumId(Envelope envelope) {
+  private String makeNumId(UdmiSchema.Envelope envelope) {
     int hash = Objects.hash(deviceId, envelope.deviceRegistryId, envelope.projectId);
     return Integer.toString(hash < 0 ? -hash : hash);
   }
@@ -257,56 +272,6 @@ public class LocalDevice {
 
   public void setDeviceNumId(String numId) {
     deviceNumId = numId;
-  }
-
-  private static class Envelope {
-    public String deviceId;
-    public String deviceNumId;
-    public String deviceRegistryId;
-    public String projectId;
-    public final String subFolder = METADATA_SUBFOLDER;
-  }
-
-  private static class Metadata {
-    public PointsetMetadata pointset;
-    public SystemMetadata system;
-    public Integer version;
-    public Date timestamp;
-    public String hash;
-  }
-
-  private static class Properties {
-    public String key_type;
-    public String connect;
-    public Integer version;
-  }
-
-  private static class PointsetMetadata {
-    public Map<String, PointMetadata> points;
-  }
-
-  private static class SystemMetadata {
-    public LocationMetadata location;
-    public PhysicalTagMetadata physical_tag;
-  }
-
-  private static class PointMetadata {
-    public String units;
-  }
-
-  private static class LocationMetadata {
-    public String site_name;
-    public String section;
-    public Object position;
-  }
-
-  private static class PhysicalTagMetadata {
-    public AssetMetadata asset;
-  }
-
-  private static class AssetMetadata {
-    public String guid;
-    public String name;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {

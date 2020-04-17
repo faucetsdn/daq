@@ -30,5 +30,8 @@
         "units": "Degrees-Celsius"
       }
     }
+  },
+  "gateway": {
+    "gateway_id": "GAT-123"
   }
 }

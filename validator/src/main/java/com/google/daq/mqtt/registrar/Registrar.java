@@ -1,6 +1,7 @@
 package com.google.daq.mqtt.registrar;
 
 import static com.google.daq.mqtt.registrar.LocalDevice.METADATA_SUBFOLDER;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 
 import com.google.api.services.cloudiot.v1.model.Device;
@@ -16,10 +17,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -157,10 +157,27 @@ public class Registrar {
     String[] devices = devicesDir.list();
     Preconditions.checkNotNull(devices, "No devices found in " + devicesDir.getAbsolutePath());
     Map<String, LocalDevice> localDevices = loadDevices(devicesDir, devices);
+    normalizeGateways(localDevices);
     validateKeys(localDevices);
     validateFiles(localDevices);
     writeNormalized(localDevices);
     return localDevices;
+  }
+
+  private void normalizeGateways(Map<String, LocalDevice> localDevices) {
+    Map<String, List<LocalDevice>> gatewayDevices = localDevices.values().stream()
+        .filter(LocalDevice::hasGateway)
+        .collect(groupingBy(LocalDevice::getGatewayId));
+    gatewayDevices.keySet().forEach();
+
+    for (Map.Entry<String, LocalDevice> localDevice : localDevices.entrySet()) {
+      String gatewayId = localDevice.getValue().getGatewayId();
+      if (localDevice.getKey().equals(gatewayId)) {
+        gateways.add(gatewayId);
+      } else if (gatewayId != null) {
+        // is proxy
+      }
+    }
   }
 
   private void validateFiles(Map<String, LocalDevice> localDevices) {
