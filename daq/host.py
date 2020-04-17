@@ -47,7 +47,6 @@ class MODE:
     LONG = 'long'
     MERR = 'merr'
 
-
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
@@ -115,6 +114,8 @@ class ConnectedHost:
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
+        self._all_ips = []
+
     @staticmethod
     def make_runid():
         """Create a timestamped runid"""
@@ -299,7 +300,7 @@ class ConnectedHost:
         self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
-    def check_module_timeout(self):
+    def heartbeat(self):
         """Checks module run time for each event loop"""
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
@@ -349,6 +350,15 @@ class ConnectedHost:
         elif self.state == _STATE.BASE:
             self._base_start()
 
+    def ip_notify(self, target_ip, state=MODE.DONE, delta_sec=-1):
+        """Handle completion of ip subtask"""
+        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
+        with open(self._trigger_path, 'a') as output_stream:
+            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
+        if self._get_dhcp_mode() == "ip_change" and len(self._all_ips) == 1:
+            self.gateway.request_new_ip(self.target_mac)
+
     def trigger_ready(self):
         """Check if this host is ready to be triggered"""
         if self.state != _STATE.WAITING:
@@ -356,20 +366,19 @@ class ConnectedHost:
         delta_t = datetime.now() - self._startup_time
         if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
+        if self._get_dhcp_mode() == "ip_change":
+            return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
-        """Handle completion of ip subtask"""
-        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
-        with open(self._trigger_path, 'a') as output_stream:
-            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        """Handle device trigger"""
+        if not self.target_ip and not self.trigger_ready():
+            LOGGER.warn('Target port %d ignoring premature trigger', self.target_port)
+            return False
         if self.target_ip:
             LOGGER.debug('Target port %d already triggered', self.target_port)
             assert self.target_ip == target_ip, "target_ip mismatch"
             return True
-        if not self.trigger_ready():
-            LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
-            return False
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
