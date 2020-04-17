@@ -8,10 +8,10 @@ There are three levels of device configuration:
 ## Device Descriptions
 
 Device descriptions are simple text files indexed by MAC address included in generated
-reports. Located by default in
-<code>local/site/mac_addrs/<em>macaddressXX</em>/report_description.txt</code>,
+reports. Located by default in directory
+<code>local/site/mac_addrs/<em>macaddressXX</em>/aux</code>,
 they are copied unmodified into the report. See
-[`misc/test_site/mac_addrs/9a02571e8f00/report_description.txt`](../misc/test_site/mac_addrs/9a02571e8f00/report_description.txt)
+[`misc/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt`](../misc/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt)
 for an example. The base site directory (`local/site`) is configurable by the
 `site_path` config parameter.
 
@@ -19,7 +19,7 @@ for an example. The base site directory (`local/site`) is configurable by the
 
 Devices can be grouped together for testing by using a "device specification"
 file that is indexed by the `device_specs` configuration parameter. See
-`misc/device_specs.json` for a baseline example (used for regression tests).
+`misc/device_specs` folder for baseline examples (used for regression tests).
 
 The basic structure is indexed by device MAC address, with a few basic fields:
 

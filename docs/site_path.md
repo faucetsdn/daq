@@ -25,6 +25,8 @@ The merged config file is written to `{site_path}/mac_addrs/{mac_addr}/aux/modul
 and is available to a test container at runtime (along with all the other files in the `aux`
 directory).
 
+![Diagram](module_config.png)
+
 # Configuration parameters
 
 * Each test can be enabled or disabled at any level, see this
