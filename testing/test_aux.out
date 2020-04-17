@@ -5,7 +5,7 @@ check_style exit code 0
 Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
-RESULT skip protocol.bacnet.version Protocol version: 1
+RESULT info protocol.bacnet.version Protocol version: 1
 RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device type directory
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
