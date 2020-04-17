@@ -15,6 +15,7 @@ public class RetrieveList {
 
   public void startTest() {
     readLocalFile();
+    System.out.println(String.format("Found %d entries in mac table\n", macDevices.size()));
     MacLookup macLookup = new MacLookup(macDevices, macAddress);
     macLookup.startTest();
   }

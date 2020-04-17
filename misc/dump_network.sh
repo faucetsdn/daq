@@ -16,5 +16,5 @@ function dump {
 dump pri
 dump sec
 
-#cp inst/faucet.log $1/
-cp inst/faucet.yaml inst/dp_ports_acl.yaml inst/port_acls/*.yaml $1/
+cp inst/faucet.log $1/
+cp inst/faucet.yaml inst/dp_port_acls.yaml inst/port_acls/*.yaml $1/
