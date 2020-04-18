@@ -64,6 +64,7 @@ if [ -f $cred_file ]; then
     registry_id=`jq .registry_id $cloud_file`
     cloud_region=`jq .cloud_region $cloud_file`
 
+    make_pubber AHU-22 daq-faux-1 null
     make_pubber AHU-1 daq-faux-2 null
     make_pubber SNS-4 daq-faux-3 1234
 else
