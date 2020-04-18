@@ -32,6 +32,7 @@ public class Pubber {
   private static final String POINTSET_TOPIC = "events/pointset";
   private static final String STATE_TOPIC = "state";
   private static final String CONFIG_TOPIC = "config";
+  private static final String ERROR_TOPIC = "errors";
 
   private static final int MIN_REPORT_MS = 200;
   private static final int DEFAULT_REPORT_MS = 1000;
@@ -156,12 +157,17 @@ public class Pubber {
   private void initialize() {
     Preconditions.checkState(mqttPublisher == null, "mqttPublisher already defined");
     Preconditions.checkNotNull(configuration.keyFile, "configuration keyFile not defined");
-    Preconditions.checkState(configuration.gatewayId == null, "gatewayId not currently supported");
     System.err.println("Loading device key file from " + configuration.keyFile);
     configuration.keyBytes = getFileBytes(configuration.keyFile);
     mqttPublisher = new MqttPublisher(configuration, this::reportError);
+    if (configuration.gatewayId != null) {
+      mqttPublisher.registerHandler(configuration.gatewayId, CONFIG_TOPIC,
+          this::configHandler, Message.Config.class);
+      mqttPublisher.registerHandler(configuration.gatewayId, ERROR_TOPIC,
+          this::errorHandler, GatewayError.class);
+    }
     mqttPublisher.registerHandler(configuration.deviceId, CONFIG_TOPIC,
-            this::configHandler, Message.Config.class);
+        this::configHandler, Message.Config.class);
   }
 
   private void connect() {
@@ -212,6 +218,11 @@ public class Pubber {
     } catch (Exception e) {
       reportError(e);
     }
+  }
+
+  private void errorHandler(GatewayError error) {
+    info(String.format("%s for %s: %s",
+        error.error_type, error.device_id, error.description));
   }
 
   private byte[] getFileBytes(String dataFile) {

@@ -53,6 +53,7 @@ public class MqttPublisher {
 
   private static final int MQTT_QOS = 1;
   private static final String CONFIG_UPDATE_TOPIC_FMT = "/devices/%s/config";
+  private static final String ERRORS_TOPIC_FMT = "/devices/%s/errors";
   private static final String UNUSED_ACCOUNT_NAME = "unused";
   private static final int INITIALIZE_TIME_MS = 2000;
 
@@ -136,18 +137,17 @@ public class MqttPublisher {
   }
 
   private MqttClient newBoundClient(String gatewayId, String deviceId) throws Exception {
-    MqttClient mqttClient = mqttClientCache.get(gatewayId);
     try {
-      connectMqttClient(mqttClient, gatewayId);
+      MqttClient mqttClient = connectMqttClient(gatewayId);
       String topic = String.format("/devices/%s/attach", deviceId);
       byte[] payload = new byte[0];
       LOG.info("Publishing attach message to topic " + topic);
       mqttClient.publish(topic, payload, MQTT_QOS, SHOULD_RETAIN);
+      return mqttClient;
     } catch (Exception e) {
       LOG.error(String.format("Error while binding client %s: %s", deviceId, e.toString()));
       return null;
     }
-    return mqttClient;
   }
 
   private MqttClient newMqttClient(String deviceId) {
@@ -163,14 +163,15 @@ public class MqttPublisher {
     }
   }
 
-  private void connectMqttClient(MqttClient mqttClient, String deviceId)
+  private MqttClient connectMqttClient(String deviceId)
       throws Exception {
+    MqttClient mqttClient = mqttClientCache.get(deviceId);
     if (!connectionLock.tryAcquire(CONNECTION_LOCK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
       throw new RuntimeException("Timeout waiting for connection lock");
     }
     try {
       if (mqttClient.isConnected()) {
-        return;
+        return mqttClient;
       }
       LOG.info("Attempting connection to " + registryId + ":" + deviceId);
 
@@ -196,6 +197,7 @@ public class MqttPublisher {
     } finally {
       connectionLock.release();
     }
+    return mqttClient;
   }
 
   private String getClientId(String deviceId) {
@@ -216,7 +218,11 @@ public class MqttPublisher {
   }
 
   private void subscribeToUpdates(MqttClient client, String deviceId) {
-    String updateTopic = String.format(CONFIG_UPDATE_TOPIC_FMT, deviceId);
+    subscribeTopic(client, String.format(CONFIG_UPDATE_TOPIC_FMT, deviceId));
+    subscribeTopic(client, String.format(ERRORS_TOPIC_FMT, deviceId));
+  }
+
+  private void subscribeTopic(MqttClient client, String updateTopic) {
     try {
       client.subscribe(updateTopic);
     } catch (MqttException e) {
@@ -295,9 +301,9 @@ public class MqttPublisher {
 
   private class ClientLoader extends CacheLoader<String, MqttClient>  {
     @Override
-    public MqttClient load(String key) throws Exception {
-      LOG.info("Creating new publisher-client for " + key);
-      return newMqttClient(key);
+    public MqttClient load(String deviceId) throws Exception {
+      LOG.info("Creating new publisher-client for " + deviceId);
+      return newMqttClient(deviceId);
     }
   }
 
@@ -325,9 +331,11 @@ public class MqttPublisher {
 
   private MqttClient getConnectedClient(String deviceId) {
     try {
-      MqttClient mqttClient = mqttClientCache.get(deviceId);
-      connectMqttClient(mqttClient, deviceId);
-      return mqttClient;
+      if (configuration.gatewayId != null) {
+        LOG.info("Connecting through gateway " + configuration.gatewayId);
+        return newBoundClient(configuration.gatewayId, deviceId);
+      }
+      return connectMqttClient(deviceId);
     } catch (Exception e) {
       throw new RuntimeException("While getting mqtt client " + deviceId + ": " + e.toString(), e);
     }
