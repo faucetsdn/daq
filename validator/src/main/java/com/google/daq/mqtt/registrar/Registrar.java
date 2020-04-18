@@ -199,17 +199,19 @@ public class Registrar {
   private void validateKeys(Map<String, LocalDevice> localDevices) {
     ExceptionMap exceptionMap = new ExceptionMap("Error validating keys");
     Map<DeviceCredential, String> privateKeys = new HashMap<>();
-    for (String deviceName : localDevices.keySet()) {
-      CloudDeviceSettings settings = localDevices.get(deviceName).getSettings();
-      if (privateKeys.containsKey(settings.credential)) {
-        String previous = privateKeys.get(settings.credential);
-        RuntimeException exception = new RuntimeException(
-            String.format("Duplicate credentials found for %s & %s", previous, deviceName));
-        exceptionMap.put(deviceName, exception);
-      } else {
-        privateKeys.put(settings.credential, deviceName);
-      }
-    }
+    localDevices.values().stream().filter(LocalDevice::isDirectConnect).forEach(
+        localDevice -> {
+          String deviceName = localDevice.getDeviceId();
+          CloudDeviceSettings settings = localDevice.getSettings();
+          if (privateKeys.containsKey(settings.credential)) {
+            String previous = privateKeys.get(settings.credential);
+            RuntimeException exception = new RuntimeException(
+                String.format("Duplicate credentials found for %s & %s", previous, deviceName));
+            exceptionMap.put(deviceName, exception);
+          } else {
+            privateKeys.put(settings.credential, deviceName);
+          }
+        });
     exceptionMap.throwIfNotEmpty();
   }
 

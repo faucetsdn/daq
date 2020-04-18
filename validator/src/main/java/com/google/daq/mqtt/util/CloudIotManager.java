@@ -129,11 +129,9 @@ public class CloudIotManager {
   }
 
   private GatewayConfig getGatewayConfig(CloudDeviceSettings settings) {
-    if (settings.proxyDevices == null) {
-      return null;
-    }
+    boolean isGateway = settings.proxyDevices != null;
     GatewayConfig gwConfig = new GatewayConfig();
-    gwConfig.setGatewayType("GATEWAY");
+    gwConfig.setGatewayType(isGateway ? "GATEWAY" : "NON_GATEWAY");
     gwConfig.setGatewayAuthMethod("DEVICE_AUTH_TOKEN_ONLY");
     return gwConfig;
   }

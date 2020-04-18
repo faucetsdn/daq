@@ -53,8 +53,8 @@ public class LocalDevice {
   private static final String PHYSICAL_TAG_FORMAT = "%s_%s";
   private static final String PHYSICAL_TAG_ERROR = "Physical asset name %s does not match expected %s";
 
-  private static final Set<String> allowedFiles = ImmutableSet.of(METADATA_JSON, RSA_PUBLIC_PEM, RSA_PRIVATE_PEM,
-      RSA_PRIVATE_PKCS8, PROPERTIES_JSON);
+  private static final Set<String> deviceFiles = ImmutableSet.of(METADATA_JSON, PROPERTIES_JSON);
+  private static final Set<String> keyFiles = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
   private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen %s %s";
   public static final String METADATA_SUBFOLDER = "metadata";
 
@@ -63,6 +63,7 @@ public class LocalDevice {
   private final File deviceDir;
   private final UdmiSchema.Metadata metadata;
   private final UdmiSchema.Properties properties;
+  private final File devicesDir;
 
   private String deviceNumId;
 
@@ -73,6 +74,7 @@ public class LocalDevice {
     try {
       this.deviceId = deviceId;
       this.schemas = schemas;
+      this.devicesDir = devicesDir;
       deviceDir = new File(devicesDir, deviceId);
       metadata = readMetadata();
       properties = readProperties();
@@ -90,11 +92,12 @@ public class LocalDevice {
       String[] files = deviceDir.list();
       Preconditions.checkNotNull(files, "No files found in " + deviceDir.getAbsolutePath());
       ImmutableSet<String> actualFiles = ImmutableSet.copyOf(files);
-      SetView<String> missing = Sets.difference(allowedFiles, actualFiles);
+      Set<String> expectedFiles = isDirectConnect() ? Sets.union(keyFiles, deviceFiles) : deviceFiles;
+      SetView<String> missing = Sets.difference(expectedFiles, actualFiles);
       if (!missing.isEmpty()) {
         throw new RuntimeException("Missing files: " + missing);
       }
-      SetView<String> extra = Sets.difference(actualFiles, allowedFiles);
+      SetView<String> extra = Sets.difference(actualFiles, expectedFiles);
       if (!extra.isEmpty()) {
         throw new RuntimeException("Extra files: " + extra);
       }
@@ -145,7 +148,8 @@ public class LocalDevice {
 
   private DeviceCredential loadCredential() {
     try {
-      File deviceKeyFile = new File(deviceDir, RSA_PUBLIC_PEM);
+      File keyDir = hasGateway() ? getGatewayDir() : deviceDir;
+      File deviceKeyFile = new File(keyDir, RSA_PUBLIC_PEM);
       if (!deviceKeyFile.exists()) {
         generateNewKey();
       }
@@ -154,6 +158,10 @@ public class LocalDevice {
     } catch (Exception e) {
       throw new RuntimeException("While loading credential for local device " + deviceId, e);
     }
+  }
+
+  private File getGatewayDir() {
+    return new File(devicesDir, getGatewayId());
   }
 
   private void generateNewKey() {
@@ -178,6 +186,10 @@ public class LocalDevice {
   boolean hasGateway() {
     return metadata.gateway != null &&
         !deviceId.equals(metadata.gateway.gateway_id);
+  }
+
+  boolean isDirectConnect() {
+    return isGateway() || !hasGateway();
   }
 
   String getGatewayId() {
