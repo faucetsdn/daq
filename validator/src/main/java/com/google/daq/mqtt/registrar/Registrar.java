@@ -30,7 +30,6 @@ public class Registrar {
 
   static final String METADATA_JSON = "metadata.json";
   static final String ENVELOPE_JSON = "envelope.json";
-  static final String PROPERTIES_JSON = "properties.json";
 
   private static final String DEVICES_DIR = "devices";
   private static final String ERROR_FORMAT_INDENT = "  ";
@@ -98,19 +97,24 @@ public class Registrar {
           exceptionMap.put(localName, e);
         }
       }
-      for (String extraName : extraDevices) {
-        try {
-          System.err.println("Blocking extra device " + extraName);
-          cloudIotManager.blockDevice(extraName, true);
-        } catch (Exception e) {
-          exceptionMap.put(extraName, e);
-        }
-      }
+      bindGatewayDevices(localDevices);
+      blockExtraDevices(exceptionMap, extraDevices);
       System.err.println(String.format("Processed %d devices", localDevices.size()));
     } catch (Exception e) {
       exceptionMap.put("Processing devices", e);
     }
     exceptionMap.throwIfNotEmpty();
+  }
+
+  private void blockExtraDevices(ExceptionMap exceptionMap, Set<String> extraDevices) {
+    for (String extraName : extraDevices) {
+      try {
+        System.err.println("Blocking extra device " + extraName);
+        cloudIotManager.blockDevice(extraName, true);
+      } catch (Exception e) {
+        exceptionMap.put(extraName, e);
+      }
+    }
   }
 
   private Device fetchDevice(String localName) {
@@ -141,6 +145,19 @@ public class Registrar {
     } else {
       System.err.println("Updated device entry " + localName);
     }
+  }
+
+  private void bindGatewayDevices(Map<String, LocalDevice> localDevices) {
+    localDevices.values().stream().filter(localDevice -> localDevice.getSettings().proxyDevices != null).forEach(
+        localDevice -> localDevice.getSettings().proxyDevices.forEach(proxyDevice -> {
+          try {
+            System.err.println("Binding " + proxyDevice.getDeviceId() + " to gateway " + localDevice.getDeviceId());
+            cloudIotManager.bindDevice(proxyDevice.getDeviceId(), localDevice.getDeviceId());
+          } catch (Exception e) {
+            throw new RuntimeException("While binding device " + localDevice.getDeviceId(), e);
+          }
+        })
+    );
   }
 
   private void shutdown() {
@@ -243,7 +260,6 @@ public class Registrar {
     schemaName = schemaBase.getName();
     loadSchema(METADATA_JSON);
     loadSchema(ENVELOPE_JSON);
-    loadSchema(PROPERTIES_JSON);
   }
 
   private void loadSchema(String key) {

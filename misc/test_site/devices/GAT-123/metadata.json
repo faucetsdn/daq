@@ -28,6 +28,7 @@
     "gateway_id": "GAT-123"
   },
   "version": 1,
-  "timestamp": "2020-04-17T20:31:02Z",
-  "hash": "7a0cc7aa"
+  "timestamp": "2020-04-19T05:11:04Z",
+  "hash": "55d252ef",
+  "auth_type": "RSA_PEM"
 }

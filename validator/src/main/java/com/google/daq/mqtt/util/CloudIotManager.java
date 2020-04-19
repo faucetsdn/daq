@@ -10,12 +10,11 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudiot.v1.CloudIot;
-import com.google.api.services.cloudiot.v1.model.Device;
-import com.google.api.services.cloudiot.v1.model.DeviceCredential;
-import com.google.api.services.cloudiot.v1.model.GatewayConfig;
-import com.google.api.services.cloudiot.v1.model.PublicKeyCredential;
+import com.google.api.services.cloudiot.v1.model.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -124,15 +123,23 @@ public class CloudIotManager {
     return new Device()
         .setId(deviceId)
         .setGatewayConfig(getGatewayConfig(settings))
-        .setCredentials(ImmutableList.of(settings.credential))
+        .setCredentials(getCredentials(settings))
         .setMetadata(metadataMap);
+  }
+
+  private ImmutableList<DeviceCredential> getCredentials(CloudDeviceSettings settings) {
+    if (settings.credential != null) {
+      return ImmutableList.of(settings.credential);
+    } else {
+      return ImmutableList.of();
+    }
   }
 
   private GatewayConfig getGatewayConfig(CloudDeviceSettings settings) {
     boolean isGateway = settings.proxyDevices != null;
     GatewayConfig gwConfig = new GatewayConfig();
     gwConfig.setGatewayType(isGateway ? "GATEWAY" : "NON_GATEWAY");
-    gwConfig.setGatewayAuthMethod("DEVICE_AUTH_TOKEN_ONLY");
+    gwConfig.setGatewayAuthMethod("ASSOCIATION_ONLY");
     return gwConfig;
   }
 
@@ -218,5 +225,14 @@ public class CloudIotManager {
 
   public String getSiteName() {
     return cloudIotConfig.site_name;
+  }
+
+  public void bindDevice(String proxyDeviceId, String gatewayDeviceId) throws IOException {
+    cloudIotRegistries.bindDeviceToGateway(getRegistryPath(registryId),
+        getBindRequest(proxyDeviceId, gatewayDeviceId));
+  }
+
+  private BindDeviceToGatewayRequest getBindRequest(String gatewayId, String deviceId) {
+    return new BindDeviceToGatewayRequest().setDeviceId(deviceId).setGatewayId(gatewayId);
   }
 }

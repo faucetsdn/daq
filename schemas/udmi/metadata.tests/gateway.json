@@ -1,6 +1,7 @@
 {
   "version": 1,
   "timestamp": "2018-08-26T21:39:29.364Z",
+  "auth_type": "RSA_PEM",
   "system": {
     "location": {
       "site_name": "US-SFO-XYY",
@@ -24,12 +25,14 @@
       }
     }
   },
-  "gateway": {
-    "gateway_id": "GAT-231",
+  "localnet": {
     "protocols": {
       "bacnet": {
         "local_id": "0x991132ec"
       }
     }
+  },
+  "gateway": {
+    "is_gateway": True
   }
 }

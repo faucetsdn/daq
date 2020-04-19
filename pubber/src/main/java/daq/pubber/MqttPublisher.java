@@ -146,9 +146,6 @@ public class MqttPublisher {
       String topic = String.format("/devices/%s/attach", deviceId);
       String payload = "";
       LOG.info("Publishing attach message to topic " + topic);
-//      JwtAuthorization jwtAuthorization = new JwtAuthorization(
-//          createJwt(configuration.projectId, configuration.keyBytes, configuration.algorithm));
-//      String payload = OBJECT_MAPPER.writeValueAsString(jwtAuthorization);
       mqttClient.publish(topic, payload.getBytes(StandardCharsets.UTF_8.name()), MQTT_QOS, SHOULD_RETAIN);
       return mqttClient;
     } catch (Exception e) {

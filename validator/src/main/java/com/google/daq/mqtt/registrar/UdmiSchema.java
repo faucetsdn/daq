@@ -20,12 +20,7 @@ public class UdmiSchema {
       public Integer version;
       public Date timestamp;
       public String hash;
-    }
-
-    static class Properties {
-      public String key_type;
-      public String connect;
-      public Integer version;
+      public String auth_type;
     }
 
     static class PointsetMetadata {

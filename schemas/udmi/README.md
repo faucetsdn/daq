@@ -87,9 +87,6 @@ processing.
 but not directly available to or on the device, defined by [<em>metadata.json</em>](metadata.json).
 This is essentially a specification about how the device should be configured or
 expectations about what the device should be doing.
-* Device _properties_ ([example](properties.tests/example.json)) which is used for
-configuring a system (e.g., when registering a device with the cloud),
-defined by [<em>properties.json</em>](properties.json).
 * Streaming device telemetry, which can take on several different forms, depending on the intended
 use.
   * Streaming _pointset_ ([example](pointset.tests/example.json)) from device to cloud,
