@@ -29,7 +29,7 @@
     }
   },
   "localnet": {
-    "protocols": {
+    "subsystem": {
       "bacnet": {
         "local_id": "0x991132ec"
       }

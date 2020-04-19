@@ -8,5 +8,6 @@ import java.util.List;
 public class CloudDeviceSettings {
   public DeviceCredential credential;
   public String metadata;
-  public List<LocalDevice> proxyDevices;
+  public List<String> proxyDevices;
+  public String config;
 }

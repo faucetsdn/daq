@@ -14,6 +14,7 @@ import com.google.api.services.cloudiot.v1.model.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,9 +96,19 @@ public class CloudIotManager {
       } else {
         updateDevice(deviceId, settings, device);
       }
+      writeDeviceConfig(deviceId, settings.config);
       return isNewDevice;
     } catch (Exception e) {
       throw new RuntimeException("While registering device " + deviceId, e);
+    }
+  }
+
+  private void writeDeviceConfig(String deviceId, String config) {
+    try {
+      cloudIotRegistries.devices().modifyCloudToDeviceConfig(getDevicePath(registryId, deviceId),
+          new ModifyCloudToDeviceConfigRequest().setBinaryData(Base64.encode(config.getBytes()))).execute();
+    } catch (Exception e) {
+      throw new RuntimeException("While modifying device config", e);
     }
   }
 
@@ -229,10 +240,10 @@ public class CloudIotManager {
 
   public void bindDevice(String proxyDeviceId, String gatewayDeviceId) throws IOException {
     cloudIotRegistries.bindDeviceToGateway(getRegistryPath(registryId),
-        getBindRequest(proxyDeviceId, gatewayDeviceId));
+        getBindRequest(proxyDeviceId, gatewayDeviceId)).execute();
   }
 
-  private BindDeviceToGatewayRequest getBindRequest(String gatewayId, String deviceId) {
+  private BindDeviceToGatewayRequest getBindRequest(String deviceId, String gatewayId) {
     return new BindDeviceToGatewayRequest().setDeviceId(deviceId).setGatewayId(gatewayId);
   }
 }

@@ -24,8 +24,10 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.daq.mqtt.registrar.Registrar.*;
+import static java.util.stream.Collectors.toList;
 
 public class LocalDevice {
 
@@ -55,6 +57,7 @@ public class LocalDevice {
   private final Map<String, Schema> schemas;
   private final File deviceDir;
   private final UdmiSchema.Metadata metadata;
+  private final UdmiSchema.Config config;
   private final File devicesDir;
 
   private String deviceNumId;
@@ -69,6 +72,7 @@ public class LocalDevice {
       this.devicesDir = devicesDir;
       deviceDir = new File(devicesDir, deviceId);
       metadata = readMetadata();
+      config = new UdmiSchema.Config();
     } catch (Exception e) {
       throw new RuntimeException("While loading local device " + deviceId, e);
     }
@@ -149,10 +153,6 @@ public class LocalDevice {
     }
   }
 
-  private File getGatewayDir() {
-    return new File(devicesDir, getGatewayId());
-  }
-
   private void generateNewKey() {
     String absolutePath = deviceDir.getAbsolutePath();
     try {
@@ -194,10 +194,28 @@ public class LocalDevice {
       settings = new CloudDeviceSettings();
       settings.credential = loadCredential();
       settings.metadata = metadataString();
-      settings.proxyDevices = proxyDevices;
+      settings.config = deviceConfigString();
+      settings.proxyDevices = getProxyDevicesList();
       return settings;
     } catch (Exception e) {
       throw new RuntimeException("While getting settings for device " + deviceId, e);
+    }
+  }
+
+  private List<String> getProxyDevicesList() {
+    return proxyDevices == null ? null :
+        proxyDevices.stream().map(LocalDevice::getDeviceId).collect(toList());
+  }
+
+  private String deviceConfigString() {
+    try {
+      if (isGateway()) {
+        config.gateway = new UdmiSchema.GatewayConfig();
+        config.gateway.proxy_ids = getProxyDevicesList();
+      }
+      return OBJECT_MAPPER.writeValueAsString(config);
+    } catch (Exception e) {
+      throw new RuntimeException("While converting device config to string", e);
     }
   }
 

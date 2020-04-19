@@ -149,10 +149,10 @@ public class Registrar {
 
   private void bindGatewayDevices(Map<String, LocalDevice> localDevices) {
     localDevices.values().stream().filter(localDevice -> localDevice.getSettings().proxyDevices != null).forEach(
-        localDevice -> localDevice.getSettings().proxyDevices.forEach(proxyDevice -> {
+        localDevice -> localDevice.getSettings().proxyDevices.forEach(proxyDeviceId -> {
           try {
-            System.err.println("Binding " + proxyDevice.getDeviceId() + " to gateway " + localDevice.getDeviceId());
-            cloudIotManager.bindDevice(proxyDevice.getDeviceId(), localDevice.getDeviceId());
+            System.err.println("Binding " + proxyDeviceId + " to gateway " + localDevice.getDeviceId());
+            cloudIotManager.bindDevice(proxyDeviceId, localDevice.getDeviceId());
           } catch (Exception e) {
             throw new RuntimeException("While binding device " + localDevice.getDeviceId(), e);
           }
