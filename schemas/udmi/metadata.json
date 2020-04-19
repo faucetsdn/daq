@@ -18,14 +18,12 @@
         1
       ]
     },
-    "auth_type": {
-      "enum": [
-        "RSA_PEM"
-      ]
-    },
     "hash": {
       "type": "string",
       "pattern": "^[0-9a-z]{8}$"
+    },
+    "cloud": {
+      "$ref": "file:metadata_cloud.json#"
     },
     "system": {
       "$ref": "file:metadata_system.json#"

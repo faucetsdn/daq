@@ -123,22 +123,26 @@ public class LocalDevice {
     }
   }
 
+  private String getAuthType() {
+    return metadata.cloud == null ? null : metadata.cloud.auth_type;
+  }
+
   private DeviceCredential loadCredential() {
     try {
-      if (hasGateway() && metadata.auth_type != null) {
+      if (hasGateway() && getAuthType() != null) {
         throw new RuntimeException("Proxied devices should not have auth_type defined");
       }
       if (!isDirectConnect()) {
         return null;
       }
-      if (metadata.auth_type == null) {
+      if (getAuthType() == null) {
         throw new RuntimeException("Credential auth_type definition missing");
       }
       File deviceKeyFile = new File(deviceDir, RSA_PUBLIC_PEM);
       if (!deviceKeyFile.exists()) {
         generateNewKey();
       }
-      return CloudIotManager.makeCredentials(metadata.auth_type,
+      return CloudIotManager.makeCredentials(getAuthType(),
           IOUtils.toString(new FileInputStream(deviceKeyFile), Charset.defaultCharset()));
     } catch (Exception e) {
       throw new RuntimeException("While loading credential for local device " + deviceId, e);
@@ -152,7 +156,7 @@ public class LocalDevice {
   private void generateNewKey() {
     String absolutePath = deviceDir.getAbsolutePath();
     try {
-      String command = String.format(KEYGEN_EXEC_FORMAT, metadata.auth_type, absolutePath);
+      String command = String.format(KEYGEN_EXEC_FORMAT, metadata.cloud.auth_type, absolutePath);
       System.err.println(command);
       int exitCode = Runtime.getRuntime().exec(command).waitFor();
       if (exitCode != 0) {

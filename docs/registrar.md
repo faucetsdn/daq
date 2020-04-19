@@ -36,11 +36,9 @@ information:
 This information is sourced from a few key files:
 
 * `{site_dir}/cloud_iot_config.json`:
-Cloud configuration parameters (`registry_id`, `cloud_region`, etc...).
-* `{site_dir}/devices/{device_id}/properties.json`:
-Device-specific properties (e.g. device mode).
+Cloud project configuration parameters (`registry_id`, `cloud_region`, etc...).
 * `{site_dir}/devices/{device_id}/metadata.json`:
-Device metadata (e.g. location).
+Device metadata (e.g. location, key type).
 * `{site_dir}/devices/{device_id}/rsa_private.pem`:
 Generated private key for device (used on-device).
 

@@ -17,9 +17,13 @@ public class UdmiSchema {
       public PointsetMetadata pointset;
       public SystemMetadata system;
       public GatewayMetadata gateway;
+      public CloudMetadata cloud;
       public Integer version;
       public Date timestamp;
       public String hash;
+    }
+
+    static class CloudMetadata {
       public String auth_type;
     }
 
