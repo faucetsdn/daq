@@ -223,6 +223,7 @@ public class Pubber {
   private void errorHandler(GatewayError error) {
     info(String.format("%s for %s: %s",
         error.error_type, error.device_id, error.description));
+    // TAP need to handle error and give up on device.
   }
 
   private byte[] getFileBytes(String dataFile) {
