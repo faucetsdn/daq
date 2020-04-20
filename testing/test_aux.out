@@ -6,7 +6,7 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device_types/../aux/ directory 
+RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device type directory
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
@@ -31,16 +31,22 @@ RESULT pass security.passwords.telnet Default passwords have been changed.
 RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
-dhcp requests 1 1 1 1
+dhcp requests 1 1 0 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
-ctrl-br.flows
-ctrl-br.ofctl
-ext-ovs.flows
-ext-ovs.ofctl
+arp.txt
+dp_port_acls.yaml
+dp_sec_port_1_acl.yaml
+dp_sec_port_2_acl.yaml
+dp_sec_port_3_acl.yaml
+faucet.log
+faucet.yaml
+finish.out
+ip_addr.txt
 pri.flows
 pri.ofctl
+route.txt
 sec.flows
 sec.ofctl
 port-01 module_config modules
@@ -144,10 +150,29 @@ port-02 module_config modules
     `'''       `\__   /\
                 ')
 Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
+?? ovs_vsctl.txt
 01: ['01:ping:Exception']
-02: ['02:ping:ValueError']
-03: ['03:ping:Exception']
+02: ['02:hold:Exception']
+03: ['03:exception:terminated']
+03: ['03:ping:ValueError']
+inst/gw01/nodes/gw01/activate.log
+inst/gw02/nodes/gw02/activate.log
+inst/gw03/nodes/gw03/activate.log
+inst/run-port-01/nodes/fail01/activate.log
+inst/run-port-01/nodes/nmap01/activate.log
+inst/run-port-01/nodes/pass01/activate.log
+inst/run-port-01/nodes/ping01/activate.log
+inst/run-port-02/nodes/fail02/activate.log
+inst/run-port-02/nodes/hold02/activate.log
+inst/run-port-02/nodes/nmap02/activate.log
+inst/run-port-02/nodes/pass02/activate.log
+inst/run-port-02/nodes/ping02/activate.log
+inst/run-port-03/nodes/fail03/activate.log
+inst/run-port-03/nodes/hold03/activate.log
+inst/run-port-03/nodes/nmap03/activate.log
+inst/run-port-03/nodes/pass03/activate.log
+inst/run-port-03/nodes/ping03/activate.log
 Done with tests

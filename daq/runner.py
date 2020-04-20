@@ -73,6 +73,7 @@ class DAQRunner:
                                           labels={"daq_run_id": str(self._daq_run_id)})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
+            LOGGER.info('Appending test_hold to master test list')
             test_list.append('hold')
         config['test_list'] = test_list
         LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
@@ -277,9 +278,10 @@ class DAQRunner:
         for key in target_set_keys:
             self.port_targets[key].terminate('_terminate')
 
-    def _check_module_timeouts(self):
+    def _module_heartbeat(self):
+        # Should probably be converted to a separate thread to timeout any blocking fn calls
         for host in list(self.mac_targets.values()):
-            host.check_module_timeout()
+            host.heartbeat()
 
     def main_loop(self):
         """Run main loop to execute tests"""
@@ -295,7 +297,7 @@ class DAQRunner:
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
             while self.stream_monitor.event_loop():
-                self._check_module_timeouts()
+                self._module_heartbeat()
         except Exception as e:
             LOGGER.error('Event loop exception: %s', e)
             LOGGER.exception(e)
@@ -452,6 +454,7 @@ class DAQRunner:
         self._target_mac_ip[target_mac] = target_ip
         if target_mac in self.mac_targets:
             self._ip_info[self.mac_targets[target_mac]] = (state, target, gateway_set)
+            self.mac_targets[target_mac].ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(self.mac_targets[target_mac])
 
     def _check_and_activate_gateway(self, host):
@@ -512,12 +515,9 @@ class DAQRunner:
             LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
             return gateway, False
 
-        ready_trigger = True
-        for ready_mac in ready_devices:
-            ready_host = self.mac_targets[ready_mac]
-            ready_trigger = ready_trigger and ready_host.trigger_ready()
+        ready_trigger = all(map(lambda mac: self.mac_targets[mac].trigger_ready(), ready_devices))
         if not ready_trigger:
-            LOGGER.warning('DHCP device group %s not ready to trigger', group_name)
+            LOGGER.info('DHCP device group %s not ready to trigger', group_name)
             return gateway, False
 
         return gateway, ready_devices
@@ -563,6 +563,7 @@ class DAQRunner:
         """Handle an error in the target port set"""
         active = target_port in self.port_targets
         LOGGER.error('Target port %d active %s exception: %s', target_port, active, exception)
+        LOGGER.exception(exception)
         self._detach_gateway(target_port)
         if active:
             target_set = self.port_targets[target_port]
