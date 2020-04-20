@@ -3,7 +3,7 @@
 import unittest
 import os
 
-#from daq.configurator import Configurator
+from daq import configurator
 
 
 class TestConfigurator(unittest.TestCase):
