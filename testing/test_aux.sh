@@ -16,13 +16,14 @@ function make_pubber {
     faux=$2
     fail=$3
     gateway=$4
-    mkdir -p inst/faux/$faux/local/
-    if [ -n "$gateway" ]; then
-        cp misc/test_site/devices/$gateway/rsa_private.pkcs8 inst/faux/$faux/local/
+    local_dir=inst/faux/$faux/local/
+    mkdir -p $local_dir
+    if [ "$gateway" == null ]; then
+        cp misc/test_site/devices/$device/rsa_private.pkcs8 $local_dir
     else
-        cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
+        cp misc/test_site/devices/$gateway/rsa_private.pkcs8 $local_dir
     fi
-    cat <<EOF > inst/faux/$faux/local/pubber.json
+    cat <<EOF > $local_dir/pubber.json
   {
     "projectId": $project_id,
     "cloudRegion": $cloud_region,
