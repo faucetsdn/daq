@@ -7,9 +7,17 @@
     "gateway_id": {
       "type": "string",
       "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
+    },
+    "proxy_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
+      }
     }
   },
-  "required": [
-    "gateway_id"
+  "oneOf": [
+    { "required": ["gateway_id"] },
+    { "required": ["proxy_ids"] }
   ]
 }

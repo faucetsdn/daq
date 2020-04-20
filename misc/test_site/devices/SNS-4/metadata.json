@@ -27,6 +27,9 @@
   "cloud": {
     "auth_type": "RSA_PEM"
   },
+  "gateway": {
+    "gateway_id": "GAT-123"
+  },
   "version": 1,
   "timestamp": "2020-04-19T14:12:52Z",
   "hash": "46da8cfb"

@@ -25,7 +25,7 @@
     }
   },
   "gateway": {
-    "gateway_id": "GAT-123"
+    "proxy_ids": ["SNS-4", "AHU-22"]
   },
   "cloud": {
     "auth_type": "RSA_PEM"

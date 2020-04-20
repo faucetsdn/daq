@@ -15,6 +15,7 @@ function make_pubber {
     device=$1
     faux=$2
     fail=$3
+    gateway=$4
     mkdir -p inst/faux/$faux/local/
     cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
     cat <<EOF > inst/faux/$faux/local/pubber.json
@@ -23,6 +24,7 @@ function make_pubber {
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
     "extraField": $fail,
+    "gatewayId": $gateway,
     "deviceId": "$device"
   }
 EOF
@@ -64,9 +66,8 @@ if [ -f $cred_file ]; then
     registry_id=`jq .registry_id $cloud_file`
     cloud_region=`jq .cloud_region $cloud_file`
 
-    make_pubber AHU-22 daq-faux-1 null
-    make_pubber AHU-1 daq-faux-2 null
-    make_pubber SNS-4 daq-faux-3 1234
+    make_pubber AHU-1 daq-faux-2 null null
+    make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.

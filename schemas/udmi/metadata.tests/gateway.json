@@ -19,7 +19,9 @@
   },
   "cloud": {
     "auth_type": "RSA_PEM",
-    "is_gateway": True
+  },
+  "gateway": {
+    "proxy_ids": ["AHU-22"]
   },
   "pointset": {
     "points": {
