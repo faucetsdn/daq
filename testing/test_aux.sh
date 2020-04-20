@@ -17,6 +17,7 @@ function make_pubber {
     fail=$3
     gateway=$4
     local_dir=inst/faux/$faux/local/
+    echo Creating $device with $fail/$gateway in $local_dir
     mkdir -p $local_dir
     if [ "$gateway" == null ]; then
         cp misc/test_site/devices/$device/rsa_private.pkcs8 $local_dir
@@ -33,6 +34,7 @@ function make_pubber {
     "deviceId": "$device"
   }
 EOF
+  ls -l $local_dir
 }
 
 function capture_test_results {
