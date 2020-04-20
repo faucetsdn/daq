@@ -63,7 +63,6 @@ public class LocalDevice {
   private String deviceNumId;
 
   private CloudDeviceSettings settings;
-  private List<LocalDevice> proxyDevices;
 
   LocalDevice(File devicesDir, String deviceId, Map<String, Schema> schemas) {
     try {
@@ -169,12 +168,12 @@ public class LocalDevice {
 
   boolean isGateway() {
     return metadata.gateway != null &&
-        deviceId.equals(metadata.gateway.gateway_id);
+        metadata.gateway.proxy_ids != null;
   }
 
   boolean hasGateway() {
     return metadata.gateway != null &&
-        !deviceId.equals(metadata.gateway.gateway_id);
+        metadata.gateway.gateway_id != null;
   }
 
   boolean isDirectConnect() {
@@ -203,8 +202,7 @@ public class LocalDevice {
   }
 
   private List<String> getProxyDevicesList() {
-    return proxyDevices == null ? null :
-        proxyDevices.stream().map(LocalDevice::getDeviceId).collect(toList());
+    return isGateway() ? metadata.gateway.proxy_ids : null;
   }
 
   private String deviceConfigString() {
@@ -291,15 +289,6 @@ public class LocalDevice {
 
   public void setDeviceNumId(String numId) {
     deviceNumId = numId;
-  }
-
-  public void setProxyDevices(List<LocalDevice> proxyDevices) {
-    System.err.println(String.format("Gateway %s proxy for: %s", deviceId, Joiner.on(", ")
-            .join(proxyDevices.stream().map(LocalDevice::getDeviceId).toArray())));
-    if (settings != null) {
-      throw new RuntimeException("Settings already finalized");
-    }
-    this.proxyDevices = proxyDevices;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {

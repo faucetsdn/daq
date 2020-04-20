@@ -3,8 +3,8 @@ package daq.pubber;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import daq.udmi.Message;
-import daq.udmi.Message.PointSet;
-import daq.udmi.Message.PointSetState;
+import daq.udmi.Message.Pointset;
+import daq.udmi.Message.PointsetState;
 import daq.udmi.Report;
 import daq.udmi.Message.State;
 import com.google.common.base.Preconditions;
@@ -48,7 +48,7 @@ public class Pubber {
   private final CountDownLatch configLatch = new CountDownLatch(1);
 
   private final State deviceState = new State();
-  private final PointSet devicePoints = new PointSet();
+  private final Pointset devicePoints = new Pointset();
   private final Set<AbstractPoint> allPoints = new HashSet<>();
 
   private MqttPublisher mqttPublisher;
@@ -85,7 +85,7 @@ public class Pubber {
   private void initializeDevice() {
     deviceState.system.make_model = "DAQ_pubber";
     deviceState.system.firmware.version = "v1";
-    deviceState.pointset = new PointSetState();
+    deviceState.pointset = new PointsetState();
     devicePoints.extraField = configuration.extraField;
   }
 

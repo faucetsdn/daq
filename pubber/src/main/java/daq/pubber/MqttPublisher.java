@@ -142,6 +142,7 @@ public class MqttPublisher {
   private MqttClient newBoundClient(String deviceId) {
     try {
       String gatewayId = configuration.gatewayId;
+      LOG.debug("Connecting through gateway " + gatewayId);
       MqttClient mqttClient = getConnectedClient(gatewayId);
       String topic = String.format("/devices/%s/attach", deviceId);
       String payload = "";
@@ -335,8 +336,8 @@ public class MqttPublisher {
 
   private MqttClient getConnectedClient(String deviceId) {
     try {
-      if (configuration.gatewayId != null && !configuration.gatewayId.equals(deviceId)) {
-        LOG.debug("Connecting through gateway " + configuration.gatewayId);
+      String gatewayId = configuration.gatewayId;
+      if (gatewayId != null && !gatewayId.equals(deviceId)) {
         return mqttClients.computeIfAbsent(deviceId, this::newBoundClient);
       }
       return mqttClients.computeIfAbsent(deviceId, this::connectMqttClient);

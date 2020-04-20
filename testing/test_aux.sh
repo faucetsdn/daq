@@ -17,7 +17,11 @@ function make_pubber {
     fail=$3
     gateway=$4
     mkdir -p inst/faux/$faux/local/
-    cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
+    if [ -n "$gateway" ]; then
+        cp misc/test_site/devices/$gateway/rsa_private.pkcs8 inst/faux/$faux/local/
+    else
+        cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
+    fi
     cat <<EOF > inst/faux/$faux/local/pubber.json
   {
     "projectId": $project_id,

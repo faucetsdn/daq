@@ -174,18 +174,10 @@ public class Registrar {
     String[] devices = devicesDir.list();
     Preconditions.checkNotNull(devices, "No devices found in " + devicesDir.getAbsolutePath());
     Map<String, LocalDevice> localDevices = loadDevices(devicesDir, devices);
-    normalizeGateways(localDevices);
     validateKeys(localDevices);
     validateFiles(localDevices);
     writeNormalized(localDevices);
     return localDevices;
-  }
-
-  private void normalizeGateways(Map<String, LocalDevice> localDevices) {
-    Map<String, List<LocalDevice>> gatewayDevices = localDevices.values().stream()
-        .filter(LocalDevice::hasGateway)
-        .collect(groupingBy(LocalDevice::getGatewayId));
-    gatewayDevices.forEach((key, value) -> localDevices.get(key).setProxyDevices(value));
   }
 
   private void validateFiles(Map<String, LocalDevice> localDevices) {
