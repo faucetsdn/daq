@@ -6,6 +6,9 @@ would ideally be stored in a git repo (separate from DAQ), that can then be used
 configuraiton across installs. The site path defaults to `local/site`, which means you can
 also store your entire configuraiton of local/ in the same source control repo, if desired.
 
+For initial testing and setup, setting `site_path=misc/test_site` will use the default devices
+used for integration testing and is a good way to get started.
+
 # Module configs
 
 A test module config is constructed for each test from a sequence of overlaid files. The
