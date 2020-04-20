@@ -5,7 +5,7 @@ import os
 
 from daq.configurator import Configurator, print_config
 
-def dict_to_str(obj):
+def dict_to_conf_str(obj):
     """Dump dict as key=value to str object."""
     config_list = []
     for key in sorted(obj.keys()):
@@ -31,7 +31,7 @@ class TestConfigurator(unittest.TestCase):
 
     def setUp(self):
         tmpfile = open(TEMP_CONF_FILE, 'w+')
-        tmpfile.write(dict_to_str(self.config))
+        tmpfile.write(dict_to_conf_str(self.config))
         tmpfile.close()
 
     def tearDown(self):
