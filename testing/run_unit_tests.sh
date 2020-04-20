@@ -4,7 +4,7 @@ MINCOVERAGE=92
 SCRIPTPATH=$(readlink -f "$0")
 TESTDIR=`dirname $SCRIPTPATH`
 BASEDIR=`readlink -f $TESTDIR/..`
-cd $BASEDIR || exit 1
+cd $BASEDIR
 
 $BASEDIR/venv/bin/coverage erase
 
