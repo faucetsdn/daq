@@ -10,9 +10,10 @@ def dict_to_str(obj):
     config_list = []
     for key in sorted(obj.keys()):
         value = obj[key]
-        quote = '"' if ' ' in str(value) else ''
         config_list.append("%s=%s" % (key, obj[key]))
     return '\n'.join(config_list)
+
+TEMP_CONF_FILE = 'temp.conf'
 
 
 class TestConfigurator(unittest.TestCase):
@@ -29,17 +30,17 @@ class TestConfigurator(unittest.TestCase):
     }
 
     def setUp(self):
-        tmpfile = open('temp.conf', 'w+')
+        tmpfile = open(TEMP_CONF_FILE, 'w+')
         tmpfile.write(dict_to_str(self.config))
         tmpfile.close()
 
     def tearDown(self):
-        os.remove('temp.conf')
+        os.remove(TEMP_CONF_FILE)
 
     def test_config_load(self):
         """Test config is loaded properly"""
         configurator = Configurator()
-        args = ['test', 'temp.conf']
+        args = ['test', TEMP_CONF_FILE]
         read_config = configurator.parse_args(args)
         self.assertEqual(self.config, read_config)
 
