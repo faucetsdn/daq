@@ -17,7 +17,9 @@ package switchtest.cisco;
 
 import switchtest.SwitchInterrogator;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Cisco9300 extends SwitchInterrogator {
 
@@ -31,13 +33,17 @@ public class Cisco9300 extends SwitchInterrogator {
 
   String consolePromptEndingLogin = ">";
 
-  public Cisco9300(String remoteIpAddress, int interfacePort, boolean deviceConfigPoeEnabled) {
+  public Cisco9300(
+      String remoteIpAddress,
+      int interfacePort,
+      boolean deviceConfigPoeEnabled,
+      String user,
+      String password) {
     super(remoteIpAddress, interfacePort, deviceConfigPoeEnabled);
     telnetClientSocket =
         new CiscoSwitchTelnetClientSocket(remoteIpAddress, remotePort, this, debug);
-    // TODO: enabled the user to input their own username and password
-    this.username = "admin";
-    this.password = "password";
+    this.username = user == null ? "admin" : user;
+    this.password = password == null ? "password" : password;
   }
 
   /** Generic Cisco Switch command to retrieve the Status of an interface. */
@@ -50,7 +56,7 @@ public class Cisco9300 extends SwitchInterrogator {
    * with actual port number for complete message
    */
   private String showIfacePowerStatusCommand() {
-    return "show power inline gigabitethernet1/0/" + interfacePort;
+    return "show power inline gigabitethernet1/0/" + interfacePort + " detail";
   }
 
   /**
@@ -348,7 +354,7 @@ public class Cisco9300 extends SwitchInterrogator {
         processInterfaceStatus(response);
         break;
       case 1: // show power status
-        processPowerStatus(response);
+        processPowerStatusInline(response);
     }
   }
 
@@ -357,12 +363,28 @@ public class Cisco9300 extends SwitchInterrogator {
     return interface_map;
   }
 
-  public HashMap<String, String> processPowerStatus(String response) {
-    // Pre-process raw data to be map ready
-    response.replaceAll("-", "");
-    String[] lines = response.split("\n");
-    response = lines[0] + " \n" + lines[lines.length - 1];
-    power_map = mapSimpleTable(response, show_power_expected, power_expected);
+  //  public HashMap<String, String> processPowerStatus(String response) {
+  //    // Pre-process raw data to be map ready
+  //    response.replaceAll("-", "");
+  //    String[] lines = response.split("\n");
+  //    response = lines[0] + " \n" + lines[lines.length - 1];
+  //    power_map = mapSimpleTable(response, show_power_expected, power_expected);
+  //    return power_map;
+  //  }
+
+  public Map<String, String> processPowerStatusInline(String response) {
+    Map<String, String> inlineMap = powerInlineMap();
+    Arrays.stream(response.split("\n"))
+        .forEach(
+            line -> {
+              String[] lineParts = line.trim().split(":");
+              if (lineParts.length > 1) {
+                String powerMapKey = inlineMap.getOrDefault(lineParts[0], null);
+                if (powerMapKey != null) {
+                  power_map.put(powerMapKey, lineParts[1].trim());
+                }
+              }
+            });
     return power_map;
   }
 
@@ -491,4 +513,17 @@ public class Cisco9300 extends SwitchInterrogator {
   public String[] showStackExpected() {
     return new String[] {};
   }
+
+  private static HashMap<String, String> powerInlineMap() {
+    HashMap<String, String> map = new HashMap<String, String>();
+    map.put("Interface", "dev_interface");
+    map.put("Inline Power Mode", "admin");
+    map.put("Operational status", "oper");
+    map.put("Measured at the port", "power");
+    map.put("Device Type", "device");
+    map.put("IEEE Class", "dev_class");
+    map.put("Power available to the device", "max");
+    return map;
+  }
 }
+
