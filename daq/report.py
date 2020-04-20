@@ -5,6 +5,7 @@ import datetime
 import os
 import re
 import shutil
+from enum import Enum
 
 import jinja2
 import pytz
@@ -15,6 +16,15 @@ import weasyprint
 import logger
 
 LOGGER = logger.get_logger('report')
+
+class ResultType(Enum):
+    """Enum for all test module info"""
+    REPORT_PATH = "report_path"
+    MODULE_CONFIG = "module_config"
+    MODULE_CONFIG_PATH = "module_config_path"
+    RETURN_CODE = "return_code"
+    EXCEPTION = "exception"
+    ACTIVATION_LOG_PATH = "activation_log_path"
 
 class ReportGenerator:
     """Generate a report for device qualification"""
@@ -45,7 +55,7 @@ class ReportGenerator:
     def __init__(self, config, tmp_base, target_mac, module_config):
         self._config = config
         self._module_config = copy.deepcopy(module_config)
-        self._reports = []
+        self._reports = {}
         self._clean_mac = target_mac.replace(':', '')
         report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
         report_filename = self._NAME_FORMAT % (self._clean_mac,
@@ -74,6 +84,7 @@ class ReportGenerator:
             LOGGER.info('Device report path %s not found', out_path)
             self._alt_path = None
 
+        self._all_results = None
         self._result_headers = list(self._module_config.get('report', {}).get('results', []))
         self._results = {}
         self._expected_headers = list(self._module_config.get('report', {}).get('expected', []))
@@ -115,6 +126,7 @@ class ReportGenerator:
         self._module_config['clean_mac'] = self._clean_mac
         self._module_config['start_time'] = self._start_time
         self._module_config['end_time'] = datetime.datetime.now(pytz.utc).replace(microsecond=0)
+        self._process_results()
         self._write_md_report()
         self._write_pdf_report()
         if self._alt_path and self._alt_path_pdf:
@@ -123,14 +135,40 @@ class ReportGenerator:
             LOGGER.info('Also copying report to %s', self._alt_path_pdf)
             shutil.copyfile(self.path_pdf, self._alt_path_pdf)
 
+    def get_all_results(self):
+        """Get all processed results"""
+        if not self._all_results:
+            self._process_results()
+        return copy.deepcopy(self._all_results)
+
+    def _process_results(self):
+        self._all_results = {"modules": {}}
+        for (module_name, result_dict) in self._reports.items():
+            module_result = {"tests": {}}
+            self._all_results["modules"][module_name] = module_result
+            for result_type in ResultType:
+                if result_type in result_dict:
+                    module_result[result_type.value] = result_dict[result_type]
+            if ResultType.REPORT_PATH not in result_dict:
+                continue
+            path = result_dict[ResultType.REPORT_PATH]
+            with open(path) as stream:
+                for line in stream:
+                    match = re.search(self._RESULT_REGEX, line)
+                    if match:
+                        result, test_name, extra = match.group(1), match.group(2), match.group(3)
+                        self._accumulate_test(test_name, result, extra, module_name=module_name)
+                        module_result["tests"][test_name] = self._results[test_name]
+        self._all_results["missing_tests"] = self._find_missing_test_results()
+
     def _write_md_report(self):
         """Generate the markdown report to be copied into /inst and /local"""
-        self._file = open(self.path, "w")
-        self._append_report_header()
-        self._write_test_summary()
-        self._copy_test_reports()
-        self._writeln(self._TEST_SEPARATOR % self._REPORT_COMPLETE)
-        self._file.close()
+        with open(self.path, "w") as _file:
+            self._file = _file
+            self._append_report_header()
+            self._write_test_summary()
+            self._copy_test_reports()
+            self._writeln(self._TEST_SEPARATOR % self._REPORT_COMPLETE)
         self._file = None
 
     def _write_pdf_report(self):
@@ -138,7 +176,7 @@ class ReportGenerator:
         LOGGER.info('Generating HTML for writing pdf report...')
         pypandoc.convert_file(self.path, 'html',
                               outputfile=self._REPORT_TMP_HTML_PATH,
-                              extra_args=['-V', 'geometry:margin=1.5cm'])
+                              extra_args=['-V', 'geometry:margin=1.5cm', '--columns', '1000'])
         LOGGER.info('Metamorphosising HTML to PDF...')
         weasyprint.HTML(self._REPORT_TMP_HTML_PATH) \
             .write_pdf(self.path_pdf, stylesheets=[weasyprint.CSS(self._REPORT_CSS_PATH)])
@@ -149,16 +187,9 @@ class ReportGenerator:
 
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
-        for (_, path) in self._reports:
-            with open(path) as stream:
-                for line in stream:
-                    match = re.search(self._RESULT_REGEX, line)
-                    if match:
-                        self._accumulate_test(match.group(2), match.group(1), match.group(3))
-        self._finalize_test_info()
         self._write_test_tables()
 
-    def _accumulate_test(self, test_name, result, extra=''):
+    def _accumulate_test(self, test_name, result, extra='', module_name=None):
         if result not in self._result_headers:
             self._result_headers.append(result)
         test_info = self._get_test_info(test_name)
@@ -176,7 +207,14 @@ class ReportGenerator:
         if result not in expected:
             expected[result] = 0
         expected[result] += 1
-        self._results[test_name] = [result, test_name, category_name, expected_name, extra]
+        self._results[test_name] = {
+            "result": result,
+            "test_name": test_name,
+            "module_name": module_name,
+            "category": category_name,
+            "expected": expected_name,
+            "result_description": extra
+        }
 
     def _write_test_tables(self):
         self._write_category_table()
@@ -192,13 +230,13 @@ class ReportGenerator:
         for category in self._categories:
             total = 0
             match = 0
-            for test_name in self._results:
+            for test_name, result_dict in self._results.items():
                 test_info = self._get_test_info(test_name)
                 category_name = test_info.get('category', self._DEFAULT_CATEGORY)
                 if category_name == category and 'required' in test_info:
                     required_result = test_info['required']
                     total += 1
-                    if self._results[test_name][0] == required_result:
+                    if result_dict["result"] == required_result:
                         match += 1
                     else:
                         passes = False
@@ -227,31 +265,34 @@ class ReportGenerator:
     def _write_result_table(self):
         self._write_table(self._SUMMARY_HEADERS)
         self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
-        for match in sorted(self._results.keys()):
-            self._write_table(self._results[match])
+        for _, result in sorted(self._results.items()):
+            row = [result["result"], result["test_name"], result["category"],\
+                    result["expected"], result["result_description"]]
+            self._write_table(row)
 
-    def _finalize_test_info(self):
-        if 'tests' not in self._module_config:
-            return
-        for test_name in self._module_config['tests'].keys():
-            test_info = self._get_test_info(test_name)
-            category_name = test_info.get('category', self._DEFAULT_CATEGORY)
-            if not category_name in self._categories:
-                self._categories.append(category_name)
-            if test_info.get('required'):
-                if test_name not in self._results:
+    def _find_missing_test_results(self):
+        missing = []
+        if 'tests' in self._module_config:
+            for test_name in self._module_config['tests'].keys():
+                test_info = self._get_test_info(test_name)
+                if test_info.get('required') and test_name not in self._results:
                     self._accumulate_test(test_name, self._MISSING_TEST_RESULT)
+                    missing.append(test_name)
+        return missing
 
     def _get_test_info(self, test_name):
-        if 'tests' not in self._module_config:
-            return {}
-        return self._module_config['tests'].get(test_name, {})
+        return self._module_config.get('tests', {}).get(test_name, {})
 
     def _copy_test_reports(self):
-        for (name, path) in self._reports:
-            self._writeln(self._TEST_SEPARATOR % ("Module " + name))
-            self._append_file(path)
+        for (test_name, result_dict) in self._reports.items():
+            if ResultType.REPORT_PATH in result_dict:
+                self._writeln(self._TEST_SEPARATOR % ("Module " + test_name))
+                self._append_file(result_dict[ResultType.REPORT_PATH])
 
-    def accumulate(self, test_name, test_path):
-        """Accumulate a test report into the overall device report"""
-        self._reports.append((test_name, test_path))
+    def accumulate(self, test_name, result_dict):
+        """Accumulate test reports into the overall device report"""
+        valid_result_types = all(isinstance(key, ResultType) for key in result_dict)
+        assert valid_result_types, "Unknown result type in %s" % result_dict
+        if test_name not in self._reports:
+            self._reports[test_name] = dict()
+        self._reports[test_name] = {**self._reports[test_name], **result_dict}

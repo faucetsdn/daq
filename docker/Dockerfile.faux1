@@ -1,4 +1,4 @@
-# Image name: daqf/faux
+# Image name: daqf/faux1
 #
 # Faux device for framework development/testing.
 #
@@ -26,6 +26,9 @@ RUN $AG update && $AG install openjdk-8-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
     python ifupdown openssl ssh nano apache2-utils
 
+# Additional OS dependencies
+RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
+
 COPY subset/network/NTPClient NTPClient
 RUN cd NTPClient && ./gradlew build
 COPY subset/network/TransportClient TransportClient
@@ -33,7 +36,7 @@ COPY subset/network/TransportClient TransportClient
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
 
-COPY misc/start_faux bin/
+COPY misc/start_faux misc/failing bin/
 
 COPY --from=java_build /root/bacnet4j/*.jar bacnet4j/
 COPY misc/bacnet_discover bin/
@@ -49,24 +52,17 @@ COPY subset/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
 COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
 RUN cd bacnetTests && ./gradlew build
 
-# Telnet dependency
-RUN $AG update && $AG install -y telnetd
-RUN $AG update && $AG install xinetd
-
 # SSH dependency
 COPY subset/security/ssh_additions.config ssh_additions.config
 RUN cat ssh_additions.config >> /etc/ssh/sshd_config
 
 # HTTP/HTTPS dependency
-RUN $AG update && $AG install nginx
-COPY /subset/security/nginxpass.conf /root/nginx/
-COPY /subset/security/nginxfail.conf /root/nginx/
-COPY /subset/security/nginx-site /var/www/nginx-site
+COPY subset/security/nginxpass.conf /root/nginx/
+COPY subset/security/nginxfail.conf /root/nginx/
+COPY subset/security/nginx-site /var/www/nginx-site
 
 # SSH login fix. Otherwise user is kicked off after login
 RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-COPY misc/start_faux misc/failing bin/
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump

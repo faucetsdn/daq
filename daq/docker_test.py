@@ -29,13 +29,15 @@ class DockerTest:
         self.start_time = None
         self.pipe = None
         self.env_vars = env_vars or []
+        self._finish_hook = None
 
-    def start(self, port, params, callback):
+    def start(self, port, params, callback, finish_hook):
         """Start the docker test"""
         LOGGER.debug('Target port %d starting docker test %s', self.target_port, self.test_name)
 
         self.start_time = datetime.datetime.now()
         self.callback = callback
+        self._finish_hook = finish_hook
 
         env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
                                     "TARGET_IP=" + params['target_ip'],
@@ -75,12 +77,14 @@ class DockerTest:
             host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
             if self._should_raise_test_exception('initialize'):
-                raise Exception('Test initialization failure')
+                LOGGER.error('Target port %d inducing initialization failure', self.target_port)
+                raise Exception('induced initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
                                        error=self._docker_error)
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
+                LOGGER.error('Target port %d will induce callback failure', self.target_port)
                 # Closing this now will cause error when attempting to write outoput.
                 self.docker_log.close()
         except Exception as e:
@@ -108,6 +112,7 @@ class DockerTest:
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             vol_maps += ['%s:/config/%s' % (abs_base, kind)]
+            LOGGER.info('Target port %d mapping %s to /config/%s', self.target_port, abs_base, kind)
 
     def _docker_error(self, exception):
         LOGGER.error('Target port %d docker error: %s', self.target_port, str(exception))
@@ -119,6 +124,8 @@ class DockerTest:
     def _docker_finalize(self):
         assert self.docker_host, 'docker host %s already finalized' % self.target_port
         LOGGER.info('Target port %d docker finalize', self.target_port)
+        if self._finish_hook:
+            self._finish_hook()
         self.runner.remove_host(self.docker_host)
         if self.pipe:
             self.runner.monitor_forget(self.pipe.stdout)
@@ -128,7 +135,8 @@ class DockerTest:
         self.docker_log.close()
         self.docker_log = None
         if self._should_raise_test_exception('finalize'):
-            raise Exception('Test finalize failure')
+            LOGGER.error('Target port %d inducing finalize failure', self.target_port)
+            raise Exception('induced finalize failure')
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):

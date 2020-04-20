@@ -3,6 +3,11 @@
 LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_IF=eth0
 
+function finished {
+    echo gateway terminating
+}
+trap finished EXIT
+
 echo Starting networking for $LOCAL_IF and $EXT_IF
 
 while ! ifconfig -a | fgrep -q $LOCAL_IF; do

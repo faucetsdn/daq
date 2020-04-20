@@ -52,16 +52,17 @@ mkdir -p local/site
 cp -r misc/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
-cp -r misc/test_site/mac_addrs/* local/site/mac_addrs/
+cp -r misc/test_site/mac_addrs local/site/
 cp misc/system_all.conf local/system.conf
 cat <<EOF >> local/system.conf
-fail_hook=misc/dump_network.sh
+finish_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
 startup_faux_1_opts="brute broadcast_client"
 startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
 startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntp_client broadcast_client"
-monitor_scan_sec=300
+long_dhcp_response_sec=0
+monitor_scan_sec=0
 EOF
 
 if [ -f $cred_file ]; then
@@ -83,31 +84,11 @@ fi
 
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
-# Wait until the hold test has been activated, and then kill dhcp on that gateway.
-MARKER=inst/run-port-03/nodes/hold03/activate.log
-function cleanup_marker {
-    mkdir -p ${MARKER%/*}
-    touch $MARKER
-}
-trap cleanup_marker EXIT
-(while [ ! -f $MARKER ]; do
-     echo test_aux.sh waiting for $MARKER
-     sleep 30
- done
- ps ax | fgrep tcpdump | fgrep gw03-eth0 | fgrep -v docker | fgrep -v /tmp/
- pid=$(ps ax | fgrep tcpdump | fgrep gw03-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
- echo $MARKER found, killing gw03-eth dhcp tcpdump pid $pid
- kill $pid
-) &
-
 echo Build all container images...
 cmd/build inline
 
 echo Starting aux test run...
-cmd/run -s -k
-
-# Check custom timeout
-cat inst/cmdrun.log | grep "Monitoring timeout for macoui after 1s" | tee -a $TEST_RESULTS
+cmd/run -s
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
 capture_test_results bacext
@@ -126,8 +107,10 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show the full logs from each test
+#more inst/gw*/nodes/gw*/activate.log | cat
 more inst/run-port-*/nodes/*/activate.log | cat
-ls inst/fail_fail01/ | tee -a $TEST_RESULTS
+#more inst/run-port-*/nodes/*/tmp/report.txt | cat
+ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file
 echo port-01 module_config modules | tee -a $TEST_RESULTS
@@ -140,7 +123,7 @@ cat inst/run-port-03/nodes/ping03/tmp/snake.txt | tee -a $TEST_RESULTS
 cat inst/run-port-03/nodes/ping03/tmp/lizard.txt | tee -a $TEST_RESULTS
 
 # Add the results for cloud tests into a different file, since cloud tests may not run if
-# our test environment isn't set up correctly. See bin/test_daq for more insight
+# our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
 for num in 1 2 3; do
@@ -149,23 +132,12 @@ for num in 1 2 3; do
 done
 echo done with docker logs
 
-# Remove things that will always (probably) change - like DAQ version/timestamps/IPs
-# from comparison
-function redact {
-    sed -E -e "s/ \{1,\}$//" \
-        -e 's/\s*%%.*//' \
-        -e 's/[0-9]{4}-.*T.*Z/XXX/' \
-        -e 's/[a-zA-Z]{3} [a-zA-Z]{3}\s+[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} [0-9]{4}/XXX/' \
-        -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}\+00:00/XXX/' \
-        -e 's/DAQ version.*//' \
-        -e 's/[0-9].[0-9]{2} seconds/XXX/' \
-        -e 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/XXX/'
-}
-
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
 cp inst/reports/report_9a02571e8f01_*.md out/
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
+
+fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
 (diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \
@@ -176,7 +148,43 @@ git status --porcelain | tee -a $TEST_RESULTS
 
 # Try various exception handling conditions.
 cp misc/system_multi.conf local/system.conf
-cmd/run -s ex_ping_01=initialize ex_ping_02=callback ex_ping_03=finalize
+cat <<EOF >> local/system.conf
+ex_ping_01=finalize
+ex_hold_02=initialize
+ex_ping_03=callback
+EOF
+
+function cleanup_marker {
+    mkdir -p ${MARKER%/*}
+    touch $MARKER
+}
+trap cleanup_marker EXIT
+
+function monitor_marker {
+    GW=$1
+    MARKER=$2
+    rm -f $MARKER
+    while [ ! -f $MARKER ]; do
+        echo test_aux.sh waiting for $MARKER
+        sleep 60
+    done
+    ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/
+    pid=$(ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
+    echo $MARKER found, killing $GW-eth dhcp tcpdump pid $pid
+    kill $pid
+}
+
+# Check that killing the dhcp monitor aborts the run.
+MARKER=inst/run-port-03/nodes/hold03/activate.log
+monitor_marker gw03 $MARKER &
+
+cmd/run -k -s finish_hook=misc/dump_network.sh
+
 cat inst/result.log | sort | tee -a $TEST_RESULTS
+find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
+more inst/run-port-*/nodes/nmap*/activate.log | cat
+more inst/run-port-*/finish/nmap*/* | cat
+
+tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
 echo Done with tests | tee -a $TEST_RESULTS
