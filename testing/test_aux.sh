@@ -22,7 +22,8 @@ function make_pubber {
     if [ "$gateway" == null ]; then
         cp misc/test_site/devices/$device/rsa_private.pkcs8 $local_dir
     else
-        cp misc/test_site/devices/$gateway/rsa_private.pkcs8 $local_dir
+        gateway_dir=$(sh -c "echo $gateway")
+        cp misc/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
     fi
     cat <<EOF > $local_dir/pubber.json
   {
