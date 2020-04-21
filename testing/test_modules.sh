@@ -11,12 +11,15 @@ TEST_LIST=/tmp/module_tests.txt
 
 cat > $TEST_LIST <<EOF
 ping
-tls
-tls tls
-tls expiredtls
+tls alt
+tls alt tls
+tls alt expiredtls
+nmap
+nmap bacnet
+nmap telnet
 EOF
 
-DAQ_TARGETS=faux bin/docker_build force
+DAQ_TARGETS=faux1,faux2 bin/docker_build force
 
 mkdir -p inst/modules/ping/config
 echo '{"static_ip": "10.20.0.5"}' > inst/modules/ping/config/module_config.json
@@ -28,7 +31,7 @@ cat $TEST_LIST | while read module args; do
     echo
     echo Testing $module $args | tee -a $TEST_RESULTS
     if bin/test_module -n $module $args; then
-        cat inst/modules/$module/run/tmp/result_lines.txt >> $TEST_RESULTS
+        fgrep RESULT inst/modules/$module/run/tmp/report.txt >> $TEST_RESULTS
     else
         echo Module $module execution failed. >> $TEST_RESULTS
     fi

@@ -136,3 +136,11 @@ div {
 #listings.active {
     display: block
 }
+
+#daq-versions {
+    display: none
+}
+
+#daq-versions.valid {
+    display: block
+}
