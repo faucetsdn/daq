@@ -221,6 +221,7 @@ class GcpManager:
         blob = bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
         LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
+        return destination_file_name
 
     def register_offenders(self):
         """Register any offenders: people who are not enabled to use the system"""
