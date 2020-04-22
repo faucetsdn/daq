@@ -272,13 +272,13 @@ class FaucetTopology:
 
     def _generate_switch_local_acls(self, portset_acls, local_acl):
         local_net_dst = self.config.get('ext_ofip')
-        if not local_net_dst:
-            return
+
         all_ports = []
-        for port_set in range(1, self.sec_port):
-            self._add_acl_rule(portset_acls[port_set], ports=[self._SWITCH_LOCAL_PORT],
-                               ipv4_dst=local_net_dst, dl_type=self.IPV4_DL_TYPE)
-            all_ports += self._get_gw_ports(port_set)
+        if local_net_dst:
+            for port_set in range(1, self.sec_port):
+                self._add_acl_rule(portset_acls[port_set], ports=[self._SWITCH_LOCAL_PORT],
+                                   ipv4_dst=local_net_dst, dl_type=self.IPV4_DL_TYPE)
+                all_ports += self._get_gw_ports(port_set)
 
         self._add_acl_rule(local_acl, ports=all_ports)
 
