@@ -37,5 +37,7 @@ cat $TEST_LIST | while read module args; do
     fi
 done
 
+testing/run_unit_tests.sh
+
 echo
 echo Testing complete. | tee -a $TEST_RESULTS

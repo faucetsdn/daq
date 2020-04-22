@@ -10,7 +10,7 @@
       "enabled": true
     },
     "hold": {
-      "enabled": false
+      "enabled": true
     },
     "network": {
       "enabled": true
