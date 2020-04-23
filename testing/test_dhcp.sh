@@ -63,6 +63,8 @@ for iface in $(seq 1 4); do
     if [ $iface == 4 ]; then
         echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 2))" | tee -a $TEST_RESULTS
         echo "Number of ips: $num_ips" | tee -a $TEST_RESULTS
+    elif [ $iface == 3 ]; then
+        echo "Device $iface long ip triggers: $((long_triggers > 0))" | tee -a $TEST_RESULTS
     else
       echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
     fi

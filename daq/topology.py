@@ -19,6 +19,7 @@ class FaucetTopology:
     CTL_PREFIX = "@ctrl:"
     INST_FILE_PREFIX = "inst/"
     BROADCAST_MAC = "ff:ff:ff:ff:ff:ff"
+    IPV4_DL_TYPE = "0x0800"
     ARP_DL_TYPE = "0x0806"
     LLDP_DL_TYPE = "0x88cc"
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
@@ -29,6 +30,7 @@ class FaucetTopology:
     TO_ACL_KEY_FORMAT = "@to:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_%d_acl"
+    LOCAL_ACL_FORMAT = "dp_%s_local_acl"
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
@@ -151,7 +153,8 @@ class FaucetTopology:
     def _make_switch_interface(self):
         interface = {}
         interface['name'] = 'local_switch'
-        interface['native_vlan'] = 1012
+        interface['native_vlan'] = self._VLAN_BASE
+        interface['acl_in'] = self.LOCAL_ACL_FORMAT % (self.pri_name)
         return interface
 
     def _make_gw_interface(self, port_set):
@@ -267,6 +270,18 @@ class FaucetTopology:
     def _get_bcast_ports(self, port_set):
         return [1, self._SWITCH_LOCAL_PORT] + self._get_gw_ports(port_set)
 
+    def _generate_switch_local_acls(self, portset_acls, local_acl):
+        local_net_dst = self.config.get('ext_ofip')
+
+        all_ports = []
+        if local_net_dst:
+            for port_set in range(1, self.sec_port):
+                self._add_acl_rule(portset_acls[port_set], ports=[self._SWITCH_LOCAL_PORT],
+                                   ipv4_dst=local_net_dst, dl_type=self.IPV4_DL_TYPE)
+                all_ports += self._get_gw_ports(port_set)
+
+        self._add_acl_rule(local_acl, ports=all_ports)
+
     def _generate_port_target_acls(self, portset_acls):
         port_set_mirrors = {}
         for target in self._port_targets.values():
@@ -297,17 +312,21 @@ class FaucetTopology:
                 self._add_acl_rule(incoming_acl, dl_src=src_mac,
                                    vlan_vid=self._NO_VLAN, ports=[src_mirror])
 
+            bcast_mirror_ports = mirror_ports + [self._SWITCH_LOCAL_PORT]
             self._add_acl_rule(portset_acls[port_set], dl_dst=self.BROADCAST_MAC,
-                               ports=copy.copy(mirror_ports), allow=1)
+                               ports=bcast_mirror_ports, allow=1)
 
     def _generate_main_acls(self):
         incoming_acl = []
         portset_acls = {}
         secondary_acl = []
+        local_acl = []
         acls = {}
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
+
+        self._generate_switch_local_acls(portset_acls, local_acl)
 
         port_set_mirrors = self._generate_port_target_acls(portset_acls)
 
@@ -320,9 +339,10 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
-            portset_acl = portset_acls[port_set]
-            self._add_acl_rule(portset_acl, allow=1)
-            acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acl
+            self._add_acl_rule(portset_acls[port_set], allow=1)
+            acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
+
+        acls[self.LOCAL_ACL_FORMAT % (self.pri_name)] = local_acl
 
         pri_acls = {}
         pri_acls["acls"] = acls
@@ -370,6 +390,7 @@ class FaucetTopology:
         self._maybe_apply(subrule, 'dl_dst', kwargs)
         self._maybe_apply(subrule, 'vlan_vid', in_vlan)
         self._maybe_apply(subrule, 'vlan_vid', kwargs)
+        self._maybe_apply(subrule, 'ipv4_dst', kwargs)
 
         rule = {}
         rule['rule'] = subrule

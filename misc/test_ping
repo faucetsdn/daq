@@ -41,10 +41,13 @@ fi
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
     ip addr add $LOCAL_IP dev `hostname`-eth0
-    echo Switch test with port $SWITCH_PORT | tee -a $MONO_LOG
+    echo Switch test with target $SWITCH_IP:$SWITCH_PORT | tee -a $MONO_LOG
     local_status=pass
-    ping -n -c 10 $SWITCH_IP || (local_status=fail && status=fail)
+    ping -n -c 10 $SWITCH_IP || local_status=fail
     echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$SWITCH_PORT | tee -a $RESULT_LINES
+    if [ $local_status != pass ]; then
+        status=fail
+    fi
 else
     echo LOCAL_IP not configured, assuming no network switch | tee -a $MONO_LOG
     echo RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf | tee -a $RESULT_LINES
