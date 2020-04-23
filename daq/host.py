@@ -331,13 +331,14 @@ class ConnectedHost:
         with open(json_path, 'w') as json_file:
             json.dump(self._report.get_all_results(), json_file)
         remote_paths = {}
-        remote_paths["report_path"] = self._gcp.upload_file(self._report.path,
-                                                            self._get_unique_upload_path(self._report.path))
-        remote_paths["json_path"] = self._gcp.upload_file(json_path,
-                                                          self._get_unique_upload_path(json_path))
+        upload_path = self._get_unique_upload_path(self._report.path)
+        remote_paths["report_path"] = self._gcp.upload_file(self._report.path, upload_path)
+
+        upload_path = self._get_unique_upload_path(json_path)
+        remote_paths["json_path"] = self._gcp.upload_file(json_path, upload_path)
         if self._trigger_path:
-            remote_paths["trigger_path"] = self._gcp.upload_file(self._trigger_path,
-                                                                 self._get_unique_upload_path(self._trigger_path))
+            upload_path = self._get_unique_upload_path(self._trigger_path)
+            remote_paths["trigger_path"] = self._gcp.upload_file(self._trigger_path, upload_path)
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
         if self.test_host:
             try:
