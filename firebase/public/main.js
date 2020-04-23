@@ -99,7 +99,7 @@ function ensureGridRow(label, content, max_rows) {
   return added;
 }
 
-function setGridValue(row, column, runid, value) {
+function setGridValue(row, column, runid, value, append) {
   const selector = `#testgrid table tr[label="${row}"] td[label="${column}"]`;
   const targetElement = document.querySelector(selector);
 
@@ -110,7 +110,11 @@ function setGridValue(row, column, runid, value) {
         targetElement.setAttribute('runid', runid);
       }
       if (value) {
-        targetElement.innerHTML = value;
+        if(append){
+          targetElement.innerHTML += "<br />" + value;
+        } else {
+          targetElement.innerHTML = value;
+        }
         targetElement.setAttribute('status', value);
       }
     }
@@ -199,6 +203,23 @@ function getResultStatus(result) {
   return '????';
 }
 
+function handleFileLinks(port, runid, result, type) {
+  const paths = Object.keys(result).filter(key => key.indexOf("path") >= 0);
+  if(paths.length){
+    let col = result.name;
+    if (result.name == "terminate") {
+      col = "report";
+    }
+    paths.forEach((path) => {
+      if(type == "port"){
+        addReportBucket(runid, col, runid, result[path], path);
+      } else {
+        addReportBucket(port, col, runid, result[path], path);
+      }
+    })
+  }
+}
+
 function handleOriginResult(origin, port, runid, test, result) {
   if (result.timestamp > last_result_time_sec) {
     last_result_time_sec = result.timestamp;
@@ -213,9 +234,7 @@ function handleOriginResult(origin, port, runid, test, result) {
   statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
   setRowState(port, runid);
   const gridElement = setGridValue(port, test, runid, status);
-  if (result.report) {
-    addReportBucket(origin, port, runid, result.report);
-  }
+  handleFileLinks(port, runid, result);
   if (test === 'info') {
     makeConfigLink(gridElement, status, port, runid);
   }
@@ -264,10 +283,13 @@ function makeActivateLink(element, port) {
   element.onclick = () => activateRun(port)
 }
 
-function addReportBucket(origin, row, runid, reportName) {
+function addReportBucket(row, col, runid, path, name) {
   const storage = firebase.app().storage();
-  storage.ref().child(reportName).getDownloadURL().then((url) => {
-    setGridValue(row, 'report', runid, `<a href="${url}">${reportName}</a>`);
+  if(!name) {
+    name = path;
+  }
+  storage.ref().child(path).getDownloadURL().then((url) => {
+    setGridValue(row, col, runid, `<a href="${url}">${name}</a>`, true);
   }).catch((e) => {
     console.error(e);
   });
@@ -293,9 +315,7 @@ function handlePortResult(origin, port, runid, test, result) {
     element.setAttribute('timer', timestamp);
     setGridValue(runid, 'timer', runid, timestamp);
   }
-  if (result.report) {
-    addReportBucket(origin, runid, runid, result.report);
-  }
+  handleFileLinks(port, runid, result, "port");
 }
 
 function watcherAdd(ref, collection, limit, handler) {
@@ -418,7 +438,7 @@ function triggerSite(db, site_name) {
     watcherAdd(ref, "runid", latest, (ref, runid_id) => {
       console.log('runid', runid_id);
       watcherAdd(ref, "test", undefined, (ref, test_id) => {
-	console.log('test', test_id);
+	      console.log('test', test_id);
         ref.onSnapshot((result) => {
           // TODO: Handle results going away.
           handleSiteResult(site_name, device_id, runid_id, test_id, result.data());
@@ -500,8 +520,8 @@ function applySchema(editor, schema_url) {
 function getJsonEditor(container_id, onChange, schema_url) {
   const container = document.getElementById(container_id);
   const options = {
-    mode: onChange ? undefined : 'view',
-    onChangeJSON: onChange
+    mode: onChange ? 'code' : 'view',
+    onChange: onChange
   };
   const editor = new JSONEditor(container, options);
   applySchema(editor, schema_url);
@@ -510,9 +530,8 @@ function getJsonEditor(container_id, onChange, schema_url) {
 
 function setDatedStatus(attribute, value) {
   data_state[attribute] = value;
-
   const element = document.getElementById('config_body');
-  element.classList.toggle('dirty', data_state.dirty > data_state.saved);
+  element.classList.toggle('dirty', !!(data_state.dirty > data_state.saved || (data_state.dirty && !data_state.saved)));
   element.classList.toggle('saving', data_state.pushed > data_state.saved);
   element.classList.toggle('dated', data_state.saved > data_state.updated);
   element.classList.toggle('provisional', data_state.provisional);
@@ -524,8 +543,9 @@ function pushConfigChange(config_editor, config_doc) {
   config_doc.update({
     'config': json,
     'timestamp': timestamp
+  }).then(() => {
+    setDatedStatus('pushed', timestamp);
   });
-  setDatedStatus('pushed', timestamp);
 }
 
 function setDirtyState() {
@@ -540,7 +560,7 @@ function loadEditor(config_doc, element_id, label, onConfigEdit, schema) {
     const firstUpdate = editor.get() == null;
     let snapshot_data = snapshot.data();
     snapshot_data && editor.update(snapshot_data.config);
-    if (firstUpdate) {
+    if (firstUpdate && editor.expandAll) {
       editor.expandAll();
     }
     if (onConfigEdit) {
@@ -575,10 +595,20 @@ function loadJsonEditors() {
     latest_doc = origin_doc.collection('runner').doc('setup').collection('config').doc('latest');
     schema_url = 'schema_system.json';
   }
-  loadEditor(latest_doc, 'latest_editor', 'latest', null);
-  const config_editor = loadEditor(config_doc, 'config_editor', 'config', setDirtyState, schema_url);
 
-  document.querySelector('#config_body .save_button').onclick = () => pushConfigChange(config_editor, config_doc)
+  // Prefill module configs from the latest config
+  Promise.all([latest_doc.get(), config_doc.get()]).then((docs) => {
+    latest_doc_resolved = docs[0].data();
+    config_doc_resolved = docs[1].data();
+    if ((!config_doc_resolved.config || JSON.stringify(config_doc_resolved.config) == "{}") && latest_doc_resolved.config.config){
+      config_doc_resolved.config = { modules: latest_doc_resolved.config.config.modules }
+      return config_doc.set(config_doc_resolved);
+    }
+  }).then(() => {
+    loadEditor(latest_doc, 'latest_editor', 'latest', null);
+    const config_editor = loadEditor(config_doc, 'config_editor', 'config', setDirtyState, schema_url);
+    document.querySelector('#config_body .save_button').onclick = () => pushConfigChange(config_editor, config_doc)
+  });
 }
 
 function authenticated(userData) {

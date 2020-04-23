@@ -44,5 +44,7 @@
   <div class="daq-text">Web version <span id="deploy-version"></span></div>
 </body>
 <script>
-  document.getElementById('deploy-version').innerHTML = daq_deploy_version;
+  if(typeof daq_deploy_version !== 'undefined'){
+    document.getElementById('deploy-version').innerHTML = daq_deploy_version;
+  }
 </script>
