@@ -217,6 +217,10 @@ class ConnectedHost:
             LOGGER.info('Copying %s...', file)
             shutil.copy(os.path.join(template_dir, file), path)
 
+    def _upload_file(self, path):
+        upload_path = self._get_unique_upload_path(path)
+        return self._gcp.upload_file(path, upload_path)
+
     def initialize(self):
         """Fully initialize a new host set"""
         LOGGER.info('Target port %d initializing...', self.target_port)
@@ -331,14 +335,10 @@ class ConnectedHost:
         with open(json_path, 'w') as json_file:
             json.dump(self._report.get_all_results(), json_file)
         remote_paths = {}
-        upload_path = self._get_unique_upload_path(self._report.path)
-        remote_paths["report_path"] = self._gcp.upload_file(self._report.path, upload_path)
-
-        upload_path = self._get_unique_upload_path(json_path)
-        remote_paths["json_path"] = self._gcp.upload_file(json_path, upload_path)
+        remote_paths["report_path"] = self._upload_file(self._report.path)
+        remote_paths["json_path"] = self._upload_file(json_path)
         if self._trigger_path:
-            upload_path = self._get_unique_upload_path(self._trigger_path)
-            remote_paths["trigger_path"] = self._gcp.upload_file(self._trigger_path, upload_path)
+            remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
         if self.test_host:
             try:
@@ -446,8 +446,7 @@ class ConnectedHost:
             LOGGER.info('Target port %d network pcap complete', self.target_port)
             nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
             assert nclosed == forget, 'forget and nclosed mismatch'
-            self._gcp.upload_file(self._startup_file,
-                                  self._get_unique_upload_path(self._startup_file))
+            self._upload_file(self._startup_file)
             if forget:
                 self.runner.monitor_forget(self._monitor_ref.stream())
                 self._monitor_ref.terminate()
@@ -603,8 +602,7 @@ class ConnectedHost:
                                   (ResultType.MODULE_CONFIG_PATH, module_config_path)):
             if os.path.isfile(path):
                 self._report.accumulate(self.test_name, {result_type: path})
-                remote_path = self._gcp.upload_file(path, self._get_unique_upload_path(path))
-                remote_paths[result_type.value] = remote_path
+                remote_paths[result_type.value] = self._upload_file(path)
         self.record_result(self.test_name, state=state, code=return_code, exception=exception, \
                            **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
