@@ -13,6 +13,6 @@ Validating 1 schemas
             #/system/location: required key [section] not found
             #/system/location: required key [site_name] not found
           #/system/physical_tag/asset: 2 schema violations found
-            #/system/physical_tag/asset/name: string [US-SFO-XYY_AHU-A01_Noope!] does not match pattern ^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]+_[A-Z]{3}-[1-9][0-9]{0,2}(_[a-zA-Z0-9-]+)?$
+            #/system/physical_tag/asset/name: string [US-SFO-XYY_AHU-A01_Noope!] does not match pattern ^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]+_[A-Z]{3,6}-[1-9][0-9]{0,2}(_[a-zA-Z0-9-]+)?$
             #/system/physical_tag/asset: required key [guid] not found
           #/system: extraneous key [guid] is not permitted

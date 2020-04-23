@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
+
 import org.everit.json.schema.ValidationException;
 
 public class ExceptionMap extends RuntimeException {
@@ -20,6 +22,10 @@ public class ExceptionMap extends RuntimeException {
 
   private void forEach(BiConsumer<String, Exception> consumer) {
     exceptions.forEach(consumer);
+  }
+
+  public boolean isEmpty() {
+    return exceptions.isEmpty();
   }
 
   public void throwIfNotEmpty() {
@@ -65,6 +71,14 @@ public class ExceptionMap extends RuntimeException {
       }
     }
     return errorTree;
+  }
+
+  public Stream<Map.Entry<String, Exception>> stream() {
+    return exceptions.entrySet().stream();
+  }
+
+  public int size() {
+    return exceptions.size();
   }
 
   public static class ErrorTree {

@@ -1,8 +1,6 @@
 Validating 1 schemas
   Validating 1 files against metadata.json
     Against input metadata.tests/toomany.json
-      #: 3 schema violations found
+      #: 2 schema violations found
         #/pointset/points: maximum size: [150], found: [672]
-        #/system: 2 schema violations found
-          #/system/location: required key [section] not found
-          #/system/physical_tag/asset/name: string [UK-LON-S2_LTGW-3] does not match pattern ^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]+_[A-Z]{3}-[1-9][0-9]{0,2}(_[a-zA-Z0-9-]+)?$
+        #/system/location: required key [section] not found

@@ -19,7 +19,7 @@ echo Using gcp credentials $config_file
 echo Using site config dir $devices_dir
 echo Using schema root dir $schema_dir
 
-JAVA=/usr/lib/jvm/java-8-openjdk-amd64/bin/java
+JAVA=/usr/lib/jvm/java-11-openjdk-amd64/bin/java
 
 error=0
 $JAVA -cp $jarfile $mainclass $config_file $devices_dir $schema_dir || error=$?
