@@ -12,11 +12,11 @@ RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui
 RESULT skip security.tls.v1
-RESULT fail security.tls.v1.x509
+RESULT skip security.tls.v1.x509
 RESULT skip security.tls.v1_2
-RESULT fail security.tls.v1_2.x509
+RESULT skip security.tls.v1_2.x509
 RESULT skip security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
+RESULT skip security.tls.v1_3.x509
 RESULT fail security.tls.v1
 RESULT fail security.tls.v1.x509
 RESULT fail security.tls.v1_2

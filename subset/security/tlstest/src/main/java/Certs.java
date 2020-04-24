@@ -34,13 +34,7 @@ public class Certs {
     }
   }
 
-  private boolean testTlsVersion(String version) throws Exception {
-    boolean pass = testTLS(version);
-    passX509(pass, version);
-    return pass;
-  }
-
-  private boolean testTLS(String tlsVersion) throws Exception {
+  private boolean testTlsVersion(String tlsVersion) throws Exception {
     SSLSocket socket;
     try {
       // Attempt to open an SSL Socket at the TLS version specified
@@ -49,6 +43,7 @@ public class Certs {
       System.out.println("TLSv" + tlsVersion + " Failed: " + e.getMessage());
       e.printStackTrace();
       skipTls(tlsVersion);
+      skipTlsX509(tlsVersion);
       return false;
     }
 
@@ -68,6 +63,7 @@ public class Certs {
     validateCipher(socket);
     boolean pass = certValid;
     passTls(pass, tlsVersion);
+    passX509(pass, tlsVersion);
     return pass;
   }
 
@@ -161,8 +157,8 @@ public class Certs {
     certificateReport += "RESULT skip security.tls.v" + tlsVersion.replace(".", "_") + "\n";
   }
 
-  private void skipTlsX509() {
-    certificateReport += "RESULT skip security.x509\n";
+  private void skipTlsX509(String tlsVersion) {
+    certificateReport += "RESULT skip security.tls.v" + tlsVersion.replace(".", "_") + ".x509\n";
   }
 
   /**
