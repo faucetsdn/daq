@@ -109,7 +109,7 @@ class ConnectedHost:
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
                                        self._loaded_config)
         self.record_result('startup', state=MODE.PREP)
-        self._gcp_record_result('info', state=self.target_mac, config=self._make_config_bundle())
+        self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
@@ -247,7 +247,7 @@ class ConnectedHost:
     def _mark_skipped_tests(self):
         for test in self.config['test_list']:
             if not self._test_enabled(test):
-                self._gcp_record_result(test, state=MODE.NOPE)
+                self._record_result(test, state=MODE.NOPE)
 
     def _state_transition(self, target, expected=None):
         if expected is not None:
@@ -267,7 +267,7 @@ class ConnectedHost:
     def notify_activate(self):
         """Return True if ready to be activated in response to an ip notification."""
         if self.state == _STATE.READY:
-            self._gcp_record_result('startup', state=MODE.HOLD)
+            self._record_result('startup', state=MODE.HOLD)
         return self.state == _STATE.WAITING
 
     def _prepare(self):
@@ -389,7 +389,7 @@ class ConnectedHost:
             assert self.target_ip == target_ip, "target_ip mismatch"
             return True
         self.target_ip = target_ip
-        self._gcp_record_result('info', state='%s/%s' % (self.target_mac, target_ip))
+        self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
         if exception:
             self._state_transition(_STATE.ERROR)
@@ -612,7 +612,7 @@ class ConnectedHost:
     def _set_module_config(self, loaded_config):
         tmp_dir = self._host_tmp_path()
         configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
-        self._gcp_record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
+        self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
 
     def _merge_run_info(self, config):
         config['run_info'] = {
@@ -640,7 +640,7 @@ class ConnectedHost:
             self.test_name = name
             self.test_start = current
         if name:
-            self._gcp_record_result(name, current, **kwargs)
+            self._record_result(name, current, **kwargs)
             if kwargs.get("exception"):
                 self._report.accumulate(name, {ResultType.EXCEPTION: str(kwargs["exception"])})
             if "code" in kwargs:
@@ -659,7 +659,7 @@ class ConnectedHost:
         }
         gcp_instance.publish_message('daq_runner', 'test_result', result)
 
-    def _gcp_record_result(self, name, run_info=True, current=None, **kwargs):
+    def _record_result(self, name, run_info=True, current=None, **kwargs):
         result = {
             'name': name,
             'runid': (self.run_id if run_info else None),
@@ -699,7 +699,7 @@ class ConnectedHost:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
         LOGGER.info('Device config reloaded: %s %s', holding, self.target_mac)
-        self._gcp_record_result(None, run_info=holding, config=config_bundle)
+        self._record_result(None, run_info=holding, config=config_bundle)
         return new_config
 
     def _dev_config_updated(self, dev_config):
@@ -714,7 +714,7 @@ class ConnectedHost:
         self._gcp.register_config(self._CONTROL_PATH % self.target_port,
                                   self._make_control_bundle(),
                                   self._control_updated, immediate=True)
-        self._gcp_record_result(None, config=self._make_config_bundle())
+        self._record_result(None, config=self._make_config_bundle())
 
     def _release_config(self):
         self._gcp.release_config(self._DEVICE_PATH % self.target_mac)

@@ -211,10 +211,11 @@ function handleFileLinks(port, runid, result, type) {
       col = "report";
     }
     paths.forEach((path) => {
+      let name = path.replace("_path", "");
       if(type == "port"){
-        addReportBucket(runid, col, runid, result[path], path);
+        addReportBucket(runid, col, runid, result[path], name);
       } else {
-        addReportBucket(port, col, runid, result[path], path);
+        addReportBucket(port, col, runid, result[path], name);
       }
     })
   }
