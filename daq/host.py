@@ -603,7 +603,7 @@ class ConnectedHost:
             if os.path.isfile(path):
                 self._report.accumulate(self.test_name, {result_type: path})
                 remote_paths[result_type.value] = self._upload_file(path)
-        self.record_result(self.test_name, state=state, code=return_code, exception=exception, \
+        self.record_result(self.test_name, state=state, code=return_code, exception=exception,
                            **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
