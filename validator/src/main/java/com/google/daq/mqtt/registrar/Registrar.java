@@ -53,6 +53,7 @@ public class Registrar {
   private String schemaName;
   private PubSubPusher pubSubPusher;
   private Map<String, LocalDevice> localDevices;
+  private File summaryFile;
 
   public static void main(String[] args) {
     Registrar registrar = new Registrar();
@@ -92,13 +93,14 @@ public class Registrar {
     });
     errorSummary.forEach((key, value) -> System.err.println("Device " + key + ": " + value.size()));
     System.err.println("Out of " + localDevices.size() + " total.");
-    File summaryFile = new File(siteConfig, "registration_summary.json");
     OBJECT_MAPPER.writeValue(summaryFile, errorSummary);
   }
 
   private void setSiteConfigPath(String siteConfigPath) {
     Preconditions.checkNotNull(schemaName, "schemaName not set yet");
     siteConfig = new File(siteConfigPath);
+    summaryFile = new File(siteConfig, "registration_summary.json");
+    summaryFile.delete();
     cloudIotConfig = new File(siteConfig, ConfigUtil.CLOUD_IOT_CONFIG_JSON);
     System.err.println("Reading Cloud IoT config from " + cloudIotConfig.getAbsolutePath());
     cloudIotManager = new CloudIotManager(new File(gcpCredPath), cloudIotConfig, schemaName);
