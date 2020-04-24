@@ -214,13 +214,14 @@ class GcpManager:
         """Uploads a report to a storage bucket."""
         if not self._storage:
             LOGGER.info('Ignoring %s upload: not configured' % file_name)
-            return
+            return None
         bucket = self._storage.get_bucket(self._report_bucket_name)
         destination_file_name = os.path.join('origin', self._client_name or "other",
                                              destination_file_name or file_name)
         blob = bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
         LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
+        return destination_file_name
 
     def register_offenders(self):
         """Register any offenders: people who are not enabled to use the system"""
