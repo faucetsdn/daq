@@ -66,9 +66,6 @@ public class ExceptionMap extends RuntimeException {
     }
     if (errorTree.child == null && errorTree.children == null && errorTree.message == null) {
       errorTree.message = e.toString();
-      if (e instanceof NullPointerException) {
-        e.printStackTrace();
-      }
     }
     return errorTree;
   }
