@@ -6,8 +6,8 @@
 const PORT_ROW_COUNT = 25;
 const ROW_TIMEOUT_SEC = 500;
 
-const display_columns = [ ];
-const display_rows = [ ];
+const display_columns = [];
+const display_rows = [];
 const row_timestamps = {};
 
 const data_state = {};
@@ -110,7 +110,7 @@ function setGridValue(row, column, runid, value, append) {
         targetElement.setAttribute('runid', runid);
       }
       if (value) {
-        if(append){
+        if (append) {
           targetElement.innerHTML += "<br />" + value;
         } else {
           targetElement.innerHTML = value;
@@ -175,7 +175,7 @@ function updateTimeClass(entry, target, prev) {
 }
 
 function getQueryParam(field) {
-  var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+  var reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
   var string = reg.exec(window.location.href);
   return string ? string[1] : null;
 }
@@ -205,14 +205,14 @@ function getResultStatus(result) {
 
 function handleFileLinks(port, runid, result, type) {
   const paths = Object.keys(result).filter(key => key.indexOf("path") >= 0);
-  if(paths.length){
+  if (paths.length) {
     let col = result.name;
     if (result.name == "terminate") {
       col = "report";
     }
     paths.forEach((path) => {
       let name = path.replace("_path", "");
-      if(type == "port"){
+      if (type == "port") {
         addReportBucket(runid, col, runid, result[path], name);
       } else {
         addReportBucket(port, col, runid, result[path], name);
@@ -228,7 +228,7 @@ function handleOriginResult(origin, port, runid, test, result) {
   if (!row_timestamps[port] || row_timestamps[port] < result.timestamp) {
     row_timestamps[port] = result.timestamp;
   }
-  const href =`?origin=${origin}&port=${port}`;
+  const href = `?origin=${origin}&port=${port}`;
   ensureGridRow(port, `<a href="${href}">${port}</a>`);
   ensureGridColumn(test);
   const status = getResultStatus(result);
@@ -255,7 +255,7 @@ function handleSiteResult(site, device, runid, test, result) {
   ensureGridColumn(test);
   setGridValue(device, 'device', runid, device)
   setRowState(device, runid);
-  
+
   const status = getResultStatus(result);
   statusUpdate(`Updating ${device} ${test} run ${runid} with '${status}'.`);
   setGridValue(device, test, runid, status);
@@ -286,7 +286,7 @@ function makeActivateLink(element, port) {
 
 function addReportBucket(row, col, runid, path, name) {
   const storage = firebase.app().storage();
-  if(!name) {
+  if (!name) {
     name = path;
   }
   storage.ref().child(path).getDownloadURL().then((url) => {
@@ -439,7 +439,7 @@ function triggerSite(db, site_name) {
     watcherAdd(ref, "runid", latest, (ref, runid_id) => {
       console.log('runid', runid_id);
       watcherAdd(ref, "test", undefined, (ref, test_id) => {
-	      console.log('test', test_id);
+        console.log('test', test_id);
         ref.onSnapshot((result) => {
           // TODO: Handle results going away.
           handleSiteResult(site_name, device_id, runid_id, test_id, result.data());
@@ -488,13 +488,13 @@ function triggerDevice(db, registry_id, device_id) {
 
 function interval_updater() {
   if (last_result_time_sec) {
-    const time_delta_sec = Math.floor(Date.now()/1000.0 - last_result_time_sec);
+    const time_delta_sec = Math.floor(Date.now() / 1000.0 - last_result_time_sec);
     document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
   }
   for (const row in row_timestamps) {
     const last_update = new Date(row_timestamps[row]);
-    const time_delta_sec = Math.floor((Date.now() - last_update)/1000.0);
-    const selector=`#testgrid table tr[label="${row}"`;
+    const time_delta_sec = Math.floor((Date.now() - last_update) / 1000.0);
+    const selector = `#testgrid table tr[label="${row}"`;
     const runid = document.querySelector(selector).getAttribute('runid');
     setGridValue(row, 'timer', runid, `${time_delta_sec} sec`);
     setRowClass(row, time_delta_sec > ROW_TIMEOUT_SEC);
@@ -513,9 +513,9 @@ function applySchema(editor, schema_url) {
 
   console.log(`Loading editor schema ${schema_url}`);
   fetch(schema_url)
-      .then(response => response.json())
-      .then(json => editor.setSchema(json, refs))
-      .catch(rejection => console.log(rejection));
+    .then(response => response.json())
+    .then(json => editor.setSchema(json, refs))
+    .catch(rejection => console.log(rejection));
 }
 
 function getJsonEditor(container_id, onChange, schema_url) {
@@ -580,8 +580,8 @@ function loadJsonEditors() {
   let config_doc;
   let schema_url;
   const subtitle = device_id
-        ? `${origin_id} device ${device_id}`
-        : `${origin_id} system`;
+    ? `${origin_id} device ${device_id}`
+    : `${origin_id} system`;
   document.getElementById('title_origin').innerHTML = subtitle;
 
   document.getElementById('dashboard_link').href = `index.html?origin=${origin_id}`
@@ -601,7 +601,7 @@ function loadJsonEditors() {
   Promise.all([latest_doc.get(), config_doc.get()]).then((docs) => {
     latest_doc_resolved = docs[0].data();
     config_doc_resolved = docs[1].data();
-    if ((!config_doc_resolved.config || JSON.stringify(config_doc_resolved.config) == "{}") && latest_doc_resolved.config.config){
+    if ((!config_doc_resolved.config || JSON.stringify(config_doc_resolved.config) == "{}") && latest_doc_resolved.config.config) {
       config_doc_resolved.config = { modules: latest_doc_resolved.config.config.modules }
       return config_doc.set(config_doc_resolved);
     }
@@ -625,7 +625,7 @@ function authenticated(userData) {
     name: userData.displayName,
     email: userData.email,
     updated: timestamp
-  }).then(function() {
+  }).then(function () {
     statusUpdate('User info updated');
     perm_doc.get().then((doc) => {
       if (doc.exists && doc.data().enabled) {
