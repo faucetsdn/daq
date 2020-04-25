@@ -31,7 +31,7 @@ import org.json.JSONTokener;
 
 import static com.google.daq.mqtt.registrar.Registrar.*;
 
-public class LocalDevice {
+class LocalDevice {
 
   private static final PrettyPrinter PROPER_PRETTY_PRINTER_POLICY = new ProperPrettyPrinterPolicy();
 

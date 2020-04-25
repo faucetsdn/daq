@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.google.daq.mqtt.registrar.LocalDevice.METADATA_SUBFOLDER;
 import static java.util.stream.Collectors.toSet;
 
 public class Registrar {
@@ -70,8 +69,8 @@ public class Registrar {
       ErrorTree errorTree = ExceptionMap.format(em, ERROR_FORMAT_INDENT);
       errorTree.write(System.err);
       System.exit(2);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (Exception ex) {
+      ex.printStackTrace();
       System.exit(-1);
     }
     System.exit(0);
@@ -159,7 +158,7 @@ public class Registrar {
     attributes.put("deviceNumId", localDevice.getDeviceNumId());
     attributes.put("deviceRegistryId", cloudIotManager.getRegistryId());
     attributes.put("projectId", cloudIotManager.getProjectId());
-    attributes.put("subFolder", METADATA_SUBFOLDER);
+    attributes.put("subFolder", LocalDevice.METADATA_SUBFOLDER);
     pubSubPusher.sendMessage(attributes, localDevice.getSettings().metadata);
   }
 
