@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -15,6 +15,11 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.daq.mqtt.util.CloudDeviceSettings;
 import com.google.daq.mqtt.util.CloudIotManager;
+import com.google.daq.mqtt.util.ExceptionMap;
+import org.apache.commons.io.IOUtils;
+import org.everit.json.schema.Schema;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -22,12 +27,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import com.google.daq.mqtt.util.ExceptionMap;
-import org.apache.commons.io.IOUtils;
-import org.everit.json.schema.Schema;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import static com.google.daq.mqtt.registrar.Registrar.*;
 
@@ -40,7 +39,7 @@ class LocalDevice {
       .enable(Feature.ALLOW_TRAILING_COMMA)
       .enable(Feature.STRICT_DUPLICATE_DETECTION)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .setDateFormat(new ISO8601DateFormat())
+      .setDateFormat(new StdDateFormat())
       .setSerializationInclusion(Include.NON_NULL);
 
   private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
@@ -291,10 +290,6 @@ class LocalDevice {
 
   public ExceptionMap getErrors() {
     return exceptionMap;
-  }
-
-  public File getDeviceDir() {
-    return deviceDir;
   }
 
   private static class Envelope {
