@@ -1,32 +1,30 @@
 package com.google.daq.mqtt.registrar;
 
-import static com.google.daq.mqtt.registrar.LocalDevice.METADATA_SUBFOLDER;
-import static java.util.stream.Collectors.toSet;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-
 import com.google.api.services.cloudiot.v1.model.Device;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
-import com.google.daq.mqtt.util.CloudDeviceSettings;
-import com.google.daq.mqtt.util.CloudIotManager;
-import com.google.daq.mqtt.util.ConfigUtil;
-import com.google.daq.mqtt.util.ExceptionMap;
+import com.google.daq.mqtt.util.*;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
-import com.google.daq.mqtt.util.PubSubPusher;
-
-import java.io.*;
-import java.math.BigInteger;
-import java.util.*;
-
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.google.daq.mqtt.registrar.LocalDevice.METADATA_SUBFOLDER;
+import static java.util.stream.Collectors.toSet;
 
 public class Registrar {
 
@@ -43,6 +41,7 @@ public class Registrar {
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .setDateFormat(new StdDateFormat())
       .setSerializationInclusion(Include.NON_NULL);
+  public static final String ALL_MATCH = "";
 
   private String gcpCredPath;
   private CloudIotManager cloudIotManager;
@@ -58,13 +57,13 @@ public class Registrar {
   public static void main(String[] args) {
     Registrar registrar = new Registrar();
     try {
-      if (args.length != 3) {
-        throw new IllegalArgumentException("Args: [gcp_cred_file] [site_dir] [schema_file]");
+      if (args.length < 3 || args.length > 4) {
+        throw new IllegalArgumentException("Args: [gcp_cred_file] [site_dir] [schema_file] (device_regex)");
       }
       registrar.setSchemaBase(args[2]);
       registrar.setGcpCredPath(args[0]);
       registrar.setSiteConfigPath(args[1]);
-      registrar.processDevices();
+      registrar.processDevices(args.length > 3 ? args[3] : ALL_MATCH);
       registrar.writeErrors();
       registrar.shutdown();
     } catch (ExceptionMap em) {
@@ -109,10 +108,11 @@ public class Registrar {
         cloudIotManager.getProjectId(), cloudIotManager.getRegistryId()));
   }
 
-  private void processDevices() {
+  private void processDevices(String deviceRegex) {
     try {
-      localDevices = loadLocalDevices();
-      List<Device> cloudDevices = fetchDeviceList();
+      Pattern devicePattern = Pattern.compile(deviceRegex);
+      localDevices = loadLocalDevices(devicePattern);
+      List<Device> cloudDevices = fetchDeviceList(devicePattern);
       Set<String> extraDevices = cloudDevices.stream().map(Device::getId).collect(toSet());
       for (String localName : localDevices.keySet()) {
         extraDevices.remove(localName);
@@ -178,16 +178,16 @@ public class Registrar {
     pubSubPusher.shutdown();
   }
 
-  private List<Device> fetchDeviceList() {
+  private List<Device> fetchDeviceList(Pattern devicePattern) {
     System.err.println("Fetching remote registry " + cloudIotManager.getRegistryId());
-    return cloudIotManager.fetchDeviceList();
+    return cloudIotManager.fetchDeviceList(devicePattern);
   }
 
-  private Map<String,LocalDevice> loadLocalDevices() {
+  private Map<String,LocalDevice> loadLocalDevices(Pattern devicePattern) {
     File devicesDir = new File(siteConfig, DEVICES_DIR);
     String[] devices = devicesDir.list();
     Preconditions.checkNotNull(devices, "No devices found in " + devicesDir.getAbsolutePath());
-    Map<String, LocalDevice> localDevices = loadDevices(devicesDir, devices);
+    Map<String, LocalDevice> localDevices = loadDevices(devicesDir, devices, devicePattern);
     validateKeys(localDevices);
     validateFiles(localDevices);
     writeNormalized(localDevices);
@@ -231,10 +231,11 @@ public class Registrar {
     }
   }
 
-  private Map<String, LocalDevice> loadDevices(File devicesDir, String[] devices) {
+  private Map<String, LocalDevice> loadDevices(File devicesDir, String[] devices, Pattern devicePattern) {
     HashMap<String, LocalDevice> localDevices = new HashMap<>();
     for (String deviceName : devices) {
-      if (LocalDevice.deviceExists(devicesDir, deviceName)) {
+      Matcher deviceMatch = devicePattern.matcher(deviceName);
+      if (deviceMatch.find() && LocalDevice.deviceExists(devicesDir, deviceName)) {
         System.err.println("Loading local device " + deviceName);
         LocalDevice localDevice = new LocalDevice(devicesDir, deviceName, schemas);
         localDevices.put(deviceName, localDevice);
