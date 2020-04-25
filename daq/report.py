@@ -7,8 +7,8 @@ import re
 import shutil
 from enum import Enum
 
-import jinja2
 import pytz
+import jinja2
 
 import pypandoc
 import weasyprint
@@ -34,6 +34,7 @@ class ReportGenerator:
     _REPORT_TMP_HTML_PATH = 'inst/last_report_out.html'
     _SIMPLE_FORMAT = "device_report.%s"
     _TEST_SEPARATOR = "\n## %s\n"
+    _TEST_SUBHEADER = "\n#### %s\n"
     _RESULT_REGEX = r'^RESULT (.*?)\s+(.*?)\s+([^%]*)\s*(%%.*)?$'
     _SUMMARY_LINE = "Report summary"
     _REPORT_COMPLETE = "Report complete"
@@ -285,9 +286,27 @@ class ReportGenerator:
 
     def _copy_test_reports(self):
         for (test_name, result_dict) in self._reports.items():
+            # To not write a module header if there is nothing to report
+            def writeln(line, test_name=test_name):
+                if not writeln.results:
+                    writeln.results = True
+                    self._writeln(self._TEST_SEPARATOR % ("Module " + test_name))
+                self._writeln(line)
+            writeln.results = False
             if ResultType.REPORT_PATH in result_dict:
-                self._writeln(self._TEST_SEPARATOR % ("Module " + test_name))
+                writeln(self._TEST_SUBHEADER % "Report")
                 self._append_file(result_dict[ResultType.REPORT_PATH])
+            if ResultType.MODULE_CONFIG in result_dict:
+                config = result_dict[ResultType.MODULE_CONFIG].get("modules", {}).get(test_name)
+                if config and len(config) > 0:
+                    writeln(self._TEST_SUBHEADER % "Module Config")
+                    self._write_table(["Attribute", "Value"])
+                    self._write_table([self._TABLE_DIV] * 2)
+                    for key, value in config.items():
+                        self._write_table((key, str(value)))
+            if result_dict.get(ResultType.EXCEPTION):
+                writeln(self._TEST_SUBHEADER % "Exceptions")
+                writeln(result_dict[ResultType.EXCEPTION])
 
     def accumulate(self, test_name, result_dict):
         """Accumulate test reports into the overall device report"""
