@@ -35,14 +35,16 @@ public class LocalDevice {
 
   private static final PrettyPrinter PROPER_PRETTY_PRINTER_POLICY = new ProperPrettyPrinterPolicy();
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-      .enable(SerializationFeature.INDENT_OUTPUT)
+  private static final ObjectMapper OBJECT_MAPPER_RAW = new ObjectMapper()
       .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
       .enable(Feature.ALLOW_TRAILING_COMMA)
       .enable(Feature.STRICT_DUPLICATE_DETECTION)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .setDateFormat(new ISO8601DateFormat())
       .setSerializationInclusion(Include.NON_NULL);
+
+  private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
+      .enable(SerializationFeature.INDENT_OUTPUT);
 
   private static final String RSA_CERT_TYPE = "RSA_X509_PEM";
   private static final String RSA_PUBLIC_PEM = "rsa_public.pem";
@@ -58,6 +60,7 @@ public class LocalDevice {
   private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen %s %s";
   public static final String METADATA_SUBFOLDER = "metadata";
   private static final String ERROR_FORMAT_INDENT = "  ";
+  private static final int MAX_METADATA_LENGTH = 32767;
 
   private final String deviceId;
   private final Map<String, Schema> schemas;
@@ -195,7 +198,11 @@ public class LocalDevice {
 
   private String metadataString() {
     try {
-      return OBJECT_MAPPER.writeValueAsString(metadata);
+      String prettyString = OBJECT_MAPPER.writeValueAsString(metadata);
+      if (prettyString.length() <= MAX_METADATA_LENGTH) {
+        return prettyString;
+      }
+      return OBJECT_MAPPER_RAW.writeValueAsString(metadata);
     } catch (Exception e) {
       throw new RuntimeException("While converting metadata to string", e);
     }
