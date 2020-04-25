@@ -44,7 +44,6 @@ public class Registrar {
 
   private String gcpCredPath;
   private CloudIotManager cloudIotManager;
-  private File cloudIotConfig;
   private File siteConfig;
   private final Map<String, Schema> schemas = new HashMap<>();
   private File schemaBase;
@@ -80,10 +79,9 @@ public class Registrar {
     Map<String, Map<String, String>> errorSummary = new TreeMap<>();
     localDevices.values().forEach(LocalDevice::writeErrors);
     localDevices.values().forEach(device -> {
-      device.getErrors().stream().forEach(error -> {
-        errorSummary.computeIfAbsent(error.getKey(), cat -> new TreeMap<>())
-            .put(device.getDeviceId(), error.getValue().toString());
-      });
+      device.getErrors().stream().forEach(error -> errorSummary
+          .computeIfAbsent(error.getKey(), cat -> new TreeMap<>())
+          .put(device.getDeviceId(), error.getValue().toString()));
       if (device.getErrors().isEmpty()) {
         errorSummary.computeIfAbsent("Clean", cat -> new TreeMap<>())
             .put(device.getDeviceId(), "True");
@@ -99,7 +97,7 @@ public class Registrar {
     siteConfig = new File(siteConfigPath);
     summaryFile = new File(siteConfig, "registration_summary.json");
     summaryFile.delete();
-    cloudIotConfig = new File(siteConfig, ConfigUtil.CLOUD_IOT_CONFIG_JSON);
+    File cloudIotConfig = new File(siteConfig, ConfigUtil.CLOUD_IOT_CONFIG_JSON);
     System.err.println("Reading Cloud IoT config from " + cloudIotConfig.getAbsolutePath());
     cloudIotManager = new CloudIotManager(new File(gcpCredPath), cloudIotConfig, schemaName);
     pubSubPusher = new PubSubPusher(new File(gcpCredPath), cloudIotConfig);
