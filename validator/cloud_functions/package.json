@@ -1,5 +1,5 @@
 {
-  "name": "flattenPoints",
+  "name": "udmi_cloud",
   "version": "0.0.1",
   "engines": {
     "node": "^8"
@@ -7,6 +7,7 @@
   "author": "Google LLC",
   "license": "Apache-2.0",
   "dependencies": {
+    "firebase-admin": "8.10.0",
     "@google-cloud/pubsub": "1.7.2"
   }
 }
