@@ -1,4 +1,4 @@
-const PubSub = require(`@google-cloud/pubsub`);
+const {PubSub} = require('@google-cloud/pubsub');
 const pubsub = new PubSub();
 
 /**
@@ -24,10 +24,9 @@ function publishPubsubMessage(topicName, data, attributes) {
 
   pubsub
     .topic(topicName)
-    .publisher()
     .publish(dataBuffer, attributes)
     .then(messageId => {
-      //console.info(`Message ${messageId} published.`);
+      console.info(`Message ${messageId} published.`);
     })
     .catch(err => {
       console.error('Publishing error:', err);
