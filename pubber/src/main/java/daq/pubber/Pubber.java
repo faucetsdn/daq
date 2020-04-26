@@ -12,6 +12,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -241,12 +242,14 @@ public class Pubber {
       System.exit(-2);
     }
     info(String.format("Sending test message for %s/%s", configuration.registryId, deviceId));
+    devicePoints.timestamp = new Date();
     mqttPublisher.publish(deviceId, POINTSET_TOPIC, devicePoints);
   }
 
   private void publishStateMessage(String deviceId) {
     lastStateTimeMs = sleepUntil(lastStateTimeMs + STATE_THROTTLE_MS);
     info("Sending state message for device " + deviceId);
+    deviceState.timestamp = new Date();
     mqttPublisher.publish(deviceId, STATE_TOPIC, deviceState);
   }
 

@@ -15,9 +15,9 @@ const EXPIRY_MS = 1000 * 60 * 60 * 24;
 
 function get_device_doc(registryId, deviceId) {
   const timestr = new Date().toJSON();
-  const reg = db.collection('registry').doc(registryId);
+  const reg = db.collection('registries').doc(registryId);
   reg.set({'updated': timestr});
-  const dev = reg.collection('device').doc(deviceId);
+  const dev = reg.collection('devices').doc(deviceId);
   dev.set({'updated': timestr});
   return dev;
 }
