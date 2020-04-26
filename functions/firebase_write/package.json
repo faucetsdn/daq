@@ -7,6 +7,6 @@
   "author": "Google LLC",
   "license": "Apache-2.0",
   "dependencies": {
-    "firebase-admin": "8.10.0"
+    "firebase-admin": "8.11.0"
   }
 }
