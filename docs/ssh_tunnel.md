@@ -1,6 +1,8 @@
 # SSH Tunnel Setup for remote connection to DAQ lab computers
 
-The following procedure configures an SSH tunnel from a local Linux computer running DAQ in a debian based distribution to a cloud linux virtual machine (VM) running a debian based distribution.
+The following procedure configures an SSH tunnel from a local Linux 
+computer running DAQ in a debian based distribution to a cloud linux 
+virtual machine (VM) running a debian based distribution.
 
 The procedure is divided into four parts:
 
@@ -11,7 +13,8 @@ The procedure is divided into four parts:
 
 # Cloud VM Instance
 
-For the first part, we are configuring a compute engine virtual machine (VM) instance in the Google Cloud Platform (GCP) and creating a remote user called `tunnel`.
+For the first part, we are configuring a compute engine virtual machine (VM) 
+instance in the Google Cloud Platform (GCP) and creating a remote user called `tunnel`.
 
 ## Virtual machine setup
 
@@ -91,7 +94,9 @@ For the first part, we are configuring a compute engine virtual machine (VM) ins
 
 # DAQ Instance
 
-For the second part, we are creating a new user called `tunnel` and then installing autossh to create the ssh-tunnel service on the DAQ instance machine.
+For the second part, we are creating a new user called `tunnel` 
+and then installing autossh to create the ssh-tunnel service on 
+the DAQ instance machine.
 
 ## Creation of the `tunnel` user on the DAQ instance machine
 
@@ -189,7 +194,9 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
-    After copying and pasting the text above, change the<code> <strong>XXX.XXX.XXX.XXX </strong></code>text with the IP address or the hostname of your virtual machine in the cloud.
+    After copying and pasting the text above, change the
+    <code> <strong>XXX.XXX.XXX.XXX </strong></code>text with the 
+    IP address or the hostname of your virtual machine in the cloud.
 
 4. Update `systemctl`
 
@@ -205,7 +212,10 @@ Created symlink /etc/systemd/system/multi-user.target.wants/ssh-tunnel.service â
 
 # Transfer of the public key 
 
-Now that the ssh-tunnel service is set up on the DAQ instance machine and that the tunnel user is created on the remote machine in the cloud, we need to exchange the keys to enable the tunnel to be created automatically without user intervention when the DAQ instance machine starts.
+Now that the ssh-tunnel service is set up on the DAQ instance machine 
+and that the tunnel user is created on the remote machine in the cloud, 
+we need to exchange the keys to enable the tunnel to be created 
+automatically without user intervention when the DAQ instance machine starts.
 
 1. **On the DAQ instance machine**, show the content of the public key file
 
@@ -263,7 +273,9 @@ Now that the ssh-tunnel service is set up on the DAQ instance machine and that t
 
 # Achieving Remote Access
 
-The final step is to login to the cloud virtual machine and check that you are able to connect to the DAQ instance machine through the ssh tunnel.
+The final step is to login to the cloud virtual machine and check 
+that you are able to connect to the DAQ instance machine through 
+the ssh tunnel.
 
 
 ```
@@ -271,6 +283,11 @@ cloud_machine$ ssh -p 19991 tunnel@localhost
 ```
 
 
-You will be prompted to input your user password and then let into the local machine from the remote one.
+You will be prompted to input your user password and then let into 
+the local machine from the remote one.
 
-If you need particular permissions to access files and resources on the local machine, you can switch to the user with the correct permissions and avoid to give too much power to the tunnel user. Alternatively you can login directly with the name of the appropriate user on the DAQ instance machine.
+If you need particular permissions to access files and resources 
+on the local machine, you can switch to the user with the correct 
+permissions and avoid to give too much power to the tunnel user. 
+Alternatively you can login directly with the name of the appropriate 
+user on the DAQ instance machine.
