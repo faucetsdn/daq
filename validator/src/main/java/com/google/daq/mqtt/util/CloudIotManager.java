@@ -30,7 +30,7 @@ import static java.util.stream.Collectors.toList;
 public class CloudIotManager {
 
   private static final String DEVICE_UPDATE_MASK = "blocked,credentials,metadata";
-  private static final String PROFILE_KEY = "profile";
+  private static final String REGISTERED_KEY = "registered";
   private static final String SCHEMA_KEY = "schema_name";
   private static final int LIST_PAGE_SIZE = 1000;
 
@@ -121,7 +121,7 @@ public class CloudIotManager {
     if (metadataMap == null) {
       metadataMap = new HashMap<>();
     }
-    metadataMap.put(PROFILE_KEY, settings.metadata);
+    metadataMap.put(REGISTERED_KEY, settings.metadata);
     metadataMap.put(SCHEMA_KEY, schemaName);
     return new Device()
         .setId(deviceId)
