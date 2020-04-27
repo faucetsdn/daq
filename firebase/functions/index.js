@@ -150,24 +150,26 @@ function handle_heartbeat(origin, message) {
 }
 
 function get_device_doc(registryId, deviceId) {
-  const timestr = new Date().toTimeString();
-  const reg = db.collection('registry').doc(registryId);
+  const timestr = new Date().toJSON();
+  const reg = db.collection('registries').doc(registryId);
   reg.set({'updated': timestr});
-  const dev = reg.collection('device').doc(deviceId);
+  const dev = reg.collection('devices').doc(deviceId);
   dev.set({'updated': timestr});
   return dev;
 }
 
-exports.device_telemetry = functions.pubsub.topic('target').onPublish((event) => {
+exports.device_target = functions.pubsub.topic('target').onPublish((event) => {
   const registryId = event.attributes.deviceRegistryId;
   const deviceId = event.attributes.deviceId;
+  const subFolder = event.attributes.subFolder || 'unknown';
   const base64 = event.data;
   const msgString = Buffer.from(base64, 'base64').toString();
   const msgObject = JSON.parse(msgString);
 
-  device_doc = get_device_doc(registryId, deviceId).collection('telemetry').doc('latest');
+  console.log(deviceId, subFolder, msgObject);
+  
+  device_doc = get_device_doc(registryId, deviceId).collection('events').doc(subFolder);
 
-  console.log(deviceId, msgObject);
   msgObject.data.forEach((data) => {
     device_doc.set(data);
   });
@@ -188,9 +190,6 @@ exports.device_state = functions.pubsub.topic('state').onPublish((event) => {
   attributes.subFolder = 'state';
   publishPubsubMessage('target', msgObject, attributes);
 
-  device_doc = get_device_doc(registryId, deviceId).collection('state').doc('latest');
-  device_doc.set(msgObject);
-
   return null;
 });
 
@@ -199,7 +198,6 @@ function publishPubsubMessage(topicName, data, attributes) {
 
   pubsub
     .topic(topicName)
-    .publisher()
     .publish(dataBuffer, attributes)
     .then(messageId => {
       console.debug(`Message ${messageId} published to ${topicName}.`);
