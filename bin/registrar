@@ -26,4 +26,6 @@ unset GOOGLE_CLOUD_PROJECT
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
+env
+
 validator/bin/registrar $gcp_cred $site_path $schema_path $*
