@@ -22,7 +22,7 @@ fi
 
 validator/bin/build
 
-unset GOOGLE_CLOUD_PROJECT
+export GOOGLE_CLOUD_PROJECT=foobar
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
