@@ -15,13 +15,17 @@ config_file=$1
 devices_dir=$2
 schema_dir=$3
 device_filter=$4
+cloud_project=`jq -r .project_id $config_file`
 
 echo Using gcp credentials $config_file
 echo Using site config dir $devices_dir
 echo Using schema root dir $schema_dir
 echo Using device filter $device_filter
+echo Using cloud project $cloud_project
 
 JAVA=/usr/lib/jvm/java-11-openjdk-amd64/bin/java
+
+export GCP_CLOUD_PROJECT=$cloud_project
 
 error=0
 $JAVA -cp $jarfile $mainclass $config_file $devices_dir $schema_dir $device_filter || error=$?
