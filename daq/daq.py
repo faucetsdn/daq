@@ -17,7 +17,7 @@ LOGGER = logger.get_logger('daq')
 ALT_LOG = logger.get_logger('mininet')
 
 _PID_FILE = 'inst/daq.pid'
-
+_LOG_FORMAT = "%(levelname)-8s%(module)-15s%(asctime)-25s%(message)s"
 
 class DAQ:
     """Wrapper class for configuration management"""
@@ -33,7 +33,7 @@ class DAQ:
         daq_env = config.get('daq_loglevel', log_def)
         level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
 
-        logger.set_config(level=level)
+        logger.set_config(level=level, format=_LOG_FORMAT)
 
         # For some reason this is necessary for travis.ci
         ROOT_LOG.setLevel(level)

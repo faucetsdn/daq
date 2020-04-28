@@ -19,4 +19,4 @@ daqf/test_password 9f68c4b56f9a
 daqf/test_ping c70c66306f17
 daqf/test_switch 8346d9317b28
 daqf/test_tls 639ce60492f0
-daqf/test_udmi 7e8e8d265958
+daqf/test_udmi db8412689a30

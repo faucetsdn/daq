@@ -97,6 +97,7 @@ div {
 #config_body .save_button {
     color: #004ED0;
     opacity: 0;
+    cursor: pointer;
 }
 
 #config_body.dirty .save_button {
