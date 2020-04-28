@@ -21,7 +21,11 @@
     "auth_type": "RSA_PEM",
   },
   "gateway": {
-    "proxy_ids": ["AHU-22"]
+    "subsystem": {
+      "bacnet": {
+        "proxy_ids": ["AHU-22"]
+      }
+    }
   },
   "pointset": {
     "points": {
