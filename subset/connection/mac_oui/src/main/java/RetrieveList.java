@@ -15,15 +15,8 @@ public class RetrieveList {
   }
 
   public void startTest() {
-    try {
-      // Read the mac prefixes from the svn nmap
-      readFileFromUrlAndUpdateMac("https://svn.nmap.org/nmap/nmap-mac-prefixes");
-    } catch (IOException e){
-      System.out.println(e);
-      System.err.println("Can not read remote file. Reading local file.");
-      // Read the local file
-      readLocalFile();
-    }
+    // Read the local file
+    readLocalFile();
     // Map the mac prefixes
     MacLookup macLookup = new MacLookup(macDevices, macAddress);
     // Start the manufacturer lookup test
@@ -56,60 +49,4 @@ public class RetrieveList {
     }
   }
 
-
-  /**
-   * Read the file from a URL and update mac prefixes
-   * @param fileURL HTTP URL of the file to be read
-   * @throws IOException - URL not reachable
-   */
-  public void readFileFromUrlAndUpdateMac(String fileURL) throws IOException {
-    URL url = new URL(fileURL);
-    HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-    int responseCode = httpConn.getResponseCode();
-
-    // always check HTTP response code first
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      String fileName = "";
-      String disposition = httpConn.getHeaderField("Content-Disposition");
-      String contentType = httpConn.getContentType();
-      int contentLength = httpConn.getContentLength();
-
-      if (disposition != null) {
-        // extracts file name from header field
-        int index = disposition.indexOf("filename=");
-        if (index > 0) {
-          fileName = disposition.substring(index + 10,
-                  disposition.length() - 1);
-        }
-      } else {
-        // extracts file name from URL
-        fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      }
-
-      System.out.println("Content-Type = " + contentType);
-      System.out.println("Content-Disposition = " + disposition);
-      System.out.println("Content-Length = " + contentLength);
-      System.out.println("fileName = " + fileName);
-
-      // opens input stream from the HTTP connection
-      InputStream inputStream = httpConn.getInputStream();
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-      String line;
-      while ((line = bufferedReader.readLine()) != null) {
-        if (line.length() > minimumMACAddressLength) {
-          String macAddress = line.substring(0, 6);
-          String manufacturer = line.substring(7);
-          if (manufacturer.length() > 0) {
-            macDevices.put(macAddress, manufacturer);
-          }
-        }
-      }
-      inputStream.close();
-
-      System.out.println("File read");
-    } else {
-      System.out.println("No file to read. Server replied HTTP code: " + responseCode);
-    }
-    httpConn.disconnect();
-  }
 }
