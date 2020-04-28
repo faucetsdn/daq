@@ -67,7 +67,7 @@ if [ "$1" == push ]; then
 elif [ "$1" == pull ]; then
     REPO_VER=$(< misc/$DOCKER_IMAGE_VER)
     REPO_HASH=`git rev-list -n 1 $REPO_VER`
-    TAG_HASH=`git rev-list -n $TAG_VER`
+    TAG_HASH=`git rev-list -n 1 $TAG_VER`
     if [ "$TAG_HASH" != "$REPO_HASH" ]; then
 	echo Tagged version $TAG_VER does not match misc/$DOCKER_IMAGE_VER $REPO_VER
 	false
