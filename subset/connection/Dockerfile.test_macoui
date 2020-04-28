@@ -8,7 +8,7 @@ RUN $AG update && $AG install curl
 
 COPY subset/connection/ .
 
-RUN mkdir -p mac_oui/src/main/resources
+RUN mkdir -p /mac_oui/src/main/resources
 
 RUN curl https://svn.nmap.org/nmap/nmap-mac-prefixes > mac_oui/src/main/resources/macList.txt
 
