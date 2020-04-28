@@ -28,7 +28,7 @@
     "points": {
       "return_air_temperature_sensor": {
         "units": "Degrees-Celsius",
-        "ref": "101.BV23.present_value"
+        "ref": "BV23.present_value"
       }
     }
   },
