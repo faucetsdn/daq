@@ -25,9 +25,14 @@ echo Using cloud project $cloud_project
 
 JAVA=/usr/lib/jvm/java-11-openjdk-amd64/bin/java
 
-export GCP_CLOUD_PROJECT=$cloud_project
+unset GOOGLE_CLOUD_PROJECT
 
 error=0
+echo TAP1
+$JAVA -cp $jarfile $mainclass $config_file $devices_dir $schema_dir $device_filter || error=$?
+
+export GOOGLE_CLOUD_PROJECT=$cloud_project
+echo TAP2
 $JAVA -cp $jarfile $mainclass $config_file $devices_dir $schema_dir $device_filter || error=$?
 
 echo Registrar complete, exit $error
