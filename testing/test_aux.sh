@@ -71,6 +71,7 @@ if [ -f $cred_file ]; then
 
     bin/registrar
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
+    echo | tee -a $GCP_RESULTS
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.
