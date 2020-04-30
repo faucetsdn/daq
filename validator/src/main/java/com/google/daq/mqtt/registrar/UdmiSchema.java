@@ -15,6 +15,7 @@ public class UdmiSchema {
     public PointsetMetadata pointset;
     public SystemMetadata system;
     public GatewayMetadata gateway;
+    public LocalnetMetadata localnet;
     public CloudMetadata cloud;
     public Integer version;
     public Date timestamp;
@@ -90,5 +91,13 @@ public class UdmiSchema {
       pointConfig.ref = ref;
       return pointConfig;
     }
+  }
+
+  static class LocalnetMetadata {
+    public Map<String, LocalnetSubsystem> subsystem;
+  }
+
+  static class LocalnetSubsystem {
+    public String local_id;
   }
 }

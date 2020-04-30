@@ -30,6 +30,13 @@
       }
     }
   },
+  "localnet": {
+    "subsystem": {
+      "bacnet": {
+        "local_id": "0x65"
+      }
+    }
+  },
   "gateway": {
     "gateway_id": "GAT-123"
   },
