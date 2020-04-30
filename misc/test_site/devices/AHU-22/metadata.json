@@ -2,10 +2,12 @@
   "pointset": {
     "points": {
       "filter_alarm_pressure_status": {
-        "units": "Bars"
+        "units": "Bars",
+        "ref": "BV11.present_value"
       },
       "filter_differential_pressure_sensor": {
-        "units": "Degrees-Celsius"
+        "units": "Degrees-Celsius",
+        "ref": "AV12.present_value"
       },
       "filter_differential_pressure_setpoint": {
         "units": "No-units"
@@ -32,6 +34,6 @@
     "gateway_id": "GAT-123"
   },
   "version": 1,
-  "timestamp": "2020-04-19T05:11:46Z",
-  "hash": "cc88e233"
+  "timestamp": "2020-04-30T04:09:22Z",
+  "hash": "d4053230"
 }

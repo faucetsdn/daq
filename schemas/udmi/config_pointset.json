@@ -20,6 +20,9 @@
         "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
           "additionalProperties": false,
           "properties": {
+            "ref": {
+              "type": "string"
+            },
             "force_value": {
               "type": ["number", "string", "boolean"]
             }

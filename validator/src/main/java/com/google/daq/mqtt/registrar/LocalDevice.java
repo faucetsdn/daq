@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -24,10 +23,8 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.google.daq.mqtt.registrar.Registrar.*;
-import static java.util.stream.Collectors.toList;
 
 public class LocalDevice {
 
@@ -211,10 +208,21 @@ public class LocalDevice {
         config.gateway = new UdmiSchema.GatewayConfig();
         config.gateway.proxy_ids = getProxyDevicesList();
       }
+      if (metadata.pointset != null) {
+        config.pointset = getDevicePointsetConfig();
+      }
       return OBJECT_MAPPER.writeValueAsString(config);
     } catch (Exception e) {
       throw new RuntimeException("While converting device config to string", e);
     }
+  }
+
+  private UdmiSchema.PointsetConfig getDevicePointsetConfig() {
+    UdmiSchema.PointsetConfig pointsetConfig = new UdmiSchema.PointsetConfig();
+    metadata.pointset.points.forEach((metadataKey, value) ->
+        pointsetConfig.points.computeIfAbsent(metadataKey, configKey ->
+            UdmiSchema.PointConfig.fromRef(value.ref)));
+    return pointsetConfig;
   }
 
   private String metadataString() {

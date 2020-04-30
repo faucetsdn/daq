@@ -7,7 +7,7 @@
     "subsystem": {
       "type": "object",
       "patternProperties": {
-        "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
+        "^[a-z0-9-]+$": {
           "additionalProperties": false,
           "properties": {
             "local_id": {

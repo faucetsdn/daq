@@ -41,6 +41,7 @@ public class UdmiSchema {
 
   static class PointMetadata {
     public String units;
+    public String ref;
   }
 
   static class LocationMetadata {
@@ -63,6 +64,7 @@ public class UdmiSchema {
     public Date timestamp = new Date();
     public GatewayConfig gateway;
     public LocalnetConfig localnet;
+    public PointsetConfig pointset;
   }
 
   static class GatewayConfig {
@@ -74,5 +76,19 @@ public class UdmiSchema {
   }
 
   static class Subsystem {
+  }
+
+  static class PointsetConfig {
+    public Map<String, PointConfig> points = new TreeMap<>();
+  }
+
+  static class PointConfig {
+    public String ref;
+
+    static PointConfig fromRef(String ref) {
+      PointConfig pointConfig = new PointConfig();
+      pointConfig.ref = ref;
+      return pointConfig;
+    }
   }
 }
