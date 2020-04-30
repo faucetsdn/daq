@@ -63,7 +63,7 @@ for schema in $schemas; do
             if [ $force == y ]; then
                 diff $expected $output || echo Updating $expected && cp $output $expected
             else
-                diff -b $expected $output || (echo Expectation letdown, to force: cp $output $expected | tee -a $errorfile)
+                diff -b $expected $output || (echo '   ' cp $output $expected | tee -a $errorfile)
             fi
         done
     done
@@ -72,7 +72,7 @@ done
 echo
 
 if [ -f $errorfile ]; then
-    echo Validation errors found:
+    echo Validation errors found in $(pwd):
     cat $errorfile
     false
 fi

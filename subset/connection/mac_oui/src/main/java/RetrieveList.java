@@ -1,6 +1,6 @@
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,22 +8,26 @@ public class RetrieveList {
   String macAddress;
   Map<String, String> macDevices = new HashMap<>();
   static final int minimumMACAddressLength = 5;
+  private static final int BUFFER_SIZE = 4096;
 
   RetrieveList(String macAddress) {
     this.macAddress = macAddress;
   }
 
   public void startTest() {
+    // Read the local file
     readLocalFile();
-    System.out.println(String.format("Found %d entries in mac table\n", macDevices.size()));
+    // Map the mac prefixes
     MacLookup macLookup = new MacLookup(macDevices, macAddress);
+    // Start the manufacturer lookup test
     macLookup.startTest();
   }
 
   public void readLocalFile(){
     try {
       System.out.println("Reading local file...");
-      InputStream inputStream = this.getClass().getResourceAsStream("/macList.txt");
+      ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+      InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("macList.txt");
       StringBuilder resultStringBuilder = new StringBuilder();
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
       String line;
@@ -44,4 +48,5 @@ public class RetrieveList {
       System.err.println("Can not read local file");
     }
   }
+
 }
