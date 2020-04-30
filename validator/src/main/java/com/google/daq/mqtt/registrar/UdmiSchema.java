@@ -38,6 +38,7 @@ public class UdmiSchema {
   static class GatewayMetadata {
     public String gateway_id;
     public List<String> proxy_ids;
+    public String subsystem;
   }
 
   static class PointMetadata {
@@ -62,7 +63,7 @@ public class UdmiSchema {
 
   static class Config {
     public Integer version = 1;
-    public Date timestamp = new Date();
+    public Date timestamp;
     public GatewayConfig gateway;
     public LocalnetConfig localnet;
     public PointsetConfig pointset;
@@ -73,10 +74,7 @@ public class UdmiSchema {
   }
 
   static class LocalnetConfig {
-    public Map<String, Subsystem> subsystems = new TreeMap<>();
-  }
-
-  static class Subsystem {
+    public Map<String, LocalnetSubsystem> subsystems = new TreeMap<>();
   }
 
   static class PointsetConfig {

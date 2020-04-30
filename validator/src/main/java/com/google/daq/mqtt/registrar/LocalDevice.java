@@ -45,8 +45,9 @@ public class LocalDevice {
   private static final String PHYSICAL_TAG_FORMAT = "%s_%s";
   private static final String PHYSICAL_TAG_ERROR = "Physical asset name %s does not match expected %s";
 
-  private static final Set<String> deviceFiles = ImmutableSet.of(METADATA_JSON);
-  private static final Set<String> keyFiles = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
+  private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
+  private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
+  private static final Set<String> OPTIONAL_FILES = ImmutableSet.of(GENERATED_CONFIG_JSON);
   private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen %s %s";
   public static final String METADATA_SUBFOLDER = "metadata";
 
@@ -54,7 +55,6 @@ public class LocalDevice {
   private final Map<String, Schema> schemas;
   private final File deviceDir;
   private final UdmiSchema.Metadata metadata;
-  private final UdmiSchema.Config config;
   private final File devicesDir;
 
   private String deviceNumId;
@@ -68,7 +68,6 @@ public class LocalDevice {
       this.devicesDir = devicesDir;
       deviceDir = new File(devicesDir, deviceId);
       metadata = readMetadata();
-      config = new UdmiSchema.Config();
     } catch (Exception e) {
       throw new RuntimeException("While loading local device " + deviceId, e);
     }
@@ -83,12 +82,12 @@ public class LocalDevice {
       String[] files = deviceDir.list();
       Preconditions.checkNotNull(files, "No files found in " + deviceDir.getAbsolutePath());
       ImmutableSet<String> actualFiles = ImmutableSet.copyOf(files);
-      Set<String> expectedFiles = isDirectConnect() ? Sets.union(keyFiles, deviceFiles) : deviceFiles;
+      Set<String> expectedFiles = isDirectConnect() ? Sets.union(KEY_FILES, DEVICE_FILES) : DEVICE_FILES;
       SetView<String> missing = Sets.difference(expectedFiles, actualFiles);
       if (!missing.isEmpty()) {
         throw new RuntimeException("Missing files: " + missing);
       }
-      SetView<String> extra = Sets.difference(actualFiles, expectedFiles);
+      SetView<String> extra = Sets.difference(Sets.difference(actualFiles, expectedFiles), OPTIONAL_FILES);
       if (!extra.isEmpty()) {
         throw new RuntimeException("Extra files: " + extra);
       }
@@ -204,6 +203,8 @@ public class LocalDevice {
 
   private String deviceConfigString() {
     try {
+      UdmiSchema.Config config = new UdmiSchema.Config();
+      config.timestamp = metadata.timestamp;
       if (isGateway()) {
         config.gateway = new UdmiSchema.GatewayConfig();
         config.gateway.proxy_ids = getProxyDevicesList();
@@ -211,10 +212,19 @@ public class LocalDevice {
       if (metadata.pointset != null) {
         config.pointset = getDevicePointsetConfig();
       }
+      if (metadata.localnet != null) {
+        config.localnet = getDeviceLocalnetConfig();
+      }
       return OBJECT_MAPPER.writeValueAsString(config);
     } catch (Exception e) {
       throw new RuntimeException("While converting device config to string", e);
     }
+  }
+
+  private UdmiSchema.LocalnetConfig getDeviceLocalnetConfig() {
+    UdmiSchema.LocalnetConfig localnetConfig = new UdmiSchema.LocalnetConfig();
+    localnetConfig.subsystems = metadata.localnet.subsystem;
+    return localnetConfig;
   }
 
   private UdmiSchema.PointsetConfig getDevicePointsetConfig() {
@@ -284,6 +294,15 @@ public class LocalDevice {
       OBJECT_MAPPER.writeValue(generator, metadata);
     } catch (Exception e) {
       throw new RuntimeException("While writing "+ metadataFile.getAbsolutePath(), e);
+    }
+  }
+
+  public void writeConfigFile() {
+    File configFile = new File(deviceDir, GENERATED_CONFIG_JSON);
+    try (OutputStream outputStream = new FileOutputStream(configFile)) {
+      outputStream.write(settings.config.getBytes());
+    } catch (Exception e) {
+      throw new RuntimeException("While writing "+ configFile.getAbsolutePath(), e);
     }
   }
 

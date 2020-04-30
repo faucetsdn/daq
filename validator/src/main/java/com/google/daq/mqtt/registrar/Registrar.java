@@ -30,6 +30,7 @@ public class Registrar {
 
   static final String METADATA_JSON = "metadata.json";
   static final String ENVELOPE_JSON = "envelope.json";
+  static final String GENERATED_CONFIG_JSON = "generated_config.json";
 
   private static final String DEVICES_DIR = "devices";
   private static final String ERROR_FORMAT_INDENT = "  ";
@@ -86,6 +87,7 @@ public class Registrar {
           extraDevices.remove(localName);
           LocalDevice localDevice = localDevices.get(localName);
           updateCloudIoT(localDevice);
+          localDevice.writeConfigFile();
           Device device = Preconditions.checkNotNull(fetchDevice(localName),
               "missing device " + localName);
           BigInteger numId = Preconditions.checkNotNull(device.getNumId(),

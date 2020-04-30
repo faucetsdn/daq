@@ -30,6 +30,9 @@
       }
     }
   },
+  "gateway": {
+    "gateway_id": "GAT-123"
+  },
   "localnet": {
     "subsystem": {
       "bacnet": {
@@ -37,10 +40,7 @@
       }
     }
   },
-  "gateway": {
-    "gateway_id": "GAT-123"
-  },
   "version": 1,
-  "timestamp": "2020-04-30T04:09:22Z",
-  "hash": "d4053230"
+  "timestamp": "2020-04-30T15:56:52Z",
+  "hash": "d88046b5"
 }
