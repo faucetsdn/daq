@@ -98,4 +98,54 @@ public class UdmiSchema {
   static class LocalnetSubsystem {
     public String local_id;
   }
+
+  private static class Envelope {
+    public String deviceId;
+    public String deviceNumId;
+    public String deviceRegistryId;
+    public String projectId;
+    public final String subFolder = METADATA_SUBFOLDER;
+  }
+
+  private static class Metadata {
+    public PointsetMetadata pointset;
+    public SystemMetadata system;
+    public Integer version;
+    public Date timestamp;
+    public String hash;
+  }
+
+  private static class Properties {
+    public String key_type;
+    public String connect;
+    public Integer version;
+  }
+
+  private static class PointsetMetadata {
+    public Map<String, PointMetadata> points;
+  }
+
+  private static class SystemMetadata {
+    public LocationMetadata location;
+    public PhysicalTagMetadata physical_tag;
+  }
+
+  private static class PointMetadata {
+    public String units;
+  }
+
+  private static class LocationMetadata {
+    public String site_name;
+    public String section;
+    public Object position;
+  }
+
+  private static class PhysicalTagMetadata {
+    public AssetMetadata asset;
+  }
+
+  private static class AssetMetadata {
+    public String guid;
+    public String name;
+  }
 }
