@@ -214,7 +214,7 @@ function handleFilterResult(origin, site, runid, test, result) {
   if (result.timestamp > last_result_time_sec) {
     last_result_time_sec = result.timestamp;
   }
-  if (!row_timestamps[id] || row_timestamps[id] < result.timestamp) {
+  if ((!row_timestamps[id] && row_timestamps[id] !== false) || row_timestamps[id] < result.timestamp) {
     row_timestamps[id] = result.timestamp;
   }
   if (test === "terminate") {
@@ -521,7 +521,7 @@ function interval_updater() {
     const runid = document.querySelector(selector).getAttribute('runid');
 
     if (row_timestamps[row] === false || timeDeltaSec >= ROW_TIMEOUT_SEC) {
-      setGridValue(row, 'timer', runid, row_timestamps[row] ? 'Timed Out': 'Done' );
+      setGridValue(row, 'timer', runid, row_timestamps[row] ? 'Timed Out' : 'Done');
       setRowClass(row, true);
     } else {
       setGridValue(row, 'timer', runid, `${timeDeltaSec}s`);
