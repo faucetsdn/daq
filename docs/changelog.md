@@ -1,5 +1,19 @@
 # Changelog
 
+* 1.2.0
+  * ssh tunnel document addition (#393)
+  * Build aardvark for travis module test (#388)
+  * Feature/ui improvements v2 (#384)
+  * adding time to log messages (#381)
+  * Fix physical switch setup and test (#379)
+  * Base configurator unit test (#373)
+  * Fix up password test redaction (#370)
+  * Feature/proper ip test (#369)
+  * Make nmap more robust, add finish_hook (#368)
+  * Fix result extraction for reports (#367)
+  * Create alternate faux container image (#366)
+  * Use VLANs for DAQ dataplane (#360)
+  * Feature/push results as json (#357)
 * 1.1.0
   * Fixing version to python 3.7, requires recent version of debian
   * Log and display more version info into GCP project

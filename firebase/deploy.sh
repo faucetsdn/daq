@@ -16,7 +16,7 @@ if [ -z "$PROJECT" ]; then
     false
 fi
 
-CFILE=firebase_config.js
+CFILE=$PROJECT.js
 
 echo
 echo For local hosting: firebase serve --only hosting --project $PROJECT
@@ -26,10 +26,10 @@ echo Application host : https://$PROJECT.firebaseapp.com
 echo
 
 if [ -f local/$CFILE ]; then
-    echo Copying local/$CFILE to firebase/public/
-    cp local/$CFILE firebase/public/
+    echo Copying local/$CFILE to firebase/public/firebase_config.js
+    cp local/$CFILE firebase/public/firebase_config.js
 else
-    echo No local/$CFILE found.
+    echo No local/$CFILE firebase configuration found.
     false
 fi
 
