@@ -3,7 +3,7 @@
  * Uses firebase for data management, and renders straight to HTML.
  */
 
-const PORT_ROW_COUNT = 25;
+const ROW_TIMEOUT_SEC = 500;
 const display_columns = [];
 const display_rows = [];
 const row_timestamps = {};
@@ -511,20 +511,20 @@ function triggerDevice(db, registry_id, device_id) {
 
 function interval_updater() {
   if (last_result_time_sec) {
-    const time_delta_sec = Math.floor(Date.now() / 1000.0 - last_result_time_sec);
-    document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+    const timeDeltaSec = Math.floor(Date.now() / 1000.0 - last_result_time_sec);
+    document.getElementById('update').innerHTML = `Last update ${timeDeltaSec} sec ago.`
   }
   for (const row in row_timestamps) {
-    const last_update = new Date(row_timestamps[row]);
-    const time_delta_sec = Math.floor((Date.now() - last_update) / 1000.0);
+    const lastUpdate = new Date(row_timestamps[row]);
+    const timeDeltaSec = Math.floor((Date.now() - lastUpdate) / 1000.0);
     const selector = `#testgrid table tr[label="${row}"`;
     const runid = document.querySelector(selector).getAttribute('runid');
 
-    if (row_timestamps[row] === false) {
-      setGridValue(row, 'timer', runid, 'Done');
+    if (row_timestamps[row] === false || timeDeltaSec >= ROW_TIMEOUT_SEC) {
+      setGridValue(row, 'timer', runid, row_timestamps[row] ? 'Timed Out': 'Done' );
       setRowClass(row, true);
     } else {
-      setGridValue(row, 'timer', runid, `${time_delta_sec}s`);
+      setGridValue(row, 'timer', runid, `${timeDeltaSec}s`);
       setRowClass(row, false);
     }
   }
