@@ -33,6 +33,10 @@ public class Message {
   }
 
   public static class PointsetConfig {
+    public Map<String, PointConfig> points = new HashMap<>();
+  }
+
+  public static class PointConfig {
   }
 
   public static class GatewayConfig {
