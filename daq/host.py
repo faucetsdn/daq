@@ -647,18 +647,6 @@ class ConnectedHost:
                 self._report.accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
             self._report.accumulate(name, {ResultType.MODULE_CONFIG: self._loaded_config})
 
-    @staticmethod
-    def clear_port(gcp_instance, port):
-        """Clear a port-based entry without having an instantiated host class"""
-        result = {
-            'name': 'startup',
-            'state': MODE.INIT,
-            'runid': ConnectedHost.make_runid(),
-            'timestamp': gcp.get_timestamp(),
-            'port': port
-        }
-        gcp_instance.publish_message('daq_runner', 'test_result', result)
-
     def _record_result(self, name, run_info=True, current=None, **kwargs):
         result = {
             'name': name,
