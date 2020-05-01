@@ -1,26 +1,14 @@
 package com.google.daq.mqtt.registrar;
 
-import static com.google.daq.mqtt.registrar.LocalDevice.METADATA_SUBFOLDER;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.Device;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
 import com.google.daq.mqtt.util.*;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
-import com.google.daq.mqtt.util.PubSubPusher;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -34,6 +22,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -50,7 +39,7 @@ public class Registrar {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .enable(SerializationFeature.INDENT_OUTPUT)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .setDateFormat(new StdDateFormat())
+      .setDateFormat(new ISO8601DateFormat())
       .setSerializationInclusion(Include.NON_NULL);
   public static final String ALL_MATCH = "";
 
@@ -63,6 +52,7 @@ public class Registrar {
   private PubSubPusher pubSubPusher;
   private Map<String, LocalDevice> localDevices;
   private File summaryFile;
+  private ExceptionMap blockErrors;
 
   public static void main(String[] args) {
     Registrar registrar = new Registrar();
@@ -99,7 +89,12 @@ public class Registrar {
             .put(device.getDeviceId(), "True");
       }
     });
-    errorSummary.forEach((key, value) -> System.err.println("Device " + key + ": " + value.size()));
+    if (!blockErrors.isEmpty()) {
+      errorSummary.put("Block", blockErrors.stream().collect(Collectors.toMap(
+          Map.Entry::getKey, entry -> entry.getValue().toString())));
+    }
+    System.err.println("\nSummary:");
+    errorSummary.forEach((key, value) -> System.err.println("  Device " + key + ": " + value.size()));
     System.err.println("Out of " + localDevices.size() + " total.");
     OBJECT_MAPPER.writeValue(summaryFile, errorSummary);
   }
@@ -141,14 +136,15 @@ public class Registrar {
         }
       }
       bindGatewayDevices(localDevices);
-      blockExtraDevices(exceptionMap, extraDevices);
+      blockErrors = blockExtraDevices(extraDevices);
       System.err.println(String.format("Processed %d devices", localDevices.size()));
     } catch (Exception e) {
       throw new RuntimeException("While processing devices", e);
     }
   }
 
-  private void blockExtraDevices(ExceptionMap exceptionMap, Set<String> extraDevices) {
+  private ExceptionMap blockExtraDevices(Set<String> extraDevices) {
+    ExceptionMap exceptionMap = new ExceptionMap("Block devices errors");
     for (String extraName : extraDevices) {
       try {
         System.err.println("Blocking extra device " + extraName);
@@ -157,6 +153,7 @@ public class Registrar {
         exceptionMap.put(extraName, e);
       }
     }
+    return exceptionMap;
   }
 
   private Device fetchDevice(String localName) {
@@ -253,7 +250,7 @@ public class Registrar {
             String previous = privateKeys.get(settings.credential);
             RuntimeException exception = new RuntimeException(
                 String.format("Duplicate credentials found for %s & %s", previous, deviceName));
-            device.getErrors().put("Key", exception);
+            localDevice.getErrors().put("Key", exception);
           } else {
             privateKeys.put(settings.credential, deviceName);
           }

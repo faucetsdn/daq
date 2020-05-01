@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -20,14 +20,6 @@ import org.apache.commons.io.IOUtils;
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import static com.google.daq.mqtt.registrar.Registrar.*;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -44,7 +36,7 @@ class LocalDevice {
       .enable(Feature.ALLOW_TRAILING_COMMA)
       .enable(Feature.STRICT_DUPLICATE_DETECTION)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .setDateFormat(new StdDateFormat())
+      .setDateFormat(new ISO8601DateFormat())
       .setSerializationInclusion(Include.NON_NULL);
 
   private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
@@ -100,7 +92,7 @@ class LocalDevice {
       String[] files = deviceDir.list();
       Preconditions.checkNotNull(files, "No files found in " + deviceDir.getAbsolutePath());
       Set<String> actualFiles = ImmutableSet.copyOf(files);
-      Set<String> expectedFiles = Sets.union(baseFiles, Set.of(publicKeyFile()));
+      Set<String> expectedFiles = Sets.union(DEVICE_FILES, keyFiles());
       SetView<String> missing = Sets.difference(expectedFiles, actualFiles);
       if (!missing.isEmpty()) {
         throw new RuntimeException("Missing files: " + missing);
@@ -122,7 +114,7 @@ class LocalDevice {
       exceptionMap.put("Validating", metadata_exception);
     }
     try {
-      return OBJECT_MAPPER.readValue(metadataFile, Metadata.class);
+      return OBJECT_MAPPER.readValue(metadataFile, UdmiSchema.Metadata.class);
     } catch (Exception mapping_exception) {
       exceptionMap.put("Reading", mapping_exception);
     }
@@ -167,8 +159,15 @@ class LocalDevice {
     }
   }
 
+  private Set<String> keyFiles() {
+    if (!isDirectConnect()) {
+      return ImmutableSet.of();
+    }
+    return Sets.union(Sets.union(DEVICE_FILES, KEY_FILES), Set.of(publicKeyFile()));
+  }
+
   private String publicKeyFile() {
-    return properties.key_type.equals(RSA_CERT_TYPE) ? RSA_CERT_PEM : RSA_PUBLIC_PEM;
+    return metadata.cloud.auth_type.equals(RSA_CERT_TYPE) ? RSA_CERT_PEM : RSA_PUBLIC_PEM;
   }
 
   private void generateNewKey() {
