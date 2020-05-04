@@ -1,19 +1,13 @@
 {
-  "device_datasheets_url": "*** Device Datasheets URL ***",
-  "device_description": "*** Device Description ***",
-  "device_image": "*** Device Image URL ***",
+  "device_datasheets_url": "https://greatnortherncontrols.com/wp-content/uploads/2018/03/O3-DIN-CPU_Catalog_Sheet.pdf",
+  "device_description": "The O3-DIN-CPU is a fully programmable native BACnet Building Controller. As the primary integration engine of the O3 system, the O3-DIN-CPU contains memory storage and external communication ports as well as the control logic for the expansion modules. The O3-DIN-CPU can support up to 4 expansion modules. The O3-DIN-CPU supports multiple communication methods, including BACnet/IP, BACnet over Ethernet, BACnet MS/TP and Delta LINKnet.",
+  "device_image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwW3OChK5E7P64JwcASNGHi2YWzcCu5kBouBugewtnzgQiZ-dh&s",
   "device_info": {
-    "guid": "*** GUID ***",
-    "hostname": "*** Network Hostname ***",
-    "make": "*** Make ***",
-    "model": "*** Model ***",
-    "name": "*** Name ***",
-    "serial": "*** Serial ***",
-    "type": "*** Type ***",
-    "firmware_version": "*** Firmware Version ***"
+    "make": "Delta Controls Inc.",
+    "model": "O3-DIN-CPU",
+    "type": "BACnet controller"
   },
-  "device_manuals_url": "*** Device Manuals URL ***",
-  "device_type": "*** Device Type ***",
+  "device_manuals_url": "https://deltacontrols.com/wp-content/uploads/Delta-Controls-Product-Catalog-2019-DIGITAL.pdf",
   "modules": {
     "bacext": {
       "enabled": true
@@ -42,7 +36,7 @@
     "discover": {
       "enabled": true
     },
-    "password": {
+    "passwords": {
       "enabled": true
     }
   },
@@ -91,7 +85,7 @@
         },
         "161": {
           "allowed": false,
-          "reason": "Simple Network Management Protocol (SNMP)",
+          "description": "Simple Network Management Protocol (SNMP)",
           "reason": ""
         },
         "162": {
@@ -139,7 +133,7 @@
           "reason": ""
         },
         "47808": {
-          "allowed": false,
+          "allowed": true,
           "description": "BACnet protocol",
           "reason": ""
         }
