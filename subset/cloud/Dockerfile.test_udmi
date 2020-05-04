@@ -5,7 +5,9 @@
 
 FROM daqf/aardvark:latest
 
-RUN $AG update && $AG install openjdk-8-jdk git
+# Run this separately so it can be shared with other builds.
+RUN $AG update && $AG install openjdk-11-jre
+RUN $AG update && $AG install openjdk-11-jdk git
 
 COPY validator/ validator/
 RUN validator/bin/build

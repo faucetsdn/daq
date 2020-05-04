@@ -19,7 +19,7 @@ nmap bacnet
 nmap telnet
 EOF
 
-DAQ_TARGETS=faux1,faux2 bin/docker_build force
+DAQ_TARGETS=aardvark,faux1,faux2 bin/docker_build force inline
 
 mkdir -p inst/modules/ping/config
 echo '{"static_ip": "10.20.0.5"}' > inst/modules/ping/config/module_config.json
