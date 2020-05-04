@@ -23,9 +23,19 @@ if [ -z "$ext_ctrl" ]; then
     false
 fi
 
+if ! ip -br link show dev "$ext_ctrl" | fgrep "UP" &> /dev/null; then
+    echo Error checking ext_ctrl interface [$ext_ctrl] status is UP, for physical_sec
+    false
+fi
+
 if [ -z "$ext_intf" ]; then
     # Not actally used in this script, but needed elsewhere.
     echo ext_intf not defined for physical_sec.
+    false
+fi
+
+if ! ip -br link show dev "$ext_intf" | fgrep "UP" &> /dev/null; then
+    echo Error checking ext_intf interface [$ext_intf] status is UP, for physical_sec
     false
 fi
 
