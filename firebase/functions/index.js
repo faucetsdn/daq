@@ -5,12 +5,17 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const {PubSub} = require(`@google-cloud/pubsub`);
+const iot = require('@google-cloud/iot');
 const pubsub = new PubSub();
 
 const EXPIRY_MS = 1000 * 60 * 60 * 24;
 
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
+
+const iotClient = new iot.v1.DeviceManagerClient({
+  // optional auth parameters.
+});
 
 function deleteRun(port, port_doc, runid) {
   const rundoc = port_doc.collection('runid').doc(runid);
@@ -86,7 +91,7 @@ function handle_test_result_by_port(now, origin_doc, message) {
   const timestamp = new Date(now).toJSON();
   const expired = new Date(now - EXPIRY_MS).toJSON();
   const port_doc = origin_doc.collection('port').doc('port-' + message.port);
-    
+
   port_doc.set({'updated': timestamp});
   const run_doc = port_doc.collection('runid').doc(message.runid);
   run_doc.set({'updated': timestamp});
@@ -192,6 +197,45 @@ exports.device_state = functions.pubsub.topic('state').onPublish((event) => {
   device_doc.set(msgObject);
 
   return null;
+});
+
+exports.device_config = functions.pubsub.topic('target').onPublish((event) => {
+  const attributes = event.attributes;
+  const subFolder = attributes.subFolder;
+  if (subFolder != 'config') {
+    return null;
+  }
+  const projectId = attributes.projectId;
+  const cloudRegion = attributes.cloudRegion;
+  const registryId = attributes.deviceRegistryId;
+  const deviceId = attributes.deviceId;
+  const binaryData = event.data;
+  const msgString = Buffer.from(binaryData, 'base64').toString();
+  const msgObject = JSON.parse(msgString);
+  const version = 0;
+
+  console.log(projectId, cloudRegion, registryId, deviceId, msgString);
+
+  const formattedName = iotClient.devicePath(
+    projectId,
+    cloudRegion,
+    registryId,
+    deviceId
+  );
+
+  console.log(formattedName, msgObject);
+
+  const request = {
+    name: formattedName,
+    versionToUpdate: version,
+    binaryData: binaryData,
+  };
+
+  return iotClient.modifyCloudToDeviceConfig(request).then(responses => {
+    console.log('Success:', responses[0]);
+  }).catch(err => {
+    console.error('Could not update config:', deviceId, err);
+  });
 });
 
 function publishPubsubMessage(topicName, data, attributes) {
