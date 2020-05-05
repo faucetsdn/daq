@@ -41,9 +41,10 @@ fi
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
 
-    IP_INDEX=${${LOCAL_IP##*.}%/*}
-    echo Using IP index $IP_INDEX
-    LOCAL_MAC=ca:50:20:b1:4f:$(printf %02x $IP_INDEX)
+    LOCAL_ONLY=${LOCAL_IP%/*}
+    LOCAL_INDEX=${LOCAL_ONLY##*.}
+    echo Using IP index $LOCAL_INDEX
+    LOCAL_MAC=ca:50:20:b1:4f:$(printf %02x $LOCAL_INDEX)
     echo Using local MAC address $LOCAL_MAC
 
     LOCAL_IFACE=`hostname`-eth0
