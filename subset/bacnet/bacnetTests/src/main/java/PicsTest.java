@@ -15,7 +15,7 @@ public class PicsTest {
   private String testName = "protocol.bacnet.pic";
   private String passedTestReport = String.format("RESULT pass %s\n", testName);
   private String failedTestReport = String.format("RESULT fail %s The device does not match the PICS\n", testName);
-  private String skippedTestReport = String.format("RESULT skip %s Bacnet device not found.", testName);
+  private String skippedTestReport = String.format("RESULT skip %s ", testName);
   private String reportAppendix = "";
   private String additionalReportAppendix = "";
   private Csv csv;
@@ -48,7 +48,8 @@ public class PicsTest {
         performPicsChecks();
       } else {
         // Results in a 'skip' result
-        reportAppendix += " Bacnet device not found... Pics check cannot be performed.\n";
+        reportAppendix += "Bacnet device not found... Pics check cannot be performed.\n";
+        skippedTestReport += reportAppendix;
         System.out.println(reportAppendix);
         generateReport();
       }
@@ -64,9 +65,9 @@ public class PicsTest {
         Multimap<String, Map<String, String>> bacnetPointsMap = bacnetPoints.getBacnetPointsMap();
         boolean csvExists = fileManager.checkDevicePicCSV();
         if(!csvExists) {
-          additionalReportAppendix = " pics.csv not found in device type directory\n";
-          skippedTestReport += additionalReportAppendix;
           this.csvFound = false;
+          reportAppendix = "Bacnet device found but pics.csv not found in device type directory" 
+          skippedTestReport += reportAppendix;
           generateReport();
           return;
         }
