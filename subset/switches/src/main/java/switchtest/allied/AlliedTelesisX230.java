@@ -374,7 +374,7 @@ public class AlliedTelesisX230 extends SwitchInterrogator {
       login_report += "\n";
 
       if (interface_map.get("link_status").equals("UP")) {
-        login_report += "RESULT pass connection.port_link\n";
+        login_report += "RESULT pass connection.port_link Link is up\n";
       } else {
         login_report += "RESULT fail connection.port_link Link is down\n";
       }
@@ -382,7 +382,8 @@ public class AlliedTelesisX230 extends SwitchInterrogator {
       if (interface_map.get("current_speed") != null) {
         if (interface_map.get("configured_speed").equals("auto")
             && Integer.parseInt(interface_map.get("current_speed")) >= 10) {
-          login_report += "RESULT pass connection.port_speed\n";
+          login_report +=
+              "RESULT pass connection.port_speed Speed auto-negotiated successfully. Speed is greater than 10 MBPS\n";
         } else {
           login_report += "RESULT fail connection.port_speed Speed is too slow\n";
         }
@@ -393,7 +394,7 @@ public class AlliedTelesisX230 extends SwitchInterrogator {
       if (interface_map.get("current_duplex") != null) {
         if (interface_map.get("configured_duplex").equals("auto")
             && interface_map.get("current_duplex").equals("full")) {
-          login_report += "RESULT pass connection.port_duplex\n";
+          login_report += "RESULT pass connection.port_duplex Full duplex mode detected\n";
         } else {
           login_report += "RESULT fail connection.port_duplex Incorrect duplex mode set\n";
         }
@@ -423,18 +424,18 @@ public class AlliedTelesisX230 extends SwitchInterrogator {
             && current_oper.length() > 0) {
           if (Integer.parseInt(current_max_power) > Integer.parseInt(current_power)
               && !current_oper.equals("Fault")) {
-            login_report += "RESULT pass poe.power\n";
+            login_report += "RESULT pass poe.power PoE is applied to device\n";
           } else {
             login_report +=
                 "RESULT fail poe.power The DUT is drawing too much current or there is a fault on the line\n";
           }
           if (current_PoE_admin.equals("Enabled")) {
-            login_report += "RESULT pass poe.negotiation\n";
+            login_report += "RESULT pass poe.negotiation PoE auto-negotiated successfully\n";
           } else {
             login_report += "RESULT fail poe.negotiation Incorrect privilege for negotiation\n";
           }
           if (!current_oper.equals("Off")) {
-            login_report += "RESULT pass poe.support\n";
+            login_report += "RESULT pass poe.support PoE supported and enabled\n";
           } else {
             login_report +=
                 "RESULT fail poe.support The AT switch does not support PoE or it is disabled\n";

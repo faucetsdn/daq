@@ -230,7 +230,7 @@ public class Cisco9300 extends SwitchInterrogator {
   public String validateLinkTest() {
     String testResults = "";
     if (interface_map.get("status").equals("connected")) {
-      testResults += "RESULT pass connection.port_link\n";
+      testResults += "RESULT pass connection.port_link Link is up\n";
     } else {
       testResults += "RESULT fail connection.port_link Link is down\n";
     }
@@ -245,9 +245,11 @@ public class Cisco9300 extends SwitchInterrogator {
         speed = speed.replaceFirst("a-", "");
       }
       if (Integer.parseInt(speed) >= 10) {
-        testResults += "RESULT pass connection.port_speed\n";
+        testResults +=
+            "RESULT pass connection.port_speed Speed auto-negotiated successfully. Speed is greater than 10 MBPS\n";
       } else {
-        testResults += "RESULT fail connection.port_speed Speed is too slow\n";
+        testResults +=
+            "RESULT fail connection.port_speed Speed is too slow. Speed is less than or equal to 10 mbps\n";
       }
     } else {
       testResults += "RESULT fail connection.port_speed Cannot detect current speed\n";
@@ -263,7 +265,7 @@ public class Cisco9300 extends SwitchInterrogator {
         duplex = duplex.replaceFirst("a-", "");
       }
       if (duplex.equals("full")) {
-        testResults += "RESULT pass connection.port_duplex\n";
+        testResults += "RESULT pass connection.port_duplex Full duplex mode detected\n";
       } else {
         testResults += "RESULT fail connection.port_duplex Incorrect duplex mode set\n";
       }
@@ -316,7 +318,7 @@ public class Cisco9300 extends SwitchInterrogator {
 
       // Determine PoE power test result
       if (maxPower >= currentPower && poeOn) {
-        testResults += "RESULT pass poe.power\n";
+        testResults += "RESULT pass poe.power PoE is applied to device\n";
       } else if (poeOff) {
         testResults += "RESULT fail poe.power No poE is applied\n";
       } else if (poeFault) {
@@ -329,14 +331,14 @@ public class Cisco9300 extends SwitchInterrogator {
 
       // Determine PoE auto negotiation result
       if (powerAuto) {
-        testResults += "RESULT pass poe.negotiation\n";
+        testResults += "RESULT pass poe.negotiation PoE auto-negotiated successfully\n";
       } else {
         testResults += "RESULT fail poe.negotiation Incorrect privilege for negotiation\n";
       }
 
       // Determine PoE support result
       if (poeOn) {
-        testResults += "RESULT pass poe.support\n";
+        testResults += "RESULT pass poe.support PoE supported and enabled\n";
       } else {
         testResults +=
             "RESULT fail poe.support The switch does not support PoE or it is disabled\n";
@@ -526,4 +528,3 @@ public class Cisco9300 extends SwitchInterrogator {
     return map;
   }
 }
-
