@@ -22,15 +22,22 @@ separate than a gateway.
 
 ## Gateway Operation
 
+There are two modes for gateway operation: _static_ and _dynamic_. In the
+_dynamic_ mode, the gateway functionality if configured dynamically through
+gateway _config_ messages, which tell it the local devices it should proxy
+for. In a _static_ gateway configuraiton, the gateway will be statically
+configured to proxy a set of devices, essentally ignoring any information
+in the associated _config_ block.
+
 The general sequence of events for gateway operation is:
 1. Optional metadata specifies configuration paramaters that should be used
 at install time to properly (manually) setup the device.
-2. On startup, the gateway connects to the cloud and receives a configuration
+2. (_dynamic_ only) On startup, the gateway connects to the cloud and receives a configuration
 block that details which _proxy devices_ the gateway should proxy for.
 4. Gateway 'attaches' (Cloud IoT terminology) to the proxied devices,
 receiving a configuration block for each proxied device. Any attch errors are
 indicated in the gateway _status_ block and sent along as a _logentry_ event.
-5. The proxy device _config_ block specifies any local connection
+5. (_dynamic_ only) The proxied device's _config_ block specifies any local connection
 parameters for the proxied device, e.g. the BacNET device id.
 6. The gateway proxies communication to/from the device, translating between
 native (e.g. BacNET) communications and UDMI-based messages.
