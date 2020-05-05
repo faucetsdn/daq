@@ -24,7 +24,13 @@ instance in the Google Cloud Platform (GCP) and creating a remote user called `t
 4. Create VM instance, selecting Debian 10 Buster as the operating system
 5. Set a static IP address for the VM instance - in this example the IP address is indicated as **XXX.XXX.XXX.XXX**
 6. Add users on the IAM section of GCP as needed
-7. Run the VM and in case `openssh` is not installed, install `openssh-server`
+7. Enable port 22 as a firewall rule
+
+     ```
+     cloud_machine$ gcloud compute firewall-rules create default-allow-ssh --allow tcp:22
+     ```
+
+8. Run the VM and in case `openssh` is not installed, install `openssh-server`
 
     ```
     cloud_machine$ sudo apt install openssh-server
