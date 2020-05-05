@@ -71,7 +71,7 @@ Overall device result FAIL
 |skip|poe.negotiation|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|poe.power|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|poe.support|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|protocol.bacnet.pic|Other|Other|Bacnet device not found.|
+|skip|protocol.bacnet.pic|Other|Other|Bacnet device not found... Pics check cannot be performed.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
@@ -313,7 +313,7 @@ Verify BACnet traffic is compliant to the PIC statement
 --------------------
 Bacnet device not found... Pics check cannot be performed.
 --------------------
-RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed
+RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.
 
 ```
 
