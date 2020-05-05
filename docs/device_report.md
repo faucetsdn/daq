@@ -311,9 +311,9 @@ protocol.bacnet.pic
 --------------------
 Verify BACnet traffic is compliant to the PIC statement
 --------------------
- Bacnet device not found... Pics check cannot be performed.
+Bacnet device not found... Pics check cannot be performed.
 --------------------
-RESULT skip protocol.bacnet.pic Bacnet device not found.
+RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed
 
 ```
 

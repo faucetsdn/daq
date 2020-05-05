@@ -66,7 +66,7 @@ public class PicsTest {
         boolean csvExists = fileManager.checkDevicePicCSV();
         if(!csvExists) {
           this.csvFound = false;
-          reportAppendix = "Bacnet device found but pics.csv not found in device type directory\n"; 
+          reportAppendix = "Bacnet device found but pics.csv not found in device type directory.\n "; 
           skippedTestReport += reportAppendix;
           generateReport();
           return;
