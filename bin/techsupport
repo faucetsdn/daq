@@ -1,0 +1,35 @@
+#!/bin/bash -e
+
+TMPDIR=./techsupport
+mkdir -p $TMPDIR
+
+echo Collecting system information
+sudo ovs-vsctl show > $TMPDIR/ovs_vsctl_show.txt
+lsb_release -a > $TMPDIR/lsb_release.txt 2>/dev/null
+ip route > $TMPDIR/ip_route.txt
+ip link show > $TMPDIR/ip_link_show.txt
+arp -n > $TMPDIR/arp.txt
+
+if [ -d inst ]; then
+    echo Collecting run logs and config from 'inst' and 'local'
+    cp -r inst $TMPDIR
+    cp -r local $TMPDIR
+fi
+
+if [ -f local/system.conf ]; then
+    source local/system.conf
+fi
+
+# If an external switch was set up, try pinging it and saving that capture
+if [ -n "$ext_ctrl" ] && [ -n "$ext_addr" ]; then
+    echo Saving packet capture of ping to external switch
+    sudo timeout 3s tcpdump -i $ext_ctrl -w $TMPDIR/ping_switch.pcap &>/dev/null &
+    sleep 1 # give a second for tcpdump to settle
+    sudo arp -d $ext_addr
+    ping -c2 $ext_addr &>/dev/null
+fi
+
+# tar and compress, then delete the working folder
+tar -cjf $TMPDIR.tar.bz2 $TMPDIR
+rm -rf $TMPDIR
+echo Created tech-support file [$TMPDIR.tar.bz2]
