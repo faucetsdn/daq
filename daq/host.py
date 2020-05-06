@@ -337,6 +337,7 @@ class ConnectedHost:
         remote_paths = {}
         remote_paths["report_path"] = self._upload_file(self._report.path)
         remote_paths["json_path"] = self._upload_file(json_path)
+        remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
         if self._trigger_path:
             remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
