@@ -101,7 +101,7 @@ class DAQRunner:
             'states': self._get_states(),
             'ports': list(self._active_ports.keys()),
             'description': self.description,
-            'timestamp': int(time.time()),
+            'timestamp': time.time()
         }
         message.update(self.get_run_info())
         self.gcp.publish_message('daq_runner', 'heartbeat', message)
@@ -192,6 +192,7 @@ class DAQRunner:
                 if self._active_ports[port] is not True:
                     self._direct_port_traffic(self._active_ports[port], port, None)
                 self._activate_port(port, None)
+        self._send_heartbeat()
 
     def _activate_port(self, port, state):
         if state:
@@ -263,6 +264,7 @@ class DAQRunner:
         self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
+        self._send_heartbeat()
 
     def _loop_hook(self):
         self._handle_queued_events()
@@ -366,8 +368,6 @@ class DAQRunner:
             new_host.initialize()
 
             self._direct_port_traffic(target_mac, target_port, target)
-
-            self._send_heartbeat()
             return True
         except Exception as e:
             self.target_set_error(target_port, e)

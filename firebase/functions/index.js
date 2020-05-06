@@ -82,7 +82,7 @@ function handleTestResult(origin, siteName, message) {
       }
       return false;
     }).then((doUpdate) => {
-      if(!doUpdate) {
+      if (!doUpdate) {
         return;
       }
       return Promise.all([
@@ -112,12 +112,18 @@ function handleHeartbeat(origin, message) {
   const timestamp = new Date().toJSON();
   const originDoc = db.collection('origin').doc(origin);
   console.log('heartbeat', timestamp, origin)
-  originDoc.set({ 'updated': timestamp });
-  const heartbeatDoc = originDoc.collection('runner').doc('heartbeat')
-  return heartbeatDoc.set({
-    'updated': timestamp,
-    message
-  });
+  const heartbeatDoc = originDoc.collection('runner').doc('heartbeat');
+  return Promise.all([
+    originDoc.set({ 'updated': timestamp }),
+    heartbeatDoc.get().then((result) => {
+      const current = result.data();
+      if (!current || !current.message || current.message.timestamp < message.timestamp)
+        return heartbeatDoc.set({
+          'updated': timestamp,
+          message
+        });
+    })
+  ]);
 }
 
 function getDeviceDoc(registryId, deviceId) {

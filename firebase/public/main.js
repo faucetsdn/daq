@@ -11,6 +11,7 @@ const row_timestamps = {};
 const data_state = {};
 
 let last_result_time_sec = 0;
+let heartbeatTimestamp = 0;
 
 const origin_id = getQueryParam('origin');
 const site_name = getQueryParam('site');
@@ -21,7 +22,7 @@ const run_id = getQueryParam('runid');
 const from = getQueryParam('from');
 const to = getQueryParam('to');
 var db;
-
+var activePorts = [];
 document.addEventListener('DOMContentLoaded', () => {
   db = firebase.firestore();
   const settings = {
@@ -77,7 +78,7 @@ function setGridValue(row, column, runid, value, append) {
   const targetElement = document.querySelector(selector);
   if (targetElement) {
     const previous = targetElement.getAttribute('runid');
-    if (!previous || runid >= previous) {
+    if (!previous || !runid || runid >= previous) {
       if (runid) {
         targetElement.setAttribute('runid', runid);
       }
@@ -199,6 +200,7 @@ function handleOriginResult(origin, port, runid, test, result) {
   const status = getResultStatus(result);
   statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
   setRowState(port, runid);
+  setGridValue(port, 'active', runid, activePorts.has(numPort) + "")
   const gridElement = setGridValue(port, test, runid, status);
   handleFileLinks(port, runid, result);
   if (test === 'info') {
@@ -348,6 +350,7 @@ function dashboardSetup() {
   } else if (origin_id) {
     ensureGridRow('header');
     ensureGridColumn('row', 'port');
+    ensureGridColumn('active');
     triggerOrigin(db, origin_id);
   } else {
     document.getElementById('listings').classList.add('active');
@@ -375,7 +378,6 @@ function applyFilter() {
   document.location = "?" + str;
 }
 
-
 function displayVersions(originId) {
   db.collection('origin').doc(originId).collection('runner').doc('heartbeat').onSnapshot((result) => {
     const message = result.data().message;
@@ -387,6 +389,31 @@ function displayVersions(originId) {
     document.querySelector('#lsb-version').innerHTML = message.lsb;
     document.querySelector('#sys-version').innerHTML = message.uname;
     document.querySelector('#daq-versions').classList.add('valid');
+    if (message.timestamp && message.timestamp < heartbeatTimestamp) {
+      return;
+    }
+    activePorts = new Set(message.ports);
+    const ports = document.querySelectorAll(`#testgrid table td[label="row"]`);
+    heartbeatTimestamp = message.timestamp;
+    ports.forEach((port) => {
+      const numPort = Number(port.innerText.replace('port', ''));
+      if (!numPort) {
+        return;
+      }
+      setGridValue("port" + numPort, "active", undefined, activePorts.has(numPort) + "");
+      if (activePorts.has(numPort) && (!row_timestamps["port" + numPort]
+        || Math.floor((Date.now() - row_timestamps["port" + numPort]) / 1000.0) >= ROW_TIMEOUT_SEC)) {
+        row_timestamps["port" + numPort] = new Date();
+        const cols = document.querySelectorAll(`#testgrid table tr[label="port${numPort}"] td`);
+        cols.forEach((entry) => {
+          if (entry.innerText == port.innerText || entry.getAttribute("label") == "active") {
+            return;
+          }
+          entry.classList.add('old');
+          entry.classList.remove('current', 'gone');
+        });
+      }
+    });
   });
 }
 
