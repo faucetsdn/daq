@@ -4,11 +4,16 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const { PubSub } = require(`@google-cloud/pubsub`);
+const {PubSub} = require(`@google-cloud/pubsub`);
+const iot = require('@google-cloud/iot');
 const pubsub = new PubSub();
 
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
+
+const iotClient = new iot.v1.DeviceManagerClient({
+  // optional auth parameters.
+});
 
 exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) => {
   const message = event.json;
@@ -170,6 +175,45 @@ exports.device_state = functions.pubsub.topic('state').onPublish((event) => {
   }).then((deviceDoc) => {
     deviceState = deviceDoc.collection('state').doc('latest');
     return deviceState.set(msgObject);
+  });
+});
+
+exports.device_config = functions.pubsub.topic('target').onPublish((event) => {
+  const attributes = event.attributes;
+  const subFolder = attributes.subFolder;
+  if (subFolder != 'config') {
+    return null;
+  }
+  const projectId = attributes.projectId;
+  const cloudRegion = attributes.cloudRegion;
+  const registryId = attributes.deviceRegistryId;
+  const deviceId = attributes.deviceId;
+  const binaryData = event.data;
+  const msgString = Buffer.from(binaryData, 'base64').toString();
+  const msgObject = JSON.parse(msgString);
+  const version = 0;
+
+  console.log(projectId, cloudRegion, registryId, deviceId, msgString);
+
+  const formattedName = iotClient.devicePath(
+    projectId,
+    cloudRegion,
+    registryId,
+    deviceId
+  );
+
+  console.log(formattedName, msgObject);
+
+  const request = {
+    name: formattedName,
+    versionToUpdate: version,
+    binaryData: binaryData,
+  };
+
+  return iotClient.modifyCloudToDeviceConfig(request).then(responses => {
+    console.log('Success:', responses[0]);
+  }).catch(err => {
+    console.error('Could not update config:', deviceId, err);
   });
 });
 
