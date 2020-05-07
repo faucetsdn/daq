@@ -42,7 +42,7 @@ if [ -n "$ext_ctrl" ] && [ -n "$ext_addr" ]; then
     sudo timeout 5s tcpdump -i $ext_ctrl -w $TMPDIR/ping_switch.pcap &>/dev/null &
     sleep 1 # a second for tcpdump to settle
     sudo arp -d $ext_addr || true
-    ping -c4 $ext_addr &>$TMPDIR/ping_switch.txt || true
+    ping -c3 $ext_addr &>$TMPDIR/ping_switch.txt || true
     wait # wait for timeout+tcpdump to finish writing to pcap file
 fi
 
