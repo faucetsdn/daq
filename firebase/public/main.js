@@ -378,9 +378,37 @@ function applyFilter() {
   document.location = "?" + str;
 }
 
-function displayVersions(originId) {
+function showActivePorts(message) {
+  activePorts = new Set(message.ports);
+  const ports = document.querySelectorAll(`#testgrid table td[label="row"]`);
+  heartbeatTimestamp = message.timestamp;
+  ports.forEach((port) => {
+    const numPort = Number(port.innerText.replace('port', ''));
+    if (!numPort) {
+      return;
+    }
+    setGridValue("port" + numPort, "active", undefined, activePorts.has(numPort) + "");
+    if (activePorts.has(numPort) && (!row_timestamps["port" + numPort]
+      || Math.floor((Date.now() - row_timestamps["port" + numPort]) / 1000.0) >= ROW_TIMEOUT_SEC)) {
+      row_timestamps["port" + numPort] = new Date();
+      const cols = document.querySelectorAll(`#testgrid table tr[label="port${numPort}"] td`);
+      cols.forEach((entry) => {
+        if (entry.innerText == port.innerText || entry.getAttribute("label") == "active") {
+          return;
+        }
+        entry.classList.add('old');
+        entry.classList.remove('current', 'gone');
+      });
+    }
+  });
+}
+
+function showMetadata(originId, showActive) {
   db.collection('origin').doc(originId).collection('runner').doc('heartbeat').onSnapshot((result) => {
     const message = result.data().message;
+    if (message.timestamp && message.timestamp < heartbeatTimestamp) {
+      return;
+    }
     message.states && ensureColumns(message.states);
     const description = document.querySelector('#description .description');
     description.innerHTML = message.description;
@@ -389,31 +417,9 @@ function displayVersions(originId) {
     document.querySelector('#lsb-version').innerHTML = message.lsb;
     document.querySelector('#sys-version').innerHTML = message.uname;
     document.querySelector('#daq-versions').classList.add('valid');
-    if (message.timestamp && message.timestamp < heartbeatTimestamp) {
-      return;
+    if (showActive) {
+      showActivePorts(message);
     }
-    activePorts = new Set(message.ports);
-    const ports = document.querySelectorAll(`#testgrid table td[label="row"]`);
-    heartbeatTimestamp = message.timestamp;
-    ports.forEach((port) => {
-      const numPort = Number(port.innerText.replace('port', ''));
-      if (!numPort) {
-        return;
-      }
-      setGridValue("port" + numPort, "active", undefined, activePorts.has(numPort) + "");
-      if (activePorts.has(numPort) && (!row_timestamps["port" + numPort]
-        || Math.floor((Date.now() - row_timestamps["port" + numPort]) / 1000.0) >= ROW_TIMEOUT_SEC)) {
-        row_timestamps["port" + numPort] = new Date();
-        const cols = document.querySelectorAll(`#testgrid table tr[label="port${numPort}"] td`);
-        cols.forEach((entry) => {
-          if (entry.innerText == port.innerText || entry.getAttribute("label") == "active") {
-            return;
-          }
-          entry.classList.add('old');
-          entry.classList.remove('current', 'gone');
-        });
-      }
-    });
   });
 }
 
@@ -423,7 +429,7 @@ function triggerOrigin(db, originId) {
   };
 
   const originRef = db.collection('origin').doc(originId);
-  displayVersions(originId);
+  showMetadata(originId, true);
 
   watcherAdd(originRef, "port", undefined, (ref, port_id) => {
     watcherAdd(ref, "runid", latest, (ref, runid_id) => {
@@ -507,14 +513,14 @@ function triggerFilter(db) {
     }
   };
   if (origin_id) {
-    displayVersions(origin_id);
+    showMetadata(origin_id);
     processOrigin(origin_id);
   } else {
     db.collection('origin').get().then((collection) => {
       const origins = collection.docs;
       origins.map((origin, i) => {
         if (i == 0) {
-          displayVersions(origin.id);
+          showMetadata(origin.id);
         }
         processOrigin(origin.id);
       })
