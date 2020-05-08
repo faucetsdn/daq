@@ -1,0 +1,174 @@
+{
+  "modules": {
+    "bacext": {
+      "enabled": true
+    },
+    "bacnet": {
+      "enabled": true
+    },
+    "brute": {
+      "enabled": false
+    },
+    "discover": {
+      "enabled": true
+    },
+    "ipaddr": {
+      "timeout_sec": 120
+    },
+    "macoui": {
+      "enabled": true
+    },
+    "mudgee": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true,
+      "poe": {
+        "enabled" : true
+      }
+    },
+    "tls": {
+      "enabled": true
+    },
+    "passwords": {
+      "enabled": true
+    },
+    "udmi": {
+      "enabled": false
+    }
+  },
+  "process": {
+    "approver": "*** Approver ***",
+    "operator": "*** Operator ***"
+  },
+  "report": {
+    "results": [ "pass", "fail", "skip", "info"  ],
+    "categories": [ "Connection", "Security", "Network Time", "TLS", "Protocol", "PoE", "BOS"],
+    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Recommended Pass", "Information" ]
+  },
+  "tests": {
+    "connection.switch.port_link": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.switch.port_speed": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.switch.port_duplex": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "base.switch.ping": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.base.target_ping": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.network.dhcp_long": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.network.mac_oui": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.network.ntp_support": {
+      "category": "Network Time",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.network.communication_type": {
+      "category": "Communication",
+      "required": "info",
+      "expected": "information"
+    },
+    "connection.network.communication_min_send": {
+      "category": "Communication",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.nmap.ports": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.v3": {
+      "category": "TLS",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.x509": {
+      "category": "Access Control",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.passwords.http": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.passwords.https": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.passwords.ssh": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.passwords.telnet": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "protocol.bacnet.pic": {
+      "category": "Protocol",
+      "required": "pass",
+      "expected": "Required Pass for BACnet Devices"
+    },
+    "protocol.bacnet.version": {
+      "category": "Protocol",
+      "required": "info",
+      "expected": "Information"
+    },
+    "poe.switch.power": {
+      "category": "PoE",
+      "required": "pass",
+      "expected": "Required Pass for PoE Devices"
+    },
+    "poe.switch.negotiation": {
+      "category": "PoE",
+      "required": "pass",
+      "expected": "Required Pass for PoE Devices"
+    },
+    "poe.switch.support": {
+      "category": "PoE",
+      "required": "info",
+      "expected": "Information"
+    },
+    "cloud.udmi.pointset": {
+      "category": "BOS",
+      "required": "pass",
+      "expected": "Recommended Pass"
+    },
+    "security.discover.firmware": {
+      "category": "Security",
+      "required": "info",
+      "expected": "Information"
+    }
+  }
+}

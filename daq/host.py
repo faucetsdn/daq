@@ -106,11 +106,10 @@ class ConnectedHost:
         assert self._loaded_config, 'config was not loaded'
         self.remaining_tests = self._get_enabled_tests()
         LOGGER.info('Host %s running with enabled tests %s', self.target_port, self.remaining_tests)
-
-        self.record_result('startup', state=MODE.PREP)
-        self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
                                        self._loaded_config)
+        self.record_result('startup', state=MODE.PREP)
+        self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
@@ -217,6 +216,10 @@ class ConnectedHost:
         for file in os.listdir(template_dir):
             LOGGER.info('Copying %s...', file)
             shutil.copy(os.path.join(template_dir, file), path)
+
+    def _upload_file(self, path):
+        upload_path = self._get_unique_upload_path(path)
+        return self._gcp.upload_file(path, upload_path)
 
     def initialize(self):
         """Fully initialize a new host set"""
@@ -325,12 +328,19 @@ class ConnectedHost:
                     self._host_name(), trigger, reason)
         self._release_config()
         self._state_transition(_STATE.TERM)
-        self.record_result(self.test_name, state=MODE.TERM)
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
+        self._report.finalize()
+        json_path = self._report.path + ".json"
+        with open(json_path, 'w') as json_file:
+            json.dump(self._report.get_all_results(), json_file)
+        remote_paths = {}
+        remote_paths["report_path"] = self._upload_file(self._report.path)
+        remote_paths["json_path"] = self._upload_file(json_path)
+        remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
         if self._trigger_path:
-            self._gcp.upload_file(self._trigger_path,
-                                  self._get_unique_upload_path(self._trigger_path))
+            remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
+        self.record_result('terminate', state=MODE.TERM, **remote_paths)
         if self.test_host:
             try:
                 self.test_host.terminate(expected=trigger)
@@ -437,8 +447,7 @@ class ConnectedHost:
             LOGGER.info('Target port %d network pcap complete', self.target_port)
             nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
             assert nclosed == forget, 'forget and nclosed mismatch'
-            self._gcp.upload_file(self._startup_file,
-                                  self._get_unique_upload_path(self._startup_file))
+            self._upload_file(self._startup_file)
             if forget:
                 self.runner.monitor_forget(self._monitor_ref.stream())
                 self._monitor_ref.terminate()
@@ -508,18 +517,8 @@ class ConnectedHost:
                 self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
-                self._report.finalize()
-                json_path = self._report.path + ".json"
-                with open(json_path, 'w') as json_file:
-                    json.dump(self._report.get_all_results(), json_file)
                 self.test_name = None
-                self._gcp.upload_file(self._report.path,
-                                      self._get_unique_upload_path(self._report.path))
-                self._gcp.upload_file(json_path,
-                                      self._get_unique_upload_path(json_path))
                 self.record_result('finish', state=MODE.FINE, report=self._report.path)
-                self._report = None
-                self.record_result(None)
         except Exception as e:
             LOGGER.error('Target port %d start error: %s', self.target_port, e)
             self._state_transition(_STATE.ERROR)
@@ -595,20 +594,18 @@ class ConnectedHost:
         self._monitor_cleanup()
         failed = return_code or exception
         state = MODE.MERR if failed else MODE.DONE
-        self.record_result(self.test_name, state=state, code=return_code, exception=exception)
-        if exception:
-            self._report.accumulate(self.test_name, {ResultType.EXCEPTION: str(exception)})
-        self._report.accumulate(self.test_name, {ResultType.RETURN_CODE: return_code})
-        self._report.accumulate(self.test_name, {ResultType.MODULE_CONFIG: self._loaded_config})
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
         activation_log_path = os.path.join(self._host_dir_path(), 'activate.log')
         module_config_path = os.path.join(self._host_tmp_path(), self._MODULE_CONFIG)
+        remote_paths = {}
         for result_type, path in ((ResultType.REPORT_PATH, report_path),
                                   (ResultType.ACTIVATION_LOG_PATH, activation_log_path),
                                   (ResultType.MODULE_CONFIG_PATH, module_config_path)):
             if os.path.isfile(path):
                 self._report.accumulate(self.test_name, {result_type: path})
-                self._gcp.upload_file(path, self._get_unique_upload_path(path))
+                remote_paths[result_type.value] = self._upload_file(path)
+        self.record_result(self.test_name, state=state, code=return_code, exception=exception,
+                           **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
         self._run_next_test()
@@ -645,6 +642,11 @@ class ConnectedHost:
             self.test_start = current
         if name:
             self._record_result(name, current, **kwargs)
+            if kwargs.get("exception"):
+                self._report.accumulate(name, {ResultType.EXCEPTION: str(kwargs["exception"])})
+            if "code" in kwargs:
+                self._report.accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
+            self._report.accumulate(name, {ResultType.MODULE_CONFIG: self._loaded_config})
 
     @staticmethod
     def clear_port(gcp_instance, port):

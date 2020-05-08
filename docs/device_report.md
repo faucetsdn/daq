@@ -89,7 +89,28 @@ Overall device result FAIL
 |gone|unknown.fake.monkey|Other|Other||
 
 
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|timeout_sec|300|
+
+## Module pass
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module ping
+
+
+#### Report
 
 ```
 --------------------
@@ -130,6 +151,9 @@ RESULT pass base.target.ping target reached
 
 ## Module nmap
 
+
+#### Report
+
 ```
 --------------------
 security.ports.nmap
@@ -147,7 +171,16 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module discover
+
+
+#### Report
 
 ```
 --------------------
@@ -163,7 +196,16 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module switch
+
+
+#### Report
 
 ```
 --------------------
@@ -222,7 +264,17 @@ RESULT skip poe.support No local IP has been set, check ext_loip in system.conf
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|poe|{'enabled': True}|
+
 ## Module macoui
+
+
+#### Report
 
 ```
 --------------------
@@ -237,7 +289,16 @@ RESULT fail connection.mac_oui Manufacturer prefix not found!
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module bacext
+
+
+#### Report
 
 ```
 --------------------
@@ -260,7 +321,16 @@ RESULT skip protocol.bacnet.pic Bacnet device not found.
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module tls
+
+
+#### Report
 
 ```
 --------------------
@@ -322,7 +392,16 @@ RESULT skip security.tls.v1_3.x509
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module password
+
+
+#### Report
 
 ```
 --------------------
@@ -415,7 +494,16 @@ RESULT skip security.passwords.ssh Port 22 is not open on target device.
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module udmi
+
+
+#### Report
 
 ```
 --------------------
@@ -428,6 +516,12 @@ Device id is null, skipping.
 RESULT skip cloud.udmi.pointset No device id
 
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Report complete
 

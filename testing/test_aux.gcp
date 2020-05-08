@@ -1,4 +1,12 @@
 Running testing/test_aux.sh
+{
+  "Clean" : {
+    "AHU-1" : "True",
+    "AHU-22" : "True",
+    "GAT-123" : "True",
+    "SNS-4" : "True"
+  }
+}
 RESULT skip cloud.udmi.pointset No device id
 RESULT pass cloud.udmi.pointset
 RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted

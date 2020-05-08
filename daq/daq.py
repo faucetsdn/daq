@@ -17,7 +17,7 @@ LOGGER = logger.get_logger('daq')
 ALT_LOG = logger.get_logger('mininet')
 
 _PID_FILE = 'inst/daq.pid'
-_LOG_FORMAT = "%(levelname)-8s%(module)-15s%(asctime)-25s%(message)s"
+_LOG_FORMAT = "%(asctime)s %(module)-12s %(levelname)-8s %(message)s"
 
 class DAQ:
     """Wrapper class for configuration management"""

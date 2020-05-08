@@ -1,13 +1,13 @@
 {
-  "device_datasheets_url": "*** Device Datasheets URL ***",
-  "device_description": "*** Device Description ***",
-  "device_image": "*** Device Image URL ***",
+  "device_datasheets_url": "https://docs.distech-controls.com/bundle/ECY-S1000_SP/resource/ECY-S1000_SP.pdf",
+  "device_description": "The ECY-S1000 is a HVAC controller that supports a range of communication protocols such as BACnetIP, BACnet MS/TP, Modbus RTU, Modbus TCP, and M-Bus. With the RESTful API, data can be accessed from different applications, such as energy dashboards, analytics tools, and mobile applications.",
+  "device_image": "https://img.acuitybrands.com/public-assets/catalog/947830/ECY-RS485_FRONT_30nov2015.png?abl_version=01%2F01%2F0001+00:00:00",
   "device_info": {
-    "make": "*** Make ***",
-    "model": "*** Model ***",
-    "type": "*** Type ***"
+    "make": "Distech Controls, Inc.",
+    "model": "ECY-S1000",
+    "type": "BACnet controller"
   },
-  "device_manuals_url": "*** Device Manuals URL ***",
+  "device_manuals_url": "https://docs.distech-controls.com/bundle/ECY-CSC_IG/resource/ECY-CSC_IG.pdf",
   "modules": {
     "bacext": {
       "enabled": true
@@ -27,7 +27,7 @@
     "switch": {
       "enabled": true,
       "poe": {
-        "enabled" : true
+        "enabled" : false
       }
     },
     "tls": {
@@ -36,7 +36,7 @@
     "discover": {
       "enabled": true
     },
-    "password": {
+    "passwords": {
       "enabled": true
     }
   },
@@ -85,7 +85,7 @@
         },
         "161": {
           "allowed": false,
-          "reason": "Simple Network Management Protocol (SNMP)",
+          "description": "Simple Network Management Protocol (SNMP)",
           "reason": ""
         },
         "162": {
@@ -133,7 +133,7 @@
           "reason": ""
         },
         "47808": {
-          "allowed": false,
+          "allowed": true,
           "description": "BACnet protocol",
           "reason": ""
         }

@@ -24,7 +24,7 @@ fi
 
 if [ -n "$DAQ_TARGETS" ]; then
     declare -A test_set
-    for target in $(echo $DAQ_TARGETS | sed 's/,/ /'); do
+    for target in $(echo $DAQ_TARGETS | sed 's/,/ /g'); do
         echo Enabling target $target
         test_set[$target]=y
     done
