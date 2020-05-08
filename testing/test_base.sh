@@ -70,18 +70,18 @@ function test_mud {
     ucast_2=$($port_1_ucast_2 | wc -l)
     bcast_3=$($port_1_bcast_3 | wc -l)
     ucast_3=$($port_1_ucast_3 | wc -l)
-    echo port_1 $type $(($bcast_2 > 2)) $(($ucast_2 > 0)) $(($bcast_3 > 2)) $(($ucast_3 > 0)) | tee -a $TEST_RESULTS
+    echo port_1 $type $(($bcast_2 > 0)) $(($ucast_2 > 0)) $(($bcast_3 > 0)) $(($ucast_3 > 0)) | tee -a $TEST_RESULTS
     bcast_1=$($port_2_bcast_1 | wc -l)
     ucast_1=$($port_2_ucast_1 | wc -l)
     bcast_3=$($port_2_bcast_3 | wc -l)
     ucast_3=$($port_2_ucast_3 | wc -l)
-    echo port_2 $type $(($bcast_2 > 2)) $(($ucast_2 > 0)) $(($bcast_3 > 2)) $(($ucast_3 > 0)) | tee -a $TEST_RESULTS
+    echo port_2 $type $(($bcast_2 > 0)) $(($ucast_2 > 0)) $(($bcast_3 > 0)) $(($ucast_3 > 0)) | tee -a $TEST_RESULTS
     more inst/run-port-*/nodes/*/activate.log | cat
 }
 
 test_mud open
 test_mud base
-test_mud frdev-mix
+test_mud mix
 test_mud none
 test_mud star
 
