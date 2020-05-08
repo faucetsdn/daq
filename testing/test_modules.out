@@ -11,40 +11,19 @@ RESULT skip security.tls.v1_2
 RESULT skip security.tls.v1_2.x509
 RESULT skip security.tls.v1_3
 RESULT skip security.tls.v1_3.x509
-RESULT skip security.tls.v1.x509
-RESULT skip security.tls.v1_2
-RESULT skip security.tls.v1_2.x509
-RESULT skip security.tls.v1_2.x509
-RESULT skip security.tls.v1_3
-RESULT skip security.tls.v1_3.x509
-RESULT skip security.tls.v1_3.x509
 Testing tls alt tls
 RESULT pass security.tls.v1
 RESULT pass security.tls.v1.x509
 RESULT pass security.tls.v1_2
 RESULT pass security.tls.v1_2.x509
-RESULT fail security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
-RESULT pass security.tls.v1.x509
-RESULT pass security.tls.v1_2
-RESULT pass security.tls.v1_2.x509
-RESULT pass security.tls.v1_2.x509
-RESULT fail security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
-RESULT fail security.tls.v1_3.x509
+RESULT pass security.tls.v1_3
+RESULT pass security.tls.v1_3.x509
 Testing tls alt expiredtls
 RESULT fail security.tls.v1
 RESULT fail security.tls.v1.x509
 RESULT fail security.tls.v1_2
 RESULT fail security.tls.v1_2.x509
 RESULT fail security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
-RESULT fail security.tls.v1.x509
-RESULT fail security.tls.v1_2
-RESULT fail security.tls.v1_2.x509
-RESULT fail security.tls.v1_2.x509
-RESULT fail security.tls.v1_3
-RESULT fail security.tls.v1_3.x509
 RESULT fail security.tls.v1_3.x509
 Testing nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
