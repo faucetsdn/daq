@@ -4,11 +4,11 @@ Lint checks
 check_style exit code 0
 Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic Bacnet device not found... Pics check cannot be performed.
+RESULT skip protocol.bacnet.pic BACnet device not found, but pics.csv found in device type directory.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device found but pics.csv not found in device type directory.
+RESULT skip protocol.bacnet.pic BACnet device found, but pics.csv not found in device type directory.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT pass protocol.bacnet.pic
+RESULT pass protocol.bacnet.pic The devices matches the PICS
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 RESULT skip security.tls.v3
