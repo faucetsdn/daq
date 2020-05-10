@@ -79,8 +79,8 @@ Overall device result FAIL
 |skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
 |pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
-|skip|security.tls.v3|Other|Other||
-|skip|security.x509|Other|Other||
+|skip|security.tls.v3|Other|Other|IOException unable to connect to server|
+|skip|security.x509|Other|Other|IOException unable to connect to server|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -331,7 +331,7 @@ RESULT skip protocol.bacnet.pic Bacnet device not found.
 ```
 --------------------
 Collecting TLS cert from target address %% 10.20.96.164
-IOException unable to connect to server.
+IOException unable to connect to server
 
 --------------------
 security.tls.v3
@@ -340,7 +340,7 @@ Verify the device supports TLS 1.2 or above (as a client)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v3
+RESULT skip security.tls.v3 IOException unable to connect to server
 
 --------------------
 security.x509
@@ -349,7 +349,7 @@ Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure 
 --------------------
 See log above
 --------------------
-RESULT skip security.x509
+RESULT skip security.x509 IOException unable to connect to server
 
 ```
 

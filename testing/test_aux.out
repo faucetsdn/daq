@@ -11,12 +11,12 @@ RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
-RESULT skip security.tls.v3
-RESULT skip security.x509
-RESULT fail security.tls.v3
-RESULT fail security.x509
-RESULT pass security.tls.v3
-RESULT pass security.x509
+RESULT skip security.tls.v3 IOException unable to connect to server
+RESULT skip security.x509 IOException unable to connect to server
+RESULT fail security.tls.v3 Certificate is expired.
+RESULT fail security.x509 Certificate is expired.
+RESULT pass security.tls.v3 Certificate is active for current date.
+RESULT pass security.x509 Certificate is active for current date.
 RESULT skip security.passwords.http Port 80 is not open on target device.
 RESULT skip security.passwords.https Port 443 is not open on target device.
 RESULT skip security.passwords.telnet Port 23 is not open on target device.

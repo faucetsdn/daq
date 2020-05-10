@@ -15,6 +15,7 @@ public class Certs {
 
   String ipAddress = "127.0.0.1";
   String certificateReport = "";
+  String summaryNote = "";
 
   Report report = new Report();
 
@@ -41,16 +42,19 @@ public class Certs {
         if (certificate instanceof X509Certificate) {
           try {
             ((X509Certificate) certificate).checkValidity();
-            certificateReport += "Certificate is active for current date.\n";
+            summaryNote = "Certificate is active for current date.";
+            certificateReport += summaryNote + "\n";
             passTlsV3(true);
             passX509(true);
           } catch (CertificateExpiredException cee) {
-            certificateReport += "Certificate is expired.\n";
+            summaryNote = "Certificate is expired.";
+            certificateReport += summaryNote + "\n";
             passTlsV3(false);
             passX509(false);
             return false;
           } catch (CertificateNotYetValidException e) {
-            certificateReport += "Certificate not yet valid.\n";
+            summaryNote = "Certificate not yet valid.";
+            certificateReport += summaryNote + "\n";
             passTlsV3(false);
             passX509(false);
             return false;
@@ -61,7 +65,8 @@ public class Certs {
           certificateReport += "Certificate:\n" + certificate + "\n";
 
         } else {
-          certificateReport += "Unknown certificate type.\n";
+          summaryNote = "Unknown certificate type";
+          certificateReport += summaryNote + "\n";
           passTlsV3(false);
           passX509(false);
           System.err.println("Unknown certificate type: " + certificate);
@@ -70,12 +75,14 @@ public class Certs {
       }
       return true;
     } catch (MalformedURLException e) {
-      certificateReport += "MalformedURLException unable to connect to server.\n";
+      summaryNote = "MalformedURLException unable to connect to server.";
+      certificateReport += summaryNote + "\n";
       System.err.println("getCertificate MalformedURLException:" + e.getMessage());
       skipTlsX509();
       return false;
     } catch (IOException e) {
-      certificateReport += "IOException unable to connect to server.\n";
+      summaryNote = "IOException unable to connect to server";
+      certificateReport += summaryNote + "\n";
       System.err.println("getCertificate IOException:" + e.getMessage());
       skipTlsX509();
       return false;
@@ -86,23 +93,23 @@ public class Certs {
 
   private void passTlsV3(boolean status){
     if(status){
-      certificateReport += "RESULT pass security.tls.v3\n";
+      certificateReport += String.format("RESULT pass security.tls.v3 %s\n", summaryNote);
     } else {
-      certificateReport += "RESULT fail security.tls.v3\n";
+      certificateReport += String.format("RESULT fail security.tls.v3 %s\n", summaryNote);
     }
   }
 
   private void passX509(boolean status){
     if(status){
-      certificateReport += "RESULT pass security.x509\n";
+      certificateReport += String.format("RESULT pass security.x509 %s\n", summaryNote);
     } else {
-      certificateReport += "RESULT fail security.x509\n";      
+      certificateReport += String.format("RESULT fail security.x509 %s\n", summaryNote); 
     }
   }
 
   private void skipTlsX509(){
-    certificateReport += "RESULT skip security.tls.v3\n";
-    certificateReport += "RESULT skip security.x509\n";
+    certificateReport += String.format("RESULT skip security.tls.v3 %s\n", summaryNote);
+    certificateReport += String.format("RESULT skip security.x509 %s\n", summaryNote);
   }
 
   private static void disableSslVerification() {

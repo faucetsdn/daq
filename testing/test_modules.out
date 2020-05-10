@@ -5,14 +5,14 @@ RESULT skip base.startup.dhcp Using static ip 10.20.0.5
 RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
 RESULT pass base.target.ping target reached %% 10.20.0.5
 Testing tls alt
-RESULT skip security.tls.v3
-RESULT skip security.x509
+RESULT skip security.tls.v3 IOException unable to connect to server
+RESULT skip security.x509 IOException unable to connect to server
 Testing tls alt tls
-RESULT pass security.tls.v3
-RESULT pass security.x509
+RESULT pass security.tls.v3 Certificate is active for current date.
+RESULT pass security.x509 Certificate is active for current date.
 Testing tls alt expiredtls
-RESULT fail security.tls.v3
-RESULT fail security.x509
+RESULT fail security.tls.v3 Certificate is expired.
+RESULT fail security.x509 Certificate is expired.
 Testing nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
 Testing nmap bacnet
