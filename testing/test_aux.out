@@ -4,7 +4,7 @@ Lint checks
 check_style exit code 0
 Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic BACnet device not found, but pics.csv found in device type directory.
+RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT skip protocol.bacnet.pic BACnet device found, but pics.csv not found in device type directory.
 RESULT info protocol.bacnet.version Protocol version: 1
