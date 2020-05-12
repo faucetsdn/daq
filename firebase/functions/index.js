@@ -4,7 +4,7 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const {PubSub} = require(`@google-cloud/pubsub`);
+const { PubSub } = require(`@google-cloud/pubsub`);
 const iot = require('@google-cloud/iot');
 const pubsub = new PubSub();
 
@@ -14,6 +14,72 @@ const db = admin.firestore();
 const iotClient = new iot.v1.DeviceManagerClient({
   // optional auth parameters.
 });
+
+function deleteQueryBatch(originId, query, resolve, reject, deleted) {
+  const origins = db.collection('origin');
+  query.get()
+    .then((snapshot) => {
+      if (snapshot.size === 0) {
+        return 0;
+      }
+      if (!deleted[originId]) {
+        deleted[originId] = []
+      }
+      const batch = db.batch();
+      snapshot.docs.forEach((doc) => {
+        deleted[originId].push(doc.id);
+        const runDoc = origins.doc(originId).collection('runid').doc(doc.id);
+        batch.delete(runDoc);
+        batch.delete(doc.ref);
+      });
+
+      return batch.commit().then(() => {
+        return snapshot.size;
+      });
+    }).then((numDeleted) => {
+      if (numDeleted === 0) {
+        resolve();
+        return;
+      }
+      process.nextTick(() => {
+        deleteQueryBatch(originId, query, resolve, reject, deleted);
+      });
+    })
+    .catch(reject);
+}
+
+exports.daq_cleanup_crontab = functions.runWith({ timeoutSeconds: 300 }).pubsub.schedule('0 2 * * *')
+  .onRun((context) => {
+    const origins = db.collection('origin');
+    const deleted = {};
+    const ports = {};
+    return origins.get().then((snapshot) => {
+      return Promise.all(snapshot.docs.map((origin) => {
+        const expiration = origins.doc(origin.id).collection('expiration');
+        return new Promise((resolve, reject) => {
+          const query = expiration.where("expiration", "<=", new Date().toISOString()).limit(100);
+          deleteQueryBatch(origin.id, query, resolve, reject, deleted);
+        });
+      }));
+    }).then(() => {
+      // get ports for each origin
+      return Promise.all(Object.keys(deleted).map((originId) => {
+        return origins.doc(originId).collection('port').get().then((snapshot) => {
+          ports[originId] = snapshot.docs.map((doc) => doc.id);
+        });
+      }));
+    }).then(() => {
+      // delete run ids under port
+      return Promise.all(Object.keys(ports).map((originId) => {
+        return Promise.all(ports[originId].map((port) => {
+          const runids = origins.doc(originId).collection("port").doc(port).collection("runid");
+          return Promise.all(deleted[originId].map((runid) => {
+            return runids.doc(runid).delete();
+          }));
+        }));
+      }));
+    });
+  });
 
 exports.daq_firestore = functions.pubsub.topic('daq_runner').onPublish((event) => {
   const message = event.json;
@@ -55,12 +121,20 @@ function handleTestResult(origin, siteName, message) {
   const siteDoc = db.collection('site').doc(siteName);
   const portDoc = originDoc.collection('port').doc('port' + message.port);
   const deviceDoc = originDoc.collection('device').doc(message.device_id);
-  return Promise.all([
+  const updates = [
     originDoc.set({ 'updated': timestamp }),
     siteDoc.set({ 'updated': timestamp }),
     portDoc.set({ 'updated': timestamp }),
     deviceDoc.set({ 'updated': timestamp })
-  ]).then(() => {
+  ];
+  if (message.config && message.config.run_info
+    && message.config.run_info.expiration) {
+    const expirationDoc = originDoc.collection('expiration').doc(message.runid);
+    updates.push(expirationDoc.set({
+      expiration: message.config.run_info.expiration
+    }));
+  }
+  return Promise.all(updates).then(() => {
     if (!message.name) {
       console.log('latest config', message.device_id, message.runid);
       const confDoc = deviceDoc.collection('config').doc('latest');
