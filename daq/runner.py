@@ -28,6 +28,7 @@ class DAQRunner:
     class owns the main event loop and shards out work to subclasses."""
 
     MAX_GATEWAYS = 10
+    _DEFAULT_RETENTION_DAYS = 30
     _MODULE_CONFIG = 'module_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
     _DEFAULT_TESTS_FILE = 'misc/host_tests.conf'
@@ -115,7 +116,7 @@ class DAQRunner:
             'uname': self._sys_uname,
             'daq_run_id': str(self._daq_run_id)
         }
-        data_retention_days = self.config.get('run_data_retention_days', None)
+        data_retention_days = self.config.get('run_data_retention_days', self._DEFAULT_RETENTION_DAYS)
         if data_retention_days:
             expiration = datetime.now(timezone.utc) + timedelta(days=float(data_retention_days))
             info['expiration'] = gcp.to_timestamp(expiration)
