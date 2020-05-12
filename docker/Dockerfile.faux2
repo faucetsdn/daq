@@ -17,6 +17,9 @@ RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
 
+# Default to python3
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
+
 # Basic faux stuff
 COPY misc/start_faux misc/failing bin/
 
