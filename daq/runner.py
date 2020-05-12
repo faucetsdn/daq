@@ -115,9 +115,9 @@ class DAQRunner:
             'uname': self._sys_uname,
             'daq_run_id': str(self._daq_run_id)
         }
-        data_retention_days = float(self.config.get('run_data_retention_days'))
+        data_retention_days = self.config.get('run_data_retention_days', None)
         if data_retention_days:
-            expiration = datetime.now(timezone.utc) + timedelta(days=data_retention_days)
+            expiration = datetime.now(timezone.utc) + timedelta(days=float(data_retention_days))
             info['expiration'] = gcp.to_timestamp(expiration)
         return info
 
