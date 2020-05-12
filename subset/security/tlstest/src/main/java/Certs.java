@@ -48,10 +48,10 @@ public class Certs {
     }
 
     // Validate Server Certificates While using specified TLS version
-    boolean certValid = false;
+    CertificateStatus certStatus = CertificateStatus.CERTIFICATE_INVALID;
     try {
       Certificate[] certificates = getServerCertificates(socket);
-      certValid = validateCertificates(certificates);
+      certStatus = validateCertificates(certificates);
     } catch (SSLHandshakeException e) {
       System.out.println("SSLHandshakeException: Unable to complete handshake:" + e.getMessage());
       e.printStackTrace();
@@ -61,10 +61,9 @@ public class Certs {
     }
 
     validateCipher(socket);
-    boolean pass = certValid;
-    passTls(pass, tlsVersion);
-    passX509(pass, tlsVersion);
-    return pass;
+    passTls(certStatus, tlsVersion);
+    passX509(certStatus, tlsVersion);
+    return certStatus == CertificateStatus.CERTIFICATE_VALID;
   }
 
   /**
@@ -97,7 +96,7 @@ public class Certs {
     }
   }
 
-  private boolean validateCertificates(Certificate[] certificates) {
+  private CertificateStatus validateCertificates(Certificate[] certificates) {
     for (Certificate certificate : certificates) {
 
       if (certificate instanceof X509Certificate) {
@@ -117,48 +116,112 @@ public class Certs {
           }
           if (keyLength >= 2048) {
             certificateReport += "Certificate has valid public key length: " + keyLength + "\n\n";
-            return true;
+            return CertificateStatus.CERTIFICATE_VALID;
           }
-          return false;
-
+          return CertificateStatus.PUBLIC_KEY_INVALID_LENGTH;
         } catch (CertificateExpiredException cee) {
           certificateReport += "Certificate is expired.\n";
-          return false;
+          return CertificateStatus.CERTIFICATE_EXPIRED;
         } catch (CertificateNotYetValidException e) {
           certificateReport += "Certificate not yet valid.\n";
-          return false;
+          return CertificateStatus.CERTIFICATE_NOT_YET_VALID;
         }
       } else {
-        certificateReport += "Unknown certificate type.\n";
-        System.err.println("Unknown certificate type: " + certificate);
-        return false;
+        certificateReport += "Unsupported certificate type.\n";
+        return CertificateStatus.CERTIFICATE_TYPE_UNSUPPORTED;
       }
     }
-    return false;
+    return CertificateStatus.CERTIFICATE_INVALID;
   }
 
-  private void passX509(boolean status, String tlsVersion) {
-    if (status) {
-      certificateReport += "RESULT pass security.tls.v" + tlsVersion.replace(".", "_") + ".x509\n";
+  private void passX509(CertificateStatus status, String tlsVersion) {
+
+    if (status == CertificateStatus.CERTIFICATE_VALID) {
+      certificateReport +=
+          "RESULT pass security.tls.v"
+              + tlsVersion.replace(".", "_")
+              + ".x509 "
+              + getCertStatusMessage(status)
+              + "\n";
     } else {
-      certificateReport += "RESULT fail security.tls.v" + tlsVersion.replace(".", "_") + ".x509\n";
+      certificateReport +=
+          "RESULT fail security.tls.v"
+              + tlsVersion.replace(".", "_")
+              + ".x509 "
+              + getCertStatusMessage(status)
+              + "\n";
     }
+
+    //    if (status) {
+    //      certificateReport += "RESULT pass security.tls.v" + tlsVersion.replace(".", "_") +
+    // ".x509\n";
+    //    } else {
+    //      certificateReport += "RESULT fail security.tls.v" + tlsVersion.replace(".", "_") +
+    // ".x509\n";
+    //    }
   }
 
-  private void passTls(boolean status, String tlsVersion) {
-    if (status) {
-      certificateReport += "RESULT pass security.tls.v" + tlsVersion.replace(".", "_") + "\n";
+  private void passTls(CertificateStatus status, String tlsVersion) {
+    if (status == CertificateStatus.CERTIFICATE_VALID) {
+      certificateReport +=
+          "RESULT pass security.tls.v"
+              + tlsVersion.replace(".", "_")
+              + " "
+              + getCertStatusMessage(status)
+              + "\n";
     } else {
-      certificateReport += "RESULT fail security.tls.v" + tlsVersion.replace(".", "_") + "\n";
+      certificateReport +=
+          "RESULT fail security.tls.v"
+              + tlsVersion.replace(".", "_")
+              + " "
+              + getCertStatusMessage(status)
+              + "\n";
     }
+    //
+    //    if (status) {
+    //      certificateReport += "RESULT pass security.tls.v" + tlsVersion.replace(".", "_") + "\n";
+    //    } else {
+    //      certificateReport += "RESULT fail security.tls.v" + tlsVersion.replace(".", "_") + "\n";
+    //    }
+  }
+
+  private String getCertStatusMessage(CertificateStatus status) {
+    String message = "";
+    switch (status) {
+      case CERTIFICATE_VALID:
+        message = "Certificate active for current date and public key length > 2048.";
+        break;
+      case CERTIFICATE_NOT_YET_VALID:
+        message = "Certificate not yet active for current date.";
+        break;
+      case CERTIFICATE_EXPIRED:
+        message = "Certificate is expired.";
+        break;
+      case CERTIFICATE_TYPE_UNSUPPORTED:
+        message = "Certificate type is NOT in supported x509 format.";
+        break;
+      case PUBLIC_KEY_INVALID_LENGTH:
+        message = "Certificate public key length is < 2048.";
+        break;
+      case CERTIFICATE_INVALID:
+      default:
+        message = "Certificate could not be validated.";
+    }
+    return message;
   }
 
   private void skipTls(String tlsVersion) {
-    certificateReport += "RESULT skip security.tls.v" + tlsVersion.replace(".", "_") + "\n";
+    certificateReport +=
+        "RESULT skip security.tls.v"
+            + tlsVersion.replace(".", "_")
+            + " IOException unable to connect to server \n";
   }
 
   private void skipTlsX509(String tlsVersion) {
-    certificateReport += "RESULT skip security.tls.v" + tlsVersion.replace(".", "_") + ".x509\n";
+    certificateReport +=
+        "RESULT skip security.tls.v"
+            + tlsVersion.replace(".", "_")
+            + ".x509 IOException unable to connect to server\n";
   }
 
   /**

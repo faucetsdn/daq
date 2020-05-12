@@ -7,7 +7,7 @@ The TLS test attempts to verify various versions of TLS support.  Separate conne
  After establishing connections to devices, the test will proceed to validate the available certificates with the following criteria:
  1. The certificat is in the x509 format
  2. The public key length is at least 2048.  Currently handles both RSA and DSA public key formats.
-
+ 3. The certificate is not expired and active for the current date.
 The cipher suite used is also checked but does not currently affect the outcome of the results.  Currently the expected cipher suites are ECDH and ECSA.  If these are not present, a warning message will be logged in the activate.log of the switch node.
 
  
