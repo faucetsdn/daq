@@ -7,6 +7,7 @@ import threading
 import time
 import traceback
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import configurator
 import faucet_event_client
@@ -108,12 +109,17 @@ class DAQRunner:
 
     def get_run_info(self):
         """Return basic run info dict"""
-        return {
+        info = {
             'version': self._daq_version,
             'lsb': self._lsb_release,
             'uname': self._sys_uname,
             'daq_run_id': str(self._daq_run_id)
         }
+        data_retention_days = float(self.config.get('run_data_retention_days'))
+        if data_retention_days:
+            expiration = datetime.now(timezone.utc) + timedelta(days=data_retention_days)
+            info['expiration'] = gcp.to_timestamp(expiration)
+        return info
 
     def initialize(self):
         """Initialize DAQ instance"""
