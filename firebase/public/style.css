@@ -31,6 +31,10 @@ div {
     color: rgba(0,0,0,0);
 }
 
+#testgrid table tr ~ tr td[status=true] {
+    background: #AEA;
+}
+
 #testgrid table tr ~ tr td[status=done] {
     background: #AEA;
 }
@@ -44,7 +48,7 @@ div {
 }
 
 #testgrid table tr ~ tr td[status=term] {
-    background: #F88;
+    background: #FFF;
 }
 
 #testgrid table tr ~ tr td[status=fine] {
@@ -134,12 +138,21 @@ div {
     display: none
 }
 
-#listings.active {
-    display: block
+.active {
+    display: block!important
+}
+
+#filters {
+    display: none;
+    padding-bottom: 20px;
+}
+
+#filters div {
+    padding: 2px;
 }
 
 #daq-versions {
-    display: none
+    display: none;
 }
 
 #daq-versions.valid {

@@ -3,9 +3,7 @@
  * Uses firebase for data management, and renders straight to HTML.
  */
 
-const PORT_ROW_COUNT = 25;
 const ROW_TIMEOUT_SEC = 500;
-
 const display_columns = [];
 const display_rows = [];
 const row_timestamps = {};
@@ -13,6 +11,7 @@ const row_timestamps = {};
 const data_state = {};
 
 let last_result_time_sec = 0;
+let heartbeatTimestamp = 0;
 
 const origin_id = getQueryParam('origin');
 const site_name = getQueryParam('site');
@@ -20,9 +19,10 @@ const port_id = getQueryParam('port');
 const registry_id = getQueryParam('registry');
 const device_id = getQueryParam('device');
 const run_id = getQueryParam('runid');
-
+const from = getQueryParam('from');
+const to = getQueryParam('to');
 var db;
-
+var activePorts = [];
 document.addEventListener('DOMContentLoaded', () => {
   db = firebase.firestore();
   const settings = {
@@ -55,44 +55,18 @@ function ensureColumns(columns) {
   }
   ensureGridColumn('info');
   ensureGridColumn('timer');
-  ensureGridColumn('report');
 }
 
-function ensureGridRow(label, content, max_rows) {
+function ensureGridRow(label, content) {
   let added = false;
   if (display_rows.indexOf(label) < 0) {
     display_rows.push(label)
     const testTable = document.querySelector("#testgrid table")
-    const tableRows = testTable.querySelectorAll('tr');
-    const existingRows = (tableRows && Array.from(tableRows).slice(1)) || [];
-
     const rowElement = document.createElement('tr');
-
-    if (max_rows) {
-      for (row of existingRows) {
-        if (label > row.getAttribute('label')) {
-          testTable.insertBefore(rowElement, row);
-          added = true;
-          break;
-        }
-      }
-    }
-
-    if (!added) {
-      testTable.appendChild(rowElement)
-      added = true;
-    }
-
+    testTable.appendChild(rowElement)
     rowElement.setAttribute('label', label)
     for (column of display_columns) {
       appendTestCell(label, column);
-    }
-
-    if (max_rows && existingRows) {
-      const extraRows = existingRows.slice(max_rows - 1);
-      for (row of extraRows) {
-        row.remove();
-      }
     }
   }
   setGridValue(label, 'row', undefined, content || label);
@@ -102,10 +76,9 @@ function ensureGridRow(label, content, max_rows) {
 function setGridValue(row, column, runid, value, append) {
   const selector = `#testgrid table tr[label="${row}"] td[label="${column}"]`;
   const targetElement = document.querySelector(selector);
-
   if (targetElement) {
     const previous = targetElement.getAttribute('runid');
-    if (!previous || runid >= previous) {
+    if (!previous || !runid || runid >= previous) {
       if (runid) {
         targetElement.setAttribute('runid', runid);
       }
@@ -114,8 +87,8 @@ function setGridValue(row, column, runid, value, append) {
           targetElement.innerHTML += "<br />" + value;
         } else {
           targetElement.innerHTML = value;
+          targetElement.setAttribute('status', value);
         }
-        targetElement.setAttribute('status', value);
       }
     }
     const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
@@ -137,7 +110,7 @@ function setRowState(row, new_runid) {
   const rowElement = document.querySelector(`#testgrid table tr[label="${row}"]`);
   let runid = rowElement.getAttribute('runid') || 0;
   let prev = rowElement.getAttribute('prev') || 0;
-  console.log('rowstate', row, 'mudgee', new_runid, runid, prev);
+  console.debug('rowstate', row, 'mudgee', new_runid, runid, prev);
   if (runid === new_runid) {
     return;
   } else if (!runid || new_runid > runid) {
@@ -159,9 +132,6 @@ function setRowState(row, new_runid) {
 
 function updateTimeClass(entry, target, prev) {
   const value = entry.getAttribute('runid');
-  const row = entry.getAttribute('row');
-  const column = entry.getAttribute('label');
-  console.log('update', row, column, value, target, prev);
   if (value === target) {
     entry.classList.add('current');
     entry.classList.remove('old', 'gone');
@@ -190,7 +160,6 @@ function statusUpdate(message, e) {
 }
 
 function getResultStatus(result) {
-  console.log(result)
   if (result.exception) {
     return 'serr';
   }
@@ -203,20 +172,13 @@ function getResultStatus(result) {
   return '????';
 }
 
-function handleFileLinks(port, runid, result, type) {
+function handleFileLinks(row, runid, result) {
   const paths = Object.keys(result).filter(key => key.indexOf("path") >= 0);
   if (paths.length) {
-    let col = result.name;
-    if (result.name == "terminate") {
-      col = "report";
-    }
+    const col = result.name;
     paths.forEach((path) => {
       let name = path.replace("_path", "");
-      if (type == "port") {
-        addReportBucket(runid, col, runid, result[path], name);
-      } else {
-        addReportBucket(port, col, runid, result[path], name);
-      }
+      addReportBucket(row, col, runid, result[path], name);
     })
   }
 }
@@ -228,12 +190,17 @@ function handleOriginResult(origin, port, runid, test, result) {
   if (!row_timestamps[port] || row_timestamps[port] < result.timestamp) {
     row_timestamps[port] = result.timestamp;
   }
-  const href = `?origin=${origin}&port=${port}`;
+  if (test === "terminate") {
+    row_timestamps[port] = false;
+  }
+  const numPort = Number(port.replace('port', ''));
+  const href = `?origin=${origin}&port=${numPort}`;
   ensureGridRow(port, `<a href="${href}">${port}</a>`);
   ensureGridColumn(test);
   const status = getResultStatus(result);
   statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
   setRowState(port, runid);
+  setGridValue(port, 'active', runid, activePorts.has(numPort) + "")
   const gridElement = setGridValue(port, test, runid, status);
   handleFileLinks(port, runid, result);
   if (test === 'info') {
@@ -244,38 +211,50 @@ function handleOriginResult(origin, port, runid, test, result) {
   }
 }
 
-function handleSiteResult(site, device, runid, test, result) {
+function handleFilterResult(origin, site, runid, test, result) {
+  const id = origin + runid;
   if (result.timestamp > last_result_time_sec) {
     last_result_time_sec = result.timestamp;
   }
-  if (!row_timestamps[device] || row_timestamps[device] < result.timestamp) {
-    row_timestamps[device] = result.timestamp;
+  if ((!row_timestamps[id] && row_timestamps[id] !== false) || row_timestamps[id] < result.timestamp) {
+    row_timestamps[id] = result.timestamp;
   }
-  ensureGridRow(device);
-  ensureGridColumn(test);
-  setGridValue(device, 'device', runid, device)
-  setRowState(device, runid);
+  if (test === "terminate") {
+    row_timestamps[id] = false;
+  }
 
+  ensureGridRow(id, runid);
+  setGridValue(id, 'origin', runid, origin);
+  setGridValue(id, 'port', runid, result.port);
+  setGridValue(id, 'site', runid, site);
+  ensureGridColumn(test);
   const status = getResultStatus(result);
-  statusUpdate(`Updating ${device} ${test} run ${runid} with '${status}'.`);
-  setGridValue(device, test, runid, status);
+  setRowState(id, runid);
+  const gridElement = setGridValue(id, test, runid, status);
+  handleFileLinks(id, runid, result);
+  if (test === 'info') {
+    makeConfigLink(gridElement, status, id, runid);
+  }
+  if (test == 'startup') {
+    makeActivateLink(gridElement, id);
+  }
 }
 
 function makeConfigLink(element, info, port, runid) {
   const parts = info.split('/');
-  const device_id = parts[0];
-  const device_link = document.createElement('a');
-  device_link.href = `config.html?origin=${origin_id}&device=${device_id}&port=${port}&runid=${runid}`;
-  device_link.innerHTML = element.innerHTML;
+  const deviceId = parts[0];
+  const deviceLink = document.createElement('a');
+  deviceLink.href = `config.html?origin=${origin_id}&device=${deviceId}&port=${port}&runid=${runid}`;
+  deviceLink.innerHTML = element.innerHTML;
   element.innerHTML = '';
-  element.appendChild(device_link);
+  element.appendChild(deviceLink);
 }
 
 function activateRun(port) {
   console.log('Activate run port', port);
-  const origin_doc = db.collection('origin').doc(origin_id);
-  const control_doc = origin_doc.collection('control').doc(port).collection('config').doc('definition');
-  control_doc.update({
+  const originDoc = db.collection('origin').doc(origin_id);
+  const controlDoc = originDoc.collection('control').doc(port).collection('config').doc('definition');
+  controlDoc.update({
     'config.paused': false
   });
 }
@@ -296,29 +275,6 @@ function addReportBucket(row, col, runid, path, name) {
   });
 }
 
-function handlePortResult(origin, port, runid, test, result) {
-  const timestamp = result.timestamp;
-  if (timestamp > last_result_time_sec) {
-    last_result_time_sec = timestamp;
-  }
-  ensureGridRow(runid, runid, PORT_ROW_COUNT);
-  ensureGridColumn(test);
-  const status = getResultStatus(result);
-  statusUpdate(`Updating ${port} ${test} run ${runid} with '${status}'.`)
-  setRowState(runid, runid);
-  setGridValue(runid, test, runid, status);
-  if (result.info) {
-    setGridValue(runid, 'info', runid, result.info);
-  }
-  const element = setGridValue(runid, 'timer', runid);
-  const oldtime = element.getAttribute('timer') || 0;
-  if ((timestamp && oldtime < timestamp) || oldtime == 0) {
-    element.setAttribute('timer', timestamp);
-    setGridValue(runid, 'timer', runid, timestamp);
-  }
-  handleFileLinks(port, runid, result, "port");
-}
-
 function watcherAdd(ref, collection, limit, handler) {
   const base = ref.collection(collection);
   const target = limit ? limit(base) : base;
@@ -334,29 +290,29 @@ function watcherAdd(ref, collection, limit, handler) {
 }
 
 function listSites(db) {
-  const link_group = document.querySelector('#listings .sites');
-  db.collection('sites').get().then((snapshot) => {
+  const linkGroup = document.querySelector('#listings .sites');
+  db.collection('site').get().then((snapshot) => {
     snapshot.forEach((site_doc) => {
       site = site_doc.id;
-      const site_link = document.createElement('a');
-      site_link.setAttribute('href', '/?site=' + site);
-      site_link.innerHTML = site;
-      link_group.appendChild(site_link);
-      link_group.appendChild(document.createElement('p'));
+      const siteLink = document.createElement('a');
+      siteLink.setAttribute('href', '/?site=' + site);
+      siteLink.innerHTML = site;
+      linkGroup.appendChild(siteLink);
+      linkGroup.appendChild(document.createElement('p'));
     });
   }).catch((e) => statusUpdate('registry list error', e));
 }
 
 function listOrigins(db) {
-  const link_group = document.querySelector('#listings .origins');
+  const linkGroup = document.querySelector('#listings .origins');
   db.collection('origin').get().then((snapshot) => {
-    snapshot.forEach((origin_doc) => {
-      origin = origin_doc.id;
-      const origin_link = document.createElement('a');
-      origin_link.setAttribute('href', '/?origin=' + origin);
-      origin_link.innerHTML = origin;
-      link_group.appendChild(origin_link);
-      link_group.appendChild(document.createElement('p'));
+    snapshot.forEach((originDoc) => {
+      const origin = originDoc.id;
+      const originLink = document.createElement('a');
+      originLink.setAttribute('href', '/?origin=' + origin);
+      originLink.innerHTML = origin;
+      linkGroup.appendChild(originLink);
+      linkGroup.appendChild(document.createElement('p'));
     });
   }).catch((e) => statusUpdate('origin list error', e));
 }
@@ -365,30 +321,37 @@ function listUsers(db) {
   const link_group = document.querySelector('#listings .users');
   db.collection('users').get().then((snapshot) => {
     snapshot.forEach((user_doc) => {
-      const user = user_doc.id;
-      const user_link = document.createElement('a');
-      user_link.innerHTML = user_doc.data().email
-      link_group.appendChild(user_link);
+      const userLink = document.createElement('a');
+      userLink.innerHTML = user_doc.data().email
+      link_group.appendChild(userLink);
       link_group.appendChild(document.createElement('p'));
     });
   }).catch((e) => statusUpdate('user list error', e));
 }
 
 function dashboardSetup() {
-  if (site_name) {
+  if (registry_id && device_id) {
+    triggerDevice(db, registry_id, device_id);
+  } else if (port_id || device_id || site_name || run_id || from || to) {
+    document.getElementById('filters').classList.add('active');
     ensureGridRow('header');
-    ensureGridColumn('device');
-    triggerSite(db, site_name);
-  } else if (port_id) {
-    ensureGridRow('header');
-    ensureGridColumn('row', port_id);
-    triggerPort(db, origin_id, port_id);
+    ensureGridColumn('row', 'runid');
+    ensureGridColumn('origin');
+    ensureGridColumn('site');
+    ensureGridColumn('port');
+    document.getElementById('fromFilter').value = from;
+    document.getElementById('toFilter').value = to;
+    document.getElementById('deviceFilter').value = device_id;
+    document.getElementById('siteFilter').value = site_name;
+    document.getElementById('originFilter').value = origin_id;
+    document.getElementById('portFilter').value = port_id;
+    document.getElementById('runidFilter').value = run_id;
+    triggerFilter(db);
   } else if (origin_id) {
     ensureGridRow('header');
     ensureGridColumn('row', 'port');
+    ensureGridColumn('active');
     triggerOrigin(db, origin_id);
-  } else if (registry_id && device_id) {
-    triggerDevice(db, registry_id, device_id);
   } else {
     document.getElementById('listings').classList.add('active');
     listSites(db);
@@ -399,76 +362,170 @@ function dashboardSetup() {
   return origin_id;
 }
 
-function triggerOrigin(db, origin_id) {
-  const latest = (ref) => {
-    return ref.orderBy('updated', 'desc').limit(3);
+function applyFilter() {
+  const filters = {
+    from: document.getElementById('fromFilter').value,
+    to: document.getElementById('toFilter').value,
+    site: document.getElementById('siteFilter').value,
+    origin: document.getElementById('originFilter').value,
+    port: document.getElementById('portFilter').value,
+    device: document.getElementById('deviceFilter').value,
+    runid: document.getElementById('runidFilter').value
   };
+  const str = Object.keys(filters).map((filter) => {
+    return filter + "=" + filters[filter];
+  }).join('&');
+  document.location = "?" + str;
+}
 
-  let ref = db.collection('origin').doc(origin_id);
-  ref.collection('runner').doc('heartbeat').onSnapshot((result) => {
+function showActivePorts(message) {
+  activePorts = new Set(message.ports);
+  const ports = document.querySelectorAll(`#testgrid table td[label="row"]`);
+  heartbeatTimestamp = message.timestamp;
+  ports.forEach((port) => {
+    const numPort = Number(port.innerText.replace('port', ''));
+    if (!numPort) {
+      return;
+    }
+    setGridValue("port" + numPort, "active", undefined, activePorts.has(numPort) + "");
+    if (activePorts.has(numPort) && (!row_timestamps["port" + numPort]
+      || Math.floor((Date.now() - row_timestamps["port" + numPort]) / 1000.0) >= ROW_TIMEOUT_SEC)) {
+      row_timestamps["port" + numPort] = new Date();
+      const cols = document.querySelectorAll(`#testgrid table tr[label="port${numPort}"] td`);
+      cols.forEach((entry) => {
+        if (entry.innerText == port.innerText || entry.getAttribute("label") == "active") {
+          return;
+        }
+        entry.classList.add('old');
+        entry.classList.remove('current', 'gone');
+      });
+    }
+  });
+}
+
+function showMetadata(originId, showActive) {
+  db.collection('origin').doc(originId).collection('runner').doc('heartbeat').onSnapshot((result) => {
     const message = result.data().message;
+    if (message.timestamp && message.timestamp < heartbeatTimestamp) {
+      return;
+    }
     message.states && ensureColumns(message.states);
     const description = document.querySelector('#description .description');
     description.innerHTML = message.description;
     description.href = `config.html?origin=${origin_id}`;
-    document.querySelector('#daq-version').innerHTML = message.version
-    document.querySelector('#lsb-version').innerHTML = message.lsb
-    document.querySelector('#sys-version').innerHTML = message.uname
-    document.querySelector('#daq-versions').classList.add('valid')
-  });
-  watcherAdd(ref, "port", undefined, (ref, port_id) => {
-    watcherAdd(ref, "runid", latest, (ref, runid_id) => {
-      watcherAdd(ref, "test", undefined, (ref, test_id) => {
-        ref.onSnapshot((result) => {
-          // TODO: Handle results going away.
-          handleOriginResult(origin_id, port_id, runid_id, test_id, result.data());
-        });
-      });
-    });
+    document.querySelector('#daq-version').innerHTML = message.version;
+    document.querySelector('#lsb-version').innerHTML = message.lsb;
+    document.querySelector('#sys-version').innerHTML = message.uname;
+    document.querySelector('#daq-versions').classList.add('valid');
+    if (showActive) {
+      showActivePorts(message);
+    }
   });
 }
 
-function triggerSite(db, site_name) {
+function triggerOrigin(db, originId) {
   const latest = (ref) => {
     return ref.orderBy('updated', 'desc').limit(1);
   };
 
-  let ref = db.collection('sites').doc(site_name);
-  watcherAdd(ref, "device", undefined, (ref, device_id) => {
-    console.log('device', device_id);
+  const originRef = db.collection('origin').doc(originId);
+  showMetadata(originId, true);
+
+  watcherAdd(originRef, "port", undefined, (ref, port_id) => {
     watcherAdd(ref, "runid", latest, (ref, runid_id) => {
-      console.log('runid', runid_id);
+      ref = originRef.collection("runid").doc(runid_id);
       watcherAdd(ref, "test", undefined, (ref, test_id) => {
-        console.log('test', test_id);
         ref.onSnapshot((result) => {
           // TODO: Handle results going away.
-          handleSiteResult(site_name, device_id, runid_id, test_id, result.data());
+          handleOriginResult(originId, port_id, runid_id, test_id, result.data());
         });
       });
     });
   });
 }
 
-function triggerPort(db, origin_id, port_id) {
-  const latest = (ref) => {
-    return ref.orderBy('updated', 'desc').limit(PORT_ROW_COUNT);
+function triggerFilter(db) {
+  const filters = {
+    siteName: site_name,
+    port: Number(port_id),
+    deviceId: device_id,
+    from,
+    to
+  };
+  const filtered = (ref) => {
+    ref = ref.orderBy('updated', "desc");
+    for (let filter in filters) {
+      let value = filters[filter];
+      if (value) {
+        let op = "==";
+        if (filter == "to" || filter == "from") {
+          op = filter == "to" ? "<=" : ">=";
+          value = value.replace('"', '');
+          value += (filter == "to" ? "\uf8FF" : "");
+          filter = "updated";
+        }
+        ref = ref.where(filter, op, value);
+      }
+    }
+    // Gonna wait to do pagination.
+    return ref.limit(100);
   };
 
-  const origin_doc = db.collection('origin').doc(origin_id);
-  const heartbeat_doc = origin_doc.collection('runner').doc('heartbeat');
-
-  heartbeat_doc.onSnapshot((result) => {
-    ensureColumns(result.data().message.states)
-  });
-
-  watcherAdd(origin_doc.collection('port').doc(port_id), "runid", latest, (ref, runid_id) => {
-    watcherAdd(ref, "test", undefined, (ref, test_id) => {
-      ref.onSnapshot((result) => {
-        // TODO: Handle results going away.
-        handlePortResult(origin_id, port_id, runid_id, test_id, result.data());
+  const processOrigin = (originId) => {
+    const ref = db.collection('origin').doc(originId);
+    if (run_id) {
+      const runIds = run_id.split(',');
+      runIds.map((runId) => {
+        const runDoc = db.collection('origin').doc(originId).collection('runid').doc(runId);
+        runDoc.get().then((doc) => {
+          const data = doc.data();
+          const site = data && data.siteName;
+          const port = data && data.port;
+          const deviceId = data && data.deviceId;
+          const updated = data && new Date(data.updated);
+          if ((filters.siteName && filters.siteName != site)
+            || (filters.port && filters.port != port)
+            || (filters.deviceId && filters.deviceId != deviceId)
+            || (filters.from && new Date(filters.from) > updated)
+            || (filters.to && (Number(new Date(filters.to)) + 60 * 24 * 60 * 1000) < updated)) {
+            return;
+          }
+          watcherAdd(runDoc, "test", undefined, (ref, test_id) => {
+            ref.onSnapshot((result) => {
+              // TODO: Handle results going away.
+              handleFilterResult(originId, site, runId, test_id, result.data());
+            });
+          });
+        });
       });
+    } else {
+      watcherAdd(ref, "runid", filtered, (ref, runid_id) => {
+        ref.get().then((runDoc) => {
+          const site = runDoc.data() && runDoc.data().siteName;
+          watcherAdd(ref, "test", undefined, (ref, test_id) => {
+            ref.onSnapshot((result) => {
+              // TODO: Handle results going away.
+              handleFilterResult(originId, site, runid_id, test_id, result.data());
+            });
+          });
+        });
+      });
+    }
+  };
+  if (origin_id) {
+    showMetadata(origin_id);
+    processOrigin(origin_id);
+  } else {
+    db.collection('origin').get().then((collection) => {
+      const origins = collection.docs;
+      origins.map((origin, i) => {
+        if (i == 0) {
+          showMetadata(origin.id);
+        }
+        processOrigin(origin.id);
+      })
     });
-  });
+  }
 }
 
 function triggerDevice(db, registry_id, device_id) {
@@ -481,23 +538,28 @@ function triggerDevice(db, registry_id, device_id) {
       statusUpdate('');
       const hue = Math.floor(snapshot.data().random * 360);
       const hsl = `hsl(${hue}, 80%, 50%)`;
-      console.log(hsl)
       document.body.style.backgroundColor = hsl;
     });
 }
 
 function interval_updater() {
   if (last_result_time_sec) {
-    const time_delta_sec = Math.floor(Date.now() / 1000.0 - last_result_time_sec);
-    document.getElementById('update').innerHTML = `Last update ${time_delta_sec} sec ago.`
+    const timeDeltaSec = Math.floor(Date.now() / 1000.0 - last_result_time_sec);
+    document.getElementById('update').innerHTML = `Last update ${timeDeltaSec} sec ago.`
   }
   for (const row in row_timestamps) {
-    const last_update = new Date(row_timestamps[row]);
-    const time_delta_sec = Math.floor((Date.now() - last_update) / 1000.0);
+    const lastUpdate = new Date(row_timestamps[row]);
+    const timeDeltaSec = Math.floor((Date.now() - lastUpdate) / 1000.0);
     const selector = `#testgrid table tr[label="${row}"`;
     const runid = document.querySelector(selector).getAttribute('runid');
-    setGridValue(row, 'timer', runid, `${time_delta_sec} sec`);
-    setRowClass(row, time_delta_sec > ROW_TIMEOUT_SEC);
+
+    if (row_timestamps[row] === false || timeDeltaSec >= ROW_TIMEOUT_SEC) {
+      setGridValue(row, 'timer', runid, row_timestamps[row] ? 'Timed Out' : 'Done');
+      setRowClass(row, true);
+    } else {
+      setGridValue(row, 'timer', runid, `${timeDeltaSec}s`);
+      setRowClass(row, false);
+    }
   }
 }
 
@@ -601,6 +663,9 @@ function loadJsonEditors() {
   Promise.all([latest_doc.get(), config_doc.get()]).then((docs) => {
     latest_doc_resolved = docs[0].data();
     config_doc_resolved = docs[1].data();
+    if (!config_doc_resolved) {
+      config_doc_resolved = {};
+    }
     if ((!config_doc_resolved.config || JSON.stringify(config_doc_resolved.config) == "{}") && latest_doc_resolved.config.config) {
       config_doc_resolved.config = { modules: latest_doc_resolved.config.config.modules }
       return config_doc.set(config_doc_resolved);
