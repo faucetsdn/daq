@@ -10,8 +10,6 @@ LOCALDIR=$ROOT/local
 FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
-SYSTEM_CONF=system.conf
-LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(git describe --dirty)
 TAGGED_VERSION=`cat misc/docker_images.ver`
 LSB_RAW=$(lsb_release -a)
@@ -133,7 +131,7 @@ if [ -d venv ]; then
 fi
 
 echo Using python3 at `which python3`
-echo Executing: $runcmd daq/daq.py $LOCAL_CONFIG $@
+echo Executing: $runcmd daq/daq.py $conf_file $@
 
 export PYTHONDONTWRITEBYTECODE=True
 export TERM=dumb
@@ -143,7 +141,7 @@ export OVSVSCTL_ORIG=`which ovs-vsctl`
 export PATH=$ROOT/binhack:$PATH
 
 exit_code=0
-$runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?
+$runcmd daq/daq.py $conf_file $@ 2>&1 || exit_code=$?
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file

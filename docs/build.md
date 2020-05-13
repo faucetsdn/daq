@@ -95,7 +95,7 @@ Build subset/pentests/Dockerfile.test_nmap into daq/test_nmap, log to build/dock
 Updating .build_hash
 ~/daq$ <b>cmd/run</b>
 Loading config from local/system.conf
-<b>Starting Mon Feb 11 08:40:12 PST 2019, run_mode is local</b>
+<b>Starting Mon Feb 11 08:40:12 PST 2019</b>
 &hellip;
 </pre>
 

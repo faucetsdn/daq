@@ -56,11 +56,6 @@ if [ -z "$ext_addr" ]; then
     false
 fi
 
-if [ "$run_mode" != "local" ]; then
-    echo Non-local run mode not supported for physical switches yet.
-    false
-fi
-
 echo Configuring control interface $ext_ctrl at $ext_ofip
 
 while ! ifconfig $ext_ctrl > /dev/null || ! ifconfig $ext_intf > /dev/null; do
