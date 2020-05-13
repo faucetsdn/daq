@@ -12,8 +12,8 @@ if [ -n "$TARGET_IP" ]; then
 
     java -jar tlstest/build/libs/tlstest.jar $TARGET_IP
 
-    grep "RESULT" $LOCAL_REPORT >> $RESULT_LINES
-    grep -v "RESULT" $LOCAL_REPORT >> $MONO_LOG
+    grep "RESULT" $LOCAL_REPORT | tee -a $RESULT_LINES
+    grep -v "RESULT" $LOCAL_REPORT | tee -a $MONO_LOG
 
     write_out_monolog $REPORT \
                       $MANIFEST \
