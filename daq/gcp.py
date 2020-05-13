@@ -22,7 +22,11 @@ LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
-    return datetime.datetime.now(datetime.timezone.utc).strftime(TIMESTAMP_FORMAT)[:-3] + 'Z'
+    return to_timestamp(datetime.datetime.now(datetime.timezone.utc))
+
+def to_timestamp(timestamp):
+    """"Get a JSON-compatible formatted timestamp"""
+    return timestamp.strftime(TIMESTAMP_FORMAT)[:-3] + 'Z'
 
 def parse_timestamp(timestamp_str):
     """Parses a timestamp generated from get_timestamp"""

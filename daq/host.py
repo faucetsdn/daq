@@ -337,6 +337,7 @@ class ConnectedHost:
         remote_paths = {}
         remote_paths["report_path"] = self._upload_file(self._report.path)
         remote_paths["json_path"] = self._upload_file(json_path)
+        remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
         if self._trigger_path:
             remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
@@ -646,18 +647,6 @@ class ConnectedHost:
             if "code" in kwargs:
                 self._report.accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
             self._report.accumulate(name, {ResultType.MODULE_CONFIG: self._loaded_config})
-
-    @staticmethod
-    def clear_port(gcp_instance, port):
-        """Clear a port-based entry without having an instantiated host class"""
-        result = {
-            'name': 'startup',
-            'state': MODE.INIT,
-            'runid': ConnectedHost.make_runid(),
-            'timestamp': gcp.get_timestamp(),
-            'port': port
-        }
-        gcp_instance.publish_message('daq_runner', 'test_result', result)
 
     def _record_result(self, name, run_info=True, current=None, **kwargs):
         result = {

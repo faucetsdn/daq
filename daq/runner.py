@@ -7,6 +7,7 @@ import threading
 import time
 import traceback
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import configurator
 import faucet_event_client
@@ -27,6 +28,7 @@ class DAQRunner:
     class owns the main event loop and shards out work to subclasses."""
 
     MAX_GATEWAYS = 10
+    _DEFAULT_RETENTION_DAYS = 30
     _MODULE_CONFIG = 'module_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
     _DEFAULT_TESTS_FILE = 'misc/host_tests.conf'
@@ -101,19 +103,25 @@ class DAQRunner:
             'states': self._get_states(),
             'ports': list(self._active_ports.keys()),
             'description': self.description,
-            'timestamp': int(time.time()),
+            'timestamp': time.time()
         }
         message.update(self.get_run_info())
         self.gcp.publish_message('daq_runner', 'heartbeat', message)
 
     def get_run_info(self):
         """Return basic run info dict"""
-        return {
+        info = {
             'version': self._daq_version,
             'lsb': self._lsb_release,
             'uname': self._sys_uname,
             'daq_run_id': str(self._daq_run_id)
         }
+        data_retention_days = self.config.get('run_data_retention_days',
+                                              self._DEFAULT_RETENTION_DAYS)
+        if data_retention_days:
+            expiration = datetime.now(timezone.utc) + timedelta(days=float(data_retention_days))
+            info['expiration'] = gcp.to_timestamp(expiration)
+        return info
 
     def initialize(self):
         """Initialize DAQ instance"""
@@ -182,8 +190,6 @@ class DAQRunner:
 
         if active != (port in self._active_ports):
             LOGGER.info('Port %s dpid %s is now active %s', port, dpid, active)
-            if active:
-                connected_host.ConnectedHost.clear_port(self.gcp, port)
         if active:
             if not self._active_ports.get(port):
                 self._activate_port(port, True)
@@ -194,6 +200,7 @@ class DAQRunner:
                 if self._active_ports[port] is not True:
                     self._direct_port_traffic(self._active_ports[port], port, None)
                 self._activate_port(port, None)
+        self._send_heartbeat()
 
     def _activate_port(self, port, state):
         if state:
@@ -265,6 +272,7 @@ class DAQRunner:
         self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
+        self._send_heartbeat()
 
     def _loop_hook(self):
         self._handle_queued_events()
@@ -368,8 +376,6 @@ class DAQRunner:
             new_host.initialize()
 
             self._direct_port_traffic(target_mac, target_port, target)
-
-            self._send_heartbeat()
             return True
         except Exception as e:
             self.target_set_error(target_port, e)

@@ -1,0 +1,551 @@
+{
+  "device_datasheets_url": "*** Device Datasheets URL ***",
+  "device_description": "*** Device Description ***",
+  "device_image": "*** Device Image URL ***",
+  "device_info": {
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "make": "*** Make ***",
+    "model": "*** Model ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "type": "*** Type ***",
+    "firmware_version": "*** Firmware Version ***"
+  },
+  "device_manuals_url": "*** Device Manuals URL ***",
+  "device_type": "*** Device Type ***",
+  "modules": {
+    "bacext": {
+      "enabled": true
+    },
+    "bacnet": {
+      "enabled": true
+    },
+    "brute": {
+      "enabled": false
+    },
+    "discover": {
+      "enabled": true
+    },
+    "ipaddr": {
+      "timeout_sec": 120
+    },
+    "macoui": {
+      "enabled": true
+    },
+    "mudgee": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true,
+      "poe": {
+        "enabled" : true
+      }
+    },
+    "tls": {
+      "enabled": true
+    },
+    "passwords": {
+      "enabled": true
+    },
+    "udmi": {
+      "enabled": false
+    }
+  },
+  "servers": {
+    "tcp": {
+      "ports": {
+        "20": {
+          "allowed": false,
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
+        },
+        "21": {
+          "allowed": false,
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
+        },
+        "22": {
+          "allowed": true,
+          "description": "Secure Shell (SSH) server",
+          "reason": ""
+        },
+        "23": {
+          "allowed": false,
+          "description": "Telnet Server",
+          "reason": ""
+        },
+        "25": {
+          "allowed": false,
+          "description": "Simple Mail Transfer Protocol (SMTP) Server",
+          "reason": ""
+        },
+        "37": {
+          "allowed": false,
+          "description": "Deprecated Time Protocol",
+          "reason": ""
+        },
+        "53": {
+          "allowed": true,
+          "description": "DNS",
+          "reason": ""
+        },
+        "80": {
+          "allowed": false,
+          "description": "Administrative Insecure Web-Server",
+          "reason": ""
+        },
+        "110": {
+          "allowed": false,
+          "description": "Post Office Protocol v3 (POP3) Server",
+          "reason": ""
+        },
+        "123": {
+          "allowed": true,
+          "description": "Network Time Protocol",
+          "reason": ""
+        },
+        "135": {
+          "allowed": false,
+          "description": "OPC Data Access",
+          "reason": ""
+        },
+        "143": {
+          "allowed": false,
+          "description": "Internet Message Access Protocol (IMAP) Server",
+          "reason": ""
+        },
+        "161": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP)",
+          "reason": ""
+        },
+        "162": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP) Trap",
+          "reason": ""
+        },
+        "443": {
+          "allowed": true,
+          "description": "Secure Web-Server",
+          "reason": ""
+        },
+        "465": {
+          "allowed": false,
+          "description": "SMTPS",
+          "reason": ""
+        },
+        "587": {
+          "allowed": false,
+          "description": "SMTPS",
+          "reason": ""
+        },
+        "502": {
+          "allowed": false,
+          "description": "Unencrypted Modbus TCP",
+          "reason": ""
+        },
+        "853": {
+          "allowed": true,
+          "description": "Secure DNS",
+          "reason": ""
+        },
+        "1883": {
+          "allowed": false,
+          "description": "Unencrypted MQTT",
+          "reason": ""
+        },
+        "1911": {
+          "allowed": false,
+          "description": "Unencrypted FOX",
+          "reason": ""
+        },
+        "2221": {
+          "allowed": false,
+          "description": "Secure EtherNet/IP",
+          "reason": ""
+        },
+        "2222": {
+          "allowed": false,
+          "description": "EtherNet/IP I/O",
+          "reason": ""
+        },
+        "2455": {
+          "allowed": false,
+          "description": "WAGO-IO-SYSTEM",
+          "reason": ""
+        },
+        "2540": {
+          "allowed": false,
+          "description": "LonWorks",
+          "reason": ""
+        },
+        "2541": {
+          "allowed": false,
+          "description": "LonWorks 2",
+          "reason": ""
+        },
+        "3011": {
+          "allowed": false,
+          "description": "Unencrypted Tridium Platform Protocol",
+          "reason": ""
+        },
+        "3639": {
+          "allowed": false,
+          "description": "XAP Extensible Automation Protocol",
+          "reason": ""
+        },
+        "3865": {
+          "allowed": false,
+          "description": "XPL Automation Protocol",
+          "reason": ""
+        },
+        "4123": {
+          "allowed": false,
+          "description": "Z-Wave Protocol",
+          "reason": ""
+        },
+        "4843": {
+          "allowed": true,
+          "description": "Secure OPC UA Protocol",
+          "reason": ""
+        },
+        "4911": {
+          "allowed": false,
+          "description": "Secure FOX",
+          "reason": ""
+        },
+        "5011": {
+          "allowed": false,
+          "description": "Secure Tridium Platform Protocol",
+          "reason": ""
+        },
+        "5500": {
+          "allowed": false,
+          "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol",
+          "reason": ""
+        },
+        "5671": {
+          "allowed": false,
+          "description": "Secure AMQP",
+          "reason": ""
+        },
+        "5672": {
+          "allowed": false,
+          "description": "Unencrypted AMQP",
+          "reason": ""
+        },
+        "5683": {
+          "allowed": false,
+          "description": "Unencrypted CoAP",
+          "reason": ""
+        },
+        "5684": {
+          "allowed": false,
+          "description": "Secure CoAP",
+          "reason": ""
+        },
+        "5800": {
+          "allowed": false,
+          "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol Over HTTP",
+          "reason": ""
+        },
+        "6454": {
+          "allowed": false,
+          "description": "ArtNet",
+          "reason": ""
+        },
+        "6626": {
+          "allowed": false,
+          "description": "WAGO-SERVICE",
+          "reason": ""
+        },
+        "8883": {
+          "allowed": true,
+          "description": "Secure MQTT",
+          "reason": ""
+        },
+        "9000": {
+          "allowed": false,
+          "description": "oBIX",
+          "reason": ""
+        },
+        "9598": {
+          "allowed": false,
+          "description": "VSCP ",
+          "reason": ""
+        },
+        "17755": {
+          "allowed": false,
+          "description": "ZigBee IP",
+          "reason": ""
+        },
+        "17756": {
+          "allowed": false,
+          "description": "Secure ZigBee IP",
+          "reason": ""
+        },
+        "34962": {
+          "allowed": false,
+          "description": "PROFInet RT Unicast",
+          "reason": ""
+        },
+        "34963": {
+          "allowed": false,
+          "description": "PROFInet RT Multicast",
+          "reason": ""
+        },
+        "34964": {
+          "allowed": false,
+          "description": "PROFInet Context Manager",
+          "reason": ""
+        },
+        "34980": {
+          "allowed": false,
+          "description": "EtherCAT",
+          "reason": ""
+        },
+        "41794": {
+          "allowed": false,
+          "description": "Crestron Control Port",
+          "reason": ""
+        },
+        "41795": {
+          "allowed": false,
+          "description": "Crestron Terminal Port",
+          "reason": ""
+        },
+        "41796": {
+          "allowed": false,
+          "description": "Crestron Secure Control Port",
+          "reason": ""
+        },
+        "41797": {
+          "allowed": false,
+          "description": "Crestron Secure Terminal Port",
+          "reason": ""
+        },
+        "44818": {
+          "allowed": false,
+          "description": "EtherNet/IP messaging",
+          "reason": ""
+        },
+        "47806": {
+          "allowed": false,
+          "description": "Automated Logic remote access",
+          "reason": ""
+        },
+        "48400": {
+          "allowed": false,
+          "description": "OPC Unified Architecture",
+          "reason": ""
+        },
+        "48401": {
+          "allowed": false,
+          "description": "OPC Unified Architecture",
+          "reason": ""
+        }
+      }
+    },
+    "udp": {
+      "ports": {
+        "69": {
+          "allowed": false,
+          "description": "Trivial File Transfer Protocol (TFTP) Server",
+          "reason": ""
+        },
+        "123": {
+          "allowed": true,
+          "description": "Network Time Protocol (NTP) Server",
+          "reason": ""
+        },
+        "135": {
+          "allowed": false,
+          "description": "OPC Data Access",
+          "reason": ""
+        },
+        "161": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP)",
+          "reason": ""
+        },
+        "162": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP) Trap",
+          "reason": ""
+        },
+        "1876": {
+          "allowed": false,
+          "description": "EasyIO/Sedona SOX",
+          "reason": ""
+        },
+        "2221": {
+          "allowed": false,
+          "description": "Secure EtherNet/IP",
+          "reason": ""
+        },
+        "2222": {
+          "allowed": false,
+          "description": "EtherNet/IP I/O",
+          "reason": ""
+        },
+        "2455": {
+          "allowed": false,
+          "description": "WAGO-IO-SYSTEM",
+          "reason": ""
+        },
+        "2540": {
+          "allowed": false,
+          "description": "LonWorks",
+          "reason": ""
+        },
+        "2541": {
+          "allowed": false,
+          "description": "LonWorks 2",
+          "reason": ""
+        },
+        "3639": {
+          "allowed": false,
+          "description": "XAP Extensible Automation Protocol",
+          "reason": ""
+        },
+        "3671": {
+          "allowed": false,
+          "description": "KNX ",
+          "reason": ""
+        },
+        "3865": {
+          "allowed": false,
+          "description": "XPL Automation Protocol",
+          "reason": ""
+        },
+        "4123": {
+          "allowed": false,
+          "description": "Z-Wave Protocol",
+          "reason": ""
+        },
+        "4843": {
+          "allowed": true,
+          "description": "Secure OPC UA Protocol",
+          "reason": ""
+        },
+        "5671": {
+          "allowed": false,
+          "description": "Secure AMQP",
+          "reason": ""
+        },
+        "5672": {
+          "allowed": false,
+          "description": "Unencrypted AMQP",
+          "reason": ""
+        },
+        "5683": {
+          "allowed": false,
+          "description": "Unencrypted CoAP",
+          "reason": ""
+        },
+        "5684": {
+          "allowed": false,
+          "description": "Secure CoAP",
+          "reason": ""
+        },
+        "6454": {
+          "allowed": false,
+          "description": "ArtNet",
+          "reason": ""
+        },
+        "6626": {
+          "allowed": false,
+          "description": "WAGO-SERVICE",
+          "reason": ""
+        },
+        "9598": {
+          "allowed": false,
+          "description": "VSCP ",
+          "reason": ""
+        },
+        "17755": {
+          "allowed": false,
+          "description": "ZigBee IP",
+          "reason": ""
+        },
+        "17756": {
+          "allowed": false,
+          "description": "Secure ZigBee IP",
+          "reason": ""
+        },
+        "34962": {
+          "allowed": false,
+          "description": "PROFInet RT Unicast",
+          "reason": ""
+        },
+        "34963": {
+          "allowed": false,
+          "description": "PROFInet RT Multicast",
+          "reason": ""
+        },
+        "34964": {
+          "allowed": false,
+          "description": "PROFInet Context Manager",
+          "reason": ""
+        },
+        "34980": {
+          "allowed": false,
+          "description": "EtherCAT",
+          "reason": ""
+        },
+        "41794": {
+          "allowed": false,
+          "description": "Crestron Control Port",
+          "reason": ""
+        },
+        "41795": {
+          "allowed": false,
+          "description": "Crestron Terminal Port",
+          "reason": ""
+        },
+        "41796": {
+          "allowed": false,
+          "description": "Crestron Secure Control Port",
+          "reason": ""
+        },
+        "41797": {
+          "allowed": false,
+          "description": "Crestron Secure Terminal Port",
+          "reason": ""
+        },
+        "44818": {
+          "allowed": false,
+          "description": "EtherNet/IP messaging",
+          "reason": ""
+        },
+        "47806": {
+          "allowed": false,
+          "description": "Automated Logic remote access",
+          "reason": ""
+        },
+        "47808": {
+          "allowed": false,
+          "description": "BACnet",
+          "reason": ""
+        },
+        "47809": {
+          "allowed": false,
+          "description": "BACnet",
+          "reason": ""
+        },
+        "57612": {
+          "allowed": false,
+          "description": "Trend Control Systems Protocol",
+          "reason": ""
+        }
+      }
+    }
+  },
+  "process": {
+     "attempt_number": 1
+  }
+}
