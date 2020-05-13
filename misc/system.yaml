@@ -6,7 +6,7 @@
 # The startup_cmds line can then be commented out to prevent the (unnecessary)
 # startup of the faux test device.
 
-# Description description for dashboard.
+# Description for dashboard.
 site_description: "Default Configuration"
 
 # Default time to monitor before starting tests.

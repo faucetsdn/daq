@@ -7,7 +7,7 @@ syntax = "proto3";
  * DAQ configuration.
  */
 message ForchConfig {
-  // Description description for dashboard.
+  // Description for dashboard.
   string site_description = 1;
 
   // Default time to monitor before starting tests.
@@ -91,7 +91,7 @@ message ForchConfig {
   // Configuration directory for runtime tests.
   string test_config = 28;
 
-  // Set port-debounce for flaky connecitons. Zero to disable.
+  // Set port-debounce for flaky connections. Zero to disable.
   int32 port_debounce_sec = 29;
 
   // Hook for failure diagnostics.
