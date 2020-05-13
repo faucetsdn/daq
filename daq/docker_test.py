@@ -50,6 +50,9 @@ class DockerTest:
                          "SWITCH_PORT=" + params['switch_port'],
                          "SWITCH_IP=" + params['switch_ip'],
                          "SWITCH_MODEL=" + params['switch_model']]
+        if 'switch_username' in params:
+            env_vars += ["SWITCH_USERNAME=" + params['switch_username'],
+                         "SWITCH_PASSWORD=" + params['switch_password']]
 
         vol_maps = [params['scan_base'] + ":/scans"]
         self._map_if_exists(vol_maps, params, 'inst')

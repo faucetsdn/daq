@@ -558,6 +558,10 @@ class ConnectedHost:
             params['switch_port'] = str(self.target_port)
             params['switch_model'] = self.config['switch_model']
 
+        if 'switch_username' in self.config:
+            params['switch_username'] = self.config['switch_username']
+            params['switch_password'] = self.config['switch_password']
+
         try:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
