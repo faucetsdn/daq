@@ -113,7 +113,7 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-cloud-logging==1.14.0
 
 $PIP freeze
-
+deactivate
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
     targetrev=$(cd mininet; git rev-parse $MININETV)
