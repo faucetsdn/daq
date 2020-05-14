@@ -79,6 +79,33 @@ $AG install \
 $AG install python-pip
 python2 -m pip install setuptools
 
+if [ -d mininet ]; then
+    echo Checking mininet version matches $MININETV...
+    targetrev=$(cd mininet; git rev-parse $MININETV)
+    instrev=$(cd mininet; git rev-parse HEAD)
+    if [ "$targetrev" != "$instrev" ]; then
+        echo Target mininet version $MININETV does not match installed version.
+        false
+    fi
+    if [ ! -f mininet/.the_house_that_daq_built ]; then
+        echo Mininet build seems to be incomplete. Try bin/clean_dev and try again.
+        false
+    fi
+else
+    echo Cloning $MININET $MININETV...
+    git clone $MININET
+    (
+        cd mininet
+        git reset --hard $MININETV
+        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
+            perl -pi -e "s/${i}//g" util/install.sh ;
+        done
+        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
+        util/install.sh -n
+    )
+    touch mininet/.the_house_that_daq_built
+fi
+
 # Can't use venv inside of containers because of absolute paths.
 if [ -n "$DAQ_CONTAINER" ]; then
     echo Skipping venv activation.
@@ -113,34 +140,6 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-cloud-logging==1.14.0
 
 $PIP freeze
-deactivate
-if [ -d mininet ]; then
-    echo Checking mininet version matches $MININETV...
-    targetrev=$(cd mininet; git rev-parse $MININETV)
-    instrev=$(cd mininet; git rev-parse HEAD)
-    if [ "$targetrev" != "$instrev" ]; then
-        echo Target mininet version $MININETV does not match installed version.
-        false
-    fi
-    if [ ! -f mininet/.the_house_that_daq_built ]; then
-        echo Mininet build seems to be incomplete. Try bin/clean_dev and try again.
-        false
-    fi
-else
-    echo Cloning $MININET $MININETV...
-    git clone $MININET
-    (
-        cd mininet
-        git reset --hard $MININETV
-        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
-            perl -pi -e "s/${i}//g" util/install.sh ;
-        done
-        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
-        util/install.sh -n
-    )
-    touch mininet/.the_house_that_daq_built
-fi
-
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
 
