@@ -26,10 +26,7 @@
 	    },
 	    "local_id": {
 	      "type": "string"
-	    },
-            "force_value": {
-              "type": ["number", "string", "boolean"]
-            }
+	    }
           }
         }
       }

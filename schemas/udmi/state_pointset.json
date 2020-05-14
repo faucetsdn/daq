@@ -16,6 +16,12 @@
             "units": {
               "type": "string",
             },
+            "source": {
+              "enum": [
+                "none",
+                "fix"
+              ]
+            },
             "status": {
               "$ref": "file:logentry.json#/definitions/report"
             }
