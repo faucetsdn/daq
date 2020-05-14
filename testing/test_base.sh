@@ -4,13 +4,15 @@ source testing/test_preamble.sh
 
 echo Base Tests >> $TEST_RESULTS
 
-cp misc/system_base.conf local/system.conf
+cp misc/system_base.yaml local/system.yaml
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp misc/report_template.md inst/tmp_site/
 
 echo Creating MUD templates...
 bin/mudacl
+
+bin/build_proto check
 
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 cmd/run -b -s site_path=inst/tmp_site
@@ -28,14 +30,14 @@ fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST
 
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
-echo device_specs=misc/device_specs/simple.json >> local/system.conf
-cmd/run -s startup_faux_opts=telnet
+cmd/run -s startup_faux_opts=telnet device_specs=misc/device_specs/simple.json
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 
 # Test an "external" switch.
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
+rm local/system.yaml
 cp misc/system_ext.conf local/system.conf
 cmd/run -s
 more inst/result.log | tee -a $TEST_RESULTS

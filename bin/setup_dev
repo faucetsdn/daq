@@ -188,3 +188,6 @@ if ! docker images > /dev/null; then
     echo If this is the first time, try logging out and log back in again.
     false
 fi
+
+rm -rf protoc-gen-doc
+git clone https://github.com/pseudomuto/protoc-gen-doc.git
