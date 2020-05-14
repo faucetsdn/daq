@@ -5,14 +5,26 @@ RESULT skip base.startup.dhcp Using static ip 10.20.0.5
 RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
 RESULT pass base.target.ping target reached %% 10.20.0.5
 Testing tls alt
-RESULT skip security.tls.v3
-RESULT skip security.x509
+RESULT skip security.tls.v1 IOException unable to connect to server
+RESULT skip security.tls.v1.x509 IOException unable to connect to server
+RESULT skip security.tls.v1_2 IOException unable to connect to server
+RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
+RESULT skip security.tls.v1_3 IOException unable to connect to server
+RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 Testing tls alt tls
-RESULT pass security.tls.v3
-RESULT pass security.x509
+RESULT pass security.tls.v1 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_2 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_2.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_3 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_3.x509 Certificate active for current date and public key length > 2048.
 Testing tls alt expiredtls
-RESULT fail security.tls.v3
-RESULT fail security.x509
+RESULT fail security.tls.v1 Certificate is expired.
+RESULT fail security.tls.v1.x509 Certificate is expired.
+RESULT fail security.tls.v1_2 Certificate is expired.
+RESULT fail security.tls.v1_2.x509 Certificate is expired.
+RESULT fail security.tls.v1_3 Certificate could not be validated.
+RESULT fail security.tls.v1_3.x509 Certificate could not be validated.
 Testing nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
 Testing nmap bacnet

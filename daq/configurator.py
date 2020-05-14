@@ -2,6 +2,7 @@
 
 """Configuration manager class for daqy-things."""
 
+import collections.abc
 import copy
 import json
 import os
@@ -34,13 +35,21 @@ def show_help():
     print("See misc/system.conf for a detailed accounting of potential options.")
 
 
+def _append_config(config_list, prefix, config):
+    for key in sorted(config.keys()):
+        value = config[key]
+        if isinstance(value, collections.abc.Mapping):
+            new_prefix = prefix + key + '.'
+            _append_config(config_list, new_prefix, value)
+        else:
+            quote = '"' if ' ' in str(value) else ''
+            config_list.append("%s%s=%s%s%s" % (prefix, key, quote, config[key], quote))
+
+
 def print_config(config):
     """Dump config info as key=value to console out."""
     config_list = []
-    for key in sorted(config.keys()):
-        value = config[key]
-        quote = '"' if ' ' in str(value) else ''
-        config_list.append("%s=%s%s%s" % (key, quote, config[key], quote))
+    _append_config(config_list, '', config)
     print(*config_list, sep='\n')
 
 
@@ -56,22 +65,25 @@ def merge_config(base, adding):
             base[key] = copy.deepcopy(value)
 
 
-def load_config(path, filename=None):
+def load_config(path, filename=None, optional=False):
     """Load a config file"""
     if not path:
         return None
     config_file = os.path.join(path, filename) if filename else path
     if not os.path.exists(config_file):
-        LOGGER.info('Skipping missing %s', config_file)
-        return {}
+        if optional:
+            LOGGER.info('Skipping missing %s', config_file)
+            return {}
+        raise Exception('Config file %s not found.' % config_file)
+
     LOGGER.info('Loading config from %s', config_file)
     with open(config_file) as data_file:
         return yaml.safe_load(data_file)
 
 
-def load_and_merge(base, path, filename=None):
+def load_and_merge(base, path, filename=None, optional=False):
     """Load a config file and merge with an existing base"""
-    merge_config(base, load_config(path, filename))
+    merge_config(base, load_config(path, filename, optional))
 
 
 def write_config(path, filename, config):
@@ -97,8 +109,17 @@ class Configurator:
         if self._verbose:
             print(message)
 
-    def _read_config_into(self, filename, config):
-        self._log('Reading config from %s' % filename)
+    def _read_yaml_config(self, config, filename):
+        self._log('Reading yaml config from %s' % filename)
+        loaded_config = load_config(filename)
+        if 'include' in loaded_config:
+            include = loaded_config['include']
+            del loaded_config['include']
+            self._read_config_into(config, include)
+        merge_config(config, loaded_config)
+
+    def _read_flat_config(self, config, filename):
+        self._log('Reading flat config from %s' % filename)
         with open(filename) as file:
             line = file.readline()
             while line:
@@ -107,10 +128,17 @@ class Configurator:
                 if len(parts) == 2:
                     config[parts[0].strip()] = parts[1].strip().strip('"').strip("'")
                 elif len(entry) == 2 and entry[0] == 'source':
-                    self._read_config_into(entry[1], config)
+                    self._read_config_into(config, entry[1])
                 elif parts and parts[0]:
                     raise Exception('Unknown config entry: %s' % line)
                 line = file.readline()
+
+    def _read_config_into(self, config, filename):
+        if filename.endswith('.yaml'):
+            return self._read_yaml_config(config, filename)
+        if filename.endswith('.conf'):
+            return self._read_flat_config(config, filename)
+        raise Exception('Unknown config file type: %s' % filename)
 
     def parse_args(self, args):
         """Parse command line arguments"""
@@ -127,7 +155,7 @@ class Configurator:
                     parts = arg.split('=', 1)
                     config[parts[0]] = parts[1]
                 else:
-                    self._read_config_into(arg, config)
+                    self._read_config_into(config, arg)
         return config
 
 

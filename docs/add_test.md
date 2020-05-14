@@ -64,7 +64,6 @@ is exactly that: flaky, so expect it to fail half the time!
 <pre>
 ~/daq$ cmd/run
 Loading config from local/system.conf
-run_mode is local
 &hellip;
 INFO:gcp:No gcp_cred credential specified in config
 INFO:runner:Reading test definition file <b>local/local_tests.conf</b>

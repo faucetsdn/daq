@@ -5,6 +5,8 @@
 .build_built
 .project
 
+protoc-gen-doc/
+
 firebase/public/firebase_config.js
 firebase/public/deploy_version.js
 
