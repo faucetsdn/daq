@@ -80,7 +80,7 @@ fi
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
 echo Build all container images...
-cmd/build inline
+cmd/build # inline
 
 echo Starting aux test run...
 cmd/run -s
