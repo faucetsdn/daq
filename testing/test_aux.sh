@@ -160,6 +160,10 @@ function monitor_marker {
     MARKER=$2
     rm -f $MARKER
     while [ ! -f $MARKER ]; do
+        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
+        if [ -n "$test_done" ]; then
+           break
+        fi
         echo test_aux.sh waiting for $MARKER
         sleep 60
     done
@@ -182,4 +186,65 @@ more inst/run-port-*/finish/nmap*/* | cat
 
 tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
+
+function monitor_interface {
+    while true; do 
+        found=$(cat inst/cmdrun.log 2>/dev/null | grep "$2")
+        if [ -n "$found" ]; then
+            echo found $2
+            eval $1 
+            break
+        fi
+        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
+        if [ -n "$test_done" ]; then
+            break
+        fi
+    done &
+}
+rm -f inst/cmdrun.log
+# Check port toggling does not cause a shutdown 
+cp misc/system_base.conf local/system.conf
+echo "port_toggle_timeout_sec=10" >> local/system.conf
+echo "port_debounce_sec=0" >> local/system.conf
+monitor_interface "sudo ifconfig faux down;sleep 1; sudo ifconfig faux up" "Port 1 dpid 2 is now active"
+cmd/run -s  
+if [ -n "$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive")" ]; then
+    echo "Port 1 dpid 2 is now inactive" | tee -a $TEST_RESULTS
+fi
+cat inst/result.log | sort | tee -a $TEST_RESULTS
+
+# Check port inactive past toggling timeout causes a shutdown
+cp misc/system_base.conf local/system.conf
+echo "port_toggle_timeout_sec=25" >> local/system.conf
+echo "port_debounce_sec=0" >> local/system.conf
+monitor_interface "sudo ifconfig faux down" "Target port 1 test hold running"
+cmd/run -s -k 
+if [ -n "$(cat inst/cmdrun.log | grep "port not active for 25s")" ]; then
+    echo "port not active for 25s" | tee -a $TEST_RESULTS
+fi
+cat inst/result.log | sort | tee -a $TEST_RESULTS
+
+rm -f inst/cmdrun.log
+# Check port toggling timeout configuration override in test module config
+cp misc/system_base.conf local/system.conf
+echo "port_toggle_timeout_sec=10" >> local/system.conf
+echo "port_debounce_sec=0" >> local/system.conf
+intf_mac="9a02571e8f00" 
+mkdir -p local/site/mac_addrs/$intf_mac
+cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+    {
+        "modules": {
+            "hold": {
+              "port_toggle_timeout_sec": 25
+            }
+        }
+    }
+EOF
+monitor_interface "sudo ifconfig faux down" "Target port 1 test hold running"
+cmd/run -s -k 
+if [ -n "$(cat inst/cmdrun.log | grep "port not active for 25s")" ]; then
+    echo "port not active for 25s" | tee -a $TEST_RESULTS
+fi
+cat inst/result.log | sort | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
+

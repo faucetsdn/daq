@@ -97,15 +97,12 @@ class DockerTest:
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def terminate(self, expected=True):
+    def terminate(self):
         """Forcibly terminate this container"""
-        if bool(self.docker_host) != expected:
-            raise Exception("Target port %d test %s already terminated %s" % (
-                self.target_port, self.test_name, expected))
-        if not expected:
-            return None
-        LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
-        return self._docker_finalize()
+        if self.docker_host:
+            LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
+            return self._docker_finalize()
+        return None
 
     def _map_if_exists(self, vol_maps, params, kind):
         base = params.get('%s_base' % kind)

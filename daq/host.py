@@ -160,6 +160,13 @@ class ConnectedHost:
             return self._default_timeout_sec
         return test_module.get('timeout_sec', self._default_timeout_sec)
 
+    def get_port_toggle_timeout(self, test):
+        """Get port toggle timeout configuration that's specific to each test module"""
+        test_module = self._loaded_config['modules'].get(test)
+        if not test_module:
+            return None
+        return test_module.get('port_toggle_timeout_sec')
+
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
 
@@ -343,7 +350,7 @@ class ConnectedHost:
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
         if self.test_host:
             try:
-                self.test_host.terminate(expected=trigger)
+                self.test_host.terminate()
                 self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
