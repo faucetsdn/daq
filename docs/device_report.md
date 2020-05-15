@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|1|0|0|0|
-|Other|1|2|20|2|
+|Other|1|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -64,6 +64,8 @@ Overall device result FAIL
 |skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |pass|base.target.ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
+|skip|cloud.udmi.state|Other|Other|No device id|
+|skip|cloud.udmi.system|Other|Other|No device id|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
 |skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
