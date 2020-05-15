@@ -509,13 +509,31 @@ RESULT skip security.passwords.ssh Port 22 is not open on target device.
 
 ```
 --------------------
+cloud.udmi.state
+--------------------
+Validates device state payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.state No device id
+
+--------------------
 cloud.udmi.pointset
 --------------------
-Validates device payload against the UDMI schema
+Validates device pointset payload.
 --------------------
-Device id is null, skipping.
+No device id
 --------------------
 RESULT skip cloud.udmi.pointset No device id
+
+--------------------
+cloud.udmi.system
+--------------------
+Validates device system payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.system No device id
 
 ```
 
