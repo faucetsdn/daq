@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import daq.udmi.Message;
 import daq.udmi.Message.PointSet;
 import daq.udmi.Message.PointSetState;
-import daq.udmi.Report;
+import daq.udmi.Entry;
 import daq.udmi.Message.State;
 import com.google.common.base.Preconditions;
 import java.io.File;
@@ -30,15 +30,16 @@ public class Pubber {
       .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
   private static final String POINTSET_TOPIC = "events/pointset";
+  private static final String SYSTEM_TOPIC = "events/system";
   private static final String STATE_TOPIC = "state";
   private static final String CONFIG_TOPIC = "config";
 
   private static final int MIN_REPORT_MS = 200;
-  private static final int DEFAULT_REPORT_MS = 1000;
+  private static final int DEFAULT_REPORT_MS = 5000;
   private static final int CONFIG_WAIT_TIME_MS = 10000;
   private static final int STATE_THROTTLE_MS = 1500;
   private static final String CONFIG_ERROR_STATUS_KEY = "config_error";
-  private static final long CONNECTION_RETRY_DELAY_MS = 10000;
+  private static final int LOGGING_MOD_COUNT = 10;
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -53,6 +54,7 @@ public class Pubber {
   private MqttPublisher mqttPublisher;
   private ScheduledFuture<?> scheduledFuture;
   private long lastStateTimeMs;
+  private int sendCount;
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
@@ -115,6 +117,10 @@ public class Pubber {
     try {
       sendDeviceMessage(configuration.deviceId);
       updatePoints();
+      if (sendCount % LOGGING_MOD_COUNT == 0) {
+        publishLogMessage(configuration.deviceId,"Sent " + sendCount + " messages");
+      }
+      sendCount++;
     } catch (Exception e) {
       LOG.error("Fatal error during execution", e);
       terminate();
@@ -178,11 +184,11 @@ public class Pubber {
   private void reportError(Exception toReport) {
     if (toReport != null) {
       LOG.error("Error receiving message: " + toReport);
-      Report report = new Report(toReport);
+      Entry report = new Entry(toReport);
       deviceState.system.statuses.put(CONFIG_ERROR_STATUS_KEY, report);
       publishStateMessage(configuration.deviceId);
     } else {
-      Report previous = deviceState.system.statuses.remove(CONFIG_ERROR_STATUS_KEY);
+      Entry previous = deviceState.system.statuses.remove(CONFIG_ERROR_STATUS_KEY);
       if (previous != null) {
         publishStateMessage(configuration.deviceId);
       }
@@ -230,6 +236,13 @@ public class Pubber {
     }
     info(String.format("Sending test message for %s/%s", configuration.registryId, deviceId));
     mqttPublisher.publish(deviceId, POINTSET_TOPIC, devicePoints);
+  }
+
+  private void publishLogMessage(String deviceId, String logMessage) {
+    info(String.format("Sending log message for %s/%s", configuration.registryId, deviceId));
+    Message.SystemEvent systemEvent = new Message.SystemEvent();
+    systemEvent.logentries.add(new Entry(logMessage));
+    mqttPublisher.publish(deviceId, SYSTEM_TOPIC, systemEvent);
   }
 
   private void publishStateMessage(String deviceId) {

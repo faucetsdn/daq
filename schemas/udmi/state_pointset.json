@@ -17,7 +17,7 @@
               "type": "string",
             },
             "status": {
-              "$ref": "file:logentry.json#/definitions/report"
+              "$ref": "file:system.json#/definitions/entry"
             }
           }
         }

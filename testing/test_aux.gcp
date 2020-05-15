@@ -7,6 +7,12 @@ Running testing/test_aux.sh
     "SNS-4" : "True"
   }
 }
+RESULT skip cloud.udmi.state No device id
 RESULT skip cloud.udmi.pointset No device id
-RESULT pass cloud.udmi.pointset
+RESULT skip cloud.udmi.system No device id
+RESULT fail cloud.udmi.state No result found
+RESULT pass cloud.udmi.pointset Payload successfully validated
+RESULT pass cloud.udmi.system Payload successfully validated
+RESULT fail cloud.udmi.state No result found
 RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted
+RESULT pass cloud.udmi.system Payload successfully validated

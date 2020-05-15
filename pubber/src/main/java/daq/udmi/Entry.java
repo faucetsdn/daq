@@ -4,14 +4,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Date;
 
-public class Report {
+public class Entry {
   public String message;
   public String detail;
-  public String category;
+  public String category = "com.acme.pubber";
   public Integer level = 500;
   public Date timestamp = new Date();
 
-  public Report(Exception e) {
+  public Entry(String message) {
+    this.message = message;
+  }
+
+  public Entry(Exception e) {
     message = e.toString();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     e.printStackTrace(new PrintStream(outputStream));

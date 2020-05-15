@@ -22,7 +22,7 @@
       "enum": [
         "config",
         "discover",
-        "logentry",
+        "system",
         "metadata",
         "pointset",
         "state"
