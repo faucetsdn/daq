@@ -2,7 +2,6 @@ Running testing/test_aux.sh
 Aux Tests
 Lint checks
 check_style exit code 0
-Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 RESULT info protocol.bacnet.version Protocol version: 1

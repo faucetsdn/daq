@@ -8,6 +8,7 @@ WEB_ROOT=firebase/public
 proto_files=`ls proto/*.proto`
 
 if [ "$1" == check ]; then
+    mkdir -p build
     sha1sum $proto_files > build/protos.hash
     diff build/protos.hash $WEB_ROOT/protos.hash
     echo Proto hashes in $WEB_ROOT/protos.hash are up-to-date.

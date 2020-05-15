@@ -117,12 +117,12 @@ fi
 
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
-    runcmd="python3 -u -m pdb"
+    runcmd="python3 -m pdb"
 elif [ -n "$DAQ_CODECOV" ]; then
     echo Running with codecov analysis...
     runcmd="coverage run --source=daq -a"
 else
-    runcmd="python3 -u"
+    runcmd="python3"
 fi
 
 if [ -d venv ]; then
@@ -134,6 +134,7 @@ echo Using python3 at `which python3`
 echo Executing: $runcmd daq/daq.py $conf_file $@
 
 export PYTHONDONTWRITEBYTECODE=True
+export PYTHONUNBUFFERED=True
 export TERM=dumb
 
 echo Prepending $ROOT/binhack to PATH

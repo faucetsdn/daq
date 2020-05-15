@@ -143,8 +143,8 @@ class DockerTest:
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):
-        key = 'ex_%s_%02d' % (self.test_name, self.target_port)
-        return self.runner.config.get(key) == trigger_value
+        key = '%s_%02d' % (self.test_name, self.target_port)
+        return self.runner.config.get('fail_module', {}).get(key) == trigger_value
 
     def _docker_complete(self):
         try:
