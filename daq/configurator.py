@@ -118,15 +118,23 @@ class Configurator:
             self._read_config_into(config, include)
         merge_config(config, loaded_config)
 
+    def _parse_flat_item(self, config, parts):
+        key_parts = parts[0].strip().split('.', 1)
+        value = parts[1].strip().strip('"').strip("'") if isinstance(parts[1], str) else parts[1]
+        if len(key_parts) == 1:
+            config[key_parts[0]] = value
+        else:
+            self._parse_flat_item(config.setdefault(key_parts[0], {}), (key_parts[1], value))
+
     def _read_flat_config(self, config, filename):
         self._log('Reading flat config from %s' % filename)
         with open(filename) as file:
             line = file.readline()
             while line:
-                parts = re.sub(r'#.*', '', line).strip().split('=')
+                parts = re.sub(r'#.*', '', line).strip().split('=', 1)
                 entry = parts[0].split() if parts else None
                 if len(parts) == 2:
-                    config[parts[0].strip()] = parts[1].strip().strip('"').strip("'")
+                    self._parse_flat_item(config, parts)
                 elif len(entry) == 2 and entry[0] == 'source':
                     self._read_config_into(config, entry[1])
                 elif parts and parts[0]:
@@ -148,12 +156,11 @@ class Configurator:
                 self._log('processing arg: %s' % arg)
                 if arg[0] == '-':
                     if arg[1:] in FLAG_MAP:
-                        config[FLAG_MAP[arg[1:]]] = True
+                        self._parse_flat_item(config, (FLAG_MAP[arg[1:]], True))
                     else:
                         raise Exception('Unknown command line arg %s' % arg)
                 elif '=' in arg:
-                    parts = arg.split('=', 1)
-                    config[parts[0]] = parts[1]
+                    self._parse_flat_item(config, arg.split('=', 1))
                 else:
                     self._read_config_into(config, arg)
         return config

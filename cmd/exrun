@@ -120,7 +120,7 @@ if [ -f .pdbrc ]; then
     runcmd="python3 -u -m pdb"
 elif [ -n "$DAQ_CODECOV" ]; then
     echo Running with codecov analysis...
-    runcmd="coverage run --source=daq -a"
+    runcmd="coverage run --source=daq -a -u"
 else
     runcmd="python3 -u"
 fi
