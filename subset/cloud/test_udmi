@@ -24,13 +24,12 @@ cat /etc/resolv.conf
 ping -c 2 172.217.164.106
 ping -c 2 pubsub.googleapis.com
 
-skip=
 if [ "$device_id" == null ]; then
     skip="No device id"
-fi
-
-if [ ! -f $gcp_cred ]; then
+elif [ ! -f $gcp_cred ]; then
     skip="No credentials"
+else
+    skip=
 fi
 
 if [ -n "$skip" ]; then
