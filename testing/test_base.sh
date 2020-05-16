@@ -4,13 +4,15 @@ source testing/test_preamble.sh
 
 echo Base Tests >> $TEST_RESULTS
 
-cp misc/system_base.conf local/system.conf
+cp misc/system_base.yaml local/system.yaml
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp misc/report_template.md inst/tmp_site/
 
 echo Creating MUD templates...
 bin/mudacl
+
+bin/build_proto check || exit 1
 
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 cmd/run -b -s site_path=inst/tmp_site
@@ -21,26 +23,27 @@ cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Check that an open port causes the appropriate failure.
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
-cmd/run -s startup_faux_opts=telnet
+cmd/run -s startup.faux.opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
-echo device_specs=misc/device_specs/simple.json >> local/system.conf
-cmd/run -s startup_faux_opts=telnet
+cmd/run -s startup.faux.opts=telnet device_specs=misc/device_specs/simple.json
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 
 # Test an "external" switch.
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
+rm local/system.yaml
 cp misc/system_ext.conf local/system.conf
 cmd/run -s
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
 fgrep -i switch inst/run-port-02/nodes/ping02/activate.log | tee -a $TEST_RESULTS
+more inst/run-port-02/nodes/ping02/activate.log | cat
 count=$(fgrep icmp_seq=5 inst/run-port-02/nodes/ping02/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
 

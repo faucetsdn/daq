@@ -4,7 +4,7 @@ username@hostname:~/daq$ <b>cp misc/system_all.conf local/system.conf</b>
 username@hostname:~/daq$ <b>cmd/run -s</b>
 Activating venv
 Loading config from local/system.conf
-Starting Thu Jun 6 20:17:51 PDT 2019, run_mode is local.
+Starting Thu Jun 6 20:17:51 PDT 2019
 Clearing previous state...
 Running as root...
 Activating venv
@@ -92,7 +92,6 @@ processing arg: -s
 base_conf=misc/module_config.json
 host_tests=misc/all_tests.conf
 intf_names=faux-1,faux-2,faux-3
-run_mode=local
 schema_path=schemas/udmi/
 sec_port=4
 single_shot=True

@@ -23,7 +23,7 @@ along with an 'external' OVS switch as per the automated integration tests.
 ~/daq$ <b>cp misc/system_ext.conf local/system.conf</b>
 ~/daq$ <b>cmd/run -s</b>
 Loading config from local/system.conf
-Starting Sun Dec 23 08:36:09 PST 2018, run_mode is local
+Starting Sun Dec 23 08:36:09 PST 2018
 Clearing previous reports...
 Running as root...
 Loading config from local/system.conf
@@ -35,7 +35,6 @@ ext_intf=ext-ovs-pri
 <b>ext_loip=192.0.3.%d/24</b>
 ext_ofip=192.0.2.10/24
 ext_ofpt=6666
-run_mode=local
 sec_port=7
 &hellip;
 Loading config from local/system.conf

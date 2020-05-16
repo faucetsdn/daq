@@ -186,7 +186,7 @@ class ConnectedHost:
         return os.path.join('run_id', self.run_id, partial)
 
     def _type_path(self):
-        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
+        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG, optional=True)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -337,6 +337,7 @@ class ConnectedHost:
         remote_paths = {}
         remote_paths["report_path"] = self._upload_file(self._report.path)
         remote_paths["json_path"] = self._upload_file(json_path)
+        remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
         if self._trigger_path:
             remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
@@ -557,6 +558,10 @@ class ConnectedHost:
             params['switch_port'] = str(self.target_port)
             params['switch_model'] = self.config['switch_model']
 
+        if 'switch_username' in self.config:
+            params['switch_username'] = self.config['switch_username']
+            params['switch_password'] = self.config['switch_password']
+
         try:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._set_module_config(self._loaded_config)
@@ -626,9 +631,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        configurator.load_and_merge(config, self._type_path(), self._MODULE_CONFIG)
-        configurator.load_and_merge(config, self._device_base, self._MODULE_CONFIG)
-        configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG)
+        configurator.load_and_merge(config, self._type_path(), self._MODULE_CONFIG, optional=True)
+        configurator.load_and_merge(config, self._device_base, self._MODULE_CONFIG, optional=True)
+        configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG, optional=True)
         return config
 
     def record_result(self, name, **kwargs):
@@ -646,18 +651,6 @@ class ConnectedHost:
             if "code" in kwargs:
                 self._report.accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
             self._report.accumulate(name, {ResultType.MODULE_CONFIG: self._loaded_config})
-
-    @staticmethod
-    def clear_port(gcp_instance, port):
-        """Clear a port-based entry without having an instantiated host class"""
-        result = {
-            'name': 'startup',
-            'state': MODE.INIT,
-            'runid': ConnectedHost.make_runid(),
-            'timestamp': gcp.get_timestamp(),
-            'port': port
-        }
-        gcp_instance.publish_message('daq_runner', 'test_result', result)
 
     def _record_result(self, name, run_info=True, current=None, **kwargs):
         result = {
@@ -708,7 +701,7 @@ class ConnectedHost:
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
+        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG, optional=True)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         self._gcp.register_config(self._CONTROL_PATH % self.target_port,

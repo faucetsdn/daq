@@ -2,21 +2,32 @@ Running testing/test_aux.sh
 Aux Tests
 Lint checks
 check_style exit code 0
-Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT skip protocol.bacnet.pic Bacnet device not found.
+RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. pics.csv not found in device type directory
+RESULT skip protocol.bacnet.pic BACnet device found, but pics.csv not found in device type directory.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT pass protocol.bacnet.pic
+RESULT pass protocol.bacnet.pic The devices matches the PICS
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
-RESULT skip security.tls.v3
-RESULT skip security.x509
-RESULT fail security.tls.v3
-RESULT fail security.x509
-RESULT pass security.tls.v3
-RESULT pass security.x509
+RESULT skip security.tls.v1 IOException unable to connect to server
+RESULT skip security.tls.v1.x509 IOException unable to connect to server
+RESULT skip security.tls.v1_2 IOException unable to connect to server
+RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
+RESULT skip security.tls.v1_3 IOException unable to connect to server
+RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
+RESULT fail security.tls.v1 Certificate is expired.
+RESULT fail security.tls.v1.x509 Certificate is expired.
+RESULT fail security.tls.v1_2 Certificate is expired.
+RESULT fail security.tls.v1_2.x509 Certificate is expired.
+RESULT fail security.tls.v1_3 Certificate could not be validated.
+RESULT fail security.tls.v1_3.x509 Certificate could not be validated.
+RESULT pass security.tls.v1 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_2 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_2.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_3 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_3.x509 Certificate active for current date and public key length > 2048.
 RESULT skip security.passwords.http Port 80 is not open on target device.
 RESULT skip security.passwords.https Port 443 is not open on target device.
 RESULT skip security.passwords.telnet Port 23 is not open on target device.
@@ -149,8 +160,8 @@ port-02 module_config modules
   `\.-''__.-' \ (     \_
     `'''       `\__   /\
                 ')
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
+Host: X.X.X.X ()        Status: Up
+Host: X.X.X.X ()        Ports: 47808/closed/udp//bacnet///      Ignored State: closed (3)
 Redacted docs diff
 No report diff
 ?? ovs_vsctl.txt
