@@ -27,6 +27,10 @@
           "timestamp": "2018-08-26T21:39:28.364Z",
           "level": 800
         }
+      },
+      "nexus_sensor": {
+        "units": "Celsius",
+        "source": "fix"
       }
     }
   }

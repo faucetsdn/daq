@@ -23,7 +23,7 @@
             "ref": {
               "type": "string"
             },
-            "force_value": {
+            "fix_value": {
               "type": ["number", "string", "boolean"]
             }
           }

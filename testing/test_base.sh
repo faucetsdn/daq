@@ -12,7 +12,7 @@ cp misc/report_template.md inst/tmp_site/
 echo Creating MUD templates...
 bin/mudacl
 
-bin/build_proto check
+bin/build_proto check || exit 1
 
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 cmd/run -b -s site_path=inst/tmp_site
@@ -23,14 +23,14 @@ cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Check that an open port causes the appropriate failure.
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
-cmd/run -s startup_faux_opts=telnet
+cmd/run -s startup.faux.opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
-cmd/run -s startup_faux_opts=telnet device_specs=misc/device_specs/simple.json
+cmd/run -s startup.faux.opts=telnet device_specs=misc/device_specs/simple.json
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
