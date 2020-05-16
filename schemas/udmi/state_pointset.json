@@ -16,6 +16,11 @@
             "units": {
               "type": "string",
             },
+            "source": {
+              "enum": [
+                "fix"
+              ]
+            },
             "status": {
               "$ref": "file:system.json#/definitions/entry"
             }

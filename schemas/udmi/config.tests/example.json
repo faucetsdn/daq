@@ -17,7 +17,9 @@
     "sample_rate_sec": 500,
     "points": {
       "return_air_temperature_sensor": {
-        "force_value": 21.1
+      },
+      "nexus_sensor": {
+        "fix_value": 21.1
       }
     }
   }

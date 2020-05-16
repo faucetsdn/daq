@@ -127,8 +127,8 @@ parsed `config` message.
 * `sample_rate_sec`: Sampling rate for the system, which should proactively send an
 update (e.g. _pointset_, _logentry_, _discover_ message) at this interval.
 * `sample_limit_sec`: Minimum time between sample updates. Updates that happen faster than this time
-(e.g. due to _cov_ events) should be coalessed so that only the most recent update is sent.
-* `force_value`: Override value for a point to be used during diagnostics and diagnosis. Should
+(e.g. due to _cov_ events) should be coalesced so that only the most recent update is sent.
+* `fix_value`: Fix a value to be used during diagnostics and operational use. Should
 override any operational values, but not override alarm conditions.
 * `min_loglevel`: Indicates the minimum loglevel for reporting log messages below which log entries
 should not be sent. See note below for a description of the level value.

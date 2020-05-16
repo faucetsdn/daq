@@ -37,28 +37,33 @@ function capture_test_results {
 rm -rf inst/test_site && mkdir -p inst/test_site
 cp -a misc/test_site inst/
 
-echo Extended tests | tee -a $TEST_RESULTS
+echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing aux test run
 mkdir -p local/site
 cp -r misc/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r misc/test_site/mac_addrs local/site/
-cp misc/system_all.conf local/system.conf
-cat <<EOF >> local/system.conf
-finish_hook=misc/dump_network.sh
-test_config=misc/runtime_configs/long_wait
-site_path=inst/test_site
-schema_path=schemas/udmi
-startup_faux_1_opts="brute broadcast_client"
-startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
-startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntp_client broadcast_client"
-long_dhcp_response_sec=0
-monitor_scan_sec=0
+cat <<EOF > local/system.yaml
+---
+include: misc/system_all.conf
+finish_hook: misc/dump_network.sh
+test_config: misc/runtime_configs/long_wait
+site_path: inst/test_site
+schema_path: schemas/udmi
+startup:
+  faux_1:
+    opts: brute broadcast_client
+  faux_2:
+    opts: nobrute expiredtls bacnetfail pubber passwordfail
+  faux_3:
+    opts: tls macoui passwordpass bacnet pubber ntp_client broadcast_client
+long_dhcp_response_sec: 0
+monitor_scan_sec: 0
 EOF
 
 if [ -f $cred_file ]; then
     echo Using credentials from $cred_file
-    echo gcp_cred=$cred_file >> local/system.conf
+    echo "gcp_cred: $cred_file" >> local/system.yaml
     project_id=`jq .project_id $cred_file`
 
     cloud_file=inst/test_site/cloud_iot_config.json
@@ -82,7 +87,7 @@ more inst/faux/daq-faux-*/local/pubber.json | cat
 echo Build all container images...
 cmd/build # inline
 
-echo Starting aux test run...
+echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
@@ -102,9 +107,9 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show the full logs from each test
-#more inst/gw*/nodes/gw*/activate.log | cat
-more inst/run-port-*/nodes/*/activate.log | cat
-#more inst/run-port-*/nodes/*/tmp/report.txt | cat
+head inst/gw*/nodes/gw*/activate.log
+head inst/run-port-*/nodes/*/activate.log
+head inst/run-port-*/nodes/*/tmp/report.txt
 ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file
@@ -145,12 +150,15 @@ echo Redacted docs diff | tee -a $TEST_RESULTS
 # Make sure there's no file pollution from the test run.
 git status --porcelain | tee -a $TEST_RESULTS
 
+echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing hold test run
 # Try various exception handling conditions.
-cp misc/system_multi.conf local/system.conf
-cat <<EOF >> local/system.conf
-ex_ping_01=finalize
-ex_hold_02=initialize
-ex_ping_03=callback
+cat <<EOF > local/system.yaml
+---
+include: misc/system_multi.conf
+fail_module:
+  ping_01: finalize
+  hold_02: initialize
+  ping_03: callback
 EOF
 
 function cleanup_marker {
@@ -177,12 +185,13 @@ function monitor_marker {
 MARKER=inst/run-port-03/nodes/hold03/activate.log
 monitor_marker gw03 $MARKER &
 
+echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting hold test run
 cmd/run -k -s finish_hook=misc/dump_network.sh
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
-more inst/run-port-*/nodes/nmap*/activate.log | cat
-more inst/run-port-*/finish/nmap*/* | cat
+head inst/run-port-*/nodes/nmap*/activate.log
+head inst/run-port-*/finish/nmap*/*
 
 tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 

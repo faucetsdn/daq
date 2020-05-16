@@ -11,6 +11,9 @@ from mininet import log as minilog
 import logger
 import runner
 import configurator
+import utils
+
+from proto import system_config_pb2 as sys_config
 
 ROOT_LOG = logger.get_logger()
 LOGGER = logger.get_logger('daq')
@@ -26,6 +29,8 @@ class DAQ:
     def __init__(self, args):
         config_helper = configurator.Configurator(verbose=True)
         self.config = config_helper.parse_args(args)
+        # Validate structure of config by reading it into a pb message.
+        utils.dict_proto(self.config, sys_config.DaqConfig)
 
     def configure_logging(self):
         """Configure logging"""

@@ -179,7 +179,19 @@
             <ul>
               
                 <li>
-                  <a href="#ForchConfig"><span class="badge">M</span>ForchConfig</a>
+                  <a href="#DaqConfig"><span class="badge">M</span>DaqConfig</a>
+                </li>
+              
+                <li>
+                  <a href="#DaqConfig.FailModuleEntry"><span class="badge">M</span>DaqConfig.FailModuleEntry</a>
+                </li>
+              
+                <li>
+                  <a href="#DaqConfig.StartupEntry"><span class="badge">M</span>DaqConfig.StartupEntry</a>
+                </li>
+              
+                <li>
+                  <a href="#StartupInfo"><span class="badge">M</span>StartupInfo</a>
                 </li>
               
               
@@ -200,7 +212,7 @@
       <p>Specification for DAQ configuration.</p>
 
       
-        <h3 id="ForchConfig">ForchConfig</h3>
+        <h3 id="DaqConfig">DaqConfig</h3>
         <p>DAQ configuration.</p>
 
         
@@ -214,7 +226,7 @@
                   <td>site_description</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Description description for dashboard. </p></td>
+                  <td><p>Description for dashboard. </p></td>
                 </tr>
               
                 <tr>
@@ -232,6 +244,13 @@
                 </tr>
               
                 <tr>
+                  <td>settle_sec</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>time to let the network settle. </p></td>
+                </tr>
+              
+                <tr>
                   <td>base_conf</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
@@ -239,7 +258,7 @@
                 </tr>
               
                 <tr>
-                  <td>site_pathk</td>
+                  <td>site_path</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Directory of site-configuration data, including devices. </p></td>
@@ -249,19 +268,26 @@
                   <td>initial_dhcp_lease_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>initial dhcp lease time on test run start </p></td>
+                  <td><p>initial dhcp lease time on test run start (needs trailing s for sec) </p></td>
                 </tr>
               
                 <tr>
                   <td>dhcp_lease_time</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>dhcp lease time after initial startup </p></td>
+                  <td><p>dhcp lease time after initial startup (needs trailing s for sec) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>dhcp_response_sec</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>dhcp response time for normal testing cycle </p></td>
                 </tr>
               
                 <tr>
                   <td>long_dhcp_response_sec</td>
-                  <td><a href="#string">string</a></td>
+                  <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>dhcp response time for testing long test cycle </p></td>
                 </tr>
@@ -281,6 +307,13 @@
                 </tr>
               
                 <tr>
+                  <td>ext_ofpt</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Port of open flow controller </p></td>
+                </tr>
+              
+                <tr>
                   <td>ext_addr</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
@@ -292,6 +325,20 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>IP address template and subnet for module ip addresses </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ext_dpid</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Dataplane id of external OpenFlow switch </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ext_intf</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Interface name for external switch data plane </p></td>
                 </tr>
               
                 <tr>
@@ -323,6 +370,13 @@
                 </tr>
               
                 <tr>
+                  <td>build_tests</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Specify if system should build tests on run. </p></td>
+                </tr>
+              
+                <tr>
                   <td>run_limit</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
@@ -334,6 +388,13 @@
                   <td><a href="#bool">bool</a></td>
                   <td></td>
                   <td><p>Stop after there are any errors. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>single_shot</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Only run test modules once per device. </p></td>
                 </tr>
               
                 <tr>
@@ -351,6 +412,13 @@
                 </tr>
               
                 <tr>
+                  <td>keep_hold</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Keep the hold container around after tests are done for debugging. </p></td>
+                </tr>
+              
+                <tr>
                   <td>daq_loglevel</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
@@ -362,6 +430,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Mininet debugging arguments. Can be one of { error, warn, info, debug } </p></td>
+                </tr>
+              
+                <tr>
+                  <td>finish_hook</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Hook for executing debug commands when a module finishes. </p></td>
                 </tr>
               
                 <tr>
@@ -410,7 +485,7 @@
                   <td>port_debounce_sec</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>Set port-debounce for flaky connecitons. Zero to disable. </p></td>
+                  <td><p>Set port-debounce for flaky connections. Zero to disable. </p></td>
                 </tr>
               
                 <tr>
@@ -439,6 +514,127 @@
                   <td><a href="#float">float</a></td>
                   <td></td>
                   <td><p>Cloud data retention policy. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>startup</td>
+                  <td><a href="#DaqConfig.StartupEntry">DaqConfig.StartupEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Startup configuration options. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>switch_model</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Switch model </p></td>
+                </tr>
+              
+                <tr>
+                  <td>switch_username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Switch connect username </p></td>
+                </tr>
+              
+                <tr>
+                  <td>switch_password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Switch connect password </p></td>
+                </tr>
+              
+                <tr>
+                  <td>fail_module</td>
+                  <td><a href="#DaqConfig.FailModuleEntry">DaqConfig.FailModuleEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Failure testing triggers </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="DaqConfig.FailModuleEntry">DaqConfig.FailModuleEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="DaqConfig.StartupEntry">DaqConfig.StartupEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#StartupInfo">StartupInfo</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="StartupInfo">StartupInfo</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>opts</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Startup command line options. </p></td>
                 </tr>
               
             </tbody>
