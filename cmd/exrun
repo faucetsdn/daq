@@ -44,6 +44,7 @@ done
 FAUCET=$(realpath $ROOT/faucet)
 FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
+LIBS=$(realpath $ROOT/libs)
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found, try running bin/setup_dev.
@@ -66,7 +67,7 @@ if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
-export PYTHONPATH=$FORCH:$FAUCET:$MININET
+export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS
 
 mkdir -p $INSTDIR
 rm -f $INSTDIR/faucet* $cleanup_file

@@ -16,7 +16,7 @@ if [ "$1" == check ]; then
     exit 0
 fi
 
-rm -rf build/ daq/proto $WEB_ROOT/protos.*
+rm -rf build/ libs/proto $WEB_ROOT/protos.*
 mkdir build
 
 sha1sum $proto_files > $WEB_ROOT/protos.hash
@@ -51,8 +51,8 @@ done
     sed -i'' -e 's/&lt;/</g' -e 's/&gt;/>/g' protos.html
 )
 
-mkdir -p daq/proto/
+mkdir -p libs/proto/
 
-touch daq/proto/__init__.py
-cp build/daq/proto/*.py daq/proto/
+touch libs/proto/__init__.py
+cp build/daq/proto/*.py libs/proto/
 cp build/protos.html $WEB_ROOT/
