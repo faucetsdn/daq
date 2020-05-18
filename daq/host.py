@@ -593,7 +593,7 @@ class ConnectedHost:
             finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
-            LOGGER.warning('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
+            LOGGER.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
             os.system('%s %s 2>&1 > %s/finish.out' %
                       (self._finish_hook_script, finish_dir, finish_dir))
 
