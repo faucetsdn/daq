@@ -40,7 +40,22 @@ fi
 # SWITCH_IP will be the IP address of the OpenFlow switch.
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
-    ip addr add $LOCAL_IP dev `hostname`-eth0
+
+    LOCAL_ONLY=${LOCAL_IP%/*}
+    LOCAL_INDEX=${LOCAL_ONLY##*.}
+    echo Using IP index $LOCAL_INDEX
+    LOCAL_MAC=ca:50:20:b1:4f:$(printf %02x $LOCAL_INDEX)
+    echo Using local MAC address $LOCAL_MAC
+
+    LOCAL_IFACE=`hostname`-eth0
+    ip link set dev $LOCAL_IFACE addr $LOCAL_MAC
+    ip addr add $LOCAL_IP dev $LOCAL_IFACE
+
+    ping -n -c 2 $SWITCH_IP || true
+
+    # Delete any local arp entry, to force a re-arp
+    arp -d $SWITCH_IP || true
+
     echo Switch test with target $SWITCH_IP:$SWITCH_PORT | tee -a $MONO_LOG
     local_status=pass
     ping -n -c 10 $SWITCH_IP || local_status=fail
