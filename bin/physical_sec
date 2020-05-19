@@ -9,9 +9,13 @@ ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 source misc/config_base.sh
 
-iprefix=ctrl
+ext_ctrl=$switch_setup_ctrl_intf
+ext_intf=$switch_setup_data_intf
+ext_ofip=$switch_setup_lo_addr
+ext_addr=$switch_setup_ip_addr
 
 echo Cleaning switch bridge, if any...
+iprefix=ctrl
 sudo ip link del $iprefix-pri 2>/dev/null || true
 sudo ip link del $iprefix-swx 2>/dev/null || true
 sudo ip link del $iprefix-swa 2>/dev/null || true
@@ -19,28 +23,28 @@ sudo ovs-vsctl --if-exists del-port pri $iprefix-pri
 sudo ovs-vsctl --if-exists del-br $iprefix-br
 
 if [ -z "$ext_ctrl" ]; then
-    echo ext_ctrl not defined for physical_sec.
+    echo switch_setup.ctrl_intf not defined for physical_sec.
     false
 fi
 
 if ! ip -br link show dev "$ext_ctrl" | fgrep "UP" &> /dev/null; then
-    echo Error: ext_ctrl interface [$ext_ctrl] is not UP, for physical_sec
+    echo Error: Control plane interface [$ext_ctrl] is not UP, for physical_sec
     false
 fi
 
-if [ -z "$ext_intf" ]; then
+if [ -z "$switch_setup_data_intf" ]; then
     # Not actally used in this script, but needed elsewhere.
-    echo ext_intf not defined for physical_sec.
+    echo switch_setup.data_intf not defined for physical_sec.
     false
 fi
 
 if ! ip -br link show dev "$ext_intf" | fgrep "UP" &> /dev/null; then
-    echo Error: ext_intf interface [$ext_intf] is not UP, for physical_sec
+    echo Error: Data plane interface [$ext_intf] is not UP, for physical_sec
     false
 fi
 
-if [ -z "$ext_ofip" ]; then
-    echo ext_ofip not defined for physical_sec.
+if [ -z "$switch_setup_lo_addr" ]; then
+    echo switch_setup.lo_addr not defined for physical_sec.
     false
 fi
 
@@ -52,7 +56,7 @@ if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
 fi
 
 if [ -z "$ext_addr" ]; then
-    echo ext_addr not defined for physical_sec.
+    echo switch_setup.ip_addr not defined for physical_sec.
     false
 fi
 
