@@ -35,7 +35,7 @@ _CONFIG_MIGRATIONS = {
     'switch_model': 'switch_setup.model',
     'switch_username': 'switch_setup.username',
     'switch_password': 'switch_setup.password',
-    'intf_names': 'interfaces.<iface_name>: (dictionary)'
+    'intf_names': 'interfaces.<iface_name>.opts= (dictionary)'
 }
 
 class DAQ:
