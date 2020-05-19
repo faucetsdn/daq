@@ -4,8 +4,6 @@ source testing/test_preamble.sh
 
 echo Base Tests >> $TEST_RESULTS
 
-cp misc/system_base.yaml local/system.yaml
-
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp misc/report_template.md inst/tmp_site/
 
@@ -15,6 +13,7 @@ bin/mudacl
 bin/build_proto check || exit 1
 
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
+rm -f local/system.yaml local/system.conf
 cmd/run -b -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
 
