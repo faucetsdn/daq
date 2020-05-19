@@ -85,7 +85,7 @@ fi
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
 echo Build all container images...
-cmd/build inline
+cmd/build #inline
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
@@ -196,7 +196,7 @@ head inst/run-port-*/finish/nmap*/*
 tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
 
-function monitor_interface {
+function monitor_log {
     while true; do 
         found=$(cat inst/cmdrun.log 2>/dev/null | grep "$2")
         if [ -n "$found" ]; then
@@ -212,48 +212,17 @@ function monitor_interface {
 }
 rm -f inst/cmdrun.log
 # Check port toggling does not cause a shutdown 
-cp misc/system_base.conf local/system.conf
-echo "port_toggle_timeout_sec=10" >> local/system.conf
-echo "port_debounce_sec=0" >> local/system.conf
-monitor_interface "sudo ifconfig faux down;sleep 1; sudo ifconfig faux up" "Port 1 dpid 2 is now active"
-cmd/run -s  
-if [ -n "$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive")" ]; then
-    echo "Port 1 dpid 2 is now inactive" | tee -a $TEST_RESULTS
-fi
-cat inst/result.log | sort | tee -a $TEST_RESULTS
-
-# Check port inactive past toggling timeout causes a shutdown
-cp misc/system_base.conf local/system.conf
-echo "port_toggle_timeout_sec=25" >> local/system.conf
-echo "port_debounce_sec=0" >> local/system.conf
-monitor_interface "sudo ifconfig faux down" "Target port 1 test hold running"
-cmd/run -s -k 
-if [ -n "$(cat inst/cmdrun.log | grep "port not active for 25s")" ]; then
-    echo "port not active for 25s" | tee -a $TEST_RESULTS
-fi
-cat inst/result.log | sort | tee -a $TEST_RESULTS
-
-rm -f inst/cmdrun.log
-# Check port toggling timeout configuration override in test module config
-cp misc/system_base.conf local/system.conf
-echo "port_toggle_timeout_sec=10" >> local/system.conf
-echo "port_debounce_sec=0" >> local/system.conf
-intf_mac="9a02571e8f00" 
-mkdir -p local/site/mac_addrs/$intf_mac
-cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
-    {
-        "modules": {
-            "hold": {
-              "port_toggle_timeout_sec": 25
-            }
-        }
-    }
+cat <<EOF > local/system.yaml
+---
+include: misc/system_base.yaml
+port_flap_timeout_sec: 10
+port_debounce_sec: 0
 EOF
-monitor_interface "sudo ifconfig faux down" "Target port 1 test hold running"
-cmd/run -s -k 
-if [ -n "$(cat inst/cmdrun.log | grep "port not active for 25s")" ]; then
-    echo "port not active for 25s" | tee -a $TEST_RESULTS
-fi
+monitor_log "sudo ifconfig faux down;sleep 1; sudo ifconfig faux up" "Port 1 dpid 2 is now active"
+monitor_log "sudo ifconfig faux down" "Target port 1 test hold running"
+cmd/run -s -k
+disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
+echo Enough port disconnects: $((disconnections >= 2)) | tee -a $TEST_RESULTS
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
 

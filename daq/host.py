@@ -160,12 +160,12 @@ class ConnectedHost:
             return self._default_timeout_sec
         return test_module.get('timeout_sec', self._default_timeout_sec)
 
-    def get_port_toggle_timeout(self, test):
+    def get_port_flap_timeout(self, test):
         """Get port toggle timeout configuration that's specific to each test module"""
         test_module = self._loaded_config['modules'].get(test)
         if not test_module:
             return None
-        return test_module.get('port_toggle_timeout_sec')
+        return test_module.get('port_flap_timeout_sec')
 
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
@@ -619,6 +619,7 @@ class ConnectedHost:
                            **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        self.test_host = None
         self._run_next_test()
 
     def _set_module_config(self, loaded_config):

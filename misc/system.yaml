@@ -16,7 +16,7 @@ monitor_scan_sec: 30
 default_timeout_sec: 350
 
 # default time between port disconnect and host tests shutdown
-port_toggle_timeout_sec: 10
+port_flap_timeout_sec: 5
 
 # Default base module configuration file.
 base_conf: misc/module_config.json

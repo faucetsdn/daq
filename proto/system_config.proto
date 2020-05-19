@@ -149,7 +149,7 @@ message DaqConfig {
   map<string, string> fail_module = 47;
 
   // Set time between port disconnect and host tests shutdown
-  int32 port_toggle_timeout_sec = 48;
+  int32 port_flap_timeout_sec = 48;
 }
 
 message StartupInfo {

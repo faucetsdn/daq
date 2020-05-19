@@ -186,10 +186,6 @@ inst/run-port-03/nodes/hold03/activate.log
 inst/run-port-03/nodes/nmap03/activate.log
 inst/run-port-03/nodes/pass03/activate.log
 inst/run-port-03/nodes/ping03/activate.log
-Port 1 dpid 2 is now inactive
-01: []
-port not active for 25s
-01: ['01:hold:DaqException']
-port not active for 25s
+Enough port disconnects: 1
 01: ['01:hold:DaqException']
 Done with tests
