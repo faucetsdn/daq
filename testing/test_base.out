@@ -35,7 +35,28 @@ Overall device result PASS
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 
 
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|timeout_sec|300|
+
+## Module pass
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module ping
+
+
+#### Report
 
 ```
 --------------------
@@ -76,6 +97,9 @@ RESULT pass base.target.ping target reached
 
 ## Module nmap
 
+
+#### Report
+
 ```
 --------------------
 security.ports.nmap
@@ -90,6 +114,12 @@ No invalid ports found.
 RESULT pass security.ports.nmap Only allowed ports found open.
 
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Report complete
 
@@ -107,9 +137,9 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 02: []
     dp_id: 1
     dp_id: 4886718345
-Switch test with port 2
+Switch test with target 192.0.2.138:2
 RESULT pass base.switch.ping target %% 192.0.2.138:2
-Switch test with port 2
+Switch test with target 192.0.2.138:2
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 01: [] 02: [] 03: []

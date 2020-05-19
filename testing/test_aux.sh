@@ -48,6 +48,7 @@ cat <<EOF >> local/system.conf
 finish_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
+schema_path=schemas/udmi
 startup_faux_1_opts="brute broadcast_client"
 startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
 startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntp_client broadcast_client"
@@ -67,6 +68,10 @@ if [ -f $cred_file ]; then
 
     make_pubber AHU-1 daq-faux-2 null
     make_pubber SNS-4 daq-faux-3 1234
+
+    bin/registrar
+    cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
+    echo | tee -a $GCP_RESULTS
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.

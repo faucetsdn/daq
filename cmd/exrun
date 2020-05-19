@@ -13,6 +13,7 @@ export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(git describe --dirty)
+TAGGED_VERSION=`cat misc/docker_images.ver`
 LSB_RAW=$(lsb_release -a)
 export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
 export DAQ_SYS_UNAME=$(uname -a)
@@ -23,6 +24,14 @@ run_args="$@"
 if [ `whoami` != root ]; then
     echo Running as root...
     sudo $0 "$@" && exit 0
+    false
+fi
+
+if ! git show $TAGGED_VERSION > /dev/null; then
+    echo
+    echo Tagged version $TAGGED_VERSION not found.
+    echo Maybe you need to fetch tags: git fetch --tags
+    echo
     false
 fi
 

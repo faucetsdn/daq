@@ -22,15 +22,25 @@ technology stack for compliant IoT devices.
 | pointset | event    | pointset  | `/devices/{device-id}/events/pointset` | pointset.json |
 | logentry | event    | logentry  | `/devices/{device-id}/events/logentry` | logentry.json |
 
-# Certificate Requirements
+# Backend Systems
 
-For device 802.1x certificates (network authentication, _not_ Cloud IoT authentitation), the following
-guidelines apply:
+Any backend system (in a GCP project) should adhere to the following guidelines:
+* All messages to/from the devices should conform to the UDMI schema payloads (pass validation).
+* All exchanges with the devices should go through a PubSub topic:
+  * The _state_ and _event_ messages are published to a topic configured through the IoT Core registry.
+  * If necessary, any _config_ or _command_ messages should go through a PubSub topic, and then converted to the requisite Cloud IoT
+  config write using a simple cloud function.
+* To make data persistent, it can be written to a back-end database, e.g. Firestore. See the `device_telemetry` and
+  `device_state` [example cloud functions](../../firebase/functions/index.js) for details.
+* A similar function called `device_config` shows how PubSub can be used to update the Cloud IoT configuration.
 
-* MUST support 802.1X-2004 with authentication using EAP-TLS standard.
-* Credentials for EAP-TLS should conform to X.509v3.
-* Key types MUST support a minimum of RSA at minimum bit length of 2048.
-* Key types ideally support ECDH and ECDSA as well at a minimum bit length of 224.
-* Owner identity keys and certificates MUST be rotatable, ideally via API method and with fallback to previous credential in case rotation fails.
-* Vendor supplied device specific identity keys and certificates may be static, but only if owner identity credentials are possible.
-* Ideally supports 802.1X-2010, 802.1AR and 802.1AE (MACSEC) for devices that will be placed in high-risk environments (outside, and public areas).
+A config push can be tested with something like:
+
+```
+gcloud pubsub topics publish target \
+    --attribute subFolder=config,deviceId=AHU-1,projectId=bos-daq-testing,cloudRegion=us-central1,deviceRegistryId=registrar_test \
+    --message '{"version": 1, "timestamp": "2019-01-17T14:02:29.364Z"}'
+```
+
+The reason for the redirection of any data through a PubSub topic is so that the Cloud IoT registry, if necessary,
+can be housed in a different cloud project from the backend applications.

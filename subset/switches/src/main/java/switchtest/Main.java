@@ -7,7 +7,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
 
-    if (args.length != 4) {
+    if (args.length < 4) {
       throw new IllegalArgumentException(
           "Expected ipAddress && port && supportPOE && switchModel as arguments");
     }
@@ -26,13 +26,23 @@ public class Main {
       throw e;
     }
 
+    String user = null;
+    if (args.length >= 5) {
+      user = args[4];
+    }
+    String password = null;
+    if (args.length >= 6) {
+      password = args[5];
+    }
+
     SwitchInterrogator switchInterrogator = null;
     switch (switchModel) {
       case CISCO_9300:
-        switchInterrogator = new Cisco9300(ipAddress, interfacePort, supportsPOE);
+        switchInterrogator = new Cisco9300(ipAddress, interfacePort, supportsPOE, user, password);
         break;
       case ALLIED_TELESIS_X230:
-        switchInterrogator = new AlliedTelesisX230(ipAddress, interfacePort, supportsPOE);
+        switchInterrogator =
+            new AlliedTelesisX230(ipAddress, interfacePort, supportsPOE, user, password);
     }
     Thread switchInterrogatorThread = new Thread(switchInterrogator);
     switchInterrogatorThread.start();
