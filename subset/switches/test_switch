@@ -13,8 +13,9 @@ RESULT_LINES=/tmp/results.switch.txt
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
-    echo Switch Test with model $SWITCH_MODEL.
-    echo Switch test with port $SWITCH_PORT.
+    echo Switch test with model $SWITCH_MODEL
+    echo Switch test with ip:port $SWITCH_IP:$SWITCH_PORT
+    echo Switch test with username:password $SWITCH_USERNAME:$SWITCH_PASSWORD
     ping -n -c 10 $SWITCH_IP
     POE_ENABLED=`jq -r .modules.switch.poe.enabled /config/device/module_config.json`
     java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
@@ -31,7 +32,7 @@ else
 
     SKIP_REASON="LOCAL_IP not configured, assuming no network switch."
     RESULT="skip"
-    SUMMARY="No local IP has been set, check ext_loip in system.conf"
+    SUMMARY="No local IP has been set, check system config"
 
     write_out_result $REPORT \
                      "connection.port_link" \

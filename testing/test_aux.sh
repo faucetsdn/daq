@@ -50,7 +50,7 @@ finish_hook: misc/dump_network.sh
 test_config: misc/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
-startup:
+interfaces:
   faux_1:
     opts: brute broadcast_client
   faux_2:
@@ -85,7 +85,7 @@ fi
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
 echo Build all container images...
-cmd/build inline
+cmd/build # inline
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s

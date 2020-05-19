@@ -23,14 +23,49 @@ _PID_FILE = 'inst/daq.pid'
 _LOG_FORMAT = "%(asctime)s %(name)-8s %(levelname)-7s %(message)s"
 _DATE_FORMAT = '%b %02d %H:%M:%S'
 
+_CONFIG_MIGRATIONS = {
+    'sec_port': 'switch_setup.uplink_port',
+    'ext_ctrl': 'switch_setup.ctrl_intf',
+    'ext_intf': 'switch_setup.data_intf',
+    'ext_ofpt': 'switch_setup.lo_port',
+    'ext_ofip': 'switch_setup.lo_addr',
+    'ext_loip': 'switch_setup.mods_addr',
+    'ext_dpid': 'switch_setup.of_dpid',
+    'ext_addr': 'switch_setup.ip_addr',
+    'switch_model': 'switch_setup.model',
+    'switch_username': 'switch_setup.username',
+    'switch_password': 'switch_setup.password',
+    'intf_names': 'interfaces.<iface_name>: (dictionary)'
+}
+
 class DAQ:
     """Wrapper class for configuration management"""
 
     def __init__(self, args):
         config_helper = configurator.Configurator(verbose=True)
         self.config = config_helper.parse_args(args)
+
+    def validate_config(self):
+        """Validate DAQ configuration"""
+        errors = False
+        for old_key in _CONFIG_MIGRATIONS:
+            if old_key in self.config:
+                errors = True
+                LOGGER.warning("Config '%s' is now '%s'",
+                               old_key, _CONFIG_MIGRATIONS[old_key])
+        if errors:
+            LOGGER.error('Old style configs found. Goodby.')
+            return False
+
+        # Work around int/str ambiguity, force to base-10 string
+        of_dpid = self.config.get('switch_setup', {}).get('of_dpid')
+        if of_dpid:
+            self.config.get('switch_setup', {})['of_dpid'] = str(int(str(of_dpid), 0))
+
         # Validate structure of config by reading it into a pb message.
         utils.dict_proto(self.config, sys_config.DaqConfig)
+
+        return True
 
     def configure_logging(self):
         """Configure logging"""
@@ -79,6 +114,9 @@ def _execute():
     if config.get('show_help'):
         configurator.show_help()
         return 0
+
+    if not daq.validate_config():
+        return 1
 
     _write_pid_file()
 

@@ -17,6 +17,10 @@ ctrl_swx=${iprefix}-swx
 ctrl_swy=${iprefix}-swy
 ctrl_swa=${iprefix}-swa
 ctrl_swb=${iprefix}-swb
+ext_ctrl=$switch_setup_ctrl_intf
+ext_ofip=$switch_setup_lo_addr
+ext_addr=$switch_setup_ip_addr
+
 
 if [ -n "$ext_ctrl" ]; then
     cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
@@ -50,7 +54,7 @@ sudo ovs-vsctl add-port $ctrl_bridge $ctrl_alt
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_swx
 
 if [ -z "$ext_ofip" ]; then
-    echo ext_ofip not defined, skipping configuration.
+    echo Local address not defined, skipping configuration.
 else
     echo Configuring $ctrl_swy with $ext_ofip
     sudo ip addr add $ext_ofip dev $ctrl_swy
@@ -59,12 +63,12 @@ fi
 ipsuffix=${ext_ofip#*/}
 
 if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
-    echo ip suffix for ext_ofip not properly defined.
+    echo cidr suffix of $ext_ofip not properly defined.
     false
 fi
 
 if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
-    echo Creating daq-switch, because only ext_addr defined.
+    echo Creating daq-switch, because no control plane interface defined
 
     docker rm -f daq-switch || true
     cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daqf/switch)
@@ -88,7 +92,7 @@ else
 fi
 
 if [ -z "$ext_ctrl" ]; then
-    echo ext_ctrl not defined, skipping configuration.
+    echo No control plane interface, skipping configuration.
 else
     echo Bridging $ext_ctrl to $ctrl_bridge
     sudo ovs-vsctl add-port $ctrl_bridge $ext_ctrl
