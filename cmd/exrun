@@ -10,9 +10,8 @@ LOCALDIR=$ROOT/local
 FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
-SYSTEM_CONF=system.conf
-LOCAL_CONFIG=$LOCALDIR/$SYSTEM_CONF
 export DAQ_VERSION=$(git describe --dirty)
+TAGGED_VERSION=`cat misc/docker_images.ver`
 LSB_RAW=$(lsb_release -a)
 export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
 export DAQ_SYS_UNAME=$(uname -a)
@@ -23,6 +22,14 @@ run_args="$@"
 if [ `whoami` != root ]; then
     echo Running as root...
     sudo $0 "$@" && exit 0
+    false
+fi
+
+if ! git show $TAGGED_VERSION > /dev/null; then
+    echo
+    echo Tagged version $TAGGED_VERSION not found.
+    echo Maybe you need to fetch tags: git fetch --tags
+    echo
     false
 fi
 
@@ -37,6 +44,7 @@ done
 FAUCET=$(realpath $ROOT/faucet)
 FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
+LIBS=$(realpath $ROOT/libs)
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found, try running bin/setup_dev.
@@ -59,7 +67,7 @@ if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
-export PYTHONPATH=$FORCH:$FAUCET:$MININET
+export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS
 
 mkdir -p $INSTDIR
 rm -f $INSTDIR/faucet* $cleanup_file
@@ -110,12 +118,12 @@ fi
 
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
-    runcmd="python3 -u -m pdb"
+    runcmd="python3 -m pdb"
 elif [ -n "$DAQ_CODECOV" ]; then
     echo Running with codecov analysis...
     runcmd="coverage run --source=daq -a"
 else
-    runcmd="python3 -u"
+    runcmd="python3"
 fi
 
 if [ -d venv ]; then
@@ -124,9 +132,10 @@ if [ -d venv ]; then
 fi
 
 echo Using python3 at `which python3`
-echo Executing: $runcmd daq/daq.py $LOCAL_CONFIG $@
+echo Executing: $runcmd daq/daq.py $conf_file $@
 
 export PYTHONDONTWRITEBYTECODE=True
+export PYTHONUNBUFFERED=True
 export TERM=dumb
 
 echo Prepending $ROOT/binhack to PATH
@@ -134,7 +143,7 @@ export OVSVSCTL_ORIG=`which ovs-vsctl`
 export PATH=$ROOT/binhack:$PATH
 
 exit_code=0
-$runcmd daq/daq.py $LOCAL_CONFIG $@ || exit_code=$?
+$runcmd daq/daq.py $conf_file $@ 2>&1 || exit_code=$?
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file

@@ -2,8 +2,9 @@
 
 if [ "$1" == help ]; then
  echo The following are expected modes of builds:
- echo $0 : defaults to force build
- echo $0 inline : builds missing containers, with results shown inline
+ echo $0 : Defaults to force build
+ echo $0 inline : Builds missing containers, with results shown inline
+ echo $0 ignore : Ignore any actual building, but reset hashes.
  echo $0 check : Check if the built images are updated.
  echo $0 push : Pushes images to docker hub
  echo $0 pull : Pulls images from docker hub
@@ -67,7 +68,7 @@ if [ "$1" == push ]; then
 elif [ "$1" == pull ]; then
     REPO_VER=$(< misc/$DOCKER_IMAGE_VER)
     REPO_HASH=`git rev-list -n 1 $REPO_VER`
-    TAG_HASH=`git rev-list -n $TAG_VER`
+    TAG_HASH=`git rev-list -n 1 $TAG_VER`
     if [ "$TAG_HASH" != "$REPO_HASH" ]; then
 	echo Tagged version $TAG_VER does not match misc/$DOCKER_IMAGE_VER $REPO_VER
 	false
@@ -97,6 +98,9 @@ elif [ "$1" == force ]; then
 elif [ "$1" == inline ]; then
     inline="inline"
     shift
+elif [ "$1" == ignore ]; then
+    bin/build_hash write
+    exit 0
 elif [ "$1" == "" ]; then
     echo Defaulting to force build
 else

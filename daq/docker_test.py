@@ -50,6 +50,9 @@ class DockerTest:
                          "SWITCH_PORT=" + params['switch_port'],
                          "SWITCH_IP=" + params['switch_ip'],
                          "SWITCH_MODEL=" + params['switch_model']]
+        if 'switch_username' in params:
+            env_vars += ["SWITCH_USERNAME=" + params['switch_username'],
+                         "SWITCH_PASSWORD=" + params['switch_password']]
 
         vol_maps = [params['scan_base'] + ":/scans"]
         self._map_if_exists(vol_maps, params, 'inst')
@@ -140,8 +143,8 @@ class DockerTest:
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):
-        key = 'ex_%s_%02d' % (self.test_name, self.target_port)
-        return self.runner.config.get(key) == trigger_value
+        key = '%s_%02d' % (self.test_name, self.target_port)
+        return self.runner.config.get('fail_module', {}).get(key) == trigger_value
 
     def _docker_complete(self):
         try:

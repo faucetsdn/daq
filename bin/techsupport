@@ -1,0 +1,52 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+TMPDIR=/tmp/techsupport
+mkdir -p $TMPDIR
+
+echo Collecting system information
+function save_to_file {
+  cmd=$1
+  outfile=${cmd// /_} # cleaner form of filename
+  outfile=${outfile//\-/}
+  $1 > $TMPDIR/$outfile.txt 2>/dev/null
+}
+save_to_file "sudo ovs-vsctl show"
+save_to_file "lsb_release -a"
+save_to_file "ip route"
+save_to_file "ip link show"
+save_to_file "arp -n"
+save_to_file "git describe --dirty"
+save_to_file "git status"
+save_to_file "git remote -v"
+save_to_file "git log -n5"
+
+for dir in inst local; do
+    if [ -d $dir ]; then
+        echo Collecting info from $dir
+        cp -r $dir $TMPDIR
+        # clear out any private keys and key_ids (eg: in gcp_creds) if they exist
+        find $TMPDIR/$dir -name \*.json | xargs sed -i 's/\"private_key.*//' || true
+    fi
+done
+
+if [ -f local/system.conf ]; then
+    source local/system.conf
+fi
+
+# If an external switch was set up, try pinging it and saving that capture
+if [ -n "$ext_ctrl" ] && [ -n "$ext_addr" ]; then
+    echo Saving packet capture of pings to external switch.
+    sudo timeout 5s tcpdump -i $ext_ctrl -w $TMPDIR/ping_switch.pcap &>/dev/null &
+    sleep 1 # a second for tcpdump to settle
+    sudo arp -d $ext_addr || true
+    ping -c3 $ext_addr &>$TMPDIR/ping_switch.txt || true
+    wait # wait for timeout+tcpdump to finish writing to pcap file
+fi
+
+# Tar and compress the tmpdir, and then delete it
+tar -C $(dirname $TMPDIR) -cjf techsupport.tar.bz2 $(basename $TMPDIR)
+rm -rf $TMPDIR
+echo Created $ROOT/techsupport.tar.bz2

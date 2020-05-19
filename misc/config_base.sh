@@ -1,20 +1,37 @@
 # Script file included by all setup scripts to load local config.
 
-LOCAL_SYSTEM=local/system.conf
-DEFAULT_CONF=${DAQ_CONF:-misc/system_base.conf}
+LOCAL_YAML=local/system.yaml
+LOCAL_CONF=local/system.conf
+DEFAULT_CONF=${DAQ_CONF:-misc/system.yaml}
+OUT_CONF=inst/config/system.conf
 
 if [ -d venv ]; then
     echo Activating venv
     source venv/bin/activate
 fi
 
-if [ ! -f "$LOCAL_SYSTEM" ]; then
-    echo No $LOCAL_SYSTEM found, copying defaults from $DEFAULT_CONF...
+if [ ! -f "$LOCAL_YAML" -a ! -f "$LOCAL_CONF" ]; then
+    echo No $LOCAL_YAML or $LOCAL_CONF found, copying defaults from $DEFAULT_CONF...
     mkdir -p local
-    cp $DEFAULT_CONF $LOCAL_SYSTEM
+    cp $DEFAULT_CONF $LOCAL_YAML
 fi
 
-echo Loading config from $LOCAL_SYSTEM into inst/config/system.conf
-mkdir -p inst/config
-python3 daq/configurator.py $LOCAL_SYSTEM $run_args > inst/config/system.conf
-source inst/config/system.conf
+if [ -f "$LOCAL_YAML" ]; then
+    conf_file=$LOCAL_YAML
+else
+    conf_file=$LOCAL_CONF
+fi
+
+echo Flattening config from $conf_file into $OUT_CONF
+mkdir -p $(dirname $OUT_CONF)
+python3 daq/configurator.py $conf_file $run_args > $OUT_CONF
+
+# Shell variables can't handle dot character, so convert to underscore
+echo -n > $OUT_CONF.sh
+cat $OUT_CONF | while read line; do
+    before=${line%%=*}
+    after=${line#*=}
+    echo ${before//./_}=$after >> $OUT_CONF.sh
+done
+
+source $OUT_CONF.sh

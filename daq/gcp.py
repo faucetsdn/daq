@@ -22,7 +22,11 @@ LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
-    return datetime.datetime.now(datetime.timezone.utc).strftime(TIMESTAMP_FORMAT)[:-3] + 'Z'
+    return to_timestamp(datetime.datetime.now(datetime.timezone.utc))
+
+def to_timestamp(timestamp):
+    """"Get a JSON-compatible formatted timestamp"""
+    return timestamp.strftime(TIMESTAMP_FORMAT)[:-3] + 'Z'
 
 def parse_timestamp(timestamp_str):
     """Parses a timestamp generated from get_timestamp"""
@@ -214,13 +218,14 @@ class GcpManager:
         """Uploads a report to a storage bucket."""
         if not self._storage:
             LOGGER.info('Ignoring %s upload: not configured' % file_name)
-            return
+            return None
         bucket = self._storage.get_bucket(self._report_bucket_name)
         destination_file_name = os.path.join('origin', self._client_name or "other",
                                              destination_file_name or file_name)
         blob = bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
         LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
+        return destination_file_name
 
     def register_offenders(self):
         """Register any offenders: people who are not enabled to use the system"""

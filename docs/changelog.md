@@ -1,5 +1,31 @@
 # Changelog
 
+* 1.3.0
+  * Cisco switch power (#375)
+  * Firebase data storage changes and supporting filters on UI (#395)
+  * Firebase data retention policy (#395)
+  * script for setting up / resetting service account permissions (#409)
+  * Fix misleading pics report output when no pics.csv file found (#404)
+  * Use python3.7 for faux2 (#410)
+  * add script to collect diagnostic info by user before they reach out (#405)
+  * adding pdf report (#406)
+  * Address cisco switch test access (#403)
+  * add checks for interfaces to switch being defined and up (#399)
+  * Introduction of the `resources` folder used for a device types library and for setups templates (#376)
+* 1.2.0
+  * ssh tunnel document addition (#393)
+  * Build aardvark for travis module test (#388)
+  * Feature/ui improvements v2 (#384)
+  * adding time to log messages (#381)
+  * Fix physical switch setup and test (#379)
+  * Base configurator unit test (#373)
+  * Fix up password test redaction (#370)
+  * Feature/proper ip test (#369)
+  * Make nmap more robust, add finish_hook (#368)
+  * Fix result extraction for reports (#367)
+  * Create alternate faux container image (#366)
+  * Use VLANs for DAQ dataplane (#360)
+  * Feature/push results as json (#357)
 * 1.1.0
   * Fixing version to python 3.7, requires recent version of debian
   * Log and display more version info into GCP project

@@ -1,0 +1,155 @@
+/*
+ * Specification for DAQ configuration.
+ */
+syntax = "proto3";
+
+/*
+ * DAQ configuration.
+ */
+message DaqConfig {
+  // Description for dashboard.
+  string site_description = 1;
+
+  // Default time to monitor before starting tests.
+  int32 monitor_scan_sec = 2;
+
+  // default timeout for tests, or 0 to disable.
+  int32 default_timeout_sec = 3;
+
+  // time to let the network settle.
+  int32 settle_sec = 38;
+
+  // Default base module configuration file.
+  string base_conf = 4;
+
+  // Directory of site-configuration data, including devices.
+  string site_path = 5;
+
+  // initial dhcp lease time on test run start (needs trailing s for sec)
+  string initial_dhcp_lease_time = 6;
+
+  // dhcp lease time after initial startup (needs trailing s for sec)
+  string dhcp_lease_time = 7;
+
+  // dhcp response time for normal testing cycle
+  int32 dhcp_response_sec = 39;
+
+  // dhcp response time for testing long test cycle
+  int32 long_dhcp_response_sec = 8;
+
+  // Interface name for switch control plane
+  string ext_ctrl = 9;
+
+  // IP address and subnet for control plane interface
+  string ext_ofip = 10;
+
+  // Port of open flow controller
+  string ext_ofpt = 43;
+
+  // IP address of external switch.
+  string ext_addr = 11;
+
+  // IP address template and subnet for module ip addresses
+  string ext_loip = 12;
+
+  // Dataplane id of external OpenFlow switch
+  string ext_dpid = 41;
+
+  // Interface name for external switch data plane
+  string ext_intf = 42;
+
+  // Upstream dataplane port from the external (secondary) switch.
+  int32 sec_port = 13;
+
+  // CSV separated list of names to assign to external switch interfaces.
+  string intf_names = 14;
+
+  // Command file with startup commands.
+  string startup_cmds = 15;
+
+  // Specify explicit host test configuration.
+  string host_tests = 16;
+
+  // Specify if system should build tests on run.
+  bool build_tests = 36;
+
+  // Limit the number of test runs before exit.
+  int32 run_limit = 17;
+
+  // Stop after there are any errors.
+  bool fail_mode = 18;
+
+  // Only run test modules once per device.
+  bool single_shot = 34;
+
+  // Keep results around and don't kill containers on error.
+  bool result_linger = 19;
+
+  // Don't run tests on devices, just activate them on the network.
+  bool no_test = 20;
+
+  // Keep the hold container around after tests are done for debugging.
+  bool keep_hold = 40;
+
+  // Extra debugging arguments. Can be one of { error, warn, info, debug }
+  string daq_loglevel = 21;
+
+  // Mininet debugging arguments. Can be one of { error, warn, info, debug }
+  string mininet_loglevel = 22;
+
+  // Hook for executing debug commands when a module finishes.
+  string finish_hook = 35;
+
+  // Service account credential for access to a cloud project.
+  string gcp_cred = 23;
+
+  // Topic used for live stream validation.
+  string gcp_topic = 24;
+
+  // Validation schema default.
+  string schema_path = 25;
+
+  // Location of mud files to use for this setup.
+  string mud_files = 26;
+
+  // File to use for runtime device behavior specification.
+  string device_specs = 27;
+
+  // Configuration directory for runtime tests.
+  string test_config = 28;
+
+  // Set port-debounce for flaky connections. Zero to disable.
+  int32 port_debounce_sec = 29;
+
+  // Hook for failure diagnostics.
+  string fail_hook = 30;
+
+  // Directory of defaults for new devices.
+  string device_template = 31;
+
+  // If defined, override destination root for device reports (defaules to {site_path})
+  string site_reports = 32;
+
+  // Cloud data retention policy.
+  float run_data_retention_days = 33;
+
+  // Startup configuration options.
+  map<string, StartupInfo> startup = 37;
+
+  // Switch model
+  string switch_model = 44;
+
+  // Switch connect username
+  string switch_username = 45;
+
+  // Switch connect password
+  string switch_password = 46;
+
+  // Failure testing triggers
+  map<string, string> fail_module = 47;
+}
+
+message StartupInfo {
+  // Startup command line options.
+  string opts = 1;
+}

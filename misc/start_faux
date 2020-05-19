@@ -13,6 +13,9 @@ for option in $*; do
     fi
 done
 
+echo Python version `python --version`
+echo Java version `java --version`
+
 # Disable docker's built-in resolv mechanism and install standard resolvconf.
 # Do this at runtime since it requires permissions that aren't availble at build.
 umount /etc/resolv.conf

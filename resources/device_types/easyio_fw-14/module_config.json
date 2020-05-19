@@ -1,0 +1,66 @@
+{
+  "device_datasheets_url": "https://www.easyio.eu/wp-content/uploads/2018/05/Datasheet_EASYIO-FW-14.pdf",
+  "device_description": "The EasyIO-FW-14 is a Wi-Fi Sedona controller designed applications such as fan coils, AHUs, room HVAC controller and stand-alone use, supporting SOX, TCOM, FGP2P and BACnet communication protocols.",
+  "device_image": "https://www.easyio.eu/wp-content/uploads/2018/03/EasyIO_FW-14_Wi-Fi_BMS_controller-320x192.jpg",
+  "device_info": { 
+    "make": "EasyIO",
+    "model": "FW-14",
+    "type": "BACnet controller"
+  },
+  "device_manuals_url": "https://techcommft.blob.core.windows.net/fluidtopics/integrations/docs/easyio_fw_installation_v2.0.pdf",
+  "servers": {
+    "tcp": {
+      "ports": {
+        "20": {
+          "allowed": false,
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
+        },
+        "21": {
+          "allowed": false,
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
+        },
+        "22": {
+          "allowed": true,
+          "description": "Secure Shell (SSH) server",
+          "reason": ""
+        },
+        "23": {
+          "allowed": false,
+          "description": "Telnet Server",
+          "reason": ""
+        },
+        "25": {
+          "allowed": false,
+          "description": "Simple Mail Transfer Protocol (SMTP) Server",
+          "reason": ""
+        },
+        "80": {
+          "allowed": false,
+          "description": "Administrative Insecure Web-Server",
+          "reason": ""
+        },
+        "443": {
+          "allowed": true,
+          "description": "Administrative Secure Web-Server",
+          "reason": ""
+        }
+      }
+    },
+    "udp": {
+      "ports": {
+        "1876": {
+          "allowed": true,
+          "description": "EasyIO/Sedona SOX",
+          "reason": ""
+        },
+        "47808": {
+          "allowed": true,
+          "description": "BACnet protocol",
+          "reason": ""
+        }
+      }
+    }
+  },
+}

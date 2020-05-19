@@ -12,7 +12,7 @@ public class Report {
   public void writeReport(String certificateReport) {
     try {
       if (debug) {
-        System.out.println("report:" + certificateReport);
+        System.out.println(certificateReport);
       }
 
       String[] directory = reportFilename.split("/");
@@ -24,7 +24,7 @@ public class Report {
       writer.write(certificateReport);
       writer.close();
     } catch (IOException e) {
-      System.err.println("Exception writeReport:" + e.getMessage());
+      System.out.println("Exception writeReport:" + e.getMessage());
     }
   }
 }
