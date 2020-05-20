@@ -123,6 +123,8 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 
 ## Report complete
 
+%%%%%%%%%%%%%%%%%%%%%% Image fail
+01: ['01:fail:DaqException']
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 01: []
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
