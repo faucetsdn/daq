@@ -230,3 +230,6 @@ DAQ -> Firebase: Merged (active)
 Firebase -> WebApp: Merged (active)
 note right of WebApp: "Normal" state
 ```
+
+# Firebase Database Schema
+![Diagram](Firebase Database.png)
