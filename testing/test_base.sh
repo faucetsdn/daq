@@ -22,6 +22,7 @@ cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Check that an open port causes the appropriate failure.
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
+docker rmi daqf/test_fail:latest # Also check that a missing image has the right failure.
 cmd/run -s interfaces.faux.opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log

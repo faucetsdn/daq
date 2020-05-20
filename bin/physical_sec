@@ -27,6 +27,8 @@ if [ -z "$ext_ctrl" ]; then
     false
 fi
 
+sudo ip link set up dev $ext_ctrl
+
 if ! ip -br link show dev "$ext_ctrl" | fgrep "UP" &> /dev/null; then
     echo Error: Control plane interface [$ext_ctrl] is not UP, for physical_sec
     false
@@ -72,8 +74,6 @@ done
 
 sudo ip addr flush dev $ext_ctrl
 sudo ip addr add $ext_ofip dev $ext_ctrl
-
-sudo ip link set up dev $ext_ctrl
 
 echo Checking external connection to $ext_addr
 if ! ping -c 2 $ext_addr; then
