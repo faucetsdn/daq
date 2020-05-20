@@ -16,7 +16,6 @@ class DockerTest:
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'
     TAGGED_IMAGE_FORMAT = IMAGE_NAME_FORMAT + ':latest'
-
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
