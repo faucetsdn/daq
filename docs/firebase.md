@@ -232,4 +232,4 @@ note right of WebApp: "Normal" state
 ```
 
 # Firebase Database Schema
-![Diagram](Firebase Database.png)
+![Diagram](Firebase%20Database.png)
