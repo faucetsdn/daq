@@ -68,7 +68,7 @@ class DockerTest:
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         # Work around an instability in the faucet/clib/docker library, b/152520627.
-        setattr(cls, 'pullImage', lambda docker_host: self._check_image(docker_host))
+        setattr(cls, 'pullImage', self._check_image)
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
@@ -103,8 +103,9 @@ class DockerTest:
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def _check_image(self, docker_host):
-        lines = subprocess.check_output(["docker", "images", "--format", "{{ .Repository }}:{{ .Tag }}"])
+    def _check_image(self, new_host):
+        lines = subprocess.check_output(["docker", "images", "--format",
+                                         "{{ .Repository }}:{{ .Tag }}"])
         expected = self.TAGGED_IMAGE_FORMAT % self.test_name
         lines = str(lines, 'utf-8').splitlines()
         assert expected in lines, 'Could not find image %s, maybe rebuild images.' % expected
