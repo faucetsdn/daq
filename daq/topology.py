@@ -31,11 +31,11 @@ class FaucetTopology:
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_%d_acl"
     LOCAL_ACL_FORMAT = "dp_%s_local_acl"
+    _DEFAULT_STACK_PORT_NAME = "stack_sec"
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
     _VLAN_BASE = 1000
-    _NETWORK_SETTLE_SEC = 5
     PRI_STACK_PORT = 1
     _NO_VLAN = "0x0000/0x1000"
 
@@ -43,10 +43,13 @@ class FaucetTopology:
         self.config = config
         self.pri = None
         self.pri_name = None
-        self.sec_port = int(config.get('sec_port', "7"), 0)
         self.sec_name = 'sec'
-        self.sec_dpid = int(config.get('ext_dpid', "2"), 0)
-        self._settle_sec = int(config.get('settle_sec', self._NETWORK_SETTLE_SEC))
+        switch_setup = self.config.get('switch_setup', {})
+        self.sec_port = int(switch_setup['uplink_port'])
+        self.sec_dpid = int(switch_setup['of_dpid'], 0)
+        self.ext_ofip = switch_setup.get('lo_addr')
+        self.ext_intf = switch_setup.get('data_intf')
+        self._settle_sec = int(config['settle_sec'])
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self.topology = None
@@ -81,7 +84,7 @@ class FaucetTopology:
 
     def get_ext_intf(self):
         """Return the external interface for seconday, if any"""
-        return self.config.get('ext_intf')
+        return self.ext_intf
 
     def get_sec_dpid(self):
         """Return the secondary dpid"""
@@ -93,8 +96,7 @@ class FaucetTopology:
 
     def get_device_intfs(self):
         """Return list of secondary device interfaces"""
-        intf_split = self.config.get('intf_names', "").split(",")
-        intf_names = intf_split if intf_split[0] else []
+        intf_names = list(self.config.get('interfaces', {}).keys())
         device_intfs = []
         for port in range(1, self.sec_port):
             named_port = port <= len(intf_names)
@@ -181,7 +183,7 @@ class FaucetTopology:
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.sec_name
         interface['stack'] = {'dp': self.pri_name, 'port': self.PRI_STACK_PORT}
-        interface['name'] = self.config.get('ext_intf', 'stack_sec')
+        interface['name'] = self.get_ext_intf() or self._DEFAULT_STACK_PORT_NAME
         return interface
 
     def _make_default_acl_rules(self):
@@ -271,13 +273,11 @@ class FaucetTopology:
         return [1, self._SWITCH_LOCAL_PORT] + self._get_gw_ports(port_set)
 
     def _generate_switch_local_acls(self, portset_acls, local_acl):
-        local_net_dst = self.config.get('ext_ofip')
-
         all_ports = []
-        if local_net_dst:
+        if self.ext_ofip:
             for port_set in range(1, self.sec_port):
                 self._add_acl_rule(portset_acls[port_set], ports=[self._SWITCH_LOCAL_PORT],
-                                   ipv4_dst=local_net_dst, dl_type=self.IPV4_DL_TYPE)
+                                   ipv4_dst=self.ext_ofip, dl_type=self.IPV4_DL_TYPE)
                 all_ports += self._get_gw_ports(port_set)
 
         self._add_acl_rule(local_acl, ports=all_ports)

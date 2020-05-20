@@ -114,6 +114,8 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
+        self.switch_setup = self.config.get('switch_setup', {})
+        self.ext_loip = self.switch_setup.get('mods_addr')
 
     @staticmethod
     def make_runid():
@@ -558,16 +560,13 @@ class ConnectedHost:
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
                                                 test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
-        if 'ext_loip' in self.config:
-            ext_loip = self.config['ext_loip'].replace('@', '%d')
-            params['local_ip'] = ext_loip % self.test_port
-            params['switch_ip'] = self.config['ext_addr']
+        if self.ext_loip:
+            params['local_ip'] = self.ext_loip.replace('@', '%d') % self.test_port
+            params['switch_ip'] = self.switch_setup.get('ip_addr')
             params['switch_port'] = str(self.target_port)
-            params['switch_model'] = self.config['switch_model']
-
-        if 'switch_username' in self.config:
-            params['switch_username'] = self.config['switch_username']
-            params['switch_password'] = self.config['switch_password']
+            params['switch_model'] = self.switch_setup.get('switch_model')
+            params['switch_username'] = self.switch_setup.get('switch_username')
+            params['switch_password'] = self.switch_setup.get('switch_password')
 
         try:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())

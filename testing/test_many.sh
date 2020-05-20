@@ -17,12 +17,11 @@ rm -f $manystartup
 echo startup_cmds=$manystartup >> local/system.conf
 
 echo monitor_scan_sec=5 >> local/system.conf
-echo sec_port=$((NUM_DEVICES+1)) >> local/system.conf
+echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
 
 
-ifaces=
 for iface in $(seq 1 $NUM_DEVICES); do
-    ifaces=${ifaces},faux-$iface
+    echo interfaces.faux-$iface.opts= >> local/system.conf
     xdhcp=""
     if [[ $iface -le $NUM_NO_DHCP_DEVICES ]]; then
         ip="10.20.0.$((iface+5))"
@@ -50,7 +49,6 @@ EOF
     fi
     echo autostart cmd/faux $iface $xdhcp>> $manystartup
 done
-echo intf_names=${ifaces#,} >> local/system.conf
 
 echo DAQ stress test | tee -a $TEST_RESULTS
 

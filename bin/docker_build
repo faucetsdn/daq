@@ -48,7 +48,7 @@ for file in $docker_files; do
         echo Skipping building existing $tag 
     else
         unset test_set[$module]
-        echo Build$ext_msg $file into $tag, log to $logfile...
+        echo Build $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
         if [ -n "$inline" ]; then
             bin/retry_cmd docker build -t $tag -f $file . 2>&1 | tee -a $logfile || failed=y
