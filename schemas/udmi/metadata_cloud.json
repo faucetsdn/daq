@@ -6,7 +6,8 @@
   "properties": {
     "auth_type": {
       "enum": [
-        "RSA_PEM"
+        "RS256",
+        "RS256_X506"
       ]
     },
     "is_gateway": {

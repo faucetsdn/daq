@@ -42,8 +42,9 @@ class LocalDevice {
   private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
       .enable(SerializationFeature.INDENT_OUTPUT);
 
-  private static final String RSA_KEY_TYPE = "RSA_PEM";
-  private static final String RSA_CERT_TYPE = "RSA_X509_PEM";
+  private static final String RSA_CERT_TYPE = "RS256_X509";
+  private static final String RSA_KEY_FILE = "RSA_PEM";
+  private static final String RSA_CERT_FILE = "RSA_X509_PEM";
   private static final String RSA_PUBLIC_PEM = "rsa_public.pem";
   private static final String RSA_CERT_PEM = "rsa_cert.pem";
   private static final String RSA_PRIVATE_PEM = "rsa_private.pem";
@@ -122,21 +123,37 @@ class LocalDevice {
     return null;
   }
 
-  private String metadataHash() {
+  private UdmiSchema.Metadata readNormalized() {
     try {
-      String savedHash = metadata.hash;
+      File metadataFile = new File(deviceDir, NORMALIZED_JSON);
+      return OBJECT_MAPPER.readValue(metadataFile, UdmiSchema.Metadata.class);
+    } catch (Exception mapping_exception) {
+      return new UdmiSchema.Metadata();
+    }
+  }
+
+  private String metadataHash() {
+    String savedHash = metadata.hash;
+    Date savedTimestamp = metadata.timestamp;
+    try {
       metadata.hash = null;
+      metadata.timestamp = null;
       String json = metadataString();
-      metadata.hash = savedHash;
       return String.format("%08x", Objects.hash(json));
     } catch (Exception e) {
       throw new RuntimeException("Converting object to string", e);
+    } finally {
+      metadata.hash = savedHash;
+      metadata.timestamp = savedTimestamp;
     }
   }
 
   private String getAuthType() {
-    String authType = metadata.cloud == null ? null : metadata.cloud.auth_type;
-    return authType == null ? RSA_KEY_TYPE : authType;
+    return metadata.cloud == null ? null : metadata.cloud.auth_type;
+  }
+
+  private String getAuthFileType() {
+    return RSA_CERT_TYPE.equals(getAuthType()) ? RSA_CERT_FILE : RSA_KEY_FILE;
   }
 
   private DeviceCredential loadCredential() {
@@ -154,7 +171,7 @@ class LocalDevice {
       if (!deviceKeyFile.exists()) {
         generateNewKey();
       }
-      return CloudIotManager.makeCredentials(getAuthType(),
+      return CloudIotManager.makeCredentials(getAuthFileType(),
           IOUtils.toString(new FileInputStream(deviceKeyFile), Charset.defaultCharset()));
     } catch (Exception e) {
       throw new RuntimeException("While loading credential for local device " + deviceId, e);
@@ -324,14 +341,16 @@ class LocalDevice {
   }
 
   void writeNormalized() {
+    UdmiSchema.Metadata normalized = readNormalized();
+    String writeHash = metadataHash();
+    if (normalized.hash != null && normalized.hash.equals(writeHash)) {
+      return;
+    }
+    metadata.timestamp = new Date();
+    metadata.hash = writeHash;
     File metadataFile = new File(deviceDir, NORMALIZED_JSON);
+    System.err.println("Writing " + metadataFile.getAbsolutePath());
     try (OutputStream outputStream = new FileOutputStream(metadataFile)) {
-      String writeHash = metadataHash();
-      boolean update = metadata.hash == null || !metadata.hash.equals(writeHash);
-      if (update) {
-        metadata.timestamp = new Date();
-        metadata.hash = metadataHash();
-      }
       // Super annoying, but can't set this on the global static instance.
       JsonGenerator generator = OBJECT_MAPPER.getFactory()
           .createGenerator(outputStream)
