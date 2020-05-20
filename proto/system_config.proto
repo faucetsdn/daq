@@ -114,6 +114,9 @@ message DaqConfig {
 
   // Failure testing triggers
   map<string, string> fail_module = 47;
+  
+  // Set time between port disconnect and host tests shutdown
+  int32 port_flap_timeout_sec = 48;
 }
 
 

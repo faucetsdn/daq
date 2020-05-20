@@ -186,4 +186,6 @@ inst/run-port-03/nodes/hold03/activate.log
 inst/run-port-03/nodes/nmap03/activate.log
 inst/run-port-03/nodes/pass03/activate.log
 inst/run-port-03/nodes/ping03/activate.log
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
 Done with tests
