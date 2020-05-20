@@ -20,9 +20,15 @@ more inst/result.log | tee -a $TEST_RESULTS
 echo Redacted report for 9a02571e8f00:
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
+# Check that a missing docker image causes hard fail.
+echo %%%%%%%%%%%%%%%%%%%%%% Image fail | tee -a $TEST_RESULTS
+docker rmi daqf/test_fail:latest
+cmd/run -s
+more inst/result.log | tee -a $TEST_RESULTS
+DAQ_TARGETS=test_fail cmd/build
+
 # Check that an open port causes the appropriate failure.
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
-docker rmi daqf/test_fail:latest # Also check that a missing image has the right failure.
 cmd/run -s interfaces.faux.opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
