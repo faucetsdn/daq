@@ -96,12 +96,14 @@ class DAQRunner:
         states = connected_host.pre_states() + self.config['test_list']
         return states + connected_host.post_states()
 
+    def _get_active_ports(self):
+        return list(filter(lambda p: self._port_info[p]["active"], self._port_info.keys()))
+
     def _send_heartbeat(self):
-        ports = list(filter(lambda p: self._port_info[p]["active"], self._port_info.keys()))
         message = {
             'name': 'status',
             'states': self._get_states(),
-            'ports': ports,
+            'ports': self._get_active_ports(),
             'description': self.description,
             'timestamp': time.time()
         }
@@ -260,7 +262,7 @@ class DAQRunner:
                 if port_info["active"] and port_info.get("mac"):
                     self._target_set_trigger(target_port)
                     all_idle = False
-        if not self._port_info and not self.run_tests:
+        if not self._get_active_ports() and not self.run_tests:
             if self.faucet_events and not self._linger_exit:
                 self.shutdown()
             if self._linger_exit == 1:
@@ -361,7 +363,7 @@ class DAQRunner:
 
         if not self.run_tests:
             del self._port_info[target_port]
-            LOGGER.info('Target port %d trigger ignored', target_port)
+            LOGGER.debug('Target port %d trigger ignored', target_port)
             return False
 
         try:
@@ -665,7 +667,7 @@ class DAQRunner:
                 self.run_tests = False
             del self._mac_port_map[target_mac]
             del self._port_info[target_port]
-        LOGGER.info('Remaining target sets: %s', list(self._port_info.keys()))
+        LOGGER.info('Remaining target sets: %s', self._get_active_ports())
 
     def _detach_gateway(self, target_port):
         if not self._port_info.get(target_port, {}).get("gateway"):
