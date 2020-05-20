@@ -85,7 +85,7 @@ fi
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
 echo Build all container images...
-cmd/build # inline
+cmd/build 
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
@@ -168,6 +168,10 @@ function monitor_marker {
     MARKER=$2
     rm -f $MARKER
     while [ ! -f $MARKER ]; do
+        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
+        if [ -n "$test_done" ]; then
+           break
+        fi
         echo test_aux.sh waiting for $MARKER
         sleep 60
     done
@@ -191,4 +195,34 @@ head inst/run-port-*/finish/nmap*/*
 
 tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
+
+function monitor_log {
+    while true; do 
+        found=$(cat inst/cmdrun.log 2>/dev/null | grep "$2")
+        if [ -n "$found" ]; then
+            echo found $2
+            eval $1 
+            break
+        fi
+        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
+        if [ -n "$test_done" ]; then
+            break
+        fi
+    done &
+}
+rm -f inst/cmdrun.log
+# Check port toggling does not cause a shutdown 
+cat <<EOF > local/system.yaml
+---
+include: misc/system_base.yaml
+port_flap_timeout_sec: 10
+port_debounce_sec: 0
+EOF
+monitor_log "sudo ifconfig faux down;sleep 1; sudo ifconfig faux up" "Port 1 dpid 2 is now active"
+monitor_log "sudo ifconfig faux down" "Target port 1 test hold running"
+cmd/run -s -k
+disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
+echo Enough port disconnects: $((disconnections >= 2)) | tee -a $TEST_RESULTS
+cat inst/result.log | sort | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
+
