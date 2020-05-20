@@ -217,7 +217,9 @@ class DAQRunner:
         self.network.direct_port_traffic(mac, port, target)
 
     def _handle_port_learn(self, dpid, port, target_mac):
-        if self.network.is_device_port(dpid, port) and port in self._port_info:
+        if self.network.is_device_port(dpid, port):
+            if not port in self._port_info:
+                self._port_info[port] = {"active": True}
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             self._mac_port_map[target_mac] = port
             self._port_info[port]["mac"] = target_mac
@@ -358,7 +360,8 @@ class DAQRunner:
             return False
 
         if not self.run_tests:
-            LOGGER.debug('Target port %d trigger ignored', target_port)
+            del self._port_info[target_port]
+            LOGGER.info('Target port %d trigger ignored', target_port)
             return False
 
         try:
@@ -598,7 +601,7 @@ class DAQRunner:
     def target_set_error(self, target_port, exception):
         """Handle an error in the target port set"""
         active = self._port_info.get(target_port, {}).get("host")
-        LOGGER.error('Target port %d active %s exception: %s', target_port, active, exception)
+        LOGGER.error('Target port %d active %s exception: %s', target_port, bool(active), exception)
         LOGGER.exception(exception)
         self._detach_gateway(target_port)
         if active:
