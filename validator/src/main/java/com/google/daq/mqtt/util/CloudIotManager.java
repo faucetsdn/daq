@@ -43,7 +43,7 @@ public class CloudIotManager {
   private CloudIot cloudIotService;
   private String projectPath;
   private CloudIot.Projects.Locations.Registries cloudIotRegistries;
-  private Map<String, Device> deviceMap;
+  private Map<String, Device> deviceMap = new HashMap<>();
   private String schemaName;
 
   public CloudIotManager(File gcpCred, File iotConfigFile, String schemaName) {
@@ -194,7 +194,6 @@ public class CloudIotManager {
   public List<Device> fetchDeviceList(Pattern devicePattern) {
     Preconditions.checkNotNull(cloudIotService, "CloudIoT service not initialized");
     try {
-      deviceMap = new HashMap<>();
       List<Device> devices = cloudIotRegistries
           .devices()
           .list(getRegistryPath(registryId))

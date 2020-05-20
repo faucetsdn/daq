@@ -14,7 +14,7 @@ if [ $type == RSA_PEM ]; then
 elif [ $type == RSA_X509_PEM ]; then
     openssl req -x509 -nodes -newkey rsa:2048 -keyout rsa_private.pem -days 1000000 -out rsa_cert.pem -subj "/CN=unused"
 else
-    echo Unknown key type $type. Try one of { RS256, RS256_X509 }
+    echo Unknown key type $type. Try one of { RSA_PEM, RS_X509_PEM }
     false
 fi
 

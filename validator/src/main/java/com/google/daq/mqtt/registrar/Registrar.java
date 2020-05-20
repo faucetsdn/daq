@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toSet;
 public class Registrar {
 
   static final String METADATA_JSON = "metadata.json";
+  static final String NORMALIZED_JSON = "metadata_norm.json";
   static final String DEVICE_ERRORS_JSON = "errors.json";
   static final String ENVELOPE_JSON = "envelope.json";
   static final String GENERATED_CONFIG_JSON = "generated_config.json";
@@ -193,7 +194,7 @@ public class Registrar {
             System.err.println("Binding " + proxyDeviceId + " to gateway " + localDevice.getDeviceId());
             cloudIotManager.bindDevice(proxyDeviceId, localDevice.getDeviceId());
           } catch (Exception e) {
-            throw new RuntimeException("While binding device " + localDevice.getDeviceId(), e);
+            throw new RuntimeException("While binding device " + proxyDeviceId, e);
           }
         })
     );

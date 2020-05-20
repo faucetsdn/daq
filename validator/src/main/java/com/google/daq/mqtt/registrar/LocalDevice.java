@@ -42,6 +42,7 @@ class LocalDevice {
   private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
       .enable(SerializationFeature.INDENT_OUTPUT);
 
+  private static final String RSA_KEY_TYPE = "RSA_PEM";
   private static final String RSA_CERT_TYPE = "RSA_X509_PEM";
   private static final String RSA_PUBLIC_PEM = "rsa_public.pem";
   private static final String RSA_CERT_PEM = "rsa_cert.pem";
@@ -50,7 +51,7 @@ class LocalDevice {
   private static final String PHYSICAL_TAG_FORMAT = "%s_%s";
   private static final String PHYSICAL_TAG_ERROR = "Physical asset name %s does not match expected %s";
 
-  private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
+  private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON, NORMALIZED_JSON);
   private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
   private static final Set<String> OPTIONAL_FILES = ImmutableSet.of(GENERATED_CONFIG_JSON, DEVICE_ERRORS_JSON);
 
@@ -134,7 +135,8 @@ class LocalDevice {
   }
 
   private String getAuthType() {
-    return metadata.cloud == null ? null : metadata.cloud.auth_type;
+    String authType = metadata.cloud == null ? null : metadata.cloud.auth_type;
+    return authType == null ? RSA_KEY_TYPE : authType;
   }
 
   private DeviceCredential loadCredential() {
@@ -167,13 +169,13 @@ class LocalDevice {
   }
 
   private String publicKeyFile() {
-    return metadata.cloud.auth_type.equals(RSA_CERT_TYPE) ? RSA_CERT_PEM : RSA_PUBLIC_PEM;
+    return RSA_CERT_TYPE.equals(getAuthType()) ? RSA_CERT_PEM : RSA_PUBLIC_PEM;
   }
 
   private void generateNewKey() {
     String absolutePath = deviceDir.getAbsolutePath();
     try {
-      String command = String.format(KEYGEN_EXEC_FORMAT, metadata.cloud.auth_type, absolutePath);
+      String command = String.format(KEYGEN_EXEC_FORMAT, getAuthType(), absolutePath);
       System.err.println(command);
       int exitCode = Runtime.getRuntime().exec(command).waitFor();
       if (exitCode != 0) {
@@ -322,7 +324,7 @@ class LocalDevice {
   }
 
   void writeNormalized() {
-    File metadataFile = new File(deviceDir, METADATA_JSON);
+    File metadataFile = new File(deviceDir, NORMALIZED_JSON);
     try (OutputStream outputStream = new FileOutputStream(metadataFile)) {
       String writeHash = metadataHash();
       boolean update = metadata.hash == null || !metadata.hash.equals(writeHash);
