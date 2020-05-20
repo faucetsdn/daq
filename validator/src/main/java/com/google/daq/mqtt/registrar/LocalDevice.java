@@ -185,12 +185,12 @@ class LocalDevice {
   }
 
   boolean isGateway() {
-    return metadata.gateway != null &&
+    return metadata != null && metadata.gateway != null &&
         metadata.gateway.proxy_ids != null;
   }
 
   boolean hasGateway() {
-    return metadata.gateway != null &&
+    return metadata != null && metadata.gateway != null &&
         metadata.gateway.gateway_id != null;
   }
 
@@ -207,8 +207,10 @@ class LocalDevice {
       if (settings != null) {
         return settings;
       }
-
       settings = new CloudDeviceSettings();
+      if (metadata == null) {
+        return settings;
+      }
       settings.credential = loadCredential();
       settings.metadata = metadataString();
       settings.config = deviceConfigString();
