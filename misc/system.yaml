@@ -2,12 +2,20 @@
 # Base configuration file for DAQ.
 #
 # This setup will create and test one faux device. To specify a real USB
-# adapter, modify the intf_names entry with the appripriate interface name(s).
+# adapter, modify the interfaces entry with the appripriate interface name(s).
 # The startup_cmds line can then be commented out to prevent the (unnecessary)
 # startup of the faux test device.
 
 # Description for dashboard.
 site_description: "Default Configuration"
+
+# Default switch configuration.
+switch_setup:
+  of_dpid: 2
+  uplink_port: 7
+
+# Time to let the network settle after some operations.
+settle_sec: 5
 
 # Default time to monitor before starting tests.
 monitor_scan_sec: 30

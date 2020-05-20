@@ -30,7 +30,7 @@ Overall device result PASS
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
-|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Other|Other|target reached|
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 
@@ -78,11 +78,11 @@ RESULT pass base.startup.dhcp
 --------------------
 base.switch.ping
 --------------------
-Attempt to ping the OpenFlow compatible switch configured in system.conf
+Attempt to ping access switch (if configured)
 --------------------
 See log above
 --------------------
-RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+RESULT skip base.switch.ping No local IP has been set, check system config
 
 --------------------
 base.target.ping

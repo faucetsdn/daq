@@ -46,10 +46,12 @@ class TestNetwork:
         self.sec = None
         self.sec_dpid = None
         self.sec_port = None
-        self.ext_intf = None
-        self.ext_ofpt = int(config.get('ext_ofpt', self.DEFAULT_OF_PORT))
-        self.switch_links = {}
         self.topology = FaucetTopology(self.config)
+        self.ext_intf = self.topology.get_ext_intf()
+        switch_setup = config.get('switch_setup', {})
+        self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
+        self.ext_loip = switch_setup.get('mods_addr')
+        self.switch_links = {}
         self.faucitizer = faucetizer.Faucetizer(None, None)
 
     # pylint: disable=too-many-arguments
@@ -104,7 +106,6 @@ class TestNetwork:
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
-        self.ext_intf = self.topology.get_ext_intf()
         if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
@@ -181,7 +182,7 @@ class TestNetwork:
         LOGGER.info("Starting mininet...")
         self.net.start()
 
-        if 'ext_loip' in self.config:
+        if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
 
     def direct_port_traffic(self, target_mac, port, target):
