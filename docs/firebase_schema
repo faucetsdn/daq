@@ -1,0 +1,76 @@
+Table User as U {
+  id uuid [pk]
+  email string
+  name string
+  updated timestamp
+}
+
+Table Permission as P{
+  id uuid [pk, ref: - U.id]
+  enabled boolean
+}
+
+Table Site {
+  id String [pk] // eg. ZZ-FRI-FECTA
+  updated timestamp
+ }
+
+Table Origin {
+  id String [pk] // eg. daq-testlab
+  control String [ref: < Control.id]
+  device String [ref: < Device.mac]
+  runner String [ref: - Config.id]
+  port String [ref: < Port.id]
+  runid String [ref: < Run.id]
+}
+
+Table Device {
+  mac String [pk]
+  config String
+  runid String [ref: < Run.id]
+}
+
+Table Control {
+  id String [pk]
+  config String [ref: - Config.id]
+}
+
+Table Port {
+  id String [pk]
+  runid String [ref: < Run.id]
+  updated timestamp
+}
+
+Table Run {
+  id String [pk]
+  config String [ref: - Config.id]
+  test String [ref: < Test.id]
+  deviceId String [ref: > Device.mac]
+  port int
+  siteName String [ref: > Site.id]
+  updated timestamp
+}
+
+Table Test {
+  id String [pk] // eg ipaddr, bacnet
+  device_id String [ref: > Device.mac]
+  name String
+  port int
+  runid String [ref: > Run.id]
+  started timestamp
+  state String
+  timestamp timestamp
+}
+
+Table Config {
+  id String [pk] // Only definition, latest
+  config json // module_config, run_info
+  port int 
+  device_id String [ref: < Device.mac]
+  name String
+  runid String [ref: < Run.id]
+  started timestamp
+  state String
+  timestamp timestamp
+}
+
