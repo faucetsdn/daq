@@ -102,7 +102,7 @@ class DockerTest:
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def _check_image(self, new_host):
+    def _check_image(self):
         lines = subprocess.check_output(["docker", "images", "--format",
                                          "{{ .Repository }}:{{ .Tag }}"])
         expected = self.TAGGED_IMAGE_FORMAT % self.test_name
