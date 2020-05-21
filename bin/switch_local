@@ -21,6 +21,7 @@ ext_ctrl=$switch_setup_ctrl_intf
 ext_ofip=$switch_setup_lo_addr
 ext_addr=$switch_setup_ip_addr
 
+echo Running switch_local setup...
 
 if [ -n "$ext_ctrl" ]; then
     cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
