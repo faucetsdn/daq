@@ -232,5 +232,5 @@ note right of WebApp: "Normal" state
 ```
 
 # Firebase Database Schema
-![Diagram](Firebase Database.png)
+![Diagram](Firebase%20Database.png)
 Generated with [dbdiagram.io](https://dbdiagram.io/) with this [file](firebase_schema)
