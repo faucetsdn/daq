@@ -95,7 +95,7 @@ if [ -z `which ifconfig` ]; then
 fi
 
 sudo rm -f $cleanup_file
-if [ -n "$switch_setup_of_dpid" ]; then
+if [ -n "$switch_setup_ip_addr" ]; then
     autostart bin/switch_local
 else
     echo No external switch configured.
