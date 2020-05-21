@@ -16,6 +16,7 @@ function save_to_file {
 save_to_file "sudo ovs-vsctl show"
 save_to_file "lsb_release -a"
 save_to_file "ip route"
+save_to_file "ip addr show"
 save_to_file "ip link show"
 save_to_file "arp -n"
 save_to_file "git describe --dirty"
@@ -26,15 +27,17 @@ save_to_file "git log -n5"
 for dir in inst local; do
     if [ -d $dir ]; then
         echo Collecting info from $dir
-        cp -r $dir $TMPDIR
+        sudo cp -r $dir $TMPDIR
+        sudo chown $USER -R $TMPDIR
         # clear out any private keys and key_ids (eg: in gcp_creds) if they exist
         find $TMPDIR/$dir -name \*.json | xargs sed -i 's/\"private_key.*//' || true
     fi
 done
 
-if [ -f local/system.conf ]; then
-    source local/system.conf
-fi
+source misc/config_base.sh
+ext_ctrl=$switch_setup_ctrl_intf
+ext_addr=$switch_setup_ip_addr
+ext_intf=$switch_setup_data_intf
 
 # If an external switch was set up, try pinging it and saving that capture
 if [ -n "$ext_ctrl" ] && [ -n "$ext_addr" ]; then
@@ -46,7 +49,15 @@ if [ -n "$ext_ctrl" ] && [ -n "$ext_addr" ]; then
     wait # wait for timeout+tcpdump to finish writing to pcap file
 fi
 
+# If the dataplane interface is defined, also take a 5 second packet capture of that
+if [ -n "$ext_intf" ]; then
+    echo Saving packet capture of dataplane interface
+    sudo timeout 5s tcpdump -i $ext_intf -w $TMPDIR/ext_intf.pcap &>/dev/null || true
+fi
+
 # Tar and compress the tmpdir, and then delete it
-tar -C $(dirname $TMPDIR) -cjf techsupport.tar.bz2 $(basename $TMPDIR)
+echo Consolidating logs and packet captures, this could take a minute
+TAR_FILENAME=daq-`date +"%Y%b%d.%H%M%S"`.tar.bz2
+tar -C $(dirname $TMPDIR) -cjf $TAR_FILENAME --exclude-vcs --exclude='faucet_event.sock' $(basename $TMPDIR)
 rm -rf $TMPDIR
-echo Created $ROOT/techsupport.tar.bz2
+echo Created $ROOT/$TAR_FILENAME
