@@ -273,7 +273,7 @@ class DAQRunner:
             LOGGER.debug('No active device ports, waiting for trigger event...')
 
     def _reap_stale_ports(self):
-        for port, port_info in self._port_info.items():
+        for port, port_info in copy.copy(self._port_info).items():
             if not all(("flapping_start" in port_info, "host" in port_info)):
                 continue
             host = port_info["host"]
