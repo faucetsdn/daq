@@ -22,10 +22,12 @@ cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Check that an open port causes the appropriate failure.
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
-cmd/run -s interfaces.faux.opts=telnet
+docker rmi daqf/test_hold:latest # Check case of missing image
+cmd/run -s -k interfaces.faux.opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
+DAQ_TARGETS=test_hold cmd/build
 
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
