@@ -24,6 +24,10 @@ ext_addr=$switch_setup_ip_addr
 
 if [ -n "$ext_ctrl" ]; then
     cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
+    if [ -z "$cplane_mac" ]; then
+        echo Could not extract mac address from iface $ext_ctrl.
+        false
+    fi
     echo Pulled cplane_mac $cplane_mac from $ext_ctrl
 else
     cplane_mac=f8:39:71:c9:7a:09
