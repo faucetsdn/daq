@@ -5,7 +5,7 @@ Table User as U {
   updated timestamp
 }
 
-Table Permission as P{
+Table Permission as P {
   id uuid [pk, ref: - U.id]
   enabled boolean
 }
