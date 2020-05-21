@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import subprocess
 
 import logger
 from clib import docker_host
@@ -14,6 +15,7 @@ class DockerTest:
     """Class for running docker tests"""
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'
+    TAGGED_IMAGE_FORMAT = IMAGE_NAME_FORMAT + ':latest'
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
@@ -65,8 +67,7 @@ class DockerTest:
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         # Work around an instability in the faucet/clib/docker library, b/152520627.
-        if getattr(cls, 'pullImage'):
-            setattr(cls, 'pullImage', lambda x: True)
+        setattr(cls, 'pullImage', self._check_image)
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
@@ -100,6 +101,13 @@ class DockerTest:
                 self.pipe = None
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
+
+    def _check_image(self):
+        lines = subprocess.check_output(["docker", "images", "--format",
+                                         "{{ .Repository }}:{{ .Tag }}"])
+        expected = self.TAGGED_IMAGE_FORMAT % self.test_name
+        lines = str(lines, 'utf-8').splitlines()
+        assert expected in lines, 'Could not find image %s, maybe rebuild images.' % expected
 
     def terminate(self):
         """Forcibly terminate this container"""
