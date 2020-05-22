@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ -n "$DAQ_SUPPRESS_PHY_SETUP" ]; then
-    echo Suppressing startup_cmds physical_sec.
+    echo Suppressing switch setup as per env setting.
     exit 0
 fi
 
@@ -9,80 +9,119 @@ ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 source misc/config_base.sh
 
+iprefix=ctrl
+ctrl_bridge=${iprefix}-br
+ctrl_pri=${iprefix}-pri
+ctrl_alt=${iprefix}-alt
+ctrl_swx=${iprefix}-swx
+ctrl_swy=${iprefix}-swy
+ctrl_swa=${iprefix}-swa
+ctrl_swb=${iprefix}-swb
 ext_ctrl=$switch_setup_ctrl_intf
-ext_intf=$switch_setup_data_intf
+ext_data=$switch_setup_data_intf
 ext_ofip=$switch_setup_lo_addr
 ext_addr=$switch_setup_ip_addr
 
-echo Cleaning switch bridge, if any...
-iprefix=ctrl
-sudo ip link del $iprefix-pri 2>/dev/null || true
-sudo ip link del $iprefix-swx 2>/dev/null || true
-sudo ip link del $iprefix-swa 2>/dev/null || true
-sudo ovs-vsctl --if-exists del-port pri $iprefix-pri
-sudo ovs-vsctl --if-exists del-br $iprefix-br
+echo Running switch setup...
 
-if [ -z "$ext_ctrl" ]; then
-    echo switch_setup.ctrl_intf not defined for physical_sec.
-    false
+if [ -n "$ext_ctrl" ]; then
+    cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
+    if [ -z "$cplane_mac" ]; then
+        echo Could not extract mac address from iface $ext_ctrl.
+        false
+    fi
+    echo Pulled cplane_mac $cplane_mac from $ext_ctrl
+else
+    cplane_mac=f8:39:71:c9:7a:09
+    echo Using default cplane_mac $cplane_mac
 fi
 
-sudo ip link set up dev $ext_ctrl
+echo Cleaning old setup...
+sudo ip link del $ctrl_pri 2>/dev/null || true
+sudo ip link del $ctrl_swx 2>/dev/null || true
+sudo ip link del $ctrl_swa 2>/dev/null || true
+sudo ovs-vsctl --if-exists del-port pri $ctrl_pri
+sudo ovs-vsctl --if-exists del-br $ctrl_bridge
 
-if ! ip -br link show dev "$ext_ctrl" | fgrep "UP" &> /dev/null; then
-    echo Error: Control plane interface [$ext_ctrl] is not UP, for physical_sec
-    false
+echo Creating ovs-link interfaces...
+sudo ip link add $ctrl_pri type veth peer name $ctrl_alt
+sudo ip link set $ctrl_pri up
+sudo ip link set $ctrl_alt up
+
+echo Creating local-link interfaces...
+sudo ip link add $ctrl_swx type veth peer name $ctrl_swy
+sudo ip link set $ctrl_swy address $cplane_mac
+sudo ip link set $ctrl_swx up
+sudo ip link set $ctrl_swy up
+
+echo Creating local bridge...
+sudo ovs-vsctl add-br $ctrl_bridge
+sudo ovs-vsctl add-port $ctrl_bridge $ctrl_alt
+sudo ovs-vsctl add-port $ctrl_bridge $ctrl_swx
+
+if [ -z "$ext_ofip" ]; then
+    echo Local address not defined, skipping configuration.
+else
+    echo Configuring $ctrl_swy with $ext_ofip
+    sudo ip addr add $ext_ofip dev $ctrl_swy
 fi
 
 if [ -z "$switch_setup_data_intf" ]; then
-    # Not actally used in this script, but needed elsewhere.
-    echo switch_setup.data_intf not defined for physical_sec.
-    false
-fi
-
-if ! ip -br link show dev "$ext_intf" | fgrep "UP" &> /dev/null; then
-    echo Error: Data plane interface [$ext_intf] is not UP, for physical_sec
-    false
-fi
-
-if [ -z "$switch_setup_lo_addr" ]; then
-    echo switch_setup.lo_addr not defined for physical_sec.
+    echo switch_setup.data_intf not defined.
     false
 fi
 
 ipsuffix=${ext_ofip#*/}
 
 if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
-    echo ip netmask suffix not properly defined for ext_ofip.
+    echo cidr suffix of $ext_ofip not properly defined.
     false
 fi
 
-if [ -z "$ext_addr" ]; then
-    echo switch_setup.ip_addr not defined for physical_sec.
-    false
+if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
+    echo Creating daq-switch, because no control plane interface defined
+
+    docker rm -f daq-switch || true
+    cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daqf/switch)
+    pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
+
+    targetip=$ext_addr/${ipsuffix}
+    echo Creating daq-switch at $targetip linked via $ctrl_swa
+    sudo ip link add $ctrl_swa type veth peer name $ctrl_swb
+    sudo ip link set $ctrl_swa address $cplane_mac
+    sudo ip link set $ctrl_swa up
+    sudo ip link set $ctrl_swb netns $pid
+    docker exec daq-switch ip addr add $targetip dev $ctrl_swb
+    docker exec daq-switch ip link set $ctrl_swb up
+
+    echo DAQ autoclean docker rm -f daq-switch
+    echo DAQ autoclean ip link del $ctrl_swa
+
+    ext_ctrl=$ctrl_swa
+else
+    sudo ip link set $ext_ctrl up
 fi
 
-echo Configuring control interface $ext_ctrl at $ext_ofip
+# Might not exist yet, if it's part of the autostart sequence.
+sudo ip link set $ext_data up || true
 
-while ! ifconfig $ext_ctrl > /dev/null || ! ifconfig $ext_intf > /dev/null; do
-    echo
-    echo Interfaces $ext_ctrl or $ext_intf not found, current set:
-    ifconfig -a | fgrep flags
-    echo
-    sleep 20
-done
-
-sudo ip addr flush dev $ext_ctrl
-sudo ip addr add $ext_ofip dev $ext_ctrl
+if [ -z "$ext_ctrl" ]; then
+    echo No control plane interface, skipping configuration.
+else
+    echo Bridging $ext_ctrl to $ctrl_bridge
+    sudo ovs-vsctl add-port $ctrl_bridge $ext_ctrl
+    sudo ip addr flush dev $ext_ctrl
+fi
 
 echo Checking external connection to $ext_addr
-if ! ping -c 2 $ext_addr; then
+if ! ping -n -c 2 $ext_addr; then
     echo
     echo That didn\'t seem to work.
     echo
     false
 fi
 
-echo
-echo DAQ autoclean ip link set down dev $ext_ctrl
-echo Done with physical switch configuration.
+echo DAQ autoclean ip link del $ctrl_pri
+echo DAQ autoclean ip link del $ctrl_swx
+echo DAQ autoclean ovs-vsctl --if-exists del-br $ctrl_bridge
+echo Done with local switch setup.

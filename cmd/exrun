@@ -95,10 +95,8 @@ if [ -z `which ifconfig` ]; then
 fi
 
 sudo rm -f $cleanup_file
-if [ -n "$switch_setup_ctrl_intf" ]; then
+if [ -n "$switch_setup_ip_addr" ]; then
     autostart bin/physical_sec
-elif [ -n "$switch_setup_ip_addr" ]; then
-    autostart bin/switch_local
 else
     echo No external switch configured.
 fi

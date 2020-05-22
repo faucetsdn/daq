@@ -564,9 +564,9 @@ class ConnectedHost:
             params['local_ip'] = self.ext_loip.replace('@', '%d') % self.test_port
             params['switch_ip'] = self.switch_setup.get('ip_addr')
             params['switch_port'] = str(self.target_port)
-            params['switch_model'] = self.switch_setup.get('switch_model')
-            params['switch_username'] = self.switch_setup.get('switch_username')
-            params['switch_password'] = self.switch_setup.get('switch_password')
+            params['switch_model'] = self.switch_setup.get('model')
+            params['switch_username'] = self.switch_setup.get('username')
+            params['switch_password'] = self.switch_setup.get('password')
 
         try:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
