@@ -51,7 +51,7 @@ def add_packet_info_to_report(packets_received):
     outnum = min(len(packet_list), max_packets_in_report)
     for x in range(0, outnum):
         write_report("{i} {p}\n".format(i=ignore, p=packet_list[x]))
-    write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packets_received)))
+    write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packet_list)))
 
 def decode_shell_result(shell_result):
     if len(shell_result) > min_packet_length_bytes:
