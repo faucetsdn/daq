@@ -58,7 +58,7 @@ def add_packet_info_to_report(packets_received):
 def decode_shell_result(shell_result):
     if len(shell_result) > min_packet_length_bytes:
         packet_request_list = shell_result.split("\n")
-        packets_received = len(packet_request_list)
+        packets_received = len(packet_request_list) - 1
         return packets_received
     return 0
 
