@@ -67,13 +67,14 @@ else
 fi
 
 if [ -z "$switch_setup_data_intf" ]; then
-    # Not actally used in this script, but needed elsewhere.
-    echo switch_setup.data_intf not defined for physical_sec.
+    echo switch_setup.data_intf not defined
     false
 fi
 
-if ! ip -br link show dev "$ext_intf" | fgrep "UP" &> /dev/null; then
-    echo Error: Data plane interface [$ext_intf] is not UP, for physical_sec
+sudo ip link set $ext_data up
+
+if ! ip -br link show dev "$ext_data" | fgrep "UP" &> /dev/null; then
+    echo Error: Data plane interface [$ext_data] is not UP
     false
 fi
 
