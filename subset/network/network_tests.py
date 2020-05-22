@@ -29,7 +29,7 @@ tcpdump_display_udp_bacnet_packets = 'tcpdump -n udp dst portrange 47808-47809 -
 tcpdump_display_arp_packets = 'tcpdump arp -r ' + cap_pcap_file
 tcpdump_display_ntp_packets = 'tcpdump dst port 123 -r ' + cap_pcap_file
 tcpdump_display_eapol_packets = 'tcpdump port 1812 or port 1813 or port 3799 -r ' + cap_pcap_file
-tcpdump_display_broadcast_packets = 'tcpdump broadcast -r ' + cap_pcap_file
+tcpdump_display_broadcast_packets = 'tcpdump broadcast src host ' + device_address + ' -r ' + cap_pcap_file
 
 def write_report(string_to_append):
     print(string_to_append.strip())
