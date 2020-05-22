@@ -67,14 +67,7 @@ else
 fi
 
 if [ -z "$switch_setup_data_intf" ]; then
-    echo switch_setup.data_intf not defined
-    false
-fi
-
-sudo ip link set $ext_data up
-
-if ! ip -br link show dev "$ext_data" | fgrep "UP" &> /dev/null; then
-    echo Error: Data plane interface [$ext_data] is not UP
+    echo switch_setup.data_intf not defined.
     false
 fi
 
@@ -108,6 +101,9 @@ if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
 else
     sudo ip link set $ext_ctrl up
 fi
+
+# Might not exist yet, if it's part of the autostart sequence.
+sudo ip link set $ext_data up || true
 
 if [ -z "$ext_ctrl" ]; then
     echo No control plane interface, skipping configuration.
