@@ -96,7 +96,7 @@ fi
 
 sudo rm -f $cleanup_file
 if [ -n "$switch_setup_ip_addr" ]; then
-    autostart bin/switch_local
+    autostart bin/physical_sec
 else
     echo No external switch configured.
 fi
