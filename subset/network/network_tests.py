@@ -49,16 +49,16 @@ def add_packet_count_to_report(packet_type, packet_count):
     write_report("{i} {t} Packets recieved={p}\n".format(i=ignore, t=packet_type, p=packet_count))
 
 def add_packet_info_to_report(packets_received):
-    packet_list = packets_received.split("\n")
+    packet_list = packets_received.rstrip().split("\n")
     outnum = min(len(packet_list), max_packets_in_report)
     for x in range(0, outnum):
         write_report("{i} {p}\n".format(i=ignore, p=packet_list[x]))
-    write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packet_list)-1))
+    write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packet_list)))
 
 def decode_shell_result(shell_result):
     if len(shell_result) > min_packet_length_bytes:
-        packet_request_list = shell_result.split("\n")
-        packets_received = len(packet_request_list) - 1
+        packet_request_list = shell_result.rstrip().split("\n")
+        packets_received = len(packet_request_list)
         return packets_received
     return 0
 
