@@ -45,6 +45,8 @@ def shell_command_with_result(command, wait_time, terminate_flag):
         process.terminate()
     return str(text)
 
+def add_packet_count_to_report(packet_type, packet_count):
+    write_report("{i} {t} Packets recieved={p}\n".format(i=ignore, t=packet_type, p=packet_count))
 
 def add_packet_info_to_report(packets_received):
     packet_list = packets_received.split("\n")
@@ -151,10 +153,12 @@ def test_communication_type_broadcast():
     broadcast_packets_received = packets_received_count(shell_result)
     if broadcast_packets_received > 0:
         add_summary("Broadcast packets received.")
+        add_packet_count_to_report("Broadcast", broadcast_packets_received)
     shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     all_packets_received = packets_received_count(shell_result)
     if (all_packets_received - broadcast_packets_received) > 0:
         add_summary("Unicast packets received.")
+        add_packet_count_to_report("Unicast", all_packets_received - broadcast_packets_received)
     return 'info'
 
 def test_ntp_support():
