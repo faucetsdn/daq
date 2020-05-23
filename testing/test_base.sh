@@ -36,7 +36,6 @@ more inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 
-# Test an "external" switch.
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
 rm local/system.yaml
 cp misc/system_ext.conf local/system.conf
@@ -47,8 +46,6 @@ fgrep -i switch inst/run-port-02/nodes/ping02/activate.log | tee -a $TEST_RESULT
 more inst/run-port-02/nodes/ping02/activate.log | cat
 count=$(fgrep icmp_seq=5 inst/run-port-02/nodes/ping02/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
-
-# Test various configurations of mud files.
 
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 cp misc/system_muddy.conf local/system.conf
