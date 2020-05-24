@@ -55,6 +55,7 @@ faucet.log
 faucet.yaml
 finish.out
 ip_addr.txt
+ovs_vsctl.txt
 pri.flows
 pri.ofctl
 route.txt
@@ -164,7 +165,6 @@ Host: X.X.X.X ()        Status: Up
 Host: X.X.X.X ()        Ports: 47808/closed/udp//bacnet///      Ignored State: closed (3)
 Redacted docs diff
 No report diff
-?? ovs_vsctl.txt
 01: ['01:ping:Exception']
 02: ['02:hold:Exception']
 03: ['03:exception:terminated']
