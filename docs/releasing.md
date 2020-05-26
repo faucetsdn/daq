@@ -5,7 +5,9 @@
 * configure with `host_tests=misc/all_tests.conf`
 * `cmd/build force $VERSION`
 * `cmd/build push`
-* ```git status --porcelain
+* Check generated files:
+```
+git status --porcelain
  M misc/docker_images.txt
  M misc/docker_images.ver
 ```
