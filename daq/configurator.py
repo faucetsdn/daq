@@ -110,7 +110,8 @@ class Configurator:
 
     def _read_yaml_config(self, config, filename):
         self._log('Reading yaml config from %s' % filename)
-        loaded_config = self.load_config(filename)
+        with open(filename) as data_file:
+            loaded_config = yaml.safe_load(data_file)
         if 'include' in loaded_config:
             include = loaded_config['include']
             del loaded_config['include']
