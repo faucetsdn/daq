@@ -637,11 +637,16 @@ class ConnectedHost:
 
     def _load_module_config(self, run_info=True):
         config = self.runner.get_base_config()
+        LOGGER.info('base_config1: %s', config)
         if run_info:
             self._merge_run_info(config)
+        LOGGER.info('base_config2: %s', config)
         self.configurator.load_and_merge(config, self._type_path(), self._MODULE_CONFIG, optional=True)
+        LOGGER.info('base_config3: %s', config)
         self.configurator.load_and_merge(config, self._device_base, self._MODULE_CONFIG, optional=True)
+        LOGGER.info('base_config4: %s', config)
         self.configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG, optional=True)
+        LOGGER.info('base_config5: %s', config)
         return config
 
     def record_result(self, name, **kwargs):
