@@ -53,69 +53,69 @@ def print_config(config):
     print(*config_list, sep='\n')
 
 
-def merge_config(base, adding):
-    """Update a dict object and follow nested objects"""
-    if not adding:
-        return
-    for key in sorted(adding.keys()):
-        value = adding[key]
-        if isinstance(value, dict) and key in base:
-            merge_config(base[key], value)
-        else:
-            base[key] = copy.deepcopy(value)
-
-
-def load_config(path, filename=None, optional=False):
-    """Load a config file"""
-    if not path:
-        return None
-    config_file = os.path.join(path, filename) if filename else path
-    if not os.path.exists(config_file):
-        if optional:
-            LOGGER.info('Skipping missing %s', config_file)
-            return {}
-        raise Exception('Config file %s not found.' % config_file)
-
-    LOGGER.info('Loading config from %s', config_file)
-    return self._read_config_into({}, config_file)
-
-
-def load_and_merge(base, path, filename=None, optional=False):
-    """Load a config file and merge with an existing base"""
-    merge_config(base, load_config(path, filename, optional))
-
-
-def write_config(path, filename, config):
-    """Write a config file"""
-    if not path:
-        return
-    if not os.path.exists(path):
-        os.makedirs(path)
-    config_file = os.path.join(path, filename)
-    LOGGER.info('Writing config to %s', config_file)
-    with open(config_file, 'w') as output_stream:
-        output_stream.write(json.dumps(config, indent=2, sort_keys=True))
-        output_stream.write('\n')
-
-
 class Configurator:
     """Manager class for system configuration."""
 
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, use_print=False):
         self._verbose = verbose
+        self._use_print = use_print
 
     def _log(self, message):
         if self._verbose:
-            print(message)
+            if self._use_print:
+                print(message)
+            else:
+                LOGGER.info(message)
+
+    def merge_config(self, base, adding):
+        """Update a dict object and follow nested objects"""
+        if not adding:
+            return
+        for key in sorted(adding.keys()):
+            value = adding[key]
+            if isinstance(value, dict) and key in base:
+                self.merge_config(base[key], value)
+            else:
+                base[key] = copy.deepcopy(value)
+
+    def load_config(self, path, filename=None, optional=False):
+        """Load a config file"""
+        if not path:
+            return None
+        config_file = os.path.join(path, filename) if filename else path
+        if not os.path.exists(config_file):
+            if optional:
+                LOGGER.info('Skipping missing %s', config_file)
+                return {}
+            raise Exception('Config file %s not found.' % config_file)
+
+        LOGGER.info('Loading config from %s', config_file)
+        return self._read_config_into({}, config_file)
+
+    def load_and_merge(self, base, path, filename=None, optional=False):
+        """Load a config file and merge with an existing base"""
+        self.merge_config(base, load_config(path, filename, optional))
+
+    def write_config(self, path, filename, config):
+        """Write a config file"""
+        if not path:
+            return
+        if not os.path.exists(path):
+            os.makedirs(path)
+        config_file = os.path.join(path, filename)
+        LOGGER.info('Writing config to %s', config_file)
+        with open(config_file, 'w') as output_stream:
+            output_stream.write(json.dumps(config, indent=2, sort_keys=True))
+            output_stream.write('\n')
 
     def _read_yaml_config(self, config, filename):
         self._log('Reading yaml config from %s' % filename)
-        loaded_config = load_config(filename)
+        loaded_config = self.load_config(filename)
         if 'include' in loaded_config:
             include = loaded_config['include']
             del loaded_config['include']
             self._read_config_into(config, include)
-        return merge_config(config, loaded_config)
+        return self.merge_config(config, loaded_config)
 
     def _parse_flat_item(self, config, parts):
         key_parts = parts[0].strip().split('.', 1)
