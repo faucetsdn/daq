@@ -100,11 +100,11 @@ class ConnectedHost:
         self._monitor_ref = None
         self._monitor_start = None
         self.target_ip = None
+        self._dhcp_listeners = []
         self._loaded_config = None
         self.reload_config()
-        self._dhcp_listeners = []
-        self.configurator.write_config(self._device_aux_path(), self._MODULE_CONFIG, self._loaded_config)
         assert self._loaded_config, 'config was not loaded'
+        self.configurator.write_config(self._device_aux_path(), self._MODULE_CONFIG, self._loaded_config)
         self.remaining_tests = self._get_enabled_tests()
         LOGGER.info('Host %s running with enabled tests %s', self.target_port, self.remaining_tests)
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
@@ -696,6 +696,7 @@ class ConnectedHost:
         """Trigger a config reload due to an eternal config change."""
         holding = self.is_holding()
         new_config = self._load_module_config(run_info=holding)
+        LOGGER.info('reload_config %s: %s', holding, new_config)
         if holding:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
