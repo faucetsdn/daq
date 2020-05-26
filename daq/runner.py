@@ -35,6 +35,7 @@ class DAQRunner:
     _RESULT_LOG_FILE = 'inst/result.log'
 
     def __init__(self, config):
+        self.configurator = configurator.Configurator()
         self.config = config
         self._port_info = {}
         self.result_sets = {}
@@ -728,7 +729,7 @@ class DAQRunner:
 
     def _base_config_changed(self, new_config):
         LOGGER.info('Base config changed: %s', new_config)
-        configurator.write_config(self.config.get('site_path'), self._MODULE_CONFIG, new_config)
+        self.configurator.write_config(self.config.get('site_path'), self._MODULE_CONFIG, new_config)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
         for _, port_info in self._get_ports_with_hosts():
@@ -736,13 +737,13 @@ class DAQRunner:
 
     def _load_base_config(self, register=True):
         base = {}
-        configurator.load_and_merge(base, self.config.get('base_conf'))
-        site_config = configurator.load_config(self.config.get('site_path'), self._MODULE_CONFIG,
-                                               optional=True)
+        self.configurator.load_and_merge(base, self.config.get('base_conf'))
+        site_config = self.configurator.load_config(self.config.get('site_path'), self._MODULE_CONFIG,
+                                                    optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
-        configurator.merge_config(base, site_config)
+        self.configurator.merge_config(base, site_config)
         return base
 
     def get_base_config(self):

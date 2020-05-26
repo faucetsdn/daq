@@ -32,7 +32,7 @@ def show_help():
     print("Common run options:")
     for option in FLAG_MAP:
         print("  -%s: %s" % (option, FLAG_MAP[option]))
-    print("See misc/system.conf for a detailed accounting of potential options.")
+    print("See firebase/public/protos.html#DaqConfig for all config options.")
 
 
 def _append_config(config_list, prefix, config):
