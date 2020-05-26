@@ -729,17 +729,17 @@ class DAQRunner:
 
     def _base_config_changed(self, new_config):
         LOGGER.info('Base config changed: %s', new_config)
-        self.configurator.write_config(self.config.get('site_path'), self._MODULE_CONFIG, new_config)
+        self.configurator.write_config(new_config, self.config.get('site_path'),
+                                       self._MODULE_CONFIG)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
         for _, port_info in self._get_ports_with_hosts():
             port_info["host"].reload_config()
 
     def _load_base_config(self, register=True):
-        base = {}
-        self.configurator.load_and_merge(base, self.config.get('base_conf'))
-        site_config = self.configurator.load_config(self.config.get('site_path'), self._MODULE_CONFIG,
-                                                    optional=True)
+        base = self.configurator.load_and_merge({}, self.config.get('base_conf'))
+        site_config = self.configurator.load_config(self.config.get('site_path'),
+                                                    self._MODULE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)

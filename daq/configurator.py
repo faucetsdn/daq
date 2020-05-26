@@ -91,9 +91,9 @@ class Configurator:
 
     def load_and_merge(self, base, path, filename=None, optional=False):
         """Load a config file and merge with an existing base"""
-        self.merge_config(base, self.load_config(path, filename, optional))
+        return self.merge_config(base, self.load_config(path, filename, optional))
 
-    def write_config(self, path, filename, config):
+    def write_config(self, config, path, filename):
         """Write a config file"""
         if not path:
             return
