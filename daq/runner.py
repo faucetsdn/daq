@@ -743,7 +743,9 @@ class DAQRunner:
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
+        LOGGER.info('load_base_config %s %s', base, site_config)
         self.configurator.merge_config(base, site_config)
+        LOGGER.info('load_base_config %s', base)
         return base
 
     def get_base_config(self):
