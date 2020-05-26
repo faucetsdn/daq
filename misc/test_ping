@@ -65,7 +65,7 @@ if [ -n "$LOCAL_IP" ]; then
     fi
 else
     echo LOCAL_IP not configured, assuming no network switch | tee -a $MONO_LOG
-    echo RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf | tee -a $RESULT_LINES
+    echo RESULT skip base.switch.ping No local IP has been set, check system config | tee -a $RESULT_LINES
 fi
 
 ping_runtime=/config/port/ping_runtime.sh
