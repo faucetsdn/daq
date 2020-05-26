@@ -56,16 +56,14 @@ def print_config(config):
 class Configurator:
     """Manager class for system configuration."""
 
-    def __init__(self, verbose=False, use_print=False):
-        self._verbose = verbose
-        self._use_print = use_print
+    def __init__(self, raw_print=False):
+        self._raw_print = raw_print
 
     def _log(self, message):
-        if self._verbose:
-            if self._use_print:
-                print(message)
-            else:
-                LOGGER.info(message)
+        if self._raw_print:
+            print(message)
+        else:
+            LOGGER.info(message)
 
     def merge_config(self, base, adding):
         """Update a dict object and follow nested objects"""
