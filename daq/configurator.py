@@ -77,8 +77,7 @@ def load_config(path, filename=None, optional=False):
         raise Exception('Config file %s not found.' % config_file)
 
     LOGGER.info('Loading config from %s', config_file)
-    with open(config_file) as data_file:
-        return yaml.safe_load(data_file)
+    return self._read_config_into({}, config_file)
 
 
 def load_and_merge(base, path, filename=None, optional=False):
@@ -116,7 +115,7 @@ class Configurator:
             include = loaded_config['include']
             del loaded_config['include']
             self._read_config_into(config, include)
-        merge_config(config, loaded_config)
+        return merge_config(config, loaded_config)
 
     def _parse_flat_item(self, config, parts):
         key_parts = parts[0].strip().split('.', 1)
@@ -140,9 +139,10 @@ class Configurator:
                 elif parts and parts[0]:
                     raise Exception('Unknown config entry: %s' % line)
                 line = file.readline()
+        return config
 
     def _read_config_into(self, config, filename):
-        if filename.endswith('.yaml'):
+        if filename.endswith('.yaml') or filename.endswith('.json'):
             return self._read_yaml_config(config, filename)
         if filename.endswith('.conf'):
             return self._read_flat_config(config, filename)
