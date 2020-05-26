@@ -185,7 +185,8 @@ class DAQRunner:
         if self.network.is_system_port(dpid, port):
             LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
             if self._system_active and not active:
-                raise Exception('System port became inactive.')
+                LOGGER.error('System port became inactive, terminating.')
+                self.shutdown()
             self._system_active = active
             return
         if not self.network.is_device_port(dpid, port):
