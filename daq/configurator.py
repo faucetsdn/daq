@@ -94,7 +94,7 @@ class Configurator:
 
     def load_and_merge(self, base, path, filename=None, optional=False):
         """Load a config file and merge with an existing base"""
-        self.merge_config(base, load_config(path, filename, optional))
+        self.merge_config(base, self.load_config(path, filename, optional))
 
     def write_config(self, path, filename, config):
         """Write a config file"""
