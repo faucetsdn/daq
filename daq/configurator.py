@@ -70,13 +70,14 @@ class Configurator:
     def merge_config(self, base, adding):
         """Update a dict object and follow nested objects"""
         if not adding:
-            return
+            return base
         for key in sorted(adding.keys()):
             value = adding[key]
             if isinstance(value, dict) and key in base:
                 self.merge_config(base[key], value)
             else:
                 base[key] = copy.deepcopy(value)
+        return base
 
     def load_config(self, path, filename=None, optional=False):
         """Load a config file"""
@@ -88,8 +89,6 @@ class Configurator:
                 LOGGER.info('Skipping missing %s', config_file)
                 return {}
             raise Exception('Config file %s not found.' % config_file)
-
-        LOGGER.info('Loading config from %s', config_file)
         return self._read_config_into({}, config_file)
 
     def load_and_merge(self, base, path, filename=None, optional=False):

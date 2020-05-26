@@ -637,16 +637,11 @@ class ConnectedHost:
 
     def _load_module_config(self, run_info=True):
         config = self.runner.get_base_config()
-        LOGGER.info('base_config1: %s', config)
         if run_info:
             self._merge_run_info(config)
-        LOGGER.info('base_config2: %s', config)
         self.configurator.load_and_merge(config, self._type_path(), self._MODULE_CONFIG, optional=True)
-        LOGGER.info('base_config3: %s', config)
         self.configurator.load_and_merge(config, self._device_base, self._MODULE_CONFIG, optional=True)
-        LOGGER.info('base_config4: %s', config)
         self.configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG, optional=True)
-        LOGGER.info('base_config5: %s', config)
         return config
 
     def record_result(self, name, **kwargs):
@@ -701,7 +696,6 @@ class ConnectedHost:
         """Trigger a config reload due to an eternal config change."""
         holding = self.is_holding()
         new_config = self._load_module_config(run_info=holding)
-        LOGGER.info('reload_config %s: %s', holding, new_config)
         if holding:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
