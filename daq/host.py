@@ -702,7 +702,6 @@ class ConnectedHost:
         """Trigger a config reload due to an eternal config change."""
         holding = self.is_holding()
         new_config = self._load_module_config(run_info=holding)
-        LOGGER.info('reload_config %s: %s', holding, new_config)
         if holding:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
