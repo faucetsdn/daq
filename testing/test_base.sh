@@ -14,7 +14,10 @@ bin/build_proto check || exit 1
 
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml local/system.conf
-cmd/run -b -s site_path=inst/tmp_site
+# Check that bringing down the trunk interface terminates DAQ.
+MARKER=inst/run-port-01/nodes/hold01/activate.log
+monitor_marker $MARKER "sudo ip link set pri-eth1 down"
+cmd/run -b -k -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
 
 echo Redacted report for 9a02571e8f00:
