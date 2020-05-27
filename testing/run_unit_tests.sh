@@ -8,11 +8,11 @@ cd $BASEDIR
 
 $BASEDIR/venv/bin/coverage erase
 
-PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch $BASEDIR/venv/bin/coverage run \
+PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch venv/bin/coverage run \
     --source $BASEDIR/daq \
     -m unittest discover \
     -s $TESTDIR/unit/ \
     -p "test_*.py"
 
-$BASEDIR/venv/bin/coverage combine || true
-$BASEDIR/venv/bin/coverage report -m
+venv/bin/coverage combine || true
+venv/bin/coverage report -m
