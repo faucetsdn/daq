@@ -18,6 +18,7 @@ rm -f local/system.yaml local/system.conf
 MARKER=inst/run-port-01/nodes/hold01/activate.log
 monitor_marker $MARKER "sudo ip link set pri-eth1 down"
 cmd/run -b -k -s site_path=inst/tmp_site
+echo DAQ result code $? | tee -a $TEST_RESULTS
 more inst/result.log | tee -a $TEST_RESULTS
 
 echo Redacted report for 9a02571e8f00:
@@ -27,6 +28,7 @@ cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
 docker rmi daqf/test_hold:latest # Check case of missing image
 cmd/run -s -k interfaces.faux.opts=telnet
+echo DAQ result code $? | tee -a $TEST_RESULTS
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
@@ -35,6 +37,7 @@ DAQ_TARGETS=test_hold cmd/build
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
 cmd/run -s interfaces.faux.opts=telnet device_specs=misc/device_specs/simple.json
+echo DAQ result code $? | tee -a $TEST_RESULTS
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log

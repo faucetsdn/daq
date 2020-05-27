@@ -1,6 +1,7 @@
 Running testing/test_base.sh
 Base Tests
 %%%%%%%%%%%%%%%%%%%%%% Base tests
+DAQ result code 1
 01: []
 # Device 9a02571e8f00, XXX to XXX
 
@@ -124,11 +125,13 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 ## Report complete
 
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
+DAQ result code 1
 01: ['01:hold:DaqException']
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
+DAQ result code 0
 01: []
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 security.ports.nmap
