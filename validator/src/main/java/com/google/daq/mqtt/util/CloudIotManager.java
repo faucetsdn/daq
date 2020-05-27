@@ -10,15 +10,10 @@ import com.google.api.services.cloudiot.v1.CloudIot;
 import com.google.api.services.cloudiot.v1.model.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.google.daq.mqtt.util.ConfigUtil.readCloudIotConfig;
@@ -109,7 +104,9 @@ public class CloudIotManager {
   private void writeDeviceConfig(String deviceId, String config) {
     try {
       cloudIotRegistries.devices().modifyCloudToDeviceConfig(getDevicePath(registryId, deviceId),
-          new ModifyCloudToDeviceConfigRequest().setBinaryData(Base64.encode(config.getBytes()))).execute();
+          new ModifyCloudToDeviceConfigRequest().setBinaryData(
+              Base64.getEncoder().encodeToString(config.getBytes()))
+      ).execute();
     } catch (Exception e) {
       throw new RuntimeException("While modifying device config", e);
     }
