@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# A script to retrieve, and collate several credential files into one large file to be used as a brute force dictionary.
+
+USERNAMES_FILE="resources/usernames.txt"
+PASSWORDS_FILE="resources/passwords.txt"
+
+FAUX_USERNAMES_FILE="resources/usernames_faux.txt"
+FAUX_PASSWORDS_FILE="resources/passwords_faux.txt"
+
+SSH_PASSWORDS=resources/ssh.txt
+TELNET_PASSWORDS=resources/telnet.txt
+
+# For manufacturer .csv remove the first and last elements of each split line. Save the two remaining pairs as colon
+# separated username and password pairs.
+
+function retrieve_full_credential_files() {
+  #curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/default-passwords.csv \
+  #  --create-dirs --output resources/manufacturer.csv
+  curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/ssh-betterdefaultpasslist.txt \
+    --create-dirs --output resources/ssh.txt
+  curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/telnet-betterdefaultpasslist.txt \
+    --create-dirs --output resources/telnet.txt
+}
+
+function retrieve_faux_credential_files() {
+  cp $FAUX_USERNAMES_FILE $USERNAMES_FILE
+  cp $FAUX_PASSWORDS_FILE $PASSWORDS_FILE
+}
+
+function create_output_credential_files() {
+  mkdir -p resources
+
+  if [ -f $1 ]; then
+    rm $1
+  fi
+
+  if [ -f $2 ]; then
+    rm $2
+  fi
+
+  touch $1
+  touch $2
+}
+
+function line_is_invalid_csv() {
+  echo $1 | grep -sqE "^\".*\"|\s|,,"
+}
+
+function remove_unwanted_characters() {
+  echo "$(echo $1 | tr -d '[' | tr -d ']' | tr -d "[:blank:]")"
+}
+
+function username_or_password_is_invalid() {
+  echo $1 | grep -sqE "<BLANK>|<N/A>"
+}
+
+function word_already_in_file() {
+  grep -sqE $1 $2
+}
+
+function add_to_credential_files() {
+  if ! username_or_password_is_invalid $1; then
+    if ! word_already_in_file $1 $3; then
+      echo $1 >> $3
+    fi
+  fi
+
+  if ! username_or_password_is_invalid $2; then
+    if ! word_already_in_file $2 $4; then
+      echo $2 >> $4
+    fi
+  fi
+}
+
+function parse_csv() {
+  while read LINE
+  do
+    if ! line_is_invalid_csv "$LINE"; then
+      IFS=',' read -ra CREDENTIAL_ARRAY <<< "$LINE"
+      USERNAME="${CREDENTIAL_ARRAY[1]}"
+      PASSWORD="${CREDENTIAL_ARRAY[2]}"
+      echo $USERNAME and $PASSWORD
+      add_to_credential_files $USERNAME $PASSWORD $2 $3
+    fi
+  done < $1
+}
+
+function parse_txt() {
+  while read LINE
+  do
+    LINE="$(remove_unwanted_characters $LINE)"
+    IFS=':' read -ra CREDENTIAL_ARRAY <<< "$LINE"
+    USERNAME="${CREDENTIAL_ARRAY[0]}"
+    PASSWORD="${CREDENTIAL_ARRAY[1]}"
+    add_to_credential_files $USERNAME $PASSWORD $2 $3
+  done < $1
+}
+
+function has_faux_device_macoui() {
+  echo $1 | grep -sqE "^3c:5a:b4|^9a:02:57"
+}
+
+echo Creating credential files...
+create_output_credential_files $USERNAMES_FILE $PASSWORDS_FILE
+
+if has_faux_device_macoui $1; then
+  echo Using faux device brute force dictionary
+  retrieve_faux_credential_files
+else
+  echo Retrieving brute force dictionary
+  retrieve_full_credential_files
+
+  echo Parsing SSH passwords file...
+  parse_txt $SSH_PASSWORDS $USERNAMES_FILE $PASSWORDS_FILE
+
+  echo Parsing telnet passwords file...
+  parse_txt $TELNET_PASSWORDS $USERNAMES_FILE $PASSWORDS_FILE
+fi
+
+echo Done!
