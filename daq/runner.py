@@ -19,7 +19,7 @@ import stream_monitor
 from wrappers import DaqException
 import logger
 
-from proto import system_state_pb2.RunnerState.PortInfo as PortInfo
+from proto.system_state_pb2 import RunnerState
 
 LOGGER = logger.get_logger('runner')
 
@@ -194,29 +194,30 @@ class DAQRunner:
             return
 
         if port not in self._port_info:
-            self._port_info[port] = {"active": None}
+            self._port_info[port] = RunnerState.PortInfo()
 
-        if active != self._port_info[port]["active"]:
+        if active != self._port_info[port].active:
             LOGGER.info('Port %s dpid %s is now %s', port, dpid, "active" if active else "inactive")
         if active:
             self._activate_port(port)
-            if "flapping_start" in self._port_info[port]:
-                del self._port_info[port]["flapping_start"]
         else:
             port_info = self._port_info[port]
-            if port_info.get("host") and not port_info.get("flapping_start"):
-                port_info["flapping_start"] = time.time()
-            if port_info["active"]:
-                if port_info.get("mac") and not port_info.get("flapping_start"):
-                    self._direct_port_traffic(port_info["mac"], port, None)
+            if port_info.host and not port_info.flapping_start:
+                port_info.flapping_start = time.time()
+            if port_info.active:
+                if port_info.mac and not port_info.flapping_start:
+                    self._direct_port_traffic(port_info.mac, port, None)
                 self._deactivate_port(port)
         self._send_heartbeat()
 
     def _activate_port(self, port):
-        self._port_info[port]["active"] = True
+        port_info = self._port_info[port]
+        port_info.flapping_start = 0
+        port_info.active = True
 
     def _deactivate_port(self, port):
-        self._port_info[port]["active"] = False
+        port_info = self._port_info[port]
+        port_info.active = False
 
     def _direct_port_traffic(self, mac, port, target):
         self.network.direct_port_traffic(mac, port, target)
@@ -224,10 +225,10 @@ class DAQRunner:
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port):
             if not port in self._port_info:
-                self._port_info[port] = {"active": True}
+                self._port_info[port].active = True
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             self._mac_port_map[target_mac] = port
-            self._port_info[port]["mac"] = target_mac
+            self._port_info[port].mac = target_mac
             self._target_set_trigger(port)
         else:
             LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
@@ -251,7 +252,7 @@ class DAQRunner:
         self._handle_faucet_events()
         all_idle = True
         for target_port, port_info in self._get_ports_with_hosts():
-            target_set = port_info["host"]
+            target_set = port_info.host
             try:
                 if target_set.is_running():
                     all_idle = False
@@ -262,7 +263,7 @@ class DAQRunner:
                 self.target_set_error(target_set.target_port, e)
         if not self.event_trigger:
             for target_port, port_info in self._port_info.items():
-                if port_info["active"] and port_info.get("mac"):
+                if port_info.active and port_info.mac:
                     self._target_set_trigger(target_port)
                     all_idle = False
         if not self._get_active_ports() and not self.run_tests:
@@ -277,9 +278,9 @@ class DAQRunner:
 
     def _reap_stale_ports(self):
         for port, port_info in copy.copy(self._port_info).items():
-            if not all(("flapping_start" in port_info, "host" in port_info)):
+            if not port_info.flapping_start or not port_info.host:
                 continue
-            host = port_info["host"]
+            host = port_info.host
             timeout_sec = host.get_port_flap_timeout(host.test_name)
             if timeout_sec is None:
                 timeout_sec = self._default_port_flap_timeout
