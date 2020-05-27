@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x1c\x64\x61q/proto/system_state.proto\"N\n\x0bRunnerState\x1a?\n\x08PortInfo\x12\x0e\n\x06\x61\x63tive\x18\x01 \x01(\x08\x12\x16\n\x0e\x66lapping_start\x18\x02 \x01(\x05\x12\x0b\n\x03mac\x18\x03 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x1c\x64\x61q/proto/system_state.proto\"N\n\x0bRunnerState\x1a?\n\x08PortInfo\x12\x0e\n\x06\x61\x63tive\x18\x01 \x01(\x08\x12\x16\n\x0e\x66lapping_start\x18\x02 \x01(\x02\x12\x0b\n\x03mac\x18\x03 \x01(\tb\x06proto3')
 )
 
 
@@ -41,8 +41,8 @@ _RUNNERSTATE_PORTINFO = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='flapping_start', full_name='RunnerState.PortInfo.flapping_start', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      number=2, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),

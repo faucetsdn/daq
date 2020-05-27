@@ -10,7 +10,7 @@ syntax = "proto3";
 message RunnerState {
   message PortInfo {
     bool active = 1;
-    int32 flapping_start = 2;
+    float flapping_start = 2;
     string mac = 3;
   }
 }
