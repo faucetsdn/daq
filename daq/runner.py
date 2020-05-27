@@ -188,6 +188,7 @@ class DAQRunner:
             LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
             if self._system_active and not active:
                 LOGGER.error('System port became inactive, terminating.')
+                self.exception = DaqException('System port inactive')
                 self.shutdown()
             self._system_active = active
             return
