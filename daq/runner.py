@@ -665,7 +665,7 @@ class DAQRunner:
             del self._mac_port_map[target_mac]
             del self._port_info[target_port]
             del self._port_host[target_port]
-            del self._port_gateway[target_port]
+            assert not target_port in self._port_gateway, 'gateway not removed before host'
         LOGGER.info('Remaining target sets: %s', self._get_active_ports())
 
     def _detach_gateway(self, target_port):
