@@ -6,7 +6,7 @@ TESTDIR=`dirname $SCRIPTPATH`
 BASEDIR=`readlink -f $TESTDIR/..`
 cd $BASEDIR
 
-$BASEDIR/venv/bin/coverage erase
+venv/bin/coverage erase
 
 PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch venv/bin/coverage run \
     --source $BASEDIR/daq \
