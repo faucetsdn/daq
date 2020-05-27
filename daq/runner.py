@@ -640,7 +640,7 @@ class DAQRunner:
     def _target_set_cancel(self, target_port):
         target_host = self._port_host[target_port]
         if target_host:
-            target_gateway = self._port_gateway[target_port]
+            target_gateway = self._port_gateway.get(target_port)
             target_mac = self._port_info[target_port].mac
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
