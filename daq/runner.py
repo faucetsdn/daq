@@ -308,11 +308,11 @@ class DAQRunner:
         LOGGER.debug('Active target sets/state: %s', states)
 
     def _terminate(self):
-        [host.terminate('_terminate') for host in self._port_host.values()]
+        _ = [host.terminate('_terminate') for host in self._port_host.values()]
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
-        [host.heartbeat() for host in self._port_host.values()]
+        _ = [host.heartbeat() for host in self._port_host.values()]
 
     def main_loop(self):
         """Run main loop to execute tests"""
@@ -731,7 +731,7 @@ class DAQRunner:
                                        self._MODULE_CONFIG)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
-        [host.reload_config for host in self._port_host.values()]
+        _ = [host.reload_config() for host in self._port_host.values()]
 
     def _load_base_config(self, register=True):
         base = self.configurator.load_and_merge({}, self.config.get('base_conf'))
