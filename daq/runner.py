@@ -19,6 +19,8 @@ import stream_monitor
 from wrappers import DaqException
 import logger
 
+from proto import system_state_pb2.RunnerState.PortInfo as PortInfo
+
 LOGGER = logger.get_logger('runner')
 
 

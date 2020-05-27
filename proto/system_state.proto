@@ -1,0 +1,16 @@
+/*
+ * Specification for DAQ internal state mechanisms.
+ */
+syntax = "proto3";
+
+
+/**
+ * Top-level runner state.
+ */
+message RunnerState {
+  message PortInfo {
+    bool active = 1;
+    int32 flapping_start = 2;
+    string mac = 3;
+  }
+}
