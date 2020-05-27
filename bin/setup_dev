@@ -152,7 +152,7 @@ else
     fi
 
     echo Setting faucet version $FAUCETV
-    (cd faucet; git checkout $FAUCETV)
+    (cd faucet; git fetch; git checkout $FAUCETV)
 fi
 
 if [ -z "$FORCHV" ]; then
@@ -164,7 +164,7 @@ else
     fi
 
     echo Setting forch version $FORCHV
-    (cd forch; git checkout $FORCHV)
+    (cd forch; git fetch; git checkout $FORCHV)
 fi
 
 echo -n "DAQ commit "
