@@ -253,7 +253,7 @@ class DAQRunner:
         # Some synthetic faucet events don't come in on the socket, so process them here.
         self._handle_faucet_events()
         all_idle = True
-        for target_port in self._port_host.keys():
+        for target_port in list(self._port_host):
             target_host = self._port_host[target_port]
             try:
                 if target_host.is_running():
