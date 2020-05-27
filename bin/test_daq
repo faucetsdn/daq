@@ -24,6 +24,10 @@ echo -n "Last DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
 echo
 
+echo -n "DAQ version "
+git describe --dirty --always
+echo
+
 if [ -d faucet ]; then
     echo -n "Last FAUCET commit "
     (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)

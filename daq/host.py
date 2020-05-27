@@ -70,6 +70,7 @@ class ConnectedHost:
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
 
     def __init__(self, runner, gateway, target, config):
+        self.configurator = configurator.Configurator()
         self.runner = runner
         self._gcp = runner.gcp
         self.gateway = gateway
@@ -99,11 +100,11 @@ class ConnectedHost:
         self._monitor_ref = None
         self._monitor_start = None
         self.target_ip = None
+        self._dhcp_listeners = []
         self._loaded_config = None
         self.reload_config()
-        self._dhcp_listeners = []
-        configurator.write_config(self._device_aux_path(), self._MODULE_CONFIG, self._loaded_config)
         assert self._loaded_config, 'config was not loaded'
+        self._write_config(self._loaded_config, self._device_aux_path())
         self.remaining_tests = self._get_enabled_tests()
         LOGGER.info('Host %s running with enabled tests %s', self.target_port, self.remaining_tests)
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
@@ -114,6 +115,8 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
+        self.switch_setup = self.config.get('switch_setup', {})
+        self.ext_loip = self.switch_setup.get('mods_addr')
 
     @staticmethod
     def make_runid():
@@ -160,6 +163,13 @@ class ConnectedHost:
             return self._default_timeout_sec
         return test_module.get('timeout_sec', self._default_timeout_sec)
 
+    def get_port_flap_timeout(self, test):
+        """Get port toggle timeout configuration that's specific to each test module"""
+        test_module = self._loaded_config['modules'].get(test)
+        if not test_module:
+            return None
+        return test_module.get('port_flap_timeout_sec')
+
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
 
@@ -185,8 +195,14 @@ class ConnectedHost:
         partial = os.path.join('tests', self.test_name, base) if self.test_name else base
         return os.path.join('run_id', self.run_id, partial)
 
+    def _load_config(self, config, path):
+        return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
+
+    def _write_config(self, config, path):
+        self.configurator.write_config(config, path, self._MODULE_CONFIG)
+
     def _type_path(self):
-        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG, optional=True)
+        dev_config = self._load_config({}, self._device_base)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -343,7 +359,7 @@ class ConnectedHost:
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
         if self.test_host:
             try:
-                self.test_host.terminate(expected=trigger)
+                self.test_host.terminate()
                 self.test_host = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
@@ -551,16 +567,13 @@ class ConnectedHost:
         self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
                                                 test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
-        if 'ext_loip' in self.config:
-            ext_loip = self.config['ext_loip'].replace('@', '%d')
-            params['local_ip'] = ext_loip % self.test_port
-            params['switch_ip'] = self.config['ext_addr']
+        if self.ext_loip:
+            params['local_ip'] = self.ext_loip.replace('@', '%d') % self.test_port
+            params['switch_ip'] = self.switch_setup.get('ip_addr')
             params['switch_port'] = str(self.target_port)
-            params['switch_model'] = self.config['switch_model']
-
-        if 'switch_username' in self.config:
-            params['switch_username'] = self.config['switch_username']
-            params['switch_password'] = self.config['switch_password']
+            params['switch_model'] = self.switch_setup.get('model')
+            params['switch_username'] = self.switch_setup.get('username')
+            params['switch_password'] = self.switch_setup.get('password')
 
         try:
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
@@ -586,7 +599,7 @@ class ConnectedHost:
             finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
-            LOGGER.warning('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
+            LOGGER.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
             os.system('%s %s 2>&1 > %s/finish.out' %
                       (self._finish_hook_script, finish_dir, finish_dir))
 
@@ -612,11 +625,12 @@ class ConnectedHost:
                            **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        self.test_host = None
         self._run_next_test()
 
     def _set_module_config(self, loaded_config):
         tmp_dir = self._host_tmp_path()
-        configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
+        self._write_config(loaded_config, tmp_dir)
         self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
 
     def _merge_run_info(self, config):
@@ -631,9 +645,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        configurator.load_and_merge(config, self._type_path(), self._MODULE_CONFIG, optional=True)
-        configurator.load_and_merge(config, self._device_base, self._MODULE_CONFIG, optional=True)
-        configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG, optional=True)
+        self._load_config(config, self._type_path())
+        self._load_config(config, self._device_base)
+        self._load_config(config, self._port_base)
         return config
 
     def record_result(self, name, **kwargs):
@@ -697,11 +711,11 @@ class ConnectedHost:
 
     def _dev_config_updated(self, dev_config):
         LOGGER.info('Device config update: %s %s', self.target_mac, dev_config)
-        configurator.write_config(self._device_base, self._MODULE_CONFIG, dev_config)
+        self._write_config(dev_config, self._device_base)
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG, optional=True)
+        dev_config = self._load_config({}, self._device_base)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         self._gcp.register_config(self._CONTROL_PATH % self.target_port,

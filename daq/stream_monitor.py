@@ -17,6 +17,7 @@ class StreamMonitor:
         self.loop_hook = loop_hook
         self.poller = select.poll()
         self.callbacks = {}
+        self.fd_priority = {}
 
     def get_fd(self, target):
         """Return the fd from a stream object, or fd directly"""
@@ -24,7 +25,7 @@ class StreamMonitor:
 
     # pylint: disable=too-many-arguments
     def monitor(self, name, desc, callback=None, hangup=None, copy_to=None,
-                error=None):
+                error=None, priority=1):
         """Start monitoring a specific descriptor"""
         fd = self.get_fd(desc)
         assert fd not in self.callbacks, 'Duplicate descriptor fd %d' % fd
@@ -34,6 +35,7 @@ class StreamMonitor:
             callback = lambda: self.copy_data(name, desc, copy_to)
         LOGGER.debug('Monitoring start %s fd %d', name, fd)
         self.callbacks[fd] = (name, callback, hangup, error, desc)
+        self.fd_priority[fd] = priority
         self.poller.register(fd, select.POLLHUP | select.POLLIN)
         self.log_monitors()
 
@@ -151,7 +153,7 @@ class StreamMonitor:
         fds = self.poller.poll(self.timeout_sec * 10e3 if self.timeout_sec else None)
         LOGGER.debug('Monitoring found fds %s', fds)
         if fds:
-            for fd, event in fds:
+            for fd, event in sorted(fds, key=lambda f: -self.fd_priority[f[0]]):
                 if fd in self.callbacks: # Monitoring set could be modified
                     self.process_poll_result(event, fd)
         return len(self.callbacks) > 0

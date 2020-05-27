@@ -1,7 +1,7 @@
 # Switch testing
 
 ## test_switch
-The switch test attempts to poll the switch for different types of data as it relates to the 
+The switch test attempts to poll the switch for different types of data as it relates to the
 connected devices.
 
 ## Currently supported switches:
@@ -15,8 +15,8 @@ connected devices.
  - Allied Telesis x230
   - User: manager
   - Password: friend
- 
-## Note for test developers 
+
+## Note for test developers
 The functional test code is included in the `src/main/java` folder.
 
 DAQ requires additional parameters to be defined in the Switches require a login to gain access to the data required so you must either configure your switch with the appropriate values in the system.conf.
@@ -25,7 +25,7 @@ Additionally to the parameters needed for all physical switch testing defined he
 
 There are specific variables required for using the specified switch that must be added to the system.conf.:
 
-- switch_model - Defines what swich is being used and is case sensitive. 
+- switch_model - Defines what swich is being used and is case sensitive.
  - CISCO_9300
  - ALLIED_TELESIS_X230
 
@@ -35,38 +35,38 @@ There are specific variables required for using the specified switch that must b
 
 Example of all necessary parameters in the system.conf related to physical switch testing:
     # Data plane ID for the connected physical switch.
-    ext_dpid=0xabcdef1234
-	
+    switch_setup.of_dpid=0xabcdef1234
+
     # Interface name of the control-plane network.
-    ext_ctrl=ens9
-	
+    switch_setup.ctrl_intf=ens9
+
     # Interface name of the data-plane network.
-    ext_intf=enx00e04c6601a4
-	
+    switch_setup.data_intf=enx00e04c6601a4
+
     # Controller OpenFlow port (defaults to 6653).
-    ext_ofpt=6653
-	
+    switch_setup.lo_port=6653
+
     # Controller control plane IP address (and subnet).
-    ext_ofip=192.168.100.9/24
-	
+    switch_setup.lo_addr=192.168.100.9/24
+
     # External switch IP address (used to verify the connection).
-    ext_addr=192.168.100.99
-	
+    switch_setup.ip_addr=192.168.100.99
+
     # Enable switch control-plane access.
     # Setting this causes the LOCAL_IP and SWITCH_IP env variables to be set in test containers
-    ext_loip=192.168.100.%d/24
-	
-    # Port of secondary (external) switch for the data-plane uplink (defaults to 7).
-    sec_port=12
-    
-	# Define the model of the switch to use. This parameter is required.
-    switch_model=CISCO_9300
-	
-	 #Define the username for the switch. This parameter is optional.
-    switch_username=tester
+    switch_setup.mods_addr=192.168.100.1%d/24
 
-	 #Define the password for the switch. This parameter is optional.
-	 switch_password=switch_p@55
+    # Port of secondary (external) switch for the data-plane uplink (defaults to 7).
+    switch_setup.uplink_port=12
+
+	# Define the model of the switch to use. This parameter is required.
+    switch_setup.model=CISCO_9300
+
+	#Define the username for the switch. This parameter is optional.
+    switch_setup.username=tester
+
+	#Define the password for the switch. This parameter is optional.
+	switch_setup.password=switch_p@55
 
 ## Conditions for connection.port_duplex
  - pass -> If the duplex mode is detected as full
@@ -82,12 +82,12 @@ Example of all necessary parameters in the system.conf related to physical switc
 
 ## Conditions for poe.negotiation
  - pass -> If the PoE is able to be auto-negotiated with the device and PoE is enabled for the device.
- - fail ->If the PoE fails to be auto-negotiated with the device and is enabled for the device. This can also fail if associated power data fails to resolve correctly during switch interrogation. 
+ - fail ->If the PoE fails to be auto-negotiated with the device and is enabled for the device. This can also fail if associated power data fails to resolve correctly during switch interrogation.
  - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.
 
 ## Conditions for poe.power
  - pass -> If the a PoE device is connected and power has been detected and supplied to the device.
- - fail -> If the a PoE device is connected and *NO* power has been detected and supplied to the device.  Failure also occurs if the switch reports either a faulty PoE state or is denying power to the device. This can also fail if associated power data fails to resolve correctly during switch interrogation. 
+ - fail -> If the a PoE device is connected and *NO* power has been detected and supplied to the device.  Failure also occurs if the switch reports either a faulty PoE state or is denying power to the device. This can also fail if associated power data fails to resolve correctly during switch interrogation.
  - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.
 
  ## Conditions for poe.support

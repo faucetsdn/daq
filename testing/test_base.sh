@@ -4,8 +4,6 @@ source testing/test_preamble.sh
 
 echo Base Tests >> $TEST_RESULTS
 
-cp misc/system_base.yaml local/system.yaml
-
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp misc/report_template.md inst/tmp_site/
 
@@ -15,6 +13,7 @@ bin/mudacl
 bin/build_proto check || exit 1
 
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
+rm -f local/system.yaml local/system.conf
 cmd/run -b -s site_path=inst/tmp_site
 more inst/result.log | tee -a $TEST_RESULTS
 
@@ -23,19 +22,20 @@ cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
 # Check that an open port causes the appropriate failure.
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
-cmd/run -s startup.faux.opts=telnet
+docker rmi daqf/test_hold:latest # Check case of missing image
+cmd/run -s -k interfaces.faux.opts=telnet
 more inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
+DAQ_TARGETS=test_hold cmd/build
 
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
-cmd/run -s startup.faux.opts=telnet device_specs=misc/device_specs/simple.json
+cmd/run -s interfaces.faux.opts=telnet device_specs=misc/device_specs/simple.json
 more inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-port-01/nodes/nmap01/activate.log
 
-# Test an "external" switch.
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
 rm local/system.yaml
 cp misc/system_ext.conf local/system.conf
@@ -46,8 +46,6 @@ fgrep -i switch inst/run-port-02/nodes/ping02/activate.log | tee -a $TEST_RESULT
 more inst/run-port-02/nodes/ping02/activate.log | cat
 count=$(fgrep icmp_seq=5 inst/run-port-02/nodes/ping02/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
-
-# Test various configurations of mud files.
 
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 cp misc/system_muddy.conf local/system.conf

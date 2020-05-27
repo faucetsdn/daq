@@ -351,6 +351,7 @@ public class Cisco9300 extends SwitchInterrogator {
   private void processCommandResponse(String response) {
     response = response.trim();
     System.out.println("\nProcessing Command Response:\n" + response);
+    login_report += "\n\n" + response;
     switch (commandIndex) {
       case 0: // show interface status
         processInterfaceStatus(response);
@@ -364,15 +365,6 @@ public class Cisco9300 extends SwitchInterrogator {
     interface_map = mapSimpleTable(response, show_interface_expected, interface_expected);
     return interface_map;
   }
-
-  //  public HashMap<String, String> processPowerStatus(String response) {
-  //    // Pre-process raw data to be map ready
-  //    response.replaceAll("-", "");
-  //    String[] lines = response.split("\n");
-  //    response = lines[0] + " \n" + lines[lines.length - 1];
-  //    power_map = mapSimpleTable(response, show_power_expected, power_expected);
-  //    return power_map;
-  //  }
 
   public Map<String, String> processPowerStatusInline(String response) {
     Map<String, String> inlineMap = powerInlineMap();
@@ -458,6 +450,7 @@ public class Cisco9300 extends SwitchInterrogator {
   }
 
   public void sendNextCommand() {
+    login_report += "\n" + command[commandIndex];
     telnetClientSocket.writeData(command[commandIndex] + "\n");
     commandPending = true;
     promptReady = false;

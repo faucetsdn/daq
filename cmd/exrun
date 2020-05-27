@@ -95,9 +95,7 @@ if [ -z `which ifconfig` ]; then
 fi
 
 sudo rm -f $cleanup_file
-if [ -n "$ext_loip" ]; then
-    autostart bin/switch_local
-elif [ -n "$ext_ctrl" ]; then
+if [ -n "$switch_setup_ip_addr" ]; then
     autostart bin/physical_sec
 else
     echo No external switch configured.

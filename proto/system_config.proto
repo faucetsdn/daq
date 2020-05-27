@@ -37,32 +37,8 @@ message DaqConfig {
   // dhcp response time for testing long test cycle
   int32 long_dhcp_response_sec = 8;
 
-  // Interface name for switch control plane
-  string ext_ctrl = 9;
-
-  // IP address and subnet for control plane interface
-  string ext_ofip = 10;
-
-  // Port of open flow controller
-  string ext_ofpt = 43;
-
-  // IP address of external switch.
-  string ext_addr = 11;
-
-  // IP address template and subnet for module ip addresses
-  string ext_loip = 12;
-
-  // Dataplane id of external OpenFlow switch
-  string ext_dpid = 41;
-
-  // Interface name for external switch data plane
-  string ext_intf = 42;
-
-  // Upstream dataplane port from the external (secondary) switch.
-  int32 sec_port = 13;
-
-  // CSV separated list of names to assign to external switch interfaces.
-  string intf_names = 14;
+  // Access switch setup information
+  SwitchSetup switch_setup = 9;
 
   // Command file with startup commands.
   string startup_cmds = 15;
@@ -133,23 +109,61 @@ message DaqConfig {
   // Cloud data retention policy.
   float run_data_retention_days = 33;
 
-  // Startup configuration options.
-  map<string, StartupInfo> startup = 37;
-
-  // Switch model
-  string switch_model = 44;
-
-  // Switch connect username
-  string switch_username = 45;
-
-  // Switch connect password
-  string switch_password = 46;
+  // Direct connect interfaces.
+  map<string, Interface> interfaces = 37;
 
   // Failure testing triggers
   map<string, string> fail_module = 47;
+  
+  // Set time between port disconnect and host tests shutdown
+  int32 port_flap_timeout_sec = 48;
 }
 
-message StartupInfo {
-  // Startup command line options.
+
+/*
+ * System configuraiton of the access switch. This is used by the system
+ * to setup and configure the switch itself.
+ */
+message SwitchSetup {
+  // Interface name for switch control plane
+  string ctrl_intf = 9;
+
+  // IP address of external switch.
+  string ip_addr = 11;
+  
+  // Dataplane uplink port
+  int32 uplink_port = 13;
+
+  // Local port of open flow controller
+  string lo_port = 43;
+
+  // IP address and subnet for local control plane interface
+  string lo_addr = 10;
+
+  // IP address template and subnet for module ip addresses
+  string mods_addr = 12;
+
+  // Dataplane id of external OpenFlow switch
+  string of_dpid = 41;
+
+  // Interface name for external switch data plane
+  string data_intf = 42;
+
+  // Switch model
+  string model = 44;
+
+  // Switch connect username
+  string username = 45;
+
+  // Switch connect password
+  string password = 46;
+}
+
+
+/*
+ * Information for faux containers.
+ */
+message Interface {
+  // Faux startup command line options.
   string opts = 1;
 }

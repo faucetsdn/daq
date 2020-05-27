@@ -2,7 +2,7 @@
 
 LOCAL_YAML=local/system.yaml
 LOCAL_CONF=local/system.conf
-DEFAULT_CONF=${DAQ_CONF:-misc/system.yaml}
+DEFAULT_CONF=${DAQ_CONF:-misc/system_base.yaml}
 OUT_CONF=inst/config/system.conf
 
 if [ -d venv ]; then
@@ -14,9 +14,11 @@ if [ ! -f "$LOCAL_YAML" -a ! -f "$LOCAL_CONF" ]; then
     echo No $LOCAL_YAML or $LOCAL_CONF found, copying defaults from $DEFAULT_CONF...
     mkdir -p local
     cp $DEFAULT_CONF $LOCAL_YAML
-fi
-
-if [ -f "$LOCAL_YAML" ]; then
+    conf_file=$LOCAL_YAML
+elif [ -f "$LOCAL_YAML" -a -f "$LOCAL_CONF" ]; then
+    echo Both $LOCAL_YAML and $LOCAL_CONF found, not sure which to use: panic quit.
+    false
+elif [ -f "$LOCAL_YAML" ]; then
     conf_file=$LOCAL_YAML
 else
     conf_file=$LOCAL_CONF
@@ -31,7 +33,7 @@ echo -n > $OUT_CONF.sh
 cat $OUT_CONF | while read line; do
     before=${line%%=*}
     after=${line#*=}
-    echo ${before//./_}=$after >> $OUT_CONF.sh
+    echo ${before//[.-]/_}=$after >> $OUT_CONF.sh
 done
 
 source $OUT_CONF.sh
