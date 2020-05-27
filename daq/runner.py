@@ -499,7 +499,7 @@ class DAQRunner:
         return self._port_info[port].host
 
     def _get_port_hosts(self):
-        return {p: i.host for p, i in self._port_info.items() if i.host}
+        return {p: i.host for p, i in self._port_info.items() if i.host}.items()
 
     def _check_and_activate_gateway(self, host):
         # Host ready to be activated and DHCP happened / Static IP
