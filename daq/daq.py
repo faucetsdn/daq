@@ -42,7 +42,7 @@ class DAQ:
     """Wrapper class for configuration management"""
 
     def __init__(self, args):
-        config_helper = configurator.Configurator(verbose=True)
+        config_helper = configurator.Configurator(raw_print=True)
         self.config = config_helper.parse_args(args)
 
     def validate_config(self):
