@@ -262,7 +262,7 @@ class DAQRunner:
                 else:
                     self.target_set_complete(target_port, 'target set not active')
             except Exception as e:
-                self.target_set_error(target_set.target_port, e)
+                self.target_set_error(target_host.target_port, e)
         if not self.event_trigger:
             for target_port, port_info in self._port_info.items():
                 if port_info.active and port_info.mac:
