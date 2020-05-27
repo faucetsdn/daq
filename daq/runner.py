@@ -292,8 +292,7 @@ class DAQRunner:
 
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
-        for port in self._port_info:
-            self._deactivate_port(port)
+        self._terminate()
         self.monitor_forget(self.faucet_events.sock)
         self.faucet_events.disconnect()
         self.faucet_events = None
