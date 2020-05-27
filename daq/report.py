@@ -191,6 +191,7 @@ class ReportGenerator:
         self._write_test_tables()
 
     def _accumulate_test(self, test_name, result, extra='', module_name=None):
+        LOGGER.info('Accumlate %s %s', test_name, result)
         if result not in self._result_headers:
             self._result_headers.append(result)
         test_info = self._get_test_info(test_name)
