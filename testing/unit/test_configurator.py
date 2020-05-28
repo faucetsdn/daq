@@ -2,8 +2,15 @@
 
 import unittest
 import os
+import sys
 
 from daq.configurator import Configurator, print_config
+
+import logging
+logger = logging.getLogger()
+logger.level = logging.INFO
+stream_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handler)
 
 def dict_to_conf_str(obj):
     """Dump dict as key=value to str object."""

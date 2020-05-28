@@ -7,6 +7,13 @@ import time
 from unittest.mock import MagicMock, mock_open, patch
 from daq.runner import DAQRunner, configurator
 from daq.host import ConnectedHost
+import network
+
+import logging
+logger = logging.getLogger()
+logger.level = logging.INFO
+stream_handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(stream_handler)
 
 class TestRunner(unittest.TestCase):
     """Test class for Configurator"""
@@ -28,7 +35,8 @@ class TestRunner(unittest.TestCase):
             "DAQ_LSB_RELEASE": "",
             "DAQ_SYS_UNAME": ""
         }
-        configurator.load_and_merge = MagicMock()
+        configurator.Configurator.load_and_merge = MagicMock(return_value={})
+        network.TestNetwork.__init__ = MagicMock(return_value=None)
         with patch("builtins.open", mock_open(read_data="data")):
             self.runner = DAQRunner(self.config)
 
