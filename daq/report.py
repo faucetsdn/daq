@@ -193,7 +193,6 @@ class ReportGenerator:
         self._write_test_tables()
 
     def _accumulate_result(self, test_name, result, extra='', module_name=None):
-        LOGGER.info('Accumlate %s %s', test_name, result)
         assert test_name not in self._results, 'result already exists'
 
         if result not in self._result_headers:

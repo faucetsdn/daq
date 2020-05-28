@@ -313,7 +313,6 @@ class DAQRunner:
 
     def _terminate(self, trigger=True):
         _ = [self._target_set_cancel(port) for port in self._get_running_ports()]
-        #_ = [host.terminate('_terminate', trigger=trigger) for _, host in self._get_port_hosts()]
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
