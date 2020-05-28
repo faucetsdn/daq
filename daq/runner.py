@@ -714,7 +714,7 @@ class DAQRunner:
         result_set_keys = list(result_sets)
         result_set_keys.sort()
         for result_set_key in result_set_keys:
-            result = _result_sets[result_set_key]
+            result = result_sets[result_set_key]
             code_string = result['code'] if 'code' in result else None
             code = int(code_string) if code_string else 0
             name = result['name'] if 'name' in result else result_set_key
