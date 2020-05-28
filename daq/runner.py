@@ -110,7 +110,7 @@ class DAQRunner:
         message = {
             'name': 'status',
             'states': self._get_states(),
-            'ports': self._get_active_ports(),
+            'ports': self._get_running_ports(),
             'description': self.description,
             'timestamp': time.time()
         }
@@ -267,7 +267,7 @@ class DAQRunner:
                 if port_info.active and port_info.mac:
                     self._target_set_trigger(target_port)
                     all_idle = False
-        if not self._get_active_ports() and not self.run_tests:
+        if not self._get_running_ports() and not self.run_tests:
             if self.faucet_events and not self._linger_exit:
                 self.shutdown()
             if self._linger_exit == 1:
@@ -495,7 +495,7 @@ class DAQRunner:
     def _get_port_hosts(self):
         return {p: i.host for p, i in self._port_info.items() if i.host}.items()
 
-    def _get_active_ports(self):
+    def _get_running_ports(self):
         return {p: i.host for p, i in self._port_info.items() if i.host}.keys()
 
     def _check_and_activate_gateway(self, host):
@@ -668,7 +668,7 @@ class DAQRunner:
             if self.single_shot and self.run_tests:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self.run_tests = False
-        LOGGER.info('Remaining target sets: %s', self._get_active_ports())
+        LOGGER.info('Remaining target sets: %s', self._get_running_ports())
 
     def _detach_gateway(self, target_port):
         target_gateway = self._port_info[target_port].gateway
