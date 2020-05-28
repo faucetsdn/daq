@@ -231,8 +231,6 @@ class DAQRunner:
 
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port):
-            if not port in self._port_info:
-                self._port_info[port].active = True
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             self._mac_port_map[target_mac] = port
             self._port_info[port].mac = target_mac
@@ -366,7 +364,6 @@ class DAQRunner:
             return False
 
         if not self.run_tests:
-            del self._port_info[target_port]
             LOGGER.debug('Target port %d trigger ignored', target_port)
             return False
 
@@ -647,8 +644,10 @@ class DAQRunner:
     def _target_set_cancel(self, target_port):
         target_host = self._port_info[target_port].host
         if target_host:
+            self._port_info[target_port].host = None
             target_gateway = self._port_info[target_port].gateway
             target_mac = self._port_info[target_port].mac
+            del self._mac_port_map[target_mac]
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
@@ -669,9 +668,6 @@ class DAQRunner:
             if self.single_shot and self.run_tests:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self.run_tests = False
-            del self._mac_port_map[target_mac]
-            assert not self._port_info[target_port].gateway, 'gateway not removed before host'
-            del self._port_info[target_port]
         LOGGER.info('Remaining target sets: %s', self._get_active_ports())
 
     def _detach_gateway(self, target_port):
