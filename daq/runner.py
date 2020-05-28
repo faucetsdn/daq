@@ -106,9 +106,6 @@ class DAQRunner:
         states = connected_host.pre_states() + self.config['test_list']
         return states + connected_host.post_states()
 
-    def _get_active_ports(self):
-        return list(filter(lambda p: self._port_info[p].active, self._port_info.keys()))
-
     def _send_heartbeat(self):
         message = {
             'name': 'status',
@@ -364,7 +361,7 @@ class DAQRunner:
             return False
 
         if not self.run_tests:
-            LOGGER.debug('Target port %d trigger ignored', target_port)
+            LOGGER.debug('Target port %d trigger suppressed', target_port)
             return False
 
         try:
@@ -497,6 +494,9 @@ class DAQRunner:
 
     def _get_port_hosts(self):
         return {p: i.host for p, i in self._port_info.items() if i.host}.items()
+
+    def _get_active_ports(self):
+        return {p: i.host for p, i in self._port_info.items() if i.host}.keys()
 
     def _check_and_activate_gateway(self, host):
         # Host ready to be activated and DHCP happened / Static IP
