@@ -106,14 +106,11 @@ class DAQRunner:
         states = connected_host.pre_states() + self.config['test_list']
         return states + connected_host.post_states()
 
-    def _get_active_ports(self):
-        return list(filter(lambda p: self._port_info[p].active, self._port_info.keys()))
-
     def _send_heartbeat(self):
         message = {
             'name': 'status',
             'states': self._get_states(),
-            'ports': self._get_active_ports(),
+            'ports': self._get_running_ports(),
             'description': self.description,
             'timestamp': time.time()
         }
@@ -237,8 +234,6 @@ class DAQRunner:
 
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port):
-            if not port in self._port_info:
-                self._port_info[port].active = True
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             self._mac_port_map[target_mac] = port
             self._port_info[port].mac = target_mac
@@ -278,7 +273,7 @@ class DAQRunner:
                 if port_info.active and port_info.mac:
                     self._target_set_trigger(target_port)
                     all_idle = False
-        if not self._get_active_ports() and not self.run_tests:
+        if not self._get_running_ports() and not self.run_tests:
             if self.faucet_events and not self._linger_exit:
                 self.shutdown()
             if self._linger_exit == 1:
@@ -371,8 +366,7 @@ class DAQRunner:
             return False
 
         if not self.run_tests:
-            del self._port_info[target_port]
-            LOGGER.debug('Target port %d trigger ignored', target_port)
+            LOGGER.debug('Target port %d trigger suppressed', target_port)
             return False
 
         try:
@@ -504,7 +498,10 @@ class DAQRunner:
         return self._port_info[port].host
 
     def _get_port_hosts(self):
-        return {p: i.host for p, i in self._port_info.items() if i.host}.items()
+        return list({p: i.host for p, i in self._port_info.items() if i.host}.items())
+
+    def _get_running_ports(self):
+        return list({p: i.host for p, i in self._port_info.items() if i.host}.keys())
 
     def _check_and_activate_gateway(self, host):
         # Host ready to be activated and DHCP happened / Static IP
@@ -652,8 +649,10 @@ class DAQRunner:
     def _target_set_cancel(self, target_port):
         target_host = self._port_info[target_port].host
         if target_host:
+            self._port_info[target_port].host = None
             target_gateway = self._port_info[target_port].gateway
             target_mac = self._port_info[target_port].mac
+            del self._mac_port_map[target_mac]
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self.result_sets[target_port])
@@ -674,10 +673,7 @@ class DAQRunner:
             if self.single_shot and self.run_tests:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self.run_tests = False
-            del self._mac_port_map[target_mac]
-            assert not self._port_info[target_port].gateway, 'gateway not removed before host'
-            del self._port_info[target_port]
-        LOGGER.info('Remaining target sets: %s', self._get_active_ports())
+        LOGGER.info('Remaining target sets: %s', self._get_running_ports())
 
     def _detach_gateway(self, target_port):
         target_gateway = self._port_info[target_port].gateway
