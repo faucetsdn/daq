@@ -47,7 +47,7 @@ class DAQRunner:
         self.configurator = configurator.Configurator()
         self.config = config
         self._port_info = {}
-        self.result_sets = {}
+        self._result_sets = {}
         self._mac_port_map = {}
         self._device_groups = {}
         self._gateway_sets = {}
@@ -311,8 +311,9 @@ class DAQRunner:
         states = {p: h.state for p, h in self._get_port_hosts()}
         LOGGER.debug('Active target sets/state: %s', states)
 
-    def _terminate(self):
-        _ = [host.terminate('_terminate') for _, host in self._get_port_hosts()]
+    def _terminate(self, trigger=True):
+        _ = [self._target_set_cancel(port) for port in self._get_running_ports()]
+        #_ = [host.terminate('_terminate', trigger=trigger) for _, host in self._get_port_hosts()]
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -644,7 +645,7 @@ class DAQRunner:
             self.run_tests = False
             if self.result_linger:
                 self._linger_exit = 1
-        self.result_sets[target_port] = result_set
+        self._result_sets[target_port] = result_set
 
     def _target_set_cancel(self, target_port):
         target_host = self._port_info[target_port].host
@@ -655,7 +656,7 @@ class DAQRunner:
             del self._mac_port_map[target_mac]
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
-            results = self._combine_result_set(target_port, self.result_sets[target_port])
+            results = self._combine_result_set(target_port, self._result_sets.get(target_port))
             this_result_linger = results and self.result_linger
             target_gateway_linger = target_gateway and target_gateway.result_linger
             if target_gateway_linger or this_result_linger:
@@ -699,17 +700,19 @@ class DAQRunner:
 
     def _combine_results(self):
         results = []
-        for result_set_key in self.result_sets:
-            result_set = self.result_sets[result_set_key]
+        for result_set_key in self._result_sets:
+            result_set = self._result_sets[result_set_key]
             results.extend(self._combine_result_set(result_set_key, result_set))
         return results
 
     def _combine_result_set(self, set_key, result_sets):
         results = []
+        if not result_sets:
+            return results
         result_set_keys = list(result_sets)
         result_set_keys.sort()
         for result_set_key in result_set_keys:
-            result = result_sets[result_set_key]
+            result = _result_sets[result_set_key]
             code_string = result['code'] if 'code' in result else None
             code = int(code_string) if code_string else 0
             name = result['name'] if 'name' in result else result_set_key

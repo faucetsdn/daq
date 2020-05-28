@@ -141,8 +141,7 @@ class ReportGenerator:
 
     def get_all_results(self):
         """Get all processed results"""
-        if not self._all_results:
-            self._process_results()
+        assert self._finalized, 'report must be finalized'
         return copy.deepcopy(self._all_results)
 
     def _process_results(self):
@@ -195,8 +194,11 @@ class ReportGenerator:
 
     def _accumulate_result(self, test_name, result, extra='', module_name=None):
         LOGGER.info('Accumlate %s %s', test_name, result)
+        assert test_name not in self._results, 'result already exists'
+
         if result not in self._result_headers:
             self._result_headers.append(result)
+
         test_info = self._get_test_info(test_name)
 
         category_name = test_info.get('category', self._DEFAULT_CATEGORY)
@@ -316,4 +318,4 @@ class ReportGenerator:
         """Accumulate test reports into the overall device report"""
         valid_result_types = all(isinstance(key, ResultType) for key in result_dict)
         assert valid_result_types, "Unknown result type in %s" % result_dict
-        self._repitems.getdefault(test_name, {}).update(result_dict)
+        self._repitems.setdefault(test_name, {}).update(result_dict)

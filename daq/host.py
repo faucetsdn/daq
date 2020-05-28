@@ -341,15 +341,16 @@ class ConnectedHost:
 
     def _finalize_report(self):
         json_path = self._report.path + ".json"
-        with open(json_path, 'w') as json_file:
-            json.dump(self._report.get_all_results(), json_file)
         remote_paths = {}
         remote_paths["report_path"] = self._upload_file(self._report.path)
         remote_paths["json_path"] = self._upload_file(json_path)
         remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
         if self._trigger_path:
             remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
+        self.record_result('terminate', state=MODE.TERM, **remote_paths)
         self._report.finalize()
+        with open(json_path, 'w') as json_file:
+            json.dump(self._report.get_all_results(), json_file)
         self._report = None
         return remote_paths
 
@@ -361,8 +362,7 @@ class ConnectedHost:
         self._release_config()
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        remote_paths = self._finalize_report()
-        self.record_result('terminate', state=MODE.TERM, **remote_paths)
+        self._finalize_report()
         if self.test_host:
             try:
                 self.test_host.terminate()
