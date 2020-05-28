@@ -58,6 +58,7 @@ class ReportGenerator:
         self._module_config = copy.deepcopy(module_config)
         self._reports = {}
         self._clean_mac = target_mac.replace(':', '')
+        self._finalized = False
         report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
         report_filename = self._NAME_FORMAT % (self._clean_mac,
                                                report_when.isoformat().replace(':', ''), 'md')
@@ -124,6 +125,8 @@ class ReportGenerator:
     def finalize(self):
         """Finalize this report"""
         LOGGER.info('Finalizing report %s', self._filename)
+        assert not self._finalized, 'report already finalized'
+        self._finalized = True
         self._module_config['clean_mac'] = self._clean_mac
         self._module_config['start_time'] = self._start_time
         self._module_config['end_time'] = datetime.datetime.now(pytz.utc).replace(microsecond=0)
