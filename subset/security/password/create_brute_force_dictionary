@@ -1,40 +1,56 @@
 #!/bin/bash
 
-# A script to retrieve, and collate several credential files into one large file to be used as a brute force dictionary.
+# A script to retrieve, and collate several raw brute force dictionaries into one large file.
+# Usage ./create_brute_force_dictionary <Macoui e.g. "3c:5a:b4">
+# Example: ./create_brute_force_dictionary "3c:5a:b4"
+#
+# How does it work?
+# Is mac oui faux device oui or not?
+# If yes:
+#   Use the existing faux dictionary and copy it as the output dictionary.
+# If no:
+#   Retrieve the manufacturer defaults .csv dictionary file, and the two colon separated dictionaries for ssh/telnet.
+#   For the csv file, convert each line into a username:password pair, append them to the temp file.
+#   For the txt files, simply append them into the temp file.
+#   Remove duplicates, empty lines and sort the temp file into the output file.
 
-USERNAMES_FILE="resources/usernames.txt"
-PASSWORDS_FILE="resources/passwords.txt"
+FAUX_DICTIONARY=resources/faux_dictionary.txt
+OUTPUT_DICTIONARY=resources/dictionary.txt
+TEMP_DICTIONARY=resources/tmp_dictionary.txt
+MANUFACTURER_DEFAULTS_DICTIONARY=resources/manufacturer.csv
+SSH_DICTIONARY=resources/ssh.txt
+TELNET_DICTIONARY=resources/telnet.txt
 
-FAUX_USERNAMES_FILE="resources/usernames_faux.txt"
-FAUX_PASSWORDS_FILE="resources/passwords_faux.txt"
-
-SSH_PASSWORDS=resources/ssh.txt
-TELNET_PASSWORDS=resources/telnet.txt
-
-# For manufacturer .csv remove the first and last elements of each split line. Save the two remaining pairs as colon
-# separated username and password pairs.
-
-function retrieve_full_credential_files() {
-  #curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/default-passwords.csv \
-  #  --create-dirs --output resources/manufacturer.csv
+# Retrieve the raw dictionary files from the gitlab source.
+# $1 Manufacturer dictionary
+# $2 SSH dictionary
+# $3 Telnet dictionary
+function retrieve_raw_dictionaries() {
+  curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/default-passwords.csv \
+    --create-dirs --output $1
   curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/ssh-betterdefaultpasslist.txt \
-    --create-dirs --output resources/ssh.txt
+    --create-dirs --output $2
   curl https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/telnet-betterdefaultpasslist.txt \
-    --create-dirs --output resources/telnet.txt
+    --create-dirs --output $3
 }
 
-function retrieve_faux_credential_files() {
-  cp $FAUX_USERNAMES_FILE $USERNAMES_FILE
-  cp $FAUX_PASSWORDS_FILE $PASSWORDS_FILE
+# Make a copy of the faux dictionary as the output one.
+# $1 Faux dictionary
+# $2 Output dictionary
+function retrieve_faux_dictionary() {
+  cp $1 $2
 }
 
-function create_output_credential_files() {
-  mkdir -p resources
+# Create the temporary and output dictionaries, and remove existing ones.
+# $1 Temporary dictionary file.
+# $2 Output dictionary file.
+function create_dictionary() {
+  mkdir -p "resources"
 
   if [ -f $1 ]; then
     rm $1
   fi
-
+  
   if [ -f $2 ]; then
     rm $2
   fi
@@ -43,79 +59,89 @@ function create_output_credential_files() {
   touch $2
 }
 
+# Helps avoid certain special characters which cause grep to fail
+# $1 Line string in file
 function line_is_invalid_csv() {
   echo $1 | grep -sqE "^\".*\"|\s|,,"
 }
 
-function remove_unwanted_characters() {
-  echo "$(echo $1 | tr -d '[' | tr -d ']' | tr -d "[:blank:]")"
-}
-
+# Helps avoid certain special usernames/passwords which cause grep to fail.
+# $1 Username or password string
 function username_or_password_is_invalid() {
   echo $1 | grep -sqE "<BLANK>|<N/A>"
 }
 
-function word_already_in_file() {
-  grep -sqE $1 $2
-}
-
-function add_to_credential_files() {
+# Append the username and password pair into the output dictionary with colon separation.
+# $1 Username
+# $2 Password
+# $3 Output dictionary
+function add_colon_pair_to_output_dictionary() {
   if ! username_or_password_is_invalid $1; then
-    if ! word_already_in_file $1 $3; then
-      echo $1 >> $3
-    fi
-  fi
-
-  if ! username_or_password_is_invalid $2; then
-    if ! word_already_in_file $2 $4; then
-      echo $2 >> $4
+    if ! username_or_password_is_invalid $2; then
+      echo "$1:$2" >> $3
     fi
   fi
 }
 
-function parse_csv() {
+# Convert lines in the manufacturer csv file into colon separated username:password pairs, then append them to file.
+# $1 Raw dictionary
+# $2 Output dictionary
+function append_manufacturer_csv_to_output_dictionary() {
   while read LINE
   do
     if ! line_is_invalid_csv "$LINE"; then
       IFS=',' read -ra CREDENTIAL_ARRAY <<< "$LINE"
       USERNAME="${CREDENTIAL_ARRAY[1]}"
       PASSWORD="${CREDENTIAL_ARRAY[2]}"
-      echo $USERNAME and $PASSWORD
-      add_to_credential_files $USERNAME $PASSWORD $2 $3
+      add_colon_pair_to_output_dictionary $USERNAME $PASSWORD $2
     fi
   done < $1
 }
 
-function parse_txt() {
-  while read LINE
-  do
-    LINE="$(remove_unwanted_characters $LINE)"
-    IFS=':' read -ra CREDENTIAL_ARRAY <<< "$LINE"
-    USERNAME="${CREDENTIAL_ARRAY[0]}"
-    PASSWORD="${CREDENTIAL_ARRAY[1]}"
-    add_to_credential_files $USERNAME $PASSWORD $2 $3
-  done < $1
+# Add colon separated txt file into the output dictionary.
+# $1 Output dictionary file
+# $2 Colon separated file
+function append_colon_separated_file_to_output_dictionary() {
+  cat $2 >> $1
 }
 
+# Removes duplicates, empty lines and sorts temporary dictionary, saving into the output dictionary. Also removes
+# some characters which weirdly cause hydra to find invalid passwords.
+# $1 Temporary dictionary file
+# $2 Output dictionary file
+function clean_output_dictionary() {
+  cat $1 | tr -d "/" | tr -d "$" | tr -d "%" | tr -d ">" | sed -E '/^$/d' | sort -u > $2
+}
+
+# Does the device have a faux device macoui?
+# $1 Mac oui
 function has_faux_device_macoui() {
   echo $1 | grep -sqE "^3c:5a:b4|^9a:02:57"
 }
 
+# Main function:
+
 echo Creating credential files...
-create_output_credential_files $USERNAMES_FILE $PASSWORDS_FILE
+create_dictionary $TEMP_DICTIONARY $OUTPUT_DICTIONARY
 
 if has_faux_device_macoui $1; then
-  echo Using faux device brute force dictionary
-  retrieve_faux_credential_files
+  echo Using faux device dictionary
+  retrieve_faux_dictionary $FAUX_DICTIONARY $OUTPUT_DICTIONARY
 else
-  echo Retrieving brute force dictionary
-  retrieve_full_credential_files
+  echo Retrieving raw dictionaries from sources
+  retrieve_raw_dictionaries $MANUFACTURER_DEFAULTS_DICTIONARY $SSH_DICTIONARY $TELNET_DICTIONARY
+
+  echo Parsing CSV file...
+  append_manufacturer_csv_to_output_dictionary $MANUFACTURER_DEFAULTS_DICTIONARY $TEMP_DICTIONARY
 
   echo Parsing SSH passwords file...
-  parse_txt $SSH_PASSWORDS $USERNAMES_FILE $PASSWORDS_FILE
+  append_colon_separated_file_to_output_dictionary $TEMP_DICTIONARY $SSH_DICTIONARY
 
   echo Parsing telnet passwords file...
-  parse_txt $TELNET_PASSWORDS $USERNAMES_FILE $PASSWORDS_FILE
+  append_colon_separated_file_to_output_dictionary $TEMP_DICTIONARY $TELNET_DICTIONARY
+
+  echo Cleaning up output dictionary...
+  clean_output_dictionary $TEMP_DICTIONARY $OUTPUT_DICTIONARY
 fi
 
 echo Done!

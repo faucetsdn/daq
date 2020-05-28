@@ -16,5 +16,8 @@
     },
     "security.tls.v1.x509" : {
         "description": "Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile"
+    },
+    "security.admin.password" : {
+        "description": "Verify default manufacturer passwords have been changed, and new secure ones are set."
     }
 }
