@@ -340,7 +340,10 @@ class ConnectedHost:
         self._dhcp_listeners.append(callback)
 
     def _finalize_report(self):
+        self._report.finalize()
         json_path = self._report.path + ".json"
+        with open(json_path, 'w') as json_file:
+            json.dump(self._report.get_all_results(), json_file)
         remote_paths = {}
         remote_paths["report_path"] = self._upload_file(self._report.path)
         remote_paths["json_path"] = self._upload_file(json_path)
@@ -348,9 +351,6 @@ class ConnectedHost:
         if self._trigger_path:
             remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
-        self._report.finalize()
-        with open(json_path, 'w') as json_file:
-            json.dump(self._report.get_all_results(), json_file)
         self._report = None
         return remote_paths
 
