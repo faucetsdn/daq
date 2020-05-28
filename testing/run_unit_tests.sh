@@ -10,11 +10,12 @@ source venv/bin/activate
 
 coverage erase
 
-PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch coverage run \
+export PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch
+coverage run \
     --source $BASEDIR/daq \
     -m unittest discover \
     -s $TESTDIR/unit/ \
-    -p "test_*.py" || exit 1
+    -p "test_*.py"
 
 coverage combine || true
 coverage report -m
