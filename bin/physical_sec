@@ -102,8 +102,11 @@ else
     sudo ip link set $ext_ctrl up
 fi
 
-# Might not exist yet, if it's part of the autostart sequence.
-sudo ip link set $ext_data up
+if [ "$ext_data" != ext-ovs-sec ]; then
+    sudo ip link set $ext_data up
+else
+    echo Skipping bring-up of ovs switch interface $ext_data
+fi
 
 if [ -z "$ext_ctrl" ]; then
     echo No control plane interface defined, skipping configuration.
