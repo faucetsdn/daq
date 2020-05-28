@@ -269,6 +269,7 @@ class ConnectedHost:
         if expected is not None:
             message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
+        assert self.state != _STATE.TERM, 'host already terminated'
         LOGGER.debug('Target port %d state: %s -> %s', self.target_port, self.state, target)
         self.state = target
 
@@ -338,15 +339,7 @@ class ConnectedHost:
         assert callable(callback), "ip listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
-    def terminate(self, reason, trigger=True):
-        """Terminate this host"""
-        LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
-                    self._host_name(), trigger, reason)
-        self._release_config()
-        self._state_transition(_STATE.TERM)
-        self._monitor_cleanup()
-        self.runner.network.delete_mirror_interface(self.target_port)
-        self._report.finalize()
+    def _finalize_report(self):
         json_path = self._report.path + ".json"
         with open(json_path, 'w') as json_file:
             json.dump(self._report.get_all_results(), json_file)
@@ -356,6 +349,19 @@ class ConnectedHost:
         remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
         if self._trigger_path:
             remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
+        self._report.finalize()
+        self._report = None
+        return remote_paths
+
+    def terminate(self, reason, trigger=True):
+        """Terminate this host"""
+        LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
+                    self._host_name(), trigger, reason)
+        self._state_transition(_STATE.TERM)
+        self._release_config()
+        self._monitor_cleanup()
+        self.runner.network.delete_mirror_interface(self.target_port)
+        remote_paths = self._finalize_report()
         self.record_result('terminate', state=MODE.TERM, **remote_paths)
         if self.test_host:
             try:
