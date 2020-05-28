@@ -3,7 +3,6 @@
 set -o pipefail
 
 ROOT=$(realpath $(dirname $0)/..)
-MISCDIR=$ROOT/misc
 INSTDIR=$ROOT/inst
 INSTLOCK=$INSTDIR/startup.lock
 LOCALDIR=$ROOT/local
@@ -11,7 +10,7 @@ FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
 export DAQ_VERSION=$(git describe --dirty)
-TAGGED_VERSION=`cat misc/docker_images.ver`
+TAGGED_VERSION=`cat etc/docker_images.ver`
 LSB_RAW=$(lsb_release -a)
 export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
 export DAQ_SYS_UNAME=$(uname -a)
@@ -56,9 +55,9 @@ if [ ! -d $FORCH ]; then
     false
 fi
 
-(cd $FAUCET; git checkout $(< $ROOT/misc/FAUCET_VERSION)) || \
+(cd $FAUCET; git checkout $(< $ROOT/etc/FAUCET_VERSION)) || \
     echo Could not update faucet, try 'bin/clean_dev && bin/setup_dev' to reset.
-(cd $FORCH; git checkout $(< $ROOT/misc/FORCH_VERSION)) || \
+(cd $FORCH; git checkout $(< $ROOT/etc/FORCH_VERSION)) || \
     echo Could not update forch, try 'bin/clean_dev && bin/setup_dev' to reset.
 
 echo Release version $DAQ_VERSION

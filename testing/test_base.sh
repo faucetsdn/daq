@@ -5,7 +5,7 @@ source testing/test_preamble.sh
 echo Base Tests >> $TEST_RESULTS
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
-cp misc/report_template.md inst/tmp_site/
+cp resources/setups/baseline/report_template.md inst/tmp_site/
 
 echo Creating MUD templates...
 bin/mudacl

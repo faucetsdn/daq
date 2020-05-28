@@ -30,7 +30,7 @@ class ReportGenerator:
     """Generate a report for device qualification"""
 
     _NAME_FORMAT = "report_%s_%s.%s"
-    _REPORT_CSS_PATH = 'misc/device_report.css'
+    _REPORT_CSS_PATH = 'resources/setups/baseline/device_report.css'
     _REPORT_TMP_HTML_PATH = 'inst/last_report_out.html'
     _SIMPLE_FORMAT = "device_report.%s"
     _TEST_SEPARATOR = "\n## %s\n"
