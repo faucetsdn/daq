@@ -603,7 +603,7 @@ class DAQRunner:
 
     def target_set_error(self, target_port, exception):
         """Handle an error in the target port set"""
-        running = bool(target_port in self._port_info and self._port_info.host)
+        running = bool(target_port in self._port_info and self._port_info[target_port].host)
         LOGGER.error('Target port %d running %s exception: %s', target_port, running, exception)
         LOGGER.exception(exception)
         self._detach_gateway(target_port)
