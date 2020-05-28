@@ -11,7 +11,7 @@ also store your entire configuraiton of local/ in the same source control repo, 
 A test module config is constructed for each test from a sequence of overlaid files. The
 general sequence of includes is:
 
-* `misc/module_config.json`: Global configuraiton paramaters that come with the DAQ distribution.
+* `resources/setups/baseline/module_config.json`: Global configuraiton paramaters that come with the DAQ distribution.
 * `{site_path}/module_config.json`: Confguraiton parameters common to all tests run with this site.
 * `{site_path}/device_types/{device_type}/module_config.json`: Device-type configuration parameters.
 * `{site_path}/mac_addrs/{mac_addr}/module_config.json`: Device-specific configuraiton parameters.
