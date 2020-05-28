@@ -29,7 +29,7 @@ class TestConfigurator(unittest.TestCase):
     config = {
         'monitor_scan_sec' : '30',
         'default_timeout_sec' : '350',
-        'base_conf' : 'misc/module_config.json',
+        'base_conf' : 'resources/setups/baseline/module_config.json',
         'site_path' : 'local/site/',
         'initial_dhcp_lease_time' : '120s',
         'dhcp_lease_time' : '500s',

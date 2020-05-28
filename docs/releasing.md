@@ -8,8 +8,8 @@
 * Check generated files:
 ```
 git status --porcelain
- M misc/docker_images.txt
- M misc/docker_images.ver
+ M etc/docker_images.txt
+ M etc/docker_images.ver
 ```
 * `git commit -a -m "$VERSION release"`
 * `git push`
