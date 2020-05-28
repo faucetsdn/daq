@@ -110,7 +110,7 @@ class DAQRunner:
         message = {
             'name': 'status',
             'states': self._get_states(),
-            'ports': self._get_running_ports(),
+            'ports': self._get_active_ports(),
             'description': self.description,
             'timestamp': time.time()
         }
@@ -501,7 +501,10 @@ class DAQRunner:
         return list({p: i.host for p, i in self._port_info.items() if i.host}.items())
 
     def _get_running_ports(self):
-        return list({p: i.host for p, i in self._port_info.items() if i.host}.keys())
+        return [p for p, i in self._port_info.items() if i.host]
+
+    def _get_active_ports(self):
+        return [p for p, i in self._port_info.items() if i.active]
 
     def _check_and_activate_gateway(self, host):
         # Host ready to be activated and DHCP happened / Static IP
