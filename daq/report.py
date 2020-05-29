@@ -26,6 +26,27 @@ class ResultType(Enum):
     EXCEPTION = "exception"
     ACTIVATION_LOG_PATH = "activation_log_path"
 
+class MdTable():
+    """Md table renderer"""
+
+    _DIV = "---"
+    _MARK = '|'
+
+    def __init__(self, headers):
+        self.headers = ['', *headers, '']
+        separators = [self._DIV for _ in headers]
+        self._header_separator = self._MARK.join(['', *separators, ''])
+        self.rows = []
+
+    def add_row(self, row):
+        """Add one row to the md table"""
+        self.rows.append(['', *map(str.strip, row), ''])
+
+    def render(self):
+        """returns a string for md"""
+        table_str = "%s\n%s\n" % (self._MARK.join(self.headers), self._header_separator)
+        return table_str + "\n".join([self._MARK.join(row) for row in self.rows])
+
 class ReportGenerator:
     """Generate a report for device qualification"""
 
@@ -44,8 +65,6 @@ class ReportGenerator:
     _DEFAULT_EXPECTED = 'Other'
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
-    _TABLE_DIV = "---"
-    _TABLE_MARK = '|'
     _CATEGORY_HEADERS = ["Category", "Result"]
     _EXPECTED_HEADER = "Expectation"
     _SUMMARY_HEADERS = ["Result", "Test", "Category", "Expectation", "Notes"]
@@ -182,10 +201,6 @@ class ReportGenerator:
         weasyprint.HTML(self._REPORT_TMP_HTML_PATH) \
             .write_pdf(self.path_pdf, stylesheets=[weasyprint.CSS(self._REPORT_CSS_PATH)])
 
-    def _write_table(self, items):
-        stripped_items = map(str.strip, items)
-        self._writeln(self._TABLE_MARK + self._TABLE_MARK.join(stripped_items) + self._TABLE_MARK)
-
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
         self._write_test_tables()
@@ -248,28 +263,27 @@ class ReportGenerator:
 
         self._writeln('Overall device result %s' % ('PASS' if passes else 'FAIL'))
         self._writeln()
-        self._write_table(self._CATEGORY_HEADERS)
-        self._write_table([self._TABLE_DIV] * len(self._CATEGORY_HEADERS))
+        table = MdTable(self._CATEGORY_HEADERS)
         for row in rows:
-            self._write_table(row)
+            table.add_row(row)
+        self._writeln(table.render())
 
     def _write_expected_table(self):
-        self._write_table([self._EXPECTED_HEADER] + self._result_headers)
-        self._write_table([self._TABLE_DIV] * (1 + len(self._result_headers)))
+        table = MdTable([self._EXPECTED_HEADER, *self._result_headers])
         for exp_name in self._expected_headers:
             table_row = [exp_name]
             for result in self._result_headers:
                 expected = self._expecteds.get(exp_name, {})
                 table_row.append(str(expected.get(result, 0)))
-            self._write_table(table_row)
+            table.add_row(table_row)
+        self._writeln(table.render())
 
     def _write_result_table(self):
-        self._write_table(self._SUMMARY_HEADERS)
-        self._write_table([self._TABLE_DIV] * len(self._SUMMARY_HEADERS))
+        table = MdTable(self._SUMMARY_HEADERS)
         for _, result in sorted(self._results.items()):
-            row = [result["result"], result["test_name"], result["category"],\
-                    result["expected"], result["result_description"]]
-            self._write_table(row)
+            table.add_row([result["result"], result["test_name"], result["category"],\
+                    result["expected"], result["result_description"]])
+        self._writeln(table.render())
 
     def _find_missing_test_results(self):
         missing = []
@@ -300,10 +314,10 @@ class ReportGenerator:
                 config = result_dict[ResultType.MODULE_CONFIG].get("modules", {}).get(test_name)
                 if config and len(config) > 0:
                     writeln(self._TEST_SUBHEADER % "Module Config")
-                    self._write_table(["Attribute", "Value"])
-                    self._write_table([self._TABLE_DIV] * 2)
+                    table = MdTable(["Attribute", "Value"])
                     for key, value in config.items():
-                        self._write_table((key, str(value)))
+                        table.add_row((key, str(value)))
+                    self._writeln(table.render())
             if result_dict.get(ResultType.EXCEPTION):
                 writeln(self._TEST_SUBHEADER % "Exceptions")
                 writeln(result_dict[ResultType.EXCEPTION])
