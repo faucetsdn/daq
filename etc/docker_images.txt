@@ -1,10 +1,10 @@
 daqf/aardvark 97fe0a197185
 daqf/default bb349ee633d6
-daqf/faucet e896690b2e3c
+daqf/faucet d58944382abf
 daqf/faux1 756f493862d3
 daqf/faux2 7846a551e8f7
 daqf/faux 201f9cacca43
-daqf/gauge a6c9a679384c
+daqf/gauge d5187bb23d30
 daqf/networking 37d2b98922d0
 daqf/switch 74008abee474
 daqf/test_bacext 8c4a94b26fc9

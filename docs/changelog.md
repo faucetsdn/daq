@@ -1,5 +1,27 @@
 # Changelog
-
+* 1.4.1
+  * Fetch before checkout (#446)
+  * Refactoring configuration mechanism (#444)
+* 1.4.0
+  * Update Faucet version to 1.9.43 (#443)
+  * Minor release docs update (#442)
+  * update techsupport to use new switchconfig names. include date-time in name of created file (#437)
+  * Physical switch config tweaks (#436)
+  * Firebase db Docs update (#433)
+  * Check for missing docker images (#435)
+  * Feature/allow port toggle (#423)
+  * Refactoring switchconfig (#426)
+  * Add switch report output (#431)
+  * Test default clean base configuration (#430)
+  * added EasyIO FW-14 to device_types (#427)
+  * enable finish_hook by default (#425)
+  * Move generated proto files out of daq/ (#424)
+  * Apply strict config checking (#422)
+  * UDMI change force_value to fix_value (#420)
+  * leave venv for mininet build  (#421)
+  * Introduce YAML config file (#418)
+  * Add password switch config (#324)
+  * Update TLS methods and tests (#362)
 * 1.3.0
   * Cisco switch power (#375)
   * Firebase data storage changes and supporting filters on UI (#395)

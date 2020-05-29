@@ -85,7 +85,7 @@ INFO:host:Finalizing report inst/report_9a02571e8f00_2018-11-06T21:20:51.txt
 
 The dynamic configuration of a test (if it is actually executed or is skipped completely),
 is controlled through the `module_config.json` file associated with the specific site install.
-See `misc/module_config.json` for an example of what this looks like. Without this entry,
+See `resources/setups/baseline/module_config.json` for an example of what this looks like. Without this entry,
 the test will be included into the runtime set of modules but not actually executed. The
 execution behavior can be altered at runtime (through the web user interface).
 
