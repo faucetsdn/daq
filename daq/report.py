@@ -27,21 +27,25 @@ class ResultType(Enum):
     ACTIVATION_LOG_PATH = "activation_log_path"
 
 class MdTable():
+    """Md table renderer"""
+
     _DIV = "---"
     _MARK = '|'
 
     def __init__(self, headers):
-       self.headers = ['', *headers, '']
-       separators = [ self._DIV for _ in headers ] 
-       self._header_separator = self._MARK.join(['', *separators ,''])
-       self.rows = []
+        self.headers = ['', *headers, '']
+        separators = [self._DIV for _ in headers]
+        self._header_separator = self._MARK.join(['', *separators, ''])
+        self.rows = []
 
     def add_row(self, row):
-       self.rows.append(['', *map(str.strip, row), ''])
-     
+        """Add one row to the md table"""
+        self.rows.append(['', *map(str.strip, row), ''])
+
     def render(self):
-        table_str = "%s\n%s\n" % (self._MARK.join(self.headers), self._header_separator) 
-        return table_str + "\n".join(map(lambda row: self._MARK.join(row), self.rows))
+        """returns a string for md"""
+        table_str = "%s\n%s\n" % (self._MARK.join(self.headers), self._header_separator)
+        return table_str + "\n".join([self._MARK.join(row) for row in self.rows])
 
 class ReportGenerator:
     """Generate a report for device qualification"""
@@ -280,7 +284,7 @@ class ReportGenerator:
             table.add_row([result["result"], result["test_name"], result["category"],\
                     result["expected"], result["result_description"]])
         self._writeln(table.render())
-        
+
     def _find_missing_test_results(self):
         missing = []
         if 'tests' in self._module_config:
