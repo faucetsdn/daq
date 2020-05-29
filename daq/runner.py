@@ -154,7 +154,7 @@ class DAQRunner:
             LOGGER.info('Stopping network...')
             self.network.stop()
         except Exception as e:
-            LOGGER.error('Exception: %s', e)
+            LOGGER.error('Cleanup exception: %s', e)
         if self.result_log:
             self.result_log.close()
             self.result_log = None
@@ -581,7 +581,7 @@ class DAQRunner:
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
-            self._port_info[target_port].host.terminate('_gateway_terminate')
+            self._port_info[target_port].host.terminate('_gateway_terminate', trigger=False)
             self.target_set_error(target_port, DaqException('terminated'))
 
     def _find_gateway_set(self, target_port):
