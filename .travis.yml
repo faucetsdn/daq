@@ -22,9 +22,9 @@ env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   jobs:
-    - DAQ_TEST=base
-    - DAQ_TEST=many
+    #- DAQ_TEST=base
+    #- DAQ_TEST=many
     - DAQ_TEST=aux
-    - DAQ_TEST=topo
-    - DAQ_TEST=modules
-    - DAQ_TEST=dhcp
+    #- DAQ_TEST=topo
+    #- DAQ_TEST=modules
+    #- DAQ_TEST=dhcp
