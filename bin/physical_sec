@@ -102,7 +102,7 @@ else
     sudo ip link set $ext_ctrl up
 fi
 
-if [ "$ext_data" != ext-ovs-sec ]; then
+if [ "$ext_data" != ext-ovs-pri ]; then
     sudo ip link set $ext_data up
 else
     echo Skipping bring-up of ovs switch interface $ext_data
