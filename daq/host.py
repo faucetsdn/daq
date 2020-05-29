@@ -317,7 +317,6 @@ class ConnectedHost:
 
     def _main_module_timeout_handler(self):
         self.test_host.terminate()
-        self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
     def heartbeat(self):
@@ -536,8 +535,8 @@ class ConnectedHost:
                 self.timeout_handler = self._main_module_timeout_handler
                 self._docker_test(self.remaining_tests.pop(0))
             else:
-                self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
+                self.timeout_handler = self._aux_module_timeout_handler
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self.test_name = None
                 self.record_result('finish', state=MODE.FINE, report=self._report.path)
@@ -610,7 +609,6 @@ class ConnectedHost:
                       (self._finish_hook_script, finish_dir, finish_dir))
 
     def _docker_callback(self, return_code=None, exception=None):
-        self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
         LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
@@ -631,7 +629,9 @@ class ConnectedHost:
                            **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        assert self.test_host, '_docker_callback with no test_host defined'
         self.test_host = None
+        self.timeout_handler = None
         self._run_next_test()
 
     def _set_module_config(self, loaded_config):
