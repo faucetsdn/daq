@@ -312,7 +312,8 @@ class DAQRunner:
         LOGGER.debug('Active target sets/state: %s', states)
 
     def _terminate(self):
-        _ = [host.terminate('_terminate') for _, host in self._get_port_hosts()]
+        for target_port in self._get_running_ports():
+            self.target_set_error(target_port, DaqException('terminated'))
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -580,7 +581,6 @@ class DAQRunner:
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
             self.target_set_error(target_port, DaqException('terminated'))
-            # self._target_set_cancel(target_port)
 
     def _find_gateway_set(self, target_port):
         if target_port not in self._gateway_sets:
