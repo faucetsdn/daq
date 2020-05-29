@@ -13,9 +13,15 @@
     "physical_tag": {
       "asset": {
         "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
-        "name": "US-SFO-XYY_AHU"
+        "name": "US-SFO-XYY_AHU-32"
       }
     }
+  },
+  "cloud": {
+    "auth_type": "RS256",
+  },
+  "gateway": {
+    "proxy_ids": ["AHU-22"]
   },
   "pointset": {
     "points": {
@@ -24,9 +30,11 @@
       }
     }
   },
-  "gateway": {
-    "gateway_id": "GAT-12",
-    "protocol": "bacnet",
-    "local_id": "*82AE98"
+  "localnet": {
+    "subsystem": {
+      "bacnet": {
+        "local_id": "0x991132ec"
+      }
+    }
   }
 }

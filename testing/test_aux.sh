@@ -15,17 +15,27 @@ function make_pubber {
     device=$1
     faux=$2
     fail=$3
-    mkdir -p inst/faux/$faux/local/
-    cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
-    cat <<EOF > inst/faux/$faux/local/pubber.json
+    gateway=$4
+    local_dir=inst/faux/$faux/local/
+    echo Creating $device with $fail/$gateway in $local_dir
+    mkdir -p $local_dir
+    if [ "$gateway" == null ]; then
+        cp misc/test_site/devices/$device/rsa_private.pkcs8 $local_dir
+    else
+        gateway_dir=$(sh -c "echo $gateway")
+        cp misc/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
+    fi
+    cat <<EOF > $local_dir/pubber.json
   {
     "projectId": $project_id,
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
     "extraField": $fail,
+    "gatewayId": $gateway,
     "deviceId": "$device"
   }
 EOF
+  ls -l $local_dir
 }
 
 function capture_test_results {
@@ -71,12 +81,15 @@ if [ -f $cred_file ]; then
     registry_id=`jq .registry_id $cloud_file`
     cloud_region=`jq .cloud_region $cloud_file`
 
-    make_pubber AHU-1 daq-faux-2 null
-    make_pubber SNS-4 daq-faux-3 1234
+    make_pubber AHU-1 daq-faux-2 null null
+    make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
     bin/registrar
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
+    fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
+    find inst/test_site -name errors.json | tee -a $GCP_RESULTS
+    more inst/test_site/devices/*/errors.json
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.

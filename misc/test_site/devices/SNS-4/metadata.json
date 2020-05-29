@@ -24,7 +24,10 @@
       }
     }
   },
+  "gateway": {
+    "gateway_id": "GAT-123"
+  },
   "version": 1,
-  "timestamp": "2020-04-29T05:15:44.709+00:00",
-  "hash": "b7a3d1b8"
+  "timestamp": "2020-05-01T13:39:07Z",
+  "hash": "6073d78f"
 }

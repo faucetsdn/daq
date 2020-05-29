@@ -24,7 +24,13 @@
       }
     }
   },
+  "gateway": {
+    "proxy_ids": [ "SNS-4", "AHU-22" ]
+  },
+  "cloud": {
+    "auth_type": "RS256"
+  },
   "version": 1,
-  "timestamp": "2020-04-29T05:15:44.705+00:00",
-  "hash": "2880717a"
+  "timestamp": "2020-05-01T13:39:07Z",
+  "hash": "f8995442"
 }

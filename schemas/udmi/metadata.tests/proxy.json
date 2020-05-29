@@ -17,11 +17,23 @@
       }
     }
   },
+  "localnet": {
+    "subsystem": {
+      "bacnet": {
+        "local_id": "0x82eecd"
+      }
+    }
+  },
   "pointset": {
     "points": {
       "return_air_temperature_sensor": {
-        "units": "Degrees-Celsius"
+        "units": "Degrees-Celsius",
+        "ref": "BV23.present_value"
       }
     }
+  },
+  "gateway": {
+    "subsystem": "bacnet",
+    "gateway_id": "GAT-123"
   }
 }

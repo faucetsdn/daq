@@ -217,21 +217,19 @@ function getDeviceDoc(registryId, deviceId) {
   });
 }
 
-exports.device_telemetry = functions.pubsub.topic('target').onPublish((event) => {
+exports.device_target = functions.pubsub.topic('target').onPublish((event) => {
   const registryId = event.attributes.deviceRegistryId;
   const deviceId = event.attributes.deviceId;
+  const subFolder = event.attributes.subFolder || 'unknown';
   const base64 = event.data;
   const msgString = Buffer.from(base64, 'base64').toString();
   const msgObject = JSON.parse(msgString);
 
-  getDeviceDoc(registryId, deviceId).then((deviceDoc) => {
-    telemetryDoc = deviceDoc.collection('telemetry').doc('latest');
-    return Promise.all(msgObject.data.map((data) => {
-      telemetryDoc.set(data);
-    }));
-  }).then(() => {
-    console.log(deviceId, msgObject);
-  });
+  console.log(deviceId, subFolder, msgObject);
+
+  device_doc = getDeviceDoc(registryId, deviceId).collection('events').doc(subFolder);
+
+  msgObject.data.forEach((data) => device_doc.set(data))
 });
 
 exports.device_state = functions.pubsub.topic('state').onPublish((event) => {
@@ -296,7 +294,6 @@ function publishPubsubMessage(topicName, data, attributes) {
 
   return pubsub
     .topic(topicName)
-    .publisher()
     .publish(dataBuffer, attributes)
     .then(messageId => {
       console.debug(`Message ${messageId} published to ${topicName}.`);
