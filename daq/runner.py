@@ -312,7 +312,7 @@ class DAQRunner:
         LOGGER.debug('Active target sets/state: %s', states)
 
     def _terminate(self):
-        _ = [host.terminate('_terminate', trigger=False) for _, host in self._get_port_hosts()]
+        _ = [host.terminate('_terminate') for _, host in self._get_port_hosts()]
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
