@@ -18,7 +18,7 @@
     }
   },
   "cloud": {
-    "auth_type": "RSA_PEM",
+    "auth_type": "RS256",
   },
   "gateway": {
     "proxy_ids": ["AHU-22"]
