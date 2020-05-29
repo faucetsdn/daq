@@ -86,11 +86,10 @@ if [ -f $cred_file ]; then
 
     bin/registrar
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
-    find inst/test_site -name metadata_norm.json | tee -a $GCP_RESULTS
+    echo | tee -a $GCP_RESULTS
+    fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
     find inst/test_site -name errors.json | tee -a $GCP_RESULTS
     more inst/test_site/devices/*/errors.json
-
-    echo | tee -a $GCP_RESULTS
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.
