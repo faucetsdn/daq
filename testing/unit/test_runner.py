@@ -5,7 +5,7 @@ import sys
 import os
 import time
 from unittest.mock import MagicMock, mock_open, patch
-from daq.runner import DAQRunner, configurator
+from daq.runner import DAQRunner, configurator, PortInfo
 from daq.host import ConnectedHost
 import network
 
@@ -43,14 +43,16 @@ class TestRunner(unittest.TestCase):
     def test_reap_stale_ports(self):
         """Test port flap timeout config override"""
         self.runner.target_set_error = MagicMock()
-        self.runner._port_info = {1: {}}
+        self.runner._port_info = {1: PortInfo()}
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
         ConnectedHost.__init__ = MagicMock(return_value=None)
         host = ConnectedHost()
         host.test_name = "test_test"
-        self.runner._port_info = {1: {"flapping_start": time.time() - 1,
-                                      "host": host}}
+        port_info = PortInfo()
+        port_info.flapping_start = time.time() - 1
+        port_info.host = host
+        self.runner._port_info = {1: port_info}
 
         host.get_port_flap_timeout = MagicMock(return_value=10000)
         self.runner._reap_stale_ports()
