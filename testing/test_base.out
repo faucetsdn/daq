@@ -2,7 +2,7 @@ Running testing/test_base.sh
 Base Tests
 %%%%%%%%%%%%%%%%%%%%%% Base tests
 DAQ result code 1
-01: []
+01: ['01:hold:DaqException']
 # Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
@@ -121,6 +121,13 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+
+## Module hold
+
+
+#### Exceptions
+
+terminated
 
 ## Report complete
 
