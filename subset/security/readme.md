@@ -5,7 +5,7 @@ The TLS test attempts to verify various versions of TLS support.  Separate conne
  
  ### Testing procedure
  After establishing connections to devices, the test will proceed to validate the available certificates with the following criteria:
- 1. The certificat is in the x509 format
+ 1. The certificate is in the x509 format
  2. The public key length is at least 2048.  Currently handles both RSA and DSA public key formats.
  3. The certificate is not expired and active for the current date.
 The cipher suite used is also checked but does not currently affect the outcome of the results.  Currently the expected cipher suites are ECDH and ECSA.  If these are not present, a warning message will be logged in the activate.log of the switch node.
@@ -43,3 +43,17 @@ The functional test code is included in the `tlstest/src/main/java` folder.
  - pass -> If the device responds to a connection with TLS 1.3 support and provides a valid certificate.
  - fail -> If the device responds to a connection with TLS 1.3 support and provides an invalid certificate.
  - skip -> If no connection to the device can be established.
+ 
+## test_password
+
+### Testing Procedure:
+1. Use Nmap to check if a specific port is open, and whether the target host is down.
+2. If target port is open, and target host is not down, then start the brute force.
+3. Run the brute force command for hydra, and collect its output.
+4. Depending on the messages seen on the output, the test will return a specific result case.
+ - PASS: Test was able to run the brute force but not guess the username/password pairs.
+ - FAIL: Test was able to run the brute force and guess the username/password pairs.
+ - SKIP: Test was not able to run a brute force successfully due to a variety of issues. In this case:
+   - Target host is down.
+   - Target protocol is down.
+   - Hydra runs into a runtime error, which could be due to multiple reasons e.g. connection issues, threads unresponsive etc...

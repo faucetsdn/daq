@@ -7,7 +7,7 @@
 # How does it work?
 # Is mac oui faux device oui or not?
 # If yes:
-#   Use the existing faux dictionary and copy it as the output dictionary.
+#   Use the existing faux dictionary (used for testing/debugging) and copy it as the output dictionary.
 # If no:
 #   Retrieve the manufacturer defaults .csv dictionary file, and the two colon separated dictionaries for ssh/telnet.
 #   For the csv file, convert each line into a username:password pair, append them to the temp file.
@@ -50,7 +50,7 @@ function create_dictionary() {
   if [ -f $1 ]; then
     rm $1
   fi
-  
+
   if [ -f $2 ]; then
     rm $2
   fi
@@ -105,8 +105,7 @@ function append_colon_separated_file_to_output_dictionary() {
   cat $2 >> $1
 }
 
-# Removes duplicates, empty lines and sorts temporary dictionary, saving into the output dictionary. Also removes
-# some characters which weirdly cause hydra to find invalid passwords.
+# Removes duplicates, empty lines and sorts temporary dictionary, saving into the output dictionary.
 # $1 Temporary dictionary file
 # $2 Output dictionary file
 function clean_output_dictionary() {
