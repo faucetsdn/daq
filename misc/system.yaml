@@ -2,12 +2,20 @@
 # Base configuration file for DAQ.
 #
 # This setup will create and test one faux device. To specify a real USB
-# adapter, modify the intf_names entry with the appripriate interface name(s).
+# adapter, modify the interfaces entry with the appripriate interface name(s).
 # The startup_cmds line can then be commented out to prevent the (unnecessary)
 # startup of the faux test device.
 
 # Description for dashboard.
 site_description: "Default Configuration"
+
+# Default switch configuration.
+switch_setup:
+  of_dpid: 2
+  uplink_port: 7
+
+# Time to let the network settle after some operations.
+settle_sec: 5
 
 # Default time to monitor before starting tests.
 monitor_scan_sec: 30
@@ -15,8 +23,11 @@ monitor_scan_sec: 30
 # default timeout for tests, or 0 to disable.
 default_timeout_sec: 350
 
+# default time between port disconnect and host tests shutdown
+port_flap_timeout_sec: 5
+
 # Default base module configuration file.
-base_conf: misc/module_config.json
+base_conf: resources/setups/baseline/module_config.json
 
 # Directory of site-configuration data, including devices.
 site_path: local/site/

@@ -187,11 +187,15 @@
                 </li>
               
                 <li>
-                  <a href="#DaqConfig.StartupEntry"><span class="badge">M</span>DaqConfig.StartupEntry</a>
+                  <a href="#DaqConfig.InterfacesEntry"><span class="badge">M</span>DaqConfig.InterfacesEntry</a>
                 </li>
               
                 <li>
-                  <a href="#StartupInfo"><span class="badge">M</span>StartupInfo</a>
+                  <a href="#Interface"><span class="badge">M</span>Interface</a>
+                </li>
+              
+                <li>
+                  <a href="#SwitchSetup"><span class="badge">M</span>SwitchSetup</a>
                 </li>
               
               
@@ -293,66 +297,10 @@
                 </tr>
               
                 <tr>
-                  <td>ext_ctrl</td>
-                  <td><a href="#string">string</a></td>
+                  <td>switch_setup</td>
+                  <td><a href="#SwitchSetup">SwitchSetup</a></td>
                   <td></td>
-                  <td><p>Interface name for switch control plane </p></td>
-                </tr>
-              
-                <tr>
-                  <td>ext_ofip</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>IP address and subnet for control plane interface </p></td>
-                </tr>
-              
-                <tr>
-                  <td>ext_ofpt</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Port of open flow controller </p></td>
-                </tr>
-              
-                <tr>
-                  <td>ext_addr</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>IP address of external switch. </p></td>
-                </tr>
-              
-                <tr>
-                  <td>ext_loip</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>IP address template and subnet for module ip addresses </p></td>
-                </tr>
-              
-                <tr>
-                  <td>ext_dpid</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Dataplane id of external OpenFlow switch </p></td>
-                </tr>
-              
-                <tr>
-                  <td>ext_intf</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Interface name for external switch data plane </p></td>
-                </tr>
-              
-                <tr>
-                  <td>sec_port</td>
-                  <td><a href="#int32">int32</a></td>
-                  <td></td>
-                  <td><p>Upstream dataplane port from the external (secondary) switch. </p></td>
-                </tr>
-              
-                <tr>
-                  <td>intf_names</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>CSV separated list of names to assign to external switch interfaces. </p></td>
+                  <td><p>Access switch setup information </p></td>
                 </tr>
               
                 <tr>
@@ -517,31 +465,10 @@
                 </tr>
               
                 <tr>
-                  <td>startup</td>
-                  <td><a href="#DaqConfig.StartupEntry">DaqConfig.StartupEntry</a></td>
+                  <td>interfaces</td>
+                  <td><a href="#DaqConfig.InterfacesEntry">DaqConfig.InterfacesEntry</a></td>
                   <td>repeated</td>
-                  <td><p>Startup configuration options. </p></td>
-                </tr>
-              
-                <tr>
-                  <td>switch_model</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Switch model </p></td>
-                </tr>
-              
-                <tr>
-                  <td>switch_username</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Switch connect username </p></td>
-                </tr>
-              
-                <tr>
-                  <td>switch_password</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Switch connect password </p></td>
+                  <td><p>Direct connect interfaces. </p></td>
                 </tr>
               
                 <tr>
@@ -549,6 +476,13 @@
                   <td><a href="#DaqConfig.FailModuleEntry">DaqConfig.FailModuleEntry</a></td>
                   <td>repeated</td>
                   <td><p>Failure testing triggers </p></td>
+                </tr>
+              
+                <tr>
+                  <td>port_flap_timeout_sec</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Set time between port disconnect and host tests shutdown </p></td>
                 </tr>
               
             </tbody>
@@ -589,7 +523,7 @@
 
         
       
-        <h3 id="DaqConfig.StartupEntry">DaqConfig.StartupEntry</h3>
+        <h3 id="DaqConfig.InterfacesEntry">DaqConfig.InterfacesEntry</h3>
         <p></p>
 
         
@@ -608,7 +542,7 @@
               
                 <tr>
                   <td>value</td>
-                  <td><a href="#StartupInfo">StartupInfo</a></td>
+                  <td><a href="#Interface">Interface</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -620,8 +554,8 @@
 
         
       
-        <h3 id="StartupInfo">StartupInfo</h3>
-        <p></p>
+        <h3 id="Interface">Interface</h3>
+        <p>Information for faux containers.</p>
 
         
           <table class="field-table">
@@ -634,7 +568,101 @@
                   <td>opts</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Startup command line options. </p></td>
+                  <td><p>Faux startup command line options. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SwitchSetup">SwitchSetup</h3>
+        <p>System configuraiton of the access switch. This is used by the system</p><p>to setup and configure the switch itself.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>ctrl_intf</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Interface name for switch control plane </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ip_addr</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>IP address of external switch. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>uplink_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Dataplane uplink port </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lo_port</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Local port of open flow controller </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lo_addr</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>IP address and subnet for local control plane interface </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mods_addr</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>IP address template and subnet for module ip addresses </p></td>
+                </tr>
+              
+                <tr>
+                  <td>of_dpid</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Dataplane id of external OpenFlow switch </p></td>
+                </tr>
+              
+                <tr>
+                  <td>data_intf</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Interface name for external switch data plane </p></td>
+                </tr>
+              
+                <tr>
+                  <td>model</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Switch model </p></td>
+                </tr>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Switch connect username </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Switch connect password </p></td>
                 </tr>
               
             </tbody>

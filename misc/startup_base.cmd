@@ -1,1 +1,1 @@
-autostart cmd/faux $startup_faux_opts
+autostart cmd/faux $interfaces_faux_opts

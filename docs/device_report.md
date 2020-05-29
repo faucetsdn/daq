@@ -61,18 +61,18 @@ Overall device result FAIL
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
-|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
-|skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|connection.port_speed|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|poe.negotiation|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|poe.power|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|poe.support|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
+|skip|connection.port_link|Other|Other|No local IP has been set, check system config|
+|skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
+|skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
+|skip|poe.power|Other|Other|No local IP has been set, check system config|
+|skip|poe.support|Other|Other|No local IP has been set, check system config|
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
@@ -134,11 +134,11 @@ RESULT pass base.startup.dhcp
 --------------------
 base.switch.ping
 --------------------
-Attempt to ping the OpenFlow compatible switch configured in system.conf
+Attempt to ping access switch (if configured)
 --------------------
 See log above
 --------------------
-RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+RESULT skip base.switch.ping No local IP has been set, check system config
 
 --------------------
 base.target.ping
@@ -217,7 +217,7 @@ Connect the device to the network switch. Check the device and the switch for th
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_link No local IP has been set, check ext_loip in system.conf
+RESULT skip connection.port_link No local IP has been set, check system config
 
 --------------------
 connection.port_speed
@@ -226,7 +226,7 @@ Verify the device auto-negotiates connection speed
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_speed No local IP has been set, check ext_loip in system.conf
+RESULT skip connection.port_speed No local IP has been set, check system config
 
 --------------------
 connection.port_duplex
@@ -235,7 +235,7 @@ Verify the device supports full duplex
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_duplex No local IP has been set, check ext_loip in system.conf
+RESULT skip connection.port_duplex No local IP has been set, check system config
 
 --------------------
 poe.power
@@ -244,7 +244,7 @@ Verify that the device draws less than the maximum power allocated by the port. 
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.power No local IP has been set, check ext_loip in system.conf
+RESULT skip poe.power No local IP has been set, check system config
 
 --------------------
 poe.negotiation
@@ -253,7 +253,7 @@ Verify the device autonegotiates power requirements
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.negotiation No local IP has been set, check ext_loip in system.conf
+RESULT skip poe.negotiation No local IP has been set, check system config
 
 --------------------
 poe.support
@@ -262,7 +262,7 @@ Verify if the device supports PoE
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.support No local IP has been set, check ext_loip in system.conf
+RESULT skip poe.support No local IP has been set, check system config
 
 ```
 

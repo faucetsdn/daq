@@ -8,14 +8,17 @@ FAUCET_SOCK=faucet_event.sock
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
-ext_ofpt=6653
-gauge_pt=6654
+faucet_pt=6653
 prom_pt=
 docker_volumes=
 port_opts=
 
 cd $ROOT
 source misc/config_base.sh
+
+if [ -n "$switch_setup_lo_port" ]; then
+    faucet_pt=$switch_setup_lo_port
+fi
 
 if [ "$1" == "local" ]; then
     docker_volumes="-v $ROOT/faucet/faucet:/usr/lib/python3.6/site-packages/faucet"
@@ -36,7 +39,7 @@ if [ -n "$1" ]; then
 fi
 
 if [ -n "$1" ]; then
-    ext_ofpt=$1
+    faucet_pt=$1
     shift
 fi
 
@@ -45,7 +48,7 @@ if [ -n "$1" ]; then
     shift
 fi
 
-echo Creating $IMAGE instance $CONTAINER on port $ext_ofpt in $INSTDIR
+echo Creating $IMAGE instance $CONTAINER on port $faucet_pt in $INSTDIR
 
 mkdir -p $INSTDIR
 
@@ -71,7 +74,7 @@ if [ -n "$prom_pt" ]; then
     port_opts="-p $prom_pt:9303"
 fi
 
-cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $port_opts $IMAGE)
+cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $faucet_pt:6653 $port_opts $IMAGE)
 echo Container $CONTAINER started as $cid
 
 while [ -n "$FAUCET_SOCK" -a ! -e $INSTDIR/$FAUCET_SOCK ]; do

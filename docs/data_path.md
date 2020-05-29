@@ -17,8 +17,8 @@ the logs.
 
 ## Device-port
 
-USB interface or virtual: `tcpdump` on Linux interface, as specified by the `intf_names`
-configuration parameter.
+USB interface or virtual: `tcpdump` on Linux interface, as specified by the `interfaces`
+configuration dictionary.
 
 Using physical switch: Can't do much about it, since it's local to the physical switch.
 
@@ -49,7 +49,7 @@ runtime option, then the system will create and <b>k</b>eep (forever) a test con
 
 # Sample path
 
-Setup with virtual switching using `intf_names=faux`:
+Setup with virtual switching using `interfaces.faux.opts=`:
 <pre>
 ~/daq$ <b>ip link show faux</b>
 2209: faux@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master ovs-system state UP mode DEFAULT group default qlen 1000

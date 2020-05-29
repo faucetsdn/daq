@@ -6,7 +6,7 @@ mkdir -p $out_dir
 ip addr > $out_dir/ip_addr.txt
 route -n > $out_dir/route.txt
 arp -n > $out_dir/arp.txt
-ovs-vsctl show > ovs_vsctl.txt
+ovs-vsctl show > $out_dir/ovs_vsctl.txt
 
 function dump {
     ovs-ofctl show $1 > $out_dir/$1.ofctl

@@ -14,8 +14,11 @@ EOF
 cat <<EOF > local/system.conf
 source misc/system.conf 
 site_description="Multi-Device Configuration"
-sec_port=5
-intf_names=faux-1,faux-2,faux-3,faux-4
+switch_setup.uplink_port=5
+interfaces.faux-1.opts=
+interfaces.faux-2.opts=
+interfaces.faux-3.opts=
+interfaces.faux-4.opts=
 monitor_scan_sec=1
 startup_cmds=local/startup.cmd
 EOF
