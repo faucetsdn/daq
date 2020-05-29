@@ -52,9 +52,10 @@ class LocalDevice {
   private static final String PHYSICAL_TAG_FORMAT = "%s_%s";
   private static final String PHYSICAL_TAG_ERROR = "Physical asset name %s does not match expected %s";
 
-  private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON, NORMALIZED_JSON);
+  private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
   private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
-  private static final Set<String> OPTIONAL_FILES = ImmutableSet.of(GENERATED_CONFIG_JSON, DEVICE_ERRORS_JSON);
+  private static final Set<String> OPTIONAL_FILES = ImmutableSet.of(
+      GENERATED_CONFIG_JSON, DEVICE_ERRORS_JSON, NORMALIZED_JSON);
 
   private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen %s %s";
   public static final String METADATA_SUBFOLDER = "metadata";

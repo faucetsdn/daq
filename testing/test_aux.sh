@@ -86,6 +86,10 @@ if [ -f $cred_file ]; then
 
     bin/registrar
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
+    find inst/test_site -name metadata_norm.json | tee -a $GCP_RESULTS
+    find inst/test_site -name errors.json | tee -a $GCP_RESULTS
+    more inst/test_site/devices/*/errors.json
+
     echo | tee -a $GCP_RESULTS
 else
     echo No gcp service account defined, as required for cloud-based tests.
@@ -152,10 +156,6 @@ fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 echo Redacted docs diff | tee -a $TEST_RESULTS
 (diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \
     | tee -a $TEST_RESULTS
-
-# Cloud diagnostics, if any...
-more inst/test_site/devices/*/errors.json
-find . -name metadata_norm.json
 
 # Make sure there's no file pollution from the test run.
 git status --porcelain | tee -a $TEST_RESULTS
