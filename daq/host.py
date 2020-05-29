@@ -366,6 +366,7 @@ class ConnectedHost:
             try:
                 self.test_host.terminate()
                 self.test_host = None
+                self.timeout_handler = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)

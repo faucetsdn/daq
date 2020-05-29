@@ -573,9 +573,7 @@ class DAQRunner:
         return gateway, ready_devices
 
     def _terminate_gateway_set(self, gateway_set):
-        if gateway_set not in self._gateway_sets:
-            LOGGER.warning('Gateway set %s not found in %s', gateway_set, self._gateway_sets)
-            return
+        assert gateway_set in self._gateway_sets, 'Gateway set %s not found'
         group_name = self._gateway_sets[gateway_set]
         gateway = self._device_groups[group_name]
         ports = [target['port'] for target in gateway.get_targets()]
@@ -614,7 +612,6 @@ class DAQRunner:
         running = bool(target_port in self._port_info and self._port_info[target_port].host)
         LOGGER.error('Target port %d running %s exception: %s', target_port, running, exception)
         LOGGER.exception(exception)
-        self._detach_gateway(target_port)
         if running:
             target_host = self._port_info[target_port].host
             target_host.record_result(target_host.test_name, exception=exception)
@@ -627,6 +624,7 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
+            self._detach_gateway(target_port)
 
     def target_set_complete(self, target_port, reason):
         """Handle completion of a target_set"""
