@@ -102,11 +102,14 @@ else
     sudo ip link set $ext_ctrl up
 fi
 
-# Might not exist yet, if it's part of the autostart sequence.
-sudo ip link set $ext_data up || true
+if [ "$ext_data" != ext-ovs-pri ]; then
+    sudo ip link set $ext_data up
+else
+    echo Skipping bring-up of ovs switch interface $ext_data
+fi
 
 if [ -z "$ext_ctrl" ]; then
-    echo No control plane interface, skipping configuration.
+    echo No control plane interface defined, skipping configuration.
 else
     echo Bridging $ext_ctrl to $ctrl_bridge
     sudo ovs-vsctl add-port $ctrl_bridge $ext_ctrl
@@ -124,4 +127,4 @@ fi
 echo DAQ autoclean ip link del $ctrl_pri
 echo DAQ autoclean ip link del $ctrl_swx
 echo DAQ autoclean ovs-vsctl --if-exists del-br $ctrl_bridge
-echo Done with local switch setup.
+echo Done with switch setup.
