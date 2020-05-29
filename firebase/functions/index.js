@@ -205,13 +205,16 @@ function handleHeartbeat(origin, message) {
   ]);
 }
 
-function get_device_doc(registryId, deviceId) {
-  const timestr = new Date().toJSON();
-  const reg = db.collection('registries').doc(registryId);
-  reg.set({'updated': timestr});
-  const dev = reg.collection('devices').doc(deviceId);
-  dev.set({'updated': timestr});
-  return dev;
+function getDeviceDoc(registryId, deviceId) {
+  const timestr = new Date().toTimeString();
+  const reg = db.collection('registry').doc(registryId);
+  const dev = reg.collection('device').doc(deviceId);
+  return Promise.all([
+    reg.set({ 'updated': timestr }),
+    dev.set({ 'updated': timestr })
+  ]).then(() => {
+    return dev;
+  });
 }
 
 exports.device_target = functions.pubsub.topic('target').onPublish((event) => {
@@ -223,8 +226,8 @@ exports.device_target = functions.pubsub.topic('target').onPublish((event) => {
   const msgObject = JSON.parse(msgString);
 
   console.log(deviceId, subFolder, msgObject);
-  
-  device_doc = get_device_doc(registryId, deviceId).collection('events').doc(subFolder);
+
+  device_doc = getDeviceDoc(registryId, deviceId).collection('events').doc(subFolder);
 
   msgObject.data.forEach((data) => device_doc.set(data))
 });
