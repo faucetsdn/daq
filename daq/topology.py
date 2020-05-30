@@ -36,6 +36,7 @@ class FaucetTopology:
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
     _VLAN_BASE = 1000
+    PRI_DPID = 1
     PRI_STACK_PORT = 1
     _NO_VLAN = "0x0000/0x1000"
 
@@ -225,7 +226,7 @@ class FaucetTopology:
 
     def _make_pri_topology(self):
         pri_dp = {}
-        pri_dp['dp_id'] = 1
+        pri_dp['dp_id'] = self.PRI_DPID
         pri_dp['name'] = self.pri_name
         pri_dp['stack'] = {'priority':1}
         pri_dp['interfaces'] = self._make_pri_interfaces()
