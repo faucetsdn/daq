@@ -5,4 +5,4 @@ cd $ROOT
 
 source venv/bin/activate
 
-python3 daq/gcp.py register_offenders=true local/system.conf
+python daq/gcp.py register_offenders=true local/system.yaml

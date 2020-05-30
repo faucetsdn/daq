@@ -4,14 +4,6 @@
   "system": {
     "min_loglevel": 500
   },
-  "gateway": {
-    "devices": {
-      "AHU-123": {
-	"protocol": "bacnet",
-        "local_id": "327412"
-      }
-    }
-  },
   "pointset": {
     "sample_limit_sec": 2,
     "sample_rate_sec": 500,

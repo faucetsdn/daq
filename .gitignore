@@ -5,6 +5,8 @@
 .build_built
 .project
 
+daq-*.tar.bz2
+
 protoc-gen-doc/
 
 firebase/public/firebase_config.js
@@ -140,4 +142,3 @@ ENV/
 testing/*dream*
 *.swp
 *.swo
-techsupport.tar.bz2

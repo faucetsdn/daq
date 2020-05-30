@@ -1,7 +1,0 @@
-Validating 1 schemas
-  Validating 1 files against properties.json
-    Against input properties.tests/empty.json
-      #: 3 schema violations found
-        #: required key [connect] not found
-        #: required key [key_type] not found
-        #: required key [version] not found
