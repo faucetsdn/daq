@@ -14,7 +14,8 @@
       "asset": {
         "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
         "site": "US-SFO-XYY",
-        "name": "AHU-1_extention11-optional"
+        "suffix": "extention11-optional",
+        "name": "AHU-1"
       }
     }
   },
