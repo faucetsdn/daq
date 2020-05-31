@@ -8,7 +8,8 @@
     },
     "physical_tag": {
       "asset": {
-        "name": "US-SFO-XYY_AHU-A01_Noope!"
+        "site": "US-SFO-XYY_Noope!",
+        "name": "US-SFO-XYY_AHU-A01"
       }
     }
   },

@@ -49,8 +49,7 @@ class LocalDevice {
   private static final String RSA_CERT_PEM = "rsa_cert.pem";
   private static final String RSA_PRIVATE_PEM = "rsa_private.pem";
   private static final String RSA_PRIVATE_PKCS8 = "rsa_private.pkcs8";
-  private static final String PHYSICAL_TAG_FORMAT = "%s_%s";
-  private static final String PHYSICAL_TAG_ERROR = "Physical asset name %s does not match expected %s";
+  private static final String PHYSICAL_TAG_ERROR = "Physical tag %s %s does not match expected %s";
 
   private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
   private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
@@ -308,17 +307,19 @@ class LocalDevice {
   }
 
   private String fakeProjectId() {
-    return metadata.system.location.site_name.toLowerCase();
+    return metadata.system.location.site.toLowerCase();
   }
 
-  private void checkConsistency(String expected_site_name) {
-    String siteName = metadata.system.location.site_name;
-    String desiredTag = String.format(PHYSICAL_TAG_FORMAT, siteName, deviceId);
+  private void checkConsistency(String expectedSite) {
+    String siteName = metadata.system.location.site;
+    String assetSite = metadata.system.physical_tag.asset.site;
     String assetName = metadata.system.physical_tag.asset.name;
-    Preconditions.checkState(desiredTag.equals(assetName),
-        String.format(PHYSICAL_TAG_ERROR, assetName, desiredTag));
-    String errorMessage = "Site name " + siteName + " is not expected " + expected_site_name;
-    Preconditions.checkState(expected_site_name.equals(siteName), errorMessage);
+    Preconditions.checkState(expectedSite.equals(siteName),
+        String.format(PHYSICAL_TAG_ERROR, "location", siteName, expectedSite));
+    Preconditions.checkState(expectedSite.equals(assetSite),
+        String.format(PHYSICAL_TAG_ERROR, "site", assetSite, expectedSite));
+    Preconditions.checkState(deviceId.equals(assetName),
+        String.format(PHYSICAL_TAG_ERROR, "name", assetName, deviceId));
   }
 
   private String makeNumId(UdmiSchema.Envelope envelope) {

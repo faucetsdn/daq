@@ -14,13 +14,14 @@
   },
   "system": {
     "location": {
-      "site_name": "ZZ-TRI-FECTA",
+      "site": "ZZ-TRI-FECTA",
       "section": "2-3N8C"
     },
     "physical_tag": {
       "asset": {
         "guid": "drw://TBC",
-        "name": "ZZ-TRI-FECTA_GAT-123"
+        "site": "ZZ-TRI-FECTA",
+        "name": "GAT-123"
       }
     }
   },
