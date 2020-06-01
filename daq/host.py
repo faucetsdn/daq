@@ -589,8 +589,10 @@ class ConnectedHost:
             test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
             self.test_host = test_host
         except Exception as e:
-            # TODO: unallocate test port if allocated
-            # TODO: Stop monitor scan if started
+            if self.test_port:
+                self.runner.release_test_port(self.target_port, self.test_port)
+                self.test_port = None
+            self._monitor_cleanup()
             raise e
 
     def _get_switch_config(self):
