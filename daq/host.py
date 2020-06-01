@@ -558,7 +558,7 @@ class ConnectedHost:
         self.test_name = test_name
         self.test_start = gcp.get_timestamp()
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
-        self.test_host = docker_test.DockerTest(self.runner, self.target_port,
+        test_host = docker_test.DockerTest(self.runner, self.target_port,
                                                 self.devdir, test_name)
         try:
             self.test_port = self.runner.allocate_test_port(self.target_port)
@@ -586,20 +586,19 @@ class ConnectedHost:
             self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
             self.record_result(test_name, state=MODE.EXEC)
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+            test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+            self.test_host = test_host
         except Exception as e:
             # TODO: unallocate test port if allocated
             # TODO: Stop monitor scan if started
-            self.test_host.terminate()
-            self.test_host = None
             raise e
 
     def _get_switch_config(self):
         return {
-          'switch_ip': self.switch_setup.get('ip_addr'),
-          'switch_model': self.switch_setup.get('model'),
-          'switch_username': self.switch_setup.get('username'),
-          'switch_password': self.switch_setup.get('password')
+            'switch_ip': self.switch_setup.get('ip_addr'),
+            'switch_model': self.switch_setup.get('model'),
+            'switch_username': self.switch_setup.get('username'),
+            'switch_password': self.switch_setup.get('password')
         }
 
     def _host_name(self):
