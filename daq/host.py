@@ -588,6 +588,8 @@ class ConnectedHost:
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
             self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
         except Exception as e:
+            # TODO: unallocate test port if allocated
+            # TODO: Stop monitor scan if started
             self.test_host.terminate()
             self.test_host = None
             raise e
