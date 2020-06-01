@@ -76,10 +76,10 @@ class ConnectedHost:
         self.gateway = gateway
         self.config = config
         self.switch_setup = self.config.get('switch_setup', {})
-        self.ext_loip = self.switch_setup.get('mods_addr', '').replace('@', '%d')
         self.target_port = target['port']
         self.target_mac = target['mac']
         self.fake_target = target['fake']
+        self.ext_loip = self._ext_loip()
         self.devdir = self._init_devdir()
         self.run_id = self.make_runid()
         self.scan_base = os.path.abspath(os.path.join(self.devdir, 'scans'))
@@ -117,6 +117,10 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
+
+    def _ext_loip(self):
+        setup = self.switch_setup
+        return setup.get('mods_addr') % self.test_port if 'mods_addr' in setup else None
 
     @staticmethod
     def make_runid():
