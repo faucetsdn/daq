@@ -79,7 +79,6 @@ class ConnectedHost:
         self.target_port = target['port']
         self.target_mac = target['mac']
         self.fake_target = target['fake']
-        self.ext_loip = self._ext_loip()
         self.devdir = self._init_devdir()
         self.run_id = self.make_runid()
         self.scan_base = os.path.abspath(os.path.join(self.devdir, 'scans'))
@@ -117,10 +116,6 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
-
-    def _ext_loip(self):
-        setup = self.switch_setup
-        return setup.get('mods_addr') % self.test_port if 'mods_addr' in setup else None
 
     @staticmethod
     def make_runid():
@@ -566,8 +561,11 @@ class ConnectedHost:
         self.test_host = docker_test.DockerTest(self.runner, self.target_port,
                                                 self.devdir, test_name)
         self.test_port = self.runner.allocate_test_port(self.target_port)
+        switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
+        ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
+
         params = {
-            'local_ip': self.ext_loip,
+            'local_ip': ext_loip,
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
             'target_port': str(self.target_port),
@@ -579,7 +577,7 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-        if self.ext_loip:
+        if ext_loip:
             params.update(self._get_switch_config())
 
         try:
