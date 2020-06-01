@@ -559,7 +559,7 @@ class ConnectedHost:
         self.test_start = gcp.get_timestamp()
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
         test_host = docker_test.DockerTest(self.runner, self.target_port,
-                                                self.devdir, test_name)
+                                           self.devdir, test_name)
         try:
             self.test_port = self.runner.allocate_test_port(self.target_port)
             switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
