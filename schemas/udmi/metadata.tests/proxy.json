@@ -15,8 +15,10 @@
         "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
         "site": "US-SFO-XYY",
         "name": "AHU-1",
-        "suffix": "extention11-optional"
       }
+    },
+    "auxiliary": {
+      "suffix": "extention11-optional"
     }
   },
   "localnet": {

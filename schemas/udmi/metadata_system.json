@@ -39,11 +39,12 @@
     },
     "physical_tag": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "asset": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
-            "additionalProperties": false,
             "guid": {
               "type": "string",
               "pattern": "^[a-z]+://[-0-9a-zA-Z_$]+$"
@@ -55,10 +56,6 @@
             "name": {
               "type": "string",
               "pattern": "^[A-Z]{2,6}-[0-9]{1,6}$"
-            },
-            "suffix": {
-              "type": "string",
-              "pattern": "^[a-zA-Z0-9-]+$"
             }
           },
           "required": [
@@ -70,6 +67,16 @@
       "required": [
         "asset"
       ]
+    },
+    "auxiliary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "suffix": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9-]+$"
+        }
+      }
     }
   },
   "required": [

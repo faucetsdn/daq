@@ -14,9 +14,11 @@
       "asset": {
         "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
         "site": "US-SFO-XYY",
-        "suffix": "extention11-optional",
         "name": "AHU-1"
       }
+    },
+    "auxiliary": {
+      "suffix": "extention11-optional",
     }
   },
   "pointset": {
