@@ -41,21 +41,18 @@ class DockerTest:
         self.callback = callback
         self._finish_hook = finish_hook
 
-        env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
-                                    "TARGET_IP=" + params['target_ip'],
-                                    "TARGET_MAC=" + params['target_mac'],
-                                    "GATEWAY_IP=" + params['gateway_ip'],
-                                    "GATEWAY_MAC=" + params['gateway_mac']]
-
         def opt_param(key):
-            return params.get(key) or ''
+            return params.get(key) or ''  # Substitute empty string for None
 
-        env_vars += ["LOCAL_IP=" + opt_param('local_ip'),
-                     "SWITCH_PORT=" + opt_param('target_port'),
-                     "SWITCH_IP=" + opt_param('switch_ip'),
-                     "SWITCH_MODEL=" + opt_param('switch_model'),
-                     "SWITCH_USERNAME=" + opt_param('switch_username'),
-                     "SWITCH_PASSWORD=" + opt_param('switch_password')]
+        env_vars = self.env_vars + [
+            "TARGET_NAME=" + self.host_name,
+            "TARGET_IP=" + params['target_ip'],
+            "TARGET_MAC=" + params['target_mac'],
+            "TARGET_PORT=" + opt_param('target_port'),
+            "GATEWAY_IP=" + params['gateway_ip'],
+            "GATEWAY_MAC=" + params['gateway_mac'],
+            "LOCAL_IP=" + opt_param('local_ip'),
+            ]
 
         vol_maps = [params['scan_base'] + ":/scans"]
         self._map_if_exists(vol_maps, params, 'inst')
@@ -90,7 +87,7 @@ class DockerTest:
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
                 LOGGER.error('Target port %d will induce callback failure', self.target_port)
-                # Closing this now will cause error when attempting to write outoput.
+                # Closing this now will cause error when attempting to write output.
                 self.docker_log.close()
         except Exception as e:
             host.terminate()
@@ -109,8 +106,10 @@ class DockerTest:
         lines = str(lines, 'utf-8').splitlines()
         assert expected in lines, 'Could not find image %s, maybe rebuild images.' % expected
 
-    def terminate(self):
+    def terminate(self, optional=False):
         """Forcibly terminate this container"""
+        if optional and not self.docker_host:
+            return None
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 

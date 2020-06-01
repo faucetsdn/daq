@@ -14,11 +14,11 @@ if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
     echo Switch test with model $SWITCH_MODEL
-    echo Switch test with ip:port $SWITCH_IP:$SWITCH_PORT
+    echo Switch test with ip:port $SWITCH_IP:$TARGET_PORT
     echo Switch test with username:password $SWITCH_USERNAME:$SWITCH_PASSWORD
     ping -n -c 10 $SWITCH_IP
     POE_ENABLED=`jq -r .modules.switch.poe.enabled /config/device/module_config.json`
-    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
+    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $TARGET_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
 
     grep -v "RESULT" $LOCAL_REPORT | tee -a $MONO_LOG
     grep "RESULT" $LOCAL_REPORT | tee -a $RESULT_LINES

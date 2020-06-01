@@ -558,8 +558,8 @@ class ConnectedHost:
         self.test_name = test_name
         self.test_start = gcp.get_timestamp()
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
-        test_host = docker_test.DockerTest(self.runner, self.target_port,
-                                           self.devdir, test_name)
+        self.test_host = docker_test.DockerTest(self.runner, self.target_port,
+                                                self.devdir, test_name)
         try:
             self.test_port = self.runner.allocate_test_port(self.target_port)
             switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
@@ -586,9 +586,11 @@ class ConnectedHost:
             self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
             self.record_result(test_name, state=MODE.EXEC)
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
-            self.test_host = test_host
+            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
         except Exception as e:
+            if self.test_host:
+                self.test_host.terminate(optional=True)
+                self.test_host = None
             if self.test_port:
                 self.runner.release_test_port(self.target_port, self.test_port)
                 self.test_port = None
