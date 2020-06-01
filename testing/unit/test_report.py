@@ -1,4 +1,4 @@
-"""Unit tests for configurator"""
+"""Unit tests for report"""
 
 import unittest
 import sys
