@@ -5,6 +5,7 @@ RESULT_LINES=/tmp/result_lines.txt
 MONO_LOG=/tmp/mono-log.txt
 MANIFEST=./module_manifest.json
 REPORT_FILE=/tmp/report.txt
+MODULE_CONFIG=/config/device/module_config.json
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
@@ -41,6 +42,7 @@ fi
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
 
+    SWITCH_IP=`jq -r .run_info.switch_ip $MODULE_CONFIG`
     LOCAL_ONLY=${LOCAL_IP%/*}
     LOCAL_INDEX=${LOCAL_ONLY##*.}
     echo Using IP index $LOCAL_INDEX
