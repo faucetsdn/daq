@@ -560,27 +560,27 @@ class ConnectedHost:
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
         self.test_host = docker_test.DockerTest(self.runner, self.target_port,
                                                 self.devdir, test_name)
-        self.test_port = self.runner.allocate_test_port(self.target_port)
-        switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
-        ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
-
-        params = {
-            'local_ip': ext_loip,
-            'target_ip': self.target_ip,
-            'target_mac': self.target_mac,
-            'target_port': str(self.target_port),
-            'gateway_ip': self.gateway.host.IP(),
-            'gateway_mac': self.gateway.host.MAC(),
-            'inst_base': self._inst_config_path(),
-            'port_base': self._port_base,
-            'device_base': self._device_aux_path(),
-            'type_base': self._type_aux_path(),
-            'scan_base': self.scan_base
-        }
-        if ext_loip:
-            params.update(self._get_switch_config())
-
         try:
+            self.test_port = self.runner.allocate_test_port(self.target_port)
+            switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
+            ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
+
+            params = {
+                'local_ip': ext_loip,
+                'target_ip': self.target_ip,
+                'target_mac': self.target_mac,
+                'target_port': str(self.target_port),
+                'gateway_ip': self.gateway.host.IP(),
+                'gateway_mac': self.gateway.host.MAC(),
+                'inst_base': self._inst_config_path(),
+                'port_base': self._port_base,
+                'device_base': self._device_aux_path(),
+                'type_base': self._type_aux_path(),
+                'scan_base': self.scan_base
+            }
+            if ext_loip:
+                params.update(self._get_switch_config())
+
             LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             self._write_module_config(self._loaded_config, self._host_tmp_path())
             self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
@@ -588,6 +588,7 @@ class ConnectedHost:
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
             self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
         except Exception as e:
+            self.test_host.terminate()
             self.test_host = None
             raise e
 
