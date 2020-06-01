@@ -29,6 +29,8 @@ manual operation (aren't automated), and increase the security exposure of the s
 
 UDMI is intended to support a few primary use-cases:
 * _Telemetry Ingestion_: Ingest device data points in a standardized format.
+* [_Gateway Proxy_](docs/gateway.md): Proxy data/connection for non-UDMI devices,
+allowing adaptation to legacy systems.
 * _On-Prem Actuation_: Ability to effect on-prem device behavior.
 * _Device Testability_: e.g. Trigger a fake alarm to test reporting mechanims.
 * _Commissioning Tools_: Streamline complete system setup and install.
@@ -39,7 +41,6 @@ UDMI is intended to support a few primary use-cases:
 * _Firmware Updates_: Initiate, monitor, and track firmware updates across an entire fleet
 of devices.
 * _On-Prem Discovery_: Enumerate and on-prem devices to aid setup or anomaly detection.
-* _Gateway Proxy_: Proxy data/connection for non-UDMI devices, allowing adaptation to legacy systems.
 
 All these situations are conceptually about _management_ of devices, which is conceptually
 different than the _control_ or _operation_. These concepts are similar to the _management_,
@@ -86,9 +87,6 @@ processing.
 but not directly available to or on the device, defined by [<em>metadata.json</em>](metadata.json).
 This is essentially a specification about how the device should be configured or
 expectations about what the device should be doing.
-* Device _properties_ ([example](properties.tests/example.json)) which is used for
-configuring a system (e.g., when registering a device with the cloud),
-defined by [<em>properties.json</em>](properties.json).
 * Streaming device telemetry, which can take on several different forms, depending on the intended
 use, e.g.:
   * Streaming _pointset_ ([example](pointset.tests/example.json)) from device to cloud,

@@ -15,17 +15,27 @@ function make_pubber {
     device=$1
     faux=$2
     fail=$3
-    mkdir -p inst/faux/$faux/local/
-    cp misc/test_site/devices/$device/rsa_private.pkcs8 inst/faux/$faux/local/
-    cat <<EOF > inst/faux/$faux/local/pubber.json
+    gateway=$4
+    local_dir=inst/faux/$faux/local/
+    echo Creating $device with $fail/$gateway in $local_dir
+    mkdir -p $local_dir
+    if [ "$gateway" == null ]; then
+        cp misc/test_site/devices/$device/rsa_private.pkcs8 $local_dir
+    else
+        gateway_dir=$(sh -c "echo $gateway")
+        cp misc/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
+    fi
+    cat <<EOF > $local_dir/pubber.json
   {
     "projectId": $project_id,
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
     "extraField": $fail,
+    "gatewayId": $gateway,
     "deviceId": "$device"
   }
 EOF
+  ls -l $local_dir
 }
 
 function capture_test_results {
@@ -71,12 +81,15 @@ if [ -f $cred_file ]; then
     registry_id=`jq .registry_id $cloud_file`
     cloud_region=`jq .cloud_region $cloud_file`
 
-    make_pubber AHU-1 daq-faux-2 null
-    make_pubber SNS-4 daq-faux-3 1234
+    make_pubber AHU-1 daq-faux-2 null null
+    make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
     bin/registrar
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
+    fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
+    find inst/test_site -name errors.json | tee -a $GCP_RESULTS
+    more inst/test_site/devices/*/errors.json
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.
@@ -85,7 +98,7 @@ fi
 more inst/faux/daq-faux-*/local/pubber.json | cat
 
 echo Build all container images...
-cmd/build 
+cmd/build
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
@@ -161,33 +174,16 @@ fail_module:
   ping_03: callback
 EOF
 
-function cleanup_marker {
-    mkdir -p ${MARKER%/*}
-    touch $MARKER
-}
-trap cleanup_marker EXIT
-
-function monitor_marker {
+function kill_gateway {
     GW=$1
-    MARKER=$2
-    rm -f $MARKER
-    while [ ! -f $MARKER ]; do
-        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
-        if [ -n "$test_done" ]; then
-           break
-        fi
-        echo test_aux.sh waiting for $MARKER
-        sleep 60
-    done
-    ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/
     pid=$(ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
-    echo $MARKER found, killing $GW-eth dhcp tcpdump pid $pid
+    echo Killing $GW-eth dhcp tcpdump pid $pid
     kill $pid
 }
 
 # Check that killing the dhcp monitor aborts the run.
 MARKER=inst/run-port-03/nodes/hold03/activate.log
-monitor_marker gw03 $MARKER &
+monitor_marker $MARKER "kill_gateway gw03"
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting hold test run
 cmd/run -k -s finish_hook=misc/dump_network.sh
@@ -200,33 +196,17 @@ head inst/run-port-*/finish/nmap*/*
 tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 
 
-function monitor_log {
-    while true; do 
-        found=$(cat inst/cmdrun.log 2>/dev/null | grep "$2")
-        if [ -n "$found" ]; then
-            echo found $2
-            eval $1 
-            break
-        fi
-        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
-        if [ -n "$test_done" ]; then
-            break
-        fi
-    done &
-}
-rm -f inst/cmdrun.log
-# Check port toggling does not cause a shutdown 
+# Check port toggling does not cause a shutdown
 cat <<EOF > local/system.yaml
 ---
 include: misc/system_base.yaml
 port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF
-monitor_log "sudo ifconfig faux down;sleep 2; sudo ifconfig faux up" "Port 1 dpid 2 is now active"
-monitor_log "sudo ifconfig faux down" "Target port 1 test hold running"
+monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 2; sudo ifconfig faux up"
+monitor_log "Target port 1 test hold running" "sudo ifconfig faux down"
 cmd/run -s -k
 disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
 echo Enough port disconnects: $((disconnections >= 2)) | tee -a $TEST_RESULTS
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
-

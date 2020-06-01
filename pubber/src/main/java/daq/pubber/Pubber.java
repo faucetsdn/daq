@@ -3,15 +3,16 @@ package daq.pubber;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import daq.udmi.Message;
-import daq.udmi.Message.PointSet;
-import daq.udmi.Message.PointSetState;
-import daq.udmi.Entry;
+import daq.udmi.Message.Pointset;
+import daq.udmi.Message.PointsetState;
+import daq.udmi.Report;
 import daq.udmi.Message.State;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +34,7 @@ public class Pubber {
   private static final String SYSTEM_TOPIC = "events/system";
   private static final String STATE_TOPIC = "state";
   private static final String CONFIG_TOPIC = "config";
+  private static final String ERROR_TOPIC = "errors";
 
   private static final int MIN_REPORT_MS = 200;
   private static final int DEFAULT_REPORT_MS = 5000;
@@ -48,7 +50,7 @@ public class Pubber {
   private final CountDownLatch configLatch = new CountDownLatch(1);
 
   private final State deviceState = new State();
-  private final PointSet devicePoints = new PointSet();
+  private final Pointset devicePoints = new Pointset();
   private final Set<AbstractPoint> allPoints = new HashSet<>();
 
   private MqttPublisher mqttPublisher;
@@ -86,7 +88,7 @@ public class Pubber {
   private void initializeDevice() {
     deviceState.system.make_model = "DAQ_pubber";
     deviceState.system.firmware.version = "v1";
-    deviceState.pointset = new PointSetState();
+    deviceState.pointset = new PointsetState();
     devicePoints.extraField = configuration.extraField;
   }
 
@@ -162,12 +164,17 @@ public class Pubber {
   private void initialize() {
     Preconditions.checkState(mqttPublisher == null, "mqttPublisher already defined");
     Preconditions.checkNotNull(configuration.keyFile, "configuration keyFile not defined");
-    Preconditions.checkState(configuration.gatewayId == null, "gatewayId not currently supported");
     System.err.println("Loading device key file from " + configuration.keyFile);
     configuration.keyBytes = getFileBytes(configuration.keyFile);
     mqttPublisher = new MqttPublisher(configuration, this::reportError);
+    if (configuration.gatewayId != null) {
+      mqttPublisher.registerHandler(configuration.gatewayId, CONFIG_TOPIC,
+          this::configHandler, Message.Config.class);
+      mqttPublisher.registerHandler(configuration.gatewayId, ERROR_TOPIC,
+          this::errorHandler, GatewayError.class);
+    }
     mqttPublisher.registerHandler(configuration.deviceId, CONFIG_TOPIC,
-            this::configHandler, Message.Config.class);
+        this::configHandler, Message.Config.class);
   }
 
   private void connect() {
@@ -220,6 +227,12 @@ public class Pubber {
     }
   }
 
+  private void errorHandler(GatewayError error) {
+    // TODO: Handle error and give up on device.
+    info(String.format("%s for %s: %s",
+        error.error_type, error.device_id, error.description));
+  }
+
   private byte[] getFileBytes(String dataFile) {
     Path dataPath = Paths.get(dataFile);
     try {
@@ -235,6 +248,7 @@ public class Pubber {
       System.exit(-2);
     }
     info(String.format("Sending test message for %s/%s", configuration.registryId, deviceId));
+    devicePoints.timestamp = new Date();
     mqttPublisher.publish(deviceId, POINTSET_TOPIC, devicePoints);
   }
 
@@ -248,6 +262,7 @@ public class Pubber {
   private void publishStateMessage(String deviceId) {
     lastStateTimeMs = sleepUntil(lastStateTimeMs + STATE_THROTTLE_MS);
     info("Sending state message for device " + deviceId);
+    deviceState.timestamp = new Date();
     mqttPublisher.publish(deviceId, STATE_TOPIC, deviceState);
   }
 

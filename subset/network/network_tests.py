@@ -29,7 +29,7 @@ tcpdump_display_udp_bacnet_packets = 'tcpdump -n udp dst portrange 47808-47809 -
 tcpdump_display_arp_packets = 'tcpdump arp -r ' + cap_pcap_file
 tcpdump_display_ntp_packets = 'tcpdump dst port 123 -r ' + cap_pcap_file
 tcpdump_display_eapol_packets = 'tcpdump port 1812 or port 1813 or port 3799 -r ' + cap_pcap_file
-tcpdump_display_broadcast_packets = 'tcpdump broadcast -r ' + cap_pcap_file
+tcpdump_display_broadcast_packets = 'tcpdump broadcast and src host ' + device_address + ' -r ' + cap_pcap_file
 
 def write_report(string_to_append):
     print(string_to_append.strip())
@@ -45,17 +45,19 @@ def shell_command_with_result(command, wait_time, terminate_flag):
         process.terminate()
     return str(text)
 
+def add_packet_count_to_report(packet_type, packet_count):
+    write_report("{i} {t} Packets recieved={p}\n".format(i=ignore, t=packet_type, p=packet_count))
 
 def add_packet_info_to_report(packets_received):
-    packet_list = packets_received.split("\n")
+    packet_list = packets_received.rstrip().split("\n")
     outnum = min(len(packet_list), max_packets_in_report)
     for x in range(0, outnum):
         write_report("{i} {p}\n".format(i=ignore, p=packet_list[x]))
-    write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packets_received)))
+    write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packet_list)))
 
 def decode_shell_result(shell_result):
     if len(shell_result) > min_packet_length_bytes:
-        packet_request_list = shell_result.split("\n")
+        packet_request_list = shell_result.rstrip().split("\n")
         packets_received = len(packet_request_list)
         return packets_received
     return 0
@@ -151,10 +153,12 @@ def test_communication_type_broadcast():
     broadcast_packets_received = packets_received_count(shell_result)
     if broadcast_packets_received > 0:
         add_summary("Broadcast packets received.")
+        add_packet_count_to_report("Broadcast", broadcast_packets_received)
     shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     all_packets_received = packets_received_count(shell_result)
     if (all_packets_received - broadcast_packets_received) > 0:
         add_summary("Unicast packets received.")
+        add_packet_count_to_report("Unicast", all_packets_received - broadcast_packets_received)
     return 'info'
 
 def test_ntp_support():

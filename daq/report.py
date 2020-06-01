@@ -75,8 +75,9 @@ class ReportGenerator:
     def __init__(self, config, tmp_base, target_mac, module_config):
         self._config = config
         self._module_config = copy.deepcopy(module_config)
-        self._reports = {}
+        self._repitems = {}
         self._clean_mac = target_mac.replace(':', '')
+        self._finalized = False
         report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
         report_filename = self._NAME_FORMAT % (self._clean_mac,
                                                report_when.isoformat().replace(':', ''), 'md')
@@ -143,6 +144,8 @@ class ReportGenerator:
     def finalize(self):
         """Finalize this report"""
         LOGGER.info('Finalizing report %s', self._filename)
+        assert not self._finalized, 'report already finalized'
+        self._finalized = True
         self._module_config['clean_mac'] = self._clean_mac
         self._module_config['start_time'] = self._start_time
         self._module_config['end_time'] = datetime.datetime.now(pytz.utc).replace(microsecond=0)
@@ -157,13 +160,12 @@ class ReportGenerator:
 
     def get_all_results(self):
         """Get all processed results"""
-        if not self._all_results:
-            self._process_results()
+        assert self._finalized, 'report must be finalized'
         return copy.deepcopy(self._all_results)
 
     def _process_results(self):
         self._all_results = {"modules": {}}
-        for (module_name, result_dict) in self._reports.items():
+        for (module_name, result_dict) in self._repitems.items():
             module_result = {"tests": {}}
             self._all_results["modules"][module_name] = module_result
             for result_type in ResultType:
@@ -177,7 +179,7 @@ class ReportGenerator:
                     match = re.search(self._RESULT_REGEX, line)
                     if match:
                         result, test_name, extra = match.group(1), match.group(2), match.group(3)
-                        self._accumulate_test(test_name, result, extra, module_name=module_name)
+                        self._accumulate_result(test_name, result, extra, module_name=module_name)
                         module_result["tests"][test_name] = self._results[test_name]
         self._all_results["missing_tests"] = self._find_missing_test_results()
 
@@ -187,7 +189,7 @@ class ReportGenerator:
             self._file = _file
             self._append_report_header()
             self._write_test_summary()
-            self._copy_test_reports()
+            self._write_repitems()
             self._writeln(self._TEST_SEPARATOR % self._REPORT_COMPLETE)
         self._file = None
 
@@ -205,9 +207,12 @@ class ReportGenerator:
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
         self._write_test_tables()
 
-    def _accumulate_test(self, test_name, result, extra='', module_name=None):
+    def _accumulate_result(self, test_name, result, extra='', module_name=None):
+        assert test_name not in self._results, 'result already exists'
+
         if result not in self._result_headers:
             self._result_headers.append(result)
+
         test_info = self._get_test_info(test_name)
 
         category_name = test_info.get('category', self._DEFAULT_CATEGORY)
@@ -291,15 +296,15 @@ class ReportGenerator:
             for test_name in self._module_config['tests'].keys():
                 test_info = self._get_test_info(test_name)
                 if test_info.get('required') and test_name not in self._results:
-                    self._accumulate_test(test_name, self._MISSING_TEST_RESULT)
+                    self._accumulate_result(test_name, self._MISSING_TEST_RESULT)
                     missing.append(test_name)
         return missing
 
     def _get_test_info(self, test_name):
         return self._module_config.get('tests', {}).get(test_name, {})
 
-    def _copy_test_reports(self):
-        for (test_name, result_dict) in self._reports.items():
+    def _write_repitems(self):
+        for (test_name, result_dict) in self._repitems.items():
             # To not write a module header if there is nothing to report
             def writeln(line, test_name=test_name):
                 if not writeln.results:
@@ -326,6 +331,4 @@ class ReportGenerator:
         """Accumulate test reports into the overall device report"""
         valid_result_types = all(isinstance(key, ResultType) for key in result_dict)
         assert valid_result_types, "Unknown result type in %s" % result_dict
-        if test_name not in self._reports:
-            self._reports[test_name] = dict()
-        self._reports[test_name] = {**self._reports[test_name], **result_dict}
+        self._repitems.setdefault(test_name, {}).update(result_dict)
