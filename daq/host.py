@@ -599,10 +599,10 @@ class ConnectedHost:
 
     def _get_switch_config(self):
         return {
-            'switch_ip': self.switch_setup.get('ip_addr'),
-            'switch_model': self.switch_setup.get('model'),
-            'switch_username': self.switch_setup.get('username'),
-            'switch_password': self.switch_setup.get('password')
+            'ip': self.switch_setup.get('ip_addr'),
+            'model': self.switch_setup.get('model'),
+            'username': self.switch_setup.get('username'),
+            'password': self.switch_setup.get('password')
         }
 
     def _host_name(self):

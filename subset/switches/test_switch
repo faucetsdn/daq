@@ -12,10 +12,10 @@ MODULE_CONFIG=/config/device/module_config.json
 # SWITCH_IP will be the IP address of the OpenFlow switch.
 
 if [ -n "$LOCAL_IP" ]; then
-    SWITCH_IP=`jq -r .run_info.switch_ip $MODULE_CONFIG`
-    SWITCH_MODEL=`jq -r .run_info.switch_model $MODULE_CONFIG`
-    SWITCH_USERNAME=`jq -r .run_info.switch_username $MODULE_CONFIG`
-    SWITCH_PASSWORD=`jq -r .run_info.switch_password $MODULE_CONFIG`
+    SWITCH_IP=`jq -r .run_info.switch.ip $MODULE_CONFIG`
+    SWITCH_MODEL=`jq -r .run_info.switch.model $MODULE_CONFIG`
+    SWITCH_USERNAME=`jq -r .run_info.switch.username $MODULE_CONFIG`
+    SWITCH_PASSWORD=`jq -r .run_info.switch.password $MODULE_CONFIG`
 
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0

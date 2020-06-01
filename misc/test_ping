@@ -42,7 +42,7 @@ fi
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
 
-    SWITCH_IP=`jq -r .run_info.switch_ip $MODULE_CONFIG`
+    SWITCH_IP=`jq -r .run_info.switch.ip $MODULE_CONFIG`
     LOCAL_ONLY=${LOCAL_IP%/*}
     LOCAL_INDEX=${LOCAL_ONLY##*.}
     echo Using IP index $LOCAL_INDEX
