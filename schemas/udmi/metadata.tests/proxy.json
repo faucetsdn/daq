@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "timestamp": "2018-08-26T21:39:29.364Z",
+  "system": {
+    "location": {
+      "site_name": "US-SFO-XYY",
+      "section": "NW-2F",
+      "position": {
+        "x": 10,
+        "y": 20
+      }
+    },
+    "physical_tag": {
+      "asset": {
+        "guid": "bim://04aEp5ymD_$u5IxhJN2aGi",
+        "name": "US-SFO-XYY_AHU-1_extention11-optional"
+      }
+    }
+  },
+  "localnet": {
+    "subsystem": {
+      "bacnet": {
+        "local_id": "0x82eecd"
+      }
+    }
+  },
+  "pointset": {
+    "points": {
+      "return_air_temperature_sensor": {
+        "units": "Degrees-Celsius",
+        "ref": "BV23.present_value"
+      }
+    }
+  },
+  "gateway": {
+    "subsystem": "bacnet",
+    "gateway_id": "GAT-123"
+  }
+}

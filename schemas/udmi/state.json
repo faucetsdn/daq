@@ -21,6 +21,9 @@
     "system": {
       "$ref": "file:state_system.json#"
     },
+    "gateway": {
+      "$ref": "file:state_gateway.json#"
+    },
     "pointset": {
       "$ref": "file:state_pointset.json#"
     }

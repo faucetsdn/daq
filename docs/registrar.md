@@ -7,9 +7,8 @@ build the executable, and register/update devices.
 ## Configuration
 
 The `local/system.conf` file should have the following parameters (in `x=y` syntax):
-* `gcp_cred`: Defines the target project and service account to use for configuration.
-Can be generated and downloaded from the Cloud IoT Service Account page.
-* `site_path`: Path of site-specific configuration. See example in `misc/test_site`.
+* `gcp_cred`: Defines the target project and [service account](service.md) to use for configuration.
+* `site_path`: [Site-specific configuration](site_path.md) for the devices that need to be registered.
 * `schema_path`: Path to metadata schema (see the [DAQ PubSub documentation](pubsub.md) for more details/examples).
 
 The target `gcp_cred` service account will need the _Cloud IoT Provisioner_ and _Pub/Sub Publisher_ roles.
@@ -36,11 +35,9 @@ information:
 This information is sourced from a few key files:
 
 * `{site_dir}/cloud_iot_config.json`:
-Cloud configuration parameters (`registry_id`, `cloud_region`, etc...).
-* `{site_dir}/devices/{device_id}/properties.json`:
-Device-specific properties (e.g. device mode).
+Cloud project configuration parameters (`registry_id`, `cloud_region`, etc...).
 * `{site_dir}/devices/{device_id}/metadata.json`:
-Device metadata (e.g. location).
+Device metadata (e.g. location, key type).
 * `{site_dir}/devices/{device_id}/rsa_private.pem`:
 Generated private key for device (used on-device).
 

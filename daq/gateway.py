@@ -198,7 +198,8 @@ class Gateway():
     def detach_target(self, target_port):
         """Detach the given target from this gateway; return number of remaining targets."""
         assert target_port in self.targets, 'target not attached to gw'
-        LOGGER.info('Detach target %d from gateway group %s', target_port, self.name)
+        LOGGER.info('Detach target %d from gateway group %s: %s',
+                    target_port, self.name, self.targets.keys())
         del self.targets[target_port]
         return len(self.targets)
 

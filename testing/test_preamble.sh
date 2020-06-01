@@ -37,6 +37,12 @@ if [ -f $cred_file ]; then
   echo GCP service account is `jq .client_email $cred_file`
 fi
 
+function kill_children {
+    pkill -P $$
+}
+
+trap kill_children EXIT
+
 # Remove things that will always (probably) change - like DAQ version/timestamps/IPs
 # from comparison
 
@@ -53,4 +59,41 @@ function redact {
         -e 's/DAQ version.*//' \
         -e 's/Not shown: .* ports//' \
         -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
+}
+
+function monitor_log {
+    logmessage=$1
+    runcommand=$2
+    rm -f inst/cmdrun.log
+    while true; do
+        sleep 1
+        found=$(cat inst/cmdrun.log 2>/dev/null | grep "$logmessage")
+        if [ -n "$found" ]; then
+            echo found $found
+            eval $runcommand
+            break
+        fi
+        test_done=$(cat $TEST_RESULTS | grep "Done with tests")
+        if [ -n "$test_done" ]; then
+            break
+        fi
+    done &
+}
+
+function monitor_marker {
+    MARKER=$1
+    RUNCMD=$2
+    rm -f $MARKER
+    (
+        while [ ! -f $MARKER ]; do
+            test_done=$(cat $TEST_RESULTS | grep "Done with tests")
+            if [ -n "$test_done" ]; then
+                break
+            fi
+            echo test_aux.sh waiting for $MARKER
+            sleep 60
+        done
+        echo Found $MARKER, executing $RUNCMD
+        $RUNCMD
+    ) &
 }

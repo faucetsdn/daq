@@ -3,7 +3,7 @@ package com.google.daq.mqtt.registrar;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.Device;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
@@ -22,15 +22,17 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
 public class Registrar {
 
   static final String METADATA_JSON = "metadata.json";
+  static final String NORMALIZED_JSON = "metadata_norm.json";
   static final String DEVICE_ERRORS_JSON = "errors.json";
   static final String ENVELOPE_JSON = "envelope.json";
-  static final String PROPERTIES_JSON = "properties.json";
+  static final String GENERATED_CONFIG_JSON = "generated_config.json";
 
   private static final String DEVICES_DIR = "devices";
   private static final String ERROR_FORMAT_INDENT = "  ";
@@ -38,7 +40,7 @@ public class Registrar {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .enable(SerializationFeature.INDENT_OUTPUT)
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .setDateFormat(new StdDateFormat())
+      .setDateFormat(new ISO8601DateFormat())
       .setSerializationInclusion(Include.NON_NULL);
   public static final String ALL_MATCH = "";
 
@@ -51,6 +53,7 @@ public class Registrar {
   private PubSubPusher pubSubPusher;
   private Map<String, LocalDevice> localDevices;
   private File summaryFile;
+  private ExceptionMap blockErrors;
 
   public static void main(String[] args) {
     Registrar registrar = new Registrar();
@@ -87,7 +90,12 @@ public class Registrar {
             .put(device.getDeviceId(), "True");
       }
     });
-    errorSummary.forEach((key, value) -> System.err.println("Device " + key + ": " + value.size()));
+    if (!blockErrors.isEmpty()) {
+      errorSummary.put("Block", blockErrors.stream().collect(Collectors.toMap(
+          Map.Entry::getKey, entry -> entry.getValue().toString())));
+    }
+    System.err.println("\nSummary:");
+    errorSummary.forEach((key, value) -> System.err.println("  Device " + key + ": " + value.size()));
     System.err.println("Out of " + localDevices.size() + " total.");
     OBJECT_MAPPER.writeValue(summaryFile, errorSummary);
   }
@@ -116,6 +124,7 @@ public class Registrar {
         LocalDevice localDevice = localDevices.get(localName);
         try {
           updateCloudIoT(localDevice);
+          localDevice.writeConfigFile();
           Device device = Preconditions.checkNotNull(fetchDevice(localName),
               "missing device " + localName);
           BigInteger numId = Preconditions.checkNotNull(device.getNumId(),
@@ -127,18 +136,25 @@ public class Registrar {
           localDevice.getErrors().put("Registering", e);
         }
       }
-      for (String extraName : extraDevices) {
-        try {
-          System.err.println("Blocking extra device " + extraName);
-          cloudIotManager.blockDevice(extraName, true);
-        } catch (Exception e) {
-          throw new RuntimeException("While blocking " + extraName, e);
-        }
-      }
+      bindGatewayDevices(localDevices);
+      blockErrors = blockExtraDevices(extraDevices);
       System.err.println(String.format("Processed %d devices", localDevices.size()));
     } catch (Exception e) {
       throw new RuntimeException("While processing devices", e);
     }
+  }
+
+  private ExceptionMap blockExtraDevices(Set<String> extraDevices) {
+    ExceptionMap exceptionMap = new ExceptionMap("Block devices errors");
+    for (String extraName : extraDevices) {
+      try {
+        System.err.println("Blocking extra device " + extraName);
+        cloudIotManager.blockDevice(extraName, true);
+      } catch (Exception e) {
+        exceptionMap.put(extraName, e);
+      }
+    }
+    return exceptionMap;
   }
 
   private Device fetchDevice(String localName) {
@@ -169,6 +185,19 @@ public class Registrar {
     } else {
       System.err.println("Updated device entry " + localName);
     }
+  }
+
+  private void bindGatewayDevices(Map<String, LocalDevice> localDevices) {
+    localDevices.values().stream().filter(localDevice -> localDevice.getSettings().proxyDevices != null).forEach(
+        localDevice -> localDevice.getSettings().proxyDevices.forEach(proxyDeviceId -> {
+          try {
+            System.err.println("Binding " + proxyDeviceId + " to gateway " + localDevice.getDeviceId());
+            cloudIotManager.bindDevice(proxyDeviceId, localDevice.getDeviceId());
+          } catch (Exception e) {
+            throw new RuntimeException("While binding device " + proxyDeviceId, e);
+          }
+        })
+    );
   }
 
   private void shutdown() {
@@ -214,18 +243,19 @@ public class Registrar {
 
   private void validateKeys(Map<String, LocalDevice> localDevices) {
     Map<DeviceCredential, String> privateKeys = new HashMap<>();
-    for (LocalDevice device : localDevices.values()) {
-      String deviceName = device.getDeviceId();
-      CloudDeviceSettings settings = device.getSettings();
-      if (privateKeys.containsKey(settings.credential)) {
-        String previous = privateKeys.get(settings.credential);
-        RuntimeException exception = new RuntimeException(
-            String.format("Duplicate credentials found for %s & %s", previous, deviceName));
-        device.getErrors().put("Key", exception);
-      } else {
-        privateKeys.put(settings.credential, deviceName);
-      }
-    }
+    localDevices.values().stream().filter(LocalDevice::isDirectConnect).forEach(
+        localDevice -> {
+          String deviceName = localDevice.getDeviceId();
+          CloudDeviceSettings settings = localDevice.getSettings();
+          if (privateKeys.containsKey(settings.credential)) {
+            String previous = privateKeys.get(settings.credential);
+            RuntimeException exception = new RuntimeException(
+                String.format("Duplicate credentials found for %s & %s", previous, deviceName));
+            localDevice.getErrors().put("Key", exception);
+          } else {
+            privateKeys.put(settings.credential, deviceName);
+          }
+        });
   }
 
   private Map<String, LocalDevice> loadDevices(File devicesDir, String[] devices, Pattern devicePattern) {
@@ -255,7 +285,6 @@ public class Registrar {
     schemaName = schemaBase.getName();
     loadSchema(METADATA_JSON);
     loadSchema(ENVELOPE_JSON);
-    loadSchema(PROPERTIES_JSON);
   }
 
   private void loadSchema(String key) {

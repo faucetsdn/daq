@@ -47,7 +47,7 @@ class DAQRunner:
         self.configurator = configurator.Configurator()
         self.config = config
         self._port_info = {}
-        self.result_sets = {}
+        self._result_sets = {}
         self._mac_port_map = {}
         self._device_groups = {}
         self._gateway_sets = {}
@@ -154,7 +154,7 @@ class DAQRunner:
             LOGGER.info('Stopping network...')
             self.network.stop()
         except Exception as e:
-            LOGGER.error('Exception: %s', e)
+            LOGGER.error('Cleanup exception: %s', e)
         if self.result_log:
             self.result_log.close()
             self.result_log = None
@@ -181,9 +181,11 @@ class DAQRunner:
             if dpid and port:
                 LOGGER.debug('port_state: %s %s', dpid, port)
                 self._handle_port_state(dpid, port, active)
+                return
             (dpid, port, target_mac) = self.faucet_events.as_port_learn(event)
             if dpid and port:
                 self._handle_port_learn(dpid, port, target_mac)
+                return
             (dpid, restart_type) = self.faucet_events.as_config_change(event)
             if dpid is not None:
                 LOGGER.debug('dp_id %d restart %s', dpid, restart_type)
@@ -191,6 +193,10 @@ class DAQRunner:
     def _handle_port_state(self, dpid, port, active):
         if self.network.is_system_port(dpid, port):
             LOGGER.info('System port %s on dpid %s is active %s', port, dpid, active)
+            if self._system_active and not active:
+                LOGGER.error('System port became inactive, terminating.')
+                self.exception = DaqException('System port inactive')
+                self.shutdown()
             self._system_active = active
             return
         if not self.network.is_device_port(dpid, port):
@@ -292,8 +298,7 @@ class DAQRunner:
 
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
-        for port in self._port_info:
-            self._deactivate_port(port)
+        self._terminate()
         self.monitor_forget(self.faucet_events.sock)
         self.faucet_events.disconnect()
         self.faucet_events = None
@@ -307,7 +312,8 @@ class DAQRunner:
         LOGGER.debug('Active target sets/state: %s', states)
 
     def _terminate(self):
-        _ = [host.terminate('_terminate') for _, host in self._get_port_hosts()]
+        for target_port in self._get_running_ports():
+            self.target_set_error(target_port, DaqException('terminated'))
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -568,15 +574,12 @@ class DAQRunner:
         return gateway, ready_devices
 
     def _terminate_gateway_set(self, gateway_set):
-        if gateway_set not in self._gateway_sets:
-            LOGGER.warning('Gateway set %s not found in %s', gateway_set, self._gateway_sets)
-            return
+        assert gateway_set in self._gateway_sets, 'Gateway set %s not found'
         group_name = self._gateway_sets[gateway_set]
         gateway = self._device_groups[group_name]
         ports = [target['port'] for target in gateway.get_targets()]
         LOGGER.info('Terminating gateway group %s set %s, ports %s', group_name, gateway_set, ports)
         for target_port in ports:
-            self._port_info[target_port].host.terminate('_gateway_terminate')
             self.target_set_error(target_port, DaqException('terminated'))
 
     def _find_gateway_set(self, target_port):
@@ -609,7 +612,6 @@ class DAQRunner:
         running = bool(target_port in self._port_info and self._port_info[target_port].host)
         LOGGER.error('Target port %d running %s exception: %s', target_port, running, exception)
         LOGGER.exception(exception)
-        self._detach_gateway(target_port)
         if running:
             target_host = self._port_info[target_port].host
             target_host.record_result(target_host.test_name, exception=exception)
@@ -622,6 +624,7 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
+            self._detach_gateway(target_port)
 
     def target_set_complete(self, target_port, reason):
         """Handle completion of a target_set"""
@@ -642,7 +645,7 @@ class DAQRunner:
             self.run_tests = False
             if self.result_linger:
                 self._linger_exit = 1
-        self.result_sets[target_port] = result_set
+        self._result_sets[target_port] = result_set
 
     def _target_set_cancel(self, target_port):
         target_host = self._port_info[target_port].host
@@ -653,7 +656,7 @@ class DAQRunner:
             del self._mac_port_map[target_mac]
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
-            results = self._combine_result_set(target_port, self.result_sets[target_port])
+            results = self._combine_result_set(target_port, self._result_sets.get(target_port))
             this_result_linger = results and self.result_linger
             target_gateway_linger = target_gateway and target_gateway.result_linger
             if target_gateway_linger or this_result_linger:
@@ -697,13 +700,15 @@ class DAQRunner:
 
     def _combine_results(self):
         results = []
-        for result_set_key in self.result_sets:
-            result_set = self.result_sets[result_set_key]
+        for result_set_key in self._result_sets:
+            result_set = self._result_sets[result_set_key]
             results.extend(self._combine_result_set(result_set_key, result_set))
         return results
 
     def _combine_result_set(self, set_key, result_sets):
         results = []
+        if not result_sets:
+            return results
         result_set_keys = list(result_sets)
         result_set_keys.sort()
         for result_set_key in result_set_keys:
