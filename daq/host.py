@@ -75,6 +75,8 @@ class ConnectedHost:
         self._gcp = runner.gcp
         self.gateway = gateway
         self.config = config
+        self.switch_setup = self.config.get('switch_setup', {})
+        self.ext_loip = self.switch_setup.get('mods_addr', '').replace('@', '%d')
         self.target_port = target['port']
         self.target_mac = target['mac']
         self.fake_target = target['fake']
@@ -115,8 +117,6 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
-        self.switch_setup = self.config.get('switch_setup', {})
-        self.ext_loip = self.switch_setup.get('mods_addr', '').replace('@', '%d')
 
     @staticmethod
     def make_runid():
