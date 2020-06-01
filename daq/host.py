@@ -467,8 +467,8 @@ class ConnectedHost:
     def _monitor_cleanup(self, forget=True):
         if self._monitor_ref:
             LOGGER.info('Target port %d network pcap complete', self.target_port)
-            nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
-            assert nclosed == forget, 'forget and nclosed mismatch'
+            active = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
+            assert active == forget, 'forget and active mismatch'
             self._upload_file(self._startup_file)
             if forget:
                 self.runner.monitor_forget(self._monitor_ref.stream())
@@ -559,10 +559,14 @@ class ConnectedHost:
         self.test_name = test_name
         self.test_start = gcp.get_timestamp()
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
+        self.test_host = docker_test.DockerTest(self.runner, self.target_port,
+                                                self.devdir, test_name)
+        self.test_port = self.runner.allocate_test_port(self.target_port)
         params = {
-            'target_ip': self.target_ip,
             'local_ip': self.ext_loip,
+            'target_ip': self.target_ip,
             'target_mac': self.target_mac,
+            'target_port': str(self.target_port),
             'gateway_ip': self.gateway.host.IP(),
             'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
@@ -571,9 +575,6 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-        self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name)
-        self.test_port = self.runner.allocate_test_port(self.target_port)
         if self.ext_loip:
             params.update(self._get_switch_config())
 
@@ -591,7 +592,6 @@ class ConnectedHost:
     def _get_switch_config(self):
         return {
           'switch_ip': self.switch_setup.get('ip_addr'),
-          'switch_port': str(self.target_port),
           'switch_model': self.switch_setup.get('model'),
           'switch_username': self.switch_setup.get('username'),
           'switch_password': self.switch_setup.get('password')

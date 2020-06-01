@@ -51,7 +51,7 @@ class DockerTest:
             return params.get(key) or ''
 
         env_vars += ["LOCAL_IP=" + opt_param('local_ip'),
-                     "SWITCH_PORT=" + opt_param('switch_port'),
+                     "SWITCH_PORT=" + opt_param('target_port'),
                      "SWITCH_IP=" + opt_param('switch_ip'),
                      "SWITCH_MODEL=" + opt_param('switch_model'),
                      "SWITCH_USERNAME=" + opt_param('switch_username'),
