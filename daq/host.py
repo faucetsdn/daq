@@ -584,9 +584,9 @@ class ConnectedHost:
             self.record_result(test_name, state=MODE.EXEC)
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
             self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
-        except:
+        except Exception as e:
             self.test_host = None
-            raise
+            raise e
 
     def _get_switch_config(self):
         return {
