@@ -199,7 +199,7 @@ include: misc/system_base.yaml
 port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF
-monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 2; sudo ifconfig faux up"
+monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 5; sudo ifconfig faux up"
 monitor_log "Target port 1 test hold running" "sudo ifconfig faux down"
 cmd/run -s -k
 disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
