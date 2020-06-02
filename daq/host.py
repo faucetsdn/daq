@@ -578,6 +578,15 @@ class ConnectedHost:
             self._state_transition(_STATE.ERROR)
             raise e
 
+    def _start_test_host(self):
+            params = self._get_module_params()
+            self._write_module_config(self._loaded_config, self._host_tmp_path())
+            self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
+            self.record_result(test_name, state=MODE.EXEC)
+            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
+            self._state_transition(_STATE.TESTING, _STATE.NEXT)
+            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+
     def _get_module_params(self):
         switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
         ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
@@ -597,15 +606,6 @@ class ConnectedHost:
         if ext_loip:
             params.update(self._get_switch_config())
         return params
-
-    def _start_test_host(self):
-            params = self._get_test_params()
-            self._write_module_config(self._loaded_config, self._host_tmp_path())
-            self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
-            self.record_result(test_name, state=MODE.EXEC)
-            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self._state_transition(_STATE.TESTING, _STATE.NEXT)
-            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
 
     def _get_switch_config(self):
         return {
