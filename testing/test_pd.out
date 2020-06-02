@@ -1,0 +1,22 @@
+Running testing/test_pd.sh
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Enough port disconnects: 1
+01: ['01:hold:DaqException']
+Done with tests
