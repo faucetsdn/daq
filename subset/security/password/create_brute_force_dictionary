@@ -120,6 +120,7 @@ function has_faux_device_macoui() {
 
 # Main function:
 
+echo "Running with MAC: $1"
 echo Creating credential files...
 create_dictionary $TEMP_DICTIONARY $OUTPUT_DICTIONARY
 
