@@ -560,8 +560,15 @@ class ConnectedHost:
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
         self.test_host = docker_test.DockerTest(self.runner, self.target_port,
                                                 self.devdir, test_name)
+
         try:
             self.test_port = self.runner.allocate_test_port(self.target_port)
+        except Exception as e:
+            self.test_host = None
+            self._state_transition(_STATE.ERROR, _STATE.TESTING)
+            raise e
+
+        try:
             switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
             ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
 
@@ -588,13 +595,11 @@ class ConnectedHost:
             self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
             self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
         except Exception as e:
-            if self.test_host:
-                self.test_host.terminate(optional=True)
-                self.test_host = None
-            if self.test_port:
-                self.runner.release_test_port(self.target_port, self.test_port)
-                self.test_port = None
+            self.test_host = None
+            self.runner.release_test_port(self.target_port, self.test_port)
+            self.test_port = None
             self._monitor_cleanup()
+            self._state_transition(_STATE.ERROR, _STATE.TESTING)
             raise e
 
     def _get_switch_config(self):

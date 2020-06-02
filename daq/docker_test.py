@@ -72,6 +72,7 @@ class DockerTest:
         except Exception as e:
             # pylint: disable=no-member
             raise wrappers.DaqException(e)
+
         try:
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             pipe = host.activate(log_name=None)
@@ -106,10 +107,8 @@ class DockerTest:
         lines = str(lines, 'utf-8').splitlines()
         assert expected in lines, 'Could not find image %s, maybe rebuild images.' % expected
 
-    def terminate(self, optional=False):
+    def terminate(self):
         """Forcibly terminate this container"""
-        if optional and not self.docker_host:
-            return None
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 
