@@ -224,7 +224,7 @@ class GcpManager:
                                              destination_file_name or file_name)
         blob = bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
-        LOGGER.info('Uploaded %s to %s' % (file_name, destination_file_name))
+        LOGGER.info('Uploaded %s' % destination_file_name)
         return destination_file_name
 
     def register_offenders(self):

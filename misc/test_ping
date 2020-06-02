@@ -5,6 +5,7 @@ RESULT_LINES=/tmp/result_lines.txt
 MONO_LOG=/tmp/mono-log.txt
 MANIFEST=./module_manifest.json
 REPORT_FILE=/tmp/report.txt
+MODULE_CONFIG=/config/device/module_config.json
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
@@ -41,6 +42,7 @@ fi
 if [ -n "$LOCAL_IP" ]; then
     echo Configuring network with local address $LOCAL_IP | tee -a $MONO_LOG
 
+    SWITCH_IP=`jq -r .run_info.switch.ip $MODULE_CONFIG`
     LOCAL_ONLY=${LOCAL_IP%/*}
     LOCAL_INDEX=${LOCAL_ONLY##*.}
     echo Using IP index $LOCAL_INDEX
@@ -56,10 +58,10 @@ if [ -n "$LOCAL_IP" ]; then
     # Delete any local arp entry, to force a re-arp
     arp -d $SWITCH_IP || true
 
-    echo Switch test with target $SWITCH_IP:$SWITCH_PORT | tee -a $MONO_LOG
+    echo Switch test with target $SWITCH_IP:$TARGET_PORT | tee -a $MONO_LOG
     local_status=pass
     ping -n -c 10 $SWITCH_IP || local_status=fail
-    echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$SWITCH_PORT | tee -a $RESULT_LINES
+    echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$TARGET_PORT | tee -a $RESULT_LINES
     if [ $local_status != pass ]; then
         status=fail
     fi
