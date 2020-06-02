@@ -565,7 +565,6 @@ class ConnectedHost:
             self.test_port = self.runner.allocate_test_port(self.target_port)
         except Exception as e:
             self.test_host = None
-            self._state_transition(_STATE.ERROR)
             raise e
 
         try:
@@ -575,7 +574,6 @@ class ConnectedHost:
             self.runner.release_test_port(self.target_port, self.test_port)
             self.test_port = None
             self._monitor_cleanup()
-            self._state_transition(_STATE.ERROR)
             raise e
 
     def _start_test_host(self):
