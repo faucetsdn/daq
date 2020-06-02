@@ -559,6 +559,7 @@ class ConnectedHost:
         self.test_start = gcp.get_timestamp()
         self.test_host = docker_test.DockerTest(self.runner, self.target_port,
                                                 self.devdir, test_name)
+        LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
 
         try:
             self.test_port = self.runner.allocate_test_port(self.target_port)
@@ -598,7 +599,6 @@ class ConnectedHost:
         return params
 
     def _start_test_host(self):
-            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
             params = self._get_test_params()
             self._write_module_config(self._loaded_config, self._host_tmp_path())
             self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
