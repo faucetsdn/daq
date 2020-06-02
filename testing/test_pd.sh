@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source testing/test_preamble.sh
+cmd/build
 
 # Check port toggling does not cause a shutdown
 cat <<EOF > local/system.yaml
