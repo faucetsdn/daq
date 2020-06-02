@@ -22,7 +22,7 @@ env:
   global:
     - DOCKER_STARTUP_TIMEOUT_MS=60000
   jobs:
-    - DAQ_TEST=pd TEST=1
-    - DAQ_TEST=pd TEST=2
-    - DAQ_TEST=pd TEST=3
-    - DAQ_TEST=pd TEST=4
+    - DAQ_TEST=aux TEST=1
+    - DAQ_TEST=aux TEST=2
+    - DAQ_TEST=aux TEST=3
+    - DAQ_TEST=aux TEST=4
