@@ -557,7 +557,6 @@ class ConnectedHost:
     def _docker_test(self, test_name):
         self.test_name = test_name
         self.test_start = gcp.get_timestamp()
-        self._state_transition(_STATE.TESTING, _STATE.NEXT)
         self.test_host = docker_test.DockerTest(self.runner, self.target_port,
                                                 self.devdir, test_name)
 
@@ -565,42 +564,48 @@ class ConnectedHost:
             self.test_port = self.runner.allocate_test_port(self.target_port)
         except Exception as e:
             self.test_host = None
-            self._state_transition(_STATE.ERROR, _STATE.TESTING)
+            self._state_transition(_STATE.ERROR)
             raise e
 
         try:
-            switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
-            ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
-
-            params = {
-                'local_ip': ext_loip,
-                'target_ip': self.target_ip,
-                'target_mac': self.target_mac,
-                'target_port': str(self.target_port),
-                'gateway_ip': self.gateway.host.IP(),
-                'gateway_mac': self.gateway.host.MAC(),
-                'inst_base': self._inst_config_path(),
-                'port_base': self._port_base,
-                'device_base': self._device_aux_path(),
-                'type_base': self._type_aux_path(),
-                'scan_base': self.scan_base
-            }
-            if ext_loip:
-                params.update(self._get_switch_config())
-
-            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
-            self._write_module_config(self._loaded_config, self._host_tmp_path())
-            self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
-            self.record_result(test_name, state=MODE.EXEC)
-            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+            self._start_test_host()
         except Exception as e:
             self.test_host = None
             self.runner.release_test_port(self.target_port, self.test_port)
             self.test_port = None
             self._monitor_cleanup()
-            self._state_transition(_STATE.ERROR, _STATE.TESTING)
+            self._state_transition(_STATE.ERROR)
             raise e
+
+    def _get_module_params(self):
+        switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
+        ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
+        params = {
+            'local_ip': ext_loip,
+            'target_ip': self.target_ip,
+            'target_mac': self.target_mac,
+            'target_port': str(self.target_port),
+            'gateway_ip': self.gateway.host.IP(),
+            'gateway_mac': self.gateway.host.MAC(),
+            'inst_base': self._inst_config_path(),
+            'port_base': self._port_base,
+            'device_base': self._device_aux_path(),
+            'type_base': self._type_aux_path(),
+            'scan_base': self.scan_base
+        }
+        if ext_loip:
+            params.update(self._get_switch_config())
+        return params
+
+    def _start_test_host(self):
+            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
+            params = self._get_test_params()
+            self._write_module_config(self._loaded_config, self._host_tmp_path())
+            self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
+            self.record_result(test_name, state=MODE.EXEC)
+            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
+            self._state_transition(_STATE.TESTING, _STATE.NEXT)
+            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
 
     def _get_switch_config(self):
         return {
