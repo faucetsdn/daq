@@ -20,7 +20,7 @@ RESULT pass base.startup.dns Correct DNS server address
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic BACnet device not found and pics.csv not found in device type directory.
+RESULT skip protocol.bacnet.pic BACnet device found, but pics.csv not found in device type directory.
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic The devices matches the PICS
 RESULT fail connection.mac_oui Manufacturer prefix not found!
@@ -48,9 +48,6 @@ dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
 dp_sec_port_2_acl.yaml
 dp_sec_port_3_acl.yaml
-dp_sec_port_4_acl.yaml
-dp_sec_port_5_acl.yaml
-dp_sec_port_6_acl.yaml
 faucet.log
 faucet.yaml
 finish.out
@@ -177,12 +174,10 @@ No report diff
 inst/gw01/nodes/gw01/activate.log
 inst/gw02/nodes/gw02/activate.log
 inst/gw03/nodes/gw03/activate.log
-inst/run-port-01/nodes/discover01/activate.log
 inst/run-port-01/nodes/fail01/activate.log
 inst/run-port-01/nodes/nmap01/activate.log
 inst/run-port-01/nodes/pass01/activate.log
 inst/run-port-01/nodes/ping01/activate.log
-inst/run-port-02/nodes/discover02/activate.log
 inst/run-port-02/nodes/fail02/activate.log
 inst/run-port-02/nodes/hold02/activate.log
 inst/run-port-02/nodes/nmap02/activate.log
