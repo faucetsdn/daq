@@ -68,7 +68,7 @@
         "asset"
       ]
     },
-    "auxiliary": {
+    "aux": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
