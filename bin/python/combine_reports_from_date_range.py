@@ -101,13 +101,14 @@ if __name__ == '__main__':
     CONFIGURATOR = configurator.Configurator()
     CONFIG = CONFIGURATOR.parse_args(sys.argv)
     GCP = None
-    if CONFIG.get('gcp_cred') and CONFIG.get('use_gcp'):
+    if CONFIG.get('gcp_cred') and CONFIG.get('from_gcp'):
         GCP = GcpManager(CONFIG, None)
     assert all([attr in CONFIG for attr in ('from_time', 'to_time', 'device')]), """
+Combines reports under inst/reports(default) or from GCP
 Usage: combine_reports_from_date_range.py device=xx:xx:xx:xx:xx:xx
        [from_time='YYYY-MM-DDThh:mm:ss']
        [to_time='YYYY-MM-DDThh:mm:ss']
-       [use_gcp='true']
+       [from_gcp='true']
        local/system.yaml"""
     FROM_TIME = datetime.datetime.fromisoformat(CONFIG.get('from_time')).replace(tzinfo=None)
     TO_TIME = datetime.datetime.fromisoformat(CONFIG.get('to_time')).replace(tzinfo=None)
