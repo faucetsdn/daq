@@ -97,5 +97,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
         combine_reports_from_date_range._render_results.assert_called()
         call_args = combine_reports_from_date_range._render_results.call_args[0][0]
         assert self._dict_compare(call_args, expected_results)
+
+
 if __name__ == '__main__':
     unittest.main()
