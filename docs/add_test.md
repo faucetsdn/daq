@@ -25,11 +25,11 @@ The _switches_ test is configured in the `misc/all_tests.conf` file. To add a ne
 should be a parallel structure, starting with a `build.conf` entry pointing to the new test
 specification.
 
-An example `flaky` test is included as a tutorial primer. To configure, do the following steps
+A setup for the `pass` test, as an example, woud be configured as follows
 (assuming a clean starting point):
 * `mkdir -p local/docker` -- Make local directories.
 * `cp misc/local_tests.conf local/` -- Copy the example test configuraiton file.
-* `cp misc/Dockerfile.test_flaky local/docker/` -- Copy the example Docker file to build directory.
+* `cp misc/Dockerfile.test_pass local/docker/` -- Copy the example Docker file to build directory.
 * `cp misc/system_base.conf local/system.conf` -- Create local version of system.conf file.
 * `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
 

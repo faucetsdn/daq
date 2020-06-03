@@ -4,6 +4,6 @@ RUN $AG update && $AG install nmap netcat jq
 
 RUN $AG update && $AG install ethtool netcat curl
 
-COPY misc/test_hold .
+COPY docker/include/bin/test_hold .
 
 CMD ./test_hold

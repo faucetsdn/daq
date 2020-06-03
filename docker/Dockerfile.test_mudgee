@@ -13,6 +13,6 @@ RUN bin/retry_cmd git clone https://github.com/grafnu/mudgee.git --single-branch
 
 RUN cd mudgee && ../bin/retry_cmd mvn clean install
 
-COPY misc/test_mudgee .
+COPY docker/include/bin/test_mudgee .
 
 CMD ./test_mudgee

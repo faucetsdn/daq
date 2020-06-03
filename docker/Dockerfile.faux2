@@ -21,7 +21,7 @@ RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv re
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
 
 # Basic faux stuff
-COPY misc/start_faux misc/failing bin/
+COPY docker/include/bin/start_faux docker/include/bin/failing bin/
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
