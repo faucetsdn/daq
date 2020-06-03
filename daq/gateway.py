@@ -110,8 +110,8 @@ class Gateway():
 
     def _scan_finalize(self, forget=True):
         if self._scan_monitor:
-            nclosed = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
-            assert nclosed == forget, 'forget and nclosed mismatch'
+            active = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
+            assert active == forget, 'forget and active mismatch'
             if forget:
                 self.runner.monitor_forget(self._scan_monitor.stream())
                 self._scan_monitor.terminate()

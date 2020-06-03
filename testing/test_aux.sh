@@ -141,7 +141,7 @@ fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num | head -n 100
+    docker logs daq-faux-$num 2>&1 | head -n 100
 done
 echo done with docker logs
 
@@ -199,7 +199,7 @@ include: misc/system_base.yaml
 port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF
-monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 2; sudo ifconfig faux up"
+monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 5; sudo ifconfig faux up"
 monitor_log "Target port 1 test hold running" "sudo ifconfig faux down"
 cmd/run -s -k
 disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
