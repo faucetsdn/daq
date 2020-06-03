@@ -2,12 +2,15 @@ package daq.pubber;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import daq.udmi.Entry;
 import daq.udmi.Message;
 import daq.udmi.Message.Pointset;
 import daq.udmi.Message.PointsetState;
-import daq.udmi.Report;
 import daq.udmi.Message.State;
-import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,8 +24,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Pubber {
 
