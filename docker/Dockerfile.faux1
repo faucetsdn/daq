@@ -36,10 +36,10 @@ COPY subset/network/TransportClient TransportClient
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
 
-COPY misc/start_faux misc/failing bin/
+COPY docker/include/bin/start_faux docker/include/bin/failing bin/
 
 COPY --from=java_build /root/bacnet4j/*.jar bacnet4j/
-COPY misc/bacnet_discover bin/
+COPY docker/include/bin/bacnet_discover bin/
 
 COPY --from=java_build /root/pubber/build/libs/*.jar pubber/build/libs/
 COPY pubber/bin/run pubber/bin/
