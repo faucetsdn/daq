@@ -15,9 +15,9 @@ from forch import faucetizer
 LOGGER = logger.get_logger('network')
 
 
+# pylint: disable=too-few-public-methods
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
-    # pylint: disable=too-few-public-methods
 
 
 class DummyNode:
