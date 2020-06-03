@@ -12,6 +12,8 @@ from gcp import GcpManager
 from report import MdTable
 
 LOGGER = logger.get_logger('combine_reports_from_date_range')
+
+
 def _reduce_labels(sets):
     return sorted(functools.reduce(lambda cur, acc: acc.union(cur), sets, set()))
 
@@ -46,11 +48,11 @@ def _render_results(results):
 
 def _get_local_reports(device, reports_dir, start, end):
     LOGGER.info('Looking for reports locally')
-    prog = re.compile(r'^report_%s_\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}.*\.json$' % device)
-    ts = re.compile(r'\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}')
-    json_files = [f for f in os.listdir(reports_dir) if prog.match(f)]
+    report_re = re.compile(r'^report_%s_\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}.*\.json$' % device)
+    ts_re = re.compile(r'\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}')
+    json_files = [f for f in os.listdir(reports_dir) if report_re.match(f)]
     for json_file in json_files:
-        timestamp = ts.search(json_file).group(0) 
+        timestamp = ts_re.search(json_file).group(0)
         start_str = start.isoformat().replace(':', '') if start else None
         end_str = end.isoformat().replace(':', '') if end else None
         if (start_str and timestamp < start_str) or (end_str and timestamp > end_str):
@@ -61,6 +63,8 @@ def _get_local_reports(device, reports_dir, start, end):
             yield json.loads(json_file_handler.read())
 
 def main(device, start=None, end=None, gcp=None, reports_dir=os.path.join('inst', 'reports')):
+    # pylint: disable=too-many-locals
+    """Main script function"""
     aggregate = {'tests': {}, 'categories': {}, 'missing': {}}
     device = device.replace(':', '').lower()
     if gcp:
@@ -97,12 +101,13 @@ if __name__ == '__main__':
     CONFIGURATOR = configurator.Configurator()
     CONFIG = CONFIGURATOR.parse_args(sys.argv)
     GCP = None
-    if CONFIG.get('gcp_cred'):
+    if CONFIG.get('gcp_cred') and CONFIG.get('use_gcp'):
         GCP = GcpManager(CONFIG, None)
     assert all([attr in CONFIG for attr in ('from_time', 'to_time', 'device')]), """
 Usage: combine_reports_from_date_range.py device=xx:xx:xx:xx:xx:xx
        [from_time='YYYY-MM-DDThh:mm:ss']
        [to_time='YYYY-MM-DDThh:mm:ss']
+       [use_gcp='true']
        local/system.yaml"""
     FROM_TIME = datetime.datetime.fromisoformat(CONFIG.get('from_time')).replace(tzinfo=None)
     TO_TIME = datetime.datetime.fromisoformat(CONFIG.get('to_time')).replace(tzinfo=None)
