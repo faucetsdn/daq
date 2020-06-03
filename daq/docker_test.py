@@ -41,21 +41,18 @@ class DockerTest:
         self.callback = callback
         self._finish_hook = finish_hook
 
-        env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
-                                    "TARGET_IP=" + params['target_ip'],
-                                    "TARGET_MAC=" + params['target_mac'],
-                                    "GATEWAY_IP=" + params['gateway_ip'],
-                                    "GATEWAY_MAC=" + params['gateway_mac']]
-
         def opt_param(key):
-            return params.get(key) or ''
+            return params.get(key) or ''  # Substitute empty string for None
 
-        env_vars += ["LOCAL_IP=" + opt_param('local_ip'),
-                     "SWITCH_PORT=" + opt_param('switch_port'),
-                     "SWITCH_IP=" + opt_param('switch_ip'),
-                     "SWITCH_MODEL=" + opt_param('switch_model'),
-                     "SWITCH_USERNAME=" + opt_param('switch_username'),
-                     "SWITCH_PASSWORD=" + opt_param('switch_password')]
+        env_vars = self.env_vars + [
+            "TARGET_NAME=" + self.host_name,
+            "TARGET_IP=" + params['target_ip'],
+            "TARGET_MAC=" + params['target_mac'],
+            "TARGET_PORT=" + opt_param('target_port'),
+            "GATEWAY_IP=" + params['gateway_ip'],
+            "GATEWAY_MAC=" + params['gateway_mac'],
+            "LOCAL_IP=" + opt_param('local_ip'),
+            ]
 
         vol_maps = [params['scan_base'] + ":/scans"]
         self._map_if_exists(vol_maps, params, 'inst')
@@ -75,6 +72,7 @@ class DockerTest:
         except Exception as e:
             # pylint: disable=no-member
             raise wrappers.DaqException(e)
+
         try:
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             pipe = host.activate(log_name=None)
@@ -90,7 +88,7 @@ class DockerTest:
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
                 LOGGER.error('Target port %d will induce callback failure', self.target_port)
-                # Closing this now will cause error when attempting to write outoput.
+                # Closing this now will cause error when attempting to write output.
                 self.docker_log.close()
         except Exception as e:
             host.terminate()

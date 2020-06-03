@@ -3,6 +3,6 @@ FROM daqf/aardvark:latest
 RUN $AG update && $AG install netcat
 
 COPY resources/setups/baseline/module_manifest.json .
-COPY misc/test_ping .
+COPY docker/include/bin/test_ping .
 
 CMD ./test_ping

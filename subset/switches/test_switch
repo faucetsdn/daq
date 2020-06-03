@@ -5,20 +5,26 @@ LOCAL_REPORT=tmp/report.txt
 MANIFEST=./module_manifest.json
 MONO_LOG=/tmp/monolog.switch.txt
 RESULT_LINES=/tmp/results.switch.txt
+MODULE_CONFIG=/config/device/module_config.json
 
 # Setup for accessing control plane switch. If LOCAL_IP is defined, which
 # is the intended local address for this node on the control plane then
 # SWITCH_IP will be the IP address of the OpenFlow switch.
 
 if [ -n "$LOCAL_IP" ]; then
+    SWITCH_IP=`jq -r .run_info.switch.ip $MODULE_CONFIG`
+    SWITCH_MODEL=`jq -r .run_info.switch.model $MODULE_CONFIG`
+    SWITCH_USERNAME=`jq -r .run_info.switch.username $MODULE_CONFIG`
+    SWITCH_PASSWORD=`jq -r .run_info.switch.password $MODULE_CONFIG`
+
     echo Configuring network with local address $LOCAL_IP.
     ip addr add $LOCAL_IP dev `hostname`-eth0
     echo Switch test with model $SWITCH_MODEL
-    echo Switch test with ip:port $SWITCH_IP:$SWITCH_PORT
+    echo Switch test with ip:port $SWITCH_IP:$TARGET_PORT
     echo Switch test with username:password $SWITCH_USERNAME:$SWITCH_PASSWORD
     ping -n -c 10 $SWITCH_IP
-    POE_ENABLED=`jq -r .modules.switch.poe.enabled /config/device/module_config.json`
-    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $SWITCH_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
+    POE_ENABLED=`jq -r .modules.switch.poe.enabled $MODULE_CONFIG`
+    java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $SWITCH_IP $TARGET_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
 
     grep -v "RESULT" $LOCAL_REPORT | tee -a $MONO_LOG
     grep "RESULT" $LOCAL_REPORT | tee -a $RESULT_LINES

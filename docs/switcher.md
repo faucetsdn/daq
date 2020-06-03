@@ -9,7 +9,7 @@ In addition to the `ext_ofip` and `ext_addr` config values, setting
 to a pattern for the test container IP, e.g. `192.0.3.%d/24`, where
 the `%d` will be automaticaly replaced with test port set number.
 Doing this causes the `LOCAL_IP` and `SWITCH_IP` env variables to be set in
-test containers. See `misc/test_ping` for an example of how to use them.
+test containers. See `docker/include/bin/test_ping` for an example of how to use them.
 
 If `ext_ctrl` is defined, then this will enable utilization of the actual physical
 switch. If `ext_ctrl` is _not_ defined, then the system will spin up a special
