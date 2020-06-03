@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+source venv/bin/activate
+
+PYTHONPATH=daq python bin/python/combine_reports_from_date_range.py $@ local/system.yaml

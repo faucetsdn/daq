@@ -256,8 +256,7 @@ class GcpManager:
         LOGGER.info('Looking for reports...')
         origins = self._firestore.collection(u'origin').stream()
         for origin in origins:
-            query = origin.reference.collection('runid')\
-                     .where('deviceId', '==', device)
+            query = origin.reference.collection('runid').where('deviceId', '==', device)
             if start:
                 query = query.where('updated', '>=', to_timestamp(start))
             if end:
@@ -265,12 +264,12 @@ class GcpManager:
             runids = query.stream()
             for runid in runids:
                 doc = runid.reference.collection('test').document('term').get().to_dict()
-                if not doc or doc.get('json_path'): 
+                if not doc or doc.get('json_path'):
                     continue
                 bucket = self._storage.get_bucket(self._report_bucket_name)
                 blob = bucket.blob(doc.get('json_path'))
-                json_report = json.loads(str(blob.download_as_string(), 'utf-8'))     
-                yield json_report 
+                json_report = json.loads(str(blob.download_as_string(), 'utf-8'))
+                yield json_report
 
     def _query_user(self, message):
         reply = input(message)
@@ -287,11 +286,5 @@ if __name__ == '__main__':
     GCP = GcpManager(CONFIG, None)
     if CONFIG.get('register_offenders'):
         GCP.register_offenders()
-    elif CONFIG.get('combine_reports'):
-        assert all(map(lambda attr: attr in CONFIG, ('from_time', 'to_time', 'device'))), \
-            "Missing arguments."
-        FROM_TIME = datetime.datetime.fromisoformat(CONFIG.get('from_time'))
-        TO_TIME = datetime.datetime.fromisoformat(CONFIG.get('to_time'))
-        GCP.combine_reports_from_date_range(FROM_TIME, TO_TIME, CONFIG.get('device'))
     else:
         print('Unknown command mode for gcp module.')

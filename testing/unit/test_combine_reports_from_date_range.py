@@ -8,7 +8,8 @@ from datetime import datetime
 from unittest.mock import MagicMock, mock_open, patch
 
 import daq
-from daq.combine_reports_from_date_range import _render_results, main, os
+import combine_reports_from_date_range
+from combine_reports_from_date_range import _render_results, main, os
 from daq.report import MdTable
 
 class TestCombineReportsFromDateRange(unittest.TestCase):
@@ -80,7 +81,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
                 raise Exception(report + ' is not expected')
             return mock_open(read_data=self.mocks[mock_name]).return_value
 
-        daq.combine_reports_from_date_range._render_results = MagicMock(return_value="fake results")
+        combine_reports_from_date_range._render_results = MagicMock(return_value="fake results")
         with patch("builtins.open", new=custom_open):
             main('device1', start=datetime.fromisoformat('2020-05-29')) 
         expected_results = {'tests': {
@@ -93,8 +94,8 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
             }, 'missing': {
                 'missing.test.1': 1
             }}
-        daq.combine_reports_from_date_range._render_results.assert_called()
-        call_args = daq.combine_reports_from_date_range._render_results.call_args[0][0]
+        combine_reports_from_date_range._render_results.assert_called()
+        call_args = combine_reports_from_date_range._render_results.call_args[0][0]
         assert self._dict_compare(call_args, expected_results)
 if __name__ == '__main__':
     unittest.main()
