@@ -1,0 +1,41 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+cleanup_file=inst/exrun_cleanup.sh
+CFILE=inst/config/system.conf
+regex='^interfaces\.(.+)\.opts=(.*)$'
+
+echo Autostarting system components...
+
+function autostart {
+    tmp=`mktemp`
+    echo DAQ autostart $@
+    eval $@ | tee $tmp
+    grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file || true
+}
+
+function start_faux {
+    iface=$1
+    opts=$2
+    if [ "$opts" == None ]; then
+        opts=
+    fi
+    if [ $iface == faux ]; then
+        autostart cmd/faux $opts
+    elif [[ $iface =~ faux-(.*) ]]; then
+        inst=${BASH_REMATCH[1]}
+        autostart cmd/faux $inst $opts
+    else
+        autostart cmd/faux :$iface $opts
+    fi
+}
+
+iopts=`egrep $regex $CFILE`
+for iopt in $iopts; do
+    [[ $iopt =~ $regex ]]
+    iface=${BASH_REMATCH[1]}
+    opts=${BASH_REMATCH[2]}
+    start_faux $iface $opts
+done
