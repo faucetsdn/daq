@@ -18,13 +18,14 @@ function autostart {
 
 function start_faux {
     iface=$1
-    opts=$2
+    shift
+    opts="$@"
     if [ "$opts" == None ]; then
         opts=
     fi
     if [ $iface == faux ]; then
         autostart cmd/faux $opts
-    elif [[ $iface =~ faux-(.*) ]]; then
+    elif [[ $iface =~ faux_(.*) ]]; then
         inst=${BASH_REMATCH[1]}
         autostart cmd/faux $inst $opts
     else
@@ -39,8 +40,8 @@ for iopt in $iopts; do
     key=${BASH_REMATCH[3]}
     val=${BASH_REMATCH[3]}
     if [ "$key" = opts ]; then
-        start_faux $iface $val
+        start_faux $iface "$val"
     elif [ "$key" = port ]; then
-        autostart bin/bridge_link ext-ovs $iface $val
+        autostart bin/bridge_link ext-ovs $iface "$val"
     fi
 done
