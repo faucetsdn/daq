@@ -27,7 +27,7 @@ function generate {
   done
 
   # Specify a different set of tests
-  echo host_tests=misc/topo_tests.conf >> local/system.conf
+  echo host_tests=config/modules/topo.conf >> local/system.conf
 
   echo site_description=\"$type with $devices devices\" >> local/system.conf
   echo device_specs=misc/device_specs/topo_$type.json >> local/system.conf

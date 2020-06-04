@@ -7,7 +7,7 @@ fi
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-source misc/config_base.sh
+source bin/config_base
 
 iprefix=ctrl
 ctrl_bridge=${iprefix}-br

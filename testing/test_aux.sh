@@ -56,7 +56,7 @@ cp -r misc/test_site/mac_addrs local/site/
 cat <<EOF > local/system.yaml
 ---
 include: misc/system_all.conf
-finish_hook: misc/dump_network.sh
+finish_hook: bin/dump_network
 test_config: misc/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
@@ -182,7 +182,7 @@ MARKER=inst/run-port-03/nodes/hold03/activate.log
 monitor_marker $MARKER "kill_gateway gw03"
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting hold test run
-cmd/run -k -s finish_hook=misc/dump_network.sh
+cmd/run -k -s finish_hook=bin/dump_network
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 find inst/ -name activate.log | sort | tee -a $TEST_RESULTS

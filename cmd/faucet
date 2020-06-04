@@ -14,7 +14,7 @@ docker_volumes=
 port_opts=
 
 cd $ROOT
-source misc/config_base.sh
+source bin/config_base
 
 if [ -n "$switch_setup_lo_port" ]; then
     faucet_pt=$switch_setup_lo_port

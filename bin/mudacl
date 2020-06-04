@@ -13,7 +13,7 @@ port_acls=inst/port_acls
 cd $ROOT
 mudacl/bin/test.sh
 
-source misc/config_base.sh
+source bin/config_base
 
 if [ $# -gt 0 ]; then
     echo Unexpected command line argument: $*

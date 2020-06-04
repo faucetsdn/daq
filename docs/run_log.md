@@ -90,7 +90,7 @@ Reading config from /home/username/daq/local/system.conf
 Reading config from misc/system.conf
 processing arg: -s
 base_conf=misc/module_config.json
-host_tests=misc/all_tests.conf
+host_tests=config/modules/all.conf
 intf_names=faux-1,faux-2,faux-3
 schema_path=schemas/udmi/
 sec_port=4
@@ -102,8 +102,8 @@ INFO:daq:pid is 231826
 INFO:gcp:No gcp_cred credential specified in config
 INFO:config:Loading config from misc/module_config.json
 INFO:config:Skipping missing local/site/module_config.json
-INFO:runner:Reading test definition file misc/all_tests.conf
-INFO:runner:Reading test definition file misc/host_tests.conf
+INFO:runner:Reading test definition file config/modules/all.conf
+INFO:runner:Reading test definition file config/modules/host.conf
 INFO:runner:Reading test definition file subset/pentests/build.conf
 INFO:runner:Reading test definition file subset/switches/build.conf
 INFO:runner:Reading test definition file subset/connection/build.conf
