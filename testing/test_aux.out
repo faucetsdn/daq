@@ -10,7 +10,7 @@ RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic The devices matches the PICS
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
-RESULT skip security.tls.v1 IOException unable to connect to server
+RESULT skip security.tls.v1 IOException unable to connect to server 
 RESULT skip security.tls.v1.x509 IOException unable to connect to server
 RESULT skip security.tls.v1_2 IOException unable to connect to server
 RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
@@ -161,7 +161,7 @@ port-02 module_config modules
   `\.-''__.-' \ (     \_
     `'''       `\__   /\
                 ')
-Host: X.X.X.X ()        Status: Up
+Host: X.X.X.X ()   Status: Up
 Host: X.X.X.X ()        Ports: 47808/closed/udp//bacnet///      Ignored State: closed (3)
 Redacted docs diff
 No report diff
