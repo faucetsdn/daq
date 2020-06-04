@@ -40,9 +40,6 @@ message DaqConfig {
   // Access switch setup information
   SwitchSetup switch_setup = 9;
 
-  // Command file with startup commands.
-  string startup_cmds = 15;
-
   // Specify explicit host test configuration.
   string host_tests = 16;
 

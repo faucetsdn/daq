@@ -5,7 +5,7 @@ cd $ROOT
 
 cleanup_file=inst/exrun_cleanup.sh
 CFILE=inst/config/system.conf
-regex='^interfaces\.(.+)\.opts=(.*)$'
+regex='^interfaces\.(.+)\.(.*)=(.*)$'
 
 echo Autostarting system components...
 
@@ -36,6 +36,11 @@ iopts=`egrep $regex $CFILE`
 for iopt in $iopts; do
     [[ $iopt =~ $regex ]]
     iface=${BASH_REMATCH[1]}
-    opts=${BASH_REMATCH[2]}
-    start_faux $iface $opts
+    key=${BASH_REMATCH[3]}
+    val=${BASH_REMATCH[3]}
+    if [ "$key" = opts ]; then
+        start_faux $iface $val
+    elif [ "$key" = port ]; then
+        autostart bin/bridge_link ext-ovs $iface $val
+    fi
 done

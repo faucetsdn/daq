@@ -4,15 +4,23 @@ source testing/test_preamble.sh
 
 echo DHCP Tests >> $TEST_RESULTS
 
+cat <<EOF > local/startup.cmd
+autostart cmd/faux 1
+autostart cmd/faux 2 xdhcp
+autostart cmd/faux 3
+autostart cmd/faux 4
+EOF
+
 cat <<EOF > local/system.conf
 source misc/system.conf 
 site_description="Multi-Device Configuration"
 switch_setup.uplink_port=5
 interfaces.faux-1.opts=
-interfaces.faux-2.opts=xdhcp
+interfaces.faux-2.opts=
 interfaces.faux-3.opts=
 interfaces.faux-4.opts=
 monitor_scan_sec=1
+startup_cmds=local/startup.cmd
 EOF
 
 intf_mac="9a02571e8f03"
