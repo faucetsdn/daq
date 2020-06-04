@@ -16,6 +16,3 @@ site_description: "Baseline Configuration"
 interfaces:
   faux:
     opts:
-
-# Command file with startup commands.
-startup_cmds: misc/startup_base.cmd

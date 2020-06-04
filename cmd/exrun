@@ -113,7 +113,7 @@ if [ -z "$skip_autostart" ]; then
         echo Sourcing $startup_cmds...
         source $startup_cmds
     else
-        cmd/autostart
+        cmd/auto
     fi
 fi
 
