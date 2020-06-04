@@ -108,9 +108,13 @@ done
 
 export DAQ_SUPPRESS_PHY_SETUP=y
 
-if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
-    echo Sourcing $startup_cmds...
-    source $startup_cmds
+if [ -z "$skip_autostart" ]; then
+    if [ -n "$startup_cmds" ]; then
+        echo Sourcing $startup_cmds...
+        source $startup_cmds
+    else
+        cmd/autostart
+    fi
 fi
 
 if [ -f .pdbrc ]; then
