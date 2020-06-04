@@ -3,7 +3,7 @@ source reporting.sh
 
 RESULT_LINES=/tmp/result_lines.txt
 MONO_LOG=/tmp/mono-log.txt
-MANIFEST=./module_manifest.json
+MANIFEST=module_manifest.json
 REPORT_FILE=/tmp/report.txt
 MODULE_CONFIG=/config/device/module_config.json
 status=pass

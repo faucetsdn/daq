@@ -73,6 +73,7 @@ if [ -f "$base.out" ]; then
     detail=`head -n 1 $base.out`
 elif [ -f "$base.json" ]; then
     result=pass
+    detail="Schema validated"
 else
     result=fail
     detail="No result found"

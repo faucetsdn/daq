@@ -12,5 +12,5 @@ inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "a6e8649a"
 inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "172929e0"
 inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "8f1e9114"
 RESULT skip cloud.udmi.pointset No device id
-RESULT pass cloud.udmi.pointset
+RESULT pass cloud.udmi.pointset 
 RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted
