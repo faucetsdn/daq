@@ -20,8 +20,6 @@ if [ "$STATIC_IP" == null ]; then
     STATIC_IP=
 fi
 
-echo TARGET_PORT=$TARGET_PORT | cat -vet
-
 if [ -n "$STATIC_IP" ]; then
     echo RESULT skip base.startup.dhcp Using static ip $STATIC_IP | tee -a $RESULT_LINES
 else
@@ -60,7 +58,7 @@ if [ -n "$LOCAL_IP" ]; then
     # Delete any local arp entry, to force a re-arp
     arp -d $SWITCH_IP || true
 
-    echo Switch test with target $SWITCH_IP:$TARGET_PORT | tee -a $MONO_LOG
+    echo Switch test with target $SWITCH_IP:$TARGET_PORT x | tee -a $MONO_LOG
     local_status=pass
     ping -n -c 10 $SWITCH_IP || local_status=fail
     echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$TARGET_PORT | tee -a $RESULT_LINES
