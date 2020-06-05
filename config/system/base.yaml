@@ -7,7 +7,7 @@
 # startup of the faux test device.
 
 # Load defaults.
-include: misc/system.yaml
+include: config/system/system.yaml
 
 # Description for dashboard.
 site_description: "Baseline Configuration"

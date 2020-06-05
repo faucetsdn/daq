@@ -30,7 +30,7 @@ A setup for the `pass` test, as an example, woud be configured as follows
 * `mkdir -p local/docker` -- Make local directories.
 * `cp config/modules/local.conf local/` -- Copy the example test configuraiton file.
 * `cp docker/Dockerfile.test_pass local/docker/` -- Copy the example Docker file to build directory.
-* `cp misc/system_base.conf local/system.conf` -- Create local version of system.conf file.
+* `cp config/system/base.conf local/system.conf` -- Create local version of system.conf file.
 * `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
 
 This, of course, only works for local development when using the `local_tests.conf` config. To
@@ -101,8 +101,8 @@ different places that are dynamically mapped into the system at runtime:
 * `/config/device`: Device-specific customizations from `{site_path}/mac_addrs/{device_mac}/aux/`.
 * `/config/port`: Switch-port customizations from `inst/runtime_conf/port-##/`.
 * `/config/type`: Device-type customizations from `{site_path}/device_types/{device_type}/aux/`.
-  * See `misc/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
-  * See `misc/test_site/device_types/rocket/` for an example device type.
+  * See `resources/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
+  * See `resources/test_site/device_types/rocket/` for an example device type.
   * See `qualification/*` for more detailed examples of test configuration files.
 
 ## Test Development Philosophy

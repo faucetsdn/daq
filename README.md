@@ -52,7 +52,6 @@ The top-level DAQ folders correspond to the following structure:
 * _`inst/`_: Install directory for specific runtime contents.
 * **`local/`**: Local setup and config information.
 * _`mininet/`_: Local version of the mininet virtual network host framework.
-* `misc/`: Miscellaneous support files.
 * `mudacl/`: Utilities for managing and testing MUD network files.
 * `mud_files/`: Examples and prototype device MUD files.
 * _`out/`_: Misc transitory output files.

@@ -140,7 +140,7 @@ add_iface corp 1 faux-3
 echo Starting faucet instances...
 sudo rm -rf inst/faucet
 mkdir -p inst/faucet/daq-faucet-corp
-cp misc/corp_$mode.yaml inst/faucet/daq-faucet-corp/faucet.yaml
+cp topology/corp-$mode/faucet.yaml inst/faucet/daq-faucet-corp/faucet.yaml
 docker kill daq-faucet-corp || true
 sudo modprobe bonding
 cmd/faucet corp 6683

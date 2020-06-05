@@ -11,7 +11,7 @@ Device descriptions are simple text files indexed by MAC address included in gen
 reports. Located by default in directory
 <code>local/site/mac_addrs/<em>macaddressXX</em>/aux</code>,
 they are copied unmodified into the report. See
-[`misc/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt`](../misc/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt)
+[`resources/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt`](../resources/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt)
 for an example. The base site directory (`local/site`) is configurable by the
 `site_path` config parameter.
 
@@ -19,7 +19,7 @@ for an example. The base site directory (`local/site`) is configurable by the
 
 Devices can be grouped together for testing by using a "device specification"
 file that is indexed by the `device_specs` configuration parameter. See
-`misc/device_specs` folder for baseline examples (used for regression tests).
+`resources/device_specs` folder for baseline examples (used for regression tests).
 
 The basic structure is indexed by device MAC address, with a few basic fields:
 
@@ -45,7 +45,7 @@ be in the same group and have compatible _type_ parameters applied.
 ## Device Topologies
 
 Specific flows can be setup between devices using a specification like the example
-in [device_specs_bacnet_star.json](../misc/device_specs_bacnet_star.json). Devices
+in [device_specs_bacnet_star.json](../resources/device_specs/bacnet_star.json). Devices
 (specified by MAC addresses) can be linked together through their corresponding
 MUD files. For example, the existence of the JSON path object:
 

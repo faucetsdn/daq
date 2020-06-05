@@ -20,10 +20,10 @@ function make_pubber {
     echo Creating $device with $fail/$gateway in $local_dir
     mkdir -p $local_dir
     if [ "$gateway" == null ]; then
-        cp misc/test_site/devices/$device/rsa_private.pkcs8 $local_dir
+        cp resources/test_site/devices/$device/rsa_private.pkcs8 $local_dir
     else
         gateway_dir=$(sh -c "echo $gateway")
-        cp misc/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
+        cp resources/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
     fi
     cat <<EOF > $local_dir/pubber.json
   {
@@ -45,19 +45,19 @@ function capture_test_results {
 
 # Setup an instance test site
 rm -rf inst/test_site && mkdir -p inst/test_site
-cp -a misc/test_site inst/
+cp -a resources/test_site inst/
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing aux test run
 mkdir -p local/site
-cp -r misc/test_site/device_types/rocket local/site/device_types/
+cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
-cp -r misc/test_site/mac_addrs local/site/
+cp -r resources/test_site/mac_addrs local/site/
 cat <<EOF > local/system.yaml
 ---
-include: misc/system_all.conf
+include: config/system/all.conf
 finish_hook: bin/dump_network
-test_config: misc/runtime_configs/long_wait
+test_config: etc/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
@@ -163,7 +163,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing hold test run
 # Try various exception handling conditions.
 cat <<EOF > local/system.yaml
 ---
-include: misc/system_multi.conf
+include: config/system/multi.conf
 fail_module:
   ping_01: finalize
   hold_02: initialize
@@ -195,7 +195,7 @@ tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
 # Check port toggling does not cause a shutdown
 cat <<EOF > local/system.yaml
 ---
-include: misc/system_base.yaml
+include: config/system/base.yaml
 port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF

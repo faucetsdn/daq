@@ -2,7 +2,7 @@
 
 LOCAL_YAML=local/system.yaml
 LOCAL_CONF=local/system.conf
-DEFAULT_CONF=${DAQ_CONF:-misc/system_base.yaml}
+DEFAULT_CONF=${DAQ_CONF:-config/system/base.yaml}
 OUT_CONF=inst/config/system.conf
 
 if [ -d venv ]; then

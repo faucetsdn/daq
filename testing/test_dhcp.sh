@@ -12,7 +12,7 @@ autostart cmd/faux 4
 EOF
 
 cat <<EOF > local/system.conf
-source misc/system.conf 
+source config/system/system.conf
 site_description="Multi-Device Configuration"
 switch_setup.uplink_port=5
 interfaces.faux-1.opts=

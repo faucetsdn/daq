@@ -10,7 +10,7 @@ NUM_NO_DHCP_DEVICES=4
 NUM_TIMEOUT_DEVICES=2
 echo Many Tests >> $TEST_RESULTS
 
-echo source misc/system.conf > local/system.conf
+echo source config/system/system.conf > local/system.conf
 
 manystartup=inst/startup_many.cmd
 rm -f $manystartup
