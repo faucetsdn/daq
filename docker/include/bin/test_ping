@@ -10,7 +10,9 @@ status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
 # This is a check that the startup.pcap file exists and is proper.
-tcpdump -en -r /scans/startup.pcap ip
+#tcpdump -en -r /scans/startup.pcap ip
+
+echo Switch ping test start | tee -a $RESULT_LINES
 
 echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
@@ -104,5 +106,6 @@ cat -vet $MONO_LOG
 echo RESULT_LINES
 cat -vet $RESULT_LINES
 
+echo Switch ping test end | tee -a $RESULT_LINES
 echo Critical module status is $status
 [ "$status" == pass ]

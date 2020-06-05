@@ -76,7 +76,7 @@ ls -l $GOLDEN_FILE $TEST_RESULTS || true
 exit_code=0
 echo
 echo Test results $TEST_RESULTS
-cat -vet $TEST_RESULTS
+cat $TEST_RESULTS
 echo
 echo Comparing $GOLDEN_FILE against $TEST_RESULTS
 diff $GOLDEN_FILE $TEST_RESULTS | cat -vet || exit_code=1
