@@ -57,7 +57,7 @@ cat <<EOF > local/system.yaml
 ---
 include: config/system/all.conf
 finish_hook: bin/dump_network
-test_config: etc/runtime_configs/long_wait
+test_config: resources/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:

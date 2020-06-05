@@ -46,6 +46,7 @@ The top-level DAQ folders correspond to the following structure:
 * `daq/`: Python source for DAQ runtime.
 * `docker/`: Docker build files for DAQ components and tests.
 * `docs/`: Documentation.
+* `etc/`: Version files and external switch setup files.
 * _`faucet/`_: Dynamically downloaded version of SDN controller.
 * `firebase/`: Hosted pages and functions for web dashboard.
 * `functions/`: Additional Cloud Functions for data processing.
@@ -56,6 +57,7 @@ The top-level DAQ folders correspond to the following structure:
 * `mud_files/`: Examples and prototype device MUD files.
 * _`out/`_: Misc transitory output files.
 * `pubber/`: Sample code for generating cloud-ingest traffic.
+* `resources/`: Templates for reports, module configs, test-site definitions.
 * `schemas/`: Device/cloud data exchange schemas.
 * `subset/`: Subsets of device tests (e.g. penetration tests).
 * `testing/`: Scripts for system continuous integration testing.
