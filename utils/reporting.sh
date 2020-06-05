@@ -43,7 +43,7 @@ function write_out_monolog() {
 
     echo $_______REPORT_DIVIDER | tee -a $_REPORT
     cat $_MONO_LOG | tee -a $_REPORT
-    echo | tee -a $_REPORT
+    echo x | tee -a $_REPORT
 
     for test_name in "${_TEST_ARR[@]}";
         do
