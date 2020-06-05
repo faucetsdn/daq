@@ -3,16 +3,14 @@ source reporting.sh
 
 RESULT_LINES=/tmp/result_lines.txt
 MONO_LOG=/tmp/mono-log.txt
-MANIFEST=module_manifest.json
+MANIFEST=./module_manifest.json
 REPORT_FILE=/tmp/report.txt
 MODULE_CONFIG=/config/device/module_config.json
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
 # This is a check that the startup.pcap file exists and is proper.
-#tcpdump -en -r /scans/startup.pcap ip
-
-echo Switch ping test start | tee -a $RESULT_LINES
+tcpdump -en -r /scans/startup.pcap ip
 
 echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
@@ -63,7 +61,7 @@ if [ -n "$LOCAL_IP" ]; then
     echo Switch test with target $SWITCH_IP:$TARGET_PORT | tee -a $MONO_LOG
     local_status=pass
     ping -n -c 10 $SWITCH_IP || local_status=fail
-    echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$TARGET_PORT| tee -a $RESULT_LINES
+    echo RESULT $local_status base.switch.ping target %% $SWITCH_IP:$TARGET_PORT | tee -a $RESULT_LINES
     if [ $local_status != pass ]; then
         status=fail
     fi
@@ -101,11 +99,5 @@ write_out_monolog $REPORT_FILE \
                   $MONO_LOG \
                   $RESULT_LINES
 
-echo MONO_LOG
-cat -vet $MONO_LOG
-echo RESULT_LINES
-cat -vet $RESULT_LINES
-
-echo Switch ping test end | tee -a $RESULT_LINES
 echo Critical module status is $status
 [ "$status" == pass ]
