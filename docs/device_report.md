@@ -13,7 +13,7 @@
 |------------------|------------------------|
 | Test report start date | XXX |
 | Test report end date   | XXX |
-|
+| 
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -524,3 +524,4 @@ RESULT skip cloud.udmi.pointset No device id
 |enabled|True|
 
 ## Report complete
+
