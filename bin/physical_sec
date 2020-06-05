@@ -54,7 +54,7 @@ sudo ip link set $ctrl_swy address $cplane_mac
 sudo ip link set $ctrl_swx up
 sudo ip link set $ctrl_swy up
 
-echo Creating local bridge...
+echo Creating local bridge $ctrl_bridge...
 sudo ovs-vsctl add-br $ctrl_bridge
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_alt
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_swx

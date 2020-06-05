@@ -166,4 +166,7 @@ message SwitchSetup {
 message Interface {
   // Faux startup command line options.
   string opts = 1;
+
+  // Switch port for attching interface.
+  int32 port = 2;
 }
