@@ -41,6 +41,6 @@ egrep $regex $CFILE | while read iopt; do
     if [ "$key" = opts ]; then
         start_faux $iface $(eval echo $val)
     elif [ "$key" = port ]; then
-        autostart bin/bridge_link ext-ovs $iface $val
+        autostart bin/bridge_link $switch_setup_ext_br $iface $val
     fi
 done
