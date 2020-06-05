@@ -20,6 +20,8 @@ if [ "$STATIC_IP" == null ]; then
     STATIC_IP=
 fi
 
+echo TARGET_PORT=$TARGET_PORT | cat -vae
+
 if [ -n "$STATIC_IP" ]; then
     echo RESULT skip base.startup.dhcp Using static ip $STATIC_IP | tee -a $RESULT_LINES
 else
