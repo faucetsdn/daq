@@ -43,6 +43,7 @@ The top-level DAQ folders correspond to the following structure:
 * `bin/`: System setup and management commands.
 * _`build/`_: Dynamically created directory for build logs.
 * `cmd/`: Primary commands for running DAQ testing.
+* `config/`: System and module configuration files.
 * `daq/`: Python source for DAQ runtime.
 * `docker/`: Docker build files for DAQ components and tests.
 * `docs/`: Documentation.
