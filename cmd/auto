@@ -19,7 +19,7 @@ function autostart {
 function start_faux {
     iface=$1
     shift
-    opts="$@"
+    opts=$@
     if [ "$opts" == None ]; then
         opts=
     fi
@@ -33,15 +33,14 @@ function start_faux {
     fi
 }
 
-iopts=`egrep $regex $CFILE`
-for iopt in $iopts; do
-    [[ $iopt =~ $regex ]]
+egrep $regex $CFILE | while read iopt; do
+    [[ "$iopt" =~ $regex ]]
     iface=${BASH_REMATCH[1]}
     key=${BASH_REMATCH[2]}
     val=${BASH_REMATCH[3]}
     if [ "$key" = opts ]; then
-        start_faux $iface "$val"
+        start_faux $iface $(eval echo $val)
     elif [ "$key" = port ]; then
-        autostart bin/bridge_link ext-ovs $iface "$val"
+        autostart bin/bridge_link ext-ovs $iface $val
     fi
 done
