@@ -42,7 +42,7 @@ function write_out_monolog() {
     mapfile -t _TEST_ARR < <(jq -r 'keys[]' $_MANIFEST)
 
     echo $_______REPORT_DIVIDER | tee -a $_REPORT
-    cat $_MONO_LOG | tee -a $_REPORT
+    cat -vet $_MONO_LOG | tee -a $_REPORT
     echo x | tee -a $_REPORT
 
     for test_name in "${_TEST_ARR[@]}";
