@@ -46,10 +46,10 @@ echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
 rm local/system.yaml
 cp misc/system_ext.conf local/system.conf
 cmd/run -s
-more inst/result.log | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
 fgrep -i switch inst/run-port-02/nodes/ping02/activate.log | tee -a $TEST_RESULTS
-more inst/run-port-02/nodes/ping02/activate.log | cat
+cat -vet inst/run-port-02/nodes/ping02/activate.log
 count=$(fgrep icmp_seq=5 inst/run-port-02/nodes/ping02/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
 
