@@ -35,6 +35,7 @@ _CONFIG_MIGRATIONS = {
     'switch_model': 'switch_setup.model',
     'switch_username': 'switch_setup.username',
     'switch_password': 'switch_setup.password',
+    'startup_cmds': 'interfaces.<iface_name>.opts= (dictionary)',
     'intf_names': 'interfaces.<iface_name>.opts= (dictionary)'
 }
 

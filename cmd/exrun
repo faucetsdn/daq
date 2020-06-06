@@ -76,6 +76,8 @@ docker ps > /dev/null 2>&1 || service docker start
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
+sudo rm -f $cleanup_file
+
 function autostart {
     tmp=`mktemp`
     echo DAQ autostart $@
@@ -93,7 +95,10 @@ if [ -z `which ifconfig` ]; then
     export PATH=/sbin:$PATH
 fi
 
-sudo rm -f $cleanup_file
+if [ -n "$switch_setup_ext_br" ]; then
+    autostart bin/external_ovs
+fi
+
 if [ -n "$switch_setup_ip_addr" ]; then
     autostart bin/physical_sec
 else
@@ -108,9 +113,13 @@ done
 
 export DAQ_SUPPRESS_PHY_SETUP=y
 
-if [ -z "$skip_autostart" -a -n "$startup_cmds" ]; then
-    echo Sourcing $startup_cmds...
-    source $startup_cmds
+if [ -z "$skip_autostart" ]; then
+    if [ -n "$startup_cmds" ]; then
+        echo Sourcing $startup_cmds...
+        source $startup_cmds
+    else
+        cmd/auto $run_args
+    fi
 fi
 
 if [ -f .pdbrc ]; then
