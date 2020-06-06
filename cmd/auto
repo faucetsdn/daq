@@ -2,6 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
+run_args="$@"
 source misc/config_base.sh
 
 cleanup_file=inst/exrun_cleanup.sh
