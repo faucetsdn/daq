@@ -10,7 +10,7 @@ NUM_NO_DHCP_DEVICES=4
 NUM_TIMEOUT_DEVICES=2
 echo Many Tests >> $TEST_RESULTS
 
-echo source misc/system.conf > local/system.conf
+echo source config/system/system.conf > local/system.conf
 
 echo monitor_scan_sec=5 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf

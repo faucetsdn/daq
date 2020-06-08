@@ -1,6 +1,6 @@
 <pre>
 username@hostname:~/daq$ <b>mkdir -p local</b>
-username@hostname:~/daq$ <b>cp misc/system_all.conf local/system.conf</b>
+username@hostname:~/daq$ <b>cp config/system/all.conf local/system.conf</b>
 username@hostname:~/daq$ <b>cmd/run -s</b>
 Activating venv
 Loading config from local/system.conf
@@ -87,10 +87,10 @@ Executing: python3 -u daq/daq.py /home/username/daq/local/system.conf -s
 Prepending /home/username/daq/binhack to PATH
 processing arg: /home/username/daq/local/system.conf
 Reading config from /home/username/daq/local/system.conf
-Reading config from misc/system.conf
+Reading config from config/system/system.conf
 processing arg: -s
-base_conf=misc/module_config.json
-host_tests=misc/all_tests.conf
+base_conf=resources/setups/baseline/module_config.json
+host_tests=config/modules/all.conf
 intf_names=faux-1,faux-2,faux-3
 schema_path=schemas/udmi/
 sec_port=4
@@ -100,10 +100,10 @@ site_path=local/site/
 startup_cmds=misc/startup_multi.cmd
 INFO:daq:pid is 231826
 INFO:gcp:No gcp_cred credential specified in config
-INFO:config:Loading config from misc/module_config.json
+INFO:config:Loading config from resources/setups/baseline/module_config.json
 INFO:config:Skipping missing local/site/module_config.json
-INFO:runner:Reading test definition file misc/all_tests.conf
-INFO:runner:Reading test definition file misc/host_tests.conf
+INFO:runner:Reading test definition file config/modules/all.conf
+INFO:runner:Reading test definition file config/modules/host.conf
 INFO:runner:Reading test definition file subset/pentests/build.conf
 INFO:runner:Reading test definition file subset/switches/build.conf
 INFO:runner:Reading test definition file subset/connection/build.conf

@@ -2,7 +2,7 @@
 
 * look through git log and add new/interesting things to docs/changelog.md
 * e.g. `VERSION=1.3.0`
-* configure with `host_tests=misc/all_tests.conf`
+* configure with `host_tests=config/modules/all.conf`
 * `cmd/build force $VERSION`
 * `cmd/build push`
 * Check generated files:

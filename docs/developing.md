@@ -52,7 +52,7 @@ the triggering line from the `.out` difference should be there as well (search f
 
 Tests can be run locally with something like `sudo testing/test_aux.sh`, and the output
 will be generated into, e.g., `out/test_aux.out`, that can be compared against the
-corresponding golden `.out` file, e.g., `misc/test_aux.out`. Running tests locally is
+corresponding golden `.out` file, e.g., `testing/test_aux.out`. Running tests locally is
 not always 100% exactly the same as running things in a real (against physical devices
 on a physical switch) or CI environment, but in most cases it provides a workable method.
 

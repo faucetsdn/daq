@@ -20,7 +20,7 @@ the switch for unit testing.
 This is a sample test run while using a simulated docker switch container
 along with an 'external' OVS switch as per the automated integration tests.
 <pre>
-~/daq$ <b>cp misc/system_ext.conf local/system.conf</b>
+~/daq$ <b>cp config/system/ext.conf local/system.conf</b>
 ~/daq$ <b>cmd/run -s</b>
 Loading config from local/system.conf
 Starting Sun Dec 23 08:36:09 PST 2018

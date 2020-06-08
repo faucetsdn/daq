@@ -5,13 +5,13 @@ assumed, as specific details are out of scope for this documentation. There are 
 for testing: building the tests, and running them.
 
 Test build configuration is controlled through the configuration parameter `host_tests`,
-which defaults to `misc/host_tests.conf`. That file provides directives used to build tests
+which defaults to `config/modules/host.conf`. That file provides directives used to build tests
 and specify which ones are available at runtime. Explicitly setting this value (e.g. to a
 local file in the `local/` directory) can be used to customize base behavior. Once set,
 both the `cmd/build` and `cmd/run` processes will pick it up.
 
-The `misc/host_tests.conf` specifies the baseline set of tests that is used for basic regression
-integration testing. `misc/all_tests.conf` is used to represent all of the tests available
+The `config/modules/host.conf` specifies the baseline set of tests that is used for basic regression
+integration testing. `config/modules/all.conf` is used to represent all of the tests available
 to the system: more comprehensive, but slower to build and run.
 
 Test _subsets_ should have a simple name that describes the rough idea of the group. Individual
@@ -21,21 +21,21 @@ follow the example set by the `subset/switches` group of tests when adding a new
 
 ## Example Test Setups
 
-The _switches_ test is configured in the `misc/all_tests.conf` file. To add a new test, there
+The _switches_ test is configured in the `config/modules/all.conf` file. To add a new test, there
 should be a parallel structure, starting with a `build.conf` entry pointing to the new test
 specification.
 
 A setup for the `pass` test, as an example, woud be configured as follows
 (assuming a clean starting point):
 * `mkdir -p local/docker` -- Make local directories.
-* `cp misc/local_tests.conf local/` -- Copy the example test configuraiton file.
+* `cp config/modules/local.conf local/` -- Copy the example test configuraiton file.
 * `cp docker/Dockerfile.test_pass local/docker/` -- Copy the example Docker file to build directory.
-* `cp misc/system_base.conf local/system.conf` -- Create local version of system.conf file.
+* `cp config/system/base.conf local/system.conf` -- Create local version of system.conf file.
 * `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
 
 This, of course, only works for local development when using the `local_tests.conf` config. To
 formalize a test and include it in the overal system build it should be included in
-`misc/all_tests.conf`.
+`config/modules/all.conf`.
 
 ## Component Build
 
@@ -67,7 +67,7 @@ Loading config from local/system.conf
 &hellip;
 INFO:gcp:No gcp_cred credential specified in config
 INFO:runner:Reading test definition file <b>local/local_tests.conf</b>
-INFO:runner:Reading test definition file misc/host_tests.conf
+INFO:runner:Reading test definition file config/modules/host.conf
 INFO:runner:<b>Configured with tests ['mudgee', 'flaky']</b>
 INFO:network:Activating faucet topology...
 INFO:topology:No device_specs file specified, skipping...
@@ -101,8 +101,8 @@ different places that are dynamically mapped into the system at runtime:
 * `/config/device`: Device-specific customizations from `{site_path}/mac_addrs/{device_mac}/aux/`.
 * `/config/port`: Switch-port customizations from `inst/runtime_conf/port-##/`.
 * `/config/type`: Device-type customizations from `{site_path}/device_types/{device_type}/aux/`.
-  * See `misc/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
-  * See `misc/test_site/device_types/rocket/` for an example device type.
+  * See `resources/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
+  * See `resources/test_site/device_types/rocket/` for an example device type.
   * See `qualification/*` for more detailed examples of test configuration files.
 
 ## Test Development Philosophy

@@ -3,7 +3,7 @@
 # Create system.conf and startup file for arbitrary number of faux virtual devices.
 function generate {
   rm -f local/system.yaml
-  echo source misc/system.conf > local/system.conf
+  echo source config/system/system.conf > local/system.conf
 
   type=$1
   faux_num=$2
@@ -22,10 +22,10 @@ function generate {
   done
 
   # Specify a different set of tests
-  echo host_tests=misc/topo_tests.conf >> local/system.conf
+  echo host_tests=config/modules/topo.conf >> local/system.conf
 
   echo site_description=\"$type with $devices devices\" >> local/system.conf
-  echo device_specs=misc/device_specs/topo_$type.json >> local/system.conf
+  echo device_specs=resources/device_specs/topo_$type.json >> local/system.conf
   echo test_config=inst/runtime_conf/ >> local/system.conf
   # Don't use default monitor scan to get both src/dst traffic.
   echo monitor_scan_sec=0 >> local/system.conf

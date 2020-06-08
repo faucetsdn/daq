@@ -13,7 +13,7 @@ image=daqf/faux1
 build=
 
 cd $ROOT
-source misc/config_base.sh
+source etc/config_base.sh
 
 # If the argument is -n then create a networking container
 if [ "$1" == "-n" ]; then

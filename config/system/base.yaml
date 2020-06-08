@@ -5,7 +5,7 @@
 # adapter, modify the interfaces entry with the appripriate interface name(s).
 
 # Load defaults.
-include: misc/system.yaml
+include: config/system/system.yaml
 
 # Description for dashboard.
 site_description: "Baseline Configuration"

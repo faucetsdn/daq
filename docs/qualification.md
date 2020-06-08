@@ -16,7 +16,7 @@ For the system overall, this installs a minimum set of basic packages, docker, a
 Additionally, it sets up a local install of required packages and components. After setup,
 also run `cmd/build` to build the necessary Docker images.
 
-To configure the system to run the comprehensive suite of tests, copy `misc/system_all.conf` to
+To configure the system to run the comprehensive suite of tests, copy `config/system/all.conf` to
 `local/system.conf` (creating `local` if necessary). The basic qualification suite can be run with
 `cmd/run -s`. The `-s` means <em>single shot</em> and will run tests just once and then exit (see the
 [options documentation](options.md) for more details). The output should approximately look like this

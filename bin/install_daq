@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 ROOT=$(dirname $(realpath $0))/..
-sudo cp misc/daq.service /etc/systemd/system/
+sudo cp etc/daq.service /etc/systemd/system/
 sudo sed -i "s#%ROOT%#$ROOT#" /etc/systemd/system/daq.service 
 
 sudo systemctl enable daq.service
