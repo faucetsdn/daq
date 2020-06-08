@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 source etc/config_base.sh
@@ -8,8 +7,9 @@ source etc/config_base.sh
 ext_intf=$switch_setup_data_intf
 ext_dpid=$switch_setup_of_dpid
 ext_ofpt=$switch_setup_lo_port
+ext_brid=$switch_setup_ext_br
+ext_brpt=$switch_setup_uplink_port
 
-ext_bridge=ext-ovs
 ext_pri=${ext_intf}
 ext_sec=${ext_intf%-pri}-sec
 
@@ -17,10 +17,10 @@ echo ext_dpid is $ext_dpid
 echo network_config is $network_config
 
 dpid=$(printf %016x $ext_dpid)
-sudo ovs-vsctl --if-exists del-br $ext_bridge \
-     -- add-br $ext_bridge -- set-controller $ext_bridge tcp:127.0.0.1:$ext_ofpt \
-     -- set bridge $ext_bridge other_config:datapath-id=$dpid
-echo Created bridge $ext_bridge with dpid $dpid
+sudo ovs-vsctl --if-exists del-br $ext_brid \
+     -- add-br $ext_brid -- set-controller $ext_brid tcp:127.0.0.1:$ext_ofpt \
+     -- set bridge $ext_brid other_config:datapath-id=$dpid
+echo Created bridge $ext_brid with dpid $dpid
 
 sudo ip link del $ext_pri || true
 sudo ip link del $ext_sec || true
@@ -29,6 +29,7 @@ sudo ifconfig $ext_pri up
 sudo ifconfig $ext_sec up
 echo Added interface link $ext_pri to $ext_sec
 
-echo DAQ autoclean ovs-vsctl del-br $ext_bridge
+echo DAQ autoclean ovs-vsctl del-br $ext_brid
 echo DAQ autoclean ip link del $ext_pri
 
+bin/bridge_link $ext_brid $ext_sec $ext_brpt

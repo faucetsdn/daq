@@ -61,11 +61,11 @@ test_config: resources/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
-  faux_1:
+  faux-1:
     opts: brute broadcast_client
-  faux_2:
+  faux-2:
     opts: nobrute expiredtls bacnetfail pubber passwordfail
-  faux_3:
+  faux-3:
     opts: tls macoui passwordpass bacnet pubber ntp_client broadcast_client
 long_dhcp_response_sec: 0
 monitor_scan_sec: 0

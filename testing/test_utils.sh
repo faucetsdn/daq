@@ -14,16 +14,11 @@ function generate {
   rm -rf inst/run-port-*
   rm -rf inst/runtime_conf
 
-  topostartup=inst/startup_topo.cmd
-  rm -f $topostartup
-  echo startup_cmds=$topostartup >> local/system.conf
-
   echo switch_setup.uplink_port=$((faux_num+1)) >> local/system.conf
 
   # Create required number of faux devices
   for iface in $(seq 1 $faux_num); do
-      echo interfaces.faux-$iface.opts= >> local/system.conf
-      echo autostart cmd/faux $iface discover >> $topostartup
+      echo interfaces.faux-$iface.opts=discover >> local/system.conf
   done
 
   # Specify a different set of tests
