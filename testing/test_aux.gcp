@@ -7,10 +7,10 @@ Running testing/test_aux.sh
     "SNS-4" : "True"
   }
 }
-inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "7c87d8a1"
-inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "a6e8649a"
-inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "172929e0"
-inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "8f1e9114"
+inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "ddf813e3"
+inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf82176c"
+inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "030193c8"
+inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "f701f900"
 RESULT skip cloud.udmi.pointset No device id
 RESULT pass cloud.udmi.pointset Schema validated
 RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted

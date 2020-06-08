@@ -16,7 +16,7 @@
   },
   "system": {
     "location": {
-      "site_name": "ZZ-TRI-FECTA",
+      "site": "ZZ-TRI-FECTA",
       "section": "2-3N8C",
       "position": {
         "x": -111.0,
@@ -26,7 +26,8 @@
     "physical_tag": {
       "asset": {
         "guid": "drw://TBC",
-        "name": "ZZ-TRI-FECTA_AHU-22"
+        "site": "ZZ-TRI-FECTA",
+        "name": "AHU-22"
       }
     }
   },

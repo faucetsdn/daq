@@ -47,7 +47,7 @@ public class UdmiSchema {
   }
 
   static class LocationMetadata {
-    public String site_name;
+    public String site;
     public String section;
     public Object position;
   }
@@ -59,6 +59,7 @@ public class UdmiSchema {
   static class AssetMetadata {
     public String guid;
     public String name;
+    public String site;
   }
 
   static class Config {
