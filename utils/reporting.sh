@@ -45,10 +45,9 @@ function write_out_monolog() {
     cat $_MONO_LOG | tee -a $_REPORT
     echo | tee -a $_REPORT
 
-    for test_name in "${_TEST_ARR[@]}";
-        do
-            test_desc=$(jq --arg tn "$test_name" -r '.[$tn].description' $_MANIFEST)
-            test_result=$(grep -E "^RESULT [a-z]+ $test_name( .*\$|\$)" $_RESULT_LINES)
-            write_out_result $_REPORT "$test_name" "$test_desc" "See log above" "$test_result"
-        done
+    for test_name in "${_TEST_ARR[@]}"; do
+        test_desc=$(jq --arg tn "$test_name" -r '.[$tn].description' $_MANIFEST)
+        test_result=$(grep -E "^RESULT [a-z]+ $test_name( .*\$|\$)" $_RESULT_LINES)
+        write_out_result $_REPORT "$test_name" "$test_desc" "See log above" "$test_result"
+    done
 }

@@ -21,7 +21,7 @@ rm -f $RESULTS
 failure=
 results=
 count=0
-for file in daq/*.py; do
+for file in daq/*.py bin/python/*.py; do
     echo Checking file $file... | tee -a $RESULTS
     pylint --rcfile=$PYLINTRC $file >> $RESULTS && count=$((count+1)) || true
 done

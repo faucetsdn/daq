@@ -30,5 +30,5 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 Testing nmap bacnet
 RESULT pass security.ports.nmap Only allowed ports found open.
 Testing nmap telnet
-RESULT fail security.ports.nmap Some disallowed ports are open:
+RESULT fail security.ports.nmap Some disallowed ports are open: 23
 Testing complete.

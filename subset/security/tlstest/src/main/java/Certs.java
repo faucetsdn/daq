@@ -214,7 +214,7 @@ public class Certs {
     certificateReport +=
         "RESULT skip security.tls.v"
             + tlsVersion.replace(".", "_")
-            + " IOException unable to connect to server \n";
+            + " IOException unable to connect to server\n";
   }
 
   private void skipTlsX509(String tlsVersion) {
