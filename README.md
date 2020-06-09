@@ -66,7 +66,6 @@ The top-level DAQ folders correspond to the following structure:
 * `subset/`: Subsets of device tests (e.g. penetration tests).
 * `testing/`: Scripts for system continuous integration testing.
 * `topology/`: Network topology setups.
-* `utils/`: Helper utilities.
 * `validator/`: Tools for validating data exchange schemas.
 * _`venv/`_: Dynamically downloaded python virtual environment files.
 
