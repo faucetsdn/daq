@@ -9,7 +9,7 @@ mailing list, and use it as the primary source of troubleshooting.
   email somebody directly, but will likely result in a slower response time.
 * The `inst/cmdrun.log` file contains a copy of the console output from DAQ.
   * This file should be attached to communications about resolving DAQ issues.
-  * It's not necessary to include the assocaited `system.conf` file, since the
+  * It's not necessary to include any assocaited `local/system.yaml` file, since the
   contents of that are already included.
 * Make sure everything is running properly using the internal simulation setup
 before tackling anything to do with external switches or physical devices.

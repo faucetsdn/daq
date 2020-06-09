@@ -30,7 +30,7 @@ $ cmd/build
 7. Create **local/system.conf** to specify switch configurations and fill in the following information: 
   <pre>
   #Load the defaults
-  source config/system/system.conf
+  source config/system/default.yaml
   ext_dpid=0x12345
   ext_ctrl=enx00e04c68036b <-- replace with first interface name
   ext_intf=enx00e03c689934 <-- replace with second interface name
