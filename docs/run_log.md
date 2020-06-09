@@ -87,7 +87,7 @@ Executing: python3 -u daq/daq.py /home/username/daq/local/system.conf -s
 Prepending /home/username/daq/binhack to PATH
 processing arg: /home/username/daq/local/system.conf
 Reading config from /home/username/daq/local/system.conf
-Reading config from config/system/system.conf
+Reading config from config/system/default.yaml
 processing arg: -s
 base_conf=resources/setups/baseline/module_config.json
 host_tests=config/modules/all.conf
