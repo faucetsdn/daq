@@ -14,7 +14,7 @@
   "dependencies": {
     "@google-cloud/pubsub": "1.7.2",
     "@google-cloud/iot": "1.8.0",
-    "firebase-admin": "8.11.0",
+    "firebase-admin": "8.12.1",
     "firebase-functions": "3.6.2",
     "extend": "3.0.2"
   },
