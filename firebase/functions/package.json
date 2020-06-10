@@ -15,7 +15,7 @@
     "@google-cloud/pubsub": "2.1.0",
     "@google-cloud/iot": "1.8.0",
     "firebase-admin": "8.12.1",
-    "firebase-functions": "3.6.2",
+    "firebase-functions": "3.7.0",
     "extend": "3.0.2"
   },
   "private": true
