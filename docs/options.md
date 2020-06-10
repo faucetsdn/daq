@@ -18,7 +18,7 @@ on the command line, or with the more verbose long-form (`single_shot=true`).
 
 ## `local/system.conf` File.
 
-Additional long-form options are documented in the `misc/system.conf` file,
+Additional long-form options are documented in the `config/system/default.yaml` file,
 and can also be included on the command-line.
 
 ### Debugging

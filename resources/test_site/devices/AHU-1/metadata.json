@@ -14,23 +14,25 @@
   },
   "system": {
     "location": {
-      "site_name": "ZZ-TRI-FECTA",
-      "section": "2-3N8C"
+      "site": "ZZ-TRI-FECTA",
+      "section": "2-3N8C",
+      "position": {
+        "x": 111.0,
+        "y": 102.3
+      }
     },
     "physical_tag": {
       "asset": {
         "guid": "drw://TBC",
-        "name": "ZZ-TRI-FECTA_GAT-123"
+        "site": "ZZ-TRI-FECTA",
+        "name": "AHU-1"
       }
     }
-  },
-  "gateway": {
-    "proxy_ids": [ "SNS-4", "AHU-22" ]
   },
   "cloud": {
     "auth_type": "RS256"
   },
   "version": 1,
   "timestamp": "2020-05-01T13:39:07Z",
-  "hash": "f8995442"
+  "hash": "181301c3"
 }

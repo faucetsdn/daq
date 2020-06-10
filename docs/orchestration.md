@@ -16,7 +16,7 @@ The overal orchestration capability relies on several simple data sources:
 2. [Device MUD files](../mud_files), which provide an
 [IETF Standard MUD descriptor](https://datatracker.ietf.org/doc/draft-ietf-opsawg-mud/) that describes
 the network protocol/ports (e.g. UDP on port 47808) utilized by a device.
-3. [System device topology specification](../misc/device_specs_bacnet_star.json), which indicates how
+3. [System device topology specification](../resources/device_specs/bacnet_star.json), which indicates how
 devices are interconnected.
 
 ## Sequence of Events

@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-source misc/config_base.sh
+source etc/config_base.sh
 
 if [ -z "$gcp_cred" ]; then
     echo gcp_cred not defined in system configuration.

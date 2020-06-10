@@ -66,7 +66,7 @@ how to set this up. It uses the same underlying schema files as the techniques a
 it though a live stream in the cloud.
 
 Streaming validation validates a stream of messages pulled from a GCP PubSub topic.
-There are three configuration values required in the `local/system.conf` file to make it work:
+There are three configuration values required in the `local/system.yaml` file to make it work:
 * `gcp_cred`: The service account credentials, as per the general [DAQ Firebase setup](firebase.md).
 * `gcp_topic`: The _PubSub_ (not MQTT) topic name.
 * `schema_path`: Indicates which schema to validate against.

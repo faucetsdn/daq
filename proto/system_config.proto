@@ -40,9 +40,6 @@ message DaqConfig {
   // Access switch setup information
   SwitchSetup switch_setup = 9;
 
-  // Command file with startup commands.
-  string startup_cmds = 15;
-
   // Specify explicit host test configuration.
   string host_tests = 16;
 
@@ -135,19 +132,22 @@ message SwitchSetup {
   int32 uplink_port = 13;
 
   // Local port of open flow controller
-  string lo_port = 43;
+  string lo_port = 14;
 
   // IP address and subnet for local control plane interface
-  string lo_addr = 10;
+  string lo_addr = 15;
 
   // IP address template and subnet for module ip addresses
-  string mods_addr = 12;
+  string mods_addr = 16;
 
   // Dataplane id of external OpenFlow switch
   string of_dpid = 41;
 
   // Interface name for external switch data plane
   string data_intf = 42;
+
+  // Name for external OVS bridge in liu of physical switch
+  string ext_br = 43;
 
   // Switch model
   string model = 44;
@@ -166,4 +166,7 @@ message SwitchSetup {
 message Interface {
   // Faux startup command line options.
   string opts = 1;
+
+  // Switch port for attching interface.
+  int32 port = 2;
 }

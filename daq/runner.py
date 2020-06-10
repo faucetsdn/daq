@@ -40,7 +40,7 @@ class DAQRunner:
     _DEFAULT_RETENTION_DAYS = 30
     _MODULE_CONFIG = 'module_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
-    _DEFAULT_TESTS_FILE = 'misc/host_tests.conf'
+    _DEFAULT_TESTS_FILE = 'config/modules/host.conf'
     _RESULT_LOG_FILE = 'inst/result.log'
 
     def __init__(self, config):

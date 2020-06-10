@@ -345,7 +345,7 @@ Verify the device supports TLS 1.0 (as a client)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1 IOException unable to connect to server 
+RESULT skip security.tls.v1 IOException unable to connect to server
 
 --------------------
 security.tls.v1.x509
@@ -363,7 +363,7 @@ Verify the device supports TLS 1.2 (as a client)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1_2 IOException unable to connect to server 
+RESULT skip security.tls.v1_2 IOException unable to connect to server
 
 --------------------
 security.tls.v1_2.x509
@@ -381,7 +381,7 @@ Verify the device supports TLS 1.3 (as a client)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1_3 IOException unable to connect to server 
+RESULT skip security.tls.v1_3 IOException unable to connect to server
 
 --------------------
 security.tls.v1_3.x509

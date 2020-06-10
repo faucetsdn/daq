@@ -7,7 +7,7 @@ iface_b=enx00e04c680029
 rm -rf inst/faucet/daq-faucet-simple
 mkdir -p inst/faucet/daq-faucet-simple
 
-cp misc/corp_bond.yaml inst/faucet/daq-faucet-simple/faucet.yaml
+cp topology/corp-bond/faucet.yaml inst/faucet/daq-faucet-simple/faucet.yaml
 
 cmd/faucet simple 6789
 

@@ -20,17 +20,21 @@ import configurator
 
 LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
     return to_timestamp(datetime.datetime.now(datetime.timezone.utc))
+
 
 def to_timestamp(timestamp):
     """"Get a JSON-compatible formatted timestamp"""
     return timestamp.strftime(TIMESTAMP_FORMAT)[:-3] + 'Z'
 
+
 def parse_timestamp(timestamp_str):
     """Parses a timestamp generated from get_timestamp"""
     return datetime.datetime.strptime(timestamp_str, TIMESTAMP_FORMAT + 'Z')
+
 
 class GcpManager:
     """Manager class for working with GCP"""
@@ -233,7 +237,7 @@ class GcpManager:
             LOGGER.error('Firestore not initialized.')
             return
         LOGGER.info('Registering offenders...')
-        users = self._firestore.collection(u'users').get()
+        users = self._firestore.collection(u'users').stream()
         for user in users:
             permissions = self._firestore.collection(u'permissions').document(user.id).get()
             user_email = user.to_dict().get('email')
@@ -248,9 +252,32 @@ class GcpManager:
             else:
                 LOGGER.info('Ignoring user %s', user_email)
 
+    def get_reports_from_date_range(self, device: str, start=None, end=None):
+        """Combine test results from reports within a date range"""
+        if not self._firestore:
+            LOGGER.error('Firestore not initialized.')
+            return
+        LOGGER.info('Looking for reports...')
+        origins = self._firestore.collection(u'origin').stream()
+        for origin in origins:
+            query = origin.reference.collection('runid').where('deviceId', '==', device)
+            if start:
+                query = query.where('updated', '>=', to_timestamp(start))
+            if end:
+                query = query.where('updated', '<=', to_timestamp(end))
+            runids = query.stream()
+            for runid in runids:
+                doc = runid.reference.collection('test').document('term').get().to_dict()
+                if not doc or doc.get('json_path'):
+                    continue
+                bucket = self._storage.get_bucket(self._report_bucket_name)
+                blob = bucket.blob(doc.get('json_path'))
+                json_report = json.loads(str(blob.download_as_string(), 'utf-8'))
+                yield json_report
+
     def _query_user(self, message):
         reply = input(message)
-        options = ['y', 'Y', 'yes', 'YES', 'Yes', 'sure']
+        options = set(('y', 'Y', 'yes', 'YES', 'Yes', 'sure'))
         if reply in options:
             return True
         return False

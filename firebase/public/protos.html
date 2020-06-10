@@ -304,13 +304,6 @@
                 </tr>
               
                 <tr>
-                  <td>startup_cmds</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Command file with startup commands. </p></td>
-                </tr>
-              
-                <tr>
                   <td>host_tests</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
@@ -571,6 +564,13 @@
                   <td><p>Faux startup command line options. </p></td>
                 </tr>
               
+                <tr>
+                  <td>port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Switch port for attching interface. </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -642,6 +642,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Interface name for external switch data plane </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ext_br</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name for external OVS bridge in liu of physical switch </p></td>
                 </tr>
               
                 <tr>

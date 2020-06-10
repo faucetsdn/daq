@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x1d\x64\x61q/proto/system_config.proto\"\x91\x08\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x14\n\x0cstartup_cmds\x18\x0f \x01(\t\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x11\n\tfail_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xd2\x01\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18+ \x01(\t\x12\x0f\n\x07lo_addr\x18\n \x01(\t\x12\x11\n\tmods_addr\x18\x0c \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\"\x19\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x1d\x64\x61q/proto/system_config.proto\"\xfb\x07\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x11\n\tfail_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xe2\x01\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\t\x12\x0f\n\x07lo_addr\x18\x0f \x01(\t\x12\x11\n\tmods_addr\x18\x10 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x62\x06proto3')
 )
 
 
@@ -58,8 +58,8 @@ _DAQCONFIG_INTERFACESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=963,
-  serialized_end=1024,
+  serialized_start=941,
+  serialized_end=1002,
 )
 
 _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
@@ -95,8 +95,8 @@ _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1026,
-  serialized_end=1075,
+  serialized_start=1004,
+  serialized_end=1053,
 )
 
 _DAQCONFIG = _descriptor.Descriptor(
@@ -184,182 +184,175 @@ _DAQCONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='startup_cmds', full_name='DaqConfig.startup_cmds', index=11,
-      number=15, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='host_tests', full_name='DaqConfig.host_tests', index=12,
+      name='host_tests', full_name='DaqConfig.host_tests', index=11,
       number=16, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='build_tests', full_name='DaqConfig.build_tests', index=13,
+      name='build_tests', full_name='DaqConfig.build_tests', index=12,
       number=36, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='run_limit', full_name='DaqConfig.run_limit', index=14,
+      name='run_limit', full_name='DaqConfig.run_limit', index=13,
       number=17, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fail_mode', full_name='DaqConfig.fail_mode', index=15,
+      name='fail_mode', full_name='DaqConfig.fail_mode', index=14,
       number=18, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='single_shot', full_name='DaqConfig.single_shot', index=16,
+      name='single_shot', full_name='DaqConfig.single_shot', index=15,
       number=34, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='result_linger', full_name='DaqConfig.result_linger', index=17,
+      name='result_linger', full_name='DaqConfig.result_linger', index=16,
       number=19, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='no_test', full_name='DaqConfig.no_test', index=18,
+      name='no_test', full_name='DaqConfig.no_test', index=17,
       number=20, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='keep_hold', full_name='DaqConfig.keep_hold', index=19,
+      name='keep_hold', full_name='DaqConfig.keep_hold', index=18,
       number=40, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='daq_loglevel', full_name='DaqConfig.daq_loglevel', index=20,
+      name='daq_loglevel', full_name='DaqConfig.daq_loglevel', index=19,
       number=21, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='mininet_loglevel', full_name='DaqConfig.mininet_loglevel', index=21,
+      name='mininet_loglevel', full_name='DaqConfig.mininet_loglevel', index=20,
       number=22, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='finish_hook', full_name='DaqConfig.finish_hook', index=22,
+      name='finish_hook', full_name='DaqConfig.finish_hook', index=21,
       number=35, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gcp_cred', full_name='DaqConfig.gcp_cred', index=23,
+      name='gcp_cred', full_name='DaqConfig.gcp_cred', index=22,
       number=23, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gcp_topic', full_name='DaqConfig.gcp_topic', index=24,
+      name='gcp_topic', full_name='DaqConfig.gcp_topic', index=23,
       number=24, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='schema_path', full_name='DaqConfig.schema_path', index=25,
+      name='schema_path', full_name='DaqConfig.schema_path', index=24,
       number=25, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='mud_files', full_name='DaqConfig.mud_files', index=26,
+      name='mud_files', full_name='DaqConfig.mud_files', index=25,
       number=26, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='device_specs', full_name='DaqConfig.device_specs', index=27,
+      name='device_specs', full_name='DaqConfig.device_specs', index=26,
       number=27, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='test_config', full_name='DaqConfig.test_config', index=28,
+      name='test_config', full_name='DaqConfig.test_config', index=27,
       number=28, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='port_debounce_sec', full_name='DaqConfig.port_debounce_sec', index=29,
+      name='port_debounce_sec', full_name='DaqConfig.port_debounce_sec', index=28,
       number=29, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fail_hook', full_name='DaqConfig.fail_hook', index=30,
+      name='fail_hook', full_name='DaqConfig.fail_hook', index=29,
       number=30, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='device_template', full_name='DaqConfig.device_template', index=31,
+      name='device_template', full_name='DaqConfig.device_template', index=30,
       number=31, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='site_reports', full_name='DaqConfig.site_reports', index=32,
+      name='site_reports', full_name='DaqConfig.site_reports', index=31,
       number=32, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='run_data_retention_days', full_name='DaqConfig.run_data_retention_days', index=33,
+      name='run_data_retention_days', full_name='DaqConfig.run_data_retention_days', index=32,
       number=33, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='interfaces', full_name='DaqConfig.interfaces', index=34,
+      name='interfaces', full_name='DaqConfig.interfaces', index=33,
       number=37, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fail_module', full_name='DaqConfig.fail_module', index=35,
+      name='fail_module', full_name='DaqConfig.fail_module', index=34,
       number=47, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='port_flap_timeout_sec', full_name='DaqConfig.port_flap_timeout_sec', index=36,
+      name='port_flap_timeout_sec', full_name='DaqConfig.port_flap_timeout_sec', index=35,
       number=48, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -378,7 +371,7 @@ _DAQCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=34,
-  serialized_end=1075,
+  serialized_end=1053,
 )
 
 
@@ -412,21 +405,21 @@ _SWITCHSETUP = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='lo_port', full_name='SwitchSetup.lo_port', index=3,
-      number=43, type=9, cpp_type=9, label=1,
+      number=14, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='lo_addr', full_name='SwitchSetup.lo_addr', index=4,
-      number=10, type=9, cpp_type=9, label=1,
+      number=15, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='mods_addr', full_name='SwitchSetup.mods_addr', index=5,
-      number=12, type=9, cpp_type=9, label=1,
+      number=16, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -446,21 +439,28 @@ _SWITCHSETUP = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='model', full_name='SwitchSetup.model', index=8,
+      name='ext_br', full_name='SwitchSetup.ext_br', index=8,
+      number=43, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='model', full_name='SwitchSetup.model', index=9,
       number=44, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='username', full_name='SwitchSetup.username', index=9,
+      name='username', full_name='SwitchSetup.username', index=10,
       number=45, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='password', full_name='SwitchSetup.password', index=10,
+      name='password', full_name='SwitchSetup.password', index=11,
       number=46, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -478,8 +478,8 @@ _SWITCHSETUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1078,
-  serialized_end=1288,
+  serialized_start=1056,
+  serialized_end=1282,
 )
 
 
@@ -497,6 +497,13 @@ _INTERFACE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='port', full_name='Interface.port', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -509,8 +516,8 @@ _INTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1290,
-  serialized_end=1315,
+  serialized_start=1284,
+  serialized_end=1323,
 )
 
 _DAQCONFIG_INTERFACESENTRY.fields_by_name['value'].message_type = _INTERFACE

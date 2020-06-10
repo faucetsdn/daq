@@ -2,7 +2,7 @@
 
 (This is how to manually work with BACnet testing, not an automated BACnet test.)
 
-* Setup system like `misc/system_multi.conf`
+* Setup system like `config/system/multi.conf`
 * Run in no-test mode with bacnet device enabled on faux3: `cmd/run startup_faux_3_opts=bacnet -n`
 * Wait until faux-3 gets an IP address:<pre>
 &hellip;

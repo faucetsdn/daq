@@ -3,11 +3,9 @@
 #
 # This setup will create and test one faux device. To specify a real USB
 # adapter, modify the interfaces entry with the appripriate interface name(s).
-# The startup_cmds line can then be commented out to prevent the (unnecessary)
-# startup of the faux test device.
 
 # Load defaults.
-include: misc/system.yaml
+include: config/system/default.yaml
 
 # Description for dashboard.
 site_description: "Baseline Configuration"
@@ -16,6 +14,3 @@ site_description: "Baseline Configuration"
 interfaces:
   faux:
     opts:
-
-# Command file with startup commands.
-startup_cmds: misc/startup_base.cmd

@@ -51,7 +51,7 @@ exported varaible, for `ping` and `nmap`, would look something like:
 Loading config from local/system.conf...
 <b>Enabling target test_ping</b>
 <b>Enabling target test_nmap</b>
-Including tests from misc/host_tests.conf
+Including tests from config/modules/host.conf
 Including build files from docker
 &hellip;
 Skipping non-enabled daq/test_mudgee

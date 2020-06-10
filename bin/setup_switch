@@ -45,7 +45,7 @@ EOM
 } 
 interface_setup
 
-curl -u manager:friend "https://$switch_ip/fs/flash/af.cfg" -k -X PUT -H 'Content-Type: ' --data-binary @misc/switch_configs/at.cfg
+curl -u manager:friend "https://$switch_ip/fs/flash/af.cfg" -k -X PUT -H 'Content-Type: ' --data-binary @etc/switch_configs/at.cfg
 
 curl -u manager:friend "https://$switch_ip/api/boot/config" -k -H 'content-type: application/json' --data '{"name":"flash:/af.cfg"}'
 

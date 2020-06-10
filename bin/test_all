@@ -2,7 +2,7 @@
 
 # Just sanity checks to make sure it's a proper directory structure.
 test -d bin
-test -d misc
+test -d resources
 test -d cmd
 
 sudo rm -rf inst/ local/ out/

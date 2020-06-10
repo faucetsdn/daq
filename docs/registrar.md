@@ -52,7 +52,7 @@ Loading config from local/system.conf
 BUILD SUCCESSFUL in 4s
 2 actionable tasks: 2 executed
 Using gcp credentials local/daq-testing-de56aa4b1e47.json
-Using site config dir misc/test_site
+Using site config dir resources/test_site
 Using schema root dir schemas/udmi
 Using service account daq-laptop@daq-testing.iam.gserviceaccount.com/null
 Created service for project daq-testing
