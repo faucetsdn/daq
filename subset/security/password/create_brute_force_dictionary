@@ -92,11 +92,11 @@ function append_colon_separated_file_to_output_dictionary() {
   cat $2 >> $1
 }
 
-# Removes duplicates, empty lines and sorts temporary dictionary, saving into the output dictionary.
+# Removes duplicates, forbidden chars, empty lines and sorts temporary dictionary, saving into the output dictionary.
 # $1 Temporary dictionary file
 # $2 Output dictionary file
 function clean_output_dictionary() {
-  cat $1 | tr -d "/" | tr -d "$" | tr -d "%" | tr -d ">" | sed -E '/^$/d' | sort -u > $2
+  cat $1 | tr -d "/" | tr -d "$" | tr -d "%" | tr -d ">" | sed -E '/^$/d' | sed -E 's/\s+$//' | sort -u > $2
 }
 
 # Main function:
