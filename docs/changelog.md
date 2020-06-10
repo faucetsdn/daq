@@ -1,4 +1,27 @@
 # Changelog
+* 1.5.0
+  * Numerous renovate-bot updgrades
+  * Move reporting.sh into docker/include (#473)
+  * Remove redundant system.conf (#470)
+  * Cleanup files from misc (#464)
+  * Update UDMI asset naming (#457)
+  * Make startup commands implicit (#466)
+  * Whitespace testing changes (#468)
+  * Add stickler.yml (#465)
+  * Feature/combine reports from date range (#458)
+  * Cleanup dot1x and docker test files from misc (#462)
+  * port disconnect integration test fix.
+  * Use module_config for module switch configuration (#459)
+  * Fix network tests  (#440)
+  * Add explicit faucet python base (#455)
+  * Terminate on DAQ trunk port going down (#445)
+  * UDMI Gateway Schema Update (#363)
+  * Fix unit tests (#448)
+  * MD Table Refactoring (#452)
+  * Minor debug fixes (#453)
+  * Convert PortInfo dict to class (#447)
+  * cleanup misc folder, moving files to etc and resources (#449)
+  * Fix flaky port disconnects (#450)
 * 1.4.1
   * Fetch before checkout (#446)
   * Refactoring configuration mechanism (#444)
