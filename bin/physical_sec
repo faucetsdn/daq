@@ -24,7 +24,7 @@ ext_addr=$switch_setup_ip_addr
 
 echo Running switch setup...
 
-if [ -n "$ext_ctrl" ]; then
+if [ "$switch_setup_model" != FAUX_SWITCH ]; then
     cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
     if [ -z "$cplane_mac" ]; then
         echo Could not extract mac address from iface $ext_ctrl.
