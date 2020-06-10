@@ -56,7 +56,7 @@ Including build files from docker
 &hellip;
 Skipping non-enabled daq/test_mudgee
 Skipping non-enabled daq/test_pass
-<b>Build docker/module/Dockerfile.test_ping into daq/test_ping, log to build/docker_build.test_ping...</b>
+<b>Build docker/modules/Dockerfile.test_ping into daq/test_ping, log to build/docker_build.test_ping...</b>
 Skipping non-enabled daq/test_brute
 <b>Build subset/pentests/Dockerfile.test_nmap into daq/test_nmap, log to build/docker_build.test_nmap...</b>
 Skipping non-enabled daq/test_switch
