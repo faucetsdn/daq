@@ -1,4 +1,5 @@
 import subprocess, time, sys, json
+from scapy.all import *
 
 arguments = sys.argv
 
@@ -23,6 +24,7 @@ description_dhcp_long = 'Device sends ARP request on DHCP lease expiry.'
 description_app_min_send = 'Device sends application packets at a frequency of less than 5 minutes.'
 description_communication_type = 'Device sends unicast or broadcast packets.'
 description_ntp_support = 'Device sends NTP request packets.'
+description_ntp_support_v4 = 'Device supports NTP v4.'
 
 tcpdump_display_all_packets = 'tcpdump -n src host ' + device_address + ' -r ' + cap_pcap_file
 tcpdump_display_udp_bacnet_packets = 'tcpdump -n udp dst portrange 47808-47809 -r ' + cap_pcap_file
@@ -65,6 +67,23 @@ def packets_received_count(shell_result):
         return 0
     else:
         return decode_shell_result(shell_result)
+
+def ntp_client_version(capture):
+    client_packets = ntp_client_packets(capture)
+    if len(client_packets) == 0:
+        return None
+    return client_packets[0].version
+
+def ntp_client_packets(capture):
+    packets = []
+    for packet in capture:
+        if NTP in packet:
+            ip = packet.payload
+            udp = ip.payload
+            ntp = udp.payload
+            if ntp.mode == 3:
+                packets.append(ntp)
+    return packets
 
 def load_json_config(json_filename):
     with open(json_filename, 'r') as json_file:
@@ -167,6 +186,22 @@ def test_ntp_support():
     else:
         return 'fail'
 
+def test_ntp_support_v4():
+    capture = rdpcap(cap_pcap_file)
+    if len(capture) > 0:
+        version = ntp_client_version(capture)
+        if version is None:
+            add_summary("No NTP packets received.")
+            return 'skip'
+        add_summary("Using NTPv" + str(version) + ".")
+        if version == 4:
+            return 'pass'
+        else:
+            return 'fail'
+    else:
+        add_summary("No NTP packets received.")
+        return 'skip'
+
 def add_summary(text):
     global summary_text
     summary_text = summary_text + " " + text if summary_text else text
@@ -188,5 +223,8 @@ elif test_request == 'communication.type.broadcast':
 elif test_request == 'network.ntp.support':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support))
     result = test_ntp_support()
+elif test_request == 'network.ntp.support_v4':
+    write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support_v4))
+    result = test_ntp_support_v4()
 
 write_report("RESULT {r} {t} {s}\n".format(r=result, t=test_request, s=summary_text.strip()))
