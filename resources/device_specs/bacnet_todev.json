@@ -1,7 +1,7 @@
 {
   "macAddrs": {
     "9a:02:57:1e:8f:01": {
-      "type": "bacnet",
+      "usage": "bacnet",
       "group": "testing",
       "controllers": {
         "bacnet": {
@@ -17,7 +17,7 @@
       }
     },
     "9a:02:57:1e:8f:02": {
-      "type": "bacnet_todev",
+      "usage": "bacnet_todev",
       "group": "testing",
       "controllers": {
         "bacnet": {

@@ -13,7 +13,6 @@
     "firmware_version": "*** Firmware Version ***"
   },
   "device_manuals_url": "*** Device Manuals URL ***",
-  "device_type": "*** Device Type ***",
   "modules": {
     "bacext": {
       "enabled": true

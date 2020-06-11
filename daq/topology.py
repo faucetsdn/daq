@@ -441,18 +441,18 @@ class FaucetTopology:
         with open(filename, "w") as output_stream:
             yaml.safe_dump(port_acl, stream=output_stream)
 
-    def _get_device_type(self, target_mac):
+    def _get_device_usage(self, target_mac):
         device_macs = self._device_specs['macAddrs']
         if target_mac not in device_macs:
             LOGGER.info("No device spec found for %s", target_mac)
             return 'default'
         device_info = device_macs[target_mac]
-        return device_info['type'] if 'type' in device_info else 'default'
+        return device_info.get('usage', 'default')
 
     def _add_acl_port_rules(self, rules, target_mac, port):
-        device_type = self._get_device_type(target_mac)
-        LOGGER.info("Applying acl template %s/%s to port %s", target_mac, device_type, port)
-        self._append_acl_template(rules, device_type, target_mac)
+        device_usage = self._get_device_usage(target_mac)
+        LOGGER.info("Applying acl template %s/%s to port %s", target_mac, device_usage, port)
+        self._append_acl_template(rules, device_usage, target_mac)
 
     def _sanitize_mac(self, mac_addr):
         return mac_addr.replace(':', '')
@@ -519,17 +519,17 @@ class FaucetTopology:
             acl = {'rule': subrule}
             self._append_augmented_rule(rules, acl)
 
-    def _get_acl_template(self, device_type):
-        filename = self.TEMPLATE_FILE_FORMAT % device_type
+    def _get_acl_template(self, device_usage):
+        filename = self.TEMPLATE_FILE_FORMAT % device_usage
         if not self._device_specs:
             return None
         return self._load_file(filename)
 
-    def _append_acl_template(self, rules, device_type, target_mac=None):
-        template_acl = self._get_acl_template(device_type)
+    def _append_acl_template(self, rules, device_usage, target_mac=None):
+        template_acl = self._get_acl_template(device_usage)
         if not template_acl:
             return False
-        template_key = self.FROM_ACL_KEY_FORMAT % device_type
+        template_key = self.FROM_ACL_KEY_FORMAT % device_usage
         for acl in template_acl['acls'][template_key]:
             new_rule = acl['rule']
             self._resolve_template_field(new_rule, 'dl_src', target_mac=target_mac)
@@ -562,16 +562,16 @@ class FaucetTopology:
         return target_ports
 
     def _allow_target_mac(self, target_mac, src_rule, controller):
-        device_type = self._get_device_type(target_mac)
-        template_acl = self._get_acl_template(device_type)
+        device_usage = self._get_device_usage(target_mac)
+        template_acl = self._get_acl_template(device_usage)
         if not template_acl:
             return False
         device_macs = self._device_specs['macAddrs']
         if target_mac not in device_macs:
             return False
         device_info = device_macs[target_mac]
-        device_type = device_info['type'] if 'type' in device_info else 'default'
-        template_key = self.TO_ACL_KEY_FORMAT % device_type
+        device_usage = device_info.get('usage', 'default')
+        template_key = self.TO_ACL_KEY_FORMAT % device_usage
         for acl in template_acl['acls'][template_key]:
             target_rule = acl['rule']
             if self._rule_match(src_rule, target_rule, controller):

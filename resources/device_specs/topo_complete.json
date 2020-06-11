@@ -1,7 +1,7 @@
 {
   "macAddrs": {
     "9a:02:57:1e:8f:01": {
-      "type": "bacnet",
+      "usage": "bacnet",
       "group": "group-1",
       "controllers": {
         "bacnet": {
@@ -19,7 +19,7 @@
       }
     },
     "9a:02:57:1e:8f:02": {
-      "type": "controller",
+      "usage": "controller",
       "group": "group-1",
       "controllers": {
         "bacnet": {
@@ -37,11 +37,11 @@
       }
     },
     "9a:02:57:1e:8f:03": {
-      "type": "bacnet",
+      "usage": "bacnet",
       "group": "default"
     },
     "9a:02:57:1e:8f:04": {
-      "type": "commissioning_tool",
+      "usage": "commissioning_tool",
       "group": "group-1",
       "controllers": {
         "bacnet": {
@@ -64,7 +64,7 @@
     }
   },
   "9a:02:57:1e:8f:05": {
-    "type": "bacnet",
+    "usage": "bacnet",
     "group": "group-1",
     "controllers": {
       "bacnet": {
@@ -82,7 +82,7 @@
     }
   },
   "9a:02:57:1e:8f:06": {
-    "type": "bacnet",
+    "usage": "bacnet",
     "group": "group-1",
     "controllers": {
       "bacnet": {

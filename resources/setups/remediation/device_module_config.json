@@ -9,7 +9,6 @@
     "type": "*** Type ***",
     "firmware_version": "*** Firmware Version ***"
   },
-  "device_type": "*** Device Type ***",
   "modules": {
     "bacext": {
       "enabled": true

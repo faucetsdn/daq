@@ -10,7 +10,7 @@
     "version": "*** Version ***",
     "firmware_version": "*** Firmware Version ***"
   },
-  "device_type": "rocket",
+  "usage": "rocket",
   "modules": {
     "foobar": {
       "enabled": false
