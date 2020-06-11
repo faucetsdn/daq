@@ -1,7 +1,7 @@
 daqf/aardvark 34718b2f3fd5
 daqf/default 3ac95db36ee4
 daqf/faucet 45c13344a8ed
-daqf/faux1 877a475757a4
+daqf/faux1 ecff07f12534
 daqf/faux2 39914ae11741
 daqf/gauge 1431053cf25e
 daqf/networking af56b0732100
