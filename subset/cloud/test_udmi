@@ -2,9 +2,6 @@
 source reporting.sh
 
 REPORT=/tmp/report.txt
-TEST_NAME="cloud.udmi.pointset"
-TEST_DESCRIPTION="Validates device payload against the UDMI schema"
-TEST_SUMMARY=""
 LOG=/tmp/udmi.log
 
 # Necessary to reach gcp. Should be done by framework but this works for now.
@@ -18,6 +15,7 @@ ip addr
 gcp_cred=/config/inst/gcp_service_account.json
 gcp_topic=target
 schema_path=schemas/udmi
+message_types="state pointset system"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
 
@@ -27,23 +25,22 @@ ping -c 2 172.217.164.106
 ping -c 2 pubsub.googleapis.com
 
 if [ "$device_id" == null ]; then
-    echo Device id is null, skipping.
-    RESULT_AND_SUMMARY="RESULT skip $TEST_NAME No device id"
-    write_out_result $REPORT \
-                     "$TEST_NAME" \
-                     "$TEST_DESCRIPTION" \
-                     "Device id is null, skipping." \
-                     "$RESULT_AND_SUMMARY"
-    exit 0
+    skip="No device id"
+elif [ ! -f $gcp_cred ]; then
+    skip="No credentials"
+else
+    skip=
 fi
 
-if [ ! -f $gcp_cred ]; then
-    RESULT_AND_SUMMARY="RESULT skip $TEST_NAME No credentials"
-    write_out_result $REPORT \
-                     "$TEST_NAME" \
-                     "$TEST_DESCRIPTION" \
-                     "Missing $gcp_cred file, skipping udmi validation." \
-                     "$RESULT_AND_SUMMARY"
+if [ -n "$skip" ]; then
+    echo Skipping udmi test because $skip
+    for message_type in $message_types; do
+        TEST_NAME="cloud.udmi.$message_type"
+        TEST_DESCRIPTION="Validates device $message_type payload."
+        RESULT_AND_SUMMARY="RESULT skip $TEST_NAME $skip"
+        write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                         "$skip" "$RESULT_AND_SUMMARY"
+    done
     exit 0
 fi
 
@@ -64,25 +61,29 @@ echo
 
 timeout 60 validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic $service_id-$HOSTNAME || true
 
-base=validations/devices/$device_id/pointset
+function message_report {
+    message_type=$1
+    base=validations/devices/$device_id/$message_type
+    ls -l $base* || true
 
-ls -l $base* || true
+    if [ -f "$base.out" ]; then
+        result=fail
+        detail=`head -n 1 $base.out`
+    elif [ -f "$base.json" ]; then
+        result=pass
+        detail="Payload successfully validated"
+    else
+        result=fail
+        detail="No result found"
+    fi
 
-if [ -f "$base.out" ]; then
-    result=fail
-    detail=`head -n 1 $base.out`
-elif [ -f "$base.json" ]; then
-    result=pass
-    detail="Schema validated"
-else
-    result=fail
-    detail="No result found"
-fi
+    TEST_NAME="cloud.udmi.$message_type"
+    TEST_DESCRIPTION="Validates device $message_type payload."
+    RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
+    write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                     "$skip" "$RESULT_AND_SUMMARY"
+}
 
-RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
-
-write_out_result $REPORT \
-                 "$TEST_NAME" \
-                 "$TEST_DESCRIPTION" \
-                 "See activate.log for more details" \
-                 "$RESULT_AND_SUMMARY"
+for message_type in $message_types; do
+    message_report $message_type
+done

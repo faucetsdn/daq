@@ -88,19 +88,19 @@ but not directly available to or on the device, defined by [<em>metadata.json</e
 This is essentially a specification about how the device should be configured or
 expectations about what the device should be doing.
 * Streaming device telemetry, which can take on several different forms, depending on the intended
-use.
+use, e.g.:
   * Streaming _pointset_ ([example](pointset.tests/example.json)) from device to cloud,
   defined by [<em>pointset.json</em>](pointset.json). _pointset_ is used for delivering a
   set of data point telemetry.
-  * Monitoring _logentry_ messages ([example](logentry.tests/example.json)) from devices,
-  defined by [<em>logentry.json</em>](logentry.json).
-  * Local _discovery_ messages ([example](discovery.tests/example.json)) that show the
+  * Core _system_ messages ([example](system.tests/example.json)) from devices, such as log
+  entries and access logs, defined by [<em>system.json</em>](system.json).
+  * Local _discover_ messages ([example](discover.tests/example.json)) that show the
   results of local scans or probes to determine which devices are on the local network,
-  defined by [<em>discovery.json</em>](discovery.json).
+  defined by [<em>discover.json</em>](discover.json).
 
 A device client implementation will typically only be aware of the _state_, _config_, and
 one or more telemetry messages (e.g. _pointset_), while all others are meant for the supporting
-infrastructure. Additionall, the _state_ and _config_ parts are comprised of several distinct
+infrastructure. Additionally, the _state_ and _config_ parts are comprised of several distinct
 subsections (e.g. _system_, _pointset_, or _gateway_) that relate to various bits of functionality.
 
 ## Validation
@@ -123,7 +123,7 @@ parsed `config` message.
 ### Config Message
 
 * `sample_rate_sec`: Sampling rate for the system, which should proactively send an
-update (e.g. _pointset_, _logentry_, _discovery_ message) at this interval.
+update (e.g. _pointset_, _logentry_, _discover_ message) at this interval.
 * `sample_limit_sec`: Minimum time between sample updates. Updates that happen faster than this time
 (e.g. due to _cov_ events) should be coalesced so that only the most recent update is sent.
 * `fix_value`: Fix a value to be used during diagnostics and operational use. Should
@@ -137,7 +137,7 @@ should not be sent. See note below for a description of the level value.
 
 ### State status and logentry entries fields
 
-The State and Logentry messages both have `status` and `entries` sub-fields, respectivly, that
+The State and System/logentry messages both have `status` and `entries` sub-fields, respectivly, that
 follow the same structure.
 * State `status` entries represent 'sticky' conditions that persist until the situation is cleared,
 e.g. "device disconnected".

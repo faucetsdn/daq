@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|1|0|0|0|
-|Other|1|2|20|2|
+|Other|1|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -64,6 +64,8 @@ Overall device result FAIL
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
+|skip|cloud.udmi.state|Other|Other|No device id|
+|skip|cloud.udmi.system|Other|Other|No device id|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
@@ -507,13 +509,31 @@ RESULT skip security.passwords.ssh Port 22 is not open on target device.
 
 ```
 --------------------
+cloud.udmi.state
+--------------------
+Validates device state payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.state No device id
+
+--------------------
 cloud.udmi.pointset
 --------------------
-Validates device payload against the UDMI schema
+Validates device pointset payload.
 --------------------
-Device id is null, skipping.
+No device id
 --------------------
 RESULT skip cloud.udmi.pointset No device id
+
+--------------------
+cloud.udmi.system
+--------------------
+Validates device system payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.system No device id
 
 ```
 

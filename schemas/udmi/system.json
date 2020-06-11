@@ -13,20 +13,19 @@
         1
       ]
     },
-    "entries": {
+    "logentries": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/report"
+        "$ref": "#/definitions/entry"
       }
     }
   },
   "required": [
-    "entries",
     "timestamp",
     "version"
   ],
   "definitions": {
-    "report": {
+    "entry": {
       "type": "object",
       "additionalProperties": false,
       "properties": {

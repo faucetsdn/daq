@@ -1,5 +1,6 @@
 package daq.udmi;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +25,8 @@ public class Message {
     public Object extraField;
   }
 
-  public static class System extends UdmiBase {
-    public Report log;
+  public static class SystemEvent extends UdmiBase {
+    public List<Entry> logentries = new ArrayList<>();
   }
 
   public static class PointsetState {
@@ -48,7 +49,7 @@ public class Message {
     public Bundle firmware = new Bundle();
     public boolean operational;
     public Date last_config;
-    public Map<String, Report> statuses = new HashMap<>();
+    public Map<String, Entry> statuses = new HashMap<>();
   }
 
   public static class SystemConfig {

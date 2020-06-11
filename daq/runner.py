@@ -239,7 +239,7 @@ class DAQRunner:
             self._port_info[port].mac = target_mac
             self._target_set_trigger(port)
         else:
-            LOGGER.debug('Port %s dpid %s learned %s', port, dpid, target_mac)
+            LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _queue_callback(self, callback):
         with self._callback_lock:
@@ -495,8 +495,9 @@ class DAQRunner:
             self._check_and_activate_gateway(host)
 
     def _get_host_from_mac(self, mac):
-        port = self._mac_port_map[mac]
-        return self._port_info[port].host
+        if mac not in self._mac_port_map:
+            return None
+        return self._port_info[self._mac_port_map[mac]].host
 
     def _get_port_hosts(self):
         return list({p: i.host for p, i in self._port_info.items() if i.host}.items())
@@ -651,9 +652,9 @@ class DAQRunner:
         target_host = self._port_info[target_port].host
         if target_host:
             self._port_info[target_port].host = None
-            target_gateway = self._port_info[target_port].gateway
             target_mac = self._port_info[target_port].mac
             del self._mac_port_map[target_mac]
+            target_gateway = self._port_info[target_port].gateway
             LOGGER.info('Target port %d cancel %s (#%d/%s).',
                         target_port, target_mac, self.run_count, self.run_limit)
             results = self._combine_result_set(target_port, self._result_sets.get(target_port))
