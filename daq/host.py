@@ -200,21 +200,20 @@ class ConnectedHost:
     def _write_module_config(self, config, path):
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
-    def _type_path(self):
+    def _usage_path(self):
         dev_config = self._load_config({}, self._device_base)
-        device_type = dev_config.get('device_type')
-        if not device_type:
+        device_usage = dev_config.get('device_usage')
+        if not device_usage:
             return None
-        LOGGER.info('Configuring device %s as type %s', self.target_mac, device_type)
+        LOGGER.info('Configuring device %s as usage %s', self.target_mac, device_usage)
         site_path = self.config.get('site_path')
-        type_path = os.path.abspath(os.path.join(site_path, 'device_types', device_type))
-        return type_path
+        return os.path.abspath(os.path.join(site_path, 'device_usages', device_usage))
 
-    def _type_aux_path(self):
-        type_path = self._type_path()
-        if not type_path:
+    def _usage_aux_path(self):
+        usage_path = self._usage_path()
+        if not usage_path:
             return None
-        aux_path = os.path.join(type_path, self._AUX_DIR)
+        aux_path = os.path.join(usage_path, self._AUX_DIR)
         if not os.path.exists(aux_path):
             LOGGER.info('Skipping missing type dir %s', aux_path)
             return None
@@ -598,7 +597,7 @@ class ConnectedHost:
             'inst_base': self._inst_config_path(),
             'port_base': self._port_base,
             'device_base': self._device_aux_path(),
-            'type_base': self._type_aux_path(),
+            'usage_base': self._usage_aux_path(),
             'scan_base': self.scan_base
         }
         if ext_loip:
@@ -670,7 +669,7 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        self._load_config(config, self._type_path())
+        self._load_config(config, self._usage_path())
         self._load_config(config, self._device_base)
         self._load_config(config, self._port_base)
         return config

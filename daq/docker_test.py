@@ -58,7 +58,7 @@ class DockerTest:
         self._map_if_exists(vol_maps, params, 'inst')
         self._map_if_exists(vol_maps, params, 'port')
         self._map_if_exists(vol_maps, params, 'device')
-        self._map_if_exists(vol_maps, params, 'type')
+        self._map_if_exists(vol_maps, params, 'usage')
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)

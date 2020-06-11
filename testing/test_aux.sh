@@ -49,9 +49,9 @@ cp -a resources/test_site inst/
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing aux test run
 mkdir -p local/site
-cp -r resources/test_site/device_types/rocket local/site/device_types/
-mkdir -p local/site/device_types/rocket/aux/
-cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
+cp -r resources/test_site/usages/rocket local/site/usages/
+mkdir -p local/site/usages/rocket/aux/
+cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/usages/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
 cat <<EOF > local/system.yaml
 ---

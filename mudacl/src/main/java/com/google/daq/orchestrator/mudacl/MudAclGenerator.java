@@ -52,7 +52,7 @@ public class MudAclGenerator {
     try {
       if (argv.length != 2 && argv.length != 6) {
         System.err
-            .println("Usage: [mud_dir] [template_dir] ([switch_topology] [device_types] [device_topology] [output_dir])");
+            .println("Usage: [mud_dir] [template_dir] ([switch_topology] [device_usage] [device_topology] [output_dir])");
         throw new ExpectedException(new IllegalArgumentException("Incorrect arg count"));
       }
       MudAclGenerator generator = new MudAclGenerator();

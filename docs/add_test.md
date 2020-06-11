@@ -99,9 +99,9 @@ different places that are dynamically mapped into the system at runtime:
 * `/config/inst`: Global DAQ instance configuration from `inst/config`. Includes processed system.conf settings.
 * `/config/device`: Device-specific customizations from `{site_path}/mac_addrs/{device_mac}/aux/`.
 * `/config/port`: Switch-port customizations from `inst/runtime_conf/port-##/`.
-* `/config/type`: Device-type customizations from `{site_path}/device_types/{device_type}/aux/`.
+* `/config/type`: Device usage customizations from `{site_path}/usages/{device_usage}/aux/`.
   * See `resources/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
-  * See `resources/test_site/device_types/rocket/` for an example device type.
+  * See `resources/test_site/usages/rocket/` for an example device type.
   * See `qualification/*` for more detailed examples of test configuration files.
 
 ## Test Development Philosophy
