@@ -17,6 +17,9 @@ git status --porcelain
 * `git push --tags`
 * make sure your gcp setup is configured for bos-daq-testing
 * `firebase/deploy.sh`
-* QA pass to make sure everything is ok.
-* `git checkout release_stable && git reset --hard $VERSION`
+* `git checkout release_testing && git reset --hard $VERSION`
 * `git push`
+* QA pass to make sure everything is ok.
+* make sure your gcp setup is configured for daq-qualification-labs
+* `firebase/deploy.sh`
+* `git checkout release_stable && git reset --hard $VERSION`
