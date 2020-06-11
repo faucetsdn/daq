@@ -99,10 +99,10 @@ if [ -n "$switch_setup_ext_br" ]; then
     autostart bin/external_ovs
 fi
 
-if [ -n "$switch_setup_ip_addr" ]; then
+if [ -n "$switch_setup_model" ]; then
     autostart bin/physical_sec
 else
-    echo No external switch configured.
+    echo No external switch model specified.
 fi
 
 # Kill any gateways so that they don't prematurely assign an IP address.

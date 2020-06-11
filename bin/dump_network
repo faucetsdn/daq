@@ -14,7 +14,7 @@ function dump {
 }
 
 dump pri
-dump sec
+test -d /sys/class/net/sec && dump sec
 
 cp inst/faucet.log $1/
 cp inst/faucet.yaml inst/dp_port_acls.yaml inst/port_acls/*.yaml $1/
