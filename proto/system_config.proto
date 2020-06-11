@@ -132,7 +132,7 @@ message SwitchSetup {
   int32 uplink_port = 13;
 
   // Local port of open flow controller
-  string lo_port = 14;
+  int32 lo_port = 14;
 
   // IP address and subnet for local control plane interface
   string lo_addr = 15;
