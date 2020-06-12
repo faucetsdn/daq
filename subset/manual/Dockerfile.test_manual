@@ -1,0 +1,7 @@
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install nmap netcat
+
+COPY subset/pentests/test_nmap .
+
+CMD ./test_nmap

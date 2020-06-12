@@ -1,0 +1,56 @@
+#!/bin/bash -e
+#
+# Write manual test results from module_config.json
+# into DAQ report output
+# https://google.github.io/styleguide/shellguide.html#s1.2-when-to-use-shell
+
+source reporting.sh
+
+# JQ filter for retrieving manual tests
+JQ_MANUAL_TESTS='.tests | to_entries[] | select(.value.type | . and contains("manual"))'
+
+CONFIG=/config/device/module_config.json
+
+REPORT=/tmp/report.txt
+LOG=/tmp/manual.log #put all the results into here
+
+rm -f $LOG $REPORT
+
+if [ -f $CONFIG ]; then
+    echo Extracting device config from $CONFIG
+else
+    echo No module config $CONFIG. 
+    exit 1
+fi
+
+# Loop through manual tests
+# in module_config.json
+while read manual_test; do
+    test_name=$(jq -r ".key" <<< "${manual_test}")
+    test_desciption=$(jq -r ".value.description // empty" <<< "${manual_test}")
+    test_outcome=$(jq -r ".value.outcome // empty" <<< "${manual_test}")
+    test_summary=$(jq -r ".value.summary" <<< "${manual_test}")
+    test_log=$(jq -r ".value.test_log" <<< "${manual_test}")
+    
+    # check if test outcome is provided, set to skip with summary
+    if [[ -z "${test_outcome}" ]]; then
+        test_outcome="skip"
+        test_summary="Test results of manual test not inputted into module_config"
+    fi
+
+    #add result and summary
+    #result_and_summary=
+
+    echo $test_name
+    echo $test_description
+    echo $test_outcome
+    echo $test_summary
+    echo "----"
+
+    write_out_result $REPORT \
+                 "$test_name" \
+                 "$test_description" \
+                 "$TEST_LOG" \
+                 "$result_and_summary"
+
+done < <(jq -c -r "${JQ_MANUAL_TESTS}" module_config.json)
