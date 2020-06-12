@@ -86,10 +86,10 @@ def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR
     else:
         json_reports = _get_local_reports(device, reports_dir, start, end, count)
 
+    json_reports = list(json_reports)
+
     aggregate = {'tests': {}, 'categories': {}, 'missing': {}}
-    report_count = 0
     for json_report in json_reports:
-        report_count += 1
         for test in json_report.get('missing_tests', []):
             aggregate['missing'].setdefault(test, 0)
             aggregate['missing'][test] += 1
@@ -112,7 +112,7 @@ def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR
         report_file.write('Device: %s\nStart: %s\nEnd: %s\n' % (device, start, end))
         report_file.write(result_str)
     LOGGER.info('Report written to %s' % reports_path)
-    assert not count or count == report_count, 'Did not find expected %d reports' % count
+    assert not count or count == len(json_reports), 'Did not find expected %d reports' % count
 
 
 if __name__ == '__main__':
