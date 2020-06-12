@@ -59,6 +59,6 @@ public class FileManager {
         if (debug) {
             return "src/main/resources";
         }
-        return "/config/type";
+        return "/config/usage";
     }
 }

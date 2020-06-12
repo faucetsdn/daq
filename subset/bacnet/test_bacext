@@ -7,13 +7,11 @@ TARGET="Object name = BACnet device"
 TMPOUT=`tempfile`
 REPORT=/tmp/report.txt
 
+ls -l /config/usage/ || true
+
 # Pick the one not-lo inet v4 address.
 line=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
-
-ls -l /config/type/ || true
-
 read -r -a parts <<< "$line"
-
 local_ip=${parts[1]%/*}
 broadcast_ip=${parts[3]}
 
