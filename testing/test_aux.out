@@ -6,7 +6,7 @@ Extended tests
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic Bacnet device not found. 
+RESULT skip protocol.bacnet.pic Bacnet device not found.
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic
 RESULT fail connection.mac_oui Manufacturer prefix not found!
@@ -167,7 +167,6 @@ port-02 module_config modules
 Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
-No report diff
 ?? ovs_vsctl.txt
 01: ['01:ping:Exception']
 02: ['02:hold:Exception']
