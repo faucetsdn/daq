@@ -47,7 +47,9 @@ done
 
 echo DAQ stress test | tee -a $TEST_RESULTS
 
+start_time=`date -u -Isec`
 cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
+end_time=`date -u -Isec`
 
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
@@ -66,5 +68,16 @@ echo Enough results: $((results >= 6*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
 # $timeouts should strictly equal $NUM_TIMEOUT_DEVICES when dhcp step is fixed. 
 echo Enough DHCP timeouts: $((timeouts >= NUM_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 echo Enough static ips: $((static_ips >= (NUM_NO_DHCP_DEVICES - NUM_TIMEOUT_DEVICES))) | tee -a $TEST_RESULTS
+
+echo bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
+bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
+
+cat inst/reports/combo_*.md
+
+redact < docs/soak_report.md > out/redaced_soak.md
+redact < inst/reports/combo_*.md > out/redaced_many.md
+echo Redacted soak diff | tee -a $TEST_RESULTS
+(diff out/redacted_soak.md out/redacted_many.md && echo No soak report diff) \
+    | tee -a $TEST_RESULTS
 
 echo Done with tests | tee -a $TEST_RESULTS

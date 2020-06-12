@@ -221,7 +221,7 @@ class GcpManager:
     def upload_file(self, file_name, destination_file_name=None):
         """Uploads a report to a storage bucket."""
         if not self._storage:
-            LOGGER.info('Ignoring %s upload: not configured' % file_name)
+            LOGGER.debug('Ignoring %s upload: not configured' % file_name)
             return None
         bucket = self._storage.get_bucket(self._report_bucket_name)
         destination_file_name = os.path.join('origin', self._client_name or "other",
@@ -252,7 +252,7 @@ class GcpManager:
             else:
                 LOGGER.info('Ignoring user %s', user_email)
 
-    def get_reports_from_date_range(self, device: str, start=None, end=None):
+    def get_reports_from_date_range(self, device: str, start=None, end=None, count=None):
         """Combine test results from reports within a date range"""
         if not self._firestore:
             LOGGER.error('Firestore not initialized.')
@@ -265,6 +265,8 @@ class GcpManager:
                 query = query.where('updated', '>=', to_timestamp(start))
             if end:
                 query = query.where('updated', '<=', to_timestamp(end))
+            if count:
+                query = query.limit(count)
             runids = query.stream()
             for runid in runids:
                 doc = runid.reference.collection('test').document('term').get().to_dict()
