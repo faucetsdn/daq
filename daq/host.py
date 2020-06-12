@@ -202,12 +202,12 @@ class ConnectedHost:
 
     def _usage_path(self):
         dev_config = self._load_config({}, self._device_base)
-        device_usage = dev_config.get('device_usage')
+        device_usage = dev_config.get('usage')
         if not device_usage:
             return None
         LOGGER.info('Configuring device %s as usage %s', self.target_mac, device_usage)
         site_path = self.config.get('site_path')
-        return os.path.abspath(os.path.join(site_path, 'device_usages', device_usage))
+        return os.path.abspath(os.path.join(site_path, 'usages', device_usage))
 
     def _usage_aux_path(self):
         usage_path = self._usage_path()
