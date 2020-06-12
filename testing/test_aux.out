@@ -44,7 +44,7 @@ RESULT fail protocol.app_min_send
 RESULT info communication.type.broadcast 
 RESULT fail connection.dhcp_long 
 RESULT fail connection.min_send 
-RESULT fail connection.network.ntpv4 Not using NTPv4
+RESULT fail connection.network.ntpv4 Not using NTPv4.
 RESULT fail protocol.app_min_send 
 dhcp requests 1 1 0 1
 01: []
