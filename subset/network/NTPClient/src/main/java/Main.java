@@ -11,6 +11,7 @@ public class Main {
     static String serverName = "time.google.com";
     static int PORT = 123;
     static int timerPeriod = 10;
+    static byte version = 3;
 
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -19,6 +20,9 @@ public class Main {
         serverName = args[0];
         PORT = Integer.parseInt(args[1]);
         timerPeriod = Integer.parseInt(args[2]);
+        if (args.length == 4) {
+            version = Byte.parseByte(args[3]);
+        }
 
         Runnable senderRunnable = new Runnable() {
             @Override
@@ -38,7 +42,7 @@ public class Main {
         // Send request
         DatagramSocket socket = new DatagramSocket();
         InetAddress address = InetAddress.getByName(serverName);
-        byte[] buf = new NtpMessage(SECONDS_FROM_01_01_1900_TO_01_01_1970).toByteArray();
+        byte[] buf = new NtpMessage(SECONDS_FROM_01_01_1900_TO_01_01_1970, version).toByteArray();
         DatagramPacket packet =
                 new DatagramPacket(buf, buf.length, address, PORT);
 

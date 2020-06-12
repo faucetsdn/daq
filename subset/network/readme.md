@@ -10,7 +10,7 @@ The connection.network.ntpv4 test reads packets from startup.pcap.
 
 If the python code needs debugging, the pip module `scapy` is required (`pip install scapy`).
 
-### Test conditions
+### connection.network.ntpv4 Test conditions
 | Test ID |  Info | Pass | Fail | Skip |
 |---|---|---|---|---|
 | connection.network.ntpv4 | Are the received NTP packets using NTP v4? | NTP version is 4 | NTP version is not 4 | No NTP packets are received |

@@ -49,8 +49,8 @@ finish_hook=misc/dump_network.sh
 test_config=misc/runtime_configs/long_wait
 site_path=inst/test_site
 startup_faux_1_opts="brute broadcast_client"
-startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail"
-startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntp_client broadcast_client"
+startup_faux_2_opts="nobrute expiredtls bacnetfail pubber passwordfail ntpv4fail"
+startup_faux_3_opts="tls macoui passwordpass bacnet pubber ntpv4pass broadcast_client"
 long_dhcp_response_sec=0
 monitor_scan_sec=0
 EOF
