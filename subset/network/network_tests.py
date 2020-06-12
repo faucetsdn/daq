@@ -23,8 +23,7 @@ description_min_send = 'Device sends data at a frequency of less than 5 minutes.
 description_dhcp_long = 'Device sends ARP request on DHCP lease expiry.'
 description_app_min_send = 'Device sends application packets at a frequency of less than 5 minutes.'
 description_communication_type = 'Device sends unicast or broadcast packets.'
-description_ntp_support = 'Device sends NTP request packets.'
-description_ntp_support_v4 = 'Device supports NTP v4.'
+description_network_ntpv4 = 'Device supports NTP v4.'
 
 tcpdump_display_all_packets = 'tcpdump -n src host ' + device_address + ' -r ' + cap_pcap_file
 tcpdump_display_udp_bacnet_packets = 'tcpdump -n udp dst portrange 47808-47809 -r ' + cap_pcap_file
@@ -68,12 +67,14 @@ def packets_received_count(shell_result):
     else:
         return decode_shell_result(shell_result)
 
+#Extracts the NTP version from the first client NTP packet
 def ntp_client_version(capture):
     client_packets = ntp_client_packets(capture)
     if len(client_packets) == 0:
         return None
     return client_packets[0].version
 
+#Filters the packets by type (NTP) from the client only
 def ntp_client_packets(capture):
     packets = []
     for packet in capture:
@@ -81,7 +82,7 @@ def ntp_client_packets(capture):
             ip = packet.payload
             udp = ip.payload
             ntp = udp.payload
-            if ntp.mode == 3:
+            if ntp.mode == 3: #Mode 3 = client mode
                 packets.append(ntp)
     return packets
 
@@ -176,27 +177,18 @@ def test_communication_type_broadcast():
         add_summary("Unicast packets received.")
     return 'info'
 
-def test_ntp_support():
-    shell_result = shell_command_with_result(tcpdump_display_ntp_packets, 0, False)
-    ntp_packets_received = packets_received_count(shell_result)
-    if ntp_packets_received > 0:
-        add_summary("NTP packets received.")
-        add_packet_info_to_report(shell_result)
-        return 'pass'
-    else:
-        return 'fail'
-
-def test_ntp_support_v4():
+def test_network_ntpv4():
     capture = rdpcap(cap_pcap_file)
     if len(capture) > 0:
         version = ntp_client_version(capture)
         if version is None:
             add_summary("No NTP packets received.")
             return 'skip'
-        add_summary("Using NTPv" + str(version) + ".")
         if version == 4:
+	    add_summary("Using NTPv4.")
             return 'pass'
         else:
+	    add_summary("Not using NTPv4.")
             return 'fail'
     else:
         add_summary("No NTP packets received.")
@@ -220,11 +212,8 @@ elif test_request == 'protocol.app_min_send':
 elif test_request == 'communication.type.broadcast':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_communication_type))
     result = test_communication_type_broadcast()
-elif test_request == 'network.ntp.support':
-    write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support))
-    result = test_ntp_support()
-elif test_request == 'network.ntp.support_v4':
-    write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support_v4))
-    result = test_ntp_support_v4()
+elif test_request == 'connection.network.ntpv4':
+    write_report("{d}\n{b}".format(b=dash_break_line, d=description_network_ntpv4))
+    result = test_network_ntpv4()
 
 write_report("RESULT {r} {t} {s}\n".format(r=result, t=test_request, s=summary_text.strip()))
