@@ -1,4 +1,6 @@
 # Changelog
+* 1.5.1
+  * Fix for local-port-as-string issue (#477)
 * 1.5.0
   * Numerous renovate-bot updgrades
   * Move reporting.sh into docker/include (#473)
