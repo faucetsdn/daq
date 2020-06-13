@@ -2,55 +2,64 @@
 #
 # Write manual test results from module_config.json
 # into DAQ report output
-# https://google.github.io/styleguide/shellguide.html#s1.2-when-to-use-shell
 
 source reporting.sh
 
 # JQ filter for retrieving manual tests
-JQ_MANUAL_TESTS='.tests | to_entries[] | select(.value.type | . and contains("manual"))'
+# from module_config.json
+JQ_MANUAL_TESTS='.tests | to_entries[] | select(.value.type == "manual")'
+
+# JQ filter for counting number of manual tests
+# in module_config.json
+JQ_COUNT_MANUAL='[.tests[] | select(.type == "manual") ] | length'
 
 CONFIG=/config/device/module_config.json
-
 REPORT=/tmp/report.txt
-LOG=/tmp/manual.log #put all the results into here
 
-rm -f $LOG $REPORT
+rm -f $REPORT
 
 if [ -f $CONFIG ]; then
-    echo Extracting device config from $CONFIG
+  echo "Extracting device config from ${CONFIG}"
 else
-    echo No module config $CONFIG. 
-    exit 1
+  echo "No module config ${CONFIG}". 
+  exit 1
+fi
+
+# Check how many manual tests are defined in module_config
+# If none, stop test and print to report that no tests were found
+manual_test_count=$(jq -r "${JQ_COUNT_MANUAL}" "${CONFIG}")
+if [[ ${manual_test_count} -eq "0" ]]; then
+  echo "No manual tests defined" | tee $REPORT
+  exit 1
 fi
 
 # Loop through manual tests
-# in module_config.json
+# in module_config.json identified by "type": "manual"
 while read manual_test; do
-    test_name=$(jq -r ".key" <<< "${manual_test}")
-    test_desciption=$(jq -r ".value.description // empty" <<< "${manual_test}")
-    test_outcome=$(jq -r ".value.outcome // empty" <<< "${manual_test}")
-    test_summary=$(jq -r ".value.summary" <<< "${manual_test}")
-    test_log=$(jq -r ".value.test_log" <<< "${manual_test}")
-    
-    # check if test outcome is provided, set to skip with summary
-    if [[ -z "${test_outcome}" ]]; then
-        test_outcome="skip"
-        test_summary="Test results of manual test not inputted into module_config"
-    fi
+  test_name=$(jq -r ".key" <<< "${manual_test}")
+  test_desciption=$(jq -r ".value.description // empty" <<< "${manual_test}")
+  test_outcome=$(jq -r ".value.outcome // empty" <<< "${manual_test}")
+  test_summary=$(jq -r ".value.summary // empty" <<< "${manual_test}")
+  test_log=$(jq -r ".value.test_log // empty" <<< "${manual_test}")
+  
+  # check if test outcome is provided, if not set to skip
+  if [[ -z "${test_outcome}" ]]; then
+    test_outcome="skip"
+    test_summary="Test results not inputted into module_config"
+  fi
 
-    #add result and summary
-    #result_and_summary=
+  # has test operator provided additional information for the test
+  if [[ -z "${test_log}" ]]; then
+    test_log="No additional information provided"
+  fi
 
-    echo $test_name
-    echo $test_description
-    echo $test_outcome
-    echo $test_summary
-    echo "----"
+  appended_summay="Manual test${test_summary:+ - $test_summary}"
+  result_and_summary="RESULT ${test_outcome} ${test_name} ${appended_summay}"
 
-    write_out_result $REPORT \
-                 "$test_name" \
-                 "$test_description" \
-                 "$TEST_LOG" \
-                 "$result_and_summary"
+  write_out_result $REPORT \
+                "$test_name" \
+                "$test_description" \
+                "$test_log" \
+                "$result_and_summary"
 
-done < <(jq -c -r "${JQ_MANUAL_TESTS}" module_config.json)
+done < <(jq -c -r "${JQ_MANUAL_TESTS}" "${CONFIG}")

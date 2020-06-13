@@ -1,38 +1,41 @@
 # Manual Tests
 
-## Todo
-- add to travis ci test for whichever device is the one for the report
-
-
-
 
 ## Manual Tests
-Some tests cannot be automated with DAQ and  The `manual` test inserts 
+Some tests cannot be automated with DAQ although these may be required. To facilitate a single test report which incorporates all tests undertaken on a device, the `manual` test can be used to input the results into reports produced by DAQ. 
 
 ## Configuration
-Manual tests are inserted into the device's `module_config.json` and marked by `"type": "manual"`.
+Manual tests including results are inserted into the device's `module_config.json` and marked by `"type": "manual"`.
 
 ```
 "tests": {
-    "connection.wireless_ap_disabled": {
-        "description": "Verify that the devices is configured not to act as an access point and not to have any hidden SSID",
+    "manual.test.name": {
+        "description": "test description",
         "enabled": true,
         "type": "manual",
-        "result": "required",
-        "outcome": "pass",
-        "summary" : 
-        "
+        "result": "required",   
+        "outcome": "pass"   
+        "summary" : "summary note in results table",
+        "test_log" : "additional information in report appendix"
     }
 }
 ```
 
-The following key-value pairs are permitted for manual tests:
-
-| Option | Description |
-| --- | --- |
-| Outcome | Did the manual test _pass_,_fail_ or  |
-| Outcome | pass, fail, info |
-
 
 ## Example Report of Manual Tests
-Test output added i
+In summary table
+|Result|Test|Category|Expectation|Notes|
+|---|---|---|---|---|
+|pass|manual.test.name|Security|Recommended|Manual test|
+
+In report appendix
+```
+--------------------
+manual.test.name
+--------------------
+Test description
+--------------------
+Test description
+--------------------
+RESULT pass manual.test.name Manual test - Test summary
+```
