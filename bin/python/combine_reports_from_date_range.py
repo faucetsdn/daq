@@ -12,10 +12,12 @@ from gcp import GcpManager
 from report import MdTable
 
 LOGGER = logger.get_logger('combine_reports_from_date_range')
+DEFAULT_REPORTS_DIR = os.path.join('inst', 'reports')
 
 
 def _reduce_labels(sets):
     return sorted(functools.reduce(lambda cur, acc: acc.union(cur), sets, set()))
+
 
 def _render_results(results):
     result_label_sets = map(lambda test: set(test.keys()), results['tests'].values())
@@ -46,15 +48,23 @@ def _render_results(results):
 
     return "\n%s\n" * 3 % (tests_table.render(), categories_table.render(), missing_table.render())
 
-def _get_local_reports(device, reports_dir, start, end):
+
+def _iso_to_fname(timestamp):
+    return timestamp.isoformat().replace(':', '') if timestamp else None
+
+
+def _get_local_reports(device, reports_dir, start, end, count):
     LOGGER.info('Looking for reports locally')
     report_re = re.compile(r'^report_%s_\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}.*\.json$' % device)
     ts_re = re.compile(r'\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}')
     json_files = [f for f in os.listdir(reports_dir) if report_re.match(f)]
+    json_files.sort()
+    if count and len(json_files) > count:
+        json_files = json_files[len(json_files) - count:]
     for json_file in json_files:
         timestamp = ts_re.search(json_file).group(0)
-        start_str = start.isoformat().replace(':', '') if start else None
-        end_str = end.isoformat().replace(':', '') if end else None
+        start_str = _iso_to_fname(start)
+        end_str = _iso_to_fname(end)
         if (start_str and timestamp < start_str) or (end_str and timestamp > end_str):
             LOGGER.info('Skipping file %s' % json_file)
             continue
@@ -62,17 +72,23 @@ def _get_local_reports(device, reports_dir, start, end):
         with open(os.path.join(reports_dir, json_file), 'r') as json_file_handler:
             yield json.loads(json_file_handler.read())
 
-def main(device, start=None, end=None, gcp=None, reports_dir=os.path.join('inst', 'reports')):
+
+def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR, count=0):
+    # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
     """Main script function"""
-    aggregate = {'tests': {}, 'categories': {}, 'missing': {}}
+
     device = device.replace(':', '').lower()
     if gcp:
         device_full = ":".join([device[i:i + 2] for i in range(0, len(device), 2)])
-        json_reports = gcp.get_reports_from_date_range(device_full, start=start, end=end)
+        json_reports = gcp.get_reports_from_date_range(device_full, start=start, end=end,
+                                                       count=count)
     else:
-        json_reports = _get_local_reports(device, reports_dir, start, end)
+        json_reports = _get_local_reports(device, reports_dir, start, end, count)
 
+    json_reports = list(json_reports)
+
+    aggregate = {'tests': {}, 'categories': {}, 'missing': {}}
     for json_report in json_reports:
         for test in json_report.get('missing_tests', []):
             aggregate['missing'].setdefault(test, 0)
@@ -88,12 +104,15 @@ def main(device, start=None, end=None, gcp=None, reports_dir=os.path.join('inst'
                 aggregate['tests'][test][result] += 1
                 aggregate['categories'][category][result] += 1
     result_str = _render_results(aggregate)
-    reports_path = os.path.join(reports_dir, 'combo_%s_(%s,%s).md' % (device, start, end))
+    start_stamp = _iso_to_fname(start)
+    end_stamp = _iso_to_fname(end)
+    reports_path = os.path.join(reports_dir, 'combo_%s_%s_%s.md' % (device, start_stamp, end_stamp))
     with open(reports_path, 'w') as report_file:
         report_file.write('# Combined Results\n')
-        report_file.write('Device: %s Start: %s End: %s\n' % (device, start, end))
+        report_file.write('Device: %s\nStart: %s\nEnd: %s\n' % (device, start, end))
         report_file.write(result_str)
     LOGGER.info('Report written to %s' % reports_path)
+    assert not count or count == len(json_reports), 'Did not find expected %d reports' % count
 
 
 if __name__ == '__main__':
@@ -105,11 +124,15 @@ if __name__ == '__main__':
         GCP = GcpManager(CONFIG, None)
     assert all([attr in CONFIG for attr in ('from_time', 'to_time', 'device')]), """
 Combines reports under inst/reports(default) or from GCP
-Usage: combine_reports_from_date_range.py device=xx:xx:xx:xx:xx:xx
-       [from_time='YYYY-MM-DDThh:mm:ss']
-       [to_time='YYYY-MM-DDThh:mm:ss']
-       [from_gcp='true']
-       local/system.yaml"""
+Usage: combine_reports_from_date_range.py
+    [local/system.yaml]
+    device=xx:xx:xx:xx:xx:xx
+    from_time='YYYY-MM-DDThh:mm:ss'
+    to_time='YYYY-MM-DDThh:mm:ss'
+    [count=N]
+    [from_gcp='true']
+"""
     FROM_TIME = datetime.datetime.fromisoformat(CONFIG.get('from_time')).replace(tzinfo=None)
     TO_TIME = datetime.datetime.fromisoformat(CONFIG.get('to_time')).replace(tzinfo=None)
-    main(CONFIG.get('device'), start=FROM_TIME, end=TO_TIME, gcp=GCP)
+    COUNT = int(CONFIG.get('count', 0))
+    main(CONFIG.get('device'), start=FROM_TIME, end=TO_TIME, gcp=GCP, count=COUNT)

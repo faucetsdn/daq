@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+source etc/config_base.sh
+
+FAILED=
+PYTHONPATH=daq python3 bin/python/combine_reports_from_date_range.py $conf_file $@ || FAILED=true
+
+if [ -n "$FAILED" ]; then
+    echo
+    echo Usage: $0 [from_time] [to_time] [from_gcp]
+    false
+fi
