@@ -77,7 +77,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
         files_list = [
             'report_someotherdevice_2020-05-29T002333.json',
             'report_' + device + '_2019-05-29T002333.json',
-            #only the following 2 should be processed
+            # only the following 2 should be processed
             'report_' + device + '_2020-05-29T002333.json',
             'report_' + device + '_2020-05-29T092333.json'
         ]
