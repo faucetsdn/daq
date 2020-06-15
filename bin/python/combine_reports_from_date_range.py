@@ -46,8 +46,12 @@ def _render_results(results):
     else:
         missing_table.add_row(['None'])
 
-    return "\n%s\n" * 3 % (tests_table.render(), categories_table.render(), missing_table.render())
+    reports_table = MdTable(['reports'])
+    for report in sorted(results['reports'].keys()):
+        reports_table.add_row([report])
 
+    all_tables = [tests_table, categories_table, missing_table, reports_table]
+    return '\n'.join(map(lambda x: x.render(), all_tables))
 
 def _iso_to_fname(timestamp):
     return timestamp.isoformat().replace(':', '') if timestamp else None
@@ -55,14 +59,13 @@ def _iso_to_fname(timestamp):
 
 def _get_local_reports(device, reports_dir, start, end, count):
     LOGGER.info('Looking for reports locally')
-    report_re = re.compile(r'^report_%s_\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}.*\.json$' % device)
-    ts_re = re.compile(r'\d{4}-\d{2}-\d{2}T\d{6}\+\d{4}')
+    report_re = re.compile(r'^report_%s_(\d{4}-\d{2}-\d{2}T\d{6})\.json$' % device)
     json_files = [f for f in os.listdir(reports_dir) if report_re.match(f)]
     json_files.sort()
     if count and len(json_files) > count:
         json_files = json_files[len(json_files) - count:]
     for json_file in json_files:
-        timestamp = ts_re.search(json_file).group(0)
+        timestamp = report_re.search(json_file).group(1)
         start_str = _iso_to_fname(start)
         end_str = _iso_to_fname(end)
         if (start_str and timestamp < start_str) or (end_str and timestamp > end_str):
@@ -79,6 +82,7 @@ def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR
     """Main script function"""
 
     device = device.replace(':', '').lower()
+    report_source = 'gcp' if gcp else 'local'
     if gcp:
         device_full = ":".join([device[i:i + 2] for i in range(0, len(device), 2)])
         json_reports = gcp.get_reports_from_date_range(device_full, start=start, end=end,
@@ -88,8 +92,9 @@ def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR
 
     json_reports = list(json_reports)
 
-    aggregate = {'tests': {}, 'categories': {}, 'missing': {}}
+    aggregate = {'tests': {}, 'categories': {}, 'missing': {}, 'reports': {}}
     for json_report in json_reports:
+        aggregate['reports'][json_report['timestamp']] = True
         for test in json_report.get('missing_tests', []):
             aggregate['missing'].setdefault(test, 0)
             aggregate['missing'][test] += 1
@@ -110,9 +115,14 @@ def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR
     with open(reports_path, 'w') as report_file:
         report_file.write('# Combined Results\n')
         report_file.write('Device: %s\nStart: %s\nEnd: %s\n' % (device, start, end))
+        report_file.write('Source: %s\n\n' % report_source)
         report_file.write(result_str)
     LOGGER.info('Report written to %s' % reports_path)
     assert not count or count == len(json_reports), 'Did not find expected %d reports' % count
+
+
+def _convert_iso(timestamp):
+    return datetime.datetime.fromisoformat(timestamp).replace(tzinfo=None) if timestamp else None
 
 
 if __name__ == '__main__':
@@ -132,7 +142,7 @@ Usage: combine_reports_from_date_range.py
     [count=N]
     [from_gcp='true']
 """
-    FROM_TIME = datetime.datetime.fromisoformat(CONFIG.get('from_time')).replace(tzinfo=None)
-    TO_TIME = datetime.datetime.fromisoformat(CONFIG.get('to_time')).replace(tzinfo=None)
+    FROM_TIME = _convert_iso(CONFIG.get('from_time'))
+    TO_TIME = _convert_iso(CONFIG.get('to_time'))
     COUNT = int(CONFIG.get('count', 0))
     main(CONFIG.get('device'), start=FROM_TIME, end=TO_TIME, gcp=GCP, count=COUNT)

@@ -1,0 +1,6 @@
+Running testing/test_many.sh
+GCP results diff
+5c5
+< Source: gcp
+---
+> Source: local
