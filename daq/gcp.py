@@ -47,14 +47,14 @@ class GcpManager:
     def __init__(self, config, callback_handler):
         self.config = config
         self._callback_handler = callback_handler
-        if 'gcp_cred' not in config:
-            LOGGER.info('No gcp_cred credential specified in config')
+        cred_file = self.config.get('gcp_cred')
+        if not cred_file:
+            LOGGER.info('No gcp_cred filr specified in config, disabling gcp use.')
             self._pubber = None
             self._storage = None
             self._firestore = None
             self._client_name = None
             return
-        cred_file = self.config['gcp_cred']
         LOGGER.info('Loading gcp credentials from %s', cred_file)
         # Normal execution assumes default credentials.
         # pylint: disable=protected-access
