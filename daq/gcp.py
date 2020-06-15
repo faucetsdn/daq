@@ -257,7 +257,7 @@ class GcpManager:
 
     def _get_json_report(self, runid):
         doc = runid.reference.collection('test').document('terminate').get().to_dict()
-        report_blob = doc.get('report.json') if doc else None
+        report_blob = doc.get('report_path.json') if doc else None
         if not report_blob:
             return None
         LOGGER.info('Downloading report %s', report_blob)
