@@ -8,9 +8,9 @@ configured. It should work properly for the majority of situations, but will not
 
 In order to find the appropriate containers, the system needs to be configured such that the build
 path has access to the module in question. Typically, this can be configured using:
-<pre>$ cp misc/system_all.conf local/system.conf</pre>
+<pre>$ cp config/system/all.conf local/system.conf</pre>
 A new module can/should be enabled by
-including it in the misc/system_all.conf file. If the target module is not available on the path,
+including it in the config/system/all.conf file. If the target module is not available on the path,
 the build will fail:
 <pre>Could not find specified test module to build: test_tls</pre>
 

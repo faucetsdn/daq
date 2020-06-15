@@ -12,12 +12,12 @@ cd $ROOT
 PVERSION=3.7
 
 FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
-FAUCETX=$(cat misc/FAUCET_VERSION)
+FAUCETX=$(cat etc/FAUCET_VERSION)
 FAUCETV=${DAQ_FAUCET_VER:-$FAUCETX}
 
 FORCHR=${DAQ_FORCH_REPO:-https://github.com/faucetsdn/forch}
 FORCHB=${DAQ_FORCH_BRANCH}
-FORCHX=$(cat misc/FORCH_VERSION)
+FORCHX=$(cat etc/FORCH_VERSION)
 FORCHV=${DAQ_FORCH_VER:-$FORCHX}
 
 MININET=https://github.com/mininet/mininet
@@ -29,11 +29,11 @@ if [ -f .daq.local ]; then
 fi
 
 if [ "$FAUCETX" != "$FAUCETV" ]; then
-    echo $FAUCETV > misc/FAUCET_VERSION
+    echo $FAUCETV > etc/FAUCET_VERSION
 fi
 
 if [ "$FORCHX" != "$FORCHV" ]; then
-    echo $FORCHV > misc/FORCH_VERSION
+    echo $FORCHV > etc/FORCH_VERSION
 fi
 
 if [ -z "$AG" ]; then
@@ -79,6 +79,33 @@ $AG install \
 $AG install python-pip
 python2 -m pip install setuptools
 
+if [ -d mininet ]; then
+    echo Checking mininet version matches $MININETV...
+    targetrev=$(cd mininet; git rev-parse $MININETV)
+    instrev=$(cd mininet; git rev-parse HEAD)
+    if [ "$targetrev" != "$instrev" ]; then
+        echo Target mininet version $MININETV does not match installed version.
+        false
+    fi
+    if [ ! -f mininet/.the_house_that_daq_built ]; then
+        echo Mininet build seems to be incomplete. Try bin/clean_dev and try again.
+        false
+    fi
+else
+    echo Cloning $MININET $MININETV...
+    git clone $MININET
+    (
+        cd mininet
+        git reset --hard $MININETV
+        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
+            perl -pi -e "s/${i}//g" util/install.sh ;
+        done
+        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
+        util/install.sh -n
+    )
+    touch mininet/.the_house_that_daq_built
+fi
+
 # Can't use venv inside of containers because of absolute paths.
 if [ -n "$DAQ_CONTAINER" ]; then
     echo Skipping venv activation.
@@ -113,34 +140,6 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-cloud-logging==1.14.0
 
 $PIP freeze
-
-if [ -d mininet ]; then
-    echo Checking mininet version matches $MININETV...
-    targetrev=$(cd mininet; git rev-parse $MININETV)
-    instrev=$(cd mininet; git rev-parse HEAD)
-    if [ "$targetrev" != "$instrev" ]; then
-        echo Target mininet version $MININETV does not match installed version.
-        false
-    fi
-    if [ ! -f mininet/.the_house_that_daq_built ]; then
-        echo Mininet build seems to be incomplete. Try bin/clean_dev and try again.
-        false
-    fi
-else
-    echo Cloning $MININET $MININETV...
-    git clone $MININET
-    (
-        cd mininet
-        git reset --hard $MININETV
-        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
-            perl -pi -e "s/${i}//g" util/install.sh ;
-        done
-        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
-        util/install.sh -n
-    )
-    touch mininet/.the_house_that_daq_built
-fi
-
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
 
@@ -153,7 +152,7 @@ else
     fi
 
     echo Setting faucet version $FAUCETV
-    (cd faucet; git checkout $FAUCETV)
+    (cd faucet; git fetch; git checkout $FAUCETV)
 fi
 
 if [ -z "$FORCHV" ]; then
@@ -165,7 +164,7 @@ else
     fi
 
     echo Setting forch version $FORCHV
-    (cd forch; git checkout $FORCHV)
+    (cd forch; git fetch; git checkout $FORCHV)
 fi
 
 echo -n "DAQ commit "
@@ -188,3 +187,6 @@ if ! docker images > /dev/null; then
     echo If this is the first time, try logging out and log back in again.
     false
 fi
+
+rm -rf protoc-gen-doc
+git clone https://github.com/pseudomuto/protoc-gen-doc.git

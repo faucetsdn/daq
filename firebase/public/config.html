@@ -11,23 +11,31 @@
     <script src="firebase_config.js"></script>
     <script src="auth.js"></script>
     <script src="main.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/8.6.4/jsoneditor.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/8.6.4/jsoneditor.css" rel="stylesheet" type="text/css"></link>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.0.0/jsoneditor.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.0.0/jsoneditor.css" rel="stylesheet" type="text/css"></link>
   </head>
   <body id="config_body">
     <div class="content">
       <h1>Configuration Editor: <span id="title_origin"></span></h1>
       <a id="dashboard_link">Dashboard</a>
-      <h2>Latest Config:
-        <span class="dated_indicator">Out of date!</span>
-        <span class="provisional_indicator">(Provisional...)</span>
-      </h2>
-      <div id="latest_editor"></div>
-      <h2>Configuration Definition:
-        <span class="save_button">Save Changes</span>
-        <span class="saving_indicator">(Saving...)</span>
-      </h2>
-      <div id="config_editor"></div>
+      <div style="display: flex">
+        <div style="flex: 1;margin: 5px">
+          <h2>Latest Config:
+            <span class="dated_indicator">Out of date!</span>
+            <span class="provisional_indicator">(Provisional...)</span>
+          </h2>
+        </div>
+        <div style="flex: 1; margin: 5px">
+          <h2>Configuration Definition:
+            <span class="save_button">Save Changes</span>
+            <span class="saving_indicator">(Saving...)</span>
+          </h2>
+        </div>
+      </div>
+      <div style="display: flex">
+          <div id="latest_editor" style="flex: 1; margin: 5px"></div>
+          <div id="config_editor" style="flex: 1; margin: 5px"></div>
+        </div>
     </div>
     <div class="daq-text" id="status">Initializing...</div>
     <div class="daq-text" id="update"></div>

@@ -17,7 +17,9 @@ package switchtest.cisco;
 
 import switchtest.SwitchInterrogator;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Cisco9300 extends SwitchInterrogator {
 
@@ -31,13 +33,17 @@ public class Cisco9300 extends SwitchInterrogator {
 
   String consolePromptEndingLogin = ">";
 
-  public Cisco9300(String remoteIpAddress, int interfacePort, boolean deviceConfigPoeEnabled) {
+  public Cisco9300(
+      String remoteIpAddress,
+      int interfacePort,
+      boolean deviceConfigPoeEnabled,
+      String user,
+      String password) {
     super(remoteIpAddress, interfacePort, deviceConfigPoeEnabled);
     telnetClientSocket =
         new CiscoSwitchTelnetClientSocket(remoteIpAddress, remotePort, this, debug);
-    // TODO: enabled the user to input their own username and password
-    this.username = "admin";
-    this.password = "password";
+    this.username = user == null ? "admin" : user;
+    this.password = password == null ? "password" : password;
   }
 
   /** Generic Cisco Switch command to retrieve the Status of an interface. */
@@ -50,7 +56,7 @@ public class Cisco9300 extends SwitchInterrogator {
    * with actual port number for complete message
    */
   private String showIfacePowerStatusCommand() {
-    return "show power inline gigabitethernet1/0/" + interfacePort;
+    return "show power inline gigabitethernet1/0/" + interfacePort + " detail";
   }
 
   /**
@@ -224,7 +230,7 @@ public class Cisco9300 extends SwitchInterrogator {
   public String validateLinkTest() {
     String testResults = "";
     if (interface_map.get("status").equals("connected")) {
-      testResults += "RESULT pass connection.port_link\n";
+      testResults += "RESULT pass connection.port_link Link is up\n";
     } else {
       testResults += "RESULT fail connection.port_link Link is down\n";
     }
@@ -239,9 +245,11 @@ public class Cisco9300 extends SwitchInterrogator {
         speed = speed.replaceFirst("a-", "");
       }
       if (Integer.parseInt(speed) >= 10) {
-        testResults += "RESULT pass connection.port_speed\n";
+        testResults +=
+            "RESULT pass connection.port_speed Speed auto-negotiated successfully. Speed is greater than 10 MBPS\n";
       } else {
-        testResults += "RESULT fail connection.port_speed Speed is too slow\n";
+        testResults +=
+            "RESULT fail connection.port_speed Speed is too slow. Speed is less than or equal to 10 mbps\n";
       }
     } else {
       testResults += "RESULT fail connection.port_speed Cannot detect current speed\n";
@@ -257,7 +265,7 @@ public class Cisco9300 extends SwitchInterrogator {
         duplex = duplex.replaceFirst("a-", "");
       }
       if (duplex.equals("full")) {
-        testResults += "RESULT pass connection.port_duplex\n";
+        testResults += "RESULT pass connection.port_duplex Full duplex mode detected\n";
       } else {
         testResults += "RESULT fail connection.port_duplex Incorrect duplex mode set\n";
       }
@@ -310,7 +318,7 @@ public class Cisco9300 extends SwitchInterrogator {
 
       // Determine PoE power test result
       if (maxPower >= currentPower && poeOn) {
-        testResults += "RESULT pass poe.power\n";
+        testResults += "RESULT pass poe.power PoE is applied to device\n";
       } else if (poeOff) {
         testResults += "RESULT fail poe.power No poE is applied\n";
       } else if (poeFault) {
@@ -323,14 +331,14 @@ public class Cisco9300 extends SwitchInterrogator {
 
       // Determine PoE auto negotiation result
       if (powerAuto) {
-        testResults += "RESULT pass poe.negotiation\n";
+        testResults += "RESULT pass poe.negotiation PoE auto-negotiated successfully\n";
       } else {
         testResults += "RESULT fail poe.negotiation Incorrect privilege for negotiation\n";
       }
 
       // Determine PoE support result
       if (poeOn) {
-        testResults += "RESULT pass poe.support\n";
+        testResults += "RESULT pass poe.support PoE supported and enabled\n";
       } else {
         testResults +=
             "RESULT fail poe.support The switch does not support PoE or it is disabled\n";
@@ -343,12 +351,13 @@ public class Cisco9300 extends SwitchInterrogator {
   private void processCommandResponse(String response) {
     response = response.trim();
     System.out.println("\nProcessing Command Response:\n" + response);
+    login_report += "\n\n" + response;
     switch (commandIndex) {
       case 0: // show interface status
         processInterfaceStatus(response);
         break;
       case 1: // show power status
-        processPowerStatus(response);
+        processPowerStatusInline(response);
     }
   }
 
@@ -357,12 +366,19 @@ public class Cisco9300 extends SwitchInterrogator {
     return interface_map;
   }
 
-  public HashMap<String, String> processPowerStatus(String response) {
-    // Pre-process raw data to be map ready
-    response.replaceAll("-", "");
-    String[] lines = response.split("\n");
-    response = lines[0] + " \n" + lines[lines.length - 1];
-    power_map = mapSimpleTable(response, show_power_expected, power_expected);
+  public Map<String, String> processPowerStatusInline(String response) {
+    Map<String, String> inlineMap = powerInlineMap();
+    Arrays.stream(response.split("\n"))
+        .forEach(
+            line -> {
+              String[] lineParts = line.trim().split(":");
+              if (lineParts.length > 1) {
+                String powerMapKey = inlineMap.getOrDefault(lineParts[0], null);
+                if (powerMapKey != null) {
+                  power_map.put(powerMapKey, lineParts[1].trim());
+                }
+              }
+            });
     return power_map;
   }
 
@@ -434,6 +450,7 @@ public class Cisco9300 extends SwitchInterrogator {
   }
 
   public void sendNextCommand() {
+    login_report += "\n" + command[commandIndex];
     telnetClientSocket.writeData(command[commandIndex] + "\n");
     commandPending = true;
     promptReady = false;
@@ -490,5 +507,17 @@ public class Cisco9300 extends SwitchInterrogator {
 
   public String[] showStackExpected() {
     return new String[] {};
+  }
+
+  private static HashMap<String, String> powerInlineMap() {
+    HashMap<String, String> map = new HashMap<String, String>();
+    map.put("Interface", "dev_interface");
+    map.put("Inline Power Mode", "admin");
+    map.put("Operational status", "oper");
+    map.put("Measured at the port", "power");
+    map.put("Device Type", "device");
+    map.put("IEEE Class", "dev_class");
+    map.put("Power available to the device", "max");
+    return map;
   }
 }

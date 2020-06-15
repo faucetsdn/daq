@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <head>
   <script src="/__/firebase/6.2.3/firebase-app.js"></script>
   <script src="/__/firebase/6.2.3/firebase-auth.js"></script>
@@ -6,16 +7,50 @@
   <script defer src="/__/firebase/6.2.3/firebase-storage.js"></script>
   <script src="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.css" />
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
   <script src="deploy_version.js"></script>
   <script src="firebase_config.js"></script>
   <script src="auth.js"></script>
   <script src="main.js"></script>
 </head>
+
 <body>
   <div class="content">
     <div id="description" class="daq-text"><a class="description"></a></div>
     <div id="module_config"></div>
+    <div id="filters">
+      <h2>Filters: </h2>
+      <div>
+        Dates 
+        <label>from</label>
+        <input id="fromFilter" type="date" />
+        <label>to</label>
+        <input id="toFilter" type="date"/>
+      </div>
+      <div>
+        <label>Device ID</label>
+        <input id="deviceFilter" type="text" />
+      </div>
+      <div>
+        <label>Site</label>
+        <input id="siteFilter" type="text" />
+      </div>
+      <div>
+        <label>Origin</label>
+        <input id="originFilter" type="text" />
+      </div>
+      <div>
+        <label>Port</label>
+        <input id="portFilter" type="number"/>
+      </div>
+      <div>
+        <label>Run IDs</label>
+        <input id="runidFilter" type="text"/>
+      </div>
+      <div>
+        <button onClick="applyFilter()">Apply</button>
+      </div>
+    </div>
     <div id="listings">
       <h2>Sites</h2>
       <div class="sites"></div>
@@ -32,9 +67,11 @@
   <div class="daq-text" id="status">Initializing...</div>
   <div class="daq-text" id="update"></div>
   <div id="auth-body">
-    <div class="auth-main"><div id="firebaseui-auth-container"></div></div>
+    <div class="auth-main">
+      <div id="firebaseui-auth-container"></div>
+    </div>
     <div class="auth-info">Signed in as <span id="user-name"></span>, <span id="user-email"></span>
-    <span id="sign-out" class="simple-button">Sign Out</span></div>
+      <span id="sign-out" class="simple-button">Sign Out</span></div>
   </div>
   <div id="daq-versions">
     <div class="daq-text">DAQ version <span id="daq-version"></span></div>
@@ -44,5 +81,7 @@
   <div class="daq-text">Web version <span id="deploy-version"></span></div>
 </body>
 <script>
-  document.getElementById('deploy-version').innerHTML = daq_deploy_version;
+  if (typeof daq_deploy_version !== 'undefined') {
+    document.getElementById('deploy-version').innerHTML = daq_deploy_version;
+  }
 </script>

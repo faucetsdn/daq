@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-source misc/config_base.sh
+source etc/config_base.sh
 
 if [ -z "$gcp_cred" ]; then
     echo Need to define [gcp_cred] config variable.
@@ -25,4 +25,4 @@ validator/bin/build
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
 echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 
-validator/bin/registrar $gcp_cred $site_path $schema_path
+validator/bin/registrar $gcp_cred $site_path $schema_path $*

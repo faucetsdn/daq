@@ -3,11 +3,10 @@
 ## General Setup
 
 The network topology is auto-generated based on settings in the specified `local/system.conf`
-on startup. Various templates are availabile in `misc/`:
-* `misc/system_base.conf`: Single faux-device internal test setup.
-* `misc/system_multi.conf`: Test setup with 3 faux-devices.
-* `misc/system_ext.conf`: Test setup for using an external OVS switch.
-* `misc/system_phy.conf`: Setup for using an external physical switch.
+on startup. Various templates are availabile in `config/system/`:
+* `config/system/base.yaml`: Single faux-device internal test setup.
+* `config/system/multi.conf`: Test setup with 3 faux-devices.
+* `config/system/ext.yaml`: Setup for using an external switch (physical or simulated).
 
 The system will generate the `inst/faucet.yaml` file, which then triggers the configuration
 of the underlying OpenFlow system. General network debugging information can be found in
@@ -19,13 +18,13 @@ and/or misconfigured switch topologies.
 The different top-level network topologies are:
 1. _Emulation_: This uses a built-in 'faux' device to test the DAQ suite itself. It is
 important to make sure this works properly to verify the basic install is sound. This
-is most useful for basic system sanity checks and system development. See `misc/system_base.conf`
-or `misc/system_multi.conf` for examples of how this is configured.
+is most useful for basic system sanity checks and system development. See `config/system/base.yaml`
+or `config/system/multi.conf` for examples of how this is configured.
 
 2. _Adapter_: This uses one or more physical USB interfaces to directly connect
 devices (no external switch). There is no particular limit on the number of devices that can be
 connected this way except for the limitations of the host's USB subsystem. See the notes at the
-top of the `misc/system_base.conf` file for instructions on how to configure this setup.
+top of the `config/system/base.conf` file for instructions on how to configure this setup.
 
 3. _Test Lab_: Use one external OpenFlow network switch detailed in the
 [test lab setup](test_lab.md) documentation. This is primarily designed for testing small

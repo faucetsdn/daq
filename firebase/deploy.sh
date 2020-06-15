@@ -1,22 +1,19 @@
 #!/bin/bash -e
 
+if [ $# != 1 ]; then
+    echo Usage: $0 [project_id]
+    false
+fi
+
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-source misc/config_base.sh
+source etc/config_base.sh
 
-if [ -z "$gcp_cred" ]; then
-    echo gcp_cred not defined in system configuration.
-    false
-fi
+PROJECT=$1
+shift
 
-PROJECT=`jq -r .project_id $gcp_cred`
-if [ -z "$PROJECT" ]; then
-    echo project_id not extracted from $gcp_cred.
-    false
-fi
-
-CFILE=firebase_config.js
+CFILE=$PROJECT.js
 
 echo
 echo For local hosting: firebase serve --only hosting --project $PROJECT
@@ -26,10 +23,10 @@ echo Application host : https://$PROJECT.firebaseapp.com
 echo
 
 if [ -f local/$CFILE ]; then
-    echo Copying local/$CFILE to firebase/public/
-    cp local/$CFILE firebase/public/
+    echo Copying local/$CFILE to firebase/public/firebase_config.js
+    cp local/$CFILE firebase/public/firebase_config.js
 else
-    echo No local/$CFILE found.
+    echo No local/$CFILE firebase configuration found.
     false
 fi
 

@@ -5,7 +5,7 @@ set -o pipefail
 
 ROOT=$(dirname $0)/..
 cd $ROOT
-source misc/config_base.sh
+source etc/config_base.sh
 
 build_root=build
 sudo rm -rf $build_root .build_hash .build_files
@@ -24,7 +24,7 @@ fi
 
 if [ -n "$DAQ_TARGETS" ]; then
     declare -A test_set
-    for target in $(echo $DAQ_TARGETS | sed 's/,/ /'); do
+    for target in $(echo $DAQ_TARGETS | sed 's/,/ /g'); do
         echo Enabling target $target
         test_set[$target]=y
     done
@@ -48,7 +48,7 @@ for file in $docker_files; do
         echo Skipping building existing $tag 
     else
         unset test_set[$module]
-        echo Build$ext_msg $file into $tag, log to $logfile...
+        echo Build $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
         if [ -n "$inline" ]; then
             bin/retry_cmd docker build -t $tag -f $file . 2>&1 | tee -a $logfile || failed=y

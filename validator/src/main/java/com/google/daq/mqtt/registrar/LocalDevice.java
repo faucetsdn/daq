@@ -1,9 +1,5 @@
 package com.google.daq.mqtt.registrar;
 
-import static com.google.daq.mqtt.registrar.Registrar.ENVELOPE_JSON;
-import static com.google.daq.mqtt.registrar.Registrar.METADATA_JSON;
-import static com.google.daq.mqtt.registrar.Registrar.PROPERTIES_JSON;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -19,28 +15,23 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.daq.mqtt.util.CloudDeviceSettings;
 import com.google.daq.mqtt.util.CloudIotManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import com.google.daq.mqtt.util.ExceptionMap;
 import org.apache.commons.io.IOUtils;
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class LocalDevice {
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+
+import static com.google.daq.mqtt.registrar.Registrar.*;
+
+class LocalDevice {
 
   private static final PrettyPrinter PROPER_PRETTY_PRINTER_POLICY = new ProperPrettyPrinterPolicy();
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-      .enable(SerializationFeature.INDENT_OUTPUT)
+  private static final ObjectMapper OBJECT_MAPPER_RAW = new ObjectMapper()
       .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
       .enable(Feature.ALLOW_TRAILING_COMMA)
       .enable(Feature.STRICT_DUPLICATE_DETECTION)
@@ -48,22 +39,34 @@ public class LocalDevice {
       .setDateFormat(new ISO8601DateFormat())
       .setSerializationInclusion(Include.NON_NULL);
 
+  private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
+      .enable(SerializationFeature.INDENT_OUTPUT);
+
+  private static final String RSA_CERT_TYPE = "RS256_X509";
+  private static final String RSA_KEY_FILE = "RSA_PEM";
+  private static final String RSA_CERT_FILE = "RSA_X509_PEM";
   private static final String RSA_PUBLIC_PEM = "rsa_public.pem";
+  private static final String RSA_CERT_PEM = "rsa_cert.pem";
   private static final String RSA_PRIVATE_PEM = "rsa_private.pem";
   private static final String RSA_PRIVATE_PKCS8 = "rsa_private.pkcs8";
-  private static final String PHYSICAL_TAG_FORMAT = "%s_%s";
-  private static final String PHYSICAL_TAG_ERROR = "Physical asset name %s does not match expected %s";
+  private static final String PHYSICAL_TAG_ERROR = "Physical tag %s %s does not match expected %s";
 
-  private static final Set<String> allowedFiles = ImmutableSet.of(METADATA_JSON, RSA_PUBLIC_PEM, RSA_PRIVATE_PEM,
-      RSA_PRIVATE_PKCS8, PROPERTIES_JSON);
+  private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
+  private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
+  private static final Set<String> OPTIONAL_FILES = ImmutableSet.of(
+      GENERATED_CONFIG_JSON, DEVICE_ERRORS_JSON, NORMALIZED_JSON);
+
   private static final String KEYGEN_EXEC_FORMAT = "validator/bin/keygen %s %s";
   public static final String METADATA_SUBFOLDER = "metadata";
+  private static final String ERROR_FORMAT_INDENT = "  ";
+  private static final int MAX_METADATA_LENGTH = 32767;
 
   private final String deviceId;
   private final Map<String, Schema> schemas;
   private final File deviceDir;
-  private final Metadata metadata;
-  private final Properties properties;
+  private final UdmiSchema.Metadata metadata;
+  private final File devicesDir;
+  private final ExceptionMap exceptionMap;
 
   private String deviceNumId;
 
@@ -73,9 +76,10 @@ public class LocalDevice {
     try {
       this.deviceId = deviceId;
       this.schemas = schemas;
+      this.devicesDir = devicesDir;
+      exceptionMap = new ExceptionMap("Exceptions for " + deviceId);
       deviceDir = new File(devicesDir, deviceId);
       metadata = readMetadata();
-      properties = readProperties();
     } catch (Exception e) {
       throw new RuntimeException("While loading local device " + deviceId, e);
     }
@@ -89,12 +93,13 @@ public class LocalDevice {
     try {
       String[] files = deviceDir.list();
       Preconditions.checkNotNull(files, "No files found in " + deviceDir.getAbsolutePath());
-      ImmutableSet<String> actualFiles = ImmutableSet.copyOf(files);
-      SetView<String> missing = Sets.difference(allowedFiles, actualFiles);
+      Set<String> actualFiles = ImmutableSet.copyOf(files);
+      Set<String> expectedFiles = Sets.union(DEVICE_FILES, keyFiles());
+      SetView<String> missing = Sets.difference(expectedFiles, actualFiles);
       if (!missing.isEmpty()) {
         throw new RuntimeException("Missing files: " + missing);
       }
-      SetView<String> extra = Sets.difference(actualFiles, allowedFiles);
+      SetView<String> extra = Sets.difference(Sets.difference(actualFiles, expectedFiles), OPTIONAL_FILES);
       if (!extra.isEmpty()) {
         throw new RuntimeException("Extra files: " + extra);
       }
@@ -103,63 +108,91 @@ public class LocalDevice {
     }
   }
 
-  private Properties readProperties() {
-    File propertiesFile = new File(deviceDir, PROPERTIES_JSON);
-    try (InputStream targetStream = new FileInputStream(propertiesFile)) {
-      schemas.get(PROPERTIES_JSON).validate(new JSONObject(new JSONTokener(targetStream)));
-    } catch (Exception e) {
-      throw new RuntimeException("Processing input " + propertiesFile, e);
-    }
-    try {
-      return OBJECT_MAPPER.readValue(propertiesFile, Properties.class);
-    } catch (Exception e) {
-      throw new RuntimeException("While reading "+ propertiesFile.getAbsolutePath(), e);
-    }
-  }
-
-  private Metadata readMetadata() {
+  private UdmiSchema.Metadata readMetadata() {
     File metadataFile = new File(deviceDir, METADATA_JSON);
     try (InputStream targetStream = new FileInputStream(metadataFile)) {
       schemas.get(METADATA_JSON).validate(new JSONObject(new JSONTokener(targetStream)));
-    } catch (Exception e1) {
-      throw new RuntimeException("Processing input " + metadataFile, e1);
+    } catch (Exception metadata_exception) {
+      exceptionMap.put("Validating", metadata_exception);
     }
     try {
-      return OBJECT_MAPPER.readValue(metadataFile, Metadata.class);
-    } catch (Exception e) {
-      throw new RuntimeException("While reading "+ metadataFile.getAbsolutePath(), e);
+      return OBJECT_MAPPER.readValue(metadataFile, UdmiSchema.Metadata.class);
+    } catch (Exception mapping_exception) {
+      exceptionMap.put("Reading", mapping_exception);
+    }
+    return null;
+  }
+
+  private UdmiSchema.Metadata readNormalized() {
+    try {
+      File metadataFile = new File(deviceDir, NORMALIZED_JSON);
+      return OBJECT_MAPPER.readValue(metadataFile, UdmiSchema.Metadata.class);
+    } catch (Exception mapping_exception) {
+      return new UdmiSchema.Metadata();
     }
   }
 
   private String metadataHash() {
+    String savedHash = metadata.hash;
+    Date savedTimestamp = metadata.timestamp;
     try {
-      String savedHash = metadata.hash;
       metadata.hash = null;
+      metadata.timestamp = null;
       String json = metadataString();
-      metadata.hash = savedHash;
       return String.format("%08x", Objects.hash(json));
     } catch (Exception e) {
       throw new RuntimeException("Converting object to string", e);
+    } finally {
+      metadata.hash = savedHash;
+      metadata.timestamp = savedTimestamp;
     }
+  }
+
+  private String getAuthType() {
+    return metadata.cloud == null ? null : metadata.cloud.auth_type;
+  }
+
+  private String getAuthFileType() {
+    return RSA_CERT_TYPE.equals(getAuthType()) ? RSA_CERT_FILE : RSA_KEY_FILE;
   }
 
   private DeviceCredential loadCredential() {
     try {
-      File deviceKeyFile = new File(deviceDir, RSA_PUBLIC_PEM);
+      if (hasGateway() && getAuthType() != null) {
+        throw new RuntimeException("Proxied devices should not have auth_type defined");
+      }
+      if (!isDirectConnect()) {
+        return null;
+      }
+      if (getAuthType() == null) {
+        throw new RuntimeException("Credential auth_type definition missing");
+      }
+      File deviceKeyFile = new File(deviceDir, publicKeyFile());
       if (!deviceKeyFile.exists()) {
         generateNewKey();
       }
-      return CloudIotManager.makeCredentials(properties.key_type,
+      return CloudIotManager.makeCredentials(getAuthFileType(),
           IOUtils.toString(new FileInputStream(deviceKeyFile), Charset.defaultCharset()));
     } catch (Exception e) {
       throw new RuntimeException("While loading credential for local device " + deviceId, e);
     }
   }
 
+  private Set<String> keyFiles() {
+    if (!isDirectConnect()) {
+      return ImmutableSet.of();
+    }
+    return Sets.union(Sets.union(DEVICE_FILES, KEY_FILES), Set.of(publicKeyFile()));
+  }
+
+  private String publicKeyFile() {
+    return RSA_CERT_TYPE.equals(getAuthType()) ? RSA_CERT_PEM : RSA_PUBLIC_PEM;
+  }
+
   private void generateNewKey() {
     String absolutePath = deviceDir.getAbsolutePath();
     try {
-      String command = String.format(KEYGEN_EXEC_FORMAT, properties.key_type, absolutePath);
+      String command = String.format(KEYGEN_EXEC_FORMAT, getAuthType(), absolutePath);
       System.err.println(command);
       int exitCode = Runtime.getRuntime().exec(command).waitFor();
       if (exitCode != 0) {
@@ -170,32 +203,96 @@ public class LocalDevice {
     }
   }
 
+  boolean isGateway() {
+    return metadata != null && metadata.gateway != null &&
+        metadata.gateway.proxy_ids != null;
+  }
+
+  boolean hasGateway() {
+    return metadata != null && metadata.gateway != null &&
+        metadata.gateway.gateway_id != null;
+  }
+
+  boolean isDirectConnect() {
+    return isGateway() || !hasGateway();
+  }
+
+  String getGatewayId() {
+    return hasGateway() ? metadata.gateway.gateway_id : null;
+  }
+
   CloudDeviceSettings getSettings() {
     try {
       if (settings != null) {
         return settings;
       }
-
       settings = new CloudDeviceSettings();
+      if (metadata == null) {
+        return settings;
+      }
       settings.credential = loadCredential();
       settings.metadata = metadataString();
+      settings.config = deviceConfigString();
+      settings.proxyDevices = getProxyDevicesList();
       return settings;
     } catch (Exception e) {
       throw new RuntimeException("While getting settings for device " + deviceId, e);
     }
   }
 
+  private List<String> getProxyDevicesList() {
+    return isGateway() ? metadata.gateway.proxy_ids : null;
+  }
+
+  private String deviceConfigString() {
+    try {
+      UdmiSchema.Config config = new UdmiSchema.Config();
+      config.timestamp = metadata.timestamp;
+      if (isGateway()) {
+        config.gateway = new UdmiSchema.GatewayConfig();
+        config.gateway.proxy_ids = getProxyDevicesList();
+      }
+      if (metadata.pointset != null) {
+        config.pointset = getDevicePointsetConfig();
+      }
+      if (metadata.localnet != null) {
+        config.localnet = getDeviceLocalnetConfig();
+      }
+      return OBJECT_MAPPER.writeValueAsString(config);
+    } catch (Exception e) {
+      throw new RuntimeException("While converting device config to string", e);
+    }
+  }
+
+  private UdmiSchema.LocalnetConfig getDeviceLocalnetConfig() {
+    UdmiSchema.LocalnetConfig localnetConfig = new UdmiSchema.LocalnetConfig();
+    localnetConfig.subsystems = metadata.localnet.subsystem;
+    return localnetConfig;
+  }
+
+  private UdmiSchema.PointsetConfig getDevicePointsetConfig() {
+    UdmiSchema.PointsetConfig pointsetConfig = new UdmiSchema.PointsetConfig();
+    metadata.pointset.points.forEach((metadataKey, value) ->
+        pointsetConfig.points.computeIfAbsent(metadataKey, configKey ->
+            UdmiSchema.PointConfig.fromRef(value.ref)));
+    return pointsetConfig;
+  }
+
   private String metadataString() {
     try {
-      return OBJECT_MAPPER.writeValueAsString(metadata);
+      String prettyString = OBJECT_MAPPER.writeValueAsString(metadata);
+      if (prettyString.length() <= MAX_METADATA_LENGTH) {
+        return prettyString;
+      }
+      return OBJECT_MAPPER_RAW.writeValueAsString(metadata);
     } catch (Exception e) {
       throw new RuntimeException("While converting metadata to string", e);
     }
   }
 
-  public void validate(String registryId, String siteName) {
+  public void validateEnvelope(String registryId, String siteName) {
     try {
-      Envelope envelope = new Envelope();
+      UdmiSchema.Envelope envelope = new UdmiSchema.Envelope();
       envelope.deviceId = deviceId;
       envelope.deviceRegistryId = registryId;
       // Don't use actual project id because it should be abstracted away.
@@ -210,40 +307,68 @@ public class LocalDevice {
   }
 
   private String fakeProjectId() {
-    return metadata.system.location.site_name.toLowerCase();
+    return metadata.system.location.site.toLowerCase();
   }
 
-  private void checkConsistency(String expected_site_name) {
-    String siteName = metadata.system.location.site_name;
-    String desiredTag = String.format(PHYSICAL_TAG_FORMAT, siteName, deviceId);
+  private void checkConsistency(String expectedSite) {
+    String siteName = metadata.system.location.site;
+    String assetSite = metadata.system.physical_tag.asset.site;
     String assetName = metadata.system.physical_tag.asset.name;
-    Preconditions.checkState(desiredTag.equals(assetName),
-        String.format(PHYSICAL_TAG_ERROR, assetName, desiredTag));
-    String errorMessage = "Site name " + siteName + " is not expected " + expected_site_name;
-    Preconditions.checkState(expected_site_name.equals(siteName), errorMessage);
+    Preconditions.checkState(expectedSite.equals(siteName),
+        String.format(PHYSICAL_TAG_ERROR, "location", siteName, expectedSite));
+    Preconditions.checkState(expectedSite.equals(assetSite),
+        String.format(PHYSICAL_TAG_ERROR, "site", assetSite, expectedSite));
+    Preconditions.checkState(deviceId.equals(assetName),
+        String.format(PHYSICAL_TAG_ERROR, "name", assetName, deviceId));
   }
 
-  private String makeNumId(Envelope envelope) {
+  private String makeNumId(UdmiSchema.Envelope envelope) {
     int hash = Objects.hash(deviceId, envelope.deviceRegistryId, envelope.projectId);
     return Integer.toString(hash < 0 ? -hash : hash);
   }
 
+  public void writeErrors() {
+    File errorsFile = new File(deviceDir, DEVICE_ERRORS_JSON);
+    System.err.println("Updating " + errorsFile);
+    if (exceptionMap.isEmpty()) {
+      errorsFile.delete();
+      return;
+    }
+    try (PrintStream printStream = new PrintStream(new FileOutputStream(errorsFile))) {
+      ExceptionMap.ErrorTree errorTree = ExceptionMap.format(exceptionMap, ERROR_FORMAT_INDENT);
+      errorTree.write(printStream);
+    } catch (Exception e) {
+      throw new RuntimeException("While writing "+ errorsFile.getAbsolutePath(), e);
+    }
+  }
+
   void writeNormalized() {
-    File metadataFile = new File(deviceDir, METADATA_JSON);
+    UdmiSchema.Metadata normalized = readNormalized();
+    String writeHash = metadataHash();
+    if (normalized.hash != null && normalized.hash.equals(writeHash)) {
+      return;
+    }
+    metadata.timestamp = new Date();
+    metadata.hash = writeHash;
+    File metadataFile = new File(deviceDir, NORMALIZED_JSON);
+    System.err.println("Writing " + metadataFile.getAbsolutePath());
     try (OutputStream outputStream = new FileOutputStream(metadataFile)) {
-      String writeHash = metadataHash();
-      boolean update = metadata.hash == null || !metadata.hash.equals(writeHash);
-      if (update) {
-        metadata.timestamp = new Date();
-        metadata.hash = metadataHash();
-      }
       // Super annoying, but can't set this on the global static instance.
       JsonGenerator generator = OBJECT_MAPPER.getFactory()
           .createGenerator(outputStream)
           .setPrettyPrinter(PROPER_PRETTY_PRINTER_POLICY);
       OBJECT_MAPPER.writeValue(generator, metadata);
     } catch (Exception e) {
-      throw new RuntimeException("While writing "+ metadataFile.getAbsolutePath(), e);
+      exceptionMap.put("Writing", e);
+    }
+  }
+
+  public void writeConfigFile() {
+    File configFile = new File(deviceDir, GENERATED_CONFIG_JSON);
+    try (OutputStream outputStream = new FileOutputStream(configFile)) {
+      outputStream.write(settings.config.getBytes());
+    } catch (Exception e) {
+      throw new RuntimeException("While writing "+ configFile.getAbsolutePath(), e);
     }
   }
 
@@ -259,54 +384,8 @@ public class LocalDevice {
     deviceNumId = numId;
   }
 
-  private static class Envelope {
-    public String deviceId;
-    public String deviceNumId;
-    public String deviceRegistryId;
-    public String projectId;
-    public final String subFolder = METADATA_SUBFOLDER;
-  }
-
-  private static class Metadata {
-    public PointsetMetadata pointset;
-    public SystemMetadata system;
-    public Integer version;
-    public Date timestamp;
-    public String hash;
-  }
-
-  private static class Properties {
-    public String key_type;
-    public String connect;
-    public Integer version;
-  }
-
-  private static class PointsetMetadata {
-    public Map<String, PointMetadata> points;
-  }
-
-  private static class SystemMetadata {
-    public LocationMetadata location;
-    public PhysicalTagMetadata physical_tag;
-  }
-
-  private static class PointMetadata {
-    public String units;
-  }
-
-  private static class LocationMetadata {
-    public String site_name;
-    public String section;
-    public Object position;
-  }
-
-  private static class PhysicalTagMetadata {
-    public AssetMetadata asset;
-  }
-
-  private static class AssetMetadata {
-    public String guid;
-    public String name;
+  public ExceptionMap getErrors() {
+    return exceptionMap;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {

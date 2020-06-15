@@ -51,12 +51,12 @@ exported varaible, for `ping` and `nmap`, would look something like:
 Loading config from local/system.conf...
 <b>Enabling target test_ping</b>
 <b>Enabling target test_nmap</b>
-Including tests from misc/host_tests.conf
+Including tests from config/modules/host.conf
 Including build files from docker
 &hellip;
 Skipping non-enabled daq/test_mudgee
 Skipping non-enabled daq/test_pass
-<b>Build docker/Dockerfile.test_ping into daq/test_ping, log to build/docker_build.test_ping...</b>
+<b>Build docker/modules/Dockerfile.test_ping into daq/test_ping, log to build/docker_build.test_ping...</b>
 Skipping non-enabled daq/test_brute
 <b>Build subset/pentests/Dockerfile.test_nmap into daq/test_nmap, log to build/docker_build.test_nmap...</b>
 Skipping non-enabled daq/test_switch
@@ -87,15 +87,15 @@ echo ab1a2dac87a9316676db74a16c5927cfd21b9976fcbf9850e42c5e5b7bdba5fe > .build_h
 Loading config from local/system.conf...
 Including build files from docker
 Including build files from subset/pentests
-Build docker/Dockerfile.aardvark into daq/aardvark, log to build/docker_build.aardvark...
-Build docker/Dockerfile.default into daq/default, log to build/docker_build.default...
+Build docker/modules/Dockerfile.aardvark into daq/aardvark, log to build/docker_build.aardvark...
+Build docker/modules/Dockerfile.default into daq/default, log to build/docker_build.default...
 &hellip;
 Build subset/pentests/Dockerfile.test_brute into daq/test_brute, log to build/docker_build.test_brute...
 Build subset/pentests/Dockerfile.test_nmap into daq/test_nmap, log to build/docker_build.test_nmap...
 Updating .build_hash
 ~/daq$ <b>cmd/run</b>
 Loading config from local/system.conf
-<b>Starting Mon Feb 11 08:40:12 PST 2019, run_mode is local</b>
+<b>Starting Mon Feb 11 08:40:12 PST 2019</b>
 &hellip;
 </pre>
 

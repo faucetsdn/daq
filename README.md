@@ -43,20 +43,25 @@ The top-level DAQ folders correspond to the following structure:
 * `bin/`: System setup and management commands.
 * _`build/`_: Dynamically created directory for build logs.
 * `cmd/`: Primary commands for running DAQ testing.
+* `config/`: System and module configuration files.
 * `daq/`: Python source for DAQ runtime.
 * `docker/`: Docker build files for DAQ components and tests.
 * `docs/`: Documentation.
+* `etc/`: Version files and external switch setup files.
 * _`faucet/`_: Dynamically downloaded version of SDN controller.
+* _`forch/`_: Dynamically downloaded version of SDN orchestrator.
 * `firebase/`: Hosted pages and functions for web dashboard.
 * `functions/`: Additional Cloud Functions for data processing.
 * _`inst/`_: Install directory for specific runtime contents.
 * **`local/`**: Local setup and config information.
 * _`mininet/`_: Local version of the mininet virtual network host framework.
-* `misc/`: Miscellaneous support files.
 * `mudacl/`: Utilities for managing and testing MUD network files.
 * `mud_files/`: Examples and prototype device MUD files.
 * _`out/`_: Misc transitory output files.
+* `proto/`: Protobuf related files.
+* _`protoc-gen-doc/`_: Dynamically downloaded Protobuf documentation generator.
 * `pubber/`: Sample code for generating cloud-ingest traffic.
+* `resources/`: Templates for reports, module configs, test-site definitions.
 * `schemas/`: Device/cloud data exchange schemas.
 * `subset/`: Subsets of device tests (e.g. penetration tests).
 * `testing/`: Scripts for system continuous integration testing.

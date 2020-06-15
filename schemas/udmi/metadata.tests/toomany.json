@@ -1,7 +1,7 @@
 {
   "system": {
     "location": {
-      "site_name": "UK-LON-S2"
+      "site": "UK-LON-S2"
     },
     "physical_tag": {
       "asset": {

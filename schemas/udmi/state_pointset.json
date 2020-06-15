@@ -16,8 +16,13 @@
             "units": {
               "type": "string",
             },
+            "source": {
+              "enum": [
+                "fix"
+              ]
+            },
             "status": {
-              "$ref": "file:logentry.json#/definitions/report"
+              "$ref": "file:system.json#/definitions/entry"
             }
           }
         }

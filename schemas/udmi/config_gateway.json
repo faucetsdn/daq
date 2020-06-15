@@ -4,34 +4,14 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "required": [
-    "devices"
+    "proxy_ids"
   ],
   "properties": {
-    "scan_interval_sec": {
-      "type": "number",
-      "minimum": 0
-    },
-    "devices": {
-      "additionalProperties": false,
-      "patternProperties": {
-	"^[A-Z]{3}-[1-9][0-9]{0,2}$": {
-          "additionalProperties": false,
-	  "required": [
-	    "protocol",
-	    "local_id"
-	  ],
-          "properties": {
-	    "protocol": {
-	      "type": "string"
-	    },
-	    "local_id": {
-	      "type": "string"
-	    },
-            "force_value": {
-              "type": ["number", "string", "boolean"]
-            }
-          }
-        }
+    "proxy_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
       }
     }
   }

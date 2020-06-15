@@ -13,7 +13,7 @@ image=daqf/faux1
 build=
 
 cd $ROOT
-source misc/config_base.sh
+source etc/config_base.sh
 
 # If the argument is -n then create a networking container
 if [ "$1" == "-n" ]; then
@@ -47,7 +47,7 @@ if [ "${1#@}" != "$1" ]; then
 fi
 
 # If the first argument is a number, then it's a port designation.
-if [ $# -gt 0 -a $(($1)) -gt 0 ]; then
+if [[ "$1" =~ ^[0-9]+$ ]]; then
     port_num=$1
     postfix=-$port_num
     intf_mac=9a:02:57:1e:8f:0$port_num

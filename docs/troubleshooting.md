@@ -9,13 +9,13 @@ mailing list, and use it as the primary source of troubleshooting.
   email somebody directly, but will likely result in a slower response time.
 * The `inst/cmdrun.log` file contains a copy of the console output from DAQ.
   * This file should be attached to communications about resolving DAQ issues.
-  * It's not necessary to include the assocaited `system.conf` file, since the
+  * It's not necessary to include any assocaited `local/system.yaml` file, since the
   contents of that are already included.
 * Make sure everything is running properly using the internal simulation setup
 before tackling anything to do with external switches or physical devices.
-  * `misc/system_base.conf` is likely the best place to start, as the simplest
+  * `config/system/base.conf` is likely the best place to start, as the simplest
   base configuration. This should generate *a* report for a faux device.
-  * `misc/system_all.conf` is the next step, as it includes all the validated
+  * `config/system/all.conf` is the next step, as it includes all the validated
   built-in tests with DAQ. This should include more tests & faux devices.
   * See [test lab setup](test_lab.md) setup for additional tips & tricks in
   dealing with external/physical switches.

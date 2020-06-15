@@ -4,7 +4,6 @@ import functools
 import os
 import shutil
 import time
-import json
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -47,7 +46,6 @@ class MODE:
     LONG = 'long'
     MERR = 'merr'
 
-
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
@@ -71,10 +69,12 @@ class ConnectedHost:
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
 
     def __init__(self, runner, gateway, target, config):
+        self.configurator = configurator.Configurator()
         self.runner = runner
         self._gcp = runner.gcp
         self.gateway = gateway
         self.config = config
+        self.switch_setup = self.config.get('switch_setup', {})
         self.target_port = target['port']
         self.target_mac = target['mac']
         self.fake_target = target['fake']
@@ -100,21 +100,22 @@ class ConnectedHost:
         self._monitor_ref = None
         self._monitor_start = None
         self.target_ip = None
+        self._dhcp_listeners = []
         self._loaded_config = None
         self.reload_config()
-        self._dhcp_listeners = []
-        configurator.write_config(self._device_aux_path(), self._MODULE_CONFIG, self._loaded_config)
         assert self._loaded_config, 'config was not loaded'
+        self._write_module_config(self._loaded_config, self._device_aux_path())
         self.remaining_tests = self._get_enabled_tests()
         LOGGER.info('Host %s running with enabled tests %s', self.target_port, self.remaining_tests)
-
-        self.record_result('startup', state=MODE.PREP)
-        self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
                                        self._loaded_config)
+        self.record_result('startup', state=MODE.PREP)
+        self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._trigger_path = None
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
+        self._all_ips = []
+
     @staticmethod
     def make_runid():
         """Create a timestamped runid"""
@@ -160,6 +161,13 @@ class ConnectedHost:
             return self._default_timeout_sec
         return test_module.get('timeout_sec', self._default_timeout_sec)
 
+    def get_port_flap_timeout(self, test):
+        """Get port toggle timeout configuration that's specific to each test module"""
+        test_module = self._loaded_config['modules'].get(test)
+        if not test_module:
+            return None
+        return test_module.get('port_flap_timeout_sec')
+
     def _get_enabled_tests(self):
         return list(filter(self._test_enabled, self.config.get('test_list')))
 
@@ -185,8 +193,14 @@ class ConnectedHost:
         partial = os.path.join('tests', self.test_name, base) if self.test_name else base
         return os.path.join('run_id', self.run_id, partial)
 
+    def _load_config(self, config, path):
+        return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
+
+    def _write_module_config(self, config, path):
+        self.configurator.write_config(config, path, self._MODULE_CONFIG)
+
     def _type_path(self):
-        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
+        dev_config = self._load_config({}, self._device_base)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -217,6 +231,10 @@ class ConnectedHost:
             LOGGER.info('Copying %s...', file)
             shutil.copy(os.path.join(template_dir, file), path)
 
+    def _upload_file(self, path):
+        upload_path = self._get_unique_upload_path(path)
+        return self._gcp.upload_file(path, upload_path)
+
     def initialize(self):
         """Fully initialize a new host set"""
         LOGGER.info('Target port %d initializing...', self.target_port)
@@ -230,7 +248,7 @@ class ConnectedHost:
         if self.config['test_list']:
             self._start_run()
         else:
-            assert self.is_holding(), 'state is not holding'
+            assert self.is_ready(), 'state is not holding'
             self.record_result('startup', state=MODE.HOLD)
 
     def _start_run(self):
@@ -249,6 +267,7 @@ class ConnectedHost:
         if expected is not None:
             message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
+        assert self.state != _STATE.TERM, 'host already terminated'
         LOGGER.debug('Target port %d state: %s -> %s', self.target_port, self.state, target)
         self.state = target
 
@@ -256,7 +275,7 @@ class ConnectedHost:
         """Return True if this host is running active test."""
         return self.state != _STATE.ERROR and self.state != _STATE.DONE
 
-    def is_holding(self):
+    def is_ready(self):
         """Return True if this host paused and waiting to run."""
         return self.state == _STATE.READY
 
@@ -296,10 +315,9 @@ class ConnectedHost:
 
     def _main_module_timeout_handler(self):
         self.test_host.terminate()
-        self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
-    def check_module_timeout(self):
+    def heartbeat(self):
         """Checks module run time for each event loop"""
         timeout_sec = self._get_test_timeout(self.test_name)
         if not timeout_sec or not self.test_start:
@@ -318,22 +336,30 @@ class ConnectedHost:
         assert callable(callback), "ip listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
+    def _finalize_report(self):
+        report_paths = self._report.finalize()
+        if self._trigger_path:
+            report_paths.update({'trigger_path': self._trigger_path})
+        LOGGER.info('Finalized with reports %s', report_paths.keys())
+        for report in report_paths.values():
+            self._upload_file(report)
+        self.record_result('terminate', state=MODE.TERM, **report_paths)
+        self._report = None
+
     def terminate(self, reason, trigger=True):
         """Terminate this host"""
         LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
                     self._host_name(), trigger, reason)
-        self._release_config()
         self._state_transition(_STATE.TERM)
-        self.record_result(self.test_name, state=MODE.TERM)
+        self._release_config()
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        if self._trigger_path:
-            self._gcp.upload_file(self._trigger_path,
-                                  self._get_unique_upload_path(self._trigger_path))
+        self._finalize_report()
         if self.test_host:
             try:
-                self.test_host.terminate(expected=trigger)
+                self.test_host.terminate()
                 self.test_host = None
+                self.timeout_handler = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
@@ -349,6 +375,15 @@ class ConnectedHost:
         elif self.state == _STATE.BASE:
             self._base_start()
 
+    def ip_notify(self, target_ip, state=MODE.DONE, delta_sec=-1):
+        """Handle completion of ip subtask"""
+        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
+        with open(self._trigger_path, 'a') as output_stream:
+            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
+        if self._get_dhcp_mode() == "ip_change" and len(self._all_ips) == 1:
+            self.gateway.request_new_ip(self.target_mac)
+
     def trigger_ready(self):
         """Check if this host is ready to be triggered"""
         if self.state != _STATE.WAITING:
@@ -356,20 +391,19 @@ class ConnectedHost:
         delta_t = datetime.now() - self._startup_time
         if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
+        if self._get_dhcp_mode() == "ip_change":
+            return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
-        """Handle completion of ip subtask"""
-        self._trigger_path = os.path.join(self.scan_base, 'ip_triggers.txt')
-        with open(self._trigger_path, 'a') as output_stream:
-            output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
+        """Handle device trigger"""
+        if not self.target_ip and not self.trigger_ready():
+            LOGGER.warn('Target port %d ignoring premature trigger', self.target_port)
+            return False
         if self.target_ip:
             LOGGER.debug('Target port %d already triggered', self.target_port)
             assert self.target_ip == target_ip, "target_ip mismatch"
             return True
-        if not self.trigger_ready():
-            LOGGER.warning('Target port %d ignoring premature trigger', self.target_port)
-            return False
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
         self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
@@ -426,10 +460,9 @@ class ConnectedHost:
     def _monitor_cleanup(self, forget=True):
         if self._monitor_ref:
             LOGGER.info('Target port %d network pcap complete', self.target_port)
-            nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
-            assert nclosed == forget, 'forget and nclosed mismatch'
-            self._gcp.upload_file(self._startup_file,
-                                  self._get_unique_upload_path(self._startup_file))
+            active = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
+            assert active == forget, 'forget and active mismatch'
+            self._upload_file(self._startup_file)
             if forget:
                 self.runner.monitor_forget(self._monitor_ref.stream())
                 self._monitor_ref.terminate()
@@ -496,21 +529,11 @@ class ConnectedHost:
                 self.timeout_handler = self._main_module_timeout_handler
                 self._docker_test(self.remaining_tests.pop(0))
             else:
-                self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
+                self.timeout_handler = self._aux_module_timeout_handler
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
-                self._report.finalize()
-                json_path = self._report.path + ".json"
-                with open(json_path, 'w') as json_file:
-                    json.dump(self._report.get_all_results(), json_file)
                 self.test_name = None
-                self._gcp.upload_file(self._report.path,
-                                      self._get_unique_upload_path(self._report.path))
-                self._gcp.upload_file(json_path,
-                                      self._get_unique_upload_path(json_path))
-                self.record_result('finish', state=MODE.FINE, report=self._report.path)
-                self._report = None
-                self.record_result(None)
+                self.record_result('finish', state=MODE.FINE)
         except Exception as e:
             LOGGER.error('Target port %d start error: %s', self.target_port, e)
             self._state_transition(_STATE.ERROR)
@@ -528,10 +551,42 @@ class ConnectedHost:
     def _docker_test(self, test_name):
         self.test_name = test_name
         self.test_start = gcp.get_timestamp()
+        self.test_host = docker_test.DockerTest(self.runner, self.target_port,
+                                                self.devdir, test_name)
+        LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
+
+        try:
+            self.test_port = self.runner.allocate_test_port(self.target_port)
+        except Exception as e:
+            self.test_host = None
+            raise e
+
+        try:
+            self._start_test_host()
+        except Exception as e:
+            self.test_host = None
+            self.runner.release_test_port(self.target_port, self.test_port)
+            self.test_port = None
+            self._monitor_cleanup()
+            raise e
+
+    def _start_test_host(self):
+        params = self._get_module_params()
+        self._write_module_config(self._loaded_config, self._host_tmp_path())
+        self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
+        self.record_result(self.test_name, state=MODE.EXEC)
+        self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % self.test_name))
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
+        self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+
+    def _get_module_params(self):
+        switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
+        ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
         params = {
+            'local_ip': ext_loip,
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
+            'target_port': str(self.target_port),
             'gateway_ip': self.gateway.host.IP(),
             'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
@@ -540,25 +595,17 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-        self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name)
-        self.test_port = self.runner.allocate_test_port(self.target_port)
-        if 'ext_loip' in self.config:
-            ext_loip = self.config['ext_loip'].replace('@', '%d')
-            params['local_ip'] = ext_loip % self.test_port
-            params['switch_ip'] = self.config['ext_addr']
-            params['switch_port'] = str(self.target_port)
-            params['switch_model'] = self.config['switch_model']
+        if ext_loip:
+            params.update(self._get_switch_config())
+        return params
 
-        try:
-            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
-            self._set_module_config(self._loaded_config)
-            self.record_result(test_name, state=MODE.EXEC)
-            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
-        except:
-            self.test_host = None
-            raise
+    def _get_switch_config(self):
+        return {
+            'ip': self.switch_setup.get('ip_addr'),
+            'model': self.switch_setup.get('model'),
+            'username': self.switch_setup.get('username'),
+            'password': self.switch_setup.get('password')
+        }
 
     def _host_name(self):
         return self.test_host.host_name if self.test_host else 'unknown'
@@ -574,46 +621,42 @@ class ConnectedHost:
             finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
-            LOGGER.warning('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
+            LOGGER.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
             os.system('%s %s 2>&1 > %s/finish.out' %
                       (self._finish_hook_script, finish_dir, finish_dir))
 
     def _docker_callback(self, return_code=None, exception=None):
-        self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
         LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
         self._monitor_cleanup()
         failed = return_code or exception
         state = MODE.MERR if failed else MODE.DONE
-        self.record_result(self.test_name, state=state, code=return_code, exception=exception)
-        if exception:
-            self._report.accumulate(self.test_name, {ResultType.EXCEPTION: str(exception)})
-        self._report.accumulate(self.test_name, {ResultType.RETURN_CODE: return_code})
-        self._report.accumulate(self.test_name, {ResultType.MODULE_CONFIG: self._loaded_config})
         report_path = os.path.join(self._host_tmp_path(), 'report.txt')
         activation_log_path = os.path.join(self._host_dir_path(), 'activate.log')
         module_config_path = os.path.join(self._host_tmp_path(), self._MODULE_CONFIG)
+        remote_paths = {}
         for result_type, path in ((ResultType.REPORT_PATH, report_path),
                                   (ResultType.ACTIVATION_LOG_PATH, activation_log_path),
                                   (ResultType.MODULE_CONFIG_PATH, module_config_path)):
             if os.path.isfile(path):
                 self._report.accumulate(self.test_name, {result_type: path})
-                self._gcp.upload_file(path, self._get_unique_upload_path(path))
+                remote_paths[result_type.value] = self._upload_file(path)
+        self.record_result(self.test_name, state=state, code=return_code, exception=exception,
+                           **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        assert self.test_host, '_docker_callback with no test_host defined'
+        self.test_host = None
+        self.timeout_handler = None
         self._run_next_test()
-
-    def _set_module_config(self, loaded_config):
-        tmp_dir = self._host_tmp_path()
-        configurator.write_config(tmp_dir, self._MODULE_CONFIG, loaded_config)
-        self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
 
     def _merge_run_info(self, config):
         config['run_info'] = {
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
-            'started': gcp.get_timestamp()
+            'started': gcp.get_timestamp(),
+            'switch': self._get_switch_config()
         }
         config['run_info'].update(self.runner.get_run_info())
 
@@ -621,9 +664,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        configurator.load_and_merge(config, self._type_path(), self._MODULE_CONFIG)
-        configurator.load_and_merge(config, self._device_base, self._MODULE_CONFIG)
-        configurator.load_and_merge(config, self._port_base, self._MODULE_CONFIG)
+        self._load_config(config, self._type_path())
+        self._load_config(config, self._device_base)
+        self._load_config(config, self._port_base)
         return config
 
     def record_result(self, name, **kwargs):
@@ -636,18 +679,11 @@ class ConnectedHost:
             self.test_start = current
         if name:
             self._record_result(name, current, **kwargs)
-
-    @staticmethod
-    def clear_port(gcp_instance, port):
-        """Clear a port-based entry without having an instantiated host class"""
-        result = {
-            'name': 'startup',
-            'state': MODE.INIT,
-            'runid': ConnectedHost.make_runid(),
-            'timestamp': gcp.get_timestamp(),
-            'port': port
-        }
-        gcp_instance.publish_message('daq_runner', 'test_result', result)
+            if kwargs.get("exception"):
+                self._report.accumulate(name, {ResultType.EXCEPTION: str(kwargs["exception"])})
+            if "code" in kwargs:
+                self._report.accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
+            self._report.accumulate(name, {ResultType.MODULE_CONFIG: self._loaded_config})
 
     def _record_result(self, name, run_info=True, current=None, **kwargs):
         result = {
@@ -676,29 +712,29 @@ class ConnectedHost:
     def _control_updated(self, control_config):
         LOGGER.info('Updated control config: %s %s', self.target_mac, control_config)
         paused = control_config.get('paused')
-        if not paused and self.is_holding():
+        if not paused and self.is_ready():
             self._start_run()
-        elif paused and not self.is_holding():
+        elif paused and not self.is_ready():
             LOGGER.warning('Inconsistent control state for update of %s', self.target_mac)
 
     def reload_config(self):
-        """Trigger a config reload due to an eternal config change."""
-        holding = self.is_holding()
-        new_config = self._load_module_config(run_info=holding)
-        if holding:
+        """Trigger a config reload due to an external config change."""
+        device_ready = self.is_ready()
+        new_config = self._load_module_config(run_info=device_ready)
+        if device_ready:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
-        LOGGER.info('Device config reloaded: %s %s', holding, self.target_mac)
-        self._record_result(None, run_info=holding, config=config_bundle)
+        LOGGER.info('Device config reloaded: %s %s', device_ready, self.target_mac)
+        self._record_result(None, run_info=device_ready, config=config_bundle)
         return new_config
 
     def _dev_config_updated(self, dev_config):
         LOGGER.info('Device config update: %s %s', self.target_mac, dev_config)
-        configurator.write_config(self._device_base, self._MODULE_CONFIG, dev_config)
+        self._write_module_config(dev_config, self._device_base)
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = configurator.load_config(self._device_base, self._MODULE_CONFIG)
+        dev_config = self._load_config({}, self._device_base)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         self._gcp.register_config(self._CONTROL_PATH % self.target_port,

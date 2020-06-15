@@ -4,6 +4,9 @@ DAQ currently uses Travis CI for integration testing: https://travis-ci.org/
 
 ## Configuration
 
+The `test_udmi` test module uses the Registrar and Validator to check that a device is
+properly communicating through Cloud IoT, automated through DAQ.
+
 ### GCP Credential
 
 To run cloud-based tests, setup the Travis `GCP_BASE64_CRED` env variable with a `base64` encoded
@@ -20,6 +23,15 @@ ewoICJ1eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYm9zLWRhcS10ZXN0a
 &hellip;
 iOiAiaHR0cHM6Ly93LWRhcS10ZXN0aW5nLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9Cg==
 </code>
+
+## Travis CI Testing
+
+* Run the [registrar tool](registrar.md) to properly configure the cloud project.
+* `gcp_topic` config to `local/system.conf` as described in this doc.
+* Configure test subsystem with proper cloud endpoint in `{test_site}/cloud_iot_config.json`.
+* Configure the DUT with the proper cloud device credentials (device specific). For _faux_ devices, this means copying
+the assocatied `rsa_private.pkcs8` file to someting like `inst/faux/daq-faux-2/local/` (exact path depends on which faux).
+* Test with `bin/registrar`, `pubber/bin/run`, and `bin/validate` manually, before integrated testing through DAQ.
 
 ### Is my Travis set up correctly?
 
