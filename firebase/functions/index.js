@@ -117,10 +117,11 @@ function handleTestResult(origin, siteName, message) {
   const now = Date.now();
   const timestamp = new Date(now).toJSON();
 
-  const originDoc = db.collection('origin').doc(origin);
   const siteDoc = db.collection('site').doc(siteName);
+  const originDoc = db.collection('origin').doc(origin);
   const portDoc = originDoc.collection('port').doc('port' + message.port);
   const deviceDoc = originDoc.collection('device').doc(message.device_id);
+
   const updates = [
     originDoc.set({ 'updated': timestamp }),
     siteDoc.set({ 'updated': timestamp }),
@@ -148,6 +149,7 @@ function handleTestResult(origin, siteName, message) {
     console.log('Test Result: ', timestamp, origin, siteName, message.port,
       message.runid, message.name, message.device_id, message.state);
     const runDoc = originDoc.collection('runid').doc(message.runid);
+    const lastDoc = originDoc.collection('last').doc(message.name);
     const resultDoc = runDoc.collection('test').doc(message.name);
     const portRunDoc = portDoc.collection('runid').doc(message.runid);
     const deviceRunDoc = deviceDoc.collection('runid').doc(message.runid);
@@ -165,13 +167,15 @@ function handleTestResult(origin, siteName, message) {
         return;
       }
       return Promise.all([
-        runDoc.set({ 'updated': timestamp }, { merge: true }),
+        runDoc.set({ 'updated': timestamp,
+                     'last_name': message.name
+                   }, { merge: true }),
         resultDoc.set(message),
+        lastDoc.set(message),
         portRunDoc.set({ 'updated': timestamp }),
         deviceRunDoc.set({ 'updated': timestamp }),
       ]).then(() => {
         if (message.config) {
-          console.log('updating config', message.port, message.runid, typeof (message.config), message.config);
           return Promise.all([
             runDoc.update({
               deviceId: message.device_id,
@@ -183,7 +187,6 @@ function handleTestResult(origin, siteName, message) {
         }
       });
     });
-
   });
 }
 

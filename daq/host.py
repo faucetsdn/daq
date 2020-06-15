@@ -340,10 +340,9 @@ class ConnectedHost:
         report_paths = self._report.finalize()
         if self._trigger_path:
             report_paths.update({'trigger_path': self._trigger_path})
-        LOGGER.info('Finalized with reports %s', report_paths.keys())
-        for report in report_paths.values():
-            self._upload_file(report)
-        self.record_result('terminate', state=MODE.TERM, **report_paths)
+        LOGGER.info('Finalized with reports %s', list(report_paths.keys()))
+        report_blobs = {report: self._upload_file(path) for report, path in report_paths}
+        self.record_result('terminate', state=MODE.TERM, **report_blobs)
         self._report = None
 
     def terminate(self, reason, trigger=True):

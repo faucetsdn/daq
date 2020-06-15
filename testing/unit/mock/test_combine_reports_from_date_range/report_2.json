@@ -29,5 +29,6 @@
             }
         }
     },
-    "missing_tests": ["missing.test.1"]
+    "missing_tests": ["missing.test.1"],
+    "timestamp": "report_2_timestamp"
 }

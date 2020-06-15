@@ -14,6 +14,7 @@ import jinja2
 import pypandoc
 import weasyprint
 
+import gcp
 import logger
 
 LOGGER = logger.get_logger('report')
@@ -45,8 +46,8 @@ class MdTable():
 
     def render(self):
         """returns a string for md"""
-        table_str = "%s\n%s\n" % (self._MARK.join(self.headers), self._header_separator)
-        return table_str + "\n".join([self._MARK.join(row) for row in self.rows])
+        table_str = '%s\n%s\n' % (self._MARK.join(self.headers), self._header_separator)
+        return table_str + '\n'.join([self._MARK.join(row) for row in self.rows]) + '\n'
 
 class ReportGenerator:
     """Generate a report for device qualification"""
@@ -80,7 +81,7 @@ class ReportGenerator:
         self._clean_mac = target_mac.replace(':', '')
         self._finalized = False
         self._start_time = datetime.datetime.now(pytz.utc).replace(microsecond=0)
-        report_mark = self._start_time.isoformat().replace(':', '')
+        report_mark = self._start_time.isoformat().replace(':', '').replace('+0000', '')
         self._report_name = self._NAME_FORMAT % (self._clean_mac, report_mark)
         self._report_base = os.path.join(tmp_base, 'reports')
         if not os.path.isdir(self._report_base):
@@ -103,8 +104,11 @@ class ReportGenerator:
 
         self._file_md = None
 
+    def _write(self, msg=''):
+        self._file_md.write(msg)
+
     def _writeln(self, msg=''):
-        self._file_md.write(msg + '\n')
+        self._write(msg + '\n')
 
     def _append_file(self, input_path, add_pre=True):
         LOGGER.info('Copying test report %s', input_path)
@@ -149,7 +153,7 @@ class ReportGenerator:
         for extension in ['.md', '.pdf', '.json']:
             if self._alt_path:
                 shutil.copyfile(self._report_prefix + extension, self._alt_prefix + extension)
-            report_paths.update({'report_' + extension: self._report_prefix + extension})
+            report_paths.update({'report' + extension: self._report_prefix + extension})
         return report_paths
 
     def _write_json_report(self):
@@ -175,7 +179,8 @@ class ReportGenerator:
                         result, test_name, extra = match.group(1), match.group(2), match.group(3)
                         self._accumulate_result(test_name, result, extra, module_name=module_name)
                         module_result["tests"][test_name] = self._results[test_name]
-        self._all_results["missing_tests"] = self._find_missing_test_results()
+        self._all_results['timestamp'] = gcp.get_timestamp()
+        self._all_results['missing_tests'] = self._find_missing_test_results()
 
     def _write_md_report(self):
         """Generate the markdown report to be copied into /inst and /local"""
@@ -267,7 +272,7 @@ class ReportGenerator:
         table = MdTable(self._CATEGORY_HEADERS)
         for row in rows:
             table.add_row(row)
-        self._writeln(table.render())
+        self._write(table.render())
 
     def _write_expected_table(self):
         table = MdTable([self._EXPECTED_HEADER, *self._result_headers])
@@ -277,14 +282,14 @@ class ReportGenerator:
                 expected = self._expecteds.get(exp_name, {})
                 table_row.append(str(expected.get(result, 0)))
             table.add_row(table_row)
-        self._writeln(table.render())
+        self._write(table.render())
 
     def _write_result_table(self):
         table = MdTable(self._SUMMARY_HEADERS)
         for _, result in sorted(self._results.items()):
             table.add_row([result["result"], result["test_name"], result["category"],\
                     result["expected"], result["result_description"]])
-        self._writeln(table.render())
+        self._write(table.render())
 
     def _find_missing_test_results(self):
         missing = []
@@ -318,7 +323,7 @@ class ReportGenerator:
                     table = MdTable(["Attribute", "Value"])
                     for key, value in config.items():
                         table.add_row((key, str(value)))
-                    self._writeln(table.render())
+                    self._write(table.render())
             if result_dict.get(ResultType.EXCEPTION):
                 writeln(self._TEST_SUBHEADER % "Exceptions")
                 writeln(result_dict[ResultType.EXCEPTION])
