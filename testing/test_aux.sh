@@ -71,10 +71,10 @@ long_dhcp_response_sec: 0
 monitor_scan_sec: 0
 EOF
 
-if [ -f $cred_file ]; then
-    echo Using credentials from $cred_file
-    echo "gcp_cred: $cred_file" >> local/system.yaml
-    project_id=`jq .project_id $cred_file`
+if [ -f "$gcp_cred" ]; then
+    echo Using credentials from $gcp_cred
+    echo gcp_cred: $gcp_cred >> local/system.yaml
+    project_id=`jq .project_id $gcp_cred`
 
     cloud_file=inst/test_site/cloud_iot_config.json
     echo Pulling cloud iot details from $cloud_file...

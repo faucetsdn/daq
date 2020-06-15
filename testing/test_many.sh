@@ -14,7 +14,7 @@ echo source config/system/default.yaml > local/system.conf
 
 echo monitor_scan_sec=5 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
-echo gcp_cred=$cred_file >> local/system.conf
+echo gcp_cred=$gcp_cred >> local/system.conf
 
 for iface in $(seq 1 $NUM_DEVICES); do
     xdhcp=""
@@ -80,7 +80,7 @@ echo Redacted soak diff | tee -a $TEST_RESULTS
 (diff out/redacted_soak.md out/redacted_many.md && echo No soak report diff) \
     | tee -a $TEST_RESULTS
 
-if [ -f $cred_file ]; then
+if [ -f "$gcp_cred" ]; then
     mv inst/reports/combo_*.md out/report_local.md
     echo Pulling reports from gcp...
     bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time \

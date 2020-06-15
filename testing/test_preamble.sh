@@ -9,6 +9,8 @@ def_name=${test_script%.sh}.out
 gcp_name=${test_script%.sh}.gcp
 TEST_RESULTS=${TEST_RESULTS:-out/$def_name}
 GCP_RESULTS=${GCP_RESULTS:-out/$gcp_name}
+GCP_FILE=inst/config/gcp_service_account.json
+
 echo Writing test results to $TEST_RESULTS and $GCP_RESULTS
 echo Running $0 > $TEST_RESULTS
 echo Running $0 > $GCP_RESULTS
@@ -21,20 +23,22 @@ fi
 lsb_release -a
 
 mkdir -p inst/config
-cred_file=inst/config/gcp_service_account.json
+gcp_cred=
 
-if [ -f $cred_file ]; then
-  echo Found previously configured $cred_file
+if [ -f $GCP_FILE ]; then
+  gcp_cred=$GCP_FILE
+  echo Found previously configured $gcp_cred
 elif [ -n "$GCP_BASE64_CRED" ]; then
-  echo Decoding GCP_BASE64_CRED to $cred_file
+  gcp_cred=$GCP_FILE
+  echo Decoding GCP_BASE64_CRED to $gcp_cred
   echo base64 wc: `echo "$GCP_BASE64_CRED" | wc`
-  echo "$GCP_BASE64_CRED" | base64 -d > $cred_file
+  echo "$GCP_BASE64_CRED" | base64 -d > $gcp_cred
 else
   echo No GCP credentials found.
 fi
 
-if [ -f $cred_file ]; then
-  echo GCP service account is `jq .client_email $cred_file`
+if [ -f "$gcp_cred" ]; then
+  echo GCP service account is `jq .client_email $gcp_cred`
 fi
 
 function kill_children {
