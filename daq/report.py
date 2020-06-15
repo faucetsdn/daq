@@ -63,6 +63,7 @@ class ReportGenerator:
     _REPORT_COMPLETE = "Report complete"
     _DEFAULT_HEADER = "# DAQ scan report for device %s"
     _REPORT_TEMPLATE = "report_template.md"
+    _PATH_PREFIX = "report_path"
     _DEFAULT_CATEGORY = 'Other'
     _DEFAULT_EXPECTED = 'Other'
     _PRE_START_MARKER = "```"
@@ -153,7 +154,7 @@ class ReportGenerator:
         for extension in ['.md', '.pdf', '.json']:
             if self._alt_path:
                 shutil.copyfile(self._report_prefix + extension, self._alt_prefix + extension)
-            report_paths.update({'report' + extension: self._report_prefix + extension})
+            report_paths.update({self._PATH_PREFIX + extension: self._report_prefix + extension})
         return report_paths
 
     def _write_json_report(self):
