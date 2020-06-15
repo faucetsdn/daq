@@ -341,7 +341,7 @@ class ConnectedHost:
         if self._trigger_path:
             report_paths.update({'trigger_path': self._trigger_path})
         LOGGER.info('Finalized with reports %s', list(report_paths.keys()))
-        report_blobs = {report: self._upload_file(path) for report, path in report_paths}
+        report_blobs = {name: self._upload_file(path) for name, path in report_paths.items()}
         self.record_result('terminate', state=MODE.TERM, **report_blobs)
         self._report = None
 
