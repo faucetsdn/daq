@@ -30,17 +30,23 @@
   "definitions": {
     "point_property_names": {
       "type": "object",
-      "propertyNames": {
-        "oneOf": [
-          {
-            "enum": [
-              "present_value"
-            ]
+      "additionalProperties": false,
+      "properties": {
+        "present_value": {
+          "type": ["number", "string", "boolean"]
+        },
+        "fittings_value": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
+              "type": ["number", "string", "boolean"]
+            }
           }
-        ]
+        }
       },
-      "required": [
-        "present_value"
+      "oneOf": [
+        { "required": [ "present_value" ] },
+        { "required": [ "fittings_value" ] }
       ]
     }
   }

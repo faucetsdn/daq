@@ -23,6 +23,12 @@
     },
     "missing_present_value": {
     },
+    "extra_present_value": {
+      "present_value": true,
+      "fittings_value": {
+        "b32": false
+      }
+    },
     "old_properties": {
       "properties": {
         "present_value": true
