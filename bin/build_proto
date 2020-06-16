@@ -1,0 +1,58 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+WEB_ROOT=firebase/public
+
+proto_files=`ls proto/*.proto`
+
+if [ "$1" == check ]; then
+    mkdir -p build
+    sha1sum $proto_files > build/protos.hash
+    diff build/protos.hash $WEB_ROOT/protos.hash
+    echo Proto hashes in $WEB_ROOT/protos.hash are up-to-date.
+    git diff --exit-code $WEB_ROOT/protos.html
+    exit 0
+fi
+
+rm -rf build/ libs/proto $WEB_ROOT/protos.*
+mkdir build
+
+sha1sum $proto_files > $WEB_ROOT/protos.hash
+
+(
+    export PATH=$PATH:/usr/local/go/bin/
+    cd protoc-gen-doc
+    script/dist.sh
+    tar -xzvf dist/protoc-gen-doc-*.linux-amd64.go*.tar.gz
+    mkdir -p bin
+    cp protoc-gen-doc-*.linux-amd64.go*/protoc-gen-doc bin/
+)
+
+gen_path=$ROOT/protoc-gen-doc/bin/protoc-gen-doc
+
+mkdir -p build/daq/proto build/proto
+cp $proto_files build/daq/proto/
+proto_files2=
+
+mkdir -p build/proto_docs
+
+for proto in $proto_files; do
+    proto_files2+="daq/$proto "
+done
+
+(
+    cd build
+    protoc --python_out=. --plugin=protoc-gen-doc=$gen_path \
+           --doc_out=html,protos.html:. \
+           $proto_files2
+    sed -i'' -e 's/id="\./id="/' -e 's/href="#\./href="#/' protos.html
+    sed -i'' -e 's/&lt;/</g' -e 's/&gt;/>/g' protos.html
+)
+
+mkdir -p libs/proto/
+
+touch libs/proto/__init__.py
+cp build/daq/proto/*.py libs/proto/
+cp build/protos.html $WEB_ROOT/

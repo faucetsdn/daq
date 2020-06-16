@@ -1,0 +1,48 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+run_args="$@"
+source etc/config_base.sh
+
+cleanup_file=inst/exrun_cleanup.sh
+CFILE=inst/config/system.conf
+regex='^interfaces\.(.+)\.([a-z]+)=(.*)$'
+
+echo Autostarting system components...
+
+function autostart {
+    tmp=`mktemp`
+    echo DAQ autostart $@
+    eval $@ | tee $tmp
+    grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file || true
+}
+
+function start_faux {
+    iface=$1
+    shift
+    opts=$@
+    if [ "$opts" == None ]; then
+        opts=
+    fi
+    if [ $iface == faux ]; then
+        autostart cmd/faux $opts
+    elif [[ $iface =~ faux-(.*) ]]; then
+        inst=${BASH_REMATCH[1]}
+        autostart cmd/faux $inst $opts
+    else
+        autostart cmd/faux :$iface $opts
+    fi
+}
+
+egrep $regex $CFILE | while read iopt; do
+    [[ "$iopt" =~ $regex ]]
+    iface=${BASH_REMATCH[1]}
+    key=${BASH_REMATCH[2]}
+    val=${BASH_REMATCH[3]}
+    if [ "$key" = opts ]; then
+        start_faux $iface $(eval echo $val)
+    elif [ "$key" = port ]; then
+        autostart bin/bridge_link $switch_setup_ext_br $iface $val
+    fi
+done

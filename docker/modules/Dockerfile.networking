@@ -1,0 +1,15 @@
+# Image name: daqf/networking
+#
+# Image used for host networking services (DNS, DHCP, etc...)
+#
+
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install dnsmasq ethtool iptables netcat python
+
+COPY docker/include/networking_scripts/* ./
+
+# Weird workaround for problem running tcdump in a privlidged container.
+RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+
+ENTRYPOINT ["./start_networking"]

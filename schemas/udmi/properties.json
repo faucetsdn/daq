@@ -11,7 +11,8 @@
   "properties": {
     "key_type": {
       "enum": [
-        "RSA_PEM"
+        "RSA_PEM",
+        "RSA_X509_PEM"
       ]
     },
     "version": {

@@ -2,7 +2,8 @@
 
 # Create system.conf and startup file for arbitrary number of faux virtual devices.
 function generate {
-  echo source misc/system.conf > local/system.conf
+  rm -f local/system.yaml
+  echo source config/system/default.yaml > local/system.conf
 
   type=$1
   faux_num=$2
@@ -13,25 +14,18 @@ function generate {
   rm -rf inst/run-port-*
   rm -rf inst/runtime_conf
 
-  topostartup=inst/startup_topo.cmd
-  rm -f $topostartup
-  echo startup_cmds=$topostartup >> local/system.conf
-
-  echo sec_port=$((faux_num+1)) >> local/system.conf
+  echo switch_setup.uplink_port=$((faux_num+1)) >> local/system.conf
 
   # Create required number of faux devices
-  iface_names=
   for iface in $(seq 1 $faux_num); do
-      iface_names=${iface_names},faux-$iface
-      echo autostart cmd/faux $iface discover >> $topostartup
+      echo interfaces.faux-$iface.opts=discover >> local/system.conf
   done
-  echo intf_names=${iface_names#,} >> local/system.conf
 
   # Specify a different set of tests
-  echo host_tests=misc/topo_tests.conf >> local/system.conf
+  echo host_tests=config/modules/topo.conf >> local/system.conf
 
   echo site_description=\"$type with $devices devices\" >> local/system.conf
-  echo device_specs=misc/device_specs/topo_$type.json >> local/system.conf
+  echo device_specs=resources/device_specs/topo_$type.json >> local/system.conf
   echo test_config=inst/runtime_conf/ >> local/system.conf
   # Don't use default monitor scan to get both src/dst traffic.
   echo monitor_scan_sec=0 >> local/system.conf

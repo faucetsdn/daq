@@ -1,0 +1,12 @@
+---
+linters:
+  flake8:
+    python: 3
+    max-line-length: 100
+  pep8:
+    python: 3
+    max-line-length: 100
+  py3k:
+files:
+  ignore:
+    - 'libs/proto/*'

@@ -5,6 +5,9 @@
     "reading_value": {
       "present_value": 21.30108642578125
     },
+    "nexus_sensor": {
+      "present_value": 21.1
+    },
     "yoyo_motion_sensor": {
       "present_value": true
     },

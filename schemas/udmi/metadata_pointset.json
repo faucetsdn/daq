@@ -13,6 +13,9 @@
           "properties": {
             "units": {
               "$ref": "file:units.json#"
+            },
+            "ref": {
+              "type": "string"
             }
           }
         }

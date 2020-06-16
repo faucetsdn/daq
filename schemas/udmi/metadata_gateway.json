@@ -8,16 +8,20 @@
       "type": "string",
       "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
     },
-    "protocol": {
-      "type": "string"
+    "subsystem": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
     },
-    "local_id": {
-      "type": "string"
+    "proxy_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}-[1-9][0-9]{0,2}$"
+      }
     }
   },
-  "required": [
-    "gateway_id",
-    "protocol",
-    "local_id"
+  "oneOf": [
+    { "required": ["gateway_id"] },
+    { "required": ["proxy_ids"] }
   ]
 }

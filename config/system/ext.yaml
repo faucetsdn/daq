@@ -1,0 +1,28 @@
+# Base configuration file for using an OVS switch external to DAQ itself.
+
+# Load defaults.
+include: config/system/default.yaml
+
+# Description description for dashboard.
+site_description: "External (not integrated with DAQ) OVS switch configuration"
+
+# Network switch configuration.
+switch_setup:
+  of_dpid: 0x123456789
+  ext_br: ext-ovs
+  ctrl_intf: ext-ovs-ctl
+  data_intf: ext-ovs-pri
+  lo_port: 6666
+  uplink_port: 7
+  lo_addr: 192.0.2.10/24
+  mods_addr: 192.0.2.1%d/24
+  ip_addr: 192.0.2.138
+  model: FAUX_SWITCH
+  username: aardvark
+  password: anteater
+
+# Faux device connection for testing.
+interfaces:
+  faux:
+    opts: 
+    port: 2

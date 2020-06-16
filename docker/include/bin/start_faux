@@ -1,0 +1,198 @@
+#!/bin/bash
+
+echo Starting faux device at `date` with $*
+
+declare -A options
+for option in $*; do
+    if [[ $option == *"="* ]]; then
+        k=$(echo $option | cut -d'=' -f1)
+        v=$(echo $option | cut -d'=' -f2)
+        options[$k]=$v
+    else
+        options[$option]=$option
+    fi
+done
+
+echo Python version `python --version`
+echo Java version `java --version`
+
+# Disable docker's built-in resolv mechanism and install standard resolvconf.
+# Do this at runtime since it requires permissions that aren't availble at build.
+umount /etc/resolv.conf
+dpkg -i resolvconf_*.deb
+
+while ! ifconfig -a | fgrep -q BROADCAST; do
+    echo Waiting for container interface to exist...
+    sleep 1
+done
+
+intf_name=$(ip link | fgrep BROADCAST | sed -rn 's/^[0-9]+: ([-a-zA-Z0-9]+).*$/\1/p')
+if [ -n "$intf_name" ]; then
+    echo Local interface is $intf_name
+else
+    echo Local interface not found.
+    exit 1
+fi
+
+set_mac_addr () {
+    echo Setting alternate mac $1 on $intf_name
+    ip link set addr $1 dev $intf_name
+}
+
+set_passwd () {
+    echo $1 | chpasswd
+}
+
+# Setup change-of-mac address for macoui testing.
+if [ -n "${options[macoui]}" ]; then
+    set_mac_addr 3c:5a:b4:1e:8f:0a
+fi
+
+# test_password faux device setup
+if [ -n "${options[passwordpass]}" ]; then
+    set_passwd 'root:pass'
+    htpasswd -b -c /etc/nginx/.htpasswd admin fail
+    /etc/init.d/openbsd-inetd restart
+    /usr/sbin/sshd -D &
+    service xinetd start
+    service ssh start
+elif [ -n "${options[passwordfail]}" ]; then
+    set_mac_addr 3c:5a:b4:1e:8f:0b
+    set_passwd 'root:default'
+    echo "pass\npass\n\n\n\n\n\ny\n" | adduser "admin"
+    echo "admin:default" | chpasswd
+    htpasswd -b -c /etc/nginx/.htpasswd admin default
+    /etc/init.d/openbsd-inetd restart
+    /usr/sbin/sshd -D &
+    service xinetd start
+    service ssh start
+fi
+
+# To capture all the data in/out of the faux device for debugging, uncomment
+# the following lines. The pcap file will end up in inst/faux/{hostname}.pcap
+# on the DAQ controller.
+#echo Starting pcap capture...
+#tcpdump -nUi $intf_name -w /tmp/`hostname`.pcap &
+
+ip addr show $intf_name
+
+if [ -n "${options[xdhcp]}" ]; then
+    echo Assigning static ip address...
+    ip link set up dev $intf_name
+    # specified ip
+    if [ "${options[xdhcp]}" !=  xdhcp ]; then
+        ip addr add "${options[xdhcp]}/16" dev $intf_name broadcast 10.20.255.255
+    else
+        ip addr add 10.20.0.5/16 dev $intf_name broadcast 10.20.255.255
+    fi
+    ip addr show $intf_name
+
+    (while true; do ping -c 1 10.20.0.1; sleep 5; done) &
+else
+    echo Running dhclient...
+    dhclient -v
+    ip addr show $intf_name
+
+    # dhclient relies on systemd to update resolv.conf -- but this setup does
+    # not use systemd, so get all hacky and update manually.
+    function update_dns {
+        dhcp_dns=$(fgrep DNS= /run/systemd/resolved.conf.d/isc-dhcp-v4-$intf_name.conf)
+        echo nameserver ${dhcp_dns#DNS=} > /tmp/resolv.conf
+        if ! diff /tmp/resolv.conf /etc/resolv.conf; then
+            echo Updating resolv.conf with $dhcp_dns
+            cp /tmp/resolv.conf /etc/resolv.conf
+        fi
+    }
+
+    # Need to do periodically for when DHCP address changes.
+    (while true; do update_dns; sleep 30; done) &
+fi
+
+# Pick the one not-lo inet v4 address.
+ipline=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
+read -r -a parts <<< "$ipline"
+local_ip=${parts[1]%/*}
+broadcast_ip=${parts[3]}
+
+echo Faux device at $local_ip bcast $broadcast_ip
+
+# Setup dummy telnet listener to trigger port-scan failure
+if [ -n "${options[telnet]}" ]; then
+    echo Enabling mock telnet server...
+    (while true; do echo Telnet `hostname`; nc -nvlt -p 23 -e `which hostname`; done) &
+fi
+
+if [ -n "${options[bacnet]}" ]; then
+    echo Starting bacnet loop device.
+    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+         FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Pass.json"  &
+elif [ -n "${options[bacnetfail]}" ]; then
+    echo Starting bacnet loop device.
+    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+         FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
+fi
+
+if [ -n "${options[ntp_client]}" ]; then
+    echo Starting ntp client.
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar "time.google.com" "123" "3" &
+fi
+
+if [ -n "${options[broadcast_client]}" ]; then
+    echo Starting broatcast client.
+    cip_port=41794
+    cycle_seconds=20
+    duration_seconds=360
+    python TransportClient/client.py $broadcast_ip $cip_port broadcast $duration_seconds $cycle_seconds &
+fi
+
+if [ -n "${options[discover]}" ]; then
+    echo Starting bacnet discover loop.
+    bin/bacnet_discover loop &
+fi
+
+if [ -n "${options[curl]}" ]; then
+    echo Starting curl loop.
+    (while true; do curl -o - http://google.com; sleep 1; done) &
+fi
+
+if [ -n "${options[brute]}" ]; then
+    echo Starting brute server.
+    (python pentests/brute_server.py bad 10000; echo Brute done.) &
+elif [ -n "${options[nobrute]}" ]; then
+    echo Starting nobrute server.
+    (python pentests/brute_server.py good 10000; echo Brute done.) &
+fi
+
+# test_tls faux device setup
+if [ -n "${options[tls]}" ]; then
+    echo Generating tls certs.
+    python tlsfaux/generate_certs.py
+    echo Starting tls server on port 443 https.
+    mv /root/nginx/nginxpass.conf /etc/nginx/nginx.conf
+    service nginx start
+elif [ -n "${options[expiredtls]}" ]; then
+    echo Starting expired tls server on port 443 https.
+    mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
+    service nginx start
+fi
+
+if [ -n "${options[pubber]}" ]; then
+    echo Running cloud pubber tool...
+    (while date; do
+	 pubber/bin/run
+	 # Do https query in case pubber is not configured, for testing port 443
+	 curl -o /dev/null https://google.com
+	 sleep 30
+     done) &
+fi
+
+conf_file=/config/start/start_faux.sh
+if [ -f $conf_file ]; then
+    echo Loading $conf_file...
+    source $conf_file
+else
+    echo Runtime config $conf_file not found.
+fi
+
+echo Blocking for all eternity.
+tail -f /dev/null

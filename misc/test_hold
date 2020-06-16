@@ -1,5 +1,0 @@
-#!/bin/bash -e
-
-echo Holding for all eternity.
-
-tail -f /dev/null

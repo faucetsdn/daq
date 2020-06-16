@@ -27,7 +27,7 @@ echo > $build_list_file
         true
     }
 
-    include ${host_tests:-misc/host_tests.conf}
+    include ${host_tests:-config/modules/host.conf}
 )
 cat $build_list_file
 rm -f $build_list_file

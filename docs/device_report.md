@@ -11,9 +11,9 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2020-03-16 11:41:45+00:00 |
-| Test report end date   | 2020-03-16 11:53:59+00:00 |
-| DAQ version      | 1.0.1 |
+| Test report start date | XXX |
+| Test report end date   | XXX |
+| 
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -56,22 +56,24 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|1|0|0|0|
-|Other|1|1|17|2|
+|Other|1|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
-|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
+|skip|cloud.udmi.state|Other|Other|No device id|
+|skip|cloud.udmi.system|Other|Other|No device id|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
-|skip|connection.port_duplex|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|connection.port_link|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|connection.port_speed|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|poe.negotiation|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|poe.power|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|poe.support|Other|Other|No local IP has been set, check ext_loip in system.conf|
-|skip|protocol.bacnet.pic|Other|Other|Bacnet device not found.|
+|skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
+|skip|connection.port_link|Other|Other|No local IP has been set, check system config|
+|skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
+|skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
+|skip|poe.power|Other|Other|No local IP has been set, check system config|
+|skip|poe.support|Other|Other|No local IP has been set, check system config|
+|fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
@@ -79,18 +81,43 @@ Overall device result FAIL
 |skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
 |pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
-|skip|security.tls.v3|Other|Other||
-|skip|security.x509|Other|Other||
+|skip|security.tls.v1|Other|Other|IOException unable to connect to server|
+|skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
+|skip|security.tls.v1_2|Other|Other|IOException unable to connect to server|
+|skip|security.tls.v1_2.x509|Other|Other|IOException unable to connect to server|
+|skip|security.tls.v1_3|Other|Other|IOException unable to connect to server|
+|skip|security.tls.v1_3.x509|Other|Other|IOException unable to connect to server|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
 
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|timeout_sec|300|
+
+## Module pass
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module ping
+
+
+#### Report
 
 ```
 --------------------
 Baseline ping test report
-%% 113 packets captured.
+
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -107,11 +134,11 @@ RESULT pass base.startup.dhcp
 --------------------
 base.switch.ping
 --------------------
-Attempt to ping the OpenFlow compatible switch configured in system.conf
+Attempt to ping access switch (if configured)
 --------------------
 See log above
 --------------------
-RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+RESULT skip base.switch.ping No local IP has been set, check system config
 
 --------------------
 base.target.ping
@@ -120,11 +147,14 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached %% 10.20.73.164
+RESULT pass base.target.ping target reached
 
 ```
 
 ## Module nmap
+
+
+#### Report
 
 ```
 --------------------
@@ -132,18 +162,27 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated Mon Mar 16 11:53:22 2020 as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.73.164
+# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-Host: 10.20.73.164 ()	Status: Up
-Host: 10.20.73.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
-# Nmap done at Mon Mar 16 11:53:23 2020 -- 1 IP address (1 host up) scanned in 0.98 seconds
+Host: X.X.X.X ()	Status: Up
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
+# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
 RESULT pass security.ports.nmap Only allowed ports found open.
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module discover
+
+
+#### Report
 
 ```
 --------------------
@@ -159,7 +198,16 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module switch
+
+
+#### Report
 
 ```
 --------------------
@@ -169,7 +217,7 @@ Connect the device to the network switch. Check the device and the switch for th
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_link No local IP has been set, check ext_loip in system.conf
+RESULT skip connection.port_link No local IP has been set, check system config
 
 --------------------
 connection.port_speed
@@ -178,7 +226,7 @@ Verify the device auto-negotiates connection speed
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_speed No local IP has been set, check ext_loip in system.conf
+RESULT skip connection.port_speed No local IP has been set, check system config
 
 --------------------
 connection.port_duplex
@@ -187,7 +235,7 @@ Verify the device supports full duplex
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_duplex No local IP has been set, check ext_loip in system.conf
+RESULT skip connection.port_duplex No local IP has been set, check system config
 
 --------------------
 poe.power
@@ -196,7 +244,7 @@ Verify that the device draws less than the maximum power allocated by the port. 
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.power No local IP has been set, check ext_loip in system.conf
+RESULT skip poe.power No local IP has been set, check system config
 
 --------------------
 poe.negotiation
@@ -205,7 +253,7 @@ Verify the device autonegotiates power requirements
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.negotiation No local IP has been set, check ext_loip in system.conf
+RESULT skip poe.negotiation No local IP has been set, check system config
 
 --------------------
 poe.support
@@ -214,11 +262,21 @@ Verify if the device supports PoE
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.support No local IP has been set, check ext_loip in system.conf
+RESULT skip poe.support No local IP has been set, check system config
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|poe|{'enabled': True}|
+
 ## Module macoui
+
+
+#### Report
 
 ```
 --------------------
@@ -233,7 +291,16 @@ RESULT fail connection.mac_oui Manufacturer prefix not found!
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module bacext
+
+
+#### Report
 
 ```
 --------------------
@@ -250,40 +317,93 @@ protocol.bacnet.pic
 --------------------
 Verify BACnet traffic is compliant to the PIC statement
 --------------------
- Bacnet device not found... Pics check cannot be performed.
+PICS file defined however a BACnet device was not found.
 --------------------
-RESULT skip protocol.bacnet.pic Bacnet device not found.
+RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Module tls
 
+
+#### Report
+
 ```
 --------------------
-Collecting TLS cert from target address %% 10.20.73.164
-IOException unable to connect to server.
+Collecting TLS cert from target address
 
 --------------------
-security.tls.v3
+security.tls.v1
 --------------------
-Verify the device supports TLS 1.2 or above (as a client)
+Verify the device supports TLS 1.0 (as a client)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v3
+RESULT skip security.tls.v1 IOException unable to connect to server
 
 --------------------
-security.x509
+security.tls.v1.x509
 --------------------
 Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
 --------------------
 See log above
 --------------------
-RESULT skip security.x509
+RESULT skip security.tls.v1.x509 IOException unable to connect to server
+
+--------------------
+security.tls.v1_2
+--------------------
+Verify the device supports TLS 1.2 (as a client)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_2 IOException unable to connect to server
+
+--------------------
+security.tls.v1_2.x509
+--------------------
+null
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
+
+--------------------
+security.tls.v1_3
+--------------------
+Verify the device supports TLS 1.3 (as a client)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_3 IOException unable to connect to server
+
+--------------------
+security.tls.v1_3.x509
+--------------------
+Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module password
+
+
+#### Report
 
 ```
 --------------------
@@ -291,20 +411,20 @@ security.passwords.http
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
-%% Starting NMAP check...
-%% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
-%% Nmap scan report for daq-faux-1 (10.20.73.164)
-%% Host is up (0.000060s latency).
-%% Not shown: 999 closed ports
-%% PORT      STATE SERVICE
-%% 10000/tcp open  snet-sensor-mgmt
-%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
-%% 
-%% Nmap done: 1 IP address (1 host up) scanned in 3.34 seconds
-%% nmap 10.20.73.164
-%% Done.
+[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
+Starting NMAP check...
+
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
+
+PORT      STATE SERVICE
+10000/tcp open  snet-sensor-mgmt
+MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+
+Nmap done: 1 IP address (1 host up) scanned in XXX
+nmap X.X.X.X
+Done.
 --------------------
 RESULT skip security.passwords.http Port 80 is not open on target device.
 
@@ -313,20 +433,20 @@ security.passwords.https
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
-%% Starting NMAP check...
-%% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
-%% Nmap scan report for daq-faux-1 (10.20.73.164)
-%% Host is up (0.000049s latency).
-%% Not shown: 999 closed ports
-%% PORT      STATE SERVICE
-%% 10000/tcp open  snet-sensor-mgmt
-%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
-%% 
-%% Nmap done: 1 IP address (1 host up) scanned in 3.06 seconds
-%% nmap 10.20.73.164
-%% Done.
+[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
+Starting NMAP check...
+
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
+
+PORT      STATE SERVICE
+10000/tcp open  snet-sensor-mgmt
+MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+
+Nmap done: 1 IP address (1 host up) scanned in XXX
+nmap X.X.X.X
+Done.
 --------------------
 RESULT skip security.passwords.https Port 443 is not open on target device.
 
@@ -335,20 +455,20 @@ security.passwords.telnet
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
-%% Starting NMAP check...
-%% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
-%% Nmap scan report for daq-faux-1 (10.20.73.164)
-%% Host is up (0.00016s latency).
-%% Not shown: 999 closed ports
-%% PORT      STATE SERVICE
-%% 10000/tcp open  snet-sensor-mgmt
-%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
-%% 
-%% Nmap done: 1 IP address (1 host up) scanned in 3.46 seconds
-%% nmap 10.20.73.164
-%% Done.
+[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
+Starting NMAP check...
+
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
+
+PORT      STATE SERVICE
+10000/tcp open  snet-sensor-mgmt
+MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+
+Nmap done: 1 IP address (1 host up) scanned in XXX
+nmap X.X.X.X
+Done.
 --------------------
 RESULT skip security.passwords.telnet Port 23 is not open on target device.
 
@@ -357,38 +477,71 @@ security.passwords.ssh
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-%% [STARTING WITH IP:10.20.73.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
-%% Starting NMAP check...
-%% 
-%% Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-16 11:53 UTC
-%% Nmap scan report for daq-faux-1 (10.20.73.164)
-%% Host is up (0.000024s latency).
-%% Not shown: 999 closed ports
-%% PORT      STATE SERVICE
-%% 10000/tcp open  snet-sensor-mgmt
-%% MAC Address: 9A:02:57:1E:8F:01 (Unknown)
-%% 
-%% Nmap done: 1 IP address (1 host up) scanned in 3.51 seconds
-%% nmap 10.20.73.164
-%% Done.
+[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
+Starting NMAP check...
+
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
+
+PORT      STATE SERVICE
+10000/tcp open  snet-sensor-mgmt
+MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+
+Nmap done: 1 IP address (1 host up) scanned in XXX
+nmap X.X.X.X
+Done.
 --------------------
 RESULT skip security.passwords.ssh Port 22 is not open on target device.
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module udmi
 
+
+#### Report
+
 ```
+--------------------
+cloud.udmi.state
+--------------------
+Validates device state payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.state No device id
+
 --------------------
 cloud.udmi.pointset
 --------------------
-Validates device payload against the UDMI schema
+Validates device pointset payload.
 --------------------
-Device id is null, skipping.
+No device id
 --------------------
 RESULT skip cloud.udmi.pointset No device id
 
+--------------------
+cloud.udmi.system
+--------------------
+Validates device system payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.system No device id
+
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Report complete
 

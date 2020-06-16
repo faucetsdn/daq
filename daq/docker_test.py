@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import subprocess
 
 import logger
 from clib import docker_host
@@ -14,6 +15,7 @@ class DockerTest:
     """Class for running docker tests"""
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'
+    TAGGED_IMAGE_FORMAT = IMAGE_NAME_FORMAT + ':latest'
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
@@ -39,17 +41,18 @@ class DockerTest:
         self.callback = callback
         self._finish_hook = finish_hook
 
-        env_vars = self.env_vars + ["TARGET_NAME=" + self.host_name,
-                                    "TARGET_IP=" + params['target_ip'],
-                                    "TARGET_MAC=" + params['target_mac'],
-                                    "GATEWAY_IP=" + params['gateway_ip'],
-                                    "GATEWAY_MAC=" + params['gateway_mac']]
+        def opt_param(key):
+            return params.get(key) or ''  # Substitute empty string for None
 
-        if 'local_ip' in params:
-            env_vars += ["LOCAL_IP=" + params['local_ip'],
-                         "SWITCH_PORT=" + params['switch_port'],
-                         "SWITCH_IP=" + params['switch_ip'],
-                         "SWITCH_MODEL=" + params['switch_model']]
+        env_vars = self.env_vars + [
+            "TARGET_NAME=" + self.host_name,
+            "TARGET_IP=" + params['target_ip'],
+            "TARGET_MAC=" + params['target_mac'],
+            "TARGET_PORT=" + opt_param('target_port'),
+            "GATEWAY_IP=" + params['gateway_ip'],
+            "GATEWAY_MAC=" + params['gateway_mac'],
+            "LOCAL_IP=" + opt_param('local_ip'),
+            ]
 
         vol_maps = [params['scan_base'] + ":/scans"]
         self._map_if_exists(vol_maps, params, 'inst')
@@ -61,8 +64,7 @@ class DockerTest:
         LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         # Work around an instability in the faucet/clib/docker library, b/152520627.
-        if getattr(cls, 'pullImage'):
-            setattr(cls, 'pullImage', lambda x: True)
+        setattr(cls, 'pullImage', self._check_image)
         try:
             host = self.runner.add_host(self.host_name, port=port, cls=cls, env_vars=env_vars,
                                         vol_maps=vol_maps, tmpdir=self.tmpdir)
@@ -70,6 +72,7 @@ class DockerTest:
         except Exception as e:
             # pylint: disable=no-member
             raise wrappers.DaqException(e)
+
         try:
             LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
             pipe = host.activate(log_name=None)
@@ -85,7 +88,7 @@ class DockerTest:
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
                 LOGGER.error('Target port %d will induce callback failure', self.target_port)
-                # Closing this now will cause error when attempting to write outoput.
+                # Closing this now will cause error when attempting to write output.
                 self.docker_log.close()
         except Exception as e:
             host.terminate()
@@ -97,13 +100,15 @@ class DockerTest:
             raise e
         LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
 
-    def terminate(self, expected=True):
+    def _check_image(self):
+        lines = subprocess.check_output(["docker", "images", "--format",
+                                         "{{ .Repository }}:{{ .Tag }}"])
+        expected = self.TAGGED_IMAGE_FORMAT % self.test_name
+        lines = str(lines, 'utf-8').splitlines()
+        assert expected in lines, 'Could not find image %s, maybe rebuild images.' % expected
+
+    def terminate(self):
         """Forcibly terminate this container"""
-        if bool(self.docker_host) != expected:
-            raise Exception("Target port %d test %s already terminated %s" % (
-                self.target_port, self.test_name, expected))
-        if not expected:
-            return None
         LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
         return self._docker_finalize()
 
@@ -140,8 +145,8 @@ class DockerTest:
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):
-        key = 'ex_%s_%02d' % (self.test_name, self.target_port)
-        return self.runner.config.get(key) == trigger_value
+        key = '%s_%02d' % (self.test_name, self.target_port)
+        return self.runner.config.get('fail_module', {}).get(key) == trigger_value
 
     def _docker_complete(self):
         try:

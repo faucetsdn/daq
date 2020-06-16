@@ -1,40 +1,32 @@
 package daq.pubber;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Handle publishing sensor data to a Cloud IoT MQTT endpoint.
@@ -53,6 +45,7 @@ public class MqttPublisher {
 
   private static final int MQTT_QOS = 1;
   private static final String CONFIG_UPDATE_TOPIC_FMT = "/devices/%s/config";
+  private static final String ERRORS_TOPIC_FMT = "/devices/%s/errors";
   private static final String UNUSED_ACCOUNT_NAME = "unused";
   private static final int INITIALIZE_TIME_MS = 2000;
 
@@ -67,10 +60,7 @@ public class MqttPublisher {
 
   private final Semaphore connectionLock = new Semaphore(1);
 
-  private final LoadingCache<String, MqttClient> mqttClientCache = CacheBuilder.newBuilder()
-      .expireAfterAccess(CACHE_EXPIRE_MS, TimeUnit.MILLISECONDS)
-      .removalListener(this::clientExpired)
-      .build(new ClientLoader());
+  private final Map<String, MqttClient> mqttClients = new ConcurrentHashMap<>();
 
   private final ExecutorService publisherExecutor =
       Executors.newFixedThreadPool(PUBLISH_THREAD_COUNT);
@@ -106,20 +96,34 @@ public class MqttPublisher {
     } catch (Exception e) {
       errorCounter.incrementAndGet();
       LOG.warn(String.format("Publish failed for %s: %s", deviceId, e));
-      closeDeviceClient(deviceId);
+      if (configuration.gatewayId == null) {
+        closeDeviceClient(deviceId);
+      } else {
+        close();
+      }
     }
   }
 
   private void closeDeviceClient(String deviceId) {
-    mqttClientCache.invalidate(deviceId);
+    MqttClient removed = mqttClients.remove(deviceId);
+    if (removed != null) {
+      try {
+        removed.close();
+      } catch (Exception e) {
+        LOG.error("Error closing MQTT client: " + e.toString());
+      }
+    }
   }
 
   void close() {
-    mqttClientCache.invalidateAll();
+    Set<String> clients = mqttClients.keySet();
+    for (String client : clients) {
+      closeDeviceClient(client);
+    }
   }
 
   long clientCount() {
-    return mqttClientCache.size();
+    return mqttClients.size();
   }
 
   private void validateCloudIoTOptions() {
@@ -135,19 +139,19 @@ public class MqttPublisher {
     }
   }
 
-  private MqttClient newBoundClient(String gatewayId, String deviceId) throws Exception {
-    MqttClient mqttClient = mqttClientCache.get(gatewayId);
+  private MqttClient newBoundClient(String deviceId) {
     try {
-      connectMqttClient(mqttClient, gatewayId);
+      String gatewayId = configuration.gatewayId;
+      LOG.debug("Connecting through gateway " + gatewayId);
+      MqttClient mqttClient = getConnectedClient(gatewayId);
       String topic = String.format("/devices/%s/attach", deviceId);
-      byte[] payload = new byte[0];
+      String payload = "";
       LOG.info("Publishing attach message to topic " + topic);
-      mqttClient.publish(topic, payload, MQTT_QOS, SHOULD_RETAIN);
+      mqttClient.publish(topic, payload.getBytes(StandardCharsets.UTF_8.name()), MQTT_QOS, SHOULD_RETAIN);
+      return mqttClient;
     } catch (Exception e) {
-      LOG.error(String.format("Error while binding client %s: %s", deviceId, e.toString()));
-      return null;
+      throw new RuntimeException("While binding client " + deviceId, e);
     }
-    return mqttClient;
   }
 
   private MqttClient newMqttClient(String deviceId) {
@@ -163,14 +167,14 @@ public class MqttPublisher {
     }
   }
 
-  private void connectMqttClient(MqttClient mqttClient, String deviceId)
-      throws Exception {
-    if (!connectionLock.tryAcquire(CONNECTION_LOCK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-      throw new RuntimeException("Timeout waiting for connection lock");
-    }
+  private MqttClient connectMqttClient(String deviceId) {
     try {
+      if (!connectionLock.tryAcquire(CONNECTION_LOCK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+        throw new RuntimeException("Timeout waiting for connection lock");
+      }
+      MqttClient mqttClient = newMqttClient(deviceId);
       if (mqttClient.isConnected()) {
-        return;
+        return mqttClient;
       }
       LOG.info("Attempting connection to " + registryId + ":" + deviceId);
 
@@ -193,6 +197,9 @@ public class MqttPublisher {
       mqttClient.connect(options);
 
       subscribeToUpdates(mqttClient, deviceId);
+      return mqttClient;
+    } catch (Exception e) {
+      throw new RuntimeException("While connecting mqtt client " + deviceId, e);
     } finally {
       connectionLock.release();
     }
@@ -216,7 +223,11 @@ public class MqttPublisher {
   }
 
   private void subscribeToUpdates(MqttClient client, String deviceId) {
-    String updateTopic = String.format(CONFIG_UPDATE_TOPIC_FMT, deviceId);
+    subscribeTopic(client, String.format(CONFIG_UPDATE_TOPIC_FMT, deviceId));
+    subscribeTopic(client, String.format(ERRORS_TOPIC_FMT, deviceId));
+  }
+
+  private void subscribeTopic(MqttClient client, String updateTopic) {
     try {
       client.subscribe(updateTopic);
     } catch (MqttException e) {
@@ -295,9 +306,9 @@ public class MqttPublisher {
 
   private class ClientLoader extends CacheLoader<String, MqttClient>  {
     @Override
-    public MqttClient load(String key) throws Exception {
-      LOG.info("Creating new publisher-client for " + key);
-      return newMqttClient(key);
+    public MqttClient load(String deviceId) throws Exception {
+      LOG.info("Creating new publisher-client for " + deviceId);
+      return newMqttClient(deviceId);
     }
   }
 
@@ -325,9 +336,11 @@ public class MqttPublisher {
 
   private MqttClient getConnectedClient(String deviceId) {
     try {
-      MqttClient mqttClient = mqttClientCache.get(deviceId);
-      connectMqttClient(mqttClient, deviceId);
-      return mqttClient;
+      String gatewayId = configuration.gatewayId;
+      if (gatewayId != null && !gatewayId.equals(deviceId)) {
+        return mqttClients.computeIfAbsent(deviceId, this::newBoundClient);
+      }
+      return mqttClients.computeIfAbsent(deviceId, this::connectMqttClient);
     } catch (Exception e) {
       throw new RuntimeException("While getting mqtt client " + deviceId + ": " + e.toString(), e);
     }
@@ -370,7 +383,7 @@ public class MqttPublisher {
   }
 
   public class PublisherStats {
-    public long clientCount = mqttClientCache.size();
+    public long clientCount = mqttClients.size();
     public int publishCount = publishCounter.getAndSet(0);
     public int errorCount = errorCounter.getAndSet(0);
   }

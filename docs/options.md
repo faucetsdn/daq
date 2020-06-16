@@ -18,15 +18,26 @@ on the command line, or with the more verbose long-form (`single_shot=true`).
 
 ## `local/system.conf` File.
 
-Additional long-form options are documented in the `misc/system.conf` file,
-and can also be included on the command-line. Some useful ones for debugging
-are:
+Additional long-form options are documented in the `config/system/default.yaml` file,
+and can also be included on the command-line.
+
+### Debugging
 
 * `daq_loglevel`: Set log-level for daq-based logging commands.
 * `mininet_loglevel`: Set log-level for underlying mininet commands.
 * `run_limit`: Set number of test runs to do before exit.
 
 e.g.: `cmd/run daq_loglevel=debug run_limit=10`
+
+### Timeout setting
+
+* `default_timeout_sec`: Set default global module timeout. Applies to all modules. 
+
+### DHCP settings
+
+* `initial_dhcp_lease_time`: Set the initial DHCP lease time. Lease time must be greater than 120s. 
+* `dhcp_lease_time`: Set the ongoing DHCP lease time for when all devices are running test modules.
+* `long_dhcp_response_sec`: Stops DHCP for X seconds for device using long DHCP mode. More on [DHCP mode](site_path.md#configuration-parameters)
 
 ## Common Run Invocation Examples
 
@@ -52,3 +63,7 @@ of testing in a test-lab environment to reduce activity.
 `cmd/run -f`: Fail a test run immediately when any individual test failes.
 Useful for debugging the state of a single test when it fails, separating it
 out from something run with a complete test suite.
+
+## More on configurations
+1. [Site wide configurations](site_path.md)
+2. [Device Specific configurations](device_specs.md)

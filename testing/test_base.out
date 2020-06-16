@@ -1,11 +1,12 @@
 Running testing/test_base.sh
 Base Tests
 %%%%%%%%%%%%%%%%%%%%%% Base tests
-01: []
+DAQ result code 1
+01: ['01:hold:DaqException']
 # Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
-By default would be in local/site/ rather than misc/test_site/.
+By default would be in local/site/ rather than resources/test_site/.
 
 ```
 \|/          (__)
@@ -30,12 +31,33 @@ Overall device result PASS
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
-|skip|base.switch.ping|Other|Other|No local IP has been set, check ext_loip in system.conf|
+|skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Other|Other|target reached|
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 
 
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|timeout_sec|300|
+
+## Module pass
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module ping
+
+
+#### Report
 
 ```
 --------------------
@@ -57,11 +79,11 @@ RESULT pass base.startup.dhcp
 --------------------
 base.switch.ping
 --------------------
-Attempt to ping the OpenFlow compatible switch configured in system.conf
+Attempt to ping access switch (if configured)
 --------------------
 See log above
 --------------------
-RESULT skip base.switch.ping No local IP has been set, check ext_loip in system.conf
+RESULT skip base.switch.ping No local IP has been set, check system config
 
 --------------------
 base.target.ping
@@ -75,6 +97,9 @@ RESULT pass base.target.ping target reached
 ```
 
 ## Module nmap
+
+
+#### Report
 
 ```
 --------------------
@@ -91,14 +116,29 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module hold
+
+
+#### Exceptions
+
+terminated
+
 ## Report complete
 
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
-01: []
+DAQ result code 1
+01: ['01:hold:DaqException']
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
+DAQ result code 0
 01: []
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 security.ports.nmap
@@ -107,9 +147,9 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 02: []
     dp_id: 1
     dp_id: 4886718345
-Switch test with port 2
+Switch test with target 192.0.2.138:2
 RESULT pass base.switch.ping target %% 192.0.2.138:2
-Switch test with port 2
+Switch test with target 192.0.2.138:2
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 01: [] 02: [] 03: []
