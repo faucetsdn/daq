@@ -3,12 +3,14 @@
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-source etc/config_base.sh
-
-if [ -z "$gcp_cred" ]; then
-    echo Need to define [gcp_cred] config variable.
+if [ $# != 1 ]; then
+    echo $0 [project_id]
     false
 fi
+project_id=$1
+shift
+
+source etc/config_base.sh
 
 if [ -z "$site_path" ]; then
     echo Need to define [site_path] config variable.
@@ -20,9 +22,9 @@ if [ -z "$schema_path" ]; then
     false
 fi
 
-validator/bin/build
+echo Building validator...
+validator/bin/build > /dev/null
 
-export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
-echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
+echo Running tools version `git describe`
 
-validator/bin/registrar $gcp_cred $site_path $schema_path $*
+validator/bin/registrar $project_id $site_path $schema_path $*

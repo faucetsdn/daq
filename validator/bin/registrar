@@ -7,27 +7,24 @@ jarfile=validator/build/libs/validator-1.0-SNAPSHOT-all.jar
 mainclass=com.google.daq.mqtt.registrar.Registrar
 
 if [ -z "$1" -o -z "$2" ]; then
-    echo Usage: $0 [config_file] [devices_dir] [schema_dir] '(device_filter)'
+    echo Usage: $0 [project_id] [devices_dir] [schema_dir] '(device_filter)'
     false
 fi
 
-config_file=$1
+project_id=$1
 devices_dir=$2
 schema_dir=$3
 device_filter=$4
-cloud_project=`jq -r .project_id $config_file`
 
-echo Using gcp credentials $config_file
+echo Using cloud project $project_id
 echo Using site config dir $devices_dir
 echo Using schema root dir $schema_dir
 echo Using device filter $device_filter
-echo Using cloud project $cloud_project
 
-export GOOGLE_CLOUD_PROJECT=$cloud_project
 JAVA=/usr/lib/jvm/java-11-openjdk-amd64/bin/java
 
 error=0
-$JAVA -cp $jarfile $mainclass $config_file $devices_dir $schema_dir $device_filter || error=$?
+$JAVA -cp $jarfile $mainclass $project_id $devices_dir $schema_dir $device_filter || error=$?
 
 echo Registrar complete, exit $error
 exit $error

@@ -27,7 +27,7 @@ function make_pubber {
     fi
     cat <<EOF > $local_dir/pubber.json
   {
-    "projectId": $project_id,
+    "projectId": "$project_id",
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
     "extraField": $fail,
@@ -74,7 +74,7 @@ EOF
 if [ -f "$gcp_cred" ]; then
     echo Using credentials from $gcp_cred
     echo gcp_cred: $gcp_cred >> local/system.yaml
-    project_id=`jq .project_id $gcp_cred`
+    project_id=`jq -r .project_id $gcp_cred`
 
     cloud_file=inst/test_site/cloud_iot_config.json
     echo Pulling cloud iot details from $cloud_file...
@@ -84,7 +84,7 @@ if [ -f "$gcp_cred" ]; then
     make_pubber AHU-1 daq-faux-2 null null
     make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
-    bin/registrar
+    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred bin/registrar $project_id
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
     fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS

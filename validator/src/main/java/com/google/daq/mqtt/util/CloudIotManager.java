@@ -1,23 +1,33 @@
 package com.google.daq.mqtt.util;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudiot.v1.CloudIot;
-import com.google.api.services.cloudiot.v1.model.*;
+import com.google.api.services.cloudiot.v1.CloudIotScopes;
+import com.google.api.services.cloudiot.v1.model.BindDeviceToGatewayRequest;
+import com.google.api.services.cloudiot.v1.model.Device;
+import com.google.api.services.cloudiot.v1.model.DeviceCredential;
+import com.google.api.services.cloudiot.v1.model.GatewayConfig;
+import com.google.api.services.cloudiot.v1.model.ModifyCloudToDeviceConfigRequest;
+import com.google.api.services.cloudiot.v1.model.PublicKeyCredential;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.daq.mqtt.util.ConfigUtil.readCloudIotConfig;
-import static com.google.daq.mqtt.util.ConfigUtil.readGcpCreds;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -30,10 +40,11 @@ public class CloudIotManager {
   private static final String SCHEMA_KEY = "schema_name";
   private static final int LIST_PAGE_SIZE = 1000;
 
-  private final GcpCreds configuration;
   private final CloudIotConfig cloudIotConfig;
 
   private final String registryId;
+  private final String projectId;
+  private final String cloudRegion;
 
   private CloudIot cloudIotService;
   private String projectPath;
@@ -41,12 +52,13 @@ public class CloudIotManager {
   private Map<String, Device> deviceMap = new HashMap<>();
   private String schemaName;
 
-  public CloudIotManager(File gcpCred, File iotConfigFile, String schemaName) {
-    configuration = readGcpCreds(gcpCred);
+  public CloudIotManager(String projectId, File iotConfigFile, String schemaName) {
+    this.projectId = projectId;
+    this.schemaName = schemaName;
     cloudIotConfig = validate(readCloudIotConfig(iotConfigFile));
     registryId = cloudIotConfig.registry_id;
-    this.schemaName = schemaName;
-    initializeCloudIoT(gcpCred);
+    cloudRegion = cloudIotConfig.cloud_region;
+    initializeCloudIoT();
   }
 
   private static CloudIotConfig validate(CloudIotConfig cloudIotConfig) {
@@ -64,20 +76,20 @@ public class CloudIotManager {
     return getRegistryPath(registryId) + "/devices/" + deviceId;
   }
 
-  private void initializeCloudIoT(File gcpCredFile) {
-    projectPath = "projects/" + configuration.project_id + "/locations/" + cloudIotConfig.cloud_region;
+  private void initializeCloudIoT() {
+    projectPath = "projects/" + projectId + "/locations/" + cloudRegion;
     try {
-      GoogleCredential credential = ConfigUtil.authorizeServiceAccount(gcpCredFile);
-      System.err.println(String.format("Using service account %s/%s",
-          credential.getServiceAccountId(), credential.getServiceAccountUser()));
+      System.err.println("Initializing with default credentials...");
+      GoogleCredentials credential =
+          GoogleCredentials.getApplicationDefault().createScoped(CloudIotScopes.all());
       JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-      HttpRequestInitializer init = new RetryHttpInitializerWrapper(credential);
+      HttpRequestInitializer init = new HttpCredentialsAdapter(credential);
       cloudIotService =
           new CloudIot.Builder(GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, init)
               .setApplicationName("com.google.iot.bos")
               .build();
       cloudIotRegistries = cloudIotService.projects().locations().registries();
-      System.err.println("Created service for project " + configuration.project_id);
+      System.err.println("Created service for project " + projectPath);
     } catch (Exception e) {
       throw new RuntimeException("While initializing Cloud IoT project " + projectPath, e);
     }
@@ -226,15 +238,19 @@ public class CloudIotManager {
   }
 
   public String getRegistryId() {
-    return cloudIotConfig.registry_id;
+    return registryId;
   }
 
   public String getProjectId() {
-    return configuration.project_id;
+    return projectId;
   }
 
   public String getSiteName() {
     return cloudIotConfig.site_name;
+  }
+
+  public Object getCloudRegion() {
+    return cloudRegion;
   }
 
   public void bindDevice(String proxyDeviceId, String gatewayDeviceId) throws IOException {

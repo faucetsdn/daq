@@ -3,7 +3,7 @@ project=$1
 service_account=$2
 custom_role_name="DAQStorageRole"
 function usage {
-   echo Usage: set_roles project service_account
+   echo Usage: set_roles project account_email
    exit 1;
 }
 
