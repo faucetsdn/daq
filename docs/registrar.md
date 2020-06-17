@@ -42,7 +42,7 @@ Generated private key for device (used on-device).
 
 ## Sample Output
 
-The produced `registration_summary.json` document provides an overview of the analyzied files,
+The produced `registration_summary.json` document provides an overview of the analyzed files,
 clearly any errors that should be addressed for full spec compliance. Additionaly, an
 `errors.json`
 
