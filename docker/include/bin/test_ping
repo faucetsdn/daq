@@ -99,5 +99,10 @@ write_out_monolog $REPORT_FILE \
                   $MONO_LOG \
                   $RESULT_LINES
 
+dns_target=${TARGET_IP%.*}.2
+dns_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 | wc -l`
+dns_proper=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 and dst host $dns_target | wc -l`
+echo DNS $dns_target $dns_request $dns_proper
+
 echo Critical module status is $status
 [ "$status" == pass ]
