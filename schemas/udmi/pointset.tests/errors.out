@@ -1,18 +1,32 @@
 Validating 1 schemas
   Validating 1 files against pointset.json
     Against input pointset.tests/errors.json
-      #: 13 schema violations found
-        #/points: 10 schema violations found
-          #/points/guid: expected type: JSONObject, found: String
-          #/points/missing_present_value: required key [present_value] not found
-          #/points/old_properties: 2 schema violations found
-            #/points/old_properties/properties: #: 0 subschemas matched instead of one
-              #/points/old_properties/properties: properties is not a valid enum value
-            #/points/old_properties: required key [present_value] not found
-          #/points/yoyo_motion_sensor: 2 schema violations found
-            #/points/yoyo_motion_sensor/bad_property_name: #: 0 subschemas matched instead of one
-              #/points/yoyo_motion_sensor/bad_property_name: bad_property_name is not a valid enum value
-            #/points/yoyo_motion_sensor: required key [present_value] not found
+      #: 21 schema violations found
+        #/points: 18 schema violations found
+          #/points/extra_present_value: #: only 1 subschema matches out of 2
+            #/points/extra_present_value: #: 2 subschemas matched instead of one
+          #/points/guid: #: only 0 subschema matches out of 2
+            #/points/guid: #: 2 subschemas matched instead of one
+            #/points/guid: expected type: JSONObject, found: String
+          #/points/magic_voice_recognizer: #: only 1 subschema matches out of 2
+            #/points/magic_voice_recognizer/present_value: #: no subschema matched out of the total 3 subschemas
+              #/points/magic_voice_recognizer/present_value: expected type: Boolean, found: JSONObject
+              #/points/magic_voice_recognizer/present_value: expected type: Number, found: JSONObject
+              #/points/magic_voice_recognizer/present_value: expected type: String, found: JSONObject
+          #/points/missing_present_value: #: only 1 subschema matches out of 2
+            #/points/missing_present_value: #: 0 subschemas matched instead of one
+              #/points/missing_present_value: required key [fittings_value] not found
+              #/points/missing_present_value: required key [present_value] not found
+          #/points/old_properties: #: only 0 subschema matches out of 2
+            #/points/old_properties: #: 0 subschemas matched instead of one
+              #/points/old_properties: required key [fittings_value] not found
+              #/points/old_properties: required key [present_value] not found
+            #/points/old_properties: extraneous key [properties] is not permitted
+          #/points/yoyo_motion_sensor: #: only 0 subschema matches out of 2
+            #/points/yoyo_motion_sensor: #: 0 subschemas matched instead of one
+              #/points/yoyo_motion_sensor: required key [fittings_value] not found
+              #/points/yoyo_motion_sensor: required key [present_value] not found
+            #/points/yoyo_motion_sensor: extraneous key [bad_property_name] is not permitted
           #/points: extraneous key [analogValue_1] is not permitted
           #/points: extraneous key [bad_____sensor] is not permitted
           #/points: extraneous key [bad_entity_name_] is not permitted

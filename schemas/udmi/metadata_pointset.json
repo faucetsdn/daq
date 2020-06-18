@@ -20,6 +20,17 @@
           }
         }
       }
+    },
+    "fittings": {
+      "additionalProperties": false,
+      "maxProperties": 150,
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
+          "additionalProperties": false,
+          "properties": {
+          }
+        }
+      }
     }
   },
   "required": [
