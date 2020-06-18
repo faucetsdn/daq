@@ -11,14 +11,16 @@ public class Main {
     static String serverName = "time.google.com";
     static int PORT = 123;
     static int timerPeriod = 10;
+    static byte version = 4;
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            throw new IllegalArgumentException("Usage: server_name port timerPeriod");
+        if (args.length != 4) {
+            throw new IllegalArgumentException("Usage: server_name port timerPeriod ntpVersion");
         }
         serverName = args[0];
         PORT = Integer.parseInt(args[1]);
         timerPeriod = Integer.parseInt(args[2]);
+        version = Byte.parseByte(args[3]);
 
         Runnable senderRunnable = new Runnable() {
             @Override

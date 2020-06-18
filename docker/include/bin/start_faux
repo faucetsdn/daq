@@ -132,9 +132,12 @@ elif [ -n "${options[bacnetfail]}" ]; then
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
-if [ -n "${options[ntp_client]}" ]; then
-    echo Starting ntp client.
-    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar "time.google.com" "123" "3" &
+if [ -n "${options[ntpv4]}" ]; then
+    echo Starting ntp version 4 client.
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar time.google.com 123 3 4 &
+elif [ -n "${options[ntpv3]}" ]; then
+    echo Starting ntp version 3 client.
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar time.google.com 123 3 3 &
 fi
 
 if [ -n "${options[broadcast_client]}" ]; then
