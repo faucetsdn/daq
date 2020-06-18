@@ -114,7 +114,7 @@ else
     dns_result=pass
     dns_summary="Correct DNS server address"
 fi
-echo RESULT $dns_result base.target.ping $summary %% DNS server $dns_target | tee -a $RESULT_LINES
+echo RESULT $dns_result base.target.dns $dns_summary %% DNS server $dns_target | tee -a $RESULT_LINES
 
 
 echo Critical module status is $status

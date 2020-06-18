@@ -104,6 +104,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
 # Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
+capture_test_results ping
 capture_test_results bacext
 capture_test_results macoui
 capture_test_results tls
