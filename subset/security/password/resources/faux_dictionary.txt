@@ -1,4 +1,4 @@
-user:pass
-admin:default
-root:user
-default:pass
+:user:pass
+:admin:default
+:root:user
+:default:pass

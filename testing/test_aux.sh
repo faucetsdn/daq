@@ -53,9 +53,14 @@ cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
+
+# Add extra configs to a copy of the baseline module config for the password test to switch between faux and full dictionaries
+cat resources/setups/baseline/module_config.json | jq '.modules.password += {"use_faux_dictionary":"true"}' > local/module_config.json
+
 cat <<EOF > local/system.yaml
 ---
 include: config/system/all.conf
+base_conf: local/module_config.json
 finish_hook: bin/dump_network
 test_config: resources/runtime_configs/long_wait
 site_path: inst/test_site
