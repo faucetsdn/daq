@@ -99,10 +99,23 @@ write_out_monolog $REPORT_FILE \
                   $MONO_LOG \
                   $RESULT_LINES
 
+
+echo Checking startup DNS activity...
 dns_target=${TARGET_IP%.*}.2
 dns_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 | wc -l`
 dns_proper=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 and dst host $dns_target | wc -l`
-echo DNS $dns_target $dns_request $dns_proper
+if [ "$dns_request" == 0 ]; then
+    dns_result=skip
+    dns_summary="No dns traffic detected"
+elif [ "$dns_proper" == 0 ]; then
+    dns_result=fail
+    dns_summary="Invalid DNS server address"
+else
+    dns_result=pass
+    dns_summary="Correct DNS server address"
+fi
+echo RESULT $dns_result base.target.ping $summary %% DNS server $dns_target | tee -a $RESULT_LINES
+
 
 echo Critical module status is $status
 [ "$status" == pass ]
