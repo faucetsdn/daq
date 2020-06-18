@@ -53,11 +53,16 @@ public class NtpMessage {
     /**
      * Constructs a new NtpMessage in client -> server mode, and sets the
      * transmit timestamp to the current time.
+     *
+     * @param SECONDS_FROM_01_01_1900_TO_01_01_1970 - time
+     * @param version - NTP version
      */
-	public NtpMessage(double SECONDS_FROM_01_01_1900_TO_01_01_1970) {
+
+    public NtpMessage(double SECONDS_FROM_01_01_1900_TO_01_01_1970, byte version) {
         this.mode = 3;
+        this.version = version;
         this.transmitTimestamp = (System.currentTimeMillis() / 1000.0) + SECONDS_FROM_01_01_1900_TO_01_01_1970;
-	}
+    }
 
     /**
      * This method constructs the data bytes of a raw NTP packet.

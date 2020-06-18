@@ -40,7 +40,7 @@ public class Main {
         // Send request
         DatagramSocket socket = new DatagramSocket();
         InetAddress address = InetAddress.getByName(serverName);
-        byte[] buf = new NtpMessage(SECONDS_FROM_01_01_1900_TO_01_01_1970).toByteArray();
+        byte[] buf = new NtpMessage(SECONDS_FROM_01_01_1900_TO_01_01_1970, version).toByteArray();
         DatagramPacket packet =
                 new DatagramPacket(buf, buf.length, address, PORT);
 
