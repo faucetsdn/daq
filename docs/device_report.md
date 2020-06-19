@@ -11,9 +11,9 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | 2020-06-19 13:28:53+00:00 |
-| Test report end date   | 2020-06-19 13:36:33+00:00 |
-| DAQ version      |  |
+| Test report start date | XXX |
+| Test report end date   | XXX |
+| 
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -118,7 +118,7 @@ Overall device result FAIL
 ```
 --------------------
 Baseline ping test report
-%% 67 packets captured.
+
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -148,7 +148,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached %% 10.20.84.164
+RESULT pass base.target.ping target reached
 
 ```
 
@@ -163,11 +163,11 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated Fri Jun 19 13:35:21 2020 as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.84.164
+# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-Host: 10.20.84.164 ()	Status: Up
-Host: 10.20.84.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
-# Nmap done at Fri Jun 19 13:35:21 2020 -- 1 IP address (1 host up) scanned in 0.64 seconds
+Host: X.X.X.X ()	Status: Up
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
+# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
 RESULT pass security.ports.nmap Only allowed ports found open.
@@ -337,7 +337,7 @@ RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was no
 
 ```
 --------------------
-Collecting TLS cert from target address %% 10.20.84.164
+Collecting TLS cert from target address
 
 --------------------
 security.tls.v1
@@ -413,15 +413,15 @@ security.passwords.http
 Verify all device manufacturer default passwords are changed for protocol: HTTP, and new passwords are set.
 --------------------
 
-Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
-Nmap scan report for daq-faux-1 (10.20.84.164)
-Host is up (0.00049s latency).
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
 
 PORT   STATE  SERVICE
 80/tcp closed http
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in 0.74 seconds
+Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
 RESULT skip security.passwords.http Port 80 not open on target device.
@@ -432,15 +432,15 @@ security.passwords.https
 Verify all device manufacturer default passwords are changed for protocol: HTTPS, and new passwords are set.
 --------------------
 
-Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
-Nmap scan report for daq-faux-1 (10.20.84.164)
-Host is up (0.000070s latency).
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
 
 PORT    STATE  SERVICE
 443/tcp closed https
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in 0.74 seconds
+Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
 RESULT skip security.passwords.https Port 443 not open on target device.
@@ -451,15 +451,15 @@ security.passwords.telnet
 Verify all device manufacturer default passwords are changed for protocol: Telnet, and new passwords are set.
 --------------------
 
-Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
-Nmap scan report for daq-faux-1 (10.20.84.164)
-Host is up (0.00024s latency).
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
 
 PORT   STATE  SERVICE
 23/tcp closed telnet
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in 0.71 seconds
+Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
 RESULT skip security.passwords.telnet Port 23 not open on target device.
@@ -470,15 +470,15 @@ security.passwords.ssh
 Verify all device manufacturer default passwords are changed for protocol: SSH, and new passwords are set.
 --------------------
 
-Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
-Nmap scan report for daq-faux-1 (10.20.84.164)
-Host is up (0.00018s latency).
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
 
 PORT   STATE  SERVICE
 22/tcp closed ssh
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in 0.77 seconds
+Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
 RESULT skip security.passwords.ssh Port 22 not open on target device.
