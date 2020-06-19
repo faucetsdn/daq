@@ -2,6 +2,10 @@
 
 DAQ currently uses Travis CI for integration testing: https://travis-ci.org/
 
+* gcp_gred for cloud project
+* site_path pointing to devices
+* device_id in device module config for MAC address
+
 ## Configuration
 
 The `test_udmi` test module uses the Registrar and Validator to check that a device is
