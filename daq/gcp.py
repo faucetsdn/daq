@@ -57,7 +57,6 @@ class GcpManager:
             return
         LOGGER.info('Loading gcp credentials from %s', cred_file)
         # Normal execution assumes default credentials.
-        # pylint: disable=protected-access
         (self._credentials, self._project) = google_auth.load_credentials_from_file(cred_file)
         self._client_name = self._parse_creds(cred_file)
         self._site_name = self._get_site_name()
