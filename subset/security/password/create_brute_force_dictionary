@@ -1,13 +1,7 @@
 #!/bin/bash
 
-# A script to retrieve, and collate several raw brute force dictionaries into one large file.
+# A script to retrieve, and collate several raw brute force dictionaries into a colon separated file with format :username:password, and also to two separate username and password lists.
 # Usage ./create_brute_force_dictionary
-#
-# Process:
-# - Retrieve the manufacturer defaults .csv dictionary file, and the two colon separated dictionaries for ssh/telnet.
-# - For the csv file, convert each line into a username:password pair, append them to the temp file.
-# - For the txt files, simply append them into the temp file.
-# - Remove duplicates, empty lines and sort the temp file into the output file.
 
 OUTPUT_DICTIONARY=resources/full_dictionary.txt
 TMP_DICTIONARY=resources/tmp_dictionary.txt
@@ -95,7 +89,6 @@ function append_colon_separated_file_to_output_dictionary() {
 }
 
 # Runs a few cleanup commands which do the following:
-# - Remove forbidden characters such as which make the scripts behave unexpectedly '/' '$' '%' '>'
 # - Remove trailing whitespace
 # - Sort and remove duplicates
 # - Finally, add a colon at the start of each line to make it suitable for use in medusa
@@ -103,7 +96,6 @@ function append_colon_separated_file_to_output_dictionary() {
 # $1 Temporary dictionary file
 # $2 Output dictionary file
 function clean_output_dictionary() {
-  #cat $1 | tr -d "/" | tr -d "$" | tr -d "%" | tr -d ">" | sed -E 's/\s+$//' | sort -u | sed -E 's/^/:/' > $2
   cat $1 | sed -E 's/\s+$//' | sort -u | sed -E 's/^/:/' > $2
 }
 
