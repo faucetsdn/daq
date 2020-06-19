@@ -15,6 +15,7 @@
     },
     "points": {
       "additionalProperties": false,
+      "maxProperties": 150,
       "patternProperties": {
         "^[a-z][a-z0-9]*(_[a-z0-9]+)*$": {
           "$ref": "#/definitions/point_property_names"
@@ -31,6 +32,7 @@
     "point_property_names": {
       "type": "object",
       "additionalProperties": false,
+      "maxProperties": 450,
       "properties": {
         "present_value": {
           "type": ["number", "string", "boolean"]
