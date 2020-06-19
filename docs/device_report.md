@@ -11,9 +11,9 @@
 
 | Test             |                        |
 |------------------|------------------------|
-| Test report start date | XXX |
-| Test report end date   | XXX |
-| 
+| Test report start date | 2020-06-19 13:28:53+00:00 |
+| Test report end date   | 2020-06-19 13:36:33+00:00 |
+| DAQ version      |  |
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -77,10 +77,10 @@ Overall device result FAIL
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
-|skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
-|skip|security.passwords.https|Other|Other|Port 443 is not open on target device.|
-|skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
-|skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
+|skip|security.passwords.http|Other|Other|Port 80 not open on target device.|
+|skip|security.passwords.https|Other|Other|Port 443 not open on target device.|
+|skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
+|skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
 |pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
 |skip|security.tls.v1|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
@@ -118,7 +118,7 @@ Overall device result FAIL
 ```
 --------------------
 Baseline ping test report
-
+%% 67 packets captured.
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -148,7 +148,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached
+RESULT pass base.target.ping target reached %% 10.20.84.164
 
 ```
 
@@ -163,11 +163,11 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
+# Nmap 7.60 scan initiated Fri Jun 19 13:35:21 2020 as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.84.164
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
-# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
+Host: 10.20.84.164 ()	Status: Up
+Host: 10.20.84.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
+# Nmap done at Fri Jun 19 13:35:21 2020 -- 1 IP address (1 host up) scanned in 0.64 seconds
 No invalid ports found.
 --------------------
 RESULT pass security.ports.nmap Only allowed ports found open.
@@ -337,7 +337,7 @@ RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was no
 
 ```
 --------------------
-Collecting TLS cert from target address
+Collecting TLS cert from target address %% 10.20.84.164
 
 --------------------
 security.tls.v1
@@ -410,90 +410,78 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 --------------------
 security.passwords.http
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: HTTP, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
-Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
+Nmap scan report for daq-faux-1 (10.20.84.164)
+Host is up (0.00049s latency).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+80/tcp closed http
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Nmap done: 1 IP address (1 host up) scanned in 0.74 seconds
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.http Port 80 is not open on target device.
+RESULT skip security.passwords.http Port 80 not open on target device.
 
 --------------------
 security.passwords.https
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: HTTPS, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
-Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
+Nmap scan report for daq-faux-1 (10.20.84.164)
+Host is up (0.000070s latency).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT    STATE  SERVICE
+443/tcp closed https
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Nmap done: 1 IP address (1 host up) scanned in 0.74 seconds
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.https Port 443 is not open on target device.
+RESULT skip security.passwords.https Port 443 not open on target device.
 
 --------------------
 security.passwords.telnet
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: Telnet, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
-Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
+Nmap scan report for daq-faux-1 (10.20.84.164)
+Host is up (0.00024s latency).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+23/tcp closed telnet
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Nmap done: 1 IP address (1 host up) scanned in 0.71 seconds
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.telnet Port 23 is not open on target device.
+RESULT skip security.passwords.telnet Port 23 not open on target device.
 
 --------------------
 security.passwords.ssh
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: SSH, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
-Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-06-19 13:36 UTC
+Nmap scan report for daq-faux-1 (10.20.84.164)
+Host is up (0.00018s latency).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+22/tcp closed ssh
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Nmap done: 1 IP address (1 host up) scanned in 0.77 seconds
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
+RESULT skip security.passwords.ssh Port 22 not open on target device.
 
 ```
 
@@ -502,6 +490,7 @@ RESULT skip security.passwords.ssh Port 22 is not open on target device.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|use_faux_dictionary|true|
 
 ## Module udmi
 
