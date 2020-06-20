@@ -87,7 +87,6 @@ if [ -f "$gcp_cred" ]; then
         count=2 from_gcp=true
     echo GCP results diff | tee -a $GCP_RESULTS
     diff inst/reports/combo_*.md out/report_local.md | tee -a $GCP_RESULTS
-    more inst/reports/combo_*.md out/report_local.md
 fi
 
-echo Done with tests | tee -a $TEST_RESULTS
+echo Done with many | tee -a $TEST_RESULTS

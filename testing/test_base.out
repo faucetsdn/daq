@@ -150,6 +150,7 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 Switch test with target 192.0.2.138:2
 RESULT pass base.switch.ping target %% 192.0.2.138:2
 Switch test with target 192.0.2.138:2
+Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 01: [] 02: [] 03: []

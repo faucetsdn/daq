@@ -1,2 +1,4 @@
-# Hang forever to test container timeout
-tail -f /dev/null
+while true; do
+    echo Blocking forever waiting for timeout...
+    sleep 5
+done
