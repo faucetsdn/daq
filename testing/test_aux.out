@@ -81,6 +81,9 @@ port-01 module_config modules
   "macoui": {
     "enabled": true
   },
+  "manual": {
+    "enabled": true
+  },
   "network": {
     "enabled": true
   },
@@ -126,6 +129,9 @@ port-02 module_config modules
   "macoui": {
     "enabled": true,
     "timeout_sec": 1
+  },
+  "manual": {
+    "enabled": true
   },
   "network": {
     "enabled": true
