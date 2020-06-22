@@ -141,6 +141,24 @@ if [ -n "${options[ntp_client]}" ]; then
     java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar "time.google.com" "123" "3" &
 fi
 
+# ntp_pass queries the NTP server learnt from DHCP. ntp_fail sends to time.google.com
+if [ -n "${options[ntp_pass]}" -o -n "${options[ntp_fail]}" ]; then
+    (while date; do
+        if [ -n "${options[ntp_pass]}" ]; then
+            dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
+            if [ -n "${dhcp_ntp}" ]; then
+                ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
+                echo NTP server from DHCP $ntp_server
+            fi
+        elif [ -n "${options[ntp_fail]}" ]; then
+            ntp_server=time.google.com
+        fi
+        echo Transmitting NTP query to $ntp_server
+        ntpdate -q -p 1 $ntp_server
+        sleep 10
+     done) &
+fi
+
 if [ -n "${options[broadcast_client]}" ]; then
     echo Starting broatcast client.
     cip_port=41794

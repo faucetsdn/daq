@@ -62,11 +62,11 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client
+    opts: brute broadcast_client ntp_pass
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail opendns
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntp_fail opendns
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber ntp_client broadcast_client
+    opts: tls macoui passwordpass bacnet pubber broadcast_client
 long_dhcp_response_sec: 0
 monitor_scan_sec: 0
 EOF
