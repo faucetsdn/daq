@@ -2,7 +2,32 @@
 
 A number of additional setup steps are required for enabling testing against "smart devices"
 that communicate with the cloud. The tests themselves are part of the `subset/cloud/test_udmi`
-module included in the standard DAQ distro.
+module included in the standard DAQ distro. The same basic device-to-cloud validation test
+pipeline can be done manually and automatically (through DAQ); it's instructure to fully
+understand the manual test pipeline before engaging with the automated setup.
+
+## Manual Test Pipeline
+
+The overal device-to-cloud pipeline looks something like the following:
+
+* Device sends data to the cloud. There's two kinds of devices:
+  * A faux _reference design_ device called [pubber](pubber.md), which is a completely contained
+  software device.
+  * An actual physical device. The setup and configuration of that device will be manufacturer
+  dependent and so is out of scope for this (DAQ) documentation.
+* A configured GCP IoT Core project, registry, and device entry. The
+[GCP docs for IoT Core](https://cloud.google.com/iot/docs/how-tos/devices) describe the basics. The
+key part is the _authentication key_ (hahaha) that needs to be setup between the local device and
+cloud device entry.
+* The IoT Core registry is configured with a _PubSub topic_ (not to be confused with an _MQTT topic_),
+that provides the bridge between incoming data and consumers of that data. See the GCP documentation
+on PubSub for more details.
+* (optional) The `gcloud` command line can be used to validate that data is being sent from the
+device to the cloud. Something like
+`gcloud pubsub subscriptions pull --auto-ack projects/{project}/subscriptions/{sub_id}`.
+(Complete documentation for how to use `gcloud` commands is out of scope of this documentation.)
+* The [validator tool](validator.md) is what programmatically validates a device data stream, and
+is what is ultimately used by `test_udmi` to validate device-cloud communication.
 
 ## Base Local Test Setup
 
@@ -29,27 +54,6 @@ This contains all the site-specific information about devices needed for testing
 as in `resources/test_site/mac_addrs/3c5ab41e8f0b/module_config.json`.
 * The GCP IoT Core setup needs to have a proper registry and device configred. This can either
 be done manually or using the [registrar tool](registrar.md) tool.
-
-## Manual Test Pipeline
-
-If anything goes wrong with the automatic DAQ setup, the ability to manually test everything will
-help debug the problem to see what's going wrong. The overal pipeline looks something like the
-following:
-
-* Device sends data to the cloud. There's two kinds of devices:
-  * A faux _reference design_ device called [pubber](pubber.md), which is a completely contained
-  software device.
-  * An actual physical device. The setup and configuration of that device will be manufacturer
-  dependent and so is out of scope for this (DAQ) documentation.
-* A configured GCP IoT Core project, registry, and device entry. The
-[GCP docs for IoT Core](https://cloud.google.com/iot/docs/how-tos/devices) describe the basics. The
-key part is the _authentication key_ (hahaha) that needs to be setup between the local device and
-cloud device entry.
-* The `gcloud` command line can be used to validate that data is being sent from the device to the
-cloud. Something like `gcloud pubsub subscriptions pull --auto-ack projects/{project}/subscriptions/{sub_id}`.
-(Complete documentation for how to use `gcloud` commands is out of scope of this documentation.)
-* The [validator tool](validator.md) is what programmatically validates a device data stream, and
-is what is ultimately used by `test_udmi` to validate device-cloud communication.
 
 ## Integration Testing
 
