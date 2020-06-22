@@ -6,21 +6,29 @@ module included in the standard DAQ distro.
 
 ## Base Local Test Setup
 
-* _enabled in build_: When running `cmd/build` there should be a line like
-`subset/cloud/Dockerfile.test_udmi`. This is enabled through the `host_tests` config parameter,
-which can be set to `config/modules/all.conf` if necessary.
-* _gcp service account_: `gcp_gred` setup as described in
+* The `udmi` module needs to be enabled in build. When running `cmd/build` there should be a line
+like `subset/cloud/Dockerfile.test_udmi`. This is enabled through the `host_tests` config parameter,
+which can be set to `config/modules/all.conf` if necessary. On startup, there should be a log
+message that includes `udmi`:
+```
+Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet, mudgee, nmap, discover, switch, macoui, bacext, tls, password, udmi, manual
+```
+* A testing gcp service account `gcp_cred` needs to be setup as described in
 [service account setup instructions](service.md).
-* The system's default `module_config` needs to enable the `udmi` test, as per
-in `./resources/setups/baseline/module_config.json`:
+* The system's default `module_config` needs to enable the `udmi` test, e.g. as per
+`resources/setups/baseline/module_config.json`. This can be validated by (runtime) checking
+`inst/run-port-01/nodes/udmi01/tmp/module_config.json` to see if it has something like the following:
 ```
     "udmi": {
       "enabled": true
     }
 ```
 4. `site_path` config needs to point to a site definition directory, or defaults to `local/site`.
+This contains all the site-specific information about devices needed for testing.
 5. `{site_path}/mac_addrs/{mac_addr}/module_config.json` needs to have a `device_id` defined, e.g.
 as in `resources/test_site/mac_addrs/3c5ab41e8f0b/module_config.json`.
+6. The GCP IoT Core setup needs to have a proper registry and device configred. This can either
+be done manually or using the [registrar tool](registrar.md) tool.
 
 ## Integration Testing
 
