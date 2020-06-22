@@ -408,9 +408,9 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 
 ```
 --------------------
-security.passwords.http
+security.admin.password.http
 --------------------
-Verify all device manufacturer default passwords are changed for protocol: HTTP, and new passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: http, and new passwords are set.
 --------------------
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
@@ -427,9 +427,9 @@ Could not connect to specified port on host.
 RESULT skip security.passwords.http Port 80 not open on target device.
 
 --------------------
-security.passwords.https
+security.admin.password.https
 --------------------
-Verify all device manufacturer default passwords are changed for protocol: HTTPS, and new passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: https, and new passwords are set.
 --------------------
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
@@ -446,28 +446,9 @@ Could not connect to specified port on host.
 RESULT skip security.passwords.https Port 443 not open on target device.
 
 --------------------
-security.passwords.telnet
+security.admin.password.ssh
 --------------------
-Verify all device manufacturer default passwords are changed for protocol: Telnet, and new passwords are set.
---------------------
-
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
-
-PORT   STATE  SERVICE
-23/tcp closed telnet
-MAC Address: 9A:02:57:1E:8F:01 (Unknown)
-
-Nmap done: 1 IP address (1 host up) scanned in XXX
-Could not connect to specified port on host.
---------------------
-RESULT skip security.passwords.telnet Port 23 not open on target device.
-
---------------------
-security.passwords.ssh
---------------------
-Verify all device manufacturer default passwords are changed for protocol: SSH, and new passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: ssh, and new passwords are set.
 --------------------
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
@@ -483,6 +464,25 @@ Could not connect to specified port on host.
 --------------------
 RESULT skip security.passwords.ssh Port 22 not open on target device.
 
+--------------------
+security.admin.password.telnet
+--------------------
+Verify all device manufacturer default passwords are changed for protocol: telnet, and new passwords are set.
+--------------------
+
+Starting Nmap 7.60 ( https://nmap.org ) at XXX
+Nmap scan report for daq-faux-1 (X.X.X.X)
+Host is up (XXX).
+
+PORT   STATE  SERVICE
+23/tcp closed telnet
+MAC Address: 9A:02:57:1E:8F:01 (Unknown)
+
+Nmap done: 1 IP address (1 host up) scanned in XXX
+Could not connect to specified port on host.
+--------------------
+RESULT skip security.passwords.telnet Port 23 not open on target device.
+
 ```
 
 #### Module Config
@@ -490,7 +490,7 @@ RESULT skip security.passwords.ssh Port 22 not open on target device.
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|use_faux_dictionary|true|
+|dictionary_folder|resources/faux|
 
 ## Module udmi
 
