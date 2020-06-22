@@ -1,22 +1,34 @@
-# Integration Testing
+# Cloud Connection Testing
 
-DAQ currently uses Travis CI for integration testing: https://travis-ci.org/
+A number of additional setup steps are required for enabling testing against "smart devices"
+that communicate with the cloud. The tests themselves are part of the `subset/cloud/test_udmi`
+module included in the standard DAQ distro.
 
-* gcp_gred for cloud project
-* site_path pointing to devices
-* device_id in device module config for MAC address
+## Base Local Test Setup
 
-## Configuration
+* _enabled in build_: When running `cmd/build` there should be a line like
+`subset/cloud/Dockerfile.test_udmi`. This is enabled through the `host_tests` config parameter,
+which can be set to `config/modules/all.conf` if necessary.
+* _gcp service account_: `gcp_gred` setup as described in
+[service account setup instructions](service.md).
+* The system's default `module_config` needs to enable the `udmi` test, as per
+in `./resources/setups/baseline/module_config.json`:
+```
+    "udmi": {
+      "enabled": true
+    }
+```
+4. `site_path` config needs to point to a site definition directory, or defaults to `local/site`.
+5. `{site_path}/mac_addrs/{mac_addr}/module_config.json` needs to have a `device_id` defined, e.g.
+as in `resources/test_site/mac_addrs/3c5ab41e8f0b/module_config.json`.
 
-The `test_udmi` test module uses the Registrar and Validator to check that a device is
-properly communicating through Cloud IoT, automated through DAQ.
+## Integration Testing
 
-### GCP Credential
-
-To run cloud-based tests, setup the Travis `GCP_BASE64_CRED` env variable with a `base64` encoded
-service account key for your project. It's recommended to use a dedicated key with a nice name
-like `daq-travis`, but not required. Encode the key value as per below, and cut/paste the
-resulting string into a
+If developing cloud-tests, then the CI build system also needs to have a service account configured
+pointing at a suitable GCP proejct. To run cloud-based tests, setup the Travis `GCP_BASE64_CRED`
+env variable with a `base64` encoded service account key for your project. It's recommended to
+use a dedicated key with a nice name like `daq-travis`, but not required. Encode the key value
+as per below, and cut/paste the resulting string into a
 [Travis environment variable](https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings)
 for a `GCP_BASE64_CRED` varaible. Note the `-w 0` option is required for proper parsing/formatting,
 as there can't be any newlines in the copied string.
@@ -28,7 +40,7 @@ ewoICJ1eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYm9zLWRhcS10ZXN0a
 iOiAiaHR0cHM6Ly93LWRhcS10ZXN0aW5nLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9Cg==
 </code>
 
-## Travis CI Testing
+### Travis CI Testing
 
 * Run the [registrar tool](registrar.md) to properly configure the cloud project.
 * `gcp_topic` config to `local/system.conf` as described in this doc.
