@@ -45,16 +45,16 @@ RESULT pass security.tls.v1_3 Certificate active for current date and public key
 RESULT pass security.tls.v1_3.x509 Certificate active for current date and public key length > 2048.
 RESULT skip security.passwords.http Port 80 not open on target device.
 RESULT skip security.passwords.https Port 443 not open on target device.
-RESULT skip security.passwords.telnet Port 23 not open on target device.
 RESULT skip security.passwords.ssh Port 22 not open on target device.
+RESULT skip security.passwords.telnet Port 23 not open on target device.
 RESULT fail security.passwords.http Was able to brute force using dictionary.
 RESULT fail security.passwords.https Was able to brute force using dictionary.
-RESULT fail security.passwords.telnet Was able to brute force using dictionary.
 RESULT fail security.passwords.ssh Was able to brute force using dictionary.
+RESULT fail security.passwords.telnet Was able to brute force using dictionary.
 RESULT pass security.passwords.http Was not able to brute force using dictionary.
 RESULT pass security.passwords.https Was not able to brute force using dictionary.
-RESULT pass security.passwords.telnet Was not able to brute force using dictionary.
 RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
+RESULT pass security.passwords.telnet Was not able to brute force using dictionary.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 dhcp requests 1 1 0 1
@@ -109,8 +109,8 @@ port-01 module_config modules
     "enabled": true
   },
   "password": {
-    "enabled": true,
-    "use_faux_dictionary": "true"
+    "dictionary_folder": "resources/faux",
+    "enabled": true
   },
   "switch": {
     "enabled": true,
@@ -159,8 +159,8 @@ port-02 module_config modules
     "enabled": false
   },
   "password": {
-    "enabled": true,
-    "use_faux_dictionary": "true"
+    "dictionary_folder": "resources/faux",
+    "enabled": true
   },
   "switch": {
     "enabled": true
