@@ -9,8 +9,6 @@ test_request = str(arguments[1])
 cap_pcap_file = str(arguments[2])
 device_address = str(arguments[3])
 
-config_file_location = "/config/inst/config.conf"
-
 if test_request == 'protocol.app_min_send':
     module_config = str(arguments[4])
     infastructure_excludes = str(arguments[5])
@@ -36,6 +34,7 @@ tcpdump_display_ntp_packets = 'tcpdump dst port 123 -r ' + cap_pcap_file
 tcpdump_display_eapol_packets = 'tcpdump port 1812 or port 1813 or port 3799 -r ' + cap_pcap_file
 tcpdump_display_broadcast_packets = 'tcpdump broadcast and src host ' + device_address + ' -r ' + cap_pcap_file
 
+system_conf_file = "/config/inst/system.conf"
 tcpdump_date_format = "%Y-%m-%d %H:%M:%S.%f" 
 min_send_seconds = 300
 min_send_duration = "5 minutes"
@@ -58,7 +57,7 @@ def add_packet_count_to_report(packet_type, packet_count):
     write_report("{i} {t} Packets recieved={p}\n".format(i=ignore, t=packet_type, p=packet_count))
 
 def add_packet_info_to_report(packets_received):
-    packet_list = packets_received.rstrip().split("\n")
+    packet_list = packets_received.strip().split("\n")
     outnum = min(len(packet_list), max_packets_in_report)
     for x in range(0, outnum):
         write_report("{i} {p}\n".format(i=ignore, p=packet_list[x]))
@@ -109,10 +108,25 @@ def decode_json_config(config_file, map_name, action):
                             remove_from_port_list(port_map)
 
 def get_scan_length(config_file):
+    """ Gets length of the monitor.pcap scan
+
+    Reads the system.conf file to and returns the length of the monitor_scan
+
+    Args:
+        config_file: Location of system.conf file within test container
+
+    Returns:
+        Length of monitor scan in seconds
+        
+        If not defined, or system.conf could not be found
+        returns false
+    """
+
     scan_length = False
     try:
         with open(config_file) as file:
             for line in file:
+                print(line)
                 match = re.search('^monitor_scan_sec=(\d+)', line)
                 if match:
                     matched_length = int(match.group(1))
@@ -124,13 +138,23 @@ def get_scan_length(config_file):
         return False
 
 def test_connection_min_send():
-    scan_length = get_scan_length('config.conf')
-    print(scan_length)
-    min_send_delta = datetime.timedelta(microseconds=min_send_seconds)
-    
+    """ Runs the connection.min_send test
+
+    Tests if the device sends data packets of any type (inc data, NTP, etc)
+    within a period of 5 minutes by looking through the monitor.pcap file
+
+    The length of test can be configured using the min_send_seconds variable
+    at the start of the file
+    """
+
+    # Get scan length
+    scan_length = get_scan_length(system_conf_file)
+    min_send_delta = datetime.timedelta(seconds=min_send_seconds)
     min_send_pass = False
+
+    # The test scans the monitor.pcap, so if it's not found skip
     if not scan_length:
-        add_summary("Monitor scan not running, please configure and run test again") 
+        add_summary("DAQ monitor scan not running, test skipped") 
         return 'skip'
 
     arp_shell_result = shell_command_with_result(tcpdump_display_arp_packets, 0, False)
@@ -140,33 +164,37 @@ def test_connection_min_send():
     
     shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     all_packets = shell_result.splitlines()
-    i=0
-    # Loop through tcpdump result and measure the time between packets
-    for packet in all_packets:
-        i = i + 1 
-        # datetime is the first 26 characters 
+
+    # Loop through tcpdump result and measure the time between succesive packets
+    for i, packet in enumerate(all_packets):
+        # datetime is the first 26 characters of the line
         packet_time = datetime.datetime.strptime(packet[:26], tcpdump_date_format) 
-        if i == 1:
+
+        if i == 0:
             previous_packet_time = packet_time
             continue
+            
         delta = packet_time - previous_packet_time
         if delta < min_send_delta:
             min_send_pass = True
             break
+
         previous_packet_time = packet_time 
 
     add_packet_info_to_report(shell_result)
+
     if not min_send_pass:
         if scan_length > min_send_seconds:
-            add_summary('Data packets were not recieved at at frequency greater than ' + 
-                min_send_duration)
-            return('fail')
+            add_summary('Data packets were not sent at a frequency less than ' 
+                + min_send_duration)
+            return 'fail'
         else:
-            add_summary('Please configure DAQ monitor scan to be greater than ' +
-                min_send_duration)
-            return('skip')
+            add_summary('Please set DAQ monitor scan to be greater than '
+                + min_send_duration)
+            return 'skip'
     
-    add_summary('Data packets recieved at frequency of than ' + min_send_duration)
+    add_summary('Data packets were sent at a frequency of less than ' 
+        + min_send_duration)
     return 'pass'
 
 def test_connection_dhcp_long():
@@ -248,8 +276,6 @@ elif test_request == 'communication.type.broadcast':
 elif test_request == 'network.ntp.support':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support))
     result = test_ntp_support()
-
-result=test_connection_min_send()
 
 write_report("RESULT {r} {t} {s}\n".format(r=result, t=test_request, s=summary_text.strip()))
 
