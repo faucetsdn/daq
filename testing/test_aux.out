@@ -2,6 +2,18 @@ Running testing/test_aux.sh
 Aux Tests
 Lint checks
 check_style exit code 0
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping No local IP has been set, check system config
+RESULT pass base.target.ping target reached
+RESULT skip base.startup.dns No dns traffic detected
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping No local IP has been set, check system config
+RESULT pass base.target.ping target reached
+RESULT fail base.startup.dns Invalid DNS server address
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping No local IP has been set, check system config
+RESULT pass base.target.ping target reached
+RESULT pass base.startup.dns Correct DNS server address
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 RESULT info protocol.bacnet.version Protocol version: 1
@@ -81,6 +93,9 @@ port-01 module_config modules
   "macoui": {
     "enabled": true
   },
+  "manual": {
+    "enabled": true
+  },
   "network": {
     "enabled": true
   },
@@ -126,6 +141,9 @@ port-02 module_config modules
   "macoui": {
     "enabled": true,
     "timeout_sec": 1
+  },
+  "manual": {
+    "enabled": true
   },
   "network": {
     "enabled": true

@@ -96,7 +96,11 @@ else
     # dhclient relies on systemd to update resolv.conf -- but this setup does
     # not use systemd, so get all hacky and update manually.
     function update_dns {
-        dhcp_dns=$(fgrep DNS= /run/systemd/resolved.conf.d/isc-dhcp-v4-$intf_name.conf)
+        if [ -n "${options[opendns]}" ]; then
+            dhcp_dns=8.8.8.8
+        else
+            dhcp_dns=$(fgrep DNS= /run/systemd/resolved.conf.d/isc-dhcp-v4-$intf_name.conf)
+        fi
         echo nameserver ${dhcp_dns#DNS=} > /tmp/resolv.conf
         if ! diff /tmp/resolv.conf /etc/resolv.conf; then
             echo Updating resolv.conf with $dhcp_dns
