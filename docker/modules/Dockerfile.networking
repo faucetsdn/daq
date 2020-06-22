@@ -5,9 +5,11 @@
 
 FROM daqf/aardvark:latest
 
-RUN $AG update && $AG install dnsmasq ethtool iptables netcat python
+RUN $AG update && $AG install dnsmasq ethtool iptables netcat ntp python
 
 COPY docker/include/networking_scripts/* ./
+RUN mkdir -p /etc
+COPY docker/include/etc/ntp.conf /etc
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump

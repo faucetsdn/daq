@@ -24,7 +24,7 @@ FROM daqf/aardvark:latest
 RUN $AG update && $AG install openjdk-8-jre
 RUN $AG update && $AG install openjdk-8-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
-    python ifupdown openssl ssh nano apache2-utils
+    python ifupdown openssl ssh nano apache2-utils ntpdate
 
 # Additional OS dependencies
 RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx

@@ -86,6 +86,22 @@ echo RESULT $local_status base.target.ping $summary %% $TARGET_IP | tee -a $RESU
 echo | tee -a $MONO_LOG
 echo Done with basic connectivity tests | tee -a $MONO_LOG
 
+echo Checking startup NTP
+ntp_target=${TARGET_IP%.*}.2
+ntp_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 123 | wc -l`
+ntp_proper=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 123 and dst host $ntp_target | wc -l`
+if [ "$ntp_request" == 0 ]; then
+    ntp_result=skip
+    ntp_summary="No NTP traffic detected"
+elif [ "$ntp_proper" == 0 ]; then
+    ntp_result=fail
+    ntp_summary="Invalid NTP server address"
+else
+    ntp_result=pass
+    ntp_summary="Correct NTP server address"
+fi
+echo RESULT $ntp_result base.startup.ntp $ntp_summary %% NTP server $ntp_target | tee -a $RESULT_LINES
+
 echo Checking startup DNS activity...
 dns_target=${TARGET_IP%.*}.2
 dns_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 | wc -l`

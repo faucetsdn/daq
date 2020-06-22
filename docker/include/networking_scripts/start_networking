@@ -30,9 +30,10 @@ subnet=$((RANDOM % 99 + 1))
 echo Configuring with subnet 10.20.$subnet.XX
 echo dhcp-range=10.20.$subnet.100,10.20.$subnet.254 >> /etc/dnsmasq.conf
 
-# Use ourself as the DNS server explicitly specified
+# Use ourself as the DNS and NTP server explicitly specified
 ip addr add 10.20.$subnet.2 dev $LOCAL_IF
 echo dhcp-option=6,10.20.$subnet.2 >> /etc/dnsmasq.conf
+echo dhcp-option=42,10.20.$subnet.2 >> /etc/dnsmasq.conf
 
 if ! ip addr show dev $LOCAL_IF | fgrep -q 'inet '; then
   echo Assigning gateway address 10.20.$subnet.1/16
@@ -40,6 +41,9 @@ if ! ip addr show dev $LOCAL_IF | fgrep -q 'inet '; then
 fi
 
 echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
+
+# Start the NTP server
+service ntp start
 
 echo Blocking for all eternity.
 ./autorestart_dnsmasq
