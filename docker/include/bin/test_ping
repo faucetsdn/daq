@@ -70,14 +70,6 @@ else
     echo RESULT skip base.switch.ping No local IP has been set, check system config | tee -a $RESULT_LINES
 fi
 
-ping_runtime=/config/port/ping_runtime.sh
-if [ -f $ping_runtime ]; then
-    echo Executing $ping_runtime
-    source $ping_runtime
-else
-    echo $ping_runtime not found.
-fi
-
 # First ping might fail b/c of warm-up delays.
 summary=""
 local_status=pass
@@ -94,10 +86,36 @@ echo RESULT $local_status base.target.ping $summary %% $TARGET_IP | tee -a $RESU
 echo | tee -a $MONO_LOG
 echo Done with basic connectivity tests | tee -a $MONO_LOG
 
+echo Checking startup DNS activity...
+dns_target=${TARGET_IP%.*}.2
+dns_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 | wc -l`
+dns_proper=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 and dst host $dns_target | wc -l`
+if [ "$dns_request" == 0 ]; then
+    dns_result=skip
+    dns_summary="No dns traffic detected"
+elif [ "$dns_proper" == 0 ]; then
+    dns_result=fail
+    dns_summary="Invalid DNS server address"
+else
+    dns_result=pass
+    dns_summary="Correct DNS server address"
+fi
+echo RESULT $dns_result base.startup.dns $dns_summary %% DNS server $dns_target | tee -a $RESULT_LINES
+
+
 write_out_monolog $REPORT_FILE \
                   $MANIFEST \
                   $MONO_LOG \
                   $RESULT_LINES
+
+
+ping_runtime=/config/port/ping_runtime.sh
+if [ -f $ping_runtime ]; then
+    echo Executing $ping_runtime
+    source $ping_runtime
+else
+    echo $ping_runtime not found.
+fi
 
 echo Critical module status is $status
 [ "$status" == pass ]
