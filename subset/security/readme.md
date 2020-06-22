@@ -45,7 +45,7 @@ The functional test code is included in the `tlstest/src/main/java` folder.
  - skip -> If no connection to the device can be established.
  
 ## test_password
-The password test runs a dictionary brute force on protocols HTTP, HTTPS, SSH and Telnet (with default ports) to check if the device has changed login credentials from defaults to a more secure combination.
+The password test runs a dictionary brute force on protocols HTTP, HTTPS, SSH and Telnet to check if the device has changed login credentials from defaults to a more secure combination.
 
 ### Testing Procedure:
 1. Use Nmap tool to check if needed port is open, and whether the target host is down.
@@ -59,4 +59,17 @@ The password test runs a dictionary brute force on protocols HTTP, HTTPS, SSH an
    - Target protocol is down.
    - HTTP server does not have authentication.
    - Brute force tool related issues such as disconnect, missing parameters etc.
-
+   
+### Available Configurations:
+The password test can be run from DAQ without specifying any further configurations, but it is possible to tweak these to your needs by modifying the password field in your local copy of module_config.json to have the following, for example:
+```
+# Note these are the default values used by the password test, regardless of whether you have set them in this file or not.
+"password": {
+      "enabled": true,
+      "dictionary_folder": "resources/default",  # Which folder to use. (Either resources/default for full version, or resources/faux for debug purposes)
+      "http_port": 80,  # Port to use when brute forcing HTTP
+      "https_port": 443,  # Port to use when brute forcing HTTPS
+      "ssh_port": 22,  # Port to use when brute forcing SSH
+      "telnet_port": 23  # Port to use when brute forcing Telnet
+    }
+```
