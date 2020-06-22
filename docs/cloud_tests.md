@@ -23,11 +23,11 @@ Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet,
       "enabled": true
     }
 ```
-4. `site_path` config needs to point to a site definition directory, or defaults to `local/site`.
+* `site_path` config needs to point to a site definition directory, or defaults to `local/site`.
 This contains all the site-specific information about devices needed for testing.
-5. `{site_path}/mac_addrs/{mac_addr}/module_config.json` needs to have a `device_id` defined, e.g.
+* `{site_path}/mac_addrs/{mac_addr}/module_config.json` needs to have a `device_id` defined, e.g.
 as in `resources/test_site/mac_addrs/3c5ab41e8f0b/module_config.json`.
-6. The GCP IoT Core setup needs to have a proper registry and device configred. This can either
+* The GCP IoT Core setup needs to have a proper registry and device configred. This can either
 be done manually or using the [registrar tool](registrar.md) tool.
 
 ## Integration Testing
