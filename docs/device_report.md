@@ -551,13 +551,13 @@ RESULT skip cloud.udmi.system No device id
 
 ```
 --------------------
-manual.test.travis
+manual.test.name
 --------------------
 
 --------------------
 No additional information provided
 --------------------
-RESULT pass manual.test.travis Manual test - for testing
+RESULT pass manual.test.name Manual test - for testing
 
 ```
 
