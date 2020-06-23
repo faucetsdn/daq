@@ -27,9 +27,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.stream.Collectors;
 import daq.usi.ResponseHandler;
 import daq.usi.SwitchController;
+import java.util.stream.Collectors;
 
 
 public class Cisco9300 extends SwitchController {

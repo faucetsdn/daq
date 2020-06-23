@@ -55,10 +55,11 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
   protected boolean debug;
 
   /**
+   * Telnet Client.
    * @param remoteIpAddress switch ip address
    * @param remotePort      telent port
    * @param interrogator    switch specific switch controller
-   * @param debug
+   * @param debug For more verbose output.
    */
   public SwitchTelnetClientSocket(
       String remoteIpAddress, int remotePort, SwitchController interrogator, boolean debug) {
@@ -315,6 +316,9 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
     }
   }
 
+  /**
+   * Closes telnet connection.
+   */
   public void disposeConnection() {
     try {
       telnetClient.disconnect();

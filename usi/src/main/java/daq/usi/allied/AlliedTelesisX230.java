@@ -28,9 +28,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import daq.usi.ResponseHandler;
 import daq.usi.SwitchController;
+import java.util.stream.Collectors;
+
 
 public class AlliedTelesisX230 extends SwitchController {
   private static final String[] powerExpected =
@@ -66,6 +67,15 @@ public class AlliedTelesisX230 extends SwitchController {
     this(remoteIpAddress, telnetPort, user, password, false);
   }
 
+  /**
+   * ATX230 Switch Controller.
+   *
+   * @param remoteIpAddress switch ip address
+   * @param telnetPort      switch telnet port
+   * @param user            switch username
+   * @param password        switch password
+   * @param debug for verbose output
+   */
   public AlliedTelesisX230(
       String remoteIpAddress,
       int telnetPort,
@@ -99,7 +109,8 @@ public class AlliedTelesisX230 extends SwitchController {
   }
 
   /**
-   * Port toggle commands
+   * Port toggle commands.
+   *
    * @param interfacePort port number
    * @param enabled       for bringing up/down interfacePort
    * @return commands

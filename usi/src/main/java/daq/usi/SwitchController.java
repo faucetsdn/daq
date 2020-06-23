@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public abstract class SwitchController implements Runnable {
   /**
    * Terminal Prompt ends with '#' when enabled, '>' when not enabled.

@@ -47,13 +47,11 @@ public class UsiServer {
   }
 
   /**
-   * Main method
-   * @param args
-   * @throws Exception
-   * @throws IOException
-   * @throws InterruptedException
+   * Main method.
+   * @param args not used.
+   * @throws Exception Maybe a refactor is needed to throw more specific exceptions.
    */
-  public static void main(String[] args) throws Exception, IOException, InterruptedException {
+  public static void main(String[] args) throws Exception {
     final UsiServer server = new UsiServer();
     server.start();
     server.blockUntilShutdown();

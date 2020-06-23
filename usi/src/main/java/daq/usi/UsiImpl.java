@@ -6,10 +6,10 @@ import grpc.SwitchActionResponse;
 import grpc.SwitchInfo;
 import grpc.USIServiceGrpc;
 import io.grpc.stub.StreamObserver;
-import java.util.HashMap;
-import java.util.Map;
 import daq.usi.allied.AlliedTelesisX230;
 import daq.usi.cisco.Cisco9300;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   private Map<String, SwitchController> switchControllers;
