@@ -47,10 +47,10 @@ RESULT skip security.passwords.http Port 80 not open on target device.
 RESULT skip security.passwords.https Port 443 not open on target device.
 RESULT skip security.passwords.ssh Port 22 not open on target device.
 RESULT skip security.passwords.telnet Port 23 not open on target device.
-RESULT fail security.passwords.http Was able to brute force using dictionary.
-RESULT fail security.passwords.https Was able to brute force using dictionary.
-RESULT fail security.passwords.ssh Was able to brute force using dictionary.
-RESULT fail security.passwords.telnet Was able to brute force using dictionary.
+RESULT skip security.passwords.http Unable to connect to host.
+RESULT skip security.passwords.https Unable to connect to host.
+RESULT skip security.passwords.ssh Unable to connect to host.
+RESULT skip security.passwords.telnet Unable to connect to host.
 RESULT pass security.passwords.http Was not able to brute force using dictionary.
 RESULT pass security.passwords.https Was not able to brute force using dictionary.
 RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
@@ -109,7 +109,7 @@ port-01 module_config modules
     "enabled": true
   },
   "password": {
-    "dictionary_folder": "resources/faux",
+    "dictionary_dir": "resources/faux",
     "enabled": true
   },
   "switch": {
@@ -159,7 +159,7 @@ port-02 module_config modules
     "enabled": false
   },
   "password": {
-    "dictionary_folder": "resources/faux",
+    "dictionary_dir": "resources/faux",
     "enabled": true
   },
   "switch": {
