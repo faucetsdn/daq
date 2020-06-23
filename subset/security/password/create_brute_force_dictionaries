@@ -2,27 +2,27 @@
 
 # A script to retrieve, and collate several raw brute force dictionaries into a colon separated file with format :username:password, and also to two separate username and password lists.
 #
-# Make sure this script is run in the password folder.
+# Make sure this script is run in the password directory.
 #
 # Usage ./create_brute_force_dictionaries
 
-RAW_DICTIONARY_FOLDER="resources/raw"
-DEFAULT_DICTIONARY_FOLDER="resources/default"
+RAW_DICTIONARY_DIR="resources/raw"
+DEFAULT_DICTIONARY_DIR="resources/default"
 
-MANUFACTURER_DEFAULTS_DICTIONARY="$RAW_DICTIONARY_FOLDER/manufacturer.csv"
-SSH_DICTIONARY="$RAW_DICTIONARY_FOLDER/ssh.txt"
-TELNET_DICTIONARY="$RAW_DICTIONARY_FOLDER/telnet.txt"
+MANUFACTURER_DEFAULTS_DICTIONARY="$RAW_DICTIONARY_DIR/manufacturer.csv"
+SSH_DICTIONARY="$RAW_DICTIONARY_DIR/ssh.txt"
+TELNET_DICTIONARY="$RAW_DICTIONARY_DIR/telnet.txt"
 
-OUTPUT_DICTIONARY="$DEFAULT_DICTIONARY_FOLDER/dictionary.txt"
-TMP_DICTIONARY="$DEFAULT_DICTIONARY_FOLDER/tmp_dictionary.txt"
-USERNAMES_LIST="$DEFAULT_DICTIONARY_FOLDER/usernames.txt"
-PASSWORDS_LIST="$DEFAULT_DICTIONARY_FOLDER/passwords.txt"
+OUTPUT_DICTIONARY="$DEFAULT_DICTIONARY_DIR/dictionary.txt"
+TMP_DICTIONARY="$DEFAULT_DICTIONARY_DIR/tmp_dictionary.txt"
+USERNAMES_LIST="$DEFAULT_DICTIONARY_DIR/usernames.txt"
+PASSWORDS_LIST="$DEFAULT_DICTIONARY_DIR/passwords.txt"
 
 # Retrieve the raw dictionary files from the gitlab source.
 # $1 Manufacturer dictionary
 # $2 SSH dictionary
 # $3 Telnet dictionary
-# $4 Raw folder to put the files in.
+# $4 Raw directory
 function retrieve_raw_dictionaries() {
   mkdir -p $4
 
@@ -35,9 +35,9 @@ function retrieve_raw_dictionaries() {
 }
 
 # Create the temporary and output dictionaries, and remove existing ones.
-# $1 Temporary dictionary file.
-# $2 Output dictionary file.
-# $3 Default dictionary folder to put the dictionaries in.
+# $1 Temporary dictionary file
+# $2 Output dictionary file
+# $3 Default dictionary directory
 function create_dictionary() {
   mkdir -p $3
 
@@ -122,10 +122,10 @@ function create_username_and_password_list_from_dictionary() {
 # Main function:
 
 echo Creating credential files...
-create_dictionary $TMP_DICTIONARY $OUTPUT_DICTIONARY $DEFAULT_DICTIONARY_FOLDER
+create_dictionary $TMP_DICTIONARY $OUTPUT_DICTIONARY $DEFAULT_DICTIONARY_DIR
 
 echo Retrieving raw dictionaries from sources
-retrieve_raw_dictionaries $MANUFACTURER_DEFAULTS_DICTIONARY $SSH_DICTIONARY $TELNET_DICTIONARY $RAW_DICTIONARY_FOLDER
+retrieve_raw_dictionaries $MANUFACTURER_DEFAULTS_DICTIONARY $SSH_DICTIONARY $TELNET_DICTIONARY $RAW_DICTIONARY_DIR
 
 echo Parsing CSV file...
 append_manufacturer_csv_to_output_dictionary $MANUFACTURER_DEFAULTS_DICTIONARY $TMP_DICTIONARY

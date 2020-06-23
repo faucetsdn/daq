@@ -66,7 +66,7 @@ The password test can be run from DAQ without specifying any further configurati
 # Note these are the default values used by the password test, regardless of whether you have set them in this file or not.
 "password": {
       "enabled": true,
-      "dictionary_folder": "resources/default",  # Which folder to use. (Either resources/default for full version, or resources/faux for debug purposes)
+      "dictionary_dir": "resources/default",  # Which directory to use. (Either resources/default for full version, or resources/faux for debug purposes)
       "http_port": 80,  # Port to use when brute forcing HTTP
       "https_port": 443,  # Port to use when brute forcing HTTPS
       "ssh_port": 22,  # Port to use when brute forcing SSH
