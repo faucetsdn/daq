@@ -21,6 +21,8 @@ import grpc.POEStatus;
 import grpc.POESupport;
 import grpc.Power;
 import grpc.SwitchActionResponse;
+import daq.usi.ResponseHandler;
+import daq.usi.SwitchController;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,8 +30,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import daq.usi.ResponseHandler;
-import daq.usi.SwitchController;
 import java.util.stream.Collectors;
 
 

@@ -5,9 +5,9 @@ import grpc.Power;
 import grpc.SwitchActionResponse;
 import grpc.SwitchInfo;
 import grpc.USIServiceGrpc;
-import io.grpc.stub.StreamObserver;
 import daq.usi.allied.AlliedTelesisX230;
 import daq.usi.cisco.Cisco9300;
+import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
 import java.util.Map;
 
