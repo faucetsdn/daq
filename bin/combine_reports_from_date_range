@@ -1,8 +1,0 @@
-#!/bin/bash -e
-
-ROOT=$(dirname $0)/..
-cd $ROOT
-
-source etc/config_base.sh
-
-PYTHONPATH=daq python3 bin/python/combine_reports_from_date_range.py $conf_file $@ 

@@ -1,5 +1,7 @@
 # Releasing Instructions
 
+These instructions assume that `faucetsdn/daq` is your git remote _origin_.
+
 * look through git log (`git log release_stable..HEAD --pretty=oneline`) and add new/interesting things to docs/changelog.md
 * e.g. `VERSION=1.3.0`
 * configure with `host_tests=config/modules/all.conf`
@@ -15,8 +17,10 @@ git status --porcelain
 * `git push`
 * `git tag -a $VERSION -m "$VERSION release"`
 * `git push --tags`
-* make sure your gcp setup is configured for bos-daq-testing
-* `firebase/deploy.sh`
+* `firebase/deploy.sh bos-daq-testing`
+* `git checkout release_testing && git reset --hard $VERSION`
+* `git push`
 * QA pass to make sure everything is ok.
+* `firebase/deploy.sh daq-qualification-labs`
 * `git checkout release_stable && git reset --hard $VERSION`
 * `git push`

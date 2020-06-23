@@ -2,6 +2,7 @@
 
 import copy
 import datetime
+import json
 import os
 import re
 import shutil
@@ -13,6 +14,7 @@ import jinja2
 import pypandoc
 import weasyprint
 
+import gcp
 import logger
 
 LOGGER = logger.get_logger('report')
@@ -44,16 +46,16 @@ class MdTable():
 
     def render(self):
         """returns a string for md"""
-        table_str = "%s\n%s\n" % (self._MARK.join(self.headers), self._header_separator)
-        return table_str + "\n".join([self._MARK.join(row) for row in self.rows])
+        table_str = '%s\n%s\n' % (self._MARK.join(self.headers), self._header_separator)
+        return table_str + '\n'.join([self._MARK.join(row) for row in self.rows]) + '\n'
 
 class ReportGenerator:
     """Generate a report for device qualification"""
 
-    _NAME_FORMAT = "report_%s_%s.%s"
+    _NAME_FORMAT = "report_%s_%s"
+    _SIMPLE_REPORT = "report"
     _REPORT_CSS_PATH = 'resources/setups/baseline/device_report.css'
     _REPORT_TMP_HTML_PATH = 'inst/last_report_out.html'
-    _SIMPLE_FORMAT = "device_report.%s"
     _TEST_SEPARATOR = "\n## %s\n"
     _TEST_SUBHEADER = "\n#### %s\n"
     _RESULT_REGEX = r'^RESULT (.*?)\s+(.*?)\s+([^%]*)\s*(%%.*)?$'
@@ -61,6 +63,7 @@ class ReportGenerator:
     _REPORT_COMPLETE = "Report complete"
     _DEFAULT_HEADER = "# DAQ scan report for device %s"
     _REPORT_TEMPLATE = "report_template.md"
+    _PATH_PREFIX = "report_path"
     _DEFAULT_CATEGORY = 'Other'
     _DEFAULT_EXPECTED = 'Other'
     _PRE_START_MARKER = "```"
@@ -78,32 +81,20 @@ class ReportGenerator:
         self._repitems = {}
         self._clean_mac = target_mac.replace(':', '')
         self._finalized = False
-        report_when = datetime.datetime.now(pytz.utc).replace(microsecond=0)
-        report_filename = self._NAME_FORMAT % (self._clean_mac,
-                                               report_when.isoformat().replace(':', ''), 'md')
-        report_filename_pdf = self._NAME_FORMAT % (self._clean_mac,
-                                                   report_when.isoformat().replace(':', ''), 'pdf')
-        self._start_time = report_when
-        self._filename = report_filename
-        report_base = os.path.join(tmp_base, 'reports')
-        if not os.path.isdir(report_base):
-            os.makedirs(report_base)
-        report_path = os.path.join(report_base, report_filename)
-        LOGGER.info('Creating report as %s', report_path)
-        report_path_pdf = os.path.join(report_base, report_filename_pdf)
-        LOGGER.info('Creating report as %s', report_path_pdf)
-        self.path = report_path
-        self.path_pdf = report_path_pdf
-        self._file = None
+        self._start_time = datetime.datetime.now(pytz.utc).replace(microsecond=0)
+        report_mark = self._start_time.isoformat().replace(':', '').replace('+0000', '')
+        self._report_name = self._NAME_FORMAT % (self._clean_mac, report_mark)
+        self._report_base = os.path.join(tmp_base, 'reports')
+        if not os.path.isdir(self._report_base):
+            os.makedirs(self._report_base)
+        self._report_prefix = os.path.join(self._report_base, self._report_name)
+        LOGGER.info('Writing report to %s.*', self._report_prefix)
 
         out_base = config.get('site_path', tmp_base)
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
-        if os.path.isdir(out_path):
-            self._alt_path = os.path.join(out_path, self._SIMPLE_FORMAT % 'md')
-            self._alt_path_pdf = os.path.join(out_path, self._SIMPLE_FORMAT % 'pdf')
-        else:
-            LOGGER.info('Device report path %s not found', out_path)
-            self._alt_path = None
+        self._alt_path = out_path if os.path.isdir(out_path) else None
+        self._alt_prefix = os.path.join(out_path, self._SIMPLE_REPORT) if out_path else None
+        LOGGER.info('Writing alternate report to %s.*', self._alt_prefix)
 
         self._all_results = None
         self._result_headers = list(self._module_config.get('report', {}).get('results', []))
@@ -112,15 +103,20 @@ class ReportGenerator:
         self._expecteds = {}
         self._categories = list(self._module_config.get('report', {}).get('categories', []))
 
+        self._file_md = None
+
+    def _write(self, msg=''):
+        self._file_md.write(msg)
+
     def _writeln(self, msg=''):
-        self._file.write(msg + '\n')
+        self._write(msg + '\n')
 
     def _append_file(self, input_path, add_pre=True):
         LOGGER.info('Copying test report %s', input_path)
         if add_pre:
             self._writeln(self._PRE_START_MARKER)
         with open(input_path, 'r') as input_stream:
-            shutil.copyfileobj(input_stream, self._file)
+            shutil.copyfileobj(input_stream, self._file_md)
         if add_pre:
             self._writeln(self._PRE_END_MARKER)
 
@@ -143,7 +139,7 @@ class ReportGenerator:
 
     def finalize(self):
         """Finalize this report"""
-        LOGGER.info('Finalizing report %s', self._filename)
+        LOGGER.info('Finalizing %s', self._report_name)
         assert not self._finalized, 'report already finalized'
         self._finalized = True
         self._module_config['clean_mac'] = self._clean_mac
@@ -152,16 +148,19 @@ class ReportGenerator:
         self._process_results()
         self._write_md_report()
         self._write_pdf_report()
-        if self._alt_path and self._alt_path_pdf:
-            LOGGER.info('Copying report to %s', self._alt_path)
-            shutil.copyfile(self.path, self._alt_path)
-            LOGGER.info('Also copying report to %s', self._alt_path_pdf)
-            shutil.copyfile(self.path_pdf, self._alt_path_pdf)
+        self._write_json_report()
+        LOGGER.info('Copying reports to %s.*', self._alt_prefix)
+        report_paths = {}
+        for extension in ['.md', '.pdf', '.json']:
+            if self._alt_path:
+                shutil.copyfile(self._report_prefix + extension, self._alt_prefix + extension)
+            report_paths.update({self._PATH_PREFIX + extension: self._report_prefix + extension})
+        return report_paths
 
-    def get_all_results(self):
-        """Get all processed results"""
-        assert self._finalized, 'report must be finalized'
-        return copy.deepcopy(self._all_results)
+    def _write_json_report(self):
+        json_path = self._report_prefix + '.json'
+        with open(json_path, 'w') as json_file:
+            json.dump(self._all_results, json_file)
 
     def _process_results(self):
         self._all_results = {"modules": {}}
@@ -181,27 +180,30 @@ class ReportGenerator:
                         result, test_name, extra = match.group(1), match.group(2), match.group(3)
                         self._accumulate_result(test_name, result, extra, module_name=module_name)
                         module_result["tests"][test_name] = self._results[test_name]
-        self._all_results["missing_tests"] = self._find_missing_test_results()
+        self._all_results['timestamp'] = gcp.get_timestamp()
+        self._all_results['missing_tests'] = self._find_missing_test_results()
 
     def _write_md_report(self):
         """Generate the markdown report to be copied into /inst and /local"""
-        with open(self.path, "w") as _file:
-            self._file = _file
+        with open(self._report_prefix + '.md', "w") as md_file:
+            self._file_md = md_file
             self._append_report_header()
             self._write_test_summary()
             self._write_repitems()
             self._writeln(self._TEST_SEPARATOR % self._REPORT_COMPLETE)
-        self._file = None
+            self._file_md = None
 
     def _write_pdf_report(self):
         """Convert the markdown report to html, then pdf"""
         LOGGER.info('Generating HTML for writing pdf report...')
-        pypandoc.convert_file(self.path, 'html',
+        md_file = self._report_prefix + '.md'
+        pypandoc.convert_file(md_file, 'html',
                               outputfile=self._REPORT_TMP_HTML_PATH,
                               extra_args=['-V', 'geometry:margin=1.5cm', '--columns', '1000'])
         LOGGER.info('Metamorphosising HTML to PDF...')
-        weasyprint.HTML(self._REPORT_TMP_HTML_PATH) \
-            .write_pdf(self.path_pdf, stylesheets=[weasyprint.CSS(self._REPORT_CSS_PATH)])
+        html_writer = weasyprint.HTML(self._REPORT_TMP_HTML_PATH)
+        pdf_file = self._report_prefix + '.pdf'
+        html_writer.write_pdf(pdf_file, stylesheets=[weasyprint.CSS(self._REPORT_CSS_PATH)])
 
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
@@ -271,7 +273,7 @@ class ReportGenerator:
         table = MdTable(self._CATEGORY_HEADERS)
         for row in rows:
             table.add_row(row)
-        self._writeln(table.render())
+        self._write(table.render())
 
     def _write_expected_table(self):
         table = MdTable([self._EXPECTED_HEADER, *self._result_headers])
@@ -281,14 +283,14 @@ class ReportGenerator:
                 expected = self._expecteds.get(exp_name, {})
                 table_row.append(str(expected.get(result, 0)))
             table.add_row(table_row)
-        self._writeln(table.render())
+        self._write(table.render())
 
     def _write_result_table(self):
         table = MdTable(self._SUMMARY_HEADERS)
         for _, result in sorted(self._results.items()):
             table.add_row([result["result"], result["test_name"], result["category"],\
                     result["expected"], result["result_description"]])
-        self._writeln(table.render())
+        self._write(table.render())
 
     def _find_missing_test_results(self):
         missing = []
@@ -322,7 +324,7 @@ class ReportGenerator:
                     table = MdTable(["Attribute", "Value"])
                     for key, value in config.items():
                         table.add_row((key, str(value)))
-                    self._writeln(table.render())
+                    self._write(table.render())
             if result_dict.get(ResultType.EXCEPTION):
                 writeln(self._TEST_SUBHEADER % "Exceptions")
                 writeln(result_dict[ResultType.EXCEPTION])

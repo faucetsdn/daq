@@ -44,7 +44,6 @@ public class Registrar {
       .setSerializationInclusion(Include.NON_NULL);
   public static final String ALL_MATCH = "";
 
-  private String gcpCredPath;
   private CloudIotManager cloudIotManager;
   private File siteConfig;
   private final Map<String, Schema> schemas = new HashMap<>();
@@ -54,15 +53,16 @@ public class Registrar {
   private Map<String, LocalDevice> localDevices;
   private File summaryFile;
   private ExceptionMap blockErrors;
+  private String projectId;
 
   public static void main(String[] args) {
     Registrar registrar = new Registrar();
     try {
       if (args.length < 3 || args.length > 4) {
-        throw new IllegalArgumentException("Args: [gcp_cred_file] [site_dir] [schema_file] (device_regex)");
+        throw new IllegalArgumentException("Args: [project_id] [site_dir] [schema_file] (device_regex)");
       }
+      registrar.setProjectId(args[0]);
       registrar.setSchemaBase(args[2]);
-      registrar.setGcpCredPath(args[0]);
       registrar.setSiteConfigPath(args[1]);
       registrar.processDevices(args.length > 3 ? args[3] : ALL_MATCH);
       registrar.writeErrors();
@@ -107,10 +107,10 @@ public class Registrar {
     summaryFile.delete();
     File cloudIotConfig = new File(siteConfig, ConfigUtil.CLOUD_IOT_CONFIG_JSON);
     System.err.println("Reading Cloud IoT config from " + cloudIotConfig.getAbsolutePath());
-    cloudIotManager = new CloudIotManager(new File(gcpCredPath), cloudIotConfig, schemaName);
-    pubSubPusher = new PubSubPusher(new File(gcpCredPath), cloudIotConfig);
-    System.err.println(String.format("Working with project %s registry %s",
-        cloudIotManager.getProjectId(), cloudIotManager.getRegistryId()));
+    cloudIotManager = new CloudIotManager(projectId, cloudIotConfig, schemaName);
+    pubSubPusher = new PubSubPusher(projectId, cloudIotConfig);
+    System.err.println(String.format("Working with project %s registry %s/%s",
+        cloudIotManager.getProjectId(), cloudIotManager.getCloudRegion(), cloudIotManager.getRegistryId()));
   }
 
   private void processDevices(String deviceRegex) {
@@ -120,8 +120,12 @@ public class Registrar {
       List<Device> cloudDevices = fetchDeviceList(devicePattern);
       Set<String> extraDevices = cloudDevices.stream().map(Device::getId).collect(toSet());
       for (String localName : localDevices.keySet()) {
-        extraDevices.remove(localName);
         LocalDevice localDevice = localDevices.get(localName);
+        if (!localDevice.hasValidMetadata()) {
+          System.err.println("Skipping (invalid) " + localName);
+          continue;
+        }
+        extraDevices.remove(localName);
         try {
           updateCloudIoT(localDevice);
           localDevice.writeConfigFile();
@@ -233,7 +237,6 @@ public class Registrar {
   private void writeNormalized(Map<String, LocalDevice> localDevices) {
     for (String deviceName : localDevices.keySet()) {
       try {
-        System.err.println("Writing normalized device " + deviceName);
         localDevices.get(deviceName).writeNormalized();
       } catch (Exception e) {
         throw new RuntimeException("While writing normalized " + deviceName, e);
@@ -276,8 +279,8 @@ public class Registrar {
     return localDevices;
   }
 
-  private void setGcpCredPath(String gcpConfigPath) {
-    this.gcpCredPath = gcpConfigPath;
+  private void setProjectId(String projectId) {
+    this.projectId = projectId;
   }
 
   private void setSchemaBase(String schemaBasePath) {

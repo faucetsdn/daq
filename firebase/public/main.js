@@ -173,7 +173,7 @@ function getResultStatus(result) {
 }
 
 function handleFileLinks(row, runid, result) {
-  const paths = Object.keys(result).filter(key => key.indexOf("path") >= 0);
+  const paths = Object.keys(result).filter(key => key.indexOf("_path") >= 0);
   if (paths.length) {
     const col = result.name;
     paths.forEach((path) => {

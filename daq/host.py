@@ -4,7 +4,6 @@ import functools
 import os
 import shutil
 import time
-import json
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -338,19 +337,13 @@ class ConnectedHost:
         self._dhcp_listeners.append(callback)
 
     def _finalize_report(self):
-        self._report.finalize()
-        json_path = self._report.path + ".json"
-        with open(json_path, 'w') as json_file:
-            json.dump(self._report.get_all_results(), json_file)
-        remote_paths = {}
-        remote_paths["report_path"] = self._upload_file(self._report.path)
-        remote_paths["json_path"] = self._upload_file(json_path)
-        remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
+        report_paths = self._report.finalize()
         if self._trigger_path:
-            remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
-        self.record_result('terminate', state=MODE.TERM, **remote_paths)
+            report_paths.update({'trigger_path': self._trigger_path})
+        LOGGER.info('Finalized with reports %s', list(report_paths.keys()))
+        report_blobs = {name: self._upload_file(path) for name, path in report_paths.items()}
+        self.record_result('terminate', state=MODE.TERM, **report_blobs)
         self._report = None
-        return remote_paths
 
     def terminate(self, reason, trigger=True):
         """Terminate this host"""
@@ -539,7 +532,7 @@ class ConnectedHost:
                 self.timeout_handler = self._aux_module_timeout_handler
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self.test_name = None
-                self.record_result('finish', state=MODE.FINE, report=self._report.path)
+                self.record_result('finish', state=MODE.FINE)
         except Exception as e:
             LOGGER.error('Target port %d start error: %s', self.target_port, e)
             self._state_transition(_STATE.ERROR)

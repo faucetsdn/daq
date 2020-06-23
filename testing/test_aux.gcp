@@ -11,6 +11,12 @@ inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "ddf813e3"
 inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf82176c"
 inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "030193c8"
 inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "f701f900"
+RESULT skip cloud.udmi.state No device id
 RESULT skip cloud.udmi.pointset No device id
-RESULT pass cloud.udmi.pointset Schema validated
+RESULT skip cloud.udmi.system No device id
+RESULT fail cloud.udmi.state No result found
+RESULT pass cloud.udmi.pointset Payload successfully validated
+RESULT pass cloud.udmi.system Payload successfully validated
+RESULT fail cloud.udmi.state No result found
 RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted
+RESULT pass cloud.udmi.system Payload successfully validated

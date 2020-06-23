@@ -47,15 +47,12 @@ public class MqttPublisher {
   private static final String CONFIG_UPDATE_TOPIC_FMT = "/devices/%s/config";
   private static final String ERRORS_TOPIC_FMT = "/devices/%s/errors";
   private static final String UNUSED_ACCOUNT_NAME = "unused";
-  private static final int INITIALIZE_TIME_MS = 2000;
+  private static final int INITIALIZE_TIME_MS = 20000;
 
   private static final String MESSAGE_TOPIC_FORMAT = "/devices/%s/%s";
   private static final String BROKER_URL_FORMAT = "ssl://%s:%s";
   private static final String CLIENT_ID_FORMAT = "projects/%s/locations/%s/registries/%s/devices/%s";
-  private static final int ONE_HOUR_MS = 1000 * 60 * 60;
-  private static final int CACHE_EXPIRE_MS = ONE_HOUR_MS;
   private static final int PUBLISH_THREAD_COUNT = 10;
-  private static final int CONNECTION_LOCK_TIMEOUT_MS = 30000;
   private static final String HANDLER_KEY_FORMAT = "%s/%s";
 
   private final Semaphore connectionLock = new Semaphore(1);
@@ -169,7 +166,7 @@ public class MqttPublisher {
 
   private MqttClient connectMqttClient(String deviceId) {
     try {
-      if (!connectionLock.tryAcquire(CONNECTION_LOCK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+      if (!connectionLock.tryAcquire(INITIALIZE_TIME_MS, TimeUnit.MILLISECONDS)) {
         throw new RuntimeException("Timeout waiting for connection lock");
       }
       MqttClient mqttClient = newMqttClient(deviceId);
@@ -182,17 +179,12 @@ public class MqttPublisher {
       mqttClient.setTimeToWait(INITIALIZE_TIME_MS);
 
       MqttConnectOptions options = new MqttConnectOptions();
-      // Note that the the Google Cloud IoT only supports MQTT 3.1.1, and Paho requires that we
-      // explicitly set this. If you don't set MQTT version, the server will immediately close its
-      // connection to your device.
       options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
       options.setUserName(UNUSED_ACCOUNT_NAME);
       options.setMaxInflight(PUBLISH_THREAD_COUNT * 2);
+      options.setConnectionTimeout(INITIALIZE_TIME_MS);
 
-      // generate the jwt password
-      options.setPassword(
-          createJwt(configuration.projectId, configuration.keyBytes, configuration.algorithm)
-              .toCharArray());
+      options.setPassword(createJwt());
 
       mqttClient.connect(options);
 
@@ -203,6 +195,11 @@ public class MqttPublisher {
     } finally {
       connectionLock.release();
     }
+  }
+
+  private char[] createJwt() throws Exception {
+    return createJwt(configuration.projectId, configuration.keyBytes, configuration.algorithm)
+        .toCharArray();
   }
 
   private String getClientId(String deviceId) {
@@ -301,29 +298,6 @@ public class MqttPublisher {
           onError.accept(e);
         }
       }
-    }
-  }
-
-  private class ClientLoader extends CacheLoader<String, MqttClient>  {
-    @Override
-    public MqttClient load(String deviceId) throws Exception {
-      LOG.info("Creating new publisher-client for " + deviceId);
-      return newMqttClient(deviceId);
-    }
-  }
-
-  private void clientExpired(RemovalNotification<String, MqttClient> notification) {
-    try {
-      LOG.info("Expired publisher-client for " + notification.getKey());
-      expiredCounter.incrementAndGet();
-      MqttClient mqttClient = notification.getValue();
-      if (mqttClient.isConnected()) {
-        LOG.info("Closing connected MqttClient for " + mqttClient.getClientId());
-        mqttClient.disconnect();
-        mqttClient.close();
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("While closing client " + notification.getKey(), e);
     }
   }
 

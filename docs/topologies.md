@@ -6,7 +6,7 @@ The network topology is auto-generated based on settings in the specified `local
 on startup. Various templates are availabile in `config/system/`:
 * `config/system/base.yaml`: Single faux-device internal test setup.
 * `config/system/multi.conf`: Test setup with 3 faux-devices.
-* `config/system/ext.conf`: Setup for using an external switch (physical or simulated).
+* `config/system/ext.yaml`: Setup for using an external switch (physical or simulated).
 
 The system will generate the `inst/faucet.yaml` file, which then triggers the configuration
 of the underlying OpenFlow system. General network debugging information can be found in

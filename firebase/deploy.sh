@@ -1,20 +1,17 @@
 #!/bin/bash -e
 
+if [ $# != 1 ]; then
+    echo Usage: $0 [project_id]
+    false
+fi
+
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
 source etc/config_base.sh
 
-if [ -z "$gcp_cred" ]; then
-    echo gcp_cred not defined in system configuration.
-    false
-fi
-
-PROJECT=`jq -r .project_id $gcp_cred`
-if [ -z "$PROJECT" ]; then
-    echo project_id not extracted from $gcp_cred.
-    false
-fi
+PROJECT=$1
+shift
 
 CFILE=$PROJECT.js
 

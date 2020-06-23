@@ -24,7 +24,7 @@ ext_addr=$switch_setup_ip_addr
 
 echo Running switch setup...
 
-if [ -n "$ext_ctrl" ]; then
+if [ "$switch_setup_model" != FAUX_SWITCH ]; then
     cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
     if [ -z "$cplane_mac" ]; then
         echo Could not extract mac address from iface $ext_ctrl.
@@ -78,8 +78,8 @@ if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
     false
 fi
 
-if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
-    echo Creating daq-switch, because no control plane interface defined
+if [ "$switch_setup_model" == FAUX_SWITCH ]; then
+    echo Creating daq-switch as per FAUX_SWITCH switch model.
 
     docker rm -f daq-switch || true
     cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daqf/switch)
@@ -97,6 +97,9 @@ if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
     echo DAQ autoclean docker rm -f daq-switch
     echo DAQ autoclean ip link del $ctrl_swa
 
+    if [ -n "$ext_ctrl" ]; then
+        echo Ignoring interface $ext_ctrl in favor of $ctrl_swa
+    fi
     ext_ctrl=$ctrl_swa
 else
     sudo ip link set $ext_ctrl up

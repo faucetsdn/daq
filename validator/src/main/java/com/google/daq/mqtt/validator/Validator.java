@@ -55,6 +55,7 @@ public class Validator {
   private static final String METADATA_REPORT_JSON = "metadata_report.json";
   private static final String DEVICE_REGISTRY_ID_KEY = "deviceRegistryId";
   private static final String UNKNOWN_SCHEMA_DEFAULT = "unknown";
+  private static final String POINTSET_TYPE = "pointset";
   private FirestoreDataSink dataSink;
   private File schemaRoot;
   private String schemaSpec;
@@ -261,12 +262,14 @@ public class Validator {
         updated = false;
       } else if (expectedDevices.containsKey(deviceId)) {
         try {
-          ReportingDevice.PointsetMessage pointsetMessage =
-              OBJECT_MAPPER.convertValue(message, ReportingDevice.PointsetMessage.class);
-          updated = !reportingDevice.hasBeenValidated();
-          reportingDevice.validateMetadata(pointsetMessage);
+          if (POINTSET_TYPE.equals(schemaId)) {
+            ReportingDevice.PointsetMessage pointsetMessage =
+                OBJECT_MAPPER.convertValue(message, ReportingDevice.PointsetMessage.class);
+            updated = !reportingDevice.hasBeenValidated();
+            reportingDevice.validateMetadata(pointsetMessage);
+          }
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          e.printStackTrace();
           OBJECT_MAPPER.writeValue(errorFile, e.getMessage());
           reportingDevice.addError(e);
         }
@@ -275,7 +278,7 @@ public class Validator {
       }
 
       if (!reportingDevice.hasError()) {
-        System.out.println("Success validating device " + deviceId);
+        System.out.println(String.format("Success validating %s/%s", deviceId, schemaId));
       }
 
       return updated;
