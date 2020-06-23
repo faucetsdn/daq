@@ -30,7 +30,6 @@ When registering or updating a device, the Registrar manipulates a few key piece
 information:
 * Auth keys: Public authentiation keys for the device.
 * Metadata: Various information about a device (e.g. site-code, location in the building).
-* Gateway Config: A proxy-mode device's gateway settings and binding.
 
 This information is sourced from a few key files:
 
@@ -43,24 +42,80 @@ Generated private key for device (used on-device).
 
 ## Sample Output
 
-<pre>
-~/daq$ <b>bin/registrar</b>
-Loading config from local/system.conf
+The produced `registration_summary.json` document provides an overview of the analyzed files,
+clearly any errors that should be addressed for full spec compliance. Additionaly, an
+`errors.json`
 
-> Task :compileJava 
-&hellip;
-BUILD SUCCESSFUL in 4s
-2 actionable tasks: 2 executed
-Using gcp credentials local/daq-testing-de56aa4b1e47.json
-Using site config dir resources/test_site
+<pre>
+user@machine:~/daq$ <b>cat local/site/cloud_iot_config.json </b>
+{
+  "cloud_region": "us-central1",
+  "site_name": "SG-MBC2-B80",
+  "registry_id": "iotRegistry",
+  "registrar_topic": "registrar"
+}
+user@machine:~/daq$ <b>bin/registrar daq-testing</b>
+Activating venv
+Flattening config from local/system.yaml into inst/config/system.conf
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Running tools version 1.5.1-16-g9ed5861
+Using cloud project bos-daq-testing
+Using site config dir local/site
 Using schema root dir schemas/udmi
-Using service account daq-laptop@daq-testing.iam.gserviceaccount.com/null
-Created service for project daq-testing
-Updated device entry AHU-001
-Blocking extra device AHU-002
-Blocking extra device bad_device
+Using device filter
+Reading Cloud IoT config from /home/user/daq/local/site/cloud_iot_config.json
+Initializing with default credentials...
+Jun 12, 2020 1:24:37 PM com.google.auth.oauth2.DefaultCredentialsProvider warnAboutProblematicCredentials
+WARNING: Your application has authenticated using end user credentials from Google Cloud SDK. We recommend that most server applications use service accounts instead. If your application continues to use end user credentials from Cloud SDK, you might receive a "quota exceeded" or "API not enabled" error. For more information about service accounts, see https://cloud.google.com/docs/authentication/.
+Created service for project bos-daq-testing
+Working with project bos-daq-testing registry iotRegistry
+Loading local device AHU-1-1
+Loading local device AHU-1-2
+Fetching remote registry iotRegistry
+Updated device entry AHU-1-1
+Sending metadata message for AHU-1-1
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by com.google.protobuf.UnsafeUtil (file:/home/user/daq/validator/build/libs/validator-1.0-SNAPSHOT-all.jar) to field java.nio.Buffer.address
+WARNING: Please consider reporting this to the maintainers of com.google.protobuf.UnsafeUtil
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+Updated device entry AHU-1-2
+Sending metadata message for AHU-1-2
+Processed 2 devices
+Updating local/site/devices/AHU-1-1/errors.json
+Updating local/site/devices/AHU-1-2/errors.json
+
+Summary:
+  Device Envelope: 2
+  Device Key: 1
+  Device Validating: 2
+Out of 2 total.
+Done with PubSubPusher
 Registrar complete, exit 0
-~/daq$ 
+user@machine:~/daq$ <b>cat local/site/registration_summary.json </b>
+{
+  "Envelope" : {
+    "AHU-1-1" : "java.lang.IllegalStateException: Validating envelope AHU-1-1",
+    "AHU-1-2" : "java.lang.IllegalStateException: Validating envelope AHU-1-2"
+  },
+  "Key" : {
+    "AHU-1-2" : "java.lang.RuntimeException: Duplicate credentials found for AHU-1-1 & AHU-1-2"
+  },
+  "Validating" : {
+    "AHU-1-1" : "org.everit.json.schema.ValidationException: #: 43 schema violations found",
+    "AHU-1-2" : "org.everit.json.schema.ValidationException: #: 43 schema violations found"
+  }
+}
+user@machine:~/daq$ <b>head local/site/devices/AHU-1-1/errors.json </b>
+Exceptions for AHU-1-1
+  Validating envelope AHU-1-1
+    #/deviceId: string [AHU-1-1] does not match pattern ^[A-Z]{2,6}-[1-9][0-9]{0,2}$
+  #: 43 schema violations found
+    #/pointset/points: 40 schema violations found
+      #/pointset/points/chilled_return_water_temperature_sensor/units: °C is not a valid enum value
+      #/pointset/points/chilled_supply_water_temperature_sensor/units: °C is not a valid enum value
+      #/pointset/points/chilled_water_valve_percentage_command/units: % is not a valid enum value
 </pre>
 
 ## Sequence Diagram

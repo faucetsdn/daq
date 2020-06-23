@@ -20,6 +20,9 @@ import configurator
 
 LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
+DEFAULT_LIMIT = 100
+# pylint: disable=no-member
+DESCENDING = firestore.Query.DESCENDING
 
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
@@ -44,18 +47,17 @@ class GcpManager:
     def __init__(self, config, callback_handler):
         self.config = config
         self._callback_handler = callback_handler
-        if 'gcp_cred' not in config:
-            LOGGER.info('No gcp_cred credential specified in config')
+        cred_file = self.config.get('gcp_cred')
+        if not cred_file:
+            LOGGER.info('No gcp_cred filr specified in config, disabling gcp use.')
             self._pubber = None
             self._storage = None
             self._firestore = None
             self._client_name = None
             return
-        cred_file = self.config['gcp_cred']
         LOGGER.info('Loading gcp credentials from %s', cred_file)
         # Normal execution assumes default credentials.
-        # pylint: disable=protected-access
-        (self._credentials, self._project) = google_auth._load_credentials_from_file(cred_file)
+        (self._credentials, self._project) = google_auth.load_credentials_from_file(cred_file)
         self._client_name = self._parse_creds(cred_file)
         self._site_name = self._get_site_name()
         self._pubber = pubsub_v1.PublisherClient(credentials=self._credentials)
@@ -64,7 +66,7 @@ class GcpManager:
         self._firestore = self._initialize_firestore(cred_file)
         self._report_bucket_name = self.REPORT_BUCKET_FORMAT % self._project
         self._storage = storage.Client(project=self._project, credentials=self._credentials)
-        self._ensure_report_bucket()
+        self._bucket = self._ensure_report_bucket()
         self._config_callbacks = {}
         self._logging = logging.Client(credentials=self._credentials, project=self._project)
 
@@ -217,16 +219,16 @@ class GcpManager:
         else:
             LOGGER.info('Creating storage bucket %s', bucket_name)
             self._storage.create_bucket(bucket_name)
+        return self._storage.get_bucket(bucket_name)
 
     def upload_file(self, file_name, destination_file_name=None):
         """Uploads a report to a storage bucket."""
         if not self._storage:
-            LOGGER.info('Ignoring %s upload: not configured' % file_name)
+            LOGGER.debug('Ignoring %s upload: not configured' % file_name)
             return None
-        bucket = self._storage.get_bucket(self._report_bucket_name)
         destination_file_name = os.path.join('origin', self._client_name or "other",
                                              destination_file_name or file_name)
-        blob = bucket.blob(destination_file_name)
+        blob = self._bucket.blob(destination_file_name)
         blob.upload_from_filename(file_name)
         LOGGER.info('Uploaded %s' % destination_file_name)
         return destination_file_name
@@ -252,27 +254,32 @@ class GcpManager:
             else:
                 LOGGER.info('Ignoring user %s', user_email)
 
-    def get_reports_from_date_range(self, device: str, start=None, end=None):
+    def _get_json_report(self, runid):
+        doc = runid.reference.collection('test').document('terminate').get().to_dict()
+        report_blob = doc.get('report_path.json') if doc else None
+        if not report_blob:
+            return None
+        LOGGER.info('Downloading report %s', report_blob)
+        blob = self._bucket.blob(report_blob)
+        return json.loads(str(blob.download_as_string(), 'utf-8'))
+
+    def get_reports_from_date_range(self, device: str, start=None, end=None, count=None):
         """Combine test results from reports within a date range"""
         if not self._firestore:
             LOGGER.error('Firestore not initialized.')
             return
         LOGGER.info('Looking for reports...')
-        origins = self._firestore.collection(u'origin').stream()
-        for origin in origins:
-            query = origin.reference.collection('runid').where('deviceId', '==', device)
-            if start:
-                query = query.where('updated', '>=', to_timestamp(start))
-            if end:
-                query = query.where('updated', '<=', to_timestamp(end))
-            runids = query.stream()
-            for runid in runids:
-                doc = runid.reference.collection('test').document('term').get().to_dict()
-                if not doc or doc.get('json_path'):
-                    continue
-                bucket = self._storage.get_bucket(self._report_bucket_name)
-                blob = bucket.blob(doc.get('json_path'))
-                json_report = json.loads(str(blob.download_as_string(), 'utf-8'))
+        limit_count = count if count else DEFAULT_LIMIT
+        origin = self._firestore.collection(u'origin').document(self._client_name).get()
+        query = origin.reference.collection('runid').where('deviceId', '==', device)
+        if start:
+            query = query.where('updated', '>=', to_timestamp(start))
+        if end:
+            query = query.where('updated', '<=', to_timestamp(end))
+        runids = query.order_by(u'updated', direction=DESCENDING).limit(limit_count).stream()
+        for runid in runids:
+            json_report = self._get_json_report(runid)
+            if json_report:
                 yield json_report
 
     def _query_user(self, message):

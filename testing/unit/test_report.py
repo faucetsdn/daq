@@ -18,7 +18,8 @@ class TestReport(unittest.TestCase):
         expected = """|a|b|c|
 |---|---|---|
 |a|a||
-|c|b|a|"""
+|c|b|a|
+"""
         self.assertEqual(expected, table.render())
           
 if __name__ == '__main__':
