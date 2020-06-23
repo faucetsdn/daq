@@ -127,14 +127,14 @@ def get_scan_length(config_file):
     try:
         with open(config_file) as file:
             for line in file:
-                match = re.search("^monitor_scan_sec=(\d+)", line)
+                match = re.search(r'^monitor_scan_sec=(\d+)', line)
                 if match:
                     matched_length = int(match.group(1))
                     # If scan length = 0 or not found, then monitor scan does not exist
                     scan_length = matched_length if matched_length > 0 else False
         return scan_length
     except Exception as e:
-        print(e)
+        write_report("Error encountered reading system.conf {}".format(e))
         return False
 
 def test_connection_min_send():
