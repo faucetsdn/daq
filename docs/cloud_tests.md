@@ -128,5 +128,5 @@ $ export DAQ_TEST=aux
 
 Take note the URL in your browser's address bar when running Travis. You might be on either
 <code>travis-ci<b>.com</b></code> or <code>travis-ci<b>.org</b></code>. Any particular setup
-may end up across both sites for undertermined reasons. Please consult with your browser's
+may end up across both sites for undetermined reasons. Please consult with your browser's
 exact URL for more clarity.
