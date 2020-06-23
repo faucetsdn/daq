@@ -70,7 +70,7 @@ Overall device result FAIL
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
-|pass|manual.test.travis|Security|Recommended|Manual test - for testing|
+|pass|manual.test.name|Security|Recommended|Manual test - for testing|
 |skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
 |skip|poe.power|Other|Other|No local IP has been set, check system config|
 |skip|poe.support|Other|Other|No local IP has been set, check system config|
