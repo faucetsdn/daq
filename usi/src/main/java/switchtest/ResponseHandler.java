@@ -1,5 +1,5 @@
 package switchtest;
 
 public interface ResponseHandler<T> {
-    void receiveData(T data) throws Exception;
+  void receiveData(T data) throws Exception;
 }
