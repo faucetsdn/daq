@@ -47,10 +47,10 @@ RESULT skip security.passwords.http Port 80 not open on target device.
 RESULT skip security.passwords.https Port 443 not open on target device.
 RESULT skip security.passwords.ssh Port 22 not open on target device.
 RESULT skip security.passwords.telnet Port 23 not open on target device.
-RESULT skip security.passwords.http Unable to connect to host.
-RESULT skip security.passwords.https Unable to connect to host.
-RESULT skip security.passwords.ssh Unable to connect to host.
-RESULT skip security.passwords.telnet Unable to connect to host.
+RESULT fail security.passwords.http Was able to brute force using dictionary.
+RESULT fail security.passwords.https Was able to brute force using dictionary.
+RESULT fail security.passwords.ssh Was able to brute force using dictionary.
+RESULT fail security.passwords.telnet Was able to brute force using dictionary.
 RESULT pass security.passwords.http Was not able to brute force using dictionary.
 RESULT pass security.passwords.https Was not able to brute force using dictionary.
 RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
@@ -66,6 +66,9 @@ dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
 dp_sec_port_2_acl.yaml
 dp_sec_port_3_acl.yaml
+dp_sec_port_4_acl.yaml
+dp_sec_port_5_acl.yaml
+dp_sec_port_6_acl.yaml
 faucet.log
 faucet.yaml
 finish.out
@@ -194,10 +197,12 @@ No report diff
 inst/gw01/nodes/gw01/activate.log
 inst/gw02/nodes/gw02/activate.log
 inst/gw03/nodes/gw03/activate.log
+inst/run-port-01/nodes/discover01/activate.log
 inst/run-port-01/nodes/fail01/activate.log
 inst/run-port-01/nodes/nmap01/activate.log
 inst/run-port-01/nodes/pass01/activate.log
 inst/run-port-01/nodes/ping01/activate.log
+inst/run-port-02/nodes/discover02/activate.log
 inst/run-port-02/nodes/fail02/activate.log
 inst/run-port-02/nodes/hold02/activate.log
 inst/run-port-02/nodes/nmap02/activate.log
