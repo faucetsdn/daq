@@ -3,7 +3,7 @@
 A number of additional setup steps are required for enabling testing against "smart devices"
 that communicate with the cloud. The tests themselves are part of the `subset/cloud/test_udmi`
 module included in the standard DAQ distro. The same basic device-to-cloud validation test
-pipeline can be done manually and automatically (through DAQ); it's instructure to fully
+pipeline can be done manually and automatically (through DAQ); it's instructive to fully
 understand the manual test pipeline before engaging with the automated setup.
 
 ## Manual Test Pipeline
