@@ -15,15 +15,14 @@ package daq.usi.cisco;
  * limitations under the License.
  */
 
-
+import daq.usi.ResponseHandler;
+import daq.usi.SwitchController;
 import grpc.Interface;
 import grpc.LinkStatus;
 import grpc.POEStatus;
 import grpc.POESupport;
 import grpc.Power;
 import grpc.SwitchActionResponse;
-import daq.usi.ResponseHandler;
-import daq.usi.SwitchController;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -54,10 +53,11 @@ public class Cisco9300 extends SwitchController {
 
   /**
    * Cisco 9300 Switch Controller.
+   *
    * @param remoteIpAddress switch ip
-   * @param telnetPort switch telnet port
-   * @param user switch username
-   * @param password switch password
+   * @param telnetPort      switch telnet port
+   * @param user            switch username
+   * @param password        switch password
    */
   public Cisco9300(
       String remoteIpAddress,
@@ -86,6 +86,7 @@ public class Cisco9300 extends SwitchController {
 
   /**
    * Get port toggle commands.
+   *
    * @param interfacePort port number
    * @param enabled       for bringing up/down interfacePort
    * @return commands

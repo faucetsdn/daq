@@ -15,14 +15,14 @@ package daq.usi.allied;
  * limitations under the License.
  */
 
+import daq.usi.ResponseHandler;
+import daq.usi.SwitchController;
 import grpc.Interface;
 import grpc.LinkStatus;
 import grpc.POEStatus;
 import grpc.POESupport;
 import grpc.Power;
 import grpc.SwitchActionResponse;
-import daq.usi.ResponseHandler;
-import daq.usi.SwitchController;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
