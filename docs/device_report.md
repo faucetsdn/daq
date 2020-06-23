@@ -490,7 +490,7 @@ RESULT skip security.passwords.telnet Port 23 not open on target device.
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|dictionary_folder|resources/faux|
+|dictionary_dir|resources/faux|
 
 ## Module udmi
 
