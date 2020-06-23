@@ -8,7 +8,7 @@ understand the manual test pipeline before engaging with the automated setup.
 
 ## Manual Test Pipeline
 
-The overal device-to-cloud pipeline looks something like the following:
+The overall device-to-cloud pipeline looks something like the following:
 
 * Device sends data to the cloud. There's two kinds of devices:
   * A faux _reference design_ device called [pubber](pubber.md), which is a completely contained
