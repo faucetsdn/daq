@@ -1,7 +1,7 @@
-package switchtest;
+package daq.usi;
 
 /*
- * Licensed to the Google under one or more contributor license agreements.
+ * Licensed to Google under one or more contributor license agreements.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -18,15 +18,13 @@ package switchtest;
 import grpc.Interface;
 import grpc.Power;
 import grpc.SwitchActionResponse;
-
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class SwitchController implements Runnable {
   /**
-   * Terminal Prompt ends with # when enabled, > when not enabled
+   * Terminal Prompt ends with '#' when enabled, '>' when not enabled.
    */
   public static final String CONSOLE_PROMPT_ENDING_ENABLED = "#";
   public static final String CONSOLE_PROMPT_ENDING_LOGIN = ">";
@@ -49,6 +47,14 @@ public abstract class SwitchController implements Runnable {
     this(remoteIpAddress, telnetPort, username, password, false);
   }
 
+  /**
+   * Abstract Switch controller. Override this class for switch specific implementation
+   * @param remoteIpAddress switch ip address
+   * @param telnetPort  switch telnet port
+   * @param username switch username
+   * @param password switch password
+   * @param debug for verbose logging
+   */
   public SwitchController(
       String remoteIpAddress, int telnetPort, String username, String password, boolean debug) {
     this.remoteIpAddress = remoteIpAddress;
@@ -114,7 +120,7 @@ public abstract class SwitchController implements Runnable {
    */
   protected static HashMap<String, String> mapSimpleTable(
       String rawPacket, String[] colNames, String[] mapNames) {
-    HashMap<String, String> colMap = new HashMap();
+    HashMap<String, String> colMap = new HashMap<>();
     String[] lines = rawPacket.split("\n");
     if (lines.length > 0) {
       String header = lines[0].trim();

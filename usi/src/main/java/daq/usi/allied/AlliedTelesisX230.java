@@ -1,4 +1,4 @@
-package switchtest.allied;
+package daq.usi.allied;
 
 /*
  * Licensed to the Google under one or more contributor license agreements.
@@ -15,17 +15,22 @@ package switchtest.allied;
  * limitations under the License.
  */
 
-import grpc.*;
-import switchtest.ResponseHandler;
-import switchtest.SwitchController;
-import switchtest.SwitchTelnetClientSocket;
-
-import java.util.*;
-import java.util.function.Consumer;
+import grpc.Interface;
+import grpc.LinkStatus;
+import grpc.POEStatus;
+import grpc.POESupport;
+import grpc.Power;
+import grpc.SwitchActionResponse;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import daq.usi.ResponseHandler;
+import daq.usi.SwitchController;
 
 public class AlliedTelesisX230 extends SwitchController {
   private static final String[] powerExpected =
@@ -34,9 +39,9 @@ public class AlliedTelesisX230 extends SwitchController {
       {"Interface", "Admin", "Pri", "Oper", "Power", "Device", "Class", "Max"};
   private static final Map<String, POEStatus> poeStatusMap = Map.of("Powered", POEStatus.ON,
       "Off", POEStatus.OFF, "Fault", POEStatus.FAULT, "Deny", POEStatus.DENY);
-  // TODO Not certain about AT power "Deny" status string. Can't find a device to produce that state.
-  private static final Map<String, POESupport> poeSupportMap = Map.of("Enabled", POESupport.ENABLED,
-      "Disabled", POESupport.DISABLED);
+  // TODO Not certain about AT power "Deny" status string. Can't find a device to produce that state
+  private static final Map<String, POESupport> poeSupportMap = Map.of("Enabled",
+      POESupport.ENABLED, "Disabled", POESupport.DISABLED);
   private static final Map<Pattern, String> interfaceProcessMap =
       Map.of(Pattern.compile("Link is (\\w+)"), "link",
           Pattern.compile("current duplex (\\w+)"), "duplex",
@@ -45,6 +50,14 @@ public class AlliedTelesisX230 extends SwitchController {
   private static final int WAIT_MS = 100;
   private ResponseHandler<String> responseHandler;
 
+  /**
+   * ATX230 Switch Controller.
+   *
+   * @param remoteIpAddress switch ip address
+   * @param telnetPort      switch telnet port
+   * @param user            switch username
+   * @param password        switch password
+   */
   public AlliedTelesisX230(
       String remoteIpAddress,
       int telnetPort,
@@ -79,14 +92,15 @@ public class AlliedTelesisX230 extends SwitchController {
 
   /**
    * Generic ATX230 Switch command to retrieve the Power Status of an interface. Replace asterisk
-   * with actual port number for complete message
+   * with actual port number for complete message.
    */
   private String showIfacePowerStatusCommand(int interfacePort) {
     return "show power-inline interface port1.0." + interfacePort;
   }
 
   /**
-   * @param interfacePort int for port number
+   * Port toggle commands
+   * @param interfacePort port number
    * @param enabled       for bringing up/down interfacePort
    * @return commands
    */
@@ -192,7 +206,8 @@ public class AlliedTelesisX230 extends SwitchController {
 
   private Power buildPowerResponse(Map<String, String> powerMap) {
     Power.Builder response = Power.newBuilder();
-    float maxPower = 0, currentPower = 0;
+    float maxPower = 0;
+    float currentPower = 0;
     try {
       maxPower = Float.parseFloat(powerMap.get("max"));
       currentPower = Float.parseFloat(powerMap.get("power"));
@@ -210,8 +225,7 @@ public class AlliedTelesisX230 extends SwitchController {
 
   private Map<String, String> processInterfaceStatus(String response) {
     Map<String, String> interfaceMap = new HashMap<>();
-    Arrays.stream(response.split("\n"))
-        .filter(s -> !containsPrompt(s)).forEach(s -> {
+    Arrays.stream(response.split("\n")).filter(s -> !containsPrompt(s)).forEach(s -> {
       for (Pattern pattern : interfaceProcessMap.keySet()) {
         Matcher m = pattern.matcher(s);
         if (m.find()) {
@@ -229,8 +243,7 @@ public class AlliedTelesisX230 extends SwitchController {
             && !containsPrompt(s)
             && !s.contains("(mW)")) // AT shows mW in second line
         .collect(Collectors.joining("\n"));
-    Map<String, String> interfaceMap = mapSimpleTable(filtered, showPowerExpected, powerExpected);
-    return interfaceMap;
+    return mapSimpleTable(filtered, showPowerExpected, powerExpected);
   }
 
   /**

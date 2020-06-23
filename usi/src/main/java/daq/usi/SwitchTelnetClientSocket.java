@@ -1,7 +1,7 @@
-package switchtest;
+package daq.usi;
 
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
+ * Licensed to Google under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
@@ -20,12 +20,10 @@ package switchtest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
 import org.apache.commons.net.telnet.EchoOptionHandler;
 import org.apache.commons.net.telnet.InvalidTelnetOptionException;
 import org.apache.commons.net.telnet.SuppressGAOptionHandler;
@@ -36,11 +34,11 @@ import org.apache.commons.net.telnet.TerminalTypeOptionHandler;
 public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runnable {
   public static String MORE_INDICATOR = "--More--";
 
-  protected final static int SLEEP_MS = 100;
+  protected static final int SLEEP_MS = 100;
   // Rx empty space timeout before sending \n
-  protected final static int MAX_EMPTY_WAIT_COUNT = 70;
+  protected static final int MAX_EMPTY_WAIT_COUNT = 70;
 
-  protected TelnetClient telnetClient = null;
+  protected TelnetClient telnetClient;
   protected SwitchController interrogator;
 
   protected String remoteIpAddress = "";
@@ -56,6 +54,12 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
 
   protected boolean debug;
 
+  /**
+   * @param remoteIpAddress switch ip address
+   * @param remotePort      telent port
+   * @param interrogator    switch specific switch controller
+   * @param debug
+   */
   public SwitchTelnetClientSocket(
       String remoteIpAddress, int remotePort, SwitchController interrogator, boolean debug) {
     this.remoteIpAddress = remoteIpAddress;
@@ -141,8 +145,8 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
           }
           rxTemp = rxTemp.replace(MORE_INDICATOR, "");
           rxData.append(rxTemp);
-        } else if (interrogator.userAuthorised &&
-            !interrogator.promptReady((rxData.toString() + rxTemp).trim())) {
+        } else if (interrogator.userAuthorised
+            && !interrogator.promptReady((rxData.toString() + rxTemp).trim())) {
           rxData.append(rxTemp);
           if (debug) {
             System.out.println("Waiting for more data till prompt ready: ");
@@ -164,13 +168,13 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
   /**
    * * Callback method called when TelnetClient receives an option negotiation command.
    *
-   * @param negotiation_code - type of negotiation command received (RECEIVED_DO, RECEIVED_DONT,
+   * @param negotiationCode - type of negotiation command received (RECEIVED_DO, RECEIVED_DONT,
    *                         RECEIVED_WILL, RECEIVED_WONT, RECEIVED_COMMAND)
-   * @param option_code      - code of the option negotiated *
+   * @param optionCode      - code of the option negotiated *
    */
-  public void receivedNegotiation(int negotiation_code, int option_code) {
+  public void receivedNegotiation(int negotiationCode, int optionCode) {
     String command = null;
-    switch (negotiation_code) {
+    switch (negotiationCode) {
       case TelnetNotificationHandler.RECEIVED_DO:
         command = "DO";
         break;
@@ -187,10 +191,10 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
         command = "COMMAND";
         break;
       default:
-        command = Integer.toString(negotiation_code); // Should not happen
+        command = Integer.toString(negotiationCode); // Should not happen
         break;
     }
-    System.out.println("Received " + command + " for option code " + option_code);
+    System.out.println("Received " + command + " for option code " + optionCode);
   }
 
   private void addOptionHandlers() {
@@ -199,13 +203,13 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
 
     EchoOptionHandler echoOptionHandler = new EchoOptionHandler(false, false, false, false);
 
-    SuppressGAOptionHandler suppressGAOptionHandler =
+    SuppressGAOptionHandler suppressGaOptionHandler =
         new SuppressGAOptionHandler(true, true, true, true);
 
     try {
       telnetClient.addOptionHandler(terminalTypeOptionHandler);
       telnetClient.addOptionHandler(echoOptionHandler);
-      telnetClient.addOptionHandler(suppressGAOptionHandler);
+      telnetClient.addOptionHandler(suppressGaOptionHandler);
     } catch (InvalidTelnetOptionException e) {
       System.err.println(
           "Error registering option handlers InvalidTelnetOptionException: " + e.getMessage());
@@ -215,12 +219,10 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
   }
 
   private String normalizeLineEnding(byte[] bytes, char endChar) {
-    String data = new String(bytes);
-
     List<Byte> bytesBuffer = new ArrayList<Byte>();
 
     int countBreak = 0;
-    int countESC = 0;
+    int countEsc = 0;
 
     for (int i = 0; i < bytes.length; i++) {
       if (bytes[i] != 0) {
@@ -240,13 +242,13 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
             break;
           case 27:
             // escape \x1B
-            countESC = 2;
+            countEsc = 2;
             break;
           case 33:
             // character:!
             break;
           default:
-            if (countESC == 0) {
+            if (countEsc == 0) {
               if (countBreak > 1) {
                 int size = bytesBuffer.size();
                 for (int x = 0; x < countBreak - 1; x++) {
@@ -256,7 +258,7 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
               }
               bytesBuffer.add(bytes[i]);
             } else {
-              countESC--;
+              countEsc--;
             }
             break;
         }

@@ -1,17 +1,20 @@
-package switchtest;
+package daq.usi;
 
-import grpc.*;
+import grpc.Interface;
+import grpc.Power;
+import grpc.SwitchActionResponse;
+import grpc.SwitchInfo;
+import grpc.USIServiceGrpc;
 import io.grpc.stub.StreamObserver;
-import switchtest.allied.AlliedTelesisX230;
-import switchtest.cisco.Cisco9300;
-
 import java.util.HashMap;
 import java.util.Map;
+import daq.usi.allied.AlliedTelesisX230;
+import daq.usi.cisco.Cisco9300;
 
-public class USIImpl extends USIServiceGrpc.USIServiceImplBase {
+public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   private Map<String, SwitchController> switchControllers;
 
-  public USIImpl() {
+  public UsiImpl() {
     super();
     switchControllers = new HashMap<>();
   }
@@ -33,8 +36,11 @@ public class USIImpl extends USIServiceGrpc.USIServiceImplBase {
               switchInfo.getUsername(), switchInfo.getPassword());
           break;
         }
+        default:
+          break;
       }
       new Thread(sc).start();
+      switchControllers.put(repr, sc);
     }
     return sc;
   }
@@ -43,9 +49,7 @@ public class USIImpl extends USIServiceGrpc.USIServiceImplBase {
   public void getPower(SwitchInfo request, StreamObserver<Power> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.getPower(request.getDevicePort(), power -> {
-        responseObserver.onNext(power);
-      });
+      sc.getPower(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
@@ -56,9 +60,7 @@ public class USIImpl extends USIServiceGrpc.USIServiceImplBase {
   public void getInterface(SwitchInfo request, StreamObserver<Interface> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.getInterface(request.getDevicePort(), iface -> {
-        responseObserver.onNext(iface);
-      });
+      sc.getInterface(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
@@ -69,9 +71,7 @@ public class USIImpl extends USIServiceGrpc.USIServiceImplBase {
   public void connect(SwitchInfo request, StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.connect(request.getDevicePort(), response -> {
-        responseObserver.onNext(response);
-      });
+      sc.connect(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
@@ -83,9 +83,7 @@ public class USIImpl extends USIServiceGrpc.USIServiceImplBase {
                          StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.disconnect(request.getDevicePort(), response -> {
-        responseObserver.onNext(response);
-      });
+      sc.disconnect(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);

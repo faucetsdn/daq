@@ -1,19 +1,18 @@
-package switchtest;
+package daq.usi;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class USIServer {
+public class UsiServer {
   private Server server;
 
   private void start() throws IOException {
     /* The port on which the server should run */
     int port = 5000;
     server = ServerBuilder.forPort(port)
-        .addService(new USIImpl())
+        .addService(new UsiImpl())
         .build()
         .start();
     System.out.println("Server started, listening on " + port);
@@ -23,7 +22,7 @@ public class USIServer {
         // Use stderr here since the logger may have been reset by its JVM shutdown hook.
         System.err.println("*** shutting down gRPC server since JVM is shutting down");
         try {
-          USIServer.this.stop();
+          UsiServer.this.stop();
         } catch (InterruptedException e) {
           e.printStackTrace(System.err);
         }
@@ -47,8 +46,15 @@ public class USIServer {
     }
   }
 
+  /**
+   * Main method
+   * @param args
+   * @throws Exception
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public static void main(String[] args) throws Exception, IOException, InterruptedException {
-    final USIServer server = new USIServer();
+    final UsiServer server = new UsiServer();
     server.start();
     server.blockUntilShutdown();
   }

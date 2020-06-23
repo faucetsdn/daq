@@ -93,7 +93,7 @@
                <configuration>
                   <archive>
                      <manifest>
-                        <mainClass>switchtest.USIServer</mainClass>
+                        <mainClass>daq.usi.UsiServer</mainClass>
                      </manifest>
                   </archive>
                   <descriptorRefs>

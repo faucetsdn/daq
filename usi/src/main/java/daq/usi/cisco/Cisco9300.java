@@ -1,7 +1,7 @@
-package switchtest.cisco;
+package daq.usi.cisco;
 
 /*
- * Licensed to the Google under one or more contributor license agreements.
+ * Licensed to Google under one or more contributor license agreements.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,12 +15,22 @@ package switchtest.cisco;
  * limitations under the License.
  */
 
-import grpc.*;
-import switchtest.ResponseHandler;
-import switchtest.SwitchController;
 
-import java.util.*;
+import grpc.Interface;
+import grpc.LinkStatus;
+import grpc.POEStatus;
+import grpc.POESupport;
+import grpc.Power;
+import grpc.SwitchActionResponse;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 import java.util.stream.Collectors;
+import daq.usi.ResponseHandler;
+import daq.usi.SwitchController;
+
 
 public class Cisco9300 extends SwitchController {
 
@@ -42,6 +52,13 @@ public class Cisco9300 extends SwitchController {
   private static final int WAIT_MS = 100;
   private ResponseHandler<String> responseHandler;
 
+  /**
+   * Cisco 9300 Switch Controller.
+   * @param remoteIpAddress switch ip
+   * @param telnetPort switch telnet port
+   * @param user switch username
+   * @param password switch password
+   */
   public Cisco9300(
       String remoteIpAddress,
       int telnetPort,
@@ -68,9 +85,10 @@ public class Cisco9300 extends SwitchController {
   }
 
   /**
-   * @param interfacePort
+   * Get port toggle commands
+   * @param interfacePort port number
    * @param enabled       for bringing up/down interfacePort
-   * @return
+   * @return commands
    */
   private String[] portManagementCommand(int interfacePort, boolean enabled) {
     return new String[] {
@@ -89,11 +107,11 @@ public class Cisco9300 extends SwitchController {
    */
   @Override
   public void handleEnableMessage(String consoleData) throws Exception {
-    if (consoleData.indexOf("Password:") >= 0) {
+    if (consoleData.contains("Password:")) {
       telnetClientSocket.writeData(password + "\n");
     } else if (containsPrompt(consoleData)) {
       userEnabled = true;
-    } else if (consoleData.indexOf("% Bad passwords") >= 0) {
+    } else if (consoleData.contains("% Bad passwords")) {
       telnetClientSocket.disposeConnection();
       throw new Exception("Could not Enable the User, Bad Password");
     }
@@ -106,18 +124,18 @@ public class Cisco9300 extends SwitchController {
    */
   @Override
   public void handleLoginMessage(String consoleData) throws Exception {
-    if (consoleData.indexOf("Username:") >= 0) {
+    if (consoleData.contains("Username:")) {
       telnetClientSocket.writeData(username + "\n");
-    } else if (consoleData.indexOf("Password:") >= 0) {
+    } else if (consoleData.contains("Password:")) {
       telnetClientSocket.writeData(password + "\n");
     } else if (consoleData.endsWith(CONSOLE_PROMPT_ENDING_LOGIN)) {
       userAuthorised = true;
       hostname = consoleData.split(CONSOLE_PROMPT_ENDING_LOGIN)[0];
       telnetClientSocket.writeData("enable\n");
-    } else if (consoleData.indexOf("% Login invalid") >= 0) {
+    } else if (consoleData.contains("% Login invalid")) {
       telnetClientSocket.disposeConnection();
       throw new Exception("Failed to Login, Login Invalid");
-    } else if (consoleData.indexOf("% Bad passwords") >= 0) {
+    } else if (consoleData.contains("% Bad passwords")) {
       telnetClientSocket.disposeConnection();
       throw new Exception("Failed to Login, Bad Password");
     }
@@ -214,12 +232,12 @@ public class Cisco9300 extends SwitchController {
   private Interface buildInterfaceResponse(Map<String, String> interfaceMap) {
     Interface.Builder response = Interface.newBuilder();
     String duplex = interfaceMap.getOrDefault("duplex", "");
-    if (duplex != null && duplex.startsWith("a-")) { // Interface in Auto Duplex
+    if (duplex.startsWith("a-")) { // Interface in Auto Duplex
       duplex = duplex.replaceFirst("a-", "");
     }
 
     String speed = interfaceMap.getOrDefault("speed", "");
-    if (speed != null && speed.startsWith("a-")) { // Interface in Auto Speed
+    if (speed.startsWith("a-")) { // Interface in Auto Speed
       speed = speed.replaceFirst("a-", "");
     }
 
@@ -247,9 +265,7 @@ public class Cisco9300 extends SwitchController {
     String filtered = Arrays.stream(response.split("\n"))
         .filter(s -> !containsPrompt(s))
         .collect(Collectors.joining("\n"));
-    Map<String, String> interfaceMap =
-        mapSimpleTable(filtered, showInterfaceExpected, interfaceExpected);
-    return interfaceMap;
+    return mapSimpleTable(filtered, showInterfaceExpected, interfaceExpected);
   }
 
   private Map<String, String> processPowerStatusInline(String response) {
