@@ -93,18 +93,7 @@
             <property name="option" value="alone"/>
             <property name="tokens"
              value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT,
-                    INSTANCE_INIT, ANNOTATION_DEF, ENUM_DEF, INTERFACE_DEF"/>
-        </module>
-        <module name="SuppressionXpathSingleFilter">
-          <!-- suppresion is required till https://github.com/checkstyle/checkstyle/issues/7541 -->
-          <property name="id" value="RightCurlyAlone"/>
-          <property name="query" value="//RCURLY[parent::SLIST[count(./*)=1]
-                                                 or preceding-sibling::*[last()][self::LCURLY]]"/>
-        </module>
-        <module name="WhitespaceAfter">
-            <property name="tokens"
-             value="COMMA, SEMI, TYPECAST, LITERAL_IF, LITERAL_ELSE,
-                    LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE"/>
+                    INSTANCE_INIT, ANNOTATION_DEF"/>
         </module>
         <module name="WhitespaceAround">
             <property name="allowEmptyConstructors" value="true"/>
@@ -256,8 +245,7 @@
         </module>
         <module name="NoWhitespaceBefore">
             <property name="tokens"
-             value="COMMA, SEMI, POST_INC, POST_DEC, DOT,
-                    LABELED_STAT, METHOD_REF"/>
+             value="COMMA, SEMI, POST_INC, POST_DEC, DOT, ELLIPSIS, METHOD_REF"/>
             <property name="allowLineBreaks" value="true"/>
         </module>
         <module name="ParenPad">
