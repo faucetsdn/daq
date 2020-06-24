@@ -1,5 +1,5 @@
 """
-    Used within the faux device to start a client which will send out broadcast or multicast packets.
+    Used within the faux device to start a client which will send out broadcast packets.
 
     Usage: python TransportClient/client.py $broadcast_ip $port broadcast $duration_seconds $cycle_seconds &
 """
