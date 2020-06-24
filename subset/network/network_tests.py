@@ -1,4 +1,22 @@
-import subprocess, time, sys, json
+"""
+    This script can be called to run a specific network module test.
+
+    Currently supports:
+    - connection.min_send
+    - connection.dhcp_long
+    - protocol.app_min_send
+    - communication.type.broadcast
+    - network.ntp.support
+
+    Usage: python network_tests.py <test_to_run> <monitor.pcap file> <target_ip>
+
+    E.g. python network_tests.py connection.min_send $MONITOR $TARGET_IP
+"""
+
+import subprocess
+import time
+import sys
+import json
 
 arguments = sys.argv
 
@@ -30,11 +48,14 @@ tcpdump_display_arp_packets = 'tcpdump arp -r ' + cap_pcap_file
 tcpdump_display_ntp_packets = 'tcpdump dst port 123 -r ' + cap_pcap_file
 tcpdump_display_eapol_packets = 'tcpdump port 1812 or port 1813 or port 3799 -r ' + cap_pcap_file
 tcpdump_display_broadcast_packets = 'tcpdump broadcast and src host ' + device_address + ' -r ' + cap_pcap_file
+tcpdump_display_multicast_packets = 'tcpdump -n \'ip[16] & 240 = 224\' -r ' + cap_pcap_file
+
 
 def write_report(string_to_append):
     print(string_to_append.strip())
     with open(report_filename, 'a+') as file_open:
         file_open.write(string_to_append)
+
 
 def shell_command_with_result(command, wait_time, terminate_flag):
     process = subprocess.Popen(command, universal_newlines=True, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -45,8 +66,10 @@ def shell_command_with_result(command, wait_time, terminate_flag):
         process.terminate()
     return str(text)
 
+
 def add_packet_count_to_report(packet_type, packet_count):
-    write_report("{i} {t} Packets recieved={p}\n".format(i=ignore, t=packet_type, p=packet_count))
+    write_report("{i} {t} packets received={p}\n".format(i=ignore, t=packet_type, p=packet_count))
+
 
 def add_packet_info_to_report(packets_received):
     packet_list = packets_received.rstrip().split("\n")
@@ -55,6 +78,7 @@ def add_packet_info_to_report(packets_received):
         write_report("{i} {p}\n".format(i=ignore, p=packet_list[x]))
     write_report("{i} packets_count={p}\n".format(i=ignore, p=len(packet_list)))
 
+
 def decode_shell_result(shell_result):
     if len(shell_result) > min_packet_length_bytes:
         packet_request_list = shell_result.rstrip().split("\n")
@@ -62,15 +86,18 @@ def decode_shell_result(shell_result):
         return packets_received
     return 0
 
+
 def packets_received_count(shell_result):
     if shell_result is None:
         return 0
     else:
         return decode_shell_result(shell_result)
 
+
 def load_json_config(json_filename):
     with open(json_filename, 'r') as json_file:
         return json.load(json_file)
+
 
 def add_to_port_list(port_map):
     global port_list
@@ -80,12 +107,14 @@ def add_to_port_list(port_map):
                 if value == True:
                     port_list.append(port)
 
+
 def remove_from_port_list(port_map):
     global port_list
     for exclude in port_map:
         for port in port_list:
             if port == exclude:
                 port_list.remove(exclude)
+
 
 def decode_json_config(config_file, map_name, action):
     dictionary = load_json_config(config_file)
@@ -98,6 +127,7 @@ def decode_json_config(config_file, map_name, action):
                             add_to_port_list(port_map)
                         elif action == 'remove':
                             remove_from_port_list(port_map)
+
 
 def test_connection_min_send():
     arp_shell_result = shell_command_with_result(tcpdump_display_arp_packets, 0, False)
@@ -113,6 +143,7 @@ def test_connection_min_send():
     add_packet_info_to_report(shell_result)
     return 'pass' if app_packets_received > 0 else 'fail'
 
+
 def test_connection_dhcp_long():
     shell_result = shell_command_with_result(tcpdump_display_arp_packets, 0, False)
     arp_packets_received = packets_received_count(shell_result)
@@ -122,6 +153,7 @@ def test_connection_dhcp_long():
         return 'pass'
     else:
         return 'fail'
+
 
 def test_protocol_app_min_send():
     """
@@ -148,18 +180,34 @@ def test_protocol_app_min_send():
     else:
         return 'fail'
 
+
 def test_communication_type_broadcast():
-    shell_result = shell_command_with_result(tcpdump_display_broadcast_packets, 0, False)
-    broadcast_packets_received = packets_received_count(shell_result)
-    if broadcast_packets_received > 0:
+    """ Runs the communication.type.broadcast DAQ test.
+
+    Counts the number of unicast, broadcast and multicast packets sent.
+
+    """
+
+    broadcast_result = shell_command_with_result(tcpdump_display_broadcast_packets, 0, False)
+    broadcast_packets = packets_received_count(broadcast_result)
+    if broadcast_packets > 0:
         add_summary("Broadcast packets received.")
-        add_packet_count_to_report("Broadcast", broadcast_packets_received)
-    shell_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
-    all_packets_received = packets_received_count(shell_result)
-    if (all_packets_received - broadcast_packets_received) > 0:
+        add_packet_count_to_report("Broadcast", broadcast_packets)
+
+    multicast_result = shell_command_with_result(tcpdump_display_multicast_packets, 0, False)
+    multicast_packets = packets_received_count(multicast_result)
+    if multicast_packets > 0:
+        add_summary("Multicast packets received.")
+        add_packet_count_to_report("Multicast", multicast_packets)
+
+    unicast_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
+    unicast_packets_received = packets_received_count(unicast_result) - broadcast_packets - multicast_packets
+    if unicast_packets_received > 0:
         add_summary("Unicast packets received.")
-        add_packet_count_to_report("Unicast", all_packets_received - broadcast_packets_received)
+        add_packet_count_to_report("Unicast", unicast_packets_received - broadcast_packets - multicast_packets)
+
     return 'info'
+
 
 def test_ntp_support():
     shell_result = shell_command_with_result(tcpdump_display_ntp_packets, 0, False)
@@ -171,9 +219,11 @@ def test_ntp_support():
     else:
         return 'fail'
 
+
 def add_summary(text):
     global summary_text
     summary_text = summary_text + " " + text if summary_text else text
+
 
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 

@@ -160,11 +160,11 @@ if [ -n "${options[ntp_pass]}" -o -n "${options[ntp_fail]}" ]; then
 fi
 
 if [ -n "${options[broadcast_client]}" ]; then
-    echo Starting broatcast client.
-    cip_port=41794
+    echo Starting broadcast client.
+    port=41794
     cycle_seconds=20
     duration_seconds=360
-    python TransportClient/client.py $broadcast_ip $cip_port broadcast $duration_seconds $cycle_seconds &
+    python TransportClient/client.py $broadcast_ip $port broadcast $duration_seconds $cycle_seconds &
 fi
 
 if [ -n "${options[discover]}" ]; then
