@@ -204,7 +204,7 @@ def test_communication_type_broadcast():
     unicast_packets_received = packets_received_count(unicast_result) - broadcast_packets - multicast_packets
     if unicast_packets_received > 0:
         add_summary("Unicast packets received.")
-        add_packet_count_to_report("Unicast", unicast_packets_received - broadcast_packets - multicast_packets)
+        add_packet_count_to_report("Unicast", unicast_packets_received)
 
     return 'info'
 
