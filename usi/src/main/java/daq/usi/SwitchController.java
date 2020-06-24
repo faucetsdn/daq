@@ -50,11 +50,12 @@ public abstract class SwitchController implements Runnable {
 
   /**
    * Abstract Switch controller. Override this class for switch specific implementation
+   *
    * @param remoteIpAddress switch ip address
-   * @param telnetPort  switch telnet port
-   * @param username switch username
-   * @param password switch password
-   * @param debug for verbose logging
+   * @param telnetPort      switch telnet port
+   * @param username        switch username
+   * @param password        switch password
+   * @param debug           for verbose logging
    */
   public SwitchController(
       String remoteIpAddress, int telnetPort, String username, String password, boolean debug) {
@@ -110,8 +111,7 @@ public abstract class SwitchController implements Runnable {
 
   /**
    * Map a simple table containing a header and 1 row of data to a hashmap
-   *
-   * <p>his method will also attempt ot correct for mis-aligned tabular data as well as empty
+   * This method will also attempt to correct for mis-aligned tabular data as well as empty
    * columns values.
    *
    * @param rawPacket Raw table response from a switch command
