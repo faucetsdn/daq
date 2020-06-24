@@ -52,11 +52,11 @@ Overall device result FAIL
 |Other|1/2|
 |Connectivity|n/a|
 
-|Expectation|pass|fail|skip|gone|
-|---|---|---|---|---|
-|Required|1|0|0|0|
-|Recommended|2|0|0|0|
-|Other|1|2|22|2|
+|Expectation|pass|fail|skip|info|gone|
+|---|---|---|---|---|---|
+|Required|1|0|0|0|0|
+|Recommended|2|0|0|0|0|
+|Other|1|6|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -66,14 +66,19 @@ Overall device result FAIL
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
+|info|communication.type.broadcast|Other|Other||
+|fail|connection.dhcp_long|Other|Other||
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
+|fail|connection.min_send|Other|Other||
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
 |pass|manual.test.travis|Security|Recommended|Manual test - for testing|
+|fail|network.ntp.support|Other|Other||
 |skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
 |skip|poe.power|Other|Other|No local IP has been set, check system config|
 |skip|poe.support|Other|Other|No local IP has been set, check system config|
+|fail|protocol.app_min_send|Other|Other||
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
@@ -559,6 +564,54 @@ No additional information provided
 --------------------
 RESULT pass manual.test.travis Manual test - for testing
 
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module network
+
+
+#### Report
+
+```
+--------------------
+connection.dhcp_long
+--------------------
+Device sends ARP request on DHCP lease expiry.
+--------------------
+RESULT fail connection.dhcp_long 
+--------------------
+connection.min_send
+--------------------
+Device sends data at a frequency of less than 5 minutes.
+--------------------
+
+
+RESULT fail connection.min_send 
+--------------------
+communication.type.broadcast
+--------------------
+Device sends unicast or broadcast packets.
+--------------------
+RESULT info communication.type.broadcast 
+--------------------
+protocol.app_min_send
+--------------------
+Device sends application packets at a frequency of less than 5 minutes.
+--------------------
+
+
+RESULT fail protocol.app_min_send 
+--------------------
+network.ntp.support
+--------------------
+Device sends NTP request packets.
+--------------------
+RESULT fail network.ntp.support 
 ```
 
 #### Module Config
