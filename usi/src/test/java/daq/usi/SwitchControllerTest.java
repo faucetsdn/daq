@@ -1,7 +1,7 @@
 package daq.usi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +25,7 @@ class SwitchControllerTest {
     String[] mapNames = {"a", "b"};
     Map<String, String> response = SwitchController.mapSimpleTable(raw, colNames, mapNames);
     for (String key : response.keySet()) {
-      assertEquals(response.get(key), null);
+      assertNull(response.get(key));
     }
   }
 
