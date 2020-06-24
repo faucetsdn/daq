@@ -32,7 +32,8 @@ is what is ultimately used by `test_udmi` to validate device-cloud communication
 ## Base Local Test Setup
 
 * The `udmi` module needs to be enabled in build. When running `cmd/build` there should be a line
-like `subset/cloud/Dockerfile.test_udmi`. This is enabled through the `host_tests` config parameter,
+like `subset/cloud/Dockerfile.test_udmi` in the startup logs.
+This is enabled through the `host_tests` config parameter,
 which can be set to `config/modules/all.conf` if necessary. On startup, there should be a log
 message that includes `udmi`:
 ```
@@ -58,12 +59,12 @@ be done manually or using the [registrar tool](registrar.md) tool.
 ## Integration Testing
 
 If developing cloud-tests, then the CI build system also needs to have a service account configured
-pointing at a suitable GCP proejct. To run cloud-based tests, setup the Travis `GCP_BASE64_CRED`
+pointing at a suitable GCP project. To run cloud-based tests, setup the Travis `GCP_BASE64_CRED`
 env variable with a `base64` encoded service account key for your project. It's recommended to
 use a dedicated key with a nice name like `daq-travis`, but not required. Encode the key value
 as per below, and cut/paste the resulting string into a
 [Travis environment variable](https://docs.travis-ci.com/user/environment-variables/#defining-variables-in-repository-settings)
-for a `GCP_BASE64_CRED` varaible. Note the `-w 0` option is required for proper parsing/formatting,
+for a `GCP_BASE64_CRED` variable. Note the `-w 0` option is required for proper parsing/formatting,
 as there can't be any newlines in the copied string.
 
 <code>
@@ -79,7 +80,7 @@ iOiAiaHR0cHM6Ly93LWRhcS10ZXN0aW5nLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9Cg==
 * `gcp_topic` config to `local/system.conf` as described in this doc.
 * Configure test subsystem with proper cloud endpoint in `{test_site}/cloud_iot_config.json`.
 * Configure the DUT with the proper cloud device credentials (device specific). For _faux_ devices, this means copying
-the assocatied `rsa_private.pkcs8` file to someting like `inst/faux/daq-faux-2/local/` (exact path depends on which faux).
+the associated `rsa_private.pkcs8` file to something like `inst/faux/daq-faux-2/local/` (exact path depends on which faux).
 * Test with `bin/registrar`, `pubber/bin/run`, and `bin/validate` manually, before integrated testing through DAQ.
 
 ### Is my Travis set up correctly?
