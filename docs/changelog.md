@@ -1,4 +1,10 @@
 # Changelog
+* 1.6.0
+  * cloud test setup documentation (#495)
+  * Baseline for NTP tests (#494)
+  * Baseline for DNS test (#492)
+  * Add manual test summary to test report (#481)  
+  * UDMI logentry schema update (#391)
 * 1.5.1
   * Fix for local-port-as-string issue (#477)
 * 1.5.0
