@@ -1,4 +1,6 @@
 # Changelog
+* 1.6.1
+  * fix image pull in cmd/build (#503) 
 * 1.6.0
   * cloud test setup documentation (#495)
   * Baseline for NTP tests (#494)
