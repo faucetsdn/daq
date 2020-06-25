@@ -27,7 +27,7 @@ DOCKER_IMAGE_VER=docker_images.ver
 cd $ROOT
 source etc/config_base.sh
 echo host_tests=$host_tests
-test_targets=$host_tests bin/docker_build_files
+test_targets=$(host_tests=$host_tests bin/docker_build_files)
 function pull_images {
     TAG=$1
     declare -A test_set
