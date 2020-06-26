@@ -16,6 +16,9 @@ devices_dir=$2
 schema_dir=$3
 device_filter=$4
 
+echo Using gcloud auth:
+gcloud config get-value account
+
 echo Using cloud project $project_id
 echo Using site config dir $devices_dir
 echo Using schema root dir $schema_dir
