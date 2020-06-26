@@ -47,10 +47,10 @@ RESULT skip security.passwords.http Port 80 is not open on target device.
 RESULT skip security.passwords.https Port 443 is not open on target device.
 RESULT skip security.passwords.telnet Port 23 is not open on target device.
 RESULT skip security.passwords.ssh Port 22 is not open on target device.
-RESULT skip security.passwords.http Port 80 is not open on target device.
-RESULT skip security.passwords.https Port 443 is not open on target device.
-RESULT skip security.passwords.telnet Port 23 is not open on target device.
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
+RESULT fail security.passwords.http Default passwords have not been changed.
+RESULT fail security.passwords.https Default passwords have not been changed.
+RESULT fail security.passwords.telnet Default passwords have not been changed.
+RESULT fail security.passwords.ssh Default passwords have not been changed.
 RESULT pass security.passwords.http Default passwords have been changed.
 RESULT pass security.passwords.https Default passwords have been changed.
 RESULT pass security.passwords.telnet Default passwords have been changed.
