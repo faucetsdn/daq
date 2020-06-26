@@ -270,6 +270,11 @@ public class Registrar {
         LocalDevice localDevice = new LocalDevice(devicesDir, deviceName, schemas);
         localDevices.put(deviceName, localDevice);
         try {
+          localDevice.loadCredential();
+        } catch (Exception e) {
+          localDevice.getErrors().put("Credential", e);
+        }
+        try {
           localDevice.validateEnvelope(cloudIotManager.getRegistryId(), cloudIotManager.getSiteName());
         } catch (Exception e) {
           localDevice.getErrors().put("Envelope", e);

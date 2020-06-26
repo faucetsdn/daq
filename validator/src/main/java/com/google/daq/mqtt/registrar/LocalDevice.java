@@ -74,6 +74,7 @@ class LocalDevice {
   private String deviceNumId;
 
   private CloudDeviceSettings settings;
+  private DeviceCredential deviceCredential;
 
   LocalDevice(File devicesDir, String deviceId, Map<String, Schema> schemas) {
     try {
@@ -162,7 +163,12 @@ class LocalDevice {
     return RSA_CERT_TYPE.equals(getAuthType()) ? RSA_CERT_FILE : RSA_KEY_FILE;
   }
 
-  private DeviceCredential loadCredential() {
+  public DeviceCredential loadCredential() {
+    deviceCredential = readCredential();
+    return deviceCredential;
+  }
+
+  public DeviceCredential readCredential() {
     try {
       if (hasGateway() && getAuthType() != null) {
         throw new RuntimeException("Proxied devices should not have auth_type defined");
@@ -236,7 +242,7 @@ class LocalDevice {
       if (metadata == null) {
         return settings;
       }
-      settings.credential = loadCredential();
+      settings.credential = deviceCredential;
       settings.metadata = metadataString();
       settings.config = deviceConfigString();
       settings.proxyDevices = getProxyDevicesList();
