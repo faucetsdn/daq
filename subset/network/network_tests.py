@@ -13,10 +13,7 @@
     E.g. python network_tests.py connection.min_send $MONITOR $TARGET_IP
 """
 
-import subprocess
-import time
-import sys
-import json
+import subprocess, time, sys, json
 
 arguments = sys.argv
 
@@ -201,10 +198,10 @@ def test_communication_type_broadcast():
         add_packet_count_to_report("Multicast", multicast_packets)
 
     unicast_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
-    unicast_packets_received = packets_received_count(unicast_result) - broadcast_packets - multicast_packets
-    if unicast_packets_received > 0:
+    unicast_packets = packets_received_count(unicast_result) - broadcast_packets - multicast_packets
+    if unicast_packets > 0:
         add_summary("Unicast packets received.")
-        add_packet_count_to_report("Unicast", unicast_packets_received)
+        add_packet_count_to_report("Unicast", unicast_packets)
 
     return 'info'
 
