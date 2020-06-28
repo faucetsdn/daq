@@ -7,7 +7,8 @@
       "section": "NW-2F",
       "position": {
         "x": 10,
-        "y": 20
+        "y": 20,
+        "level": "5th",
       }
     },
     "physical_tag": {
