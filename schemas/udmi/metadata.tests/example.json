@@ -5,10 +5,11 @@
     "location": {
       "site": "US-SFO-XYY",
       "section": "NW-2F",
+      "level": "4th",
       "position": {
-        "x": 10,
-        "y": 20,
-        "level": "5th",
+        "x": 1170,
+        "y": 2820,
+        "z": 298
       }
     },
     "physical_tag": {
