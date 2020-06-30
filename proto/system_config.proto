@@ -114,6 +114,9 @@ message DaqConfig {
   
   // Set time between port disconnect and host tests shutdown
   int32 port_flap_timeout_sec = 48;
+
+  // USI url
+  string usi_url = 49;
 }
 
 
@@ -139,6 +142,9 @@ message SwitchSetup {
 
   // IP address template and subnet for module ip addresses
   string mods_addr = 16;
+ 
+  // Switch connect Telnet port
+  int32 telnet_port = 17;
 
   // Dataplane id of external OpenFlow switch
   string of_dpid = 41;

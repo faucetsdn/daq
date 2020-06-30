@@ -56,3 +56,5 @@ mkdir -p libs/proto/
 touch libs/proto/__init__.py
 cp build/daq/proto/*.py libs/proto/
 cp build/protos.html $WEB_ROOT/
+
+python -m grpc_tools.protoc -I usi/src/main/proto/ --python_out=libs/proto/ --grpc_python_out=libs/proto/ usi/src/main/proto/usi.proto

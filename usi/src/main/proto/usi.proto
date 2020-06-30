@@ -35,6 +35,7 @@ message Interface {
 enum SwitchModel {
   ALLIED_TELESIS_X230 = 0;
   CISCO_9300 = 1;
+  OVS = 2;
 }
 
 enum LinkStatus {
