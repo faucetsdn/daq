@@ -280,8 +280,8 @@ public class Registrar {
       Matcher deviceMatch = devicePattern.matcher(deviceName);
       if (deviceMatch.find() && LocalDevice.deviceExists(devicesDir, deviceName)) {
         System.err.println("Loading local device " + deviceName);
-        LocalDevice localDevice = new LocalDevice(devicesDir, deviceName, schemas);
-        localDevices.put(deviceName, localDevice);
+        LocalDevice localDevice = localDevices.computeIfAbsent(deviceName,
+            keyName -> new LocalDevice(devicesDir, deviceName, schemas));
         try {
           localDevice.loadCredential();
         } catch (Exception e) {
