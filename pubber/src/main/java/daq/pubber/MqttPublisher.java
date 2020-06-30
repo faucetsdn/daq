@@ -155,7 +155,9 @@ public class MqttPublisher {
     try {
       Preconditions.checkNotNull(registryId, "registryId is null");
       Preconditions.checkNotNull(deviceId, "deviceId is null");
-      MqttClient mqttClient = new MqttClient(getBrokerUrl(), getClientId(deviceId),
+      String clientId = getClientId(deviceId);
+      LOG.info("Creating new mqtt client for " + clientId);
+      MqttClient mqttClient = new MqttClient(getBrokerUrl(), clientId,
           new MemoryPersistence());
       return mqttClient;
     } catch (Exception e) {
