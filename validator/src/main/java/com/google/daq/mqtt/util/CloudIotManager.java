@@ -68,12 +68,12 @@ public class CloudIotManager {
     return cloudIotConfig;
   }
 
-  private String getRegistryPath(String registryId) {
+  public String getRegistryPath() {
     return projectPath + "/registries/" + registryId;
   }
 
   private String getDevicePath(String registryId, String deviceId) {
-    return getRegistryPath(registryId) + "/devices/" + deviceId;
+    return getRegistryPath() + "/devices/" + deviceId;
   }
 
   private void initializeCloudIoT() {
@@ -168,7 +168,7 @@ public class CloudIotManager {
 
   private void createDevice(String deviceId, CloudDeviceSettings settings) throws IOException {
     try {
-      cloudIotRegistries.devices().create(getRegistryPath(registryId),
+      cloudIotRegistries.devices().create(getRegistryPath(),
           makeDevice(deviceId, settings, null)).execute();
     } catch (GoogleJsonResponseException e) {
       throw new RuntimeException("Remote error creating device " + deviceId, e);
@@ -205,7 +205,7 @@ public class CloudIotManager {
     try {
       List<Device> devices = cloudIotRegistries
           .devices()
-          .list(getRegistryPath(registryId))
+          .list(getRegistryPath())
           .setPageSize(LIST_PAGE_SIZE)
           .execute()
           .getDevices();
@@ -254,7 +254,7 @@ public class CloudIotManager {
   }
 
   public void bindDevice(String proxyDeviceId, String gatewayDeviceId) throws IOException {
-    cloudIotRegistries.bindDeviceToGateway(getRegistryPath(registryId),
+    cloudIotRegistries.bindDeviceToGateway(getRegistryPath(),
         getBindRequest(proxyDeviceId, gatewayDeviceId)).execute();
   }
 

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.Device;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.daq.mqtt.util.*;
 import com.google.daq.mqtt.util.ExceptionMap.ErrorTree;
 import org.everit.json.schema.Schema;
@@ -43,6 +44,7 @@ public class Registrar {
       .setDateFormat(new ISO8601DateFormat())
       .setSerializationInclusion(Include.NON_NULL);
   public static final String ALL_MATCH = "";
+  private static final String LOCAL_ONLY_PROJECT_ID = "--";
 
   private CloudIotManager cloudIotManager;
   private File siteConfig;
@@ -127,14 +129,16 @@ public class Registrar {
         }
         extraDevices.remove(localName);
         try {
-          updateCloudIoT(localDevice);
           localDevice.writeConfigFile();
-          Device device = Preconditions.checkNotNull(fetchDevice(localName),
-              "missing device " + localName);
-          BigInteger numId = Preconditions.checkNotNull(device.getNumId(),
-              "missing deviceNumId for " + localName);
-          localDevice.setDeviceNumId(numId.toString());
-          sendMetadataMessage(localDevice);
+          if (!localOnly()) {
+            updateCloudIoT(localDevice);
+            Device device = Preconditions.checkNotNull(fetchDevice(localName),
+                "missing device " + localName);
+            BigInteger numId = Preconditions.checkNotNull(device.getNumId(),
+                "missing deviceNumId for " + localName);
+            localDevice.setDeviceNumId(numId.toString());
+            sendMetadataMessage(localDevice);
+          }
         } catch (Exception e) {
           System.err.println("Deferring exception: " + e.toString());
           localDevice.getErrors().put("Registering", e);
@@ -209,8 +213,17 @@ public class Registrar {
   }
 
   private List<Device> fetchDeviceList(Pattern devicePattern) {
-    System.err.println("Fetching remote registry " + cloudIotManager.getRegistryId());
-    return cloudIotManager.fetchDeviceList(devicePattern);
+    if (localOnly()) {
+      System.err.println("Skipping remote registry fetch");
+      return ImmutableList.of();
+    } else {
+      System.err.println("Fetching remote registry " + cloudIotManager.getRegistryPath());
+      return cloudIotManager.fetchDeviceList(devicePattern);
+    }
+  }
+
+  private boolean localOnly() {
+    return LOCAL_ONLY_PROJECT_ID.equals(projectId);
   }
 
   private Map<String,LocalDevice> loadLocalDevices(Pattern devicePattern) {
