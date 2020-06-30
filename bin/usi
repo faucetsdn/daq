@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
 echo Starting USI 
-docker run -d --network=host --name daq-usi daqf/usi
+docker run -d --network=host --name daq-usi daqf/usi || true 
 
 echo DAQ autoclean docker kill daq-usi 
