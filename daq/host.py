@@ -64,7 +64,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
-    _DEFAULT_TELNET_PORT = 23
+    _DEFAULT_SWITCH_TELNET_PORT = 23
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
     _MODULE_CONFIG = "module_config.json"
@@ -102,7 +102,7 @@ class ConnectedHost:
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._finish_hook_script = config.get('finish_hook')
-        self._usi_url = config.get('usi_url')
+        self._usi_url = config.get('usi_setup', {}).get('url')
         self._mirror_intf_name = None
         self._monitor_ref = None
         self._monitor_start = None
@@ -287,7 +287,7 @@ class ConnectedHost:
             switch_model = usi.SwitchModel.OVS
         params = {
             "ip_addr": switch_config["ip"],
-            "telnet_port": switch_config["telnet_port"],
+            "telnet_port": switch_config["telnet_cmd_port"],
             "device_port": self.target_port,
             "model": switch_model,
             "username": switch_config["username"],
@@ -638,10 +638,12 @@ class ConnectedHost:
         return params
 
     def _get_switch_config(self):
+        telnet_cmd_port = int(self.switch_setup.get(
+            'telnet_cmd_port', self._DEFAULT_SWITCH_TELNET_PORT))
         return {
             'ip': self.switch_setup.get('ip_addr'),
             'model': self.switch_setup.get('model'),
-            'telnet_port': int(self.switch_setup.get('telnet_port', self._DEFAULT_TELNET_PORT)),
+            'telnet_cmd_port': telnet_cmd_port,
             'username': self.switch_setup.get('username'),
             'password': self.switch_setup.get('password')
         }

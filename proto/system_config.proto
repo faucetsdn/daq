@@ -116,9 +116,15 @@ message DaqConfig {
   int32 port_flap_timeout_sec = 48;
 
   // USI url
-  string usi_url = 49;
+  USISetup usi_setup = 49;
 }
 
+/**
+ * USI paramters
+**/
+message USISetup {
+  string url = 1;
+}
 
 /*
  * System configuraiton of the access switch. This is used by the system
@@ -143,8 +149,8 @@ message SwitchSetup {
   // IP address template and subnet for module ip addresses
   string mods_addr = 16;
  
-  // Switch connect Telnet port
-  int32 telnet_port = 17;
+  // telnet command port for USI to send switch commands
+  int32 telnet_cmd_port = 17;
 
   // Dataplane id of external OpenFlow switch
   string of_dpid = 41;

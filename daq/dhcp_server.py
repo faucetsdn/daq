@@ -1,4 +1,4 @@
-"""Gateway module for device testing"""
+"""DHCP server module for device testing"""
 
 import os
 
@@ -34,7 +34,7 @@ class DHCPServer():
             self._initialize()
         except Exception as e:
             LOGGER.error(
-                'Gateway initialization failed, terminating: %s', str(e))
+                'DHCP server initialization failed, terminating: %s', str(e))
             self.terminate()
             raise
 
@@ -93,7 +93,7 @@ class DHCPServer():
 
     def _startup_scan(self, host):
         assert not self._scan_monitor, 'startup_scan already active'
-        startup_file = '/tmp/gateway.pcap'
+        startup_file = '/tmp/dhcp_server.pcap'
         LOGGER.info('%s startup capture %s in container\'s %s', repr(self),
                     self._host_intf, startup_file)
         tcp_filter = ''
