@@ -51,7 +51,6 @@ class LocalDevice {
   private static final String RSA_CERT_PEM = "rsa_cert.pem";
   private static final String RSA_PRIVATE_PEM = "rsa_private.pem";
   private static final String RSA_PRIVATE_PKCS8 = "rsa_private.pkcs8";
-  private static final String PHYSICAL_TAG_ERROR = "Physical tag %s %s does not match expected %s";
 
   private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
   private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
@@ -171,13 +170,13 @@ class LocalDevice {
   public DeviceCredential readCredential() {
     try {
       if (hasGateway() && getAuthType() != null) {
-        throw new RuntimeException("Proxied devices should not have auth_type defined");
+        throw new RuntimeException("Proxied devices should not have cloud.auth_type defined");
       }
       if (!isDirectConnect()) {
         return null;
       }
       if (getAuthType() == null) {
-        throw new RuntimeException("Credential auth_type definition missing");
+        throw new RuntimeException("Credential cloud.auth_type definition missing");
       }
       File deviceKeyFile = new File(deviceDir, publicKeyFile());
       if (!deviceKeyFile.exists()) {
@@ -303,6 +302,7 @@ class LocalDevice {
   }
 
   public void validateEnvelope(String registryId, String siteName) {
+    checkConsistency(siteName);
     try {
       UdmiSchema.Envelope envelope = new UdmiSchema.Envelope();
       envelope.deviceId = deviceId;
@@ -315,7 +315,6 @@ class LocalDevice {
     } catch (Exception e) {
       throw new IllegalStateException("Validating envelope " + deviceId, e);
     }
-    checkConsistency(siteName);
   }
 
   private String fakeProjectId() {
@@ -323,15 +322,17 @@ class LocalDevice {
   }
 
   private void checkConsistency(String expectedSite) {
-    String siteName = metadata.system.location.site;
-    String assetSite = metadata.system.physical_tag.asset.site;
     String assetName = metadata.system.physical_tag.asset.name;
-    Preconditions.checkState(expectedSite.equals(siteName),
-        String.format(PHYSICAL_TAG_ERROR, "location", siteName, expectedSite));
-    Preconditions.checkState(expectedSite.equals(assetSite),
-        String.format(PHYSICAL_TAG_ERROR, "site", assetSite, expectedSite));
     Preconditions.checkState(deviceId.equals(assetName),
-        String.format(PHYSICAL_TAG_ERROR, "name", assetName, deviceId));
+        String.format("system.physical_tag.asset.name %s does not match expected %s", assetName, deviceId));
+
+    String assetSite = metadata.system.physical_tag.asset.site;
+    Preconditions.checkState(expectedSite.equals(assetSite),
+        String.format("system.physical_tag.asset.site %s does not match expected %s", assetSite, expectedSite));
+
+    String siteName = metadata.system.location.site;
+    Preconditions.checkState(expectedSite.equals(siteName),
+        String.format("system.location.site %s does not match expected %s", siteName, expectedSite));
   }
 
   private String makeNumId(UdmiSchema.Envelope envelope) {
