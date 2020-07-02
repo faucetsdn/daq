@@ -1,0 +1,650 @@
+{
+  "pointset": {
+    "points": {
+      "energy_sensor_active_delivered_40": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_active_delivered_41": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_active_delivered_42": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_active_delivered_43": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_active_delivered_44": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_active_delivered_45": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_apparent_delivered_40": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_apparent_delivered_41": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_apparent_delivered_42": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_apparent_delivered_43": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_apparent_delivered_44": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_apparent_delivered_45": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_reactive_delivered_40": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_reactive_delivered_41": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_reactive_delivered_42": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_reactive_delivered_43": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_reactive_delivered_44": {
+        "units": "Kilowatt-hours"
+      },
+      "energy_sensor_reactive_delivered_45": {
+        "units": "Kilowatt-hours"
+      },
+      "frequency_sensor_40": {
+        "units": "Hertz"
+      },
+      "frequency_sensor_41": {
+        "units": "Hertz"
+      },
+      "frequency_sensor_42": {
+        "units": "Hertz"
+      },
+      "frequency_sensor_43": {
+        "units": "Hertz"
+      },
+      "frequency_sensor_44": {
+        "units": "Hertz"
+      },
+      "frequency_sensor_45": {
+        "units": "Hertz"
+      },
+      "linea_current_sensor_40": {
+        "units": "Amperes"
+      },
+      "linea_current_sensor_41": {
+        "units": "Amperes"
+      },
+      "linea_current_sensor_42": {
+        "units": "Amperes"
+      },
+      "linea_current_sensor_43": {
+        "units": "Amperes"
+      },
+      "linea_current_sensor_44": {
+        "units": "Amperes"
+      },
+      "linea_current_sensor_45": {
+        "units": "Amperes"
+      },
+      "linea_current_sensor_unbalance_40": {
+        "units": "Percent"
+      },
+      "linea_current_sensor_unbalance_41": {
+        "units": "Percent"
+      },
+      "linea_current_sensor_unbalance_42": {
+        "units": "Percent"
+      },
+      "linea_current_sensor_unbalance_43": {
+        "units": "Percent"
+      },
+      "linea_current_sensor_unbalance_44": {
+        "units": "Percent"
+      },
+      "linea_current_sensor_unbalance_45": {
+        "units": "Percent"
+      },
+      "linea_lineb_voltage_sensor_40": {
+        "units": "Volts"
+      },
+      "linea_lineb_voltage_sensor_41": {
+        "units": "Volts"
+      },
+      "linea_lineb_voltage_sensor_42": {
+        "units": "Volts"
+      },
+      "linea_lineb_voltage_sensor_43": {
+        "units": "Volts"
+      },
+      "linea_lineb_voltage_sensor_44": {
+        "units": "Volts"
+      },
+      "linea_lineb_voltage_sensor_45": {
+        "units": "Volts"
+      },
+      "linea_linec_voltage_sensor_40": {
+        "units": "Volts"
+      },
+      "linea_linec_voltage_sensor_41": {
+        "units": "Volts"
+      },
+      "linea_linec_voltage_sensor_42": {
+        "units": "Volts"
+      },
+      "linea_linec_voltage_sensor_43": {
+        "units": "Volts"
+      },
+      "linea_linec_voltage_sensor_44": {
+        "units": "Volts"
+      },
+      "linea_linec_voltage_sensor_45": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_40": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_41": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_42": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_43": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_44": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_45": {
+        "units": "Volts"
+      },
+      "linea_neutral_voltage_sensor_unbalance_40": {
+        "units": "Percent"
+      },
+      "linea_neutral_voltage_sensor_unbalance_41": {
+        "units": "Percent"
+      },
+      "linea_neutral_voltage_sensor_unbalance_42": {
+        "units": "Percent"
+      },
+      "linea_neutral_voltage_sensor_unbalance_43": {
+        "units": "Percent"
+      },
+      "linea_neutral_voltage_sensor_unbalance_44": {
+        "units": "Percent"
+      },
+      "linea_neutral_voltage_sensor_unbalance_45": {
+        "units": "Percent"
+      },
+      "lineb_current_sensor_40": {
+        "units": "Amperes"
+      },
+      "lineb_current_sensor_41": {
+        "units": "Amperes"
+      },
+      "lineb_current_sensor_42": {
+        "units": "Amperes"
+      },
+      "lineb_current_sensor_43": {
+        "units": "Amperes"
+      },
+      "lineb_current_sensor_44": {
+        "units": "Amperes"
+      },
+      "lineb_current_sensor_45": {
+        "units": "Amperes"
+      },
+      "lineb_current_sensor_unbalance_40": {
+        "units": "Percent"
+      },
+      "lineb_current_sensor_unbalance_41": {
+        "units": "Percent"
+      },
+      "lineb_current_sensor_unbalance_42": {
+        "units": "Percent"
+      },
+      "lineb_current_sensor_unbalance_43": {
+        "units": "Percent"
+      },
+      "lineb_current_sensor_unbalance_44": {
+        "units": "Percent"
+      },
+      "lineb_current_sensor_unbalance_45": {
+        "units": "Percent"
+      },
+      "lineb_linec_voltage_sensor_40": {
+        "units": "Volts"
+      },
+      "lineb_linec_voltage_sensor_41": {
+        "units": "Volts"
+      },
+      "lineb_linec_voltage_sensor_42": {
+        "units": "Volts"
+      },
+      "lineb_linec_voltage_sensor_43": {
+        "units": "Volts"
+      },
+      "lineb_linec_voltage_sensor_44": {
+        "units": "Volts"
+      },
+      "lineb_linec_voltage_sensor_45": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_40": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_41": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_42": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_43": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_44": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_45": {
+        "units": "Volts"
+      },
+      "lineb_neutral_voltage_sensor_unbalance_40": {
+        "units": "Percent"
+      },
+      "lineb_neutral_voltage_sensor_unbalance_41": {
+        "units": "Percent"
+      },
+      "lineb_neutral_voltage_sensor_unbalance_42": {
+        "units": "Percent"
+      },
+      "lineb_neutral_voltage_sensor_unbalance_43": {
+        "units": "Percent"
+      },
+      "lineb_neutral_voltage_sensor_unbalance_44": {
+        "units": "Percent"
+      },
+      "lineb_neutral_voltage_sensor_unbalance_45": {
+        "units": "Percent"
+      },
+      "linec_current_sensor_40": {
+        "units": "Amperes"
+      },
+      "linec_current_sensor_41": {
+        "units": "Amperes"
+      },
+      "linec_current_sensor_42": {
+        "units": "Amperes"
+      },
+      "linec_current_sensor_43": {
+        "units": "Amperes"
+      },
+      "linec_current_sensor_44": {
+        "units": "Amperes"
+      },
+      "linec_current_sensor_45": {
+        "units": "Amperes"
+      },
+      "linec_current_sensor_unbalance_40": {
+        "units": "Percent"
+      },
+      "linec_current_sensor_unbalance_41": {
+        "units": "Percent"
+      },
+      "linec_current_sensor_unbalance_42": {
+        "units": "Percent"
+      },
+      "linec_current_sensor_unbalance_43": {
+        "units": "Percent"
+      },
+      "linec_current_sensor_unbalance_44": {
+        "units": "Percent"
+      },
+      "linec_current_sensor_unbalance_45": {
+        "units": "Percent"
+      },
+      "linec_neutral_voltage_sensor_40": {
+        "units": "Volts"
+      },
+      "linec_neutral_voltage_sensor_41": {
+        "units": "Volts"
+      },
+      "linec_neutral_voltage_sensor_42": {
+        "units": "Volts"
+      },
+      "linec_neutral_voltage_sensor_43": {
+        "units": "Volts"
+      },
+      "linec_neutral_voltage_sensor_44": {
+        "units": "Volts"
+      },
+      "linec_neutral_voltage_sensor_45": {
+        "units": "Volts"
+      },
+      "linec_neutral_voltage_sensor_unbalance_40": {
+        "units": "Percent"
+      },
+      "linec_neutral_voltage_sensor_unbalance_41": {
+        "units": "Percent"
+      },
+      "linec_neutral_voltage_sensor_unbalance_42": {
+        "units": "Percent"
+      },
+      "linec_neutral_voltage_sensor_unbalance_43": {
+        "units": "Percent"
+      },
+      "linec_neutral_voltage_sensor_unbalance_44": {
+        "units": "Percent"
+      },
+      "linec_neutral_voltage_sensor_unbalance_45": {
+        "units": "Percent"
+      },
+      "power_sensor_linea_active_40": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linea_active_41": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linea_active_42": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linea_active_43": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linea_active_44": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linea_active_45": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linea_apparent_40": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linea_apparent_41": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linea_apparent_42": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linea_apparent_43": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linea_apparent_44": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linea_apparent_45": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linea_reactive_40": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linea_reactive_41": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linea_reactive_42": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linea_reactive_43": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linea_reactive_44": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linea_reactive_45": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_lineb_active_40": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_lineb_active_41": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_lineb_active_42": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_lineb_active_43": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_lineb_active_44": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_lineb_active_45": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_lineb_apparent_40": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_lineb_apparent_41": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_lineb_apparent_42": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_lineb_apparent_43": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_lineb_apparent_44": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_lineb_apparent_45": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_lineb_reactive_40": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_lineb_reactive_41": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_lineb_reactive_42": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_lineb_reactive_43": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_lineb_reactive_44": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_lineb_reactive_45": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linec_active_40": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linec_active_41": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linec_active_42": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linec_active_43": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linec_active_44": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linec_active_45": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_linec_apparent_40": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linec_apparent_41": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linec_apparent_42": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linec_apparent_43": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linec_apparent_44": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linec_apparent_45": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_linec_reactive_40": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linec_reactive_41": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linec_reactive_42": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linec_reactive_43": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linec_reactive_44": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_linec_reactive_45": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_total_active_40": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_total_active_41": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_total_active_42": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_total_active_43": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_total_active_44": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_total_active_45": {
+        "units": "Kilowatts"
+      },
+      "power_sensor_total_apparent_40": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_total_apparent_41": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_total_apparent_42": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_total_apparent_43": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_total_apparent_44": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_total_apparent_45": {
+        "units": "Kilo-volt-amperes"
+      },
+      "power_sensor_total_reactive_40": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_total_reactive_41": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_total_reactive_42": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_total_reactive_43": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_total_reactive_44": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "power_sensor_total_reactive_45": {
+        "units": "Kilo-volt-amperes-reactive"
+      },
+      "powerfactor_percentage_sensor_linea_40": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linea_41": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linea_42": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linea_43": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linea_44": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linea_45": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_lineb_40": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_lineb_41": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_lineb_42": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_lineb_43": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_lineb_44": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_lineb_45": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linec_40": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linec_41": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linec_42": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linec_43": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linec_44": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_linec_45": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_total_40": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_total_41": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_total_42": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_total_43": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_total_44": {
+        "units": "Power-factor"
+      },
+      "powerfactor_percentage_sensor_total_45": {
+        "units": "Power-factor"
+      }
+    }
+  },
+  "system": {
+    "location": {
+      "site_name": "UK-LON-S2"
+    },
+    "physical_tag": {
+      "asset": {
+        "guid": "ifc://1hh$6W90vEJOHgOMqXNzry",
+        "name": "UK-LON-S2_BMS-1008_1"
+      }
+    }
+  },
+  "version": 1,
+  "timestamp": "2020-05-21T15:55:40Z",
+  "hash": "a490e046"
+}

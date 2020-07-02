@@ -1,0 +1,6 @@
+Validating 1 schemas
+  Validating 1 files against metadata.json
+    Against input metadata.tests/example.json
+      #/system/location: 2 schema violations found
+        #/system/location/position: extraneous key [z] is not permitted
+        #/system/location: extraneous key [level] is not permitted
