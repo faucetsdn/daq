@@ -9,8 +9,8 @@ option java_outer_classname = "USIProto";
 option java_package = "grpc";
 
 service USIService {
-  rpc GetPower(SwitchInput) returns (Power) {}
-  rpc GetInterface(SwitchInput) returns (Interface) {}
+  rpc GetPower(SwitchInput) returns (PowerResponse) {}
+  rpc GetInterface(SwitchInput) returns (InterfaceResponse) {}
   rpc disconnect(SwitchInput) returns (SwitchActionResponse) {}
   rpc connect(SwitchInput) returns (SwitchActionResponse) {}
 }
@@ -19,14 +19,14 @@ message SwitchActionResponse {
   bool success = 1;
 }
 
-message Power {
+message PowerResponse {
   float current_power_consumption = 1;
   float max_power_consumption = 2;
   POESupport poe_support = 3;
   POEStatus poe_status = 4;
 }
 
-message Interface {
+message InterfaceResponse {
   LinkStatus link_status = 1;
   int32 link_speed = 2;
   string duplex = 3;

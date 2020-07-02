@@ -39,7 +39,7 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
   protected static final int MAX_EMPTY_WAIT_COUNT = 70;
 
   protected TelnetClient telnetClient;
-  protected SwitchController interrogator;
+  protected BaseSwitchController interrogator;
 
   protected String remoteIpAddress = "";
   protected int remotePort = 23;
@@ -62,7 +62,7 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
    * @param debug For more verbose output.
    */
   public SwitchTelnetClientSocket(
-      String remoteIpAddress, int remotePort, SwitchController interrogator, boolean debug) {
+      String remoteIpAddress, int remotePort, BaseSwitchController interrogator, boolean debug) {
     this.remoteIpAddress = remoteIpAddress;
     this.remotePort = remotePort;
     this.interrogator = interrogator;

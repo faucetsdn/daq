@@ -15,13 +15,13 @@ package daq.usi.allied;
  * limitations under the License.
  */
 
+import daq.usi.BaseSwitchController;
 import daq.usi.ResponseHandler;
-import daq.usi.SwitchController;
-import grpc.Interface;
+import grpc.InterfaceResponse;
 import grpc.LinkStatus;
 import grpc.POEStatus;
 import grpc.POESupport;
-import grpc.Power;
+import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
-public class AlliedTelesisX230 extends SwitchController {
+public class AlliedTelesisX230 extends BaseSwitchController {
   private static final String[] powerExpected =
       {"dev_interface", "admin", "pri", "oper", "power", "device", "dev_class", "max"};
   private static final String[] showPowerExpected =
@@ -74,7 +74,7 @@ public class AlliedTelesisX230 extends SwitchController {
    * @param telnetPort      switch telnet port
    * @param user            switch username
    * @param password        switch password
-   * @param debug for verbose output
+   * @param debug           for verbose output
    */
   public AlliedTelesisX230(
       String remoteIpAddress,
@@ -126,7 +126,7 @@ public class AlliedTelesisX230 extends SwitchController {
 
 
   @Override
-  public void getPower(int devicePort, ResponseHandler<Power> handler) throws Exception {
+  public void getPower(int devicePort, ResponseHandler<PowerResponse> handler) throws Exception {
     while (commandPending) {
       Thread.sleep(WAIT_MS);
     }
@@ -145,7 +145,8 @@ public class AlliedTelesisX230 extends SwitchController {
   }
 
   @Override
-  public void getInterface(int devicePort, ResponseHandler<Interface> handler) throws Exception {
+  public void getInterface(int devicePort, ResponseHandler<InterfaceResponse> handler)
+      throws Exception {
     while (commandPending) {
       Thread.sleep(WAIT_MS);
     }
@@ -199,8 +200,8 @@ public class AlliedTelesisX230 extends SwitchController {
     managePort(devicePort, handler, false);
   }
 
-  private Interface buildInterfaceResponse(Map<String, String> interfaceMap) {
-    Interface.Builder response = Interface.newBuilder();
+  private InterfaceResponse buildInterfaceResponse(Map<String, String> interfaceMap) {
+    InterfaceResponse.Builder response = InterfaceResponse.newBuilder();
     String duplex = interfaceMap.getOrDefault("duplex", "");
     int speed = 0;
     try {
@@ -215,8 +216,8 @@ public class AlliedTelesisX230 extends SwitchController {
         .build();
   }
 
-  private Power buildPowerResponse(Map<String, String> powerMap) {
-    Power.Builder response = Power.newBuilder();
+  private PowerResponse buildPowerResponse(Map<String, String> powerMap) {
+    PowerResponse.Builder response = PowerResponse.newBuilder();
     float maxPower = 0;
     float currentPower = 0;
     try {

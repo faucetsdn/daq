@@ -1,25 +1,25 @@
 package daq.usi.ovs;
 
-import daq.usi.ISwitchController;
 import daq.usi.ResponseHandler;
-import grpc.Interface;
+import daq.usi.SwitchController;
+import grpc.InterfaceResponse;
 import grpc.LinkStatus;
 import grpc.POEStatus;
 import grpc.POESupport;
-import grpc.Power;
+import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 
-public class OpenVSwitch implements ISwitchController {
-  private String fauxIface;
+public class OpenVSwitch implements SwitchController {
+  private final String fauxIface;
 
   public OpenVSwitch(String fauxIface) {
     this.fauxIface = fauxIface;
   }
 
   @Override
-  public void getPower(int devicePort, ResponseHandler<Power> handler) throws Exception {
-    Power.Builder response = Power.newBuilder();
-    Power power = response.setPoeStatus(POEStatus.OFF)
+  public void getPower(int devicePort, ResponseHandler<PowerResponse> handler) throws Exception {
+    PowerResponse.Builder response = PowerResponse.newBuilder();
+    PowerResponse power = response.setPoeStatus(POEStatus.OFF)
         .setPoeSupport(POESupport.DISABLED)
         .setMaxPowerConsumption(0)
         .setCurrentPowerConsumption(0).build();
@@ -27,9 +27,10 @@ public class OpenVSwitch implements ISwitchController {
   }
 
   @Override
-  public void getInterface(int devicePort, ResponseHandler<Interface> handler) throws Exception {
-    Interface.Builder response = Interface.newBuilder();
-    Interface iface = response.setLinkStatus(LinkStatus.UP)
+  public void getInterface(int devicePort, ResponseHandler<InterfaceResponse> handler)
+      throws Exception {
+    InterfaceResponse.Builder response = InterfaceResponse.newBuilder();
+    InterfaceResponse iface = response.setLinkStatus(LinkStatus.UP)
         .setDuplex("")
         .setLinkSpeed(0)
         .build();

@@ -15,13 +15,13 @@ package daq.usi.cisco;
  * limitations under the License.
  */
 
+import daq.usi.BaseSwitchController;
 import daq.usi.ResponseHandler;
-import daq.usi.SwitchController;
-import grpc.Interface;
+import grpc.InterfaceResponse;
 import grpc.LinkStatus;
 import grpc.POEStatus;
 import grpc.POESupport;
-import grpc.Power;
+import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 
-public class Cisco9300 extends SwitchController {
+public class Cisco9300 extends BaseSwitchController {
 
   private static final String[] interfaceExpected =
       {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
@@ -156,7 +156,7 @@ public class Cisco9300 extends SwitchController {
   }
 
   @Override
-  public void getPower(int devicePort, ResponseHandler<Power> powerResponseHandler)
+  public void getPower(int devicePort, ResponseHandler<PowerResponse> powerResponseHandler)
       throws Exception {
     while (commandPending) {
       Thread.sleep(WAIT_MS);
@@ -176,7 +176,8 @@ public class Cisco9300 extends SwitchController {
   }
 
   @Override
-  public void getInterface(int devicePort, ResponseHandler<Interface> handler) throws Exception {
+  public void getInterface(int devicePort, ResponseHandler<InterfaceResponse> handler)
+      throws Exception {
     while (commandPending) {
       Thread.sleep(WAIT_MS);
     }
@@ -230,8 +231,8 @@ public class Cisco9300 extends SwitchController {
     managePort(devicePort, handler, false);
   }
 
-  private Interface buildInterfaceResponse(Map<String, String> interfaceMap) {
-    Interface.Builder response = Interface.newBuilder();
+  private InterfaceResponse buildInterfaceResponse(Map<String, String> interfaceMap) {
+    InterfaceResponse.Builder response = InterfaceResponse.newBuilder();
     String duplex = interfaceMap.getOrDefault("duplex", "");
     if (duplex.startsWith("a-")) { // Interface in Auto Duplex
       duplex = duplex.replaceFirst("a-", "");
@@ -249,8 +250,8 @@ public class Cisco9300 extends SwitchController {
         .build();
   }
 
-  private Power buildPowerResponse(Map<String, String> powerMap) {
-    Power.Builder response = Power.newBuilder();
+  private PowerResponse buildPowerResponse(Map<String, String> powerMap) {
+    PowerResponse.Builder response = PowerResponse.newBuilder();
     float maxPower = Float.parseFloat(powerMap.get("max"));
     float currentPower = Float.parseFloat(powerMap.get("power"));
 

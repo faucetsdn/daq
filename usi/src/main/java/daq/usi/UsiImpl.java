@@ -3,8 +3,8 @@ package daq.usi;
 import daq.usi.allied.AlliedTelesisX230;
 import daq.usi.cisco.Cisco9300;
 import daq.usi.ovs.OpenVSwitch;
-import grpc.Interface;
-import grpc.Power;
+import grpc.InterfaceResponse;
+import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 import grpc.SwitchInfo;
 import grpc.SwitchInput;
@@ -14,14 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
-  private Map<String, SwitchController> switchControllers;
+  private final Map<String, BaseSwitchController> switchControllers;
 
   public UsiImpl() {
     super();
     switchControllers = new HashMap<>();
   }
 
-  private ISwitchController getSwitchController(SwitchInput switchInput) {
+  private SwitchController getSwitchController(SwitchInput switchInput) {
     if (!switchInput.hasSwitchInfo()) {
       return new OpenVSwitch(switchInput.getFauxInterface());
     }
@@ -29,7 +29,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
     String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
         String.valueOf(switchInfo.getTelnetPort()), switchInfo.getUsername(),
         switchInfo.getPassword());
-    SwitchController sc = switchControllers.get(repr);
+    BaseSwitchController sc = switchControllers.get(repr);
     if (sc == null) {
       switch (switchInfo.getModel()) {
         case ALLIED_TELESIS_X230: {
@@ -52,8 +52,8 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void getPower(SwitchInput request, StreamObserver<Power> responseObserver) {
-    ISwitchController sc = getSwitchController(request);
+  public void getPower(SwitchInput request, StreamObserver<PowerResponse> responseObserver) {
+    SwitchController sc = getSwitchController(request);
     try {
       sc.getPower(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
@@ -63,8 +63,9 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void getInterface(SwitchInput request, StreamObserver<Interface> responseObserver) {
-    ISwitchController sc = getSwitchController(request);
+  public void getInterface(SwitchInput request,
+                           StreamObserver<InterfaceResponse> responseObserver) {
+    SwitchController sc = getSwitchController(request);
     try {
       sc.getInterface(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
@@ -75,7 +76,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
 
   @Override
   public void connect(SwitchInput request, StreamObserver<SwitchActionResponse> responseObserver) {
-    ISwitchController sc = getSwitchController(request);
+    SwitchController sc = getSwitchController(request);
     try {
       sc.connect(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
@@ -87,7 +88,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   @Override
   public void disconnect(SwitchInput request,
                          StreamObserver<SwitchActionResponse> responseObserver) {
-    ISwitchController sc = getSwitchController(request);
+    SwitchController sc = getSwitchController(request);
     try {
       sc.disconnect(request.getDevicePort(), responseObserver::onNext);
     } catch (Exception e) {
