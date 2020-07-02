@@ -15,15 +15,12 @@ package daq.usi;
  * limitations under the License.
  */
 
-import grpc.Interface;
-import grpc.Power;
-import grpc.SwitchActionResponse;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public abstract class SwitchController implements Runnable {
+public abstract class SwitchController implements Runnable, ISwitchController {
   /**
    * Terminal Prompt ends with '#' when enabled, '>' when not enabled.
    */
@@ -181,17 +178,6 @@ public abstract class SwitchController implements Runnable {
   protected abstract void handleLoginMessage(String consoleData) throws Exception;
 
   protected abstract void handleEnableMessage(String consoleData) throws Exception;
-
-  public abstract void getPower(int devicePort, ResponseHandler<Power> handler) throws Exception;
-
-  public abstract void getInterface(int devicePort, ResponseHandler<Interface> handler)
-      throws Exception;
-
-  public abstract void connect(int devicePort, ResponseHandler<SwitchActionResponse> handler)
-      throws Exception;
-
-  public abstract void disconnect(int devicePort, ResponseHandler<SwitchActionResponse> handler)
-      throws Exception;
 
   @Override
   public void run() {
