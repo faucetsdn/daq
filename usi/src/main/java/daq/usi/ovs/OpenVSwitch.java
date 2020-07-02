@@ -10,10 +10,10 @@ import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 
 public class OpenVSwitch implements SwitchController {
-  private final String fauxIface;
+  private final String fauxInterface;
 
-  public OpenVSwitch(String fauxIface) {
-    this.fauxIface = fauxIface;
+  public OpenVSwitch(String fauxInterface) {
+    this.fauxInterface = fauxInterface;
   }
 
   @Override
@@ -40,7 +40,7 @@ public class OpenVSwitch implements SwitchController {
   private void managePort(int devicePort, ResponseHandler<SwitchActionResponse> handler,
                           boolean enabled) throws Exception {
     ProcessBuilder processBuilder = new ProcessBuilder();
-    processBuilder.command("bash", "-c", "ifconfig " + fauxIface + (enabled ? " up" : " down"));
+    processBuilder.command("bash", "-c", "ifconfig " + fauxInterface + (enabled ? " up" : " down"));
     Process process = processBuilder.start();
     int exitCode = process.waitFor();
     handler.receiveData(SwitchActionResponse.newBuilder().setSuccess(exitCode == 0).build());
