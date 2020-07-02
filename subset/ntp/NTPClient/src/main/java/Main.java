@@ -20,7 +20,7 @@ public class Main {
         serverName = args[0];
         port = Integer.parseInt(args[1]);
         timerPeriod = Integer.parseInt(args[2]);
-        version = Byte.parseByte(args[3));
+        version = Byte.parseByte(args[3]);
 
         Runnable senderRunnable = new Runnable() {
             @Override
