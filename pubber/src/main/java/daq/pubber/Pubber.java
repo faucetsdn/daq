@@ -40,7 +40,7 @@ public class Pubber {
   private static final int MIN_REPORT_MS = 200;
   private static final int DEFAULT_REPORT_MS = 5000;
   private static final int CONFIG_WAIT_TIME_MS = 10000;
-  private static final int STATE_THROTTLE_MS = 1500;
+  private static final int STATE_THROTTLE_MS = 2000;
   private static final String CONFIG_ERROR_STATUS_KEY = "config_error";
   private static final int LOGGING_MOD_COUNT = 10;
 
@@ -262,8 +262,8 @@ public class Pubber {
 
   private void publishStateMessage(String deviceId) {
     lastStateTimeMs = sleepUntil(lastStateTimeMs + STATE_THROTTLE_MS);
-    info("Sending state message for device " + deviceId);
     deviceState.timestamp = new Date();
+    info("Sending state message for device " + deviceId + " at " + deviceState.timestamp);
     mqttPublisher.publish(deviceId, STATE_TOPIC, deviceState);
   }
 
