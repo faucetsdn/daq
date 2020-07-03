@@ -136,12 +136,15 @@ elif [ -n "${options[bacnetfail]}" ]; then
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
+# Queries the NTP server learnt from DHCP.
 if [ -n "${options[ntpv4]}" ]; then
-    echo Starting ntp version 4 client.
-    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar time.google.com 123 3 4 &
+    dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
+    ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
+    echo Transmitting NTP query to $ntp_server using NTPv4
+    ntpdate -q -o 4 $ntp_server &
 elif [ -n "${options[ntpv3]}" ]; then
-    echo Starting ntp version 3 client.
-    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar time.google.com 123 3 3 &
+    echo Transmitting NTP query to time.google.com using NTPv3
+    ntpdate -q -o 3 time.google.com &
 fi
 
 # ntp_pass queries the NTP server learnt from DHCP. ntp_fail sends to time.google.com
