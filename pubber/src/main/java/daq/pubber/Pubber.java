@@ -43,6 +43,7 @@ public class Pubber {
   private static final int STATE_THROTTLE_MS = 2000;
   private static final String CONFIG_ERROR_STATUS_KEY = "config_error";
   private static final int LOGGING_MOD_COUNT = 10;
+  public static final String KEY_SITE_PATH_FORMAT = "%s/devices/%s/rsa_private.pkcs8";
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -163,6 +164,10 @@ public class Pubber {
   }
 
   private void initialize() {
+    Preconditions.checkNotNull(configuration.deviceId, "configuration deviceId not defined");
+    if (configuration.sitePath != null) {
+      configuration.keyFile = String.format(KEY_SITE_PATH_FORMAT, configuration.sitePath, configuration.deviceId);
+    }
     Preconditions.checkState(mqttPublisher == null, "mqttPublisher already defined");
     Preconditions.checkNotNull(configuration.keyFile, "configuration keyFile not defined");
     System.err.println("Loading device key file from " + configuration.keyFile);
