@@ -1,4 +1,0 @@
-include: [uniform.yaml, dps.yaml]
-version: 2
-vlans:
-  Faucet_IoT: {description: Faucet IoT, vid: 100}

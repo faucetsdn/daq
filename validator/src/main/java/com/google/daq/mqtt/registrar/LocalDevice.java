@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.api.services.cloudiot.v1.model.DeviceCredential;
 import com.google.common.base.Preconditions;
@@ -40,6 +41,7 @@ class LocalDevice {
       .setSerializationInclusion(Include.NON_NULL);
 
   private static final ObjectMapper OBJECT_MAPPER = OBJECT_MAPPER_RAW.copy()
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .enable(SerializationFeature.INDENT_OUTPUT);
 
   private static final String RSA_CERT_TYPE = "RS256_X509";
@@ -60,6 +62,7 @@ class LocalDevice {
   public static final String METADATA_SUBFOLDER = "metadata";
   private static final String ERROR_FORMAT_INDENT = "  ";
   private static final int MAX_METADATA_LENGTH = 32767;
+  public static final String INVALID_METADATA_HASH = "INVALID";
 
   private final String deviceId;
   private final Map<String, Schema> schemas;
@@ -133,6 +136,9 @@ class LocalDevice {
   }
 
   private String metadataHash() {
+    if (metadata == null) {
+      return INVALID_METADATA_HASH;
+    }
     String savedHash = metadata.hash;
     Date savedTimestamp = metadata.timestamp;
     try {
@@ -343,6 +349,12 @@ class LocalDevice {
   }
 
   void writeNormalized() {
+    File metadataFile = new File(deviceDir, NORMALIZED_JSON);
+    if (metadata == null) {
+      System.err.println("Deleting (invalid) " + metadataFile.getAbsolutePath());
+      metadataFile.delete();
+      return;
+    }
     UdmiSchema.Metadata normalized = readNormalized();
     String writeHash = metadataHash();
     if (normalized.hash != null && normalized.hash.equals(writeHash)) {
@@ -350,8 +362,7 @@ class LocalDevice {
     }
     metadata.timestamp = new Date();
     metadata.hash = writeHash;
-    File metadataFile = new File(deviceDir, NORMALIZED_JSON);
-    System.err.println("Writing " + metadataFile.getAbsolutePath());
+    System.err.println("Writing normalized " + metadataFile.getAbsolutePath());
     try (OutputStream outputStream = new FileOutputStream(metadataFile)) {
       // Super annoying, but can't set this on the global static instance.
       JsonGenerator generator = OBJECT_MAPPER.getFactory()
@@ -386,6 +397,10 @@ class LocalDevice {
 
   public ExceptionMap getErrors() {
     return exceptionMap;
+  }
+
+  public boolean hasValidMetadata() {
+    return metadata != null;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {

@@ -14,6 +14,12 @@
     },
     "network": {
       "enabled": true
+    },
+    "manual": {
+      "enabled": true
+    },
+    "ntp": {
+      "enabled": true
     }
   },
   "process": {
@@ -40,6 +46,14 @@
       "required": "pass",
       "category": "Security",
       "expected": "Recommended"
+    },
+    "manual.test.travis": {
+      "required": "pass",
+      "category": "Security",
+      "expected": "Recommended",
+      "type": "manual",
+      "outcome" : "pass",
+      "summary" : "for testing"
     }
   }
 }

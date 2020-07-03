@@ -1,0 +1,10 @@
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install python python-setuptools python-pip netcat
+
+RUN pip install scapy
+
+COPY subset/ntp/ntp_tests.py .
+COPY subset/ntp/test_ntp .
+
+CMD ["./test_ntp"]

@@ -34,7 +34,7 @@ A setup for the `pass` test, as an example, woud be configured as follows
 * `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
 
 This, of course, only works for local development when using the `local_tests.conf` config. To
-formalize a test and include it in the overal system build it should be included in
+formalize a test and include it in the overall system build it should be included in
 `config/modules/all.conf`.
 
 ## Component Build
