@@ -202,12 +202,8 @@ function handleHeartbeat(origin, message) {
     }),
     heartbeatDoc.get().then((result) => {
       const current = result.data();
-      if (current && current.message) {
-        console.log('heartbeat message', current.message.timestamp,
-                    message.timestamp, current.message.timestamp < message.timestamp);
-      }
-      if (!current || !current.message || current.message.timestamp < message.timestamp) {
-        console.log('heartbeat update', origin);
+      const defined = current && current.message && current.message.timestamp;
+      if (!defined || current.message.timestamp < message.timestamp) {
         return heartbeatDoc.set({
           'updated': timestamp,
           'message': message
