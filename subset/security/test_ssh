@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash -e
 #
 # Checks if a device only support SSHv2
 # Runs NMAP script to check if a device runs 

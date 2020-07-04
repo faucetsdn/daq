@@ -1,0 +1,7 @@
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install nmap
+
+COPY subset/security/test_ssh .
+
+CMD ./test_ssh
