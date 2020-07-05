@@ -62,7 +62,7 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntp_pass
+    opts: brute broadcast_client ntp_pass ssh
   faux-2:
     opts: nobrute expiredtls bacnetfail pubber passwordfail ntp_fail opendns
   faux-3:
@@ -114,6 +114,7 @@ capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
+capture_test_results ssh
 
 # Capture peripheral logs
 more inst/run-port-*/scans/ip_triggers.txt | cat

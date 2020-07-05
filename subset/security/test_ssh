@@ -11,7 +11,7 @@ TEST_DESCRIPTION="Check that device only support SSHv2"
 REPORT=/tmp/report.txt
 LOG=/tmp/nmap_log.txt
 
-nmap -sV -sC -oN $LOG $TARGET_IP
+nmap -sV -sC $TARGET_IP > $LOG
 
 nmap_log=$(cat $LOG )
 
@@ -39,6 +39,6 @@ result_and_summary="RESULT ${test_outcome} ${TEST_NAME} ${test_summary}"
 write_out_result $REPORT \
             "$TEST_NAME" \
             "$TEST_DESCRIPTION" \
-            "$nmap_log" \
+            "$sshv2" \
             "$result_and_summary"
             

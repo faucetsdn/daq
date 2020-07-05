@@ -46,7 +46,7 @@ RESULT pass security.tls.v1_3.x509 Certificate active for current date and publi
 RESULT skip security.passwords.http Port 80 is not open on target device.
 RESULT skip security.passwords.https Port 443 is not open on target device.
 RESULT skip security.passwords.telnet Port 23 is not open on target device.
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
+RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT fail security.passwords.http Default passwords have not been changed.
 RESULT fail security.passwords.https Default passwords have not been changed.
 RESULT fail security.passwords.telnet Default passwords have not been changed.
@@ -57,6 +57,9 @@ RESULT pass security.passwords.telnet Default passwords have been changed.
 RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
+RESULT pass security.ssh.version Device only supports SSHv2
+RESULT pass security.ssh.version Device only supports SSHv2
+RESULT pass security.ssh.version Device only supports SSHv2
 dhcp requests 1 1 0 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
@@ -111,6 +114,9 @@ port-01 module_config modules
   "password": {
     "enabled": true
   },
+  "ssh": {
+    "enabled": true
+  },
   "switch": {
     "enabled": true,
     "poe": {
@@ -158,6 +164,9 @@ port-02 module_config modules
     "enabled": false
   },
   "password": {
+    "enabled": true
+  },
+  "ssh": {
     "enabled": true
   },
   "switch": {

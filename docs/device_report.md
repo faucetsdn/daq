@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|2|0|0|0|
-|Other|1|2|22|2|
+|Other|3|2|21|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -79,9 +79,10 @@ Overall device result FAIL
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
 |skip|security.passwords.https|Other|Other|Port 443 is not open on target device.|
-|skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
+|pass|security.passwords.ssh|Other|Other|Default passwords have been changed.|
 |skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
 |pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
+|pass|security.ssh.version|Other|Other|Device only supports SSHv2|
 |skip|security.tls.v1|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1_2|Other|Other|IOException unable to connect to server|
@@ -420,6 +421,7 @@ Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
 PORT      STATE SERVICE
+22/tcp    open  ssh
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
@@ -442,6 +444,7 @@ Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
 PORT      STATE SERVICE
+22/tcp    open  ssh
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
@@ -464,6 +467,7 @@ Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
 PORT      STATE SERVICE
+22/tcp    open  ssh
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
@@ -486,14 +490,47 @@ Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
 PORT      STATE SERVICE
+22/tcp    open  ssh
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
 nmap X.X.X.X
+Starting brute force...
+hydra -L /tmp/ssh_usernames.txt -P /tmp/ssh_passwords.txt X.X.X.X ssh -s 22
+Hydra v8.6 (c) 2017 by van Hauser/THC - Please do not use in military or secret service organizations, or for illegal purposes.
+
+Hydra (http://www.thc.org/thc-hydra) starting at XXX
+[DATA] max 6 tasks per 1 server, overall 6 tasks, 6 login tries (l:2/p:3), ~1 try per task
+[DATA] attacking ssh://X.X.X.X:22/
+1 of 1 target completed, 0 valid passwords found
+Hydra (http://www.thc.org/thc-hydra) finished at XXX
 Done.
 --------------------
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
+RESULT pass security.passwords.ssh Default passwords have been changed.
+
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module ssh
+
+
+#### Report
+
+```
+--------------------
+security.ssh.version
+--------------------
+Check that device only support SSHv2
+--------------------
+22/tcp    open  ssh               OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+--------------------
+RESULT pass security.ssh.version Device only supports SSHv2
 
 ```
 

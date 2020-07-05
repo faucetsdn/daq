@@ -17,6 +17,9 @@
     },
     "manual": {
       "enabled": true
+    },
+    "ssh": {
+      "enabled": true
     }
   },
   "process": {
