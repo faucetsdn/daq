@@ -1,10 +1,6 @@
 from __future__ import absolute_import
-import time
 import sys
-import json
-import re
-import datetime
-from scapy.all import *
+from scapy.all import NTP,rdpcap
 
 arguments = sys.argv
 
