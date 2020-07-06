@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import sys
-from scapy.all import NTP,rdpcap
+from scapy.all import NTP, rdpcap
 
 arguments = sys.argv
 
@@ -13,6 +13,7 @@ summary_text = ''
 result = 'fail'
 dash_break_line = '--------------------\n'
 description_ntp_support = 'Device supports NTP version 4.'
+
 
 def write_report(string_to_append):
     print(string_to_append.strip())
