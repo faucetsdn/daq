@@ -1,5 +1,7 @@
 package daq.usi;
 
+import static grpc.SwitchModel.OVS_SWITCH;
+
 import daq.usi.allied.AlliedTelesisX230;
 import daq.usi.cisco.Cisco9300;
 import daq.usi.ovs.OpenVSwitch;
@@ -7,7 +9,6 @@ import grpc.InterfaceResponse;
 import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 import grpc.SwitchInfo;
-import grpc.SwitchInput;
 import grpc.USIServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
@@ -21,11 +22,10 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
     switchControllers = new HashMap<>();
   }
 
-  private SwitchController getSwitchController(SwitchInput switchInput) {
-    if (!switchInput.hasSwitchInfo()) {
-      return new OpenVSwitch(switchInput.getFauxInterface());
+  private SwitchController getSwitchController(SwitchInfo switchInfo) {
+    if (switchInfo.getModel().equals(OVS_SWITCH)) {
+      return new OpenVSwitch();
     }
-    SwitchInfo switchInfo = switchInput.getSwitchInfo();
     String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
         String.valueOf(switchInfo.getTelnetPort()), switchInfo.getUsername(),
         switchInfo.getPassword());
@@ -52,7 +52,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void getPower(SwitchInput request, StreamObserver<PowerResponse> responseObserver) {
+  public void getPower(SwitchInfo request, StreamObserver<PowerResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
       sc.getPower(request.getDevicePort(), responseObserver::onNext);
@@ -63,7 +63,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void getInterface(SwitchInput request,
+  public void getInterface(SwitchInfo request,
                            StreamObserver<InterfaceResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
@@ -75,7 +75,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void connect(SwitchInput request, StreamObserver<SwitchActionResponse> responseObserver) {
+  public void connect(SwitchInfo request, StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
       sc.connect(request.getDevicePort(), responseObserver::onNext);
@@ -86,7 +86,7 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void disconnect(SwitchInput request,
+  public void disconnect(SwitchInfo request,
                          StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {

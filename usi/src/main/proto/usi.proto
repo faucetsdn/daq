@@ -9,10 +9,10 @@ option java_outer_classname = "USIProto";
 option java_package = "grpc";
 
 service USIService {
-  rpc GetPower(SwitchInput) returns (PowerResponse) {}
-  rpc GetInterface(SwitchInput) returns (InterfaceResponse) {}
-  rpc disconnect(SwitchInput) returns (SwitchActionResponse) {}
-  rpc connect(SwitchInput) returns (SwitchActionResponse) {}
+  rpc GetPower(SwitchInfo) returns (PowerResponse) {}
+  rpc GetInterface(SwitchInfo) returns (InterfaceResponse) {}
+  rpc disconnect(SwitchInfo) returns (SwitchActionResponse) {}
+  rpc connect(SwitchInfo) returns (SwitchActionResponse) {}
 }
 
 message SwitchActionResponse {
@@ -35,6 +35,7 @@ message InterfaceResponse {
 enum SwitchModel {
   ALLIED_TELESIS_X230 = 0;
   CISCO_9300 = 1;
+  OVS_SWITCH = 2;
 }
 
 enum LinkStatus {
@@ -54,15 +55,6 @@ enum POEStatus {
   DENY = 3;
 }
 
-message SwitchInput {
-  // Device Port
-  int32 device_port = 1;
-  oneof input {
-    SwitchInfo switch_info = 2;
-    string faux_interface = 3;
-  }
-}
-
 /*
  * System configuraiton of the access switch. This is used by the system
  * to setup and configure the switch itself.
@@ -74,12 +66,15 @@ message SwitchInfo {
   // Telnet Port
   int32 telnet_port = 2;
 
+  // Device Port
+  int32 device_port = 3;
+
   // Switch model
-  SwitchModel model = 3;
+  SwitchModel model = 4;
 
   // Switch connect username
-  string username = 4;
+  string username = 5;
 
   // Switch connect password
-  string password = 5;
+  string password = 6;
 }
