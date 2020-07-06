@@ -206,7 +206,7 @@ function handleHeartbeat(origin, message) {
       if (!defined || current.message.timestamp < message.timestamp) {
         return heartbeatDoc.set({
           'updated': timestamp,
-          'message': message
+          message
         });
       }
     })
