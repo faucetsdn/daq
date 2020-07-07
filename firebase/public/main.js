@@ -8,11 +8,6 @@ const display_columns = [];
 const display_rows = [];
 const row_timestamps = {};
 
-const data_state = {};
-
-let last_result_time_sec = 0;
-let heartbeatTimestamp = 0;
-
 const origin_id = getQueryParam('origin');
 const site_name = getQueryParam('site');
 const port_id = getQueryParam('port');
@@ -21,8 +16,13 @@ const device_id = getQueryParam('device');
 const run_id = getQueryParam('runid');
 const from = getQueryParam('from');
 const to = getQueryParam('to');
+
+const data_state = {};
+let last_result_time_sec = 0;
+let heartbeatTimestamp = 0;
 var db;
-var activePorts = [];
+var activePorts = new Set();
+
 document.addEventListener('DOMContentLoaded', () => {
   db = firebase.firestore();
   const settings = {
@@ -289,7 +289,7 @@ function watcherAdd(ref, collection, limit, handler) {
   }, (e) => console.error(e));
 }
 
-function listSites(db) {
+function listSites() {
   const linkGroup = document.querySelector('#listings .sites');
   db.collection('site').get().then((snapshot) => {
     snapshot.forEach((site_doc) => {
@@ -303,21 +303,31 @@ function listSites(db) {
   }).catch((e) => statusUpdate('registry list error', e));
 }
 
-function listOrigins(db) {
-  const linkGroup = document.querySelector('#listings .origins');
+function addOrigin(originId) {
+  db.collection('origin').doc(originId).get().then((result) => {
+    const linkGroup = document.querySelector('#listings .origins');
+    const originLink = document.createElement('a');
+    originLink.setAttribute('href', '/?origin=' + originId);
+    originLink.innerHTML = originId;
+    linkGroup.appendChild(originLink);
+    const originInfo = document.createElement('span');
+    const version = result.data() && result.data().version;
+    const updated = result.data() && result.data().updated;
+    originInfo.innerHTML = `  ${version}, ${updated}`;
+    linkGroup.appendChild(originInfo);
+    linkGroup.appendChild(document.createElement('p'));
+  });
+}
+
+function listOrigins() {
   db.collection('origin').get().then((snapshot) => {
     snapshot.forEach((originDoc) => {
-      const origin = originDoc.id;
-      const originLink = document.createElement('a');
-      originLink.setAttribute('href', '/?origin=' + origin);
-      originLink.innerHTML = origin;
-      linkGroup.appendChild(originLink);
-      linkGroup.appendChild(document.createElement('p'));
+      addOrigin(originDoc.id);
     });
   }).catch((e) => statusUpdate('origin list error', e));
 }
 
-function listUsers(db) {
+function listUsers() {
   const link_group = document.querySelector('#listings .users');
   db.collection('users').get().then((snapshot) => {
     snapshot.forEach((user_doc) => {
@@ -354,9 +364,9 @@ function dashboardSetup() {
     triggerOrigin(db, origin_id);
   } else {
     document.getElementById('listings').classList.add('active');
-    listSites(db);
-    listOrigins(db);
-    listUsers(db);
+    listOrigins();
+    listSites();
+    listUsers();
   }
 
   return origin_id;

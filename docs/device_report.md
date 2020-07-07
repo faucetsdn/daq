@@ -55,7 +55,7 @@ Overall device result FAIL
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
 |Required|1|0|0|0|
-|Recommended|1|0|0|0|
+|Recommended|2|0|0|0|
 |Other|1|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
@@ -70,6 +70,7 @@ Overall device result FAIL
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
+|pass|manual.test.travis|Security|Recommended|Manual test - for testing|
 |skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
 |skip|poe.power|Other|Other|No local IP has been set, check system config|
 |skip|poe.support|Other|Other|No local IP has been set, check system config|
@@ -534,6 +535,29 @@ Validates device system payload.
 No device id
 --------------------
 RESULT skip cloud.udmi.system No device id
+
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module manual
+
+
+#### Report
+
+```
+--------------------
+manual.test.travis
+--------------------
+
+--------------------
+No additional information provided
+--------------------
+RESULT pass manual.test.travis Manual test - for testing
 
 ```
 

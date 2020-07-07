@@ -62,11 +62,11 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client
+    opts: brute broadcast_client ntp_pass
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntp_fail opendns
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber ntp_client broadcast_client
+    opts: tls macoui passwordpass bacnet pubber broadcast_client
 long_dhcp_response_sec: 0
 monitor_scan_sec: 0
 EOF
@@ -103,7 +103,11 @@ cmd/build
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
-# Add the RESULT lines from all aux tests (from all ports, 3 in this case) into a file.
+# Capture RESULT lines from ping activation logs (not generated report).
+fgrep -h RESULT inst/run-port*/nodes/ping*/activate.log \
+    | sed -e 's/\s*\(%%.*\)*$//' | tee -a $TEST_RESULTS
+
+# Add the RESULT lines from all aux test report files.
 capture_test_results bacext
 capture_test_results macoui
 capture_test_results tls
@@ -119,7 +123,7 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
      $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
-# Show the full logs from each test
+# Show partial logs from each test
 head inst/gw*/nodes/gw*/activate.log
 head inst/run-port-*/nodes/*/activate.log
 head inst/run-port-*/nodes/*/tmp/report.txt

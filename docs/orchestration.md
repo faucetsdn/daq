@@ -11,7 +11,7 @@ to change.
 
 ## Data Rouces
 
-The overal orchestration capability relies on several simple data sources:
+The overall orchestration capability relies on several simple data sources:
 1. [Overall network topology](topologies.md), which indicates how the network hardware is configured.
 2. [Device MUD files](../mud_files), which provide an
 [IETF Standard MUD descriptor](https://datatracker.ietf.org/doc/draft-ietf-opsawg-mud/) that describes
