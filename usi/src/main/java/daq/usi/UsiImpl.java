@@ -2,8 +2,9 @@ package daq.usi;
 
 import daq.usi.allied.AlliedTelesisX230;
 import daq.usi.cisco.Cisco9300;
-import grpc.Interface;
-import grpc.Power;
+import daq.usi.ovs.OpenVSwitch;
+import grpc.InterfaceResponse;
+import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 import grpc.SwitchInfo;
 import grpc.USIServiceGrpc;
@@ -12,41 +13,48 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
-  private Map<String, SwitchController> switchControllers;
+  private final Map<String, SwitchController> switchControllers;
 
   public UsiImpl() {
     super();
     switchControllers = new HashMap<>();
   }
 
-  private SwitchController getSwitchController(SwitchInfo switchInfo) {
-    String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
-        String.valueOf(switchInfo.getTelnetPort()), switchInfo.getUsername(),
-        switchInfo.getPassword());
-    SwitchController sc = switchControllers.get(repr);
-    if (sc == null) {
-      switch (switchInfo.getModel()) {
-        case ALLIED_TELESIS_X230: {
-          sc = new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getTelnetPort(),
-              switchInfo.getUsername(), switchInfo.getPassword());
-          break;
-        }
-        case CISCO_9300: {
-          sc = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getTelnetPort(),
-              switchInfo.getUsername(), switchInfo.getPassword());
-          break;
-        }
-        default:
-          break;
+  private SwitchController createController(SwitchInfo switchInfo) {
+    SwitchController newController;
+    switch (switchInfo.getModel()) {
+      case ALLIED_TELESIS_X230: {
+        newController =
+            new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
+                switchInfo.getPassword());
+        break;
       }
-      new Thread(sc).start();
-      switchControllers.put(repr, sc);
+      case CISCO_9300: {
+        newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(),
+            switchInfo.getPassword());
+        break;
+      }
+      case OVS_SWITCH: {
+        newController = new OpenVSwitch();
+        break;
+      }
+      default:
+        throw new IllegalArgumentException("Unrecognized switch model "
+            + switchInfo.getModel());
     }
-    return sc;
+    newController.start();
+    return newController;
+  }
+
+  private SwitchController getSwitchController(SwitchInfo switchInfo) {
+    String repr = String.join(",", switchInfo.getModel().toString(),
+        switchInfo.getIpAddr(), switchInfo.getUsername(),
+        switchInfo.getPassword());
+    return switchControllers.computeIfAbsent(repr, key -> createController(switchInfo));
   }
 
   @Override
-  public void getPower(SwitchInfo request, StreamObserver<Power> responseObserver) {
+  public void getPower(SwitchInfo request, StreamObserver<PowerResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
       sc.getPower(request.getDevicePort(), responseObserver::onNext);
@@ -57,7 +65,8 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void getInterface(SwitchInfo request, StreamObserver<Interface> responseObserver) {
+  public void getInterface(SwitchInfo request,
+                           StreamObserver<InterfaceResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
       sc.getInterface(request.getDevicePort(), responseObserver::onNext);
