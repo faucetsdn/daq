@@ -1,7 +1,5 @@
 package daq.usi;
 
-import static grpc.SwitchModel.OVS_SWITCH;
-
 import daq.usi.allied.AlliedTelesisX230;
 import daq.usi.cisco.Cisco9300;
 import daq.usi.ovs.OpenVSwitch;
@@ -15,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
-  private final Map<String, BaseSwitchController> switchControllers;
+  private final Map<String, SwitchController> switchControllers;
 
   public UsiImpl() {
     super();
@@ -23,31 +21,35 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   private SwitchController getSwitchController(SwitchInfo switchInfo) {
-    if (switchInfo.getModel().equals(OVS_SWITCH)) {
-      return new OpenVSwitch();
-    }
-    String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
+    String repr = String.join(",", switchInfo.getModel().toString(),
+        switchInfo.getIpAddr(),
         String.valueOf(switchInfo.getCmdTelnetPort()), switchInfo.getUsername(),
         switchInfo.getPassword());
-    BaseSwitchController sc = switchControllers.get(repr);
-    if (sc == null) {
+    SwitchController sc = switchControllers.computeIfAbsent(repr, key -> {
+      final SwitchController newController;
       switch (switchInfo.getModel()) {
         case ALLIED_TELESIS_X230: {
-          sc = new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
-              switchInfo.getUsername(), switchInfo.getPassword());
+          newController =
+              new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
+                  switchInfo.getUsername(), switchInfo.getPassword());
           break;
         }
         case CISCO_9300: {
-          sc = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
+          newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
               switchInfo.getUsername(), switchInfo.getPassword());
           break;
         }
-        default:
+        case OVS_SWITCH: {
+          newController = new OpenVSwitch();
           break;
+        }
+        default:
+          throw new IllegalArgumentException("Unrecognized switch model "
+              + switchInfo.getModel());
       }
-      new Thread(sc).start();
-      switchControllers.put(repr, sc);
-    }
+      newController.start();
+      return newController;
+    });
     return sc;
   }
 

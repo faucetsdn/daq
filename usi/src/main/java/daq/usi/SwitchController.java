@@ -16,4 +16,6 @@ public interface SwitchController {
 
   void disconnect(int devicePort, ResponseHandler<SwitchActionResponse> handler)
       throws Exception;
+
+  void start();
 }

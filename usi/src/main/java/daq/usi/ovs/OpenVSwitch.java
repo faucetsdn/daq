@@ -79,4 +79,7 @@ public class OpenVSwitch implements SwitchController {
       throws Exception {
     managePort(devicePort, handler, false);
   }
+
+  public void start() {
+  }
 }

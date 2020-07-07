@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public abstract class BaseSwitchController implements Runnable, SwitchController {
+public abstract class BaseSwitchController implements SwitchController {
   /**
    * Terminal Prompt ends with '#' when enabled, '>' when not enabled.
    */
@@ -165,7 +165,7 @@ public abstract class BaseSwitchController implements Runnable, SwitchController
   protected abstract void handleEnableMessage(String consoleData) throws Exception;
 
   @Override
-  public void run() {
+  public void start() {
     telnetClientSocketThread = new Thread(telnetClientSocket);
     telnetClientSocketThread.start();
   }
