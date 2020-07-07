@@ -20,36 +20,37 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
     switchControllers = new HashMap<>();
   }
 
+  private SwitchController createController(SwitchInfo switchInfo) {
+    SwitchController newController;
+    switch (switchInfo.getModel()) {
+      case ALLIED_TELESIS_X230: {
+        newController =
+            new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
+                switchInfo.getPassword());
+        break;
+      }
+      case CISCO_9300: {
+        newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(),
+            switchInfo.getPassword());
+        break;
+      }
+      case OVS_SWITCH: {
+        newController = new OpenVSwitch();
+        break;
+      }
+      default:
+        throw new IllegalArgumentException("Unrecognized switch model "
+            + switchInfo.getModel());
+    }
+    newController.start();
+    return newController;
+  }
+
   private SwitchController getSwitchController(SwitchInfo switchInfo) {
     String repr = String.join(",", switchInfo.getModel().toString(),
         switchInfo.getIpAddr(), switchInfo.getUsername(),
         switchInfo.getPassword());
-    SwitchController sc = switchControllers.computeIfAbsent(repr, key -> {
-      final SwitchController newController;
-      switch (switchInfo.getModel()) {
-        case ALLIED_TELESIS_X230: {
-          newController =
-              new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
-                  switchInfo.getPassword());
-          break;
-        }
-        case CISCO_9300: {
-          newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(),
-              switchInfo.getPassword());
-          break;
-        }
-        case OVS_SWITCH: {
-          newController = new OpenVSwitch();
-          break;
-        }
-        default:
-          throw new IllegalArgumentException("Unrecognized switch model "
-              + switchInfo.getModel());
-      }
-      newController.start();
-      return newController;
-    });
-    return sc;
+    return switchControllers.computeIfAbsent(repr, key -> createController(switchInfo));
   }
 
   @Override
