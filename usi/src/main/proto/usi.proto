@@ -63,8 +63,8 @@ message SwitchInfo {
   // IP address of external switch.
   string ip_addr = 1;
 
-  // Telnet Port
-  int32 telnet_port = 2;
+  // telnet port for sending switch commands.
+  int32 cmd_telnet_port = 2;
 
   // Device Port
   int32 device_port = 3;

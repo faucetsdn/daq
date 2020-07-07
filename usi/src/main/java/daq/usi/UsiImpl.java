@@ -27,18 +27,18 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
       return new OpenVSwitch();
     }
     String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
-        String.valueOf(switchInfo.getTelnetPort()), switchInfo.getUsername(),
+        String.valueOf(switchInfo.getCmdTelnetPort()), switchInfo.getUsername(),
         switchInfo.getPassword());
     BaseSwitchController sc = switchControllers.get(repr);
     if (sc == null) {
       switch (switchInfo.getModel()) {
         case ALLIED_TELESIS_X230: {
-          sc = new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getTelnetPort(),
+          sc = new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
               switchInfo.getUsername(), switchInfo.getPassword());
           break;
         }
         case CISCO_9300: {
-          sc = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getTelnetPort(),
+          sc = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
               switchInfo.getUsername(), switchInfo.getPassword());
           break;
         }
