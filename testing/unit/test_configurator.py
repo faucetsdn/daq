@@ -2,8 +2,14 @@
 
 import unittest
 import os
+import sys
 
 from daq.configurator import Configurator, print_config
+
+import logging
+logger = logging.getLogger()
+logger.level = logging.INFO
+
 
 def dict_to_conf_str(obj):
     """Dump dict as key=value to str object."""
@@ -22,7 +28,7 @@ class TestConfigurator(unittest.TestCase):
     config = {
         'monitor_scan_sec' : '30',
         'default_timeout_sec' : '350',
-        'base_conf' : 'misc/module_config.json',
+        'base_conf' : 'resources/setups/baseline/module_config.json',
         'site_path' : 'local/site/',
         'initial_dhcp_lease_time' : '120s',
         'dhcp_lease_time' : '500s',

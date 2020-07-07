@@ -1,0 +1,12 @@
+# Image name: daqf/networking
+#
+# Image used for testing a mock OpenFlow switch.
+#
+
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install netcat python
+
+COPY docker/include/bin/test_hold .
+
+CMD ./test_hold

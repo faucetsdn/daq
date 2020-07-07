@@ -6,13 +6,16 @@ TESTDIR=`dirname $SCRIPTPATH`
 BASEDIR=`readlink -f $TESTDIR/..`
 cd $BASEDIR
 
-$BASEDIR/venv/bin/coverage erase
+source venv/bin/activate
 
-PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch $BASEDIR/venv/bin/coverage run \
-    --source $BASEDIR/daq \
+coverage erase
+
+export PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch:$BASEDIR/bin/python
+coverage run \
+    --source $BASEDIR/daq,$BASEDIR/bin/python/ \
     -m unittest discover \
     -s $TESTDIR/unit/ \
     -p "test_*.py"
 
-$BASEDIR/venv/bin/coverage combine || true
-$BASEDIR/venv/bin/coverage report -m
+coverage combine || true
+coverage report -m

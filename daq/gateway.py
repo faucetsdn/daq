@@ -110,8 +110,8 @@ class Gateway():
 
     def _scan_finalize(self, forget=True):
         if self._scan_monitor:
-            nclosed = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
-            assert nclosed == forget, 'forget and nclosed mismatch'
+            active = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
+            assert active == forget, 'forget and active mismatch'
             if forget:
                 self.runner.monitor_forget(self._scan_monitor.stream())
                 self._scan_monitor.terminate()
@@ -198,7 +198,8 @@ class Gateway():
     def detach_target(self, target_port):
         """Detach the given target from this gateway; return number of remaining targets."""
         assert target_port in self.targets, 'target not attached to gw'
-        LOGGER.info('Detach target %d from gateway group %s', target_port, self.name)
+        LOGGER.info('Detach target %d from gateway group %s: %s',
+                    target_port, self.name, list(self.targets.keys()))
         del self.targets[target_port]
         return len(self.targets)
 

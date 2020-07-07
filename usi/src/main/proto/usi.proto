@@ -1,0 +1,77 @@
+/*
+ * Specification for Universal Switch Interface.
+ */
+syntax = "proto3";
+package usi;
+
+option java_multiple_files = true;
+option java_outer_classname = "USIProto";
+option java_package = "grpc";
+
+service USIService {
+  rpc GetPower(SwitchInfo) returns (PowerResponse) {}
+  rpc GetInterface(SwitchInfo) returns (InterfaceResponse) {}
+  rpc disconnect(SwitchInfo) returns (SwitchActionResponse) {}
+  rpc connect(SwitchInfo) returns (SwitchActionResponse) {}
+}
+
+message SwitchActionResponse {
+  bool success = 1;
+}
+
+message PowerResponse {
+  float current_power_consumption = 1;
+  float max_power_consumption = 2;
+  POESupport poe_support = 3;
+  POEStatus poe_status = 4;
+}
+
+message InterfaceResponse {
+  LinkStatus link_status = 1;
+  int32 link_speed = 2;
+  string duplex = 3;
+}
+
+enum SwitchModel {
+  ALLIED_TELESIS_X230 = 0;
+  CISCO_9300 = 1;
+  OVS_SWITCH = 2;
+}
+
+enum LinkStatus {
+  UP = 0;
+  DOWN = 1;
+}
+
+enum POESupport {
+  ENABLED = 0;
+  DISABLED = 1;
+}
+
+enum POEStatus {
+  ON = 0;
+  OFF = 1;
+  FAULT = 2;
+  DENY = 3;
+}
+
+/*
+ * System configuraiton of the access switch. This is used by the system
+ * to setup and configure the switch itself.
+ */
+message SwitchInfo {
+  // IP address of external switch.
+  string ip_addr = 1;
+
+  // Device Port
+  int32 device_port = 3;
+
+  // Switch model
+  SwitchModel model = 4;
+
+  // Switch connect username
+  string username = 5;
+
+  // Switch connect password
+  string password = 6;
+}

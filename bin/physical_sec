@@ -7,7 +7,7 @@ fi
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-source misc/config_base.sh
+source etc/config_base.sh
 
 iprefix=ctrl
 ctrl_bridge=${iprefix}-br
@@ -24,7 +24,7 @@ ext_addr=$switch_setup_ip_addr
 
 echo Running switch setup...
 
-if [ -n "$ext_ctrl" ]; then
+if [ "$switch_setup_model" != FAUX_SWITCH ]; then
     cplane_mac=$(ip link show $ext_ctrl | fgrep ether | awk '{print $2}')
     if [ -z "$cplane_mac" ]; then
         echo Could not extract mac address from iface $ext_ctrl.
@@ -54,7 +54,7 @@ sudo ip link set $ctrl_swy address $cplane_mac
 sudo ip link set $ctrl_swx up
 sudo ip link set $ctrl_swy up
 
-echo Creating local bridge...
+echo Creating local bridge $ctrl_bridge...
 sudo ovs-vsctl add-br $ctrl_bridge
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_alt
 sudo ovs-vsctl add-port $ctrl_bridge $ctrl_swx
@@ -78,8 +78,8 @@ if [ -z "$ipsuffix" -o "$ipsuffix" == "$ext_ofip" ]; then
     false
 fi
 
-if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
-    echo Creating daq-switch, because no control plane interface defined
+if [ "$switch_setup_model" == FAUX_SWITCH ]; then
+    echo Creating daq-switch as per FAUX_SWITCH switch model.
 
     docker rm -f daq-switch || true
     cid=$(docker run -d --privileged --name daq-switch --hostname switch --net=none daqf/switch)
@@ -97,16 +97,22 @@ if [ -z "$ext_ctrl" -a -n "$ext_addr" ]; then
     echo DAQ autoclean docker rm -f daq-switch
     echo DAQ autoclean ip link del $ctrl_swa
 
+    if [ -n "$ext_ctrl" ]; then
+        echo Ignoring interface $ext_ctrl in favor of $ctrl_swa
+    fi
     ext_ctrl=$ctrl_swa
 else
     sudo ip link set $ext_ctrl up
 fi
 
-# Might not exist yet, if it's part of the autostart sequence.
-sudo ip link set $ext_data up || true
+if [ "$ext_data" != ext-ovs-pri ]; then
+    sudo ip link set $ext_data up
+else
+    echo Skipping bring-up of ovs switch interface $ext_data
+fi
 
 if [ -z "$ext_ctrl" ]; then
-    echo No control plane interface, skipping configuration.
+    echo No control plane interface defined, skipping configuration.
 else
     echo Bridging $ext_ctrl to $ctrl_bridge
     sudo ovs-vsctl add-port $ctrl_bridge $ext_ctrl
@@ -124,4 +130,4 @@ fi
 echo DAQ autoclean ip link del $ctrl_pri
 echo DAQ autoclean ip link del $ctrl_swx
 echo DAQ autoclean ovs-vsctl --if-exists del-br $ctrl_bridge
-echo Done with local switch setup.
+echo Done with switch setup.

@@ -25,16 +25,17 @@ DOCKER_IMAGE_LIST=docker_images.txt
 DOCKER_IMAGE_VER=docker_images.ver
 
 cd $ROOT
-source misc/config_base.sh
-host_tests=$host_tests bin/docker_build_files
+source etc/config_base.sh
+echo host_tests=$host_tests
+test_targets=$(host_tests=$host_tests bin/docker_build_files)
 function pull_images {
     TAG=$1
     declare -A test_set
-    for target in $(host_tests=$host_tests bin/docker_build_files); do
+    for target in $test_targets; do
         target=$(echo $target | sed 's|^.*/Dockerfile.||' | echo daqf/$(</dev/stdin))
         test_set[$target]=y
     done
-    cat misc/$DOCKER_IMAGE_LIST | while read image hash other; do
+    cat etc/$DOCKER_IMAGE_LIST | while read image hash other; do
         if [ -z "${test_set[$image]}" ]; then
             echo Skipping $image pull 
             continue
@@ -60,17 +61,17 @@ if [ "$1" == push ]; then
         echo Push $image:$NEWVER to dockerhub...
         bin/docker_push $image $NEWVER
     done
-    echo Updating misc/$DOCKER_IMAGE_LIST for version $NEWVER
-    cp inst/$DOCKER_IMAGE_LIST misc/$DOCKER_IMAGE_LIST
-    cp inst/$DOCKER_IMAGE_VER misc/$DOCKER_IMAGE_VER
+    echo Updating etc/$DOCKER_IMAGE_LIST for version $NEWVER
+    cp inst/$DOCKER_IMAGE_LIST etc/$DOCKER_IMAGE_LIST
+    cp inst/$DOCKER_IMAGE_VER etc/$DOCKER_IMAGE_VER
     echo Done with docker build push.
     exit 0
 elif [ "$1" == pull ]; then
-    REPO_VER=$(< misc/$DOCKER_IMAGE_VER)
+    REPO_VER=$(< etc/$DOCKER_IMAGE_VER)
     REPO_HASH=`git rev-list -n 1 $REPO_VER`
     TAG_HASH=`git rev-list -n 1 $TAG_VER`
     if [ "$TAG_HASH" != "$REPO_HASH" ]; then
-	echo Tagged version $TAG_VER does not match misc/$DOCKER_IMAGE_VER $REPO_VER
+	echo Tagged version $TAG_VER does not match etc/$DOCKER_IMAGE_VER $REPO_VER
 	false
     fi
     echo Pulling images for version $REPO_VER
@@ -117,16 +118,16 @@ fi
 
 local_version=$(cd faucet; git rev-list -n 1 HEAD)
 if [ "$1" == -f ]; then
-    echo Forcing misc/FAUCET_VERSION to $local_version
-    echo $local_version > misc/FAUCET_VERSION
+    echo Forcing etc/FAUCET_VERSION to $local_version
+    echo $local_version > etc/FAUCET_VERSION
     shift
 fi
 
-target_version=$(cat misc/FAUCET_VERSION)
+target_version=$(cat etc/FAUCET_VERSION)
 target_commit=$(cd faucet; git rev-parse $target_version)
 if [ "$target_commit" != "$local_version" ]; then
     echo Local faucet commit is at: $local_version
-    echo Mismatch with misc/FAUCET_VERSION: $target_version
+    echo Mismatch with etc/FAUCET_VERSION: $target_version
     echo Try 'bin/clean_dev && bin/setup_dev' to reset.
     false
 fi
@@ -137,7 +138,7 @@ echo Updating inst/$DOCKER_IMAGE_LIST...
 docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do
     echo $image $hash >> inst/$DOCKER_IMAGE_LIST
 done
-echo Push images to update misc/$DOCKER_IMAGE_LIST
+echo Push images to update etc/$DOCKER_IMAGE_LIST
 
 echo Updating .build_hash
 bin/build_hash write

@@ -2,7 +2,7 @@
 
 The _faux_ device represents a reference design for a Device Under Test that can
 be configured to emulate { _pass_, _fail_, _skip_ } modes for most tests. It
-consists of a docker container or two (in `docker/`) and the `misc/start_faux` file.
+consists of a docker container or two (in `docker/`) and the `docker/include/bin/start_faux` file.
 
 Unless there's a specific reason it can't be done (e.g. hardware requirements), all tests
 should have a _pass_ and _fail_ condition in the faux device (and also possibly _skip_),

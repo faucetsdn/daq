@@ -2,6 +2,21 @@ Running testing/test_aux.sh
 Aux Tests
 Lint checks
 check_style exit code 0
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping No local IP has been set, check system config
+RESULT pass base.target.ping target reached
+RESULT pass base.startup.ntp Correct NTP server address
+RESULT skip base.startup.dns No dns traffic detected
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping No local IP has been set, check system config
+RESULT pass base.target.ping target reached
+RESULT fail base.startup.ntp Invalid NTP server address
+RESULT fail base.startup.dns Invalid DNS server address
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping No local IP has been set, check system config
+RESULT pass base.target.ping target reached
+RESULT skip base.startup.ntp No NTP traffic detected
+RESULT pass base.startup.dns Correct DNS server address
 RESULT skip protocol.bacnet.version Bacnet device not found.
 RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
 RESULT info protocol.bacnet.version Protocol version: 1
@@ -81,6 +96,9 @@ port-01 module_config modules
   "macoui": {
     "enabled": true
   },
+  "manual": {
+    "enabled": true
+  },
   "network": {
     "enabled": true
   },
@@ -127,6 +145,9 @@ port-02 module_config modules
     "enabled": true,
     "timeout_sec": 1
   },
+  "manual": {
+    "enabled": true
+  },
   "network": {
     "enabled": true
   },
@@ -161,14 +182,13 @@ port-02 module_config modules
   `\.-''__.-' \ (     \_
     `'''       `\__   /\
                 ')
-Host: X.X.X.X ()        Status: Up
-Host: X.X.X.X ()        Ports: 47808/closed/udp//bacnet///      Ignored State: closed (3)
+Host: X.X.X.X ()	Status: Up
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
 01: ['01:ping:Exception']
 02: ['02:hold:Exception']
-03: ['03:exception:terminated']
-03: ['03:ping:ValueError']
+03: ['03:hold:DaqException', '03:ping:ValueError']
 inst/gw01/nodes/gw01/activate.log
 inst/gw02/nodes/gw02/activate.log
 inst/gw03/nodes/gw03/activate.log

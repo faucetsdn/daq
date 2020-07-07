@@ -1,11 +1,12 @@
 Running testing/test_base.sh
 Base Tests
 %%%%%%%%%%%%%%%%%%%%%% Base tests
-01: []
+DAQ result code 1
+01: ['01:hold:DaqException']
 # Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
-By default would be in local/site/ rather than misc/test_site/.
+By default would be in local/site/ rather than resources/test_site/.
 
 ```
 \|/          (__)
@@ -121,14 +122,23 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 |---|---|
 |enabled|True|
 
+## Module hold
+
+
+#### Exceptions
+
+terminated
+
 ## Report complete
 
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
+DAQ result code 1
 01: ['01:hold:DaqException']
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
+DAQ result code 0
 01: []
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 security.ports.nmap
@@ -140,6 +150,7 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 Switch test with target 192.0.2.138:2
 RESULT pass base.switch.ping target %% 192.0.2.138:2
 Switch test with target 192.0.2.138:2
+Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 01: [] 02: [] 03: []

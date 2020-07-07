@@ -1,5 +1,66 @@
 # Changelog
-
+* 1.7.0
+ * Add DAQ version to origin summary (#522)
+ * Add check for git version tag in Travis (#519)
+ * Minor UDMI updates for pubber keygen
+ * Update Minimum Send Test (#498)
+ * Universal Switch Interface (USI) (#496)
+* 1.6.1
+  * fix image pull in cmd/build (#503)
+* 1.6.0
+  * cloud test setup documentation (#495)
+  * Baseline for NTP tests (#494)
+  * Baseline for DNS test (#492)
+  * Add manual test summary to test report (#481)
+  * UDMI logentry schema update (#391)
+* 1.5.1
+  * Fix for local-port-as-string issue (#477)
+* 1.5.0
+  * Numerous renovate-bot updgrades
+  * Move reporting.sh into docker/include (#473)
+  * Remove redundant system.conf (#470)
+  * Cleanup files from misc (#464)
+  * Update UDMI asset naming (#457)
+  * Make startup commands implicit (#466)
+  * Whitespace testing changes (#468)
+  * Add stickler.yml (#465)
+  * Feature/combine reports from date range (#458)
+  * Cleanup dot1x and docker test files from misc (#462)
+  * port disconnect integration test fix.
+  * Use module_config for module switch configuration (#459)
+  * Fix network tests  (#440)
+  * Add explicit faucet python base (#455)
+  * Terminate on DAQ trunk port going down (#445)
+  * UDMI Gateway Schema Update (#363)
+  * Fix unit tests (#448)
+  * MD Table Refactoring (#452)
+  * Minor debug fixes (#453)
+  * Convert PortInfo dict to class (#447)
+  * cleanup misc folder, moving files to etc and resources (#449)
+  * Fix flaky port disconnects (#450)
+* 1.4.1
+  * Fetch before checkout (#446)
+  * Refactoring configuration mechanism (#444)
+* 1.4.0
+  * Update Faucet version to 1.9.43 (#443)
+  * Minor release docs update (#442)
+  * update techsupport to use new switchconfig names. include date-time in name of created file (#437)
+  * Physical switch config tweaks (#436)
+  * Firebase db Docs update (#433)
+  * Check for missing docker images (#435)
+  * Feature/allow port toggle (#423)
+  * Refactoring switchconfig (#426)
+  * Add switch report output (#431)
+  * Test default clean base configuration (#430)
+  * added EasyIO FW-14 to device_types (#427)
+  * enable finish_hook by default (#425)
+  * Move generated proto files out of daq/ (#424)
+  * Apply strict config checking (#422)
+  * UDMI change force_value to fix_value (#420)
+  * leave venv for mininet build  (#421)
+  * Introduce YAML config file (#418)
+  * Add password switch config (#324)
+  * Update TLS methods and tests (#362)
 * 1.3.0
   * Cisco switch power (#375)
   * Firebase data storage changes and supporting filters on UI (#395)

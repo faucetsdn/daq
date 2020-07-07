@@ -1,0 +1,50 @@
+#!/bin/bash -e
+project=$1
+service_account=$2
+custom_role_name="DAQStorageRole"
+function usage {
+   echo Usage: set_roles project account_email
+   exit 1;
+}
+
+if [ -z $project ]; then
+   echo Project is not defined.
+   usage
+fi
+
+if [ -z $service_account ]; then
+   echo Service account is not defined.
+   usage
+fi
+
+roles=$(gcloud projects get-iam-policy $project --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:$service_account" | tail -n +2)
+echo "$roles" | while read -r role; do
+    if [ -z "$role" ]; then 
+        continue
+    fi
+    echo "Removing existing role $role"
+    gcloud projects remove-iam-policy-binding $project --member=serviceAccount:$service_account --role=$role > /dev/null
+done
+
+custom_role_full=$(gcloud iam roles list --project=$project | grep "roles/$custom_role_name" | awk '{print $2}' | head -1)
+if [ -z "$custom_role_full" ]; then
+    echo "Creating custom storage role with name: $custom_role_name"
+    gcloud iam roles create $custom_role_name --project=$project\
+        --title=$custom_role_name \
+        --description="Custom storage role for DAQ" \
+        --permissions=storage.buckets.create,storage.buckets.get,storage.objects.create,storage.objects.get,storage.objects.update
+    custom_role_full=$(gcloud iam roles list --project=$project | grep "roles/$custom_role_name" | awk '{print $2}')
+else
+    echo "Found existing $custom_role_name: $custom_role_full"
+fi
+
+while read -r role; do
+    echo "Adding role $role"
+    gcloud projects add-iam-policy-binding $project --member=serviceAccount:$service_account --role=$role > /dev/null
+done <<EOF 
+$custom_role_full
+roles/datastore.user
+roles/logging.logWriter
+roles/pubsub.publisher
+roles/pubsub.subscriber 
+EOF

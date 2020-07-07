@@ -34,7 +34,10 @@ for dir in inst local; do
     fi
 done
 
-source misc/config_base.sh
+CONF_PROBE=inst/config/system.conf
+touch $CONF_PROBE || sudo chown $USER -R inst
+
+source etc/config_base.sh
 ext_ctrl=$switch_setup_ctrl_intf
 ext_addr=$switch_setup_ip_addr
 ext_intf=$switch_setup_data_intf
@@ -57,7 +60,7 @@ fi
 
 # Tar and compress the tmpdir, and then delete it
 echo Consolidating logs and packet captures, this could take a minute
-TAR_FILENAME=daq-`date +"%Y%b%d.%H%M%S"`.tar.bz2
+TAR_FILENAME=daq-`date +"%Y%m%d%H%M"`.tar.bz2
 tar -C $(dirname $TMPDIR) -cjf $TAR_FILENAME --exclude-vcs --exclude='faucet_event.sock' $(basename $TMPDIR)
 rm -rf $TMPDIR
 echo Created $ROOT/$TAR_FILENAME

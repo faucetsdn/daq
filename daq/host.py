@@ -4,7 +4,6 @@ import functools
 import os
 import shutil
 import time
-import json
 from datetime import timedelta, datetime
 
 from clib import tcpdump_helper
@@ -75,6 +74,7 @@ class ConnectedHost:
         self._gcp = runner.gcp
         self.gateway = gateway
         self.config = config
+        self.switch_setup = self.config.get('switch_setup', {})
         self.target_port = target['port']
         self.target_mac = target['mac']
         self.fake_target = target['fake']
@@ -104,7 +104,7 @@ class ConnectedHost:
         self._loaded_config = None
         self.reload_config()
         assert self._loaded_config, 'config was not loaded'
-        self._write_config(self._loaded_config, self._device_aux_path())
+        self._write_module_config(self._loaded_config, self._device_aux_path())
         self.remaining_tests = self._get_enabled_tests()
         LOGGER.info('Host %s running with enabled tests %s', self.target_port, self.remaining_tests)
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
@@ -115,8 +115,6 @@ class ConnectedHost:
         self._startup_file = None
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
-        self.switch_setup = self.config.get('switch_setup', {})
-        self.ext_loip = self.switch_setup.get('mods_addr')
 
     @staticmethod
     def make_runid():
@@ -198,7 +196,7 @@ class ConnectedHost:
     def _load_config(self, config, path):
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
 
-    def _write_config(self, config, path):
+    def _write_module_config(self, config, path):
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
     def _type_path(self):
@@ -250,7 +248,7 @@ class ConnectedHost:
         if self.config['test_list']:
             self._start_run()
         else:
-            assert self.is_holding(), 'state is not holding'
+            assert self.is_ready(), 'state is not holding'
             self.record_result('startup', state=MODE.HOLD)
 
     def _start_run(self):
@@ -269,6 +267,7 @@ class ConnectedHost:
         if expected is not None:
             message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
+        assert self.state != _STATE.TERM, 'host already terminated'
         LOGGER.debug('Target port %d state: %s -> %s', self.target_port, self.state, target)
         self.state = target
 
@@ -276,7 +275,7 @@ class ConnectedHost:
         """Return True if this host is running active test."""
         return self.state != _STATE.ERROR and self.state != _STATE.DONE
 
-    def is_holding(self):
+    def is_ready(self):
         """Return True if this host paused and waiting to run."""
         return self.state == _STATE.READY
 
@@ -316,7 +315,6 @@ class ConnectedHost:
 
     def _main_module_timeout_handler(self):
         self.test_host.terminate()
-        self.test_host = None
         self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
 
     def heartbeat(self):
@@ -338,29 +336,29 @@ class ConnectedHost:
         assert callable(callback), "ip listener callback is not callable"
         self._dhcp_listeners.append(callback)
 
+    def _finalize_report(self):
+        report_paths = self._report.finalize()
+        if self._trigger_path:
+            report_paths.update({'trigger_path': self._trigger_path})
+        LOGGER.info('Finalized with reports %s', list(report_paths.keys()))
+        report_blobs = {name: self._upload_file(path) for name, path in report_paths.items()}
+        self.record_result('terminate', state=MODE.TERM, **report_blobs)
+        self._report = None
+
     def terminate(self, reason, trigger=True):
         """Terminate this host"""
         LOGGER.info('Target port %d terminate, running %s, trigger %s: %s', self.target_port,
                     self._host_name(), trigger, reason)
-        self._release_config()
         self._state_transition(_STATE.TERM)
+        self._release_config()
         self._monitor_cleanup()
         self.runner.network.delete_mirror_interface(self.target_port)
-        self._report.finalize()
-        json_path = self._report.path + ".json"
-        with open(json_path, 'w') as json_file:
-            json.dump(self._report.get_all_results(), json_file)
-        remote_paths = {}
-        remote_paths["report_path"] = self._upload_file(self._report.path)
-        remote_paths["json_path"] = self._upload_file(json_path)
-        remote_paths["pdf_report_path"] = self._upload_file(self._report.path_pdf)
-        if self._trigger_path:
-            remote_paths["trigger_path"] = self._upload_file(self._trigger_path)
-        self.record_result('terminate', state=MODE.TERM, **remote_paths)
+        self._finalize_report()
         if self.test_host:
             try:
                 self.test_host.terminate()
                 self.test_host = None
+                self.timeout_handler = None
             except Exception as e:
                 LOGGER.error('Target port %d terminating test: %s', self.target_port, e)
                 LOGGER.exception(e)
@@ -461,8 +459,8 @@ class ConnectedHost:
     def _monitor_cleanup(self, forget=True):
         if self._monitor_ref:
             LOGGER.info('Target port %d network pcap complete', self.target_port)
-            nclosed = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
-            assert nclosed == forget, 'forget and nclosed mismatch'
+            active = self._monitor_ref.stream() and not self._monitor_ref.stream().closed
+            assert active == forget, 'forget and active mismatch'
             self._upload_file(self._startup_file)
             if forget:
                 self.runner.monitor_forget(self._monitor_ref.stream())
@@ -530,11 +528,11 @@ class ConnectedHost:
                 self.timeout_handler = self._main_module_timeout_handler
                 self._docker_test(self.remaining_tests.pop(0))
             else:
-                self.timeout_handler = self._aux_module_timeout_handler
                 LOGGER.info('Target port %d no more tests remaining', self.target_port)
+                self.timeout_handler = self._aux_module_timeout_handler
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
                 self.test_name = None
-                self.record_result('finish', state=MODE.FINE, report=self._report.path)
+                self.record_result('finish', state=MODE.FINE)
         except Exception as e:
             LOGGER.error('Target port %d start error: %s', self.target_port, e)
             self._state_transition(_STATE.ERROR)
@@ -552,10 +550,42 @@ class ConnectedHost:
     def _docker_test(self, test_name):
         self.test_name = test_name
         self.test_start = gcp.get_timestamp()
+        self.test_host = docker_test.DockerTest(self.runner, self.target_port,
+                                                self.devdir, test_name)
+        LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
+
+        try:
+            self.test_port = self.runner.allocate_test_port(self.target_port)
+        except Exception as e:
+            self.test_host = None
+            raise e
+
+        try:
+            self._start_test_host()
+        except Exception as e:
+            self.test_host = None
+            self.runner.release_test_port(self.target_port, self.test_port)
+            self.test_port = None
+            self._monitor_cleanup()
+            raise e
+
+    def _start_test_host(self):
+        params = self._get_module_params()
+        self._write_module_config(self._loaded_config, self._host_tmp_path())
+        self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
+        self.record_result(self.test_name, state=MODE.EXEC)
+        self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % self.test_name))
         self._state_transition(_STATE.TESTING, _STATE.NEXT)
+        self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+
+    def _get_module_params(self):
+        switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
+        ext_loip = switch_setup.get('mods_addr') % self.test_port if switch_setup else None
         params = {
+            'local_ip': ext_loip,
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
+            'target_port': str(self.target_port),
             'gateway_ip': self.gateway.host.IP(),
             'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
@@ -564,26 +594,17 @@ class ConnectedHost:
             'type_base': self._type_aux_path(),
             'scan_base': self.scan_base
         }
-        self.test_host = docker_test.DockerTest(self.runner, self.target_port, self.devdir,
-                                                test_name)
-        self.test_port = self.runner.allocate_test_port(self.target_port)
-        if self.ext_loip:
-            params['local_ip'] = self.ext_loip.replace('@', '%d') % self.test_port
-            params['switch_ip'] = self.switch_setup.get('ip_addr')
-            params['switch_port'] = str(self.target_port)
-            params['switch_model'] = self.switch_setup.get('model')
-            params['switch_username'] = self.switch_setup.get('username')
-            params['switch_password'] = self.switch_setup.get('password')
+        if ext_loip:
+            params.update(self._get_switch_config())
+        return params
 
-        try:
-            LOGGER.debug('test_host start %s/%s', test_name, self._host_name())
-            self._set_module_config(self._loaded_config)
-            self.record_result(test_name, state=MODE.EXEC)
-            self._monitor_scan(os.path.join(self.scan_base, 'test_%s.pcap' % test_name))
-            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
-        except:
-            self.test_host = None
-            raise
+    def _get_switch_config(self):
+        return {
+            'ip': self.switch_setup.get('ip_addr'),
+            'model': self.switch_setup.get('model'),
+            'username': self.switch_setup.get('username'),
+            'password': self.switch_setup.get('password')
+        }
 
     def _host_name(self):
         return self.test_host.host_name if self.test_host else 'unknown'
@@ -604,7 +625,6 @@ class ConnectedHost:
                       (self._finish_hook_script, finish_dir, finish_dir))
 
     def _docker_callback(self, return_code=None, exception=None):
-        self.timeout_handler = None # cancel timeout handling
         host_name = self._host_name()
         LOGGER.info('Host callback %s/%s was %s with %s',
                     self.test_name, host_name, return_code, exception)
@@ -625,19 +645,17 @@ class ConnectedHost:
                            **remote_paths)
         self.runner.release_test_port(self.target_port, self.test_port)
         self._state_transition(_STATE.NEXT, _STATE.TESTING)
+        assert self.test_host, '_docker_callback with no test_host defined'
         self.test_host = None
+        self.timeout_handler = None
         self._run_next_test()
-
-    def _set_module_config(self, loaded_config):
-        tmp_dir = self._host_tmp_path()
-        self._write_config(loaded_config, tmp_dir)
-        self._record_result(self.test_name, config=self._loaded_config, state=MODE.CONF)
 
     def _merge_run_info(self, config):
         config['run_info'] = {
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
-            'started': gcp.get_timestamp()
+            'started': gcp.get_timestamp(),
+            'switch': self._get_switch_config()
         }
         config['run_info'].update(self.runner.get_run_info())
 
@@ -693,25 +711,25 @@ class ConnectedHost:
     def _control_updated(self, control_config):
         LOGGER.info('Updated control config: %s %s', self.target_mac, control_config)
         paused = control_config.get('paused')
-        if not paused and self.is_holding():
+        if not paused and self.is_ready():
             self._start_run()
-        elif paused and not self.is_holding():
+        elif paused and not self.is_ready():
             LOGGER.warning('Inconsistent control state for update of %s', self.target_mac)
 
     def reload_config(self):
-        """Trigger a config reload due to an eternal config change."""
-        holding = self.is_holding()
-        new_config = self._load_module_config(run_info=holding)
-        if holding:
+        """Trigger a config reload due to an external config change."""
+        device_ready = self.is_ready()
+        new_config = self._load_module_config(run_info=device_ready)
+        if device_ready:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
-        LOGGER.info('Device config reloaded: %s %s', holding, self.target_mac)
-        self._record_result(None, run_info=holding, config=config_bundle)
+        LOGGER.info('Device config reloaded: %s %s', device_ready, self.target_mac)
+        self._record_result(None, run_info=device_ready, config=config_bundle)
         return new_config
 
     def _dev_config_updated(self, dev_config):
         LOGGER.info('Device config update: %s %s', self.target_mac, dev_config)
-        self._write_config(dev_config, self._device_base)
+        self._write_module_config(dev_config, self._device_base)
         self.reload_config()
 
     def _initialize_config(self):

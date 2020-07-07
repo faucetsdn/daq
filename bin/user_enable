@@ -3,6 +3,6 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-source venv/bin/activate
+source etc/config_base.sh
 
-python3 daq/gcp.py register_offenders=true local/system.conf
+python daq/gcp.py register_offenders=true $conf_file 

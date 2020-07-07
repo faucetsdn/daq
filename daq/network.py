@@ -15,9 +15,9 @@ from forch import faucetizer
 LOGGER = logger.get_logger('network')
 
 
+# pylint: disable=too-few-public-methods
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
-    # pylint: disable=too-few-public-methods
 
 
 class DummyNode:
@@ -135,9 +135,8 @@ class TestNetwork:
             self._switch_attach(self.sec, intf)
 
     def is_system_port(self, dpid, port):
-        """Check if the dpid/port combo is a system port for logging"""
-        target_dpid = int(self.sec_dpid)
-        return dpid == target_dpid and port == self.sec_port
+        """Check if the dpid/port combo is the system trunk port"""
+        return dpid == self.topology.PRI_DPID and port == self.topology.PRI_STACK_PORT
 
     def is_device_port(self, dpid, port):
         """Check if the dpid/port combo is for a valid device"""

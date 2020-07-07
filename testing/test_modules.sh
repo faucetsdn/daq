@@ -5,7 +5,7 @@ source testing/test_preamble.sh
 echo Base Tests >> $TEST_RESULTS
 
 mkdir -p local
-cp misc/system_all.conf local/system.conf
+cp config/system/all.conf local/system.conf
 
 TEST_LIST=/tmp/module_tests.txt
 
@@ -37,7 +37,7 @@ cat $TEST_LIST | while read module args; do
     fi
 done
 
-testing/run_unit_tests.sh
+testing/run_unit_tests.sh || exit 1
 
 echo
 echo Testing complete. | tee -a $TEST_RESULTS

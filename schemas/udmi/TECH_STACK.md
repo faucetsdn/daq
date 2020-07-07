@@ -20,7 +20,7 @@ technology stack for compliant IoT devices.
 | state    | state    | _n/a_     | `/devices/{device_id}/state`           | state.json    |
 | config   | config   | _n/a_     | `/devices/{device-id}/config`          | config.json   |
 | pointset | event    | pointset  | `/devices/{device-id}/events/pointset` | pointset.json |
-| logentry | event    | logentry  | `/devices/{device-id}/events/logentry` | logentry.json |
+| system   | event    | system    | `/devices/{device-id}/events/system`   | system.json   |
 
 # Backend Systems
 

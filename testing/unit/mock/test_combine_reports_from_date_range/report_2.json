@@ -1,0 +1,34 @@
+{
+    "modules": {
+        "ping": {
+            "tests": {
+                "base.startup.dhcp": {
+                    "result": "pass",
+                    "test_name": "base.startup.dhcp",
+                    "module_name": "ping",
+                    "category": "Other",
+                    "expected": "Other",
+                    "result_description": ""
+                },
+                "base.switch.ping": {
+                    "result": "pass",
+                    "test_name": "base.switch.ping",
+                    "module_name": "ping",
+                    "category": "Other",
+                    "expected": "Other",
+                    "result_description": "target "
+                },
+                "base.target.ping": {
+                    "result": "fail",
+                    "test_name": "base.target.ping",
+                    "module_name": "ping",
+                    "category": "Other",
+                    "expected": "Other",
+                    "result_description": "target not reached "
+                }
+            }
+        }
+    },
+    "missing_tests": ["missing.test.1"],
+    "timestamp": "report_2_timestamp"
+}

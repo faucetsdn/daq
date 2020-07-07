@@ -6,12 +6,15 @@ would ideally be stored in a git repo (separate from DAQ), that can then be used
 configuraiton across installs. The site path defaults to `local/site`, which means you can
 also store your entire configuraiton of local/ in the same source control repo, if desired.
 
+For initial testing and setup, setting `site_path=resources/test_site` will use the default devices
+used for integration testing and is a good way to get started.
+
 # Module configs
 
 A test module config is constructed for each test from a sequence of overlaid files. The
 general sequence of includes is:
 
-* `misc/module_config.json`: Global configuraiton paramaters that come with the DAQ distribution.
+* `resources/setups/baseline/module_config.json`: Global configuraiton paramaters that come with the DAQ distribution.
 * `{site_path}/module_config.json`: Confguraiton parameters common to all tests run with this site.
 * `{site_path}/device_types/{device_type}/module_config.json`: Device-type configuration parameters.
 * `{site_path}/mac_addrs/{mac_addr}/module_config.json`: Device-specific configuraiton parameters.
@@ -30,15 +33,15 @@ directory).
 # Configuration parameters
 
 * Each test can be enabled or disabled at any level, see this
-[site level example](https://github.com/faucetsdn/daq/blob/master/misc/test_site/module_config.json) uner the `modules` section.
+[site level example](https://github.com/faucetsdn/daq/blob/master/resources/test_site/module_config.json) uner the `modules` section.
 * Generic test options are also possible, but the exact contents depend on the tests themselves. See this
-[device level example](https://github.com/faucetsdn/daq/blob/master/misc/test_site/mac_addrs/9a02571e8f01/module_config.json)
+[device level example](https://github.com/faucetsdn/daq/blob/master/resources/test_site/mac_addrs/9a02571e8f01/module_config.json)
 for how to "allow" certain ports under the `servers` section.
 * Many other parameters (seen in the examples) are simply passed through to the generated report.
 
 ## Test configuration
 
-See `misc/test_site/module_config.json` for an example of line-item test configurations,
+See `resources/test_site/module_config.json` for an example of line-item test configurations,
 which should look something like:
 ```
 {

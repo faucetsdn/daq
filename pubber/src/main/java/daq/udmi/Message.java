@@ -1,7 +1,9 @@
 package daq.udmi;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -9,25 +11,37 @@ public class Message {
 
   public static class State extends UdmiBase {
     public SystemState system = new SystemState();
-    public PointSetState pointset;
+    public PointsetState pointset;
   }
 
   public static class Config extends UdmiBase {
     public SystemConfig system;
-    public PointSetState pointset;
+    public PointsetConfig pointset;
+    public GatewayConfig gateway;
   }
 
-  public static class PointSet extends UdmiBase {
+  public static class Pointset extends UdmiBase {
     public Map<String, PointData> points = new HashMap<>();
     public Object extraField;
   }
 
-  public static class System extends UdmiBase {
-    public Report log;
+  public static class SystemEvent extends UdmiBase {
+    public List<Entry> logentries = new ArrayList<>();
   }
 
-  public static class PointSetState {
+  public static class PointsetState {
     public Map<String, PointState> points = new HashMap<>();
+  }
+
+  public static class PointsetConfig {
+    public Map<String, PointConfig> points = new HashMap<>();
+  }
+
+  public static class PointConfig {
+  }
+
+  public static class GatewayConfig {
+    public List<String> proxy_ids;
   }
 
   public static class SystemState {
@@ -35,7 +49,7 @@ public class Message {
     public Bundle firmware = new Bundle();
     public boolean operational;
     public Date last_config;
-    public Map<String, Report> statuses = new HashMap<>();
+    public Map<String, Entry> statuses = new HashMap<>();
   }
 
   public static class SystemConfig {
