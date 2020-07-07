@@ -93,6 +93,11 @@
       "required": "pass",
       "expected": "Required Pass"
     },
+    "connection.network.ntp_update": {
+      "category": "Network Time",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
     "connection.network.communication_type": {
       "category": "Communication",
       "required": "info",

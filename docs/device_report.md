@@ -13,7 +13,7 @@
 |------------------|------------------------|
 | Test report start date | XXX |
 | Test report end date   | XXX |
-| 
+| DAQ version      |  |
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|2|0|0|0|
-|Other|2|2|22|2|
+|Other|3|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -68,6 +68,7 @@ Overall device result FAIL
 |skip|cloud.udmi.system|Other|Other|No device id|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
+|pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
@@ -119,7 +120,7 @@ Overall device result FAIL
 ```
 --------------------
 Baseline ping test report
-
+%% 74 packets captured.
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -149,7 +150,7 @@ Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached
+RESULT pass base.target.ping target reached %% 10.20.50.164
 
 ```
 
@@ -164,11 +165,11 @@ security.ports.nmap
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
+# Nmap 7.60 scan initiated Mon Jul  6 16:02:31 2020 as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log 10.20.50.164
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
-# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
+Host: 10.20.50.164 ()	Status: Up
+Host: 10.20.50.164 ()	Ports: 47808/open|filtered/udp//bacnet///	Ignored State: closed (3)
+# Nmap done at Mon Jul  6 16:02:32 2020 -- 1 IP address (1 host up) scanned in 0.55 seconds
 No invalid ports found.
 --------------------
 RESULT pass security.ports.nmap Only allowed ports found open.
@@ -338,7 +339,7 @@ RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was no
 
 ```
 --------------------
-Collecting TLS cert from target address
+Collecting TLS cert from target address %% 10.20.50.164
 
 --------------------
 security.tls.v1
@@ -413,19 +414,19 @@ security.passwords.http
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
+[STARTING WITH IP:10.20.50.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
 Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
-
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-07-06 16:03 UTC
+Nmap scan report for daq-faux-1 (10.20.50.164)
+Host is up (0.00016s latency).
+Not shown: 999 closed ports
 PORT      STATE SERVICE
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
+Nmap done: 1 IP address (1 host up) scanned in 1.87 seconds
+nmap 10.20.50.164
 Done.
 --------------------
 RESULT skip security.passwords.http Port 80 is not open on target device.
@@ -435,19 +436,19 @@ security.passwords.https
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
+[STARTING WITH IP:10.20.50.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
 Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
-
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-07-06 16:03 UTC
+Nmap scan report for daq-faux-1 (10.20.50.164)
+Host is up (0.000035s latency).
+Not shown: 999 closed ports
 PORT      STATE SERVICE
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
+Nmap done: 1 IP address (1 host up) scanned in 3.46 seconds
+nmap 10.20.50.164
 Done.
 --------------------
 RESULT skip security.passwords.https Port 443 is not open on target device.
@@ -457,19 +458,19 @@ security.passwords.telnet
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
+[STARTING WITH IP:10.20.50.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
 Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
-
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-07-06 16:03 UTC
+Nmap scan report for daq-faux-1 (10.20.50.164)
+Host is up (0.00013s latency).
+Not shown: 999 closed ports
 PORT      STATE SERVICE
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
+Nmap done: 1 IP address (1 host up) scanned in 2.02 seconds
+nmap 10.20.50.164
 Done.
 --------------------
 RESULT skip security.passwords.telnet Port 23 is not open on target device.
@@ -479,19 +480,19 @@ security.passwords.ssh
 --------------------
 Verify all default passwords are updated and new Google provided passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
+[STARTING WITH IP:10.20.50.164, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
 Starting NMAP check...
 
-Starting Nmap 7.60 ( https://nmap.org ) at XXX
-Nmap scan report for daq-faux-1 (X.X.X.X)
-Host is up (XXX).
-
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-07-06 16:03 UTC
+Nmap scan report for daq-faux-1 (10.20.50.164)
+Host is up (0.000021s latency).
+Not shown: 999 closed ports
 PORT      STATE SERVICE
 10000/tcp open  snet-sensor-mgmt
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
-Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
+Nmap done: 1 IP address (1 host up) scanned in 1.74 seconds
+nmap 10.20.50.164
 Done.
 --------------------
 RESULT skip security.passwords.ssh Port 22 is not open on target device.
@@ -580,6 +581,12 @@ connection.network.ntp_support
 Device supports NTP version 4.
 --------------------
 RESULT pass connection.network.ntp_support Using NTPv4.
+--------------------
+connection.network.ntp_update
+--------------------
+Device synchronizes its time to the NTP server.
+--------------------
+RESULT pass connection.network.ntp_update Device clock synchronized.
 ```
 
 #### Module Config
