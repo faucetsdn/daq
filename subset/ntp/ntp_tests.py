@@ -16,7 +16,6 @@ description_ntp_support = 'Device supports NTP version 4.'
 
 
 def write_report(string_to_append):
-    print(string_to_append.strip())
     with open(report_filename, 'a+') as file_open:
         file_open.write(string_to_append)
 
