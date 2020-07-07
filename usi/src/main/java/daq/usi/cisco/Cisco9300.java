@@ -40,16 +40,14 @@ public class Cisco9300 extends BaseSwitchController {
    * Cisco 9300 Switch Controller.
    *
    * @param remoteIpAddress switch ip
-   * @param telnetPort      switch telnet port
    * @param user            switch username
    * @param password        switch password
    */
   public Cisco9300(
       String remoteIpAddress,
-      int telnetPort,
       String user,
       String password) {
-    super(remoteIpAddress, telnetPort, user, password);
+    super(remoteIpAddress, user, password);
     this.username = user == null ? "admin" : user;
     this.password = password == null ? "password" : password;
   }

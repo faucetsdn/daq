@@ -22,21 +22,20 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
 
   private SwitchController getSwitchController(SwitchInfo switchInfo) {
     String repr = String.join(",", switchInfo.getModel().toString(),
-        switchInfo.getIpAddr(),
-        String.valueOf(switchInfo.getCmdTelnetPort()), switchInfo.getUsername(),
+        switchInfo.getIpAddr(), switchInfo.getUsername(),
         switchInfo.getPassword());
     SwitchController sc = switchControllers.computeIfAbsent(repr, key -> {
       final SwitchController newController;
       switch (switchInfo.getModel()) {
         case ALLIED_TELESIS_X230: {
           newController =
-              new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
-                  switchInfo.getUsername(), switchInfo.getPassword());
+              new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
+                  switchInfo.getPassword());
           break;
         }
         case CISCO_9300: {
-          newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getCmdTelnetPort(),
-              switchInfo.getUsername(), switchInfo.getPassword());
+          newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(),
+              switchInfo.getPassword());
           break;
         }
         case OVS_SWITCH: {

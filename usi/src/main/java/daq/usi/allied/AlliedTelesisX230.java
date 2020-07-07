@@ -40,33 +40,29 @@ public class AlliedTelesisX230 extends BaseSwitchController {
    * ATX230 Switch Controller.
    *
    * @param remoteIpAddress switch ip address
-   * @param telnetPort      switch telnet port
    * @param user            switch username
    * @param password        switch password
    */
   public AlliedTelesisX230(
       String remoteIpAddress,
-      int telnetPort,
       String user,
       String password) {
-    this(remoteIpAddress, telnetPort, user, password, false);
+    this(remoteIpAddress, user, password, false);
   }
 
   /**
    * ATX230 Switch Controller.
    *
    * @param remoteIpAddress switch ip address
-   * @param telnetPort      switch telnet port
    * @param user            switch username
    * @param password        switch password
    * @param debug           for verbose output
    */
   public AlliedTelesisX230(
       String remoteIpAddress,
-      int telnetPort,
       String user,
       String password, boolean debug) {
-    super(remoteIpAddress, telnetPort, user, password, debug);
+    super(remoteIpAddress, user, password, debug);
     this.username = user == null ? "manager" : user;
     this.password = password == null ? "friend" : password;
   }
