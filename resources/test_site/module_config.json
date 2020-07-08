@@ -17,6 +17,9 @@
     },
     "manual": {
       "enabled": true
+    },
+    "ntp": {
+      "enabled": true
     }
   },
   "process": {
