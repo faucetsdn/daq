@@ -57,6 +57,9 @@ RESULT pass security.passwords.telnet Default passwords have been changed.
 RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
+RESULT pass connection.network.ntp_support Using NTPv4.
+RESULT fail connection.network.ntp_support Not using NTPv4.
+RESULT skip connection.network.ntp_support No NTP packets received.
 dhcp requests 1 1 0 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
@@ -103,6 +106,9 @@ port-01 module_config modules
     "enabled": true
   },
   "nmap": {
+    "enabled": true
+  },
+  "ntp": {
     "enabled": true
   },
   "pass": {
@@ -152,6 +158,9 @@ port-02 module_config modules
     "enabled": true
   },
   "nmap": {
+    "enabled": true
+  },
+  "ntp": {
     "enabled": true
   },
   "pass": {
