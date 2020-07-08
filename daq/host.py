@@ -64,7 +64,6 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
-    _DEFAULT_SWITCH_TELNET_PORT = 23
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
     _MODULE_CONFIG = "module_config.json"
@@ -637,12 +636,9 @@ class ConnectedHost:
         return params
 
     def _get_switch_config(self):
-        telnet_cmd_port = int(self.switch_setup.get(
-            'telnet_cmd_port', self._DEFAULT_SWITCH_TELNET_PORT))
         return {
             'ip': self.switch_setup.get('ip_addr'),
             'model': self.switch_setup.get('model'),
-            'telnet_cmd_port': telnet_cmd_port,
             'username': self.switch_setup.get('username'),
             'password': self.switch_setup.get('password')
         }
