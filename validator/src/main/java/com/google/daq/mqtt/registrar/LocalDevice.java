@@ -342,11 +342,12 @@ class LocalDevice {
 
   public void writeErrors() {
     File errorsFile = new File(deviceDir, DEVICE_ERRORS_JSON);
-    System.err.println("Updating " + errorsFile);
     if (exceptionMap.isEmpty()) {
+      System.err.println("Removing " + errorsFile);
       errorsFile.delete();
       return;
     }
+    System.err.println("Updating " + errorsFile);
     try (PrintStream printStream = new PrintStream(new FileOutputStream(errorsFile))) {
       ExceptionMap.ErrorTree errorTree = ExceptionMap.format(exceptionMap, ERROR_FORMAT_INDENT);
       errorTree.write(printStream);
