@@ -99,7 +99,7 @@ public class Registrar {
             .put(device.getDeviceId(), "True");
       }
     });
-    if (!blockErrors.isEmpty()) {
+    if (blockErrors != null && !blockErrors.isEmpty()) {
       errorSummary.put("Block", blockErrors.stream().collect(Collectors.toMap(
           Map.Entry::getKey, entry -> entry.getValue().toString())));
     }
@@ -151,8 +151,10 @@ public class Registrar {
           localDevice.getErrors().put("Registering", e);
         }
       }
-      bindGatewayDevices(localDevices);
-      blockErrors = blockExtraDevices(extraDevices);
+      if (!localOnly()) {
+        bindGatewayDevices(localDevices);
+        blockErrors = blockExtraDevices(extraDevices);
+      }
       System.err.println(String.format("Processed %d devices", localDevices.size()));
     } catch (Exception e) {
       throw new RuntimeException("While processing devices", e);

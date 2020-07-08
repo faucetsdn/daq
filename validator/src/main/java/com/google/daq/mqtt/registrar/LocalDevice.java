@@ -67,7 +67,6 @@ class LocalDevice {
   private final Map<String, Schema> schemas;
   private final File deviceDir;
   private final UdmiSchema.Metadata metadata;
-  private final File devicesDir;
   private final ExceptionMap exceptionMap;
 
   private String deviceNumId;
@@ -79,7 +78,6 @@ class LocalDevice {
     try {
       this.deviceId = deviceId;
       this.schemas = schemas;
-      this.devicesDir = devicesDir;
       exceptionMap = new ExceptionMap("Exceptions for " + deviceId);
       deviceDir = new File(devicesDir, deviceId);
       metadata = readMetadata();
@@ -381,7 +379,7 @@ class LocalDevice {
   public void writeConfigFile() {
     File configFile = new File(deviceDir, GENERATED_CONFIG_JSON);
     try (OutputStream outputStream = new FileOutputStream(configFile)) {
-      outputStream.write(settings.config.getBytes());
+      outputStream.write(getSettings().config.getBytes());
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("While writing "+ configFile.getAbsolutePath(), e);
@@ -405,7 +403,7 @@ class LocalDevice {
   }
 
   public boolean isValid() {
-    return metadata != null && settings != null;
+    return metadata != null;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {
