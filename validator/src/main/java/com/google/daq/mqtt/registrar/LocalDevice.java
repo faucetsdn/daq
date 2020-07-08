@@ -228,10 +228,6 @@ class LocalDevice {
     return isGateway() || !hasGateway();
   }
 
-  String getGatewayId() {
-    return hasGateway() ? metadata.gateway.gateway_id : null;
-  }
-
   CloudDeviceSettings getSettings() {
     try {
       if (settings != null) {
@@ -408,8 +404,8 @@ class LocalDevice {
     return exceptionMap;
   }
 
-  public boolean hasValidMetadata() {
-    return metadata != null;
+  public boolean isValid() {
+    return metadata != null && settings != null;
   }
 
   private static class ProperPrettyPrinterPolicy extends DefaultPrettyPrinter {

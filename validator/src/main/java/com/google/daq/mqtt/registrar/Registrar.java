@@ -130,7 +130,7 @@ public class Registrar {
       Set<String> extraDevices = cloudDevices.stream().map(Device::getId).collect(toSet());
       for (String localName : localDevices.keySet()) {
         LocalDevice localDevice = localDevices.get(localName);
-        if (!localDevice.hasValidMetadata()) {
+        if (!localDevice.isValid()) {
           System.err.println("Skipping (invalid) " + localName);
           continue;
         }
