@@ -284,10 +284,9 @@ class ConnectedHost:
         if switch_model in usi.SwitchModel.keys():
             switch_model = usi.SwitchModel.Value(switch_model)
         else:
-            switch_model = usi.SwitchModel.OVS
+            switch_model = usi.SwitchModel.OVS_SWITCH
         params = {
             "ip_addr": switch_config["ip"],
-            "telnet_port": switch_config["telnet_cmd_port"],
             "device_port": self.target_port,
             "model": switch_model,
             "username": switch_config["username"],
@@ -319,7 +318,7 @@ class ConnectedHost:
                     res = stub.connect(switch_info)
                 else:
                     res = stub.disconnect(switch_info)
-                LOGGER.info('Target port %s: %s', self.target_port, "connect"
+                LOGGER.info('Target port %s %s successful? %s', self.target_port, "connect"
                             if connect else "disconnect", res.success)
         except Exception as e:
             LOGGER.error(e)
@@ -601,6 +600,7 @@ class ConnectedHost:
 
         try:
             self._start_test_host()
+            self.connect_port(False)
         except Exception as e:
             self.test_host = None
             self.runner.release_test_port(self.target_port, self.test_port)

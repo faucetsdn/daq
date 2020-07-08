@@ -17,12 +17,12 @@ class USIServiceStub(object):
         self.GetPower = channel.unary_unary(
                 '/usi.USIService/GetPower',
                 request_serializer=usi__pb2.SwitchInfo.SerializeToString,
-                response_deserializer=usi__pb2.Power.FromString,
+                response_deserializer=usi__pb2.PowerResponse.FromString,
                 )
         self.GetInterface = channel.unary_unary(
                 '/usi.USIService/GetInterface',
                 request_serializer=usi__pb2.SwitchInfo.SerializeToString,
-                response_deserializer=usi__pb2.Interface.FromString,
+                response_deserializer=usi__pb2.InterfaceResponse.FromString,
                 )
         self.disconnect = channel.unary_unary(
                 '/usi.USIService/disconnect',
@@ -69,12 +69,12 @@ def add_USIServiceServicer_to_server(servicer, server):
             'GetPower': grpc.unary_unary_rpc_method_handler(
                     servicer.GetPower,
                     request_deserializer=usi__pb2.SwitchInfo.FromString,
-                    response_serializer=usi__pb2.Power.SerializeToString,
+                    response_serializer=usi__pb2.PowerResponse.SerializeToString,
             ),
             'GetInterface': grpc.unary_unary_rpc_method_handler(
                     servicer.GetInterface,
                     request_deserializer=usi__pb2.SwitchInfo.FromString,
-                    response_serializer=usi__pb2.Interface.SerializeToString,
+                    response_serializer=usi__pb2.InterfaceResponse.SerializeToString,
             ),
             'disconnect': grpc.unary_unary_rpc_method_handler(
                     servicer.disconnect,
@@ -108,7 +108,7 @@ class USIService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/usi.USIService/GetPower',
             usi__pb2.SwitchInfo.SerializeToString,
-            usi__pb2.Power.FromString,
+            usi__pb2.PowerResponse.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -124,7 +124,7 @@ class USIService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/usi.USIService/GetInterface',
             usi__pb2.SwitchInfo.SerializeToString,
-            usi__pb2.Interface.FromString,
+            usi__pb2.InterfaceResponse.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 

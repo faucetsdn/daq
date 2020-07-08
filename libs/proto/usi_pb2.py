@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\004grpcB\010USIProtoP\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\tusi.proto\x12\x03usi\"\'\n\x14SwitchActionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x93\x01\n\x05Power\x12!\n\x19\x63urrent_power_consumption\x18\x01 \x01(\x02\x12\x1d\n\x15max_power_consumption\x18\x02 \x01(\x02\x12$\n\x0bpoe_support\x18\x03 \x01(\x0e\x32\x0f.usi.POESupport\x12\"\n\npoe_status\x18\x04 \x01(\x0e\x32\x0e.usi.POEStatus\"U\n\tInterface\x12$\n\x0blink_status\x18\x01 \x01(\x0e\x32\x0f.usi.LinkStatus\x12\x12\n\nlink_speed\x18\x02 \x01(\x05\x12\x0e\n\x06\x64uplex\x18\x03 \x01(\t\"\x8c\x01\n\nSwitchInfo\x12\x0f\n\x07ip_addr\x18\x01 \x01(\t\x12\x13\n\x0btelnet_port\x18\x02 \x01(\x05\x12\x13\n\x0b\x64\x65vice_port\x18\x03 \x01(\x05\x12\x1f\n\x05model\x18\x04 \x01(\x0e\x32\x10.usi.SwitchModel\x12\x10\n\x08username\x18\x05 \x01(\t\x12\x10\n\x08password\x18\x06 \x01(\t*?\n\x0bSwitchModel\x12\x17\n\x13\x41LLIED_TELESIS_X230\x10\x00\x12\x0e\n\nCISCO_9300\x10\x01\x12\x07\n\x03OVS\x10\x02*\x1e\n\nLinkStatus\x12\x06\n\x02UP\x10\x00\x12\x08\n\x04\x44OWN\x10\x01*\'\n\nPOESupport\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01*1\n\tPOEStatus\x12\x06\n\x02ON\x10\x00\x12\x07\n\x03OFF\x10\x01\x12\t\n\x05\x46\x41ULT\x10\x02\x12\x08\n\x04\x44\x45NY\x10\x03\x32\xdf\x01\n\nUSIService\x12)\n\x08GetPower\x12\x0f.usi.SwitchInfo\x1a\n.usi.Power\"\x00\x12\x31\n\x0cGetInterface\x12\x0f.usi.SwitchInfo\x1a\x0e.usi.Interface\"\x00\x12:\n\ndisconnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x12\x37\n\x07\x63onnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x42\x12\n\x04grpcB\x08USIProtoP\x01\x62\x06proto3'
+  serialized_pb=b'\n\tusi.proto\x12\x03usi\"\'\n\x14SwitchActionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x9b\x01\n\rPowerResponse\x12!\n\x19\x63urrent_power_consumption\x18\x01 \x01(\x02\x12\x1d\n\x15max_power_consumption\x18\x02 \x01(\x02\x12$\n\x0bpoe_support\x18\x03 \x01(\x0e\x32\x0f.usi.POESupport\x12\"\n\npoe_status\x18\x04 \x01(\x0e\x32\x0e.usi.POEStatus\"]\n\x11InterfaceResponse\x12$\n\x0blink_status\x18\x01 \x01(\x0e\x32\x0f.usi.LinkStatus\x12\x12\n\nlink_speed\x18\x02 \x01(\x05\x12\x0e\n\x06\x64uplex\x18\x03 \x01(\t\"w\n\nSwitchInfo\x12\x0f\n\x07ip_addr\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_port\x18\x03 \x01(\x05\x12\x1f\n\x05model\x18\x04 \x01(\x0e\x32\x10.usi.SwitchModel\x12\x10\n\x08username\x18\x05 \x01(\t\x12\x10\n\x08password\x18\x06 \x01(\t*F\n\x0bSwitchModel\x12\x17\n\x13\x41LLIED_TELESIS_X230\x10\x00\x12\x0e\n\nCISCO_9300\x10\x01\x12\x0e\n\nOVS_SWITCH\x10\x02*\x1e\n\nLinkStatus\x12\x06\n\x02UP\x10\x00\x12\x08\n\x04\x44OWN\x10\x01*\'\n\nPOESupport\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01*1\n\tPOEStatus\x12\x06\n\x02ON\x10\x00\x12\x07\n\x03OFF\x10\x01\x12\t\n\x05\x46\x41ULT\x10\x02\x12\x08\n\x04\x44\x45NY\x10\x03\x32\xef\x01\n\nUSIService\x12\x31\n\x08GetPower\x12\x0f.usi.SwitchInfo\x1a\x12.usi.PowerResponse\"\x00\x12\x39\n\x0cGetInterface\x12\x0f.usi.SwitchInfo\x1a\x16.usi.InterfaceResponse\"\x00\x12:\n\ndisconnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x12\x37\n\x07\x63onnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x42\x12\n\x04grpcB\x08USIProtoP\x01\x62\x06proto3'
 )
 
 _SWITCHMODEL = _descriptor.EnumDescriptor(
@@ -41,15 +41,15 @@ _SWITCHMODEL = _descriptor.EnumDescriptor(
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='OVS', index=2, number=2,
+      name='OVS_SWITCH', index=2, number=2,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=439,
-  serialized_end=502,
+  serialized_start=433,
+  serialized_end=503,
 )
 _sym_db.RegisterEnumDescriptor(_SWITCHMODEL)
 
@@ -74,8 +74,8 @@ _LINKSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=504,
-  serialized_end=534,
+  serialized_start=505,
+  serialized_end=535,
 )
 _sym_db.RegisterEnumDescriptor(_LINKSTATUS)
 
@@ -100,8 +100,8 @@ _POESUPPORT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=536,
-  serialized_end=575,
+  serialized_start=537,
+  serialized_end=576,
 )
 _sym_db.RegisterEnumDescriptor(_POESUPPORT)
 
@@ -136,15 +136,15 @@ _POESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=577,
-  serialized_end=626,
+  serialized_start=578,
+  serialized_end=627,
 )
 _sym_db.RegisterEnumDescriptor(_POESTATUS)
 
 POEStatus = enum_type_wrapper.EnumTypeWrapper(_POESTATUS)
 ALLIED_TELESIS_X230 = 0
 CISCO_9300 = 1
-OVS = 2
+OVS_SWITCH = 2
 UP = 0
 DOWN = 1
 ENABLED = 0
@@ -188,37 +188,37 @@ _SWITCHACTIONRESPONSE = _descriptor.Descriptor(
 )
 
 
-_POWER = _descriptor.Descriptor(
-  name='Power',
-  full_name='usi.Power',
+_POWERRESPONSE = _descriptor.Descriptor(
+  name='PowerResponse',
+  full_name='usi.PowerResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='current_power_consumption', full_name='usi.Power.current_power_consumption', index=0,
+      name='current_power_consumption', full_name='usi.PowerResponse.current_power_consumption', index=0,
       number=1, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='max_power_consumption', full_name='usi.Power.max_power_consumption', index=1,
+      name='max_power_consumption', full_name='usi.PowerResponse.max_power_consumption', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='poe_support', full_name='usi.Power.poe_support', index=2,
+      name='poe_support', full_name='usi.PowerResponse.poe_support', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='poe_status', full_name='usi.Power.poe_status', index=3,
+      name='poe_status', full_name='usi.PowerResponse.poe_status', index=3,
       number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -237,34 +237,34 @@ _POWER = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=60,
-  serialized_end=207,
+  serialized_end=215,
 )
 
 
-_INTERFACE = _descriptor.Descriptor(
-  name='Interface',
-  full_name='usi.Interface',
+_INTERFACERESPONSE = _descriptor.Descriptor(
+  name='InterfaceResponse',
+  full_name='usi.InterfaceResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='link_status', full_name='usi.Interface.link_status', index=0,
+      name='link_status', full_name='usi.InterfaceResponse.link_status', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='link_speed', full_name='usi.Interface.link_speed', index=1,
+      name='link_speed', full_name='usi.InterfaceResponse.link_speed', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='duplex', full_name='usi.Interface.duplex', index=2,
+      name='duplex', full_name='usi.InterfaceResponse.duplex', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -282,8 +282,8 @@ _INTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=209,
-  serialized_end=294,
+  serialized_start=217,
+  serialized_end=310,
 )
 
 
@@ -303,35 +303,28 @@ _SWITCHINFO = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='telnet_port', full_name='usi.SwitchInfo.telnet_port', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='device_port', full_name='usi.SwitchInfo.device_port', index=2,
+      name='device_port', full_name='usi.SwitchInfo.device_port', index=1,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='model', full_name='usi.SwitchInfo.model', index=3,
+      name='model', full_name='usi.SwitchInfo.model', index=2,
       number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='username', full_name='usi.SwitchInfo.username', index=4,
+      name='username', full_name='usi.SwitchInfo.username', index=3,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='password', full_name='usi.SwitchInfo.password', index=5,
+      name='password', full_name='usi.SwitchInfo.password', index=4,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -349,17 +342,17 @@ _SWITCHINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=297,
-  serialized_end=437,
+  serialized_start=312,
+  serialized_end=431,
 )
 
-_POWER.fields_by_name['poe_support'].enum_type = _POESUPPORT
-_POWER.fields_by_name['poe_status'].enum_type = _POESTATUS
-_INTERFACE.fields_by_name['link_status'].enum_type = _LINKSTATUS
+_POWERRESPONSE.fields_by_name['poe_support'].enum_type = _POESUPPORT
+_POWERRESPONSE.fields_by_name['poe_status'].enum_type = _POESTATUS
+_INTERFACERESPONSE.fields_by_name['link_status'].enum_type = _LINKSTATUS
 _SWITCHINFO.fields_by_name['model'].enum_type = _SWITCHMODEL
 DESCRIPTOR.message_types_by_name['SwitchActionResponse'] = _SWITCHACTIONRESPONSE
-DESCRIPTOR.message_types_by_name['Power'] = _POWER
-DESCRIPTOR.message_types_by_name['Interface'] = _INTERFACE
+DESCRIPTOR.message_types_by_name['PowerResponse'] = _POWERRESPONSE
+DESCRIPTOR.message_types_by_name['InterfaceResponse'] = _INTERFACERESPONSE
 DESCRIPTOR.message_types_by_name['SwitchInfo'] = _SWITCHINFO
 DESCRIPTOR.enum_types_by_name['SwitchModel'] = _SWITCHMODEL
 DESCRIPTOR.enum_types_by_name['LinkStatus'] = _LINKSTATUS
@@ -374,19 +367,19 @@ SwitchActionResponse = _reflection.GeneratedProtocolMessageType('SwitchActionRes
   })
 _sym_db.RegisterMessage(SwitchActionResponse)
 
-Power = _reflection.GeneratedProtocolMessageType('Power', (_message.Message,), {
-  'DESCRIPTOR' : _POWER,
+PowerResponse = _reflection.GeneratedProtocolMessageType('PowerResponse', (_message.Message,), {
+  'DESCRIPTOR' : _POWERRESPONSE,
   '__module__' : 'usi_pb2'
-  # @@protoc_insertion_point(class_scope:usi.Power)
+  # @@protoc_insertion_point(class_scope:usi.PowerResponse)
   })
-_sym_db.RegisterMessage(Power)
+_sym_db.RegisterMessage(PowerResponse)
 
-Interface = _reflection.GeneratedProtocolMessageType('Interface', (_message.Message,), {
-  'DESCRIPTOR' : _INTERFACE,
+InterfaceResponse = _reflection.GeneratedProtocolMessageType('InterfaceResponse', (_message.Message,), {
+  'DESCRIPTOR' : _INTERFACERESPONSE,
   '__module__' : 'usi_pb2'
-  # @@protoc_insertion_point(class_scope:usi.Interface)
+  # @@protoc_insertion_point(class_scope:usi.InterfaceResponse)
   })
-_sym_db.RegisterMessage(Interface)
+_sym_db.RegisterMessage(InterfaceResponse)
 
 SwitchInfo = _reflection.GeneratedProtocolMessageType('SwitchInfo', (_message.Message,), {
   'DESCRIPTOR' : _SWITCHINFO,
@@ -405,8 +398,8 @@ _USISERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=629,
-  serialized_end=852,
+  serialized_start=630,
+  serialized_end=869,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetPower',
@@ -414,7 +407,7 @@ _USISERVICE = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_SWITCHINFO,
-    output_type=_POWER,
+    output_type=_POWERRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -424,7 +417,7 @@ _USISERVICE = _descriptor.ServiceDescriptor(
     index=1,
     containing_service=None,
     input_type=_SWITCHINFO,
-    output_type=_INTERFACE,
+    output_type=_INTERFACERESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
