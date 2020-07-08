@@ -8,9 +8,6 @@ import daq.udmi.Message;
 import daq.udmi.Message.Pointset;
 import daq.udmi.Message.PointsetState;
 import daq.udmi.Message.State;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Pubber {
 
@@ -166,7 +165,8 @@ public class Pubber {
   private void initialize() {
     Preconditions.checkNotNull(configuration.deviceId, "configuration deviceId not defined");
     if (configuration.sitePath != null) {
-      configuration.keyFile = String.format(KEY_SITE_PATH_FORMAT, configuration.sitePath, configuration.deviceId);
+      configuration.keyFile = String.format(KEY_SITE_PATH_FORMAT, configuration.sitePath,
+          configuration.deviceId);
     }
     Preconditions.checkState(mqttPublisher == null, "mqttPublisher already defined");
     Preconditions.checkNotNull(configuration.keyFile, "configuration keyFile not defined");
