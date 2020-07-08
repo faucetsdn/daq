@@ -69,17 +69,13 @@ public class Validator {
   public static void main(String[] args) {
     Validator validator = new Validator();
     try {
-      System.out.println(ServiceOptions.CREDENTIAL_ENV_NAME + "=" +
-          System.getenv(ServiceOptions.CREDENTIAL_ENV_NAME));
-      if (args.length < 3 || args.length > 4) {
-        throw new IllegalArgumentException("Args: schema target inst_name [site]");
+      if (args.length != 4) {
+        throw new IllegalArgumentException("Args: [schema] [target] [inst_name] [site]");
       }
       validator.setSchemaSpec(args[0]);
       String targetSpec = args[1];
       String instName = args[2];
-      if (args.length >= 4) {
-        validator.setSiteDir(args[3]);
-      }
+      validator.setSiteDir(args[3]);
       if (targetSpec.startsWith(PUBSUB_PREFIX)) {
         String topicName = targetSpec.substring(PUBSUB_PREFIX.length());
         validator.validatePubSub(instName, topicName);
