@@ -600,7 +600,6 @@ class ConnectedHost:
 
         try:
             self._start_test_host()
-            self.connect_port(False)
         except Exception as e:
             self.test_host = None
             self.runner.release_test_port(self.target_port, self.test_port)
