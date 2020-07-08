@@ -29,7 +29,8 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
         break;
       }
       case CISCO_9300: {
-        newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(), switchInfo.getPassword());
+        newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(),
+            switchInfo.getPassword());
         break;
       }
       case OVS_SWITCH: {
@@ -44,7 +45,8 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   private SwitchController getSwitchController(SwitchInfo switchInfo) {
-    String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(), switchInfo.getUsername(),
+    String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
+        switchInfo.getUsername(),
         switchInfo.getPassword());
     return switchControllers.computeIfAbsent(repr, key -> createController(switchInfo));
   }
@@ -92,7 +94,8 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void disconnect(SwitchInfo request, StreamObserver<SwitchActionResponse> responseObserver) {
+  public void disconnect(SwitchInfo request,
+                         StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
       sc.disconnect(request.getDevicePort(), data -> {
