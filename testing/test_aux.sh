@@ -128,6 +128,7 @@ head inst/gw*/nodes/gw*/activate.log
 head inst/run-port-*/nodes/*/activate.log
 head inst/run-port-*/nodes/*/tmp/report.txt
 ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
+more inst/run-port-*/nodes/udmi*/activate.log
 
 # Add the port-01 and port-02 module config into the file
 echo port-01 module_config modules | tee -a $TEST_RESULTS
