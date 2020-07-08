@@ -387,6 +387,7 @@ class LocalDevice {
     try (OutputStream outputStream = new FileOutputStream(configFile)) {
       outputStream.write(settings.config.getBytes());
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException("While writing "+ configFile.getAbsolutePath(), e);
     }
   }
