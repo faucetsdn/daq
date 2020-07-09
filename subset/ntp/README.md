@@ -15,4 +15,3 @@ If the python code needs debugging, the pip module `scapy` is required (`pip ins
 |---|---|---|---|---|
 | connection.network.ntp_support | Are the received NTP packets using NTP v4? | NTP version is 4 | NTP version is not 4 | No NTP packets are received |
 | connection.network.ntp_update | Does the device demonstrate updating its clock using NTP? | Device clock is synchronized | Device clock is not synchronized | Not enough NTP packets are received |
-

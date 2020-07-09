@@ -123,7 +123,7 @@ function handleTestResult(origin, siteName, message) {
   const deviceDoc = originDoc.collection('device').doc(message.device_id);
 
   const updates = [
-    originDoc.set({ 'updated': timestamp }),
+    originDoc.set({ 'updated': timestamp }, { merge: true }),
     siteDoc.set({ 'updated': timestamp }),
     portDoc.set({ 'updated': timestamp }),
     deviceDoc.set({ 'updated': timestamp })
@@ -193,17 +193,22 @@ function handleTestResult(origin, siteName, message) {
 function handleHeartbeat(origin, message) {
   const timestamp = new Date().toJSON();
   const originDoc = db.collection('origin').doc(origin);
-  console.log('heartbeat', timestamp, origin)
+  console.log('heartbeat', timestamp, origin, message)
   const heartbeatDoc = originDoc.collection('runner').doc('heartbeat');
   return Promise.all([
-    originDoc.set({ 'updated': timestamp }),
+    originDoc.set({
+      'updated': timestamp,
+      'version': message.version
+    }),
     heartbeatDoc.get().then((result) => {
       const current = result.data();
-      if (!current || !current.message || current.message.timestamp < message.timestamp)
+      const defined = current && current.message && current.message.timestamp;
+      if (!defined || current.message.timestamp < message.timestamp) {
         return heartbeatDoc.set({
           'updated': timestamp,
           message
         });
+      }
     })
   ]);
 }
