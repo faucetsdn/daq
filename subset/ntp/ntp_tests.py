@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 import sys
 from scapy.all import NTP, rdpcap
 
@@ -73,14 +73,15 @@ def test_ntp_update():
     packets = ntp_packets(capture)
     if len(packets) < 4:
         add_summary("Not enough NTP packets received.")
-        return 'skip';
+        return 'skip'
     # Check that DAQ NTP server has been used
     local_device = local_ntp_server = None
     using_local_server = False
     local_ntp_packets = []
     for packet in packets:
         # Packet is to or from local NTP server
-        if (packet.payload.dst.startswith('10.20.') and packet.payload.dst.endswith('.2')) or (packet.payload.src.startswith('10.20.') and packet.payload.src.endswith('.2')):
+        if ((packet.payload.dst.startswith('10.20.') and packet.payload.dst.endswith('.2')) or 
+(packet.payload.src.startswith('10.20.') and packet.payload.src.endswith('.2'))):
             using_local_server = True
             local_ntp_packets.append(packet)
             if packet.payload.dst.endswith('.2'):
@@ -95,33 +96,34 @@ def test_ntp_update():
     # Ensuring the correct sequence of ntp packets are collated
     p1 = p2 = p3 = p4 = None
     for i in range(len(local_ntp_packets)):
-        if p1 == None:
+        if p1 is None:
             if ntp_payload(local_ntp_packets[i]).mode == 3:
                 p1 = local_ntp_packets[i]
                 continue
-        if p2 == None:
+        if p2 is None:
             if ntp_payload(local_ntp_packets[i]).mode == 4:
                 p2 = local_ntp_packets[i]
             else:
                 p1 = None
             continue
-        if p3 == None:
+        if p3 is None:
             if ntp_payload(local_ntp_packets[i]).mode == 3:
                 p3 = local_ntp_packets[i]
                 continue
-        if p4 == None:
+        if p4 is None:
             if ntp_payload(local_ntp_packets[i]).mode == 4:
                 p4 = local_ntp_packets[i]
             else:
                 p3 = None
             continue
-    if p1 == None or p2 == None or p3 == None or p4 == None:
+    if p1 is None or p2 is None or p3 is None or p4 is None:
         add_summary("Device clock not synchronized with local NTP server. One of 4 packets is None")
         return 'fail'
-    offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) + (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
+    offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) + 
+(ntp_payload(p3).sent - ntp_payload(p4).recv))/2
     if offset < 1:
         add_summary("Device clock synchronized.")
-    	return 'pass'
+        return 'pass'
     else:
         add_summary("Device clock not synchronized with local NTP server. Offset is " + str(offset))
         return 'fail'
