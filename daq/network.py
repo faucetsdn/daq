@@ -136,7 +136,7 @@ class TestNetwork:
 
     def is_system_port(self, dpid, port):
         """Check if the dpid/port combo is the system trunk port"""
-        return dpid == self.topology.PRI_DPID and port == self.topology.PRI_STACK_PORT
+        return dpid == self.topology.PRI_DPID and port == self.topology.PRI_TRUNK_PORT
 
     def is_device_port(self, dpid, port):
         """Check if the dpid/port combo is for a valid device"""
