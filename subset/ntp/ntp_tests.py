@@ -80,13 +80,10 @@ def test_ntp_update():
     local_ntp_packets = []
     for packet in packets:
         # Packet is to or from local NTP server
-        if ((packet.payload.dst.startswith('10.20.') and packet.payload.dst.endswith('.2')) or 
-(packet.payload.src.startswith('10.20.') and packet.payload.src.endswith('.2'))):
+        if ((packet.payload.dst.startswith('10.20.') and packet.payload.dst.endswith('.2')) or
+                (packet.payload.src.startswith('10.20.') and packet.payload.src.endswith('.2'))):
             using_local_server = True
             local_ntp_packets.append(packet)
-            if packet.payload.dst.endswith('.2'):
-                local_ntp_server = packet.payload.dst
-                local_device = packet.payload.src
     if not using_local_server:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
@@ -119,8 +116,8 @@ def test_ntp_update():
     if p1 is None or p2 is None or p3 is None or p4 is None:
         add_summary("Device clock not synchronized with local NTP server. One of 4 packets is None")
         return 'fail'
-    offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) + 
-(ntp_payload(p3).sent - ntp_payload(p4).recv))/2
+    offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) +
+            (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
     if offset < 1:
         add_summary("Device clock synchronized.")
         return 'pass'
