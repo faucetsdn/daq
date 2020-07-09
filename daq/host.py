@@ -279,9 +279,8 @@ class ConnectedHost:
 
     def _build_switch_info(self) -> usi.SwitchInfo:
         switch_config = self._get_switch_config()
-        switch_model = switch_config["model"]
-        if switch_model in usi.SwitchModel.keys():
-            switch_model = usi.SwitchModel.Value(switch_model)
+        if switch_config["model"]:
+            switch_model = usi.SwitchModel.Value(switch_config["model"])
         else:
             switch_model = usi.SwitchModel.OVS_SWITCH
         params = {
