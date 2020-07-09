@@ -75,7 +75,6 @@ def test_ntp_update():
         add_summary("Not enough NTP packets received.")
         return 'skip'
     # Check that DAQ NTP server has been used
-    local_device = local_ntp_server = None
     using_local_server = False
     local_ntp_packets = []
     for packet in packets:
@@ -117,7 +116,7 @@ def test_ntp_update():
         add_summary("Device clock not synchronized with local NTP server. One of 4 packets is None")
         return 'fail'
     offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) +
-            (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
+              (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
     if offset < 1:
         add_summary("Device clock synchronized.")
         return 'pass'
