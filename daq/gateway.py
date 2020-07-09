@@ -3,6 +3,10 @@
 import datetime
 import os
 import shutil
+
+from clib import docker_host
+from clib import tcpdump_helper
+
 from dhcp_server import DHCPServer
 import logger
 
@@ -30,6 +34,7 @@ class Gateway():
         self.dhcp_monitor = None
         self.fake_target = None
         self.host = None
+        self.host_intf = None
         self.dummy = None
         self.tmpdir = None
         self.targets = {}
@@ -38,6 +43,7 @@ class Gateway():
         self.activated = False
         self.result_linger = False
         self._dhcp_servers = {}
+        self._scan_monitor = None
 
     def initialize(self):
         """Initialize the gateway host"""
@@ -55,8 +61,10 @@ class Gateway():
         LOGGER.info('Initializing gateway %s as %s/%d',
                     self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir('inst', host_name)
-        self.host = self._start_dhcp_server(host_port).host
-
+        cls = docker_host.make_docker_host('daqf/gateway', prefix='daq', network='bridge')
+        self.host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
+        self.host.activate()
+        self._start_dhcp_server(self.allocate_test_port())
         dummy_name = 'dummy%02d' % self.port_set
         dummy_port = self._switch_port(self.DUMMY_OFFSET)
         dummy = self.runner.add_host(dummy_name, port=dummy_port)
@@ -67,11 +75,11 @@ class Gateway():
                     dummy_name, dummy_port, dummy.IP())
 
         self.fake_target = self.TEST_IP_FORMAT % self.port_set
-        host_intf = self.runner.get_host_interface(self.host)
+        self.host_intf = self.runner.get_host_interface(self.host)
         LOGGER.debug('Adding fake target at %s to %s',
-                     self.fake_target, host_intf)
+                     self.fake_target, self.host_intf)
         self.host.cmd('ip addr add %s dev %s' %
-                      (self.fake_target, host_intf))
+                      (self.fake_target, self.host_intf))
 
         ping_retry = self._PING_RETRY_COUNT
         while not self._ping_test(self.host, dummy):
@@ -99,6 +107,16 @@ class Gateway():
         for _, dhcp_server in self._dhcp_servers.items():
             dhcp_server.activate()
         self.activated = True
+        self._scan_finalize()
+
+    def _scan_finalize(self, forget=True):
+        if self._scan_monitor:
+            active = self._scan_monitor.stream() and not self._scan_monitor.stream().closed
+            assert active == forget, 'forget and active mismatch'
+            if forget:
+                self.runner.monitor_forget(self._scan_monitor.stream())
+                self._scan_monitor.terminate()
+            self._scan_monitor = None
 
     def request_new_ip(self, mac):
         """Requests a new ip for the device"""
@@ -123,6 +141,28 @@ class Gateway():
         assert test_port < limit_port, 'no test ports available'
         self.test_ports.add(test_port)
         return test_port
+
+    def _startup_scan(self, host):
+        assert not self._scan_monitor, 'startup_scan already active'
+        startup_file = '/tmp/gateway.pcap'
+        LOGGER.info('Gateway %s startup capture %s in container\'s %s', self.port_set,
+                    self.host_intf, startup_file)
+        tcp_filter = ''
+        helper = tcpdump_helper.TcpdumpHelper(host, tcp_filter, packets=None,
+                                              intf_name=self.host_intf, timeout=None,
+                                              pcap_out=startup_file, blocking=False)
+        self._scan_monitor = helper
+        self.runner.monitor_stream('start%d' % self.port_set, helper.stream(),
+                                   helper.next_line, hangup=self._scan_complete,
+                                   error=self._scan_error)
+
+    def _scan_complete(self):
+        LOGGER.info('Gateway %d scan complete', self.port_set)
+        self._scan_finalize(forget=False)
+
+    def _scan_error(self, e):
+        LOGGER.error('Gateway %d monitor error: %s', self.port_set, e)
+        self._scan_finalize()
 
     def release_test_port(self, test_port):
         """Release the given port from the gateway"""
@@ -196,7 +236,15 @@ class Gateway():
             except Exception as e:
                 LOGGER.error('Gateway %s terminating host: %s', self.name, e)
                 LOGGER.exception(e)
-        self.host = None
+        self._scan_finalize()
+        if self.host:
+            try:
+                self.host.terminate()
+                self.runner.remove_host(self.host)
+                self.host = None
+            except Exception as e:
+                LOGGER.error('Gateway %s terminating host: %s', self.name, e)
+                LOGGER.exception(e)
         if self.dummy:
             try:
                 self.dummy.terminate()

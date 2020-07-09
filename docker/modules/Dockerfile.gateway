@@ -1,0 +1,15 @@
+# Image name: daqf/gateway
+#
+# Image used for host networking services (DNS, DHCP, etc...)
+#
+
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install ethtool iptables python
+
+COPY docker/include/networking_scripts/start_gateway ./
+
+# Weird workaround for problem running tcdump in a privlidged container.
+RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+
+ENTRYPOINT ["./start_gateway"]
