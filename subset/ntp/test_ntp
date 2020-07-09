@@ -5,5 +5,6 @@ REPORT=/tmp/report.txt
 STARTUP=/scans/startup.pcap
 
 python ntp_tests.py connection.network.ntp_support $STARTUP
+python ntp_tests.py connection.network.ntp_update $STARTUP
 
 cat report.txt >> $REPORT
