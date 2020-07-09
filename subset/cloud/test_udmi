@@ -60,7 +60,7 @@ echo Configured schema is $schema_path
 echo Target device is $device_id
 echo
 
-timeout 60 validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic $service_id-$HOSTNAME || true
+timeout 60 validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic $service_id-$HOSTNAME -- || true
 
 function message_report {
     message_type=$1

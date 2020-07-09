@@ -56,6 +56,7 @@ public class Validator {
   private static final String DEVICE_REGISTRY_ID_KEY = "deviceRegistryId";
   private static final String UNKNOWN_SCHEMA_DEFAULT = "unknown";
   private static final String POINTSET_TYPE = "pointset";
+  private static final String NO_SITE = "--";
   private FirestoreDataSink dataSink;
   private File schemaRoot;
   private String schemaSpec;
@@ -69,15 +70,14 @@ public class Validator {
   public static void main(String[] args) {
     Validator validator = new Validator();
     try {
-      System.out.println(ServiceOptions.CREDENTIAL_ENV_NAME + "=" +
-          System.getenv(ServiceOptions.CREDENTIAL_ENV_NAME));
-      if (args.length < 3 || args.length > 4) {
-        throw new IllegalArgumentException("Args: schema target inst_name [site]");
+      if (args.length != 4) {
+        throw new IllegalArgumentException("Args: [schema] [target] [inst_name] [site]");
       }
       validator.setSchemaSpec(args[0]);
       String targetSpec = args[1];
       String instName = args[2];
-      if (args.length >= 4) {
+      String siteDir = args[3];
+      if (!NO_SITE.equals(siteDir)) {
         validator.setSiteDir(args[3]);
       }
       if (targetSpec.startsWith(PUBSUB_PREFIX)) {

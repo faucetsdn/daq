@@ -51,7 +51,6 @@ class LocalDevice {
   private static final String RSA_CERT_PEM = "rsa_cert.pem";
   private static final String RSA_PRIVATE_PEM = "rsa_private.pem";
   private static final String RSA_PRIVATE_PKCS8 = "rsa_private.pkcs8";
-  private static final String PHYSICAL_TAG_ERROR = "Physical tag %s %s does not match expected %s";
 
   private static final Set<String> DEVICE_FILES = ImmutableSet.of(METADATA_JSON);
   private static final Set<String> KEY_FILES = ImmutableSet.of(RSA_PUBLIC_PEM, RSA_PRIVATE_PEM, RSA_PRIVATE_PKCS8);
@@ -68,18 +67,17 @@ class LocalDevice {
   private final Map<String, Schema> schemas;
   private final File deviceDir;
   private final UdmiSchema.Metadata metadata;
-  private final File devicesDir;
   private final ExceptionMap exceptionMap;
 
   private String deviceNumId;
 
   private CloudDeviceSettings settings;
+  private DeviceCredential deviceCredential;
 
   LocalDevice(File devicesDir, String deviceId, Map<String, Schema> schemas) {
     try {
       this.deviceId = deviceId;
       this.schemas = schemas;
-      this.devicesDir = devicesDir;
       exceptionMap = new ExceptionMap("Exceptions for " + deviceId);
       deviceDir = new File(devicesDir, deviceId);
       metadata = readMetadata();
@@ -162,16 +160,21 @@ class LocalDevice {
     return RSA_CERT_TYPE.equals(getAuthType()) ? RSA_CERT_FILE : RSA_KEY_FILE;
   }
 
-  private DeviceCredential loadCredential() {
+  public DeviceCredential loadCredential() {
+    deviceCredential = readCredential();
+    return deviceCredential;
+  }
+
+  public DeviceCredential readCredential() {
     try {
       if (hasGateway() && getAuthType() != null) {
-        throw new RuntimeException("Proxied devices should not have auth_type defined");
+        throw new RuntimeException("Proxied devices should not have cloud.auth_type defined");
       }
       if (!isDirectConnect()) {
         return null;
       }
       if (getAuthType() == null) {
-        throw new RuntimeException("Credential auth_type definition missing");
+        throw new RuntimeException("Credential cloud.auth_type definition missing");
       }
       File deviceKeyFile = new File(deviceDir, publicKeyFile());
       if (!deviceKeyFile.exists()) {
@@ -223,10 +226,6 @@ class LocalDevice {
     return isGateway() || !hasGateway();
   }
 
-  String getGatewayId() {
-    return hasGateway() ? metadata.gateway.gateway_id : null;
-  }
-
   CloudDeviceSettings getSettings() {
     try {
       if (settings != null) {
@@ -236,7 +235,7 @@ class LocalDevice {
       if (metadata == null) {
         return settings;
       }
-      settings.credential = loadCredential();
+      settings.credential = deviceCredential;
       settings.metadata = metadataString();
       settings.config = deviceConfigString();
       settings.proxyDevices = getProxyDevicesList();
@@ -297,6 +296,7 @@ class LocalDevice {
   }
 
   public void validateEnvelope(String registryId, String siteName) {
+    checkConsistency(siteName);
     try {
       UdmiSchema.Envelope envelope = new UdmiSchema.Envelope();
       envelope.deviceId = deviceId;
@@ -309,7 +309,6 @@ class LocalDevice {
     } catch (Exception e) {
       throw new IllegalStateException("Validating envelope " + deviceId, e);
     }
-    checkConsistency(siteName);
   }
 
   private String fakeProjectId() {
@@ -317,15 +316,17 @@ class LocalDevice {
   }
 
   private void checkConsistency(String expectedSite) {
-    String siteName = metadata.system.location.site;
-    String assetSite = metadata.system.physical_tag.asset.site;
     String assetName = metadata.system.physical_tag.asset.name;
-    Preconditions.checkState(expectedSite.equals(siteName),
-        String.format(PHYSICAL_TAG_ERROR, "location", siteName, expectedSite));
-    Preconditions.checkState(expectedSite.equals(assetSite),
-        String.format(PHYSICAL_TAG_ERROR, "site", assetSite, expectedSite));
     Preconditions.checkState(deviceId.equals(assetName),
-        String.format(PHYSICAL_TAG_ERROR, "name", assetName, deviceId));
+        String.format("system.physical_tag.asset.name %s does not match expected %s", assetName, deviceId));
+
+    String assetSite = metadata.system.physical_tag.asset.site;
+    Preconditions.checkState(expectedSite.equals(assetSite),
+        String.format("system.physical_tag.asset.site %s does not match expected %s", assetSite, expectedSite));
+
+    String siteName = metadata.system.location.site;
+    Preconditions.checkState(expectedSite.equals(siteName),
+        String.format("system.location.site %s does not match expected %s", siteName, expectedSite));
   }
 
   private String makeNumId(UdmiSchema.Envelope envelope) {
@@ -335,11 +336,12 @@ class LocalDevice {
 
   public void writeErrors() {
     File errorsFile = new File(deviceDir, DEVICE_ERRORS_JSON);
-    System.err.println("Updating " + errorsFile);
     if (exceptionMap.isEmpty()) {
+      System.err.println("Removing " + errorsFile);
       errorsFile.delete();
       return;
     }
+    System.err.println("Updating " + errorsFile);
     try (PrintStream printStream = new PrintStream(new FileOutputStream(errorsFile))) {
       ExceptionMap.ErrorTree errorTree = ExceptionMap.format(exceptionMap, ERROR_FORMAT_INDENT);
       errorTree.write(printStream);
@@ -377,8 +379,9 @@ class LocalDevice {
   public void writeConfigFile() {
     File configFile = new File(deviceDir, GENERATED_CONFIG_JSON);
     try (OutputStream outputStream = new FileOutputStream(configFile)) {
-      outputStream.write(settings.config.getBytes());
+      outputStream.write(getSettings().config.getBytes());
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException("While writing "+ configFile.getAbsolutePath(), e);
     }
   }
@@ -399,7 +402,7 @@ class LocalDevice {
     return exceptionMap;
   }
 
-  public boolean hasValidMetadata() {
+  public boolean isValid() {
     return metadata != null;
   }
 
