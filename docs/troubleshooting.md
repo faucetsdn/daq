@@ -35,11 +35,9 @@ a summary of all test results.
   contains all configuration, packet captures and runtime logs of a run.
   Sending that file is sufficient in most cases.  Be wary of file
   size, as `inst/` might have large pcap files or older files that can be
-  trimmed to get more manageable fize sizes for email attachments.
-* Unless you are developing for DAQ and need the latest code, ensure that you
-  are on the version of software with git tag `release_stable`.
-* If you see incorrect behavior, ensure you dont have any local changes to
-  `inst' and start over with a clean build.
+  trimmed to get more manageable file sizes for email attachments.
+* Unless you are developing for DAQ and want the latest code, ensure that you
+  are on the latest stable software version tracked by the git tag `release_stable`.
 
 ## Test-Specific
 
