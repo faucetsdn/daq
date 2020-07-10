@@ -33,7 +33,6 @@ public class OpenVSwitch implements SwitchController {
         Matcher m = pattern.matcher(line);
         return m.find();
       }).findFirst().get();
-      bufferedReader.close();
       Matcher m = pattern.matcher(interfaceLine);
       m.matches();
       return m.group(3);
