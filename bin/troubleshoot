@@ -23,7 +23,7 @@ fi
 switch_timeout=`fgrep 'Monitoring timeout for switch' inst/cmdrun.log`
 if [ -n "$switch_timeout" ]; then
     echo "Error: Timeout connecting to physical switch"
-    echo "Check switch username/password configuration and connection"
+    echo "Check switch username/password configuration"
 else
     echo "Checking Switch timeout: ok"
 fi
