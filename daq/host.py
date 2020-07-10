@@ -5,9 +5,12 @@ import os
 import shutil
 import time
 from datetime import timedelta, datetime
+import grpc
 
 from clib import tcpdump_helper
 from report import ResultType, ReportGenerator
+from proto import usi_pb2 as usi
+from proto import usi_pb2_grpc as usi_service
 
 import configurator
 import docker_test
@@ -46,9 +49,11 @@ class MODE:
     LONG = 'long'
     MERR = 'merr'
 
+
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
+
 
 def post_states():
     """Return post-test states for recording finalization"""
@@ -96,6 +101,7 @@ class ConnectedHost:
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._finish_hook_script = config.get('finish_hook')
+        self._usi_url = config.get('usi_setup', {}).get('url')
         self._mirror_intf_name = None
         self._monitor_ref = None
         self._monitor_start = None
@@ -271,6 +277,21 @@ class ConnectedHost:
         LOGGER.debug('Target port %d state: %s -> %s', self.target_port, self.state, target)
         self.state = target
 
+    def _build_switch_info(self) -> usi.SwitchInfo:
+        switch_config = self._get_switch_config()
+        if switch_config["model"]:
+            switch_model = usi.SwitchModel.Value(switch_config["model"])
+        else:
+            switch_model = usi.SwitchModel.OVS_SWITCH
+        params = {
+            "ip_addr": switch_config["ip"],
+            "device_port": self.target_port,
+            "model": switch_model,
+            "username": switch_config["username"],
+            "password": switch_config["password"]
+        }
+        return usi.SwitchInfo(**params)
+
     def is_running(self):
         """Return True if this host is running active test."""
         return self.state != _STATE.ERROR and self.state != _STATE.DONE
@@ -284,6 +305,21 @@ class ConnectedHost:
         if self.state == _STATE.READY:
             self._record_result('startup', state=MODE.HOLD)
         return self.state == _STATE.WAITING
+
+    def connect_port(self, connect):
+        """Connects/Disconnects port for this host"""
+        switch_info = self._build_switch_info()
+        try:
+            with grpc.insecure_channel(self._usi_url) as channel:
+                stub = usi_service.USIServiceStub(channel)
+                if connect:
+                    res = stub.connect(switch_info)
+                else:
+                    res = stub.disconnect(switch_info)
+                LOGGER.info('Target port %s %s successful? %s', self.target_port, "connect"
+                            if connect else "disconnect", res.success)
+        except Exception as e:
+            LOGGER.error(e)
 
     def _prepare(self):
         LOGGER.info('Target port %d waiting for ip as %s', self.target_port, self.target_mac)
@@ -306,7 +342,7 @@ class ConnectedHost:
                 if dhcp_mode == 'long_response' else 0
             LOGGER.info('Target port %d using %s DHCP mode, wait %s',
                         self.target_port, dhcp_mode, wait_time)
-            self.gateway.execute_script('change_dhcp_response_time', self.target_mac, wait_time)
+            self.gateway.change_dhcp_response_time(self.target_mac, wait_time)
         _ = [listener(self) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):

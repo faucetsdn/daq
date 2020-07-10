@@ -24,9 +24,8 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
     SwitchController newController;
     switch (switchInfo.getModel()) {
       case ALLIED_TELESIS_X230: {
-        newController =
-            new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
-                switchInfo.getPassword());
+        newController = new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
+            switchInfo.getPassword());
         break;
       }
       case CISCO_9300: {
@@ -39,16 +38,15 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
         break;
       }
       default:
-        throw new IllegalArgumentException("Unrecognized switch model "
-            + switchInfo.getModel());
+        throw new IllegalArgumentException("Unrecognized switch model " + switchInfo.getModel());
     }
     newController.start();
     return newController;
   }
 
   private SwitchController getSwitchController(SwitchInfo switchInfo) {
-    String repr = String.join(",", switchInfo.getModel().toString(),
-        switchInfo.getIpAddr(), switchInfo.getUsername(),
+    String repr = String.join(",", switchInfo.getModel().toString(), switchInfo.getIpAddr(),
+        switchInfo.getUsername(),
         switchInfo.getPassword());
     return switchControllers.computeIfAbsent(repr, key -> createController(switchInfo));
   }
@@ -57,7 +55,10 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   public void getPower(SwitchInfo request, StreamObserver<PowerResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.getPower(request.getDevicePort(), responseObserver::onNext);
+      sc.getPower(request.getDevicePort(), data -> {
+        responseObserver.onNext(data);
+        responseObserver.onCompleted();
+      });
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
@@ -65,11 +66,13 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   }
 
   @Override
-  public void getInterface(SwitchInfo request,
-                           StreamObserver<InterfaceResponse> responseObserver) {
+  public void getInterface(SwitchInfo request, StreamObserver<InterfaceResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.getInterface(request.getDevicePort(), responseObserver::onNext);
+      sc.getInterface(request.getDevicePort(), data -> {
+        responseObserver.onNext(data);
+        responseObserver.onCompleted();
+      });
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
@@ -80,7 +83,10 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   public void connect(SwitchInfo request, StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.connect(request.getDevicePort(), responseObserver::onNext);
+      sc.connect(request.getDevicePort(), data -> {
+        responseObserver.onNext(data);
+        responseObserver.onCompleted();
+      });
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
@@ -92,7 +98,10 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
                          StreamObserver<SwitchActionResponse> responseObserver) {
     SwitchController sc = getSwitchController(request);
     try {
-      sc.disconnect(request.getDevicePort(), responseObserver::onNext);
+      sc.disconnect(request.getDevicePort(), data -> {
+        responseObserver.onNext(data);
+        responseObserver.onCompleted();
+      });
     } catch (Exception e) {
       e.printStackTrace();
       responseObserver.onError(e);
