@@ -187,7 +187,7 @@ function kill_gateway {
 
 # Check that killing the dhcp monitor aborts the run.
 MARKER=inst/run-port-03/nodes/hold03/activate.log
-monitor_marker $MARKER "kill_gateway dhcp32"
+monitor_marker $MARKER "kill_gateway dhcp30"
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting hold test run
 cmd/run -k -s finish_hook=bin/dump_network
