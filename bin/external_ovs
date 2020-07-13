@@ -6,14 +6,19 @@ source etc/config_base.sh
 
 ext_intf=$switch_setup_data_intf
 ext_dpid=$switch_setup_of_dpid
-ext_ofpt=$switch_setup_lo_port
 ext_brid=$switch_setup_ext_br
 ext_brpt=$switch_setup_uplink_port
 
 ext_pri=${ext_intf}
 ext_sec=${ext_intf%-pri}-sec
 
-echo ext_dpid is $ext_dpid
+if [ -n "$switch_setup_alt_port" ]; then
+    ext_ofpt=$switch_setup_alt_port
+else
+    ext_ofpt=$switch_setup_lo_port
+fi
+
+echo ext_dpid is $ext_dpid on port $ext_ofpt
 echo network_config is $network_config
 
 dpid=$(printf %016x $ext_dpid)
@@ -32,4 +37,6 @@ echo Added interface link $ext_pri to $ext_sec
 echo DAQ autoclean ovs-vsctl del-br $ext_brid
 echo DAQ autoclean ip link del $ext_pri
 
-bin/bridge_link $ext_brid $ext_sec $ext_brpt
+if [ -n "$ext_brpt" -a "$ext_brpt" != 0 ]; then
+    bin/bridge_link $ext_brid $ext_sec $ext_brpt
+fi

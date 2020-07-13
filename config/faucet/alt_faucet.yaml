@@ -1,0 +1,22 @@
+dps:
+  alt-switch:
+    dp_id: 2
+    interfaces:
+      1:
+        native_vlan: 101
+      2:
+        native_vlan: 102
+      3:
+        native_vlan: 103
+      4:
+        native_vlan: 104
+      5:
+        native_vlan: 105
+      100:
+        tagged_vlans: [101, 102, 103, 104, 105]
+vlans:
+  101:
+  102:
+  103:
+  104:
+  105:
