@@ -3,7 +3,7 @@
 # Load defaults.
 include: config/system/default.yaml
 
-# Description description for dashboard.
+# Description for dashboard.
 site_description: "Alternate (not managed by DAQ) OVS switch configuration"
 
 # Network switch configuration.
