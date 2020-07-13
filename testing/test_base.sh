@@ -55,9 +55,7 @@ echo switch ping $count | tee -a $TEST_RESULTS
 echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
 cp config/system/alt.yaml local/system.yaml
 timeout 120s cmd/run -s
-fgrep '9a:02:57:1e:8f:00' inst/faucet.log
-egrep '9a:02:57:1e:8f:00.*VLAN 1002' inst/faucet.log | redact | tee -a $TEST_RESULTS
-
+fgrep 'Port 1 9a:02:57:1e:8f:00' inst/faucet.log | redact | tee -a $TEST_RESULTS
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
 cp config/system/muddy.conf local/system.conf
