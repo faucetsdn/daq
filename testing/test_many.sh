@@ -3,11 +3,16 @@
 source testing/test_preamble.sh
 
 # num of devices need to less than 10
-NUM_DEVICES=8
+NUM_DEVICES=9
 RUN_LIMIT=20
 # num of timeout devices need to be less or equal to num dhcp devices
 NUM_NO_DHCP_DEVICES=4
 NUM_TIMEOUT_DEVICES=2
+
+# Extended DHCP tests
+NUM_PORT_TOGGLE_DHCP_TEST_DEVICES=2
+NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES=1
+
 echo Many Tests >> $TEST_RESULTS
 
 echo source config/system/default.yaml > local/system.conf
@@ -18,11 +23,11 @@ echo gcp_cred=$gcp_cred >> local/system.conf
 
 for iface in $(seq 1 $NUM_DEVICES); do
     xdhcp=""
+    intf_mac="9a02571e8f0$iface"
+    mkdir -p local/site/mac_addrs/$intf_mac
     if [[ $iface -le $NUM_NO_DHCP_DEVICES ]]; then
         ip="10.20.0.$((iface+5))"
-        intf_mac="9a02571e8f0$iface"
         xdhcp="xdhcp=$ip"
-        mkdir -p local/site/mac_addrs/$intf_mac
         if [[ $iface -gt $NUM_TIMEOUT_DEVICES ]]; then
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
@@ -41,6 +46,31 @@ EOF
     }
 EOF
         fi
+    elif [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_PORT_TOGGLE_DHCP_TEST_DEVICES)) ]]; then
+        if [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES)) ]]; then
+            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+    {
+        "dhcp_tests": {
+            "port_toggle": {
+                "enabled": true,
+                "port_flap_timeout_sec": 20,
+                "timeout_sec": 1
+            }
+        }
+    }
+EOF
+        else
+            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+    {
+        "dhcp_tests": {
+            "port_toggle": {
+                "enabled": true,
+                "port_flap_timeout_sec": 20
+            }
+        }
+    }
+EOF
+        fi
     fi
     echo interfaces.faux-$iface.opts=$xdhcp >> local/system.conf
 done
@@ -54,6 +84,8 @@ end_time=`date -u -Isec`
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
+port_toggle_timeouts=$(fgrep "port_toggle:TimeoutError" inst/result.log | wc -l)
+port_toggles=$(fgrep "port_toggle test Received ip:" inst/cmdrun.log | wc -l)
 
 cat inst/run-port-*/scans/ip_triggers.txt
 static_ips=$(fgrep nope inst/run-port-*/scans/ip_triggers.txt | wc -l)
@@ -68,6 +100,9 @@ echo Enough results: $((results >= 6*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
 # $timeouts should strictly equal $NUM_TIMEOUT_DEVICES when dhcp step is fixed.
 echo Enough DHCP timeouts: $((timeouts >= NUM_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 echo Enough static ips: $((static_ips >= (NUM_NO_DHCP_DEVICES - NUM_TIMEOUT_DEVICES))) | tee -a $TEST_RESULTS
+
+echo Enough port toggle tests: $((port_toggles >= (NUM_PORT_TOGGLE_DHCP_TEST_DEVICES - NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
+echo Enough port toggle timeouts: $((port_toggle_timeouts >= NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 
 echo bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
 bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2

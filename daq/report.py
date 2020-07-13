@@ -318,7 +318,9 @@ class ReportGenerator:
                 writeln(self._TEST_SUBHEADER % "Report")
                 self._append_file(result_dict[ResultType.REPORT_PATH])
             if ResultType.MODULE_CONFIG in result_dict:
-                config = result_dict[ResultType.MODULE_CONFIG].get("modules", {}).get(test_name)
+                module_configs = result_dict[ResultType.MODULE_CONFIG]
+                config = module_configs.get("modules", {}).get(test_name)
+                config = config or module_configs.get("dhcp_tests", {}).get(test_name)
                 if config and len(config) > 0:
                     writeln(self._TEST_SUBHEADER % "Module Config")
                     table = MdTable(["Attribute", "Value"])

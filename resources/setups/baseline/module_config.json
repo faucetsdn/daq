@@ -36,5 +36,11 @@
     "ntp": {
       "enabled": true
     }
+  },
+  "dhcp_tests": {
+    "port_toggle": {
+      "enabled": false,
+      "port_flap_timeout_sec": 20
+    }
   }
 }

@@ -4,6 +4,8 @@ DAQ stress test
 Enough results: 1
 Enough DHCP timeouts: 1
 Enough static ips: 1
+Enough port toggle tests: 1
+Enough port toggle timeouts: 1
 Redacted soak diff
 No soak report diff
 Done with many
