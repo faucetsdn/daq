@@ -54,6 +54,7 @@ echo switch ping $count | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
 cp config/system/alt.yaml local/system.yaml
+# TODO: Replace this with proper test once VLAN-triggers are added.
 timeout 120s cmd/run -s
 fgrep 'Port 1 9a:02:57:1e:8f:00' inst/faucet.log | redact | tee -a $TEST_RESULTS
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
