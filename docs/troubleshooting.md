@@ -9,7 +9,7 @@ mailing list, and use it as the primary source of troubleshooting.
   email somebody directly, but will likely result in a slower response time.
 * The `inst/cmdrun.log` file contains a copy of the console output from DAQ.
   * This file should be attached to communications about resolving DAQ issues.
-  * It's not necessary to include any assocaited `local/system.yaml` file, since the
+  * It's not necessary to include any associated `local/system.yaml` file, since the
   contents of that are already included.
 * Make sure everything is running properly using the internal simulation setup
 before tackling anything to do with external switches or physical devices.
@@ -29,12 +29,17 @@ a summary of all test results.
   * The determination of _PASS_ vs. _FAIL_ is one of policy, not a technical
   consideration. If the question is "Is it OK if this tests fails or not?" then
   you need to contact whomever is responsible for policy, not DAQ-proper.
-  * The reports are _optionally_ available trough the _optionally_ configured
+  * The reports are _optionally_ available through the _optionally_ configured
   GCP instance, but that's only relevant after the basics are working.
-* Capturing a complete zip of the `inst/` directory should encompass all the
-state neesary to diagnose/debug problems, so simply captuing that and sending
-it along would be sufficient in most cases. Be wary of file size, as `inst/`
-can collect cruft over time and occasionally need to be cleaned.
+* Running `bin/techsupport.sh` will create a zipped techsupport file that
+  contains all configuration, packet captures and runtime logs of a run.
+  Sending that file is sufficient in most cases.  Be wary of file
+  size, as `inst/` might have large pcap files or older files that can be
+  trimmed to get more manageable file sizes for email attachments.
+* Unless you are developing for DAQ and want the latest code, ensure that you
+  are on the latest stable software version tracked by the git tag `release_stable`.
+* If a test run blocks or errors out, try running `bin/troubleshoot` to detect 
+  some common misconfiguration and setup related issues.
 
 ## Test-Specific
 
@@ -82,4 +87,4 @@ directory.
     * Filter results for the device's MAC address with something like:
     <code>tcpdump -en -r testing.pacp ether host <em>de:vi:ce:ma:ca:dr</em></code>.
     * There is no one-size-fits-all guidance here, because what is expected is
-    extremeley test-specific.
+    extremely test-specific.

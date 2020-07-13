@@ -1,2 +1,2 @@
 #!/bin/bash -e
-java -jar usi/target/usi-0.0.1-jar-with-dependencies.jar 
+java -cp /ovs:usi/target/usi-0.0.1-jar-with-dependencies.jar daq.usi.UsiServer 

@@ -114,8 +114,17 @@ message DaqConfig {
   
   // Set time between port disconnect and host tests shutdown
   int32 port_flap_timeout_sec = 48;
+
+  // USI url
+  USISetup usi_setup = 49;
 }
 
+/**
+ * USI paramters
+**/
+message USISetup {
+  string url = 1;
+}
 
 /*
  * System configuraiton of the access switch. This is used by the system
