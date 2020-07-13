@@ -69,7 +69,7 @@ fi
 export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS
 
 mkdir -p $INSTDIR
-rm -f $INSTDIR/faucet* $cleanup_file
+rm -rf $INSTDIR/faucet* $cleanup_file
 
 docker ps > /dev/null 2>&1 || service docker start
 
@@ -97,6 +97,10 @@ fi
 
 if [ -n "$switch_setup_ext_br" ]; then
     autostart bin/external_ovs
+fi
+
+if [ -n "$switch_setup_alt_port" ]; then
+    autostart bin/alt_faucet
 fi
 
 if [ -n "$switch_setup_model" ]; then
