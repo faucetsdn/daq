@@ -38,6 +38,8 @@ a summary of all test results.
   trimmed to get more manageable file sizes for email attachments.
 * Unless you are developing for DAQ and want the latest code, ensure that you
   are on the latest stable software version tracked by the git tag `release_stable`.
+* If a test run blocks or errors out, try running `bin/troubleshoot` to detect 
+  some common misconfiguration and setup related issues.
 
 ## Test-Specific
 
