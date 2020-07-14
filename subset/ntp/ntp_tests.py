@@ -5,7 +5,8 @@ from scapy.all import NTP, rdpcap
 arguments = sys.argv
 
 test_request = str(arguments[1])
-cap_pcap_file = str(arguments[2])
+startup_pcap_file = str(arguments[2])
+monitor_pcap_file = str(arguments[3])
 
 report_filename = 'report.txt'
 ignore = '%%'
@@ -51,7 +52,7 @@ def ntp_payload(packet):
 
 
 def test_ntp_support():
-    capture = rdpcap(cap_pcap_file)
+    capture = rdpcap(startup_pcap_file)
     if len(capture) > 0:
         version = ntp_client_version(capture)
         if version is None:
@@ -69,24 +70,30 @@ def test_ntp_support():
 
 
 def test_ntp_update():
-    capture = rdpcap(cap_pcap_file)
-    packets = ntp_packets(capture)
-    if len(packets) < 4:
+    startup_capture = rdpcap(startup_pcap_file)
+    monitor_capture = rdpcap(monitor_pcap_file)
+    startup_packets = ntp_packets(startup_capture)
+    monitor_packets = ntp_packets(monitor_capture)
+    for packet in monitor_packets:
+        if ntp_payload(packet).leap == 3:
+            add_summary("Leap indicator found to be 3 (alarm condition)")
+            return 'fail'
+    if len(startup_packets) < 4:
         add_summary("Not enough NTP packets received.")
         return 'skip'
     # Check that DAQ NTP server has been used
     using_local_server = False
     local_ntp_packets = []
-    for packet in packets:
+    for packet in startup_packets:
+        if ntp_payload(packet).leap == 3:
+            add_summary("Leap indicator found to be 3 (alarm condition)")
+            return 'fail'
         # Packet is to or from local NTP server
         if ((packet.payload.dst.startswith('10.20.') and packet.payload.dst.endswith('.2')) or
                 (packet.payload.src.startswith('10.20.') and packet.payload.src.endswith('.2'))):
             using_local_server = True
             local_ntp_packets.append(packet)
-    if not using_local_server:
-        add_summary("Device clock not synchronized with local NTP server.")
-        return 'fail'
-    if len(local_ntp_packets) < 4:
+    if not using_local_server or len(local_ntp_packets) < 4:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
     # Ensuring the correct sequence of ntp packets are collated
@@ -113,15 +120,16 @@ def test_ntp_update():
                 p3 = None
             continue
     if p1 is None or p2 is None or p3 is None or p4 is None:
-        add_summary("Device clock not synchronized with local NTP server. One of 4 packets is None")
+        add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
+    arrival_time = p3.
     offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) +
               (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
-    if offset < 1:
+    if offset < 0.128:
         add_summary("Device clock synchronized.")
         return 'pass'
     else:
-        add_summary("Device clock not synchronized with local NTP server. Offset is " + str(offset))
+        add_summary("Device clock not synchronized with local NTP server. Offset is " + str(offset) + "s")
         return 'fail'
 
 
