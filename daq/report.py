@@ -16,7 +16,7 @@ import weasyprint
 
 import gcp
 import logger
-
+import host
 LOGGER = logger.get_logger('report')
 
 class ResultType(Enum):
@@ -319,8 +319,7 @@ class ReportGenerator:
                 self._append_file(result_dict[ResultType.REPORT_PATH])
             if ResultType.MODULE_CONFIG in result_dict:
                 module_configs = result_dict[ResultType.MODULE_CONFIG]
-                config = module_configs.get("modules", {}).get(test_name)
-                config = config or module_configs.get("dhcp_tests", {}).get(test_name)
+                config = host.get_test_config(module_configs, test_name)
                 if config and len(config) > 0:
                     writeln(self._TEST_SUBHEADER % "Module Config")
                     table = MdTable(["Attribute", "Value"])

@@ -50,11 +50,15 @@ EOF
         if [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES)) ]]; then
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
-        "dhcp_tests": {
-            "port_toggle": {
-                "enabled": true,
-                "port_flap_timeout_sec": 20,
-                "timeout_sec": 1
+        "modules": {
+            "ipaddr": {
+                "dhcp_tests": {
+                    "port_toggle": {
+                        "enabled": true,
+                        "port_flap_timeout_sec": 20,
+                        "timeout_sec": 1
+                    }
+                }
             }
         }
     }
@@ -62,10 +66,14 @@ EOF
         else
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
-        "dhcp_tests": {
-            "port_toggle": {
-                "enabled": true,
-                "port_flap_timeout_sec": 20
+        "modules": {
+            "ipaddr": {
+                "dhcp_tests": {
+                    "port_toggle": {
+                        "enabled": true,
+                        "port_flap_timeout_sec": 20
+                    }
+                }
             }
         }
     }

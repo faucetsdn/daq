@@ -51,12 +51,6 @@ class MODE:
     MERR = 'merr'
 
 
-# Mapping DHCP test name to host function call
-DHCP_TESTS_MAPPING = {
-    'port_toggle': '_dhcp_port_toggle_test'
-}
-
-
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
@@ -64,13 +58,18 @@ def pre_states():
 
 def dhcp_tests():
     """Returns all supported dhcp tests"""
-    return list(DHCP_TESTS_MAPPING.keys())
+    return ['port_toggle', 'multi_subnet', 'ip_change']
 
 
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
 
+def get_test_config(config, test):
+    """Get a single test module's config"""
+    if test in dhcp_tests():
+        return config['modules'].get('ipaddr', {}).get('dhcp_tests', {}).get(test)
+    return config["modules"].get(test)
 
 class ConnectedHost:
     """Class managing a device-under-test"""
@@ -135,6 +134,11 @@ class ConnectedHost:
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
         self._ip_listener = None
+        self._dhcp_tests_map = {
+            'port_toggle': self._dhcp_port_toggle_test,
+            'multi_subnet': None, # TODO
+            'ip_change': None # TODO
+        }
 
     @staticmethod
     def make_runid():
@@ -169,8 +173,7 @@ class ConnectedHost:
         }
 
     def _get_test_config(self, test):
-        return self._loaded_config['modules'].get(test) or \
-            self._loaded_config.get('dhcp_tests', {}).get(test)
+        return get_test_config(self._loaded_config, test)
 
     def _test_enabled(self, test):
         fallback_config = {'enabled': test in self._CORE_TESTS}
@@ -213,7 +216,7 @@ class ConnectedHost:
         return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', 'normal')
 
     def _get_dhcp_tests(self):
-        tests = self._loaded_config.get('dhcp_tests', {}).keys()
+        tests = self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_tests', {}).keys()
         return list(filter(self._test_enabled, tests))
 
     def _get_unique_upload_path(self, file_name):
@@ -591,7 +594,7 @@ class ConnectedHost:
             self._end_test()
 
         self.connect_port(False)
-        time.sleep(5)
+        time.sleep(self.runner.config.get("port_debounce_sec", 0) + 1)
         self.connect_port(True)
         self._ip_listener = ip_listener
 
@@ -650,7 +653,7 @@ class ConnectedHost:
         LOGGER.info('Target port %d dhcp test %s running', self.target_port, test_name)
         self.timeout_handler = self._aux_module_timeout_handler
         self._start_test(test_name)
-        test_fn = getattr(self, DHCP_TESTS_MAPPING[test_name])
+        test_fn = self._dhcp_tests_map[test_name]
         logging_handler = logging.FileHandler(
             os.path.join(self._host_dir_path(), 'activate.log'))
         # All the logging from this host will also go to activation log to be stored
