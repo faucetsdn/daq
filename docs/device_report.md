@@ -101,6 +101,7 @@ Overall device result FAIL
 |Attribute|Value|
 |---|---|
 |timeout_sec|300|
+|dhcp_tests|{'port_toggle': {'enabled': False, 'port_flap_timeout_sec': 20}, 'multi_subnet': {'subnets': [], 'timeout_sec': 600, 'enabled': False}, 'ip_change': {'timeout_sec': 500, 'enabled': False}}|
 
 ## Module pass
 
