@@ -65,6 +65,7 @@ def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
 
+
 def get_test_config(config, test):
     """Get a single test module's config"""
     if test in dhcp_tests():
@@ -136,8 +137,8 @@ class ConnectedHost:
         self._ip_listener = None
         self._dhcp_tests_map = {
             'port_toggle': self._dhcp_port_toggle_test,
-            'multi_subnet': None, # TODO
-            'ip_change': None # TODO
+            'multi_subnet': None, #  TODO
+            'ip_change': None #  TODO
         }
 
     @staticmethod
