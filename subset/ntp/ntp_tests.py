@@ -122,14 +122,13 @@ def test_ntp_update():
     if p1 is None or p2 is None or p3 is None or p4 is None:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
-    arrival_time = p3.
     offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) +
               (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
     if offset < 0.128:
         add_summary("Device clock synchronized.")
         return 'pass'
     else:
-        add_summary("Device clock not synchronized with local NTP server. Offset is " + str(offset) + "s")
+        add_summary("Device clock not synchronized with local NTP server. Offset is " + str(offset))
         return 'fail'
 
 
