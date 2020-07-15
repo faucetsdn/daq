@@ -92,9 +92,6 @@ def test_ntp_update():
     using_local_server = False
     local_ntp_packets = []
     for packet in packets:
-        if ntp_payload(packet).leap == LEAP_ALARM:
-            add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
-            return 'fail'
         # Packet is to or from local NTP server
         if ((packet.payload.dst.startswith(LOCAL_PREFIX) and
                 packet.payload.dst.endswith(NTP_SERVER_SUFFIX)) or
@@ -129,6 +126,9 @@ def test_ntp_update():
                 p3 = local_ntp_packets[i]
     if p1 is None or p2 is None:
         add_summary("Device clock not synchronized with local NTP server.")
+        return 'fail'
+    if ntp_payload(p1).leap == LEAP_ALARM:
+        add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
         return 'fail'
     t1 = ntp_payload(p1).sent
     t2 = ntp_payload(p1).time
