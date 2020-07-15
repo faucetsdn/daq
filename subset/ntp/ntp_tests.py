@@ -16,6 +16,15 @@ dash_break_line = '--------------------\n'
 description_ntp_support = 'Device supports NTP version 4.'
 description_ntp_update = 'Device synchronizes its time to the NTP server.'
 
+NTP_VERSION_PASS = 4
+LOCAL_PREFIX = '10.20.'
+NTP_SERVER_SUFFIX = '.2'
+MODE_CLIENT = 3
+MODE_SERVER = 4
+YEAR_2900 = 29348006400
+SECONDS_BETWEEN_1900_1970 = 2208988800
+OFFSET_ALLOWANCE = 0.128
+LEAP_ALARM = 3
 
 def write_report(string_to_append):
     with open(report_filename, 'a+') as file_open:
@@ -24,7 +33,7 @@ def write_report(string_to_append):
 
 # Extracts the NTP version from the first client NTP packet
 def ntp_client_version(capture):
-    client_packets = ntp_packets(capture, 3)
+    client_packets = ntp_packets(capture, MODE_CLIENT)
     if len(client_packets) == 0:
         return None
     return ntp_payload(client_packets[0]).version
@@ -58,11 +67,11 @@ def test_ntp_support():
         if version is None:
             add_summary("No NTP packets received.")
             return 'skip'
-        if version == 4:
-            add_summary("Using NTPv4.")
+        if version == NTP_VERSION_PASS:
+            add_summary("Using NTPv" + str(NTP_VERSION_PASS) + ".")
             return 'pass'
         else:
-            add_summary("Not using NTPv4.")
+            add_summary("Not using NTPv" + str(NTP_VERSION_PASS) + ".")
             return 'fail'
     else:
         add_summary("No NTP packets received.")
@@ -71,60 +80,70 @@ def test_ntp_support():
 
 def test_ntp_update():
     startup_capture = rdpcap(startup_pcap_file)
-    monitor_capture = rdpcap(monitor_pcap_file)
-    startup_packets = ntp_packets(startup_capture)
-    monitor_packets = ntp_packets(monitor_capture)
-    for packet in monitor_packets:
-        if ntp_payload(packet).leap == 3:
-            add_summary("Leap indicator found to be 3 (alarm condition)")
-            return 'fail'
-    if len(startup_packets) < 4:
+    packets = ntp_packets(startup_capture)
+    if os.path.isfile(monitor_pcap_file):
+        monitor_capture = rdpcap(monitor_pcap_file)
+        packets += ntp_packets(monitor_capture)
+    if len(packets) < 4:
         add_summary("Not enough NTP packets received.")
         return 'skip'
     # Check that DAQ NTP server has been used
     using_local_server = False
     local_ntp_packets = []
-    for packet in startup_packets:
-        if ntp_payload(packet).leap == 3:
-            add_summary("Leap indicator found to be 3 (alarm condition)")
+    for packet in packets:
+        if ntp_payload(packet).leap == LEAP_ALARM:
+            add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
             return 'fail'
         # Packet is to or from local NTP server
-        if ((packet.payload.dst.startswith('10.20.') and packet.payload.dst.endswith('.2')) or
-                (packet.payload.src.startswith('10.20.') and packet.payload.src.endswith('.2'))):
+        if ((packet.payload.dst.startswith(LOCAL_PREFIX) and packet.payload.dst.endswith(NTP_SERVER_SUFFIX)) or
+                (packet.payload.src.startswith(LOCAL_PREFIX) and packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
             using_local_server = True
             local_ntp_packets.append(packet)
     if not using_local_server or len(local_ntp_packets) < 4:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
-    # Ensuring the correct sequence of ntp packets are collated
+    # Obtain the latest NTP poll
     p1 = p2 = p3 = p4 = None
     for i in range(len(local_ntp_packets)):
         if p1 is None:
-            if ntp_payload(local_ntp_packets[i]).mode == 3:
+            if ntp_payload(local_ntp_packets[i]).mode == MODE_CLIENT:
                 p1 = local_ntp_packets[i]
-                continue
-        if p2 is None:
-            if ntp_payload(local_ntp_packets[i]).mode == 4:
+        elif p2 is None:
+            if ntp_payload(local_ntp_packets[i]).mode == MODE_SERVER:
                 p2 = local_ntp_packets[i]
             else:
-                p1 = None
-            continue
-        if p3 is None:
-            if ntp_payload(local_ntp_packets[i]).mode == 3:
+                p1 = local_ntp_packets[i]
+        elif p3 is None:
+            if ntp_payload(local_ntp_packets[i]).mode == MODE_CLIENT:
                 p3 = local_ntp_packets[i]
-                continue
-        if p4 is None:
-            if ntp_payload(local_ntp_packets[i]).mode == 4:
+        elif p4 is None:
+            if ntp_payload(local_ntp_packets[i]).mode == MODE_SERVER:
                 p4 = local_ntp_packets[i]
+                p1 = p3
+                p2 = p4
+                p3 = p4 = None
             else:
-                p3 = None
-            continue
-    if p1 is None or p2 is None or p3 is None or p4 is None:
+                p3 = local_ntp_packets[i]
+    if p1 is None or p2 is None:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
-    offset = ((ntp_payload(p2).recv - ntp_payload(p1).sent) +
-              (ntp_payload(p3).sent - ntp_payload(p4).recv))/2
-    if offset < 0.128:
+    t1 = ntp_payload(p1).sent
+    t2 = ntp_payload(p1).time
+    t3 = ntp_payload(p2).sent
+    t4 = ntp_payload(p2).time
+
+    # Timestamps are inconsistenly either from 1900 or 1970
+    if t1 > YEAR_2900:
+        t1 = t1 - SECONDS_BETWEEN_1900_1970
+    if t2 > YEAR_2900:
+        t2 = t2 - SECONDS_BETWEEN_1900_1970
+    if t3 > YEAR_2900:
+        t3 = t3 - SECONDS_BETWEEN_1900_1970
+    if t4 > YEAR_2900:
+        t4 = t4 - SECONDS_BETWEEN_1900_1970
+    
+    offset = abs((t2 - t1) + (t3 - t4))/2
+    if offset < OFFSET_ALLOWANCE:
         add_summary("Device clock synchronized.")
         return 'pass'
     else:
