@@ -96,10 +96,10 @@ def test_ntp_update():
             add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
             return 'fail'
         # Packet is to or from local NTP server
-        if ((packet.payload.dst.startswith(LOCAL_PREFIX) and 
+        if ((packet.payload.dst.startswith(LOCAL_PREFIX) and
                 packet.payload.dst.endswith(NTP_SERVER_SUFFIX)) or
-                (packet.payload.src.startswith(LOCAL_PREFIX) and 
-                packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
+                (packet.payload.src.startswith(LOCAL_PREFIX) and
+                    packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
             using_local_server = True
             local_ntp_packets.append(packet)
     if not using_local_server or len(local_ntp_packets) < 4:
