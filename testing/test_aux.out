@@ -97,6 +97,21 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
+    "dhcp_tests": {
+      "ip_change": {
+        "enabled": false,
+        "timeout_sec": 500
+      },
+      "multi_subnet": {
+        "enabled": false,
+        "subnets": [],
+        "timeout_sec": 600
+      },
+      "port_toggle": {
+        "enabled": false,
+        "port_flap_timeout_sec": 20
+      }
+    },
     "timeout_sec": 300
   },
   "macoui": {
@@ -148,6 +163,21 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
+    "dhcp_tests": {
+      "ip_change": {
+        "enabled": false,
+        "timeout_sec": 500
+      },
+      "multi_subnet": {
+        "enabled": false,
+        "subnets": [],
+        "timeout_sec": 600
+      },
+      "port_toggle": {
+        "enabled": false,
+        "port_flap_timeout_sec": 20
+      }
+    },
     "timeout_sec": 300
   },
   "macoui": {
