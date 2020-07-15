@@ -6,7 +6,7 @@ The NTP tests inspect the client NTP version and the device's ability to update 
 ### Note for test developers 
 The functional test code is included in the `ntp_tests.py` file.
 
-The test reads packets from startup.pcap.
+The test reads packets from startup.pcap and monitor.pcap.
 
 If the python code needs debugging, the pip module `scapy` is required (`pip install scapy`).
 
