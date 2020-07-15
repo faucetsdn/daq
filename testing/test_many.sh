@@ -10,8 +10,8 @@ NUM_NO_DHCP_DEVICES=4
 NUM_TIMEOUT_DEVICES=2
 
 # Extended DHCP tests
-NUM_PORT_TOGGLE_DHCP_TEST_DEVICES=2
-NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES=1
+NUM_IPADDR_TEST_DEVICES=2
+NUM_IPADDR_TEST_TIMEOUT_DEVICES=1
 
 echo Many Tests >> $TEST_RESULTS
 
@@ -46,19 +46,15 @@ EOF
     }
 EOF
         fi
-    elif [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_PORT_TOGGLE_DHCP_TEST_DEVICES)) ]]; then
-        if [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES)) ]]; then
+    elif [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_IPADDR_TEST_DEVICES)) ]]; then
+        if [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_IPADDR_TEST_TIMEOUT_DEVICES)) ]]; then
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
         "modules": {
             "ipaddr": {
-                "dhcp_tests": {
-                    "port_toggle": {
-                        "enabled": true,
-                        "port_flap_timeout_sec": 20,
-                        "timeout_sec": 1
-                    }
-                }
+                "enabled": true,
+                "port_flap_timeout_sec": 20,
+                "timeout_sec": 1
             }
         }
     }
@@ -68,12 +64,8 @@ EOF
     {
         "modules": {
             "ipaddr": {
-                "dhcp_tests": {
-                    "port_toggle": {
-                        "enabled": true,
-                        "port_flap_timeout_sec": 20
-                    }
-                }
+                "enabled": true,
+                "port_flap_timeout_sec": 20
             }
         }
     }
@@ -92,25 +84,27 @@ end_time=`date -u -Isec`
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
-port_toggle_timeouts=$(fgrep "port_toggle:TimeoutError" inst/result.log | wc -l)
-port_toggles=$(fgrep "port_toggle test Received ip:" inst/cmdrun.log | wc -l)
+ipaddr_timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
+ip_notifications=$(fgrep "ip notification" inst/run-port-*/nodes/ipaddr*/activate.log | wc -l)
 
 cat inst/run-port-*/scans/ip_triggers.txt
 static_ips=$(fgrep nope inst/run-port-*/scans/ip_triggers.txt | wc -l)
 
 more inst/run-port-*/nodes/ping*/activate.log | cat
+more inst/run-port-*/nodes/ipaddr*/activate.log | cat
 
 echo Found $results clean runs, $timeouts timeouts, and $static_ips static_ips.
+echo ipaddr had $ip_notifications notifications and $ipaddr_timeouts timeouts.
 
 # This is broken -- should have many more results available!
-echo Enough results: $((results >= 6*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
+echo Enough results: $((results >= 5*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
 
 # $timeouts should strictly equal $NUM_TIMEOUT_DEVICES when dhcp step is fixed.
 echo Enough DHCP timeouts: $((timeouts >= NUM_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 echo Enough static ips: $((static_ips >= (NUM_NO_DHCP_DEVICES - NUM_TIMEOUT_DEVICES))) | tee -a $TEST_RESULTS
 
-echo Enough port toggle tests: $((port_toggles >= (NUM_PORT_TOGGLE_DHCP_TEST_DEVICES - NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
-echo Enough port toggle timeouts: $((port_toggle_timeouts >= NUM_PORT_TOGGLE_DHCP_TEST_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
+echo Enough ipaddr tests: $((ip_notifications >= (NUM_IPADDR_TEST_DEVICES - NUM_IPADDR_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
+echo Enough ipaddr timeouts: $((ipaddr_timeouts >= NUM_IPADDR_TEST_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 
 echo bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
 bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
