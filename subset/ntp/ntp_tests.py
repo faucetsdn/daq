@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division
-import sys
 from scapy.all import NTP, rdpcap
+import sys
+import os
 
 arguments = sys.argv
 
@@ -95,8 +96,10 @@ def test_ntp_update():
             add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
             return 'fail'
         # Packet is to or from local NTP server
-        if ((packet.payload.dst.startswith(LOCAL_PREFIX) and packet.payload.dst.endswith(NTP_SERVER_SUFFIX)) or
-                (packet.payload.src.startswith(LOCAL_PREFIX) and packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
+        if ((packet.payload.dst.startswith(LOCAL_PREFIX) and 
+                packet.payload.dst.endswith(NTP_SERVER_SUFFIX)) or
+                (packet.payload.src.startswith(LOCAL_PREFIX) and 
+                packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
             using_local_server = True
             local_ntp_packets.append(packet)
     if not using_local_server or len(local_ntp_packets) < 4:
@@ -141,7 +144,7 @@ def test_ntp_update():
         t3 = t3 - SECONDS_BETWEEN_1900_1970
     if t4 > YEAR_2900:
         t4 = t4 - SECONDS_BETWEEN_1900_1970
-    
+
     offset = abs((t2 - t1) + (t3 - t4))/2
     if offset < OFFSET_ALLOWANCE:
         add_summary("Device clock synchronized.")
