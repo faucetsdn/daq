@@ -300,7 +300,10 @@ class ConnectedHost:
 
     def _build_switch_info(self) -> usi.SwitchInfo:
         switch_config = self._get_switch_config()
-        if switch_config["model"]:
+        switch_model = switch_config['model']
+        if switch_model == 'FAUX_SWITCH':
+            return None
+        else if switch_model:
             switch_model = usi.SwitchModel.Value(switch_config["model"])
         else:
             switch_model = usi.SwitchModel.OVS_SWITCH
@@ -330,6 +333,9 @@ class ConnectedHost:
     def connect_port(self, connect):
         """Connects/Disconnects port for this host"""
         switch_info = self._build_switch_info()
+        if not switch_info:
+            self.logger.info('No switch model found, skipping port connect')
+            return False
         try:
             with grpc.insecure_channel(self._usi_url) as channel:
                 stub = usi_service.USIServiceStub(channel)
@@ -342,6 +348,7 @@ class ConnectedHost:
         except Exception as e:
             self.logger.error(e)
             raise e
+        return True
 
     def _prepare(self):
         self.logger.info('Target port %d waiting for ip as %s', self.target_port, self.target_mac)

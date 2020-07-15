@@ -36,7 +36,6 @@ enum SwitchModel {
   ALLIED_TELESIS_X230 = 0;
   CISCO_9300 = 1;
   OVS_SWITCH = 2;
-  FAUX_SWITCH = 3;
 }
 
 enum LinkStatus {
