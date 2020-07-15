@@ -300,11 +300,11 @@ class ConnectedHost:
 
     def _build_switch_info(self) -> usi.SwitchInfo:
         switch_config = self._get_switch_config()
-        switch_model = switch_config['model']
-        if switch_model == 'FAUX_SWITCH':
+        model_str = switch_config['model']
+        if model_str == 'FAUX_SWITCH':
             return None
-        else if switch_model:
-            switch_model = usi.SwitchModel.Value(switch_config["model"])
+        if model_str:
+            switch_model = usi.SwitchModel.Value(model_str)
         else:
             switch_model = usi.SwitchModel.OVS_SWITCH
         params = {
