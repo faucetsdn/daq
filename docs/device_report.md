@@ -68,7 +68,7 @@ Overall device result FAIL
 |skip|cloud.udmi.system|Other|Other|No device id|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
-|fail|connection.network.ntp_update|Other|Other|Leap indicator found to be 3 (alarm condition)|
+|pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
@@ -588,7 +588,7 @@ connection.network.ntp_update
 --------------------
 Device synchronizes its time to the NTP server.
 --------------------
-RESULT fail connection.network.ntp_update Leap indicator found to be 3 (alarm condition)
+RESULT pass connection.network.ntp_update Device clock synchronized.
 ```
 
 #### Module Config
