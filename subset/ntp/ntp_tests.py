@@ -143,7 +143,6 @@ def test_ntp_update():
         t4 = t4 - SECONDS_BETWEEN_1900_1970
 
     offset = abs((t2 - t1) + (t3 - t4))/2
-    print("offset = " + str(offset))
     if offset < OFFSET_ALLOWANCE:
         add_summary("Device clock synchronized.")
         return 'pass'
