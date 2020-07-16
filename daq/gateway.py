@@ -134,9 +134,9 @@ class Gateway():
         """Stops DHCP response for the device"""
         self.change_dhcp_response_time(mac, -1)
 
-    def change_dhcp_range(self, start, end, mask):
+    def change_dhcp_range(self, start, end, prefix_length):
         """Change dhcp range for devices"""
-        self.execute_script('change_dhcp_range', start, end, mask)
+        self.execute_script('change_dhcp_range', start, end, prefix_length)
 
     def allocate_test_port(self):
         """Get the test port to use for this gateway setup"""
