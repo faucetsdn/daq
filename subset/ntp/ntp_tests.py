@@ -85,7 +85,7 @@ def test_ntp_update():
     if os.path.isfile(monitor_pcap_file):
         monitor_capture = rdpcap(monitor_pcap_file)
         packets += ntp_packets(monitor_capture)
-    if len(packets) < 4:
+    if len(packets) < 2:
         add_summary("Not enough NTP packets received.")
         return 'skip'
     # Check that DAQ NTP server has been used
@@ -99,7 +99,7 @@ def test_ntp_update():
                     packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
             using_local_server = True
             local_ntp_packets.append(packet)
-    if not using_local_server or len(local_ntp_packets) < 4:
+    if not using_local_server or len(local_ntp_packets) < 2:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
     # Obtain the latest NTP poll
