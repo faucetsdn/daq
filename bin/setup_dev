@@ -75,10 +75,6 @@ $AG install \
     python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python emacs-nox python$PVERSION-venv
 
-# Jump through some hoops for mininet, which still has some python2 deps.
-$AG install python-pip
-python2 -m pip install setuptools
-
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
     targetrev=$(cd mininet; git rev-parse $MININETV)

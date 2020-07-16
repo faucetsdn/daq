@@ -63,7 +63,7 @@ RESULT fail connection.network.ntp_support Not using NTPv4.
 RESULT fail connection.network.ntp_update Device clock not synchronized with local NTP server.
 RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
-dhcp requests 1 1 0 1
+dhcp requests 1 1 1 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
@@ -97,21 +97,8 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-    "dhcp_tests": {
-      "ip_change": {
-        "enabled": false,
-        "timeout_sec": 500
-      },
-      "multi_subnet": {
-        "enabled": false,
-        "subnets": [],
-        "timeout_sec": 600
-      },
-      "port_toggle": {
-        "enabled": false,
-        "port_flap_timeout_sec": 20
-      }
-    },
+    "enabled": true,
+    "port_flap_timeout_sec": 20,
     "timeout_sec": 300
   },
   "macoui": {
@@ -163,21 +150,8 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
-    "dhcp_tests": {
-      "ip_change": {
-        "enabled": false,
-        "timeout_sec": 500
-      },
-      "multi_subnet": {
-        "enabled": false,
-        "subnets": [],
-        "timeout_sec": 600
-      },
-      "port_toggle": {
-        "enabled": false,
-        "port_flap_timeout_sec": 20
-      }
-    },
+    "enabled": true,
+    "port_flap_timeout_sec": 20,
     "timeout_sec": 300
   },
   "macoui": {
@@ -235,16 +209,19 @@ inst/gw01/nodes/gw01/activate.log
 inst/gw02/nodes/gw02/activate.log
 inst/gw03/nodes/gw03/activate.log
 inst/run-port-01/nodes/fail01/activate.log
+inst/run-port-01/nodes/ipaddr01/activate.log
 inst/run-port-01/nodes/nmap01/activate.log
 inst/run-port-01/nodes/pass01/activate.log
 inst/run-port-01/nodes/ping01/activate.log
 inst/run-port-02/nodes/fail02/activate.log
 inst/run-port-02/nodes/hold02/activate.log
+inst/run-port-02/nodes/ipaddr02/activate.log
 inst/run-port-02/nodes/nmap02/activate.log
 inst/run-port-02/nodes/pass02/activate.log
 inst/run-port-02/nodes/ping02/activate.log
 inst/run-port-03/nodes/fail03/activate.log
 inst/run-port-03/nodes/hold03/activate.log
+inst/run-port-03/nodes/ipaddr03/activate.log
 inst/run-port-03/nodes/nmap03/activate.log
 inst/run-port-03/nodes/pass03/activate.log
 inst/run-port-03/nodes/ping03/activate.log
