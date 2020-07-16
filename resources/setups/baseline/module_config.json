@@ -1,7 +1,9 @@
 {
   "modules": {
     "ipaddr": {
-      "timeout_sec": 300
+      "enabled": true,
+      "timeout_sec": 300,
+      "port_flap_timeout_sec": 20
     },
     "pass": {
       "enabled": true

@@ -93,15 +93,6 @@ Overall device result FAIL
 |gone|unknown.fake.monkey|Other|Other||
 
 
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|timeout_sec|300|
-
 ## Module pass
 
 
@@ -152,6 +143,17 @@ See log above
 RESULT pass base.target.ping target reached
 
 ```
+
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|300|
+|port_flap_timeout_sec|20|
 
 ## Module nmap
 

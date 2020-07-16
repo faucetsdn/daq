@@ -36,6 +36,10 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/faucet" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/forch" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/local" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/mininet" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/protoc-gen-doc" vcs="Git" />
   </component>
 </project>

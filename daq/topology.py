@@ -231,22 +231,24 @@ class FaucetTopology:
     def _make_pri_topology(self):
         pri_dp = {}
         pri_dp['dp_id'] = self.PRI_DPID
-        pri_dp['name'] = self.pri_name
         pri_dp['interfaces'] = self._make_pri_interfaces()
         return pri_dp
 
     def _make_sec_topology(self):
         sec_dp = {}
         sec_dp['dp_id'] = self.sec_dpid
-        sec_dp['name'] = self.sec_name
         sec_dp['interfaces'] = self._make_sec_interfaces()
         return sec_dp
+
+    def _has_sec_switch(self):
+        return self.sec_dpid and self.sec_port
 
     def _make_base_network_topology(self):
         assert self.pri, 'pri dataplane not configured'
         dps = {}
         dps['pri'] = self._make_pri_topology()
-        dps['sec'] = self._make_sec_topology()
+        if self._has_sec_switch():
+            dps['sec'] = self._make_sec_topology()
         topology = {}
         topology['dps'] = dps
         topology['vlans'] = self._make_vlan_description(10)
