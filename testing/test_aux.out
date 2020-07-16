@@ -60,7 +60,7 @@ RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass connection.network.ntp_support Using NTPv4.
 RESULT fail connection.network.ntp_update Leap indicator found to be 3 (alarm condition)
 RESULT fail connection.network.ntp_support Not using NTPv4.
-RESULT fail connection.network.ntp_update Leap indicator found to be 3 (alarm condition)
+RESULT fail connection.network.ntp_update Device clock not synchronized with local NTP server.
 RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
 dhcp requests 1 1 0 1
