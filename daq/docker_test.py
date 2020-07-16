@@ -19,18 +19,17 @@ class DockerTest:
     CONTAINER_PREFIX = 'daq'
 
     # pylint: disable=too-many-arguments
-    def __init__(self, runner, target_port, tmpdir, test_name, env_vars=None):
+    def __init__(self, host, target_port, tmpdir, test_name, module_config):
         self.target_port = target_port
         self.tmpdir = tmpdir
         self.test_name = test_name
-        self.runner = runner
+        self.runner = host.runner
         self.host_name = '%s%02d' % (test_name, self.target_port)
         self.docker_log = None
         self.docker_host = None
         self.callback = None
         self.start_time = None
         self.pipe = None
-        self.env_vars = env_vars or []
         self._finish_hook = None
 
     def start(self, port, params, callback, finish_hook):
@@ -44,7 +43,7 @@ class DockerTest:
         def opt_param(key):
             return params.get(key) or ''  # Substitute empty string for None
 
-        env_vars = self.env_vars + [
+        env_vars = [
             "TARGET_NAME=" + self.host_name,
             "TARGET_IP=" + params['target_ip'],
             "TARGET_MAC=" + params['target_mac'],
@@ -168,3 +167,6 @@ class DockerTest:
             LOGGER.info("Target port %d test %s passed %ss",
                         self.target_port, self.test_name, delay)
         self.callback(return_code=return_code, exception=exception)
+
+    def ip_listener(self, target_ip):
+        """Do nothing b/c docker tests don't care about ip notifications"""

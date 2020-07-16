@@ -5,10 +5,10 @@ import os
 import shutil
 import time
 from datetime import timedelta, datetime
-import logging
 import grpc
 
 from clib import tcpdump_helper
+
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
@@ -16,7 +16,9 @@ from proto import usi_pb2_grpc as usi_service
 import configurator
 import docker_test
 import gcp
+import ipaddr_test
 import logger
+
 
 class _STATE:
     """Host state enum for testing cycle"""
@@ -50,7 +52,7 @@ class MODE:
 
 def pre_states():
     """Return pre-test states for basic operation"""
-    return ['startup', 'sanity', 'ipaddr', 'base', 'monitor']
+    return ['startup', 'sanity', 'acquire', 'base', 'monitor']
 
 
 def dhcp_tests():
@@ -65,9 +67,8 @@ def post_states():
 
 def get_test_config(config, test):
     """Get a single test module's config"""
-    if test in dhcp_tests():
-        return config['modules'].get('ipaddr', {}).get('dhcp_tests', {}).get(test)
     return config["modules"].get(test)
+
 
 class ConnectedHost:
     """Class managing a device-under-test"""
@@ -123,7 +124,6 @@ class ConnectedHost:
         assert self._loaded_config, 'config was not loaded'
         self._write_module_config(self._loaded_config, self._device_aux_path())
         self.remaining_tests = self._get_enabled_tests()
-        self.dhcp_tests = self._get_dhcp_tests()
         self.logger.info('Host %s running with enabled tests %s', self.target_port,
                          self.remaining_tests)
         self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
@@ -135,11 +135,6 @@ class ConnectedHost:
         self.timeout_handler = self._aux_module_timeout_handler
         self._all_ips = []
         self._ip_listener = None
-        self._dhcp_tests_map = {
-            'port_toggle': self._dhcp_port_toggle_test,
-            'multi_subnet': None,  # TODO
-            'ip_change': None  # TODO
-        }
 
     @staticmethod
     def make_runid():
@@ -305,8 +300,11 @@ class ConnectedHost:
 
     def _build_switch_info(self) -> usi.SwitchInfo:
         switch_config = self._get_switch_config()
-        if switch_config["model"]:
-            switch_model = usi.SwitchModel.Value(switch_config["model"])
+        model_str = switch_config['model']
+        if model_str == 'FAUX_SWITCH':
+            return None
+        if model_str:
+            switch_model = usi.SwitchModel.Value(model_str)
         else:
             switch_model = usi.SwitchModel.OVS_SWITCH
         params = {
@@ -335,6 +333,9 @@ class ConnectedHost:
     def connect_port(self, connect):
         """Connects/Disconnects port for this host"""
         switch_info = self._build_switch_info()
+        if not switch_info:
+            self.logger.info('No switch model found, skipping port connect')
+            return False
         try:
             with grpc.insecure_channel(self._usi_url) as channel:
                 stub = usi_service.USIServiceStub(channel)
@@ -347,12 +348,13 @@ class ConnectedHost:
         except Exception as e:
             self.logger.error(e)
             raise e
+        return True
 
     def _prepare(self):
         self.logger.info('Target port %d waiting for ip as %s', self.target_port, self.target_mac)
         self._state_transition(_STATE.WAITING, _STATE.INIT)
         self.record_result('sanity', state=MODE.DONE)
-        self.record_result('ipaddr', state=MODE.EXEC)
+        self.record_result('acquire', state=MODE.EXEC)
         static_ip = self._get_static_ip()
         if static_ip:
             self.logger.info('Target port %d using static ip', self.target_port)
@@ -378,7 +380,7 @@ class ConnectedHost:
 
     def _main_module_timeout_handler(self):
         self.test_host.terminate()
-        self._docker_callback(exception=self._TIMEOUT_EXCEPTION)
+        self._module_callback(exception=self._TIMEOUT_EXCEPTION)
 
     def heartbeat(self):
         """Checks module run time for each event loop"""
@@ -446,8 +448,8 @@ class ConnectedHost:
         self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
         if self._get_dhcp_mode() == "ip_change" and len(self._all_ips) == 1:
             self.gateway.request_new_ip(self.target_mac)
-        if self._ip_listener:
-            self._ip_listener(target_ip)
+        if self.test_host:
+            self.test_host.ip_listener(target_ip)
 
     def trigger_ready(self):
         """Check if this host is ready to be triggered"""
@@ -471,7 +473,7 @@ class ConnectedHost:
             return True
         self.target_ip = target_ip
         self._record_result('info', state='%s/%s' % (self.target_mac, target_ip))
-        self.record_result('ipaddr', ip=target_ip, state=state, exception=exception)
+        self.record_result('acquire', ip=target_ip, state=state, exception=exception)
         if exception:
             self._state_transition(_STATE.ERROR)
             self.runner.target_set_error(self.target_port, exception)
@@ -535,7 +537,6 @@ class ConnectedHost:
 
     def _monitor_error(self, exception, forget=False):
         self.logger.error('Target port %d monitor error: %s', self.target_port, exception)
-        self._ip_listener = None
         self._monitor_cleanup(forget=forget)
         self.record_result(self.test_name, exception=exception)
         self._state_transition(_STATE.ERROR)
@@ -568,6 +569,7 @@ class ConnectedHost:
 
     def _monitor_continue(self):
         self._state_transition(_STATE.NEXT, _STATE.MONITOR)
+        self.test_name = None
         self._run_next_test()
 
     def _base_tests(self):
@@ -587,33 +589,17 @@ class ConnectedHost:
         self.record_result('base', state=MODE.DONE)
         return True
 
-    def _dhcp_port_toggle_test(self, logging_handler):
-        def ip_listener(target_ip):
-            self.logger.info("%s test Received ip: %s" % (self.test_name, target_ip))
-            if logging_handler:
-                self.logger.removeHandler(logging_handler)
-            self._ip_listener = None
-            self._end_test()
-
-        self.connect_port(False)
-        time.sleep(self.runner.config.get("port_debounce_sec", 0) + 1)
-        self.connect_port(True)
-        self._ip_listener = ip_listener
-
     def _run_next_test(self):
+        assert not self.test_name, 'test_name defined: %s' % self.test_name
         try:
             if self.remaining_tests:
                 self.logger.debug('Target port %d executing tests %s',
                                   self.target_port, self.remaining_tests)
-                self.timeout_handler = self._main_module_timeout_handler
-                self._docker_test(self.remaining_tests.pop(0))
-            elif self.dhcp_tests:
-                self._dhcp_test(self.dhcp_tests.pop(0))
+                self._run_test(self.remaining_tests.pop(0))
             else:
                 self.logger.info('Target port %d no more tests remaining', self.target_port)
                 self.timeout_handler = self._aux_module_timeout_handler
                 self._state_transition(_STATE.DONE, _STATE.NEXT)
-                self.test_name = None
                 self.record_result('finish', state=MODE.FINE)
         except Exception as e:
             self.logger.error('Target port %d start error: %s', self.target_port, e)
@@ -629,10 +615,15 @@ class ConnectedHost:
             os.makedirs(path)
         return path
 
-    def _docker_test(self, test_name):
-        self.test_host = docker_test.DockerTest(self.runner, self.target_port,
-                                                self.devdir, test_name)
-        self.logger.debug('test_host start %s/%s', test_name, self._host_name())
+    def _new_test(self, test_name):
+        clazz = ipaddr_test.IpAddrTest if test_name == 'ipaddr' else docker_test.DockerTest
+        return clazz(self, self.target_port, self.devdir, test_name, self._loaded_config)
+
+    def _run_test(self, test_name):
+        self.timeout_handler = self._main_module_timeout_handler
+        self.test_host = self._new_test(test_name)
+
+        self.logger.info('Target port %d start %s', self.target_port, self._host_name())
 
         try:
             self.test_port = self.runner.allocate_test_port(self.target_port)
@@ -643,29 +634,13 @@ class ConnectedHost:
         try:
             self._start_test(test_name)
             params = self._get_module_params()
-            self.test_host.start(self.test_port, params, self._docker_callback, self._finish_hook)
+            self.test_host.start(self.test_port, params, self._module_callback, self._finish_hook)
         except Exception as e:
             self.test_host = None
             self.runner.release_test_port(self.target_port, self.test_port)
             self.test_port = None
             self._monitor_cleanup()
             raise e
-
-    def _dhcp_test(self, test_name):
-        self.logger.info('Target port %d dhcp test %s running', self.target_port, test_name)
-        self.timeout_handler = self._aux_module_timeout_handler
-        self._start_test(test_name)
-        test_fn = self._dhcp_tests_map[test_name]
-        logging_handler = logging.FileHandler(
-            os.path.join(self._host_dir_path(), 'activate.log'))
-        # All the logging from this host will also go to activation log to be stored
-        self.logger.addHandler(logging_handler)
-        try:
-            test_fn(logging_handler)
-        except Exception as e:
-            self._end_test(state=MODE.MERR, exception=e)
-            self.logger.removeHandler(logging_handler)
-            self._run_next_test()
 
     def _start_test(self, test_name):
         self.test_name = test_name
@@ -691,6 +666,7 @@ class ConnectedHost:
                 remote_paths[result_type.value] = self._upload_file(path)
         self.record_result(self.test_name, state=state, code=return_code, exception=exception,
                            **remote_paths)
+        self.test_name = None
         self.test_host = None
         self.timeout_handler = None
         self._run_next_test()
@@ -724,7 +700,7 @@ class ConnectedHost:
         }
 
     def _host_name(self):
-        return self.test_host.host_name if self.test_host else (self.test_name or 'unknown')
+        return self.test_host.host_name if self.test_host else 'unknown'
 
     def _host_dir_path(self):
         return os.path.join(self.devdir, 'nodes', self._host_name())
@@ -741,14 +717,14 @@ class ConnectedHost:
             os.system('%s %s 2>&1 > %s/finish.out' %
                       (self._finish_hook_script, finish_dir, finish_dir))
 
-    def _docker_callback(self, return_code=None, exception=None):
+    def _module_callback(self, return_code=None, exception=None):
         host_name = self._host_name()
         self.logger.info('Host callback %s/%s was %s with %s',
                          self.test_name, host_name, return_code, exception)
         failed = return_code or exception
         state = MODE.MERR if failed else MODE.DONE
         self.runner.release_test_port(self.target_port, self.test_port)
-        assert self.test_host, '_docker_callback with no test_host defined'
+        assert self.test_host, '_module_callback with no test_host defined'
         self._end_test(state=state, return_code=return_code, exception=exception)
 
     def _merge_run_info(self, config):

@@ -94,16 +94,6 @@ Overall device result FAIL
 |gone|unknown.fake.monkey|Other|Other||
 
 
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|timeout_sec|300|
-|dhcp_tests|{'port_toggle': {'enabled': False, 'port_flap_timeout_sec': 20}, 'multi_subnet': {'subnets': [], 'timeout_sec': 600, 'enabled': False}, 'ip_change': {'timeout_sec': 500, 'enabled': False}}|
-
 ## Module pass
 
 
@@ -154,6 +144,17 @@ See log above
 RESULT pass base.target.ping target reached
 
 ```
+
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|300|
+|port_flap_timeout_sec|20|
 
 ## Module nmap
 
