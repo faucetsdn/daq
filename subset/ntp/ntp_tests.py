@@ -22,7 +22,7 @@ LOCAL_PREFIX = '10.20.'
 NTP_SERVER_SUFFIX = '.2'
 MODE_CLIENT = 3
 MODE_SERVER = 4
-YEAR_2900 = 29348006400
+YEAR_2500 = 16725225600
 SECONDS_BETWEEN_1900_1970 = 2208988800
 OFFSET_ALLOWANCE = 0.128
 LEAP_ALARM = 3
@@ -127,28 +127,29 @@ def test_ntp_update():
     if p1 is None or p2 is None:
         add_summary("Device clock not synchronized with local NTP server.")
         return 'fail'
-    if ntp_payload(p1).leap == LEAP_ALARM:
-        add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
-        return 'fail'
     t1 = ntp_payload(p1).sent
     t2 = ntp_payload(p1).time
     t3 = ntp_payload(p2).sent
     t4 = ntp_payload(p2).time
 
     # Timestamps are inconsistenly either from 1900 or 1970
-    if t1 > YEAR_2900:
+    if t1 > YEAR_2500:
         t1 = t1 - SECONDS_BETWEEN_1900_1970
-    if t2 > YEAR_2900:
+    if t2 > YEAR_2500:
         t2 = t2 - SECONDS_BETWEEN_1900_1970
-    if t3 > YEAR_2900:
+    if t3 > YEAR_2500:
         t3 = t3 - SECONDS_BETWEEN_1900_1970
-    if t4 > YEAR_2900:
+    if t4 > YEAR_2500:
         t4 = t4 - SECONDS_BETWEEN_1900_1970
 
     offset = abs((t2 - t1) + (t3 - t4))/2
+    print("offset = " + str(offset))
     if offset < OFFSET_ALLOWANCE:
         add_summary("Device clock synchronized.")
         return 'pass'
+    elif ntp_payload(p1).leap == LEAP_ALARM:
+        add_summary("Leap indicator found to be " + str(LEAP_ALARM) + " (alarm condition)")
+        return 'fail'
     else:
         add_summary("Device clock not synchronized with local NTP server. Offset is " + str(offset))
         return 'fail'
