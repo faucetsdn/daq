@@ -68,7 +68,7 @@ interfaces:
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client
 long_dhcp_response_sec: 0
-monitor_scan_sec: 15
+monitor_scan_sec: 20
 EOF
 
 if [ -f "$gcp_cred" ]; then

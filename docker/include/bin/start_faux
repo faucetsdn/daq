@@ -161,7 +161,7 @@ if [ -n "${options[ntp_pass]}" -o -n "${options[ntp_fail]}" ]; then
         fi
         echo Transmitting NTP query to $ntp_server
         ntpdate -q -p 1 $ntp_server
-        sleep 10
+        sleep 3
      done) &
 fi
 
