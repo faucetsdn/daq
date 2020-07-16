@@ -94,10 +94,16 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-    "dhcp_ranges": [["192.168.0.1", "192.168.255.254", 16]],
+    "dhcp_ranges": [
+       [
+         "192.168.0.1",
+         "192.168.255.254",
+         16
+       ]
+     ],
     "enabled": false,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 300
+    "timeout_sec": 900
   },
   "macoui": {
     "enabled": true
@@ -148,10 +154,16 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
-    "dhcp_ranges": [["192.168.0.1", "192.168.255.254", 16]],
+    "dhcp_ranges": [
+       [
+         "192.168.0.1",
+         "192.168.255.254",
+         16
+       ]
+     ],
     "enabled": false,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 300
+    "timeout_sec": 900
   },
   "macoui": {
     "enabled": true,
@@ -208,19 +220,16 @@ inst/gw01/nodes/gw01/activate.log
 inst/gw02/nodes/gw02/activate.log
 inst/gw03/nodes/gw03/activate.log
 inst/run-port-01/nodes/fail01/activate.log
-inst/run-port-01/nodes/ipaddr01/activate.log
 inst/run-port-01/nodes/nmap01/activate.log
 inst/run-port-01/nodes/pass01/activate.log
 inst/run-port-01/nodes/ping01/activate.log
 inst/run-port-02/nodes/fail02/activate.log
 inst/run-port-02/nodes/hold02/activate.log
-inst/run-port-02/nodes/ipaddr02/activate.log
 inst/run-port-02/nodes/nmap02/activate.log
 inst/run-port-02/nodes/pass02/activate.log
 inst/run-port-02/nodes/ping02/activate.log
 inst/run-port-03/nodes/fail03/activate.log
 inst/run-port-03/nodes/hold03/activate.log
-inst/run-port-03/nodes/ipaddr03/activate.log
 inst/run-port-03/nodes/nmap03/activate.log
 inst/run-port-03/nodes/pass03/activate.log
 inst/run-port-03/nodes/ping03/activate.log
