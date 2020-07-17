@@ -147,10 +147,8 @@ if [ -n "${options[ntpv4]}" ]; then
     done) &
 elif [ -n "${options[ntpv3]}" ]; then
     (while date; do
-    	dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
-    	ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
-    	echo Transmitting NTP query to $ntp_server using NTPv3
-    	ntpdate -q -o 3 $ntp_server
+    	echo Transmitting NTP query to time.google.com using NTPv3
+    	ntpdate -q -o 3 time.google.com || true
 	sleep 5
     done) &
 fi
