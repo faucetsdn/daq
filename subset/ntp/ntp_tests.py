@@ -147,7 +147,7 @@ def test_ntp_update():
         add_summary("Device clock synchronized.")
         return 'pass'
     else:
-        add_summary("Device clock not synchronized with local NTP server.")
+        add_summary("Device clock not synchronized with local NTP server. Offset = " + str(offset))
         return 'fail'
 
 
