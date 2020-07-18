@@ -7,7 +7,7 @@ Running testing/test_aux.sh
     "SNS-4" : "True"
   }
 }
-inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "c2fac5e3"
+inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "175e704a"
 inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf0ba5fa"
 inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "cbcf045e"
 inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "879557b4"
