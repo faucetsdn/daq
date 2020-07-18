@@ -145,8 +145,6 @@ cat inst/run-port-03/nodes/ping03/tmp/lizard.txt | tee -a $TEST_RESULTS
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
-more inst/run-port-*/nodes/udmi*/activate.log | cat
-
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
     docker logs daq-faux-$num 2>&1 | head -n 100

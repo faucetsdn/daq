@@ -85,8 +85,6 @@ function message_report {
                      "$skip" "$RESULT_AND_SUMMARY"
 }
 
-find . -type f
-
 for message_type in $message_types; do
     message_report $message_type
 done
