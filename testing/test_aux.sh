@@ -31,6 +31,7 @@ function make_pubber {
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
     "extraField": $fail,
+    "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
   }
@@ -84,7 +85,7 @@ if [ -f "$gcp_cred" ]; then
     make_pubber AHU-1 daq-faux-2 null null
     make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
-    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred bin/registrar $project_id
+    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar $project_id inst/test_site
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
     fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
@@ -143,6 +144,8 @@ cat inst/run-port-03/nodes/ping03/tmp/lizard.txt | tee -a $TEST_RESULTS
 # Add the results for cloud tests into a different file, since cloud tests may not run if
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
+
+more inst/run-port-*/nodes/udmi*/activate.log | cat
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
