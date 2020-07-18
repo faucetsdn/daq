@@ -229,7 +229,4 @@ else
 fi
 
 echo Blocking for all eternity.
-while true; do
-    echo Blocked at `date`
-    sleep 60
-done
+tail -f /dev/null
