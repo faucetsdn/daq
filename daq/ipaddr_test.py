@@ -28,6 +28,7 @@ class IpAddrTest:
         self.tests = [
             ('dhcp port_toggle test', self._dhcp_port_toggle_test),
             ('dhcp multi subnet test', self._multi_subnet_test),
+            ('ip change test', self._ip_change_test),
             ('finalize', self._finalize)
         ]
 
@@ -68,6 +69,10 @@ class IpAddrTest:
         self.log('Testing dhcp range: ' + ",".join([str(arg) for arg in dhcp_range]))
         self.host.gateway.change_dhcp_range(*dhcp_range)
         self._ip_callback = self._multi_subnet_test if self.test_dhcp_ranges else self._next_test
+
+    def _ip_change_test(self):
+        self.host.gateway.request_new_ip(self.host.target_mac)
+        self._ip_callback = self._next_test
 
     def _finalize(self, exception=None):
         self.terminate()
