@@ -54,12 +54,6 @@ def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'acquire', 'base', 'monitor']
 
-
-def dhcp_tests():
-    """Returns all supported dhcp tests"""
-    return ['port_toggle', 'multi_subnet', 'ip_change']
-
-
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
@@ -282,7 +276,7 @@ class ConnectedHost:
         self._startup_scan()
 
     def _mark_skipped_tests(self):
-        for test in self.config['test_list'] + dhcp_tests():
+        for test in self.config['test_list']:
             if not self._test_enabled(test):
                 self._record_result(test, state=MODE.NOPE)
 
@@ -442,8 +436,6 @@ class ConnectedHost:
         with open(self._trigger_path, 'a') as output_stream:
             output_stream.write('%s %s %d\n' % (target_ip, state, delta_sec))
         self._all_ips.append({"ip": target_ip, "timestamp": time.time()})
-        if self._get_dhcp_mode() == "ip_change" and len(self._all_ips) == 1:
-            self.gateway.request_new_ip(self.target_mac)
         # Update ip directly if it's already triggered.
         if self.target_ip:
             self.target_ip = target_ip
