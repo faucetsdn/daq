@@ -1,0 +1,20 @@
+# Example configuration file for using an OVS switch not managed by DAQ.
+
+# Load defaults.
+include: config/system/default.yaml
+
+# Description for dashboard.
+site_description: "Alternate (not managed by DAQ) OVS switch configuration"
+
+# Network switch configuration.
+switch_setup:
+  data_intf: alt-intf
+  alt_port: 6669
+  uplink_port: 100
+  ext_br: alt-switch
+
+# Faux device connection for testing.
+interfaces:
+  faux:
+    opts: 
+    port: 2

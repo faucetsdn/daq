@@ -1,0 +1,24 @@
+#!/bin/bash -e
+#
+# Dynamically change DHCP lease range, requires killing and restarting
+# dnsmasq as per documentation (SIGHUP does not reload configuration file).
+LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
+
+range_start=$1
+range_end=$2
+prefix_len=$3
+if [ -z $range_start -o -z $range_end -o -z $prefix_len ]; then
+    echo "Usage: change_dhcp_range range_start range_end prefix_len"
+    exit 1
+fi
+while [ $(cat /etc/dnsmasq.conf | egrep "^dhcp-range=" | wc -l) == 0 ]; do 
+    sleep 1
+done
+ip addr add $range_start/$prefix_len dev $LOCAL_IF || true
+original=$(cat /etc/dnsmasq.conf | egrep "^dhcp-range=" | head -1)
+lease=$(echo $original | cut -d',' -f 3)
+if [ -n "lease" ]; then
+    lease=",$lease"
+fi
+new="dhcp-range=$range_start,$range_end$lease"
+flock /etc/dnsmasq.conf sed -i s/$original/$new/ /etc/dnsmasq.conf

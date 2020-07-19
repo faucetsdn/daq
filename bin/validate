@@ -20,16 +20,14 @@ if [ -z "$schema_path" ]; then
   false
 fi
 
-validator/bin/build
+echo Building validator...
+validator/bin/build > /dev/null
 
-unset GOOGLE_CLOUD_PROJECT
-export GOOGLE_APPLICATION_CREDENTIALS=$PWD/$gcp_cred
-echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 echo Configured topic is $gcp_topic
 echo Configured schema is $schema_path
-if [ -n "$site_path" ]; then
-    echo Configured site path is $site_path
-fi
+echo Configured site path is $site_path
 echo
+
+echo Running tools version `git describe`
 
 validator/bin/validate $schema_path pubsub:$gcp_topic dev $site_path

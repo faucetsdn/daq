@@ -32,6 +32,11 @@ sha1sum $proto_files > $WEB_ROOT/protos.hash
 
 gen_path=$ROOT/protoc-gen-doc/bin/protoc-gen-doc
 
+if [ -d venv ]; then
+    echo Entering virtual python environment...
+    source venv/bin/activate
+fi
+
 mkdir -p build/daq/proto build/proto
 cp $proto_files build/daq/proto/
 proto_files2=
@@ -56,3 +61,5 @@ mkdir -p libs/proto/
 touch libs/proto/__init__.py
 cp build/daq/proto/*.py libs/proto/
 cp build/protos.html $WEB_ROOT/
+
+python3 -m grpc_tools.protoc -I usi/src/main/proto/ --python_out=libs/proto/ --grpc_python_out=libs/proto/ usi/src/main/proto/usi.proto

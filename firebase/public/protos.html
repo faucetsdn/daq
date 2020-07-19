@@ -198,6 +198,10 @@
                   <a href="#SwitchSetup"><span class="badge">M</span>SwitchSetup</a>
                 </li>
               
+                <li>
+                  <a href="#USISetup"><span class="badge">M</span>USISetup</a>
+                </li>
+              
               
               
               
@@ -478,6 +482,13 @@
                   <td><p>Set time between port disconnect and host tests shutdown </p></td>
                 </tr>
               
+                <tr>
+                  <td>usi_setup</td>
+                  <td><a href="#USISetup">USISetup</a></td>
+                  <td></td>
+                  <td><p>USI url </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -613,7 +624,14 @@
                   <td>lo_port</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>Local port of open flow controller </p></td>
+                  <td><p>Local port of DAQ OpenFlow controller </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Local port for an alternate OpenFlow controller </p></td>
                 </tr>
               
                 <tr>
@@ -670,6 +688,30 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Switch connect password </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="USISetup">USISetup</h3>
+        <p>USI paramters</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>url</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>

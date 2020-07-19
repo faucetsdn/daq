@@ -24,6 +24,7 @@ DEFAULT_LIMIT = 100
 # pylint: disable=no-member
 DESCENDING = firestore.Query.DESCENDING
 
+
 def get_timestamp():
     """"Get a JSON-compatible formatted timestamp"""
     return to_timestamp(datetime.datetime.now(datetime.timezone.utc))
@@ -49,7 +50,7 @@ class GcpManager:
         self._callback_handler = callback_handler
         cred_file = self.config.get('gcp_cred')
         if not cred_file:
-            LOGGER.info('No gcp_cred filr specified in config, disabling gcp use.')
+            LOGGER.info('No gcp_cred file specified in config, disabling gcp use.')
             self._pubber = None
             self._storage = None
             self._firestore = None

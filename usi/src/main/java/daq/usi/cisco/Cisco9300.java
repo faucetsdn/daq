@@ -1,27 +1,12 @@
 package daq.usi.cisco;
 
-/*
- * Licensed to Google under one or more contributor license agreements.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import daq.usi.BaseSwitchController;
 import daq.usi.ResponseHandler;
-import daq.usi.SwitchController;
-import grpc.Interface;
+import grpc.InterfaceResponse;
 import grpc.LinkStatus;
 import grpc.POEStatus;
 import grpc.POESupport;
-import grpc.Power;
+import grpc.PowerResponse;
 import grpc.SwitchActionResponse;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +16,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 
-public class Cisco9300 extends SwitchController {
+public class Cisco9300 extends BaseSwitchController {
 
   private static final String[] interfaceExpected =
       {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
@@ -55,16 +40,14 @@ public class Cisco9300 extends SwitchController {
    * Cisco 9300 Switch Controller.
    *
    * @param remoteIpAddress switch ip
-   * @param telnetPort      switch telnet port
    * @param user            switch username
    * @param password        switch password
    */
   public Cisco9300(
       String remoteIpAddress,
-      int telnetPort,
       String user,
       String password) {
-    super(remoteIpAddress, telnetPort, user, password);
+    super(remoteIpAddress, user, password);
     this.username = user == null ? "admin" : user;
     this.password = password == null ? "password" : password;
   }
@@ -156,7 +139,7 @@ public class Cisco9300 extends SwitchController {
   }
 
   @Override
-  public void getPower(int devicePort, ResponseHandler<Power> powerResponseHandler)
+  public void getPower(int devicePort, ResponseHandler<PowerResponse> powerResponseHandler)
       throws Exception {
     while (commandPending) {
       Thread.sleep(WAIT_MS);
@@ -176,7 +159,8 @@ public class Cisco9300 extends SwitchController {
   }
 
   @Override
-  public void getInterface(int devicePort, ResponseHandler<Interface> handler) throws Exception {
+  public void getInterface(int devicePort, ResponseHandler<InterfaceResponse> handler)
+      throws Exception {
     while (commandPending) {
       Thread.sleep(WAIT_MS);
     }
@@ -230,8 +214,8 @@ public class Cisco9300 extends SwitchController {
     managePort(devicePort, handler, false);
   }
 
-  private Interface buildInterfaceResponse(Map<String, String> interfaceMap) {
-    Interface.Builder response = Interface.newBuilder();
+  private InterfaceResponse buildInterfaceResponse(Map<String, String> interfaceMap) {
+    InterfaceResponse.Builder response = InterfaceResponse.newBuilder();
     String duplex = interfaceMap.getOrDefault("duplex", "");
     if (duplex.startsWith("a-")) { // Interface in Auto Duplex
       duplex = duplex.replaceFirst("a-", "");
@@ -249,8 +233,8 @@ public class Cisco9300 extends SwitchController {
         .build();
   }
 
-  private Power buildPowerResponse(Map<String, String> powerMap) {
-    Power.Builder response = Power.newBuilder();
+  private PowerResponse buildPowerResponse(Map<String, String> powerMap) {
+    PowerResponse.Builder response = PowerResponse.newBuilder();
     float maxPower = Float.parseFloat(powerMap.get("max"));
     float currentPower = Float.parseFloat(powerMap.get("power"));
 
