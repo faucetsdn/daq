@@ -28,8 +28,8 @@ RUN wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz && \
       tar -xzf openssl-1.0.2g.tar.gz && \
       cd openssl-1.0.2g && \
       ./config --prefix=/usr/local/openssl --openssldir=/usr/local/openssl && \
-      make && \ 
-      make install && \
+      make -s && \ 
+      make -s install && \
       cd .. && \
       mkdir /etc/ssh && \
       mkdir /var/empty && \
@@ -41,12 +41,8 @@ RUN wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz && \
       tar -xzf openssh-7.2p1.tar.gz && \
       cd openssh-7.2p1 && \
       ./configure --with-ssl-dir=/usr/local/openssl --with-ssh1 && \
-      make && \ 
-      make install
-
-#This will install the OpenSSH binaries in /usr/local/bin, configuration files
-#in /usr/local/etc, the server in /usr/local/sbin, etc. To specify a different
-#installation prefix, use the --prefix option to configure:
+      make -s && \ 
+      make -s install
 
 FROM daqf/aardvark:latest
 

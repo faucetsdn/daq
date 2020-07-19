@@ -18,6 +18,9 @@
     "manual": {
       "enabled": true
     },
+    "ssh": {
+      "enabled": false
+    },
     "ntp": {
       "enabled": true
     }
