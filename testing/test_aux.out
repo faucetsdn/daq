@@ -58,8 +58,8 @@ RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass security.ssh.version Device only supports SSHv2
-RESULT pass security.ssh.version Device only supports SSHv2
-RESULT pass security.ssh.version Device only supports SSHv2
+RESULT fail security.ssh.version Device supports SSHv1
+RESULT skip security.ssh.version Device is not running an SSH server
 dhcp requests 1 1 0 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
