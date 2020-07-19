@@ -62,13 +62,13 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntp_pass ssh
+    opts: brute broadcast_client ntpv4 ssh
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntp_fail opendns sshv1
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
 long_dhcp_response_sec: 0
-monitor_scan_sec: 0
+monitor_scan_sec: 20
 EOF
 
 if [ -f "$gcp_cred" ]; then
@@ -114,14 +114,14 @@ capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
-capture_test_results ssh
+capture_test_results ntp
 
 # Capture peripheral logs
 more inst/run-port-*/scans/ip_triggers.txt | cat
 dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
 dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
-     $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
+     $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test

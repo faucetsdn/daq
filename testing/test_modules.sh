@@ -17,6 +17,9 @@ tls alt expiredtls
 nmap
 nmap bacnet
 nmap telnet
+ssh
+ssh ssh
+ssh sshv1
 EOF
 
 DAQ_TARGETS=aardvark,faux1,faux2 bin/docker_build force inline
