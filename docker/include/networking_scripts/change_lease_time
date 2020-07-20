@@ -7,10 +7,10 @@ if [ -z $lease ]; then
     echo "Lease time not defined."
     exit 1
 fi
-while [ $(cat /etc/dnsmasq.conf | grep dhcp-range=10.20 | wc -l) == 0 ]; do 
+while [ $(cat /etc/dnsmasq.conf | grep "^dhcp-range=" | wc -l) == 0 ]; do 
     sleep 1
 done
-original=$(cat /etc/dnsmasq.conf | grep dhcp-range=10.20 | head -1)
+original=$(cat /etc/dnsmasq.conf | grep "^dhcp-range=" | head -1)
 new="$(echo $original | cut -d',' -f 1,2),$lease"
 flock /etc/dnsmasq.conf sed -i s/$original/$new/ /etc/dnsmasq.conf
 

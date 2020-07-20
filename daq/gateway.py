@@ -12,6 +12,7 @@ import logger
 
 LOGGER = logger.get_logger('gateway')
 
+
 class Gateway():
     """Gateway collection class for managing testing services"""
 
@@ -37,8 +38,8 @@ class Gateway():
         self.dummy = None
         self.tmpdir = None
         self.targets = {}
-        self.test_ports = {}
-        self.ready = {}
+        self.test_ports = set()
+        self.ready = set()
         self.activated = False
         self.result_linger = False
         self._scan_monitor = None
@@ -125,6 +126,18 @@ class Gateway():
         """Requests a new ip for the device"""
         self.execute_script('new_ip', mac)
 
+    def change_dhcp_response_time(self, mac, time):
+        """Change dhcp response time for device mac"""
+        self.execute_script('change_dhcp_response_time', mac, time)
+
+    def stop_dhcp_response(self, mac):
+        """Stops DHCP response for the device"""
+        self.change_dhcp_response_time(mac, -1)
+
+    def change_dhcp_range(self, start, end, prefix_length):
+        """Change dhcp range for devices"""
+        self.execute_script('change_dhcp_range', start, end, prefix_length)
+
     def allocate_test_port(self):
         """Get the test port to use for this gateway setup"""
         test_port = self._switch_port(self.TEST_OFFSET_START)
@@ -132,7 +145,7 @@ class Gateway():
             test_port = test_port + 1
         limit_port = self._switch_port(self.NUM_SET_PORTS)
         assert test_port < limit_port, 'no test ports available'
-        self.test_ports[test_port] = True
+        self.test_ports.add(test_port)
         return test_port
 
     def _startup_scan(self, host):
@@ -160,7 +173,7 @@ class Gateway():
     def release_test_port(self, test_port):
         """Release the given port from the gateway"""
         assert test_port in self.test_ports, 'test port not allocated'
-        del self.test_ports[test_port]
+        self.test_ports.remove(test_port)
 
     def _switch_port(self, offset):
         return self.port_set * self.SET_SPACING + offset
@@ -207,7 +220,7 @@ class Gateway():
         """Mark a target ready, and return set of ready targets"""
         if not target_mac in self.ready:
             LOGGER.info('Ready target %s from gateway group %s', target_mac, self.name)
-            self.ready[target_mac] = True
+            self.ready.add(target_mac)
         return self.ready
 
     def get_targets(self):

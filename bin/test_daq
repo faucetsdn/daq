@@ -31,6 +31,16 @@ echo -n "DAQ version "
 git describe --dirty --always
 echo
 
+TAGGED_VERSION=`cat etc/docker_images.ver`
+if ! git show $TAGGED_VERSION > /dev/null; then
+    echo
+    echo Tagged version $TAGGED_VERSION not found.
+    echo Maybe you need to fetch tags: git fetch --tags.
+    echo If this is on Travis, ensure tags were pushed to your repo.
+    echo
+    false
+fi
+
 if [ -d faucet ]; then
     echo -n "Last FAUCET commit "
     (cd $FAUCET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)

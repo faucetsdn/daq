@@ -114,8 +114,17 @@ message DaqConfig {
   
   // Set time between port disconnect and host tests shutdown
   int32 port_flap_timeout_sec = 48;
+
+  // USI url
+  USISetup usi_setup = 49;
 }
 
+/**
+ * USI paramters
+**/
+message USISetup {
+  string url = 1;
+}
 
 /*
  * System configuraiton of the access switch. This is used by the system
@@ -131,14 +140,17 @@ message SwitchSetup {
   // Dataplane uplink port
   int32 uplink_port = 13;
 
-  // Local port of open flow controller
+  // Local port of DAQ OpenFlow controller
   int32 lo_port = 14;
 
+  // Local port for an alternate OpenFlow controller
+  int32 alt_port = 16;
+
   // IP address and subnet for local control plane interface
-  string lo_addr = 15;
+  string lo_addr = 18;
 
   // IP address template and subnet for module ip addresses
-  string mods_addr = 16;
+  string mods_addr = 20;
 
   // Dataplane id of external OpenFlow switch
   string of_dpid = 41;

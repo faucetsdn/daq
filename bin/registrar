@@ -27,4 +27,4 @@ validator/bin/build > /dev/null
 
 echo Running tools version `git describe`
 
-validator/bin/registrar $project_id $site_path $schema_path $*
+validator/bin/registrar $project_id $site_path $schema_path $* 2>&1

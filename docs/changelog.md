@@ -1,4 +1,18 @@
 # Changelog
+* 1.7.0
+ * Add DAQ version to origin summary (#522)
+ * Add check for git version tag in Travis (#519)
+ * Minor UDMI updates for pubber keygen
+ * Update Minimum Send Test (#498)
+ * Universal Switch Interface (USI) (#496)
+* 1.6.1
+  * fix image pull in cmd/build (#503)
+* 1.6.0
+  * cloud test setup documentation (#495)
+  * Baseline for NTP tests (#494)
+  * Baseline for DNS test (#492)
+  * Add manual test summary to test report (#481)
+  * UDMI logentry schema update (#391)
 * 1.5.1
   * Fix for local-port-as-string issue (#477)
 * 1.5.0

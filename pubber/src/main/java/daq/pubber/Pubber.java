@@ -8,9 +8,6 @@ import daq.udmi.Message;
 import daq.udmi.Message.Pointset;
 import daq.udmi.Message.PointsetState;
 import daq.udmi.Message.State;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Pubber {
 
@@ -40,9 +39,10 @@ public class Pubber {
   private static final int MIN_REPORT_MS = 200;
   private static final int DEFAULT_REPORT_MS = 5000;
   private static final int CONFIG_WAIT_TIME_MS = 10000;
-  private static final int STATE_THROTTLE_MS = 1500;
+  private static final int STATE_THROTTLE_MS = 2000;
   private static final String CONFIG_ERROR_STATUS_KEY = "config_error";
   private static final int LOGGING_MOD_COUNT = 10;
+  public static final String KEY_SITE_PATH_FORMAT = "%s/devices/%s/rsa_private.pkcs8";
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -163,6 +163,11 @@ public class Pubber {
   }
 
   private void initialize() {
+    Preconditions.checkNotNull(configuration.deviceId, "configuration deviceId not defined");
+    if (configuration.sitePath != null) {
+      configuration.keyFile = String.format(KEY_SITE_PATH_FORMAT, configuration.sitePath,
+          configuration.deviceId);
+    }
     Preconditions.checkState(mqttPublisher == null, "mqttPublisher already defined");
     Preconditions.checkNotNull(configuration.keyFile, "configuration keyFile not defined");
     System.err.println("Loading device key file from " + configuration.keyFile);
@@ -262,8 +267,8 @@ public class Pubber {
 
   private void publishStateMessage(String deviceId) {
     lastStateTimeMs = sleepUntil(lastStateTimeMs + STATE_THROTTLE_MS);
-    info("Sending state message for device " + deviceId);
     deviceState.timestamp = new Date();
+    info("Sending state message for device " + deviceId + " at " + deviceState.timestamp);
     mqttPublisher.publish(deviceId, STATE_TOPIC, deviceState);
   }
 

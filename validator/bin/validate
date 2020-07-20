@@ -20,6 +20,9 @@ if [ ! -f $jarfile ]; then
     validator/bin/build
 fi
 
+echo Using gcloud auth:
+gcloud config get-value account || true
+
 echo Executing validator $schema $target...
 
 echo Validating against schema $schemafile into validations/

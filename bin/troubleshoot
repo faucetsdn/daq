@@ -1,0 +1,29 @@
+#!/bin/bash
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+if [ ! -d inst ]; then
+    echo "Error: run this script after a test run completes"
+    exit 1
+fi
+
+# After the system settles (early on some dpid=1 messages are expected) if we see 
+# unknown dpid in faucet log, dpid might be misconfigured
+unknown_dpid=`fgrep 'unknown datapath' inst/faucet.log | wc -l`
+if [ "$unknown_dpid" -gt 20 ]; then
+    echo "Error: Faucet reports unknown datapath DPID:"
+    fgrep 'unknown datapath' inst/faucet.log | tail -n1
+    echo "Check if switch_setup:of_dpid in config matches the DPID on the physical switch"
+else
+    echo "Checking DPID misconfig: ok"
+fi
+
+# If the switch test failed with a monitoring timeout, switch login info could be wrong
+switch_timeout=`fgrep 'Monitoring timeout for switch' inst/cmdrun.log`
+if [ -n "$switch_timeout" ]; then
+    echo "Error: Timeout connecting to physical switch"
+    echo "Check switch username/password configuration"
+else
+    echo "Checking Switch timeout: ok"
+fi
