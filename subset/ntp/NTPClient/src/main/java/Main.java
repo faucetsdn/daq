@@ -63,9 +63,15 @@ public class Main {
     packet = new DatagramPacket(buf, buf.length);
     socket.receive(packet);
 
+    // Display response
+    System.out.println("NTP server: " + serverName);
+
     // Immediately record the incoming timestamp
     double destinationTimestamp =
             (System.currentTimeMillis() / 1000.0) + SECONDS_FROM_01_01_1900_TO_01_01_1970;
+    System.out.println(msg.toString());
+    System.out.println("Dest. timestamp: "
+            + NtpMessage.timestampToString(destinationTimestamp));
 
     // Process response
     NtpMessage msg = new NtpMessage(packet.getData());
@@ -73,11 +79,6 @@ public class Main {
       leapIndicator = 0;
     }
 
-    // Display response
-    System.out.println("NTP server: " + serverName);
-    System.out.println(msg.toString());
-    System.out.println("Dest. timestamp: "
-            + NtpMessage.timestampToString(destinationTimestamp));
     double roundTripDelay = (destinationTimestamp - msg.originateTimestamp)
             - (msg.transmitTimestamp - msg.receiveTimestamp);
     System.out.println("Round-trip delay: "

@@ -128,8 +128,7 @@ public class NtpMessage {
   public static short unsignedByteToShort(byte b) {
     if ((b & 0x80) == 0x80) {
       return (short)(128 + (b & 0x7f));
-    }
-    else {
+    } else {
       return (short) b;
     }
   }
@@ -188,16 +187,12 @@ public class NtpMessage {
   public static String referenceIdentifierToString(byte[] ref, short stratum, byte version) {
     if (stratum == 0 || stratum == 1) {
       return new String(ref);
-    } 
-    else if (version == 3) {
+    } else if (version == 3) {
       return unsignedByteToShort(ref[0]) + "."
                 + unsignedByteToShort(ref[1]) + "."
                 + unsignedByteToShort(ref[2]) + "."
                 + unsignedByteToShort(ref[3]);
-    }
-    // In NTP Version 4 secondary servers, this is the low order 32 bits
-    // of the latest transmit timestamp of the reference source.
-    else if (version == 4) {
+    } else if (version == 4) {
       return "" + ((unsignedByteToShort(ref[0]) / 256.0)
                 + (unsignedByteToShort(ref[1]) / 65536.0)
                 + (unsignedByteToShort(ref[2]) / 16777216.0)
