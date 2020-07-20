@@ -149,7 +149,7 @@ if [ -n "${options[ntpv4]}" ]; then
 elif [ -n "${options[ntpv3]}" ]; then
     (while date; do
     	echo Transmitting NTP query to 216.239.35.8 using NTPv3
-    	ntpdate -q -o 3 216.239.35.8 || true
+    	ntpdate -q -o 3 216.239.35.8
 	sleep 5
     done) &
 fi
