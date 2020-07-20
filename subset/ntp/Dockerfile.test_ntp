@@ -4,7 +4,7 @@ RUN $AG update && $AG install python python-setuptools python-pip netcat
 
 RUN pip install scapy
 
-COPY subset/ntp/ntp_tests.py .
 COPY subset/ntp/test_ntp .
+COPY subset/ntp/ntp_tests.py .
 
 CMD ["./test_ntp"]

@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
 REPORT=/tmp/report.txt
-
 STARTUP=/scans/startup.pcap
 MONITOR=/scans/monitor.pcap
 

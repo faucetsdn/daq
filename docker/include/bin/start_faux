@@ -141,10 +141,10 @@ if [ -n "${options[ntpv4]}" ]; then
     dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
     ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
     echo Transmitting NTP query to $ntp_server using NTPv4
-    ntpdate -q -o 4 $ntp_server &
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 2 &
 elif [ -n "${options[ntpv3]}" ]; then
     echo Transmitting NTP query to time.google.com using NTPv3
-    ntpdate -q -o 3 time.google.com &
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar time.google.com 123 3 2 &
 fi
 
 # ntp_pass queries the NTP server learnt from DHCP. ntp_fail sends to time.google.com
