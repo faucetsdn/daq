@@ -15,7 +15,8 @@ ip addr
 
 gcp_cred=/config/inst/gcp_service_account.json
 gcp_topic=target
-schema_path=schemas/udmi
+schema_path=schema
+subscription=daq-validator-dev
 message_types="state pointset system"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
@@ -56,15 +57,14 @@ echo Using credentials from $GOOGLE_APPLICATION_CREDENTIALS
 echo Extracted project $project_id
 echo Extracted service $service_id
 echo Configured topic is $gcp_topic
-echo Configured schema is $schema_path
 echo Target device is $device_id
 echo
 
-timeout 60 validator/bin/validate $PWD/$schema_path pubsub:$gcp_topic $service_id-$HOSTNAME -- || true
+timeout 90 validator/bin/validate $project_id $schema_path pubsub $subscription local/ || true
 
 function message_report {
     message_type=$1
-    base=validations/devices/$device_id/$message_type
+    base=out/devices/$device_id/$message_type
     ls -l $base* || true
 
     if [ -f "$base.out" ]; then

@@ -7,16 +7,16 @@ Running testing/test_aux.sh
     "SNS-4" : "True"
   }
 }
-inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "ddf813e3"
-inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf82176c"
-inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "030193c8"
-inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "f701f900"
+inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "175e704a"
+inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf0ba5fa"
+inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "cbcf045e"
+inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "879557b4"
 RESULT skip cloud.udmi.state No device id
 RESULT skip cloud.udmi.pointset No device id
 RESULT skip cloud.udmi.system No device id
-RESULT fail cloud.udmi.state No result found
+RESULT pass cloud.udmi.state Payload successfully validated
 RESULT pass cloud.udmi.pointset Payload successfully validated
 RESULT pass cloud.udmi.system Payload successfully validated
-RESULT fail cloud.udmi.state No result found
-RESULT fail cloud.udmi.pointset #: extraneous key [extraField] is not permitted
+RESULT pass cloud.udmi.state Payload successfully validated
+RESULT fail cloud.udmi.pointset "Unrecognized field \"extraField\" (class com.google.daq.mqtt.registrar.UdmiSchema$PointsetMessage), not marked as ignorable (3 known properties: \"version\", \"points\", \"timestamp\"])\n at [Source: UNKNOWN; line: -1, column: -1] (through reference chain: com.google.daq.mqtt.registrar.UdmiSchema$PointsetMessage[\"extraField\"])"
 RESULT pass cloud.udmi.system Payload successfully validated

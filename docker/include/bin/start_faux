@@ -213,10 +213,10 @@ fi
 if [ -n "${options[pubber]}" ]; then
     echo Running cloud pubber tool...
     (while date; do
-	 pubber/bin/run
-	 # Do https query in case pubber is not configured, for testing port 443
-	 curl -o /dev/null https://google.com
-	 sleep 30
+         pubber/bin/run local/pubber.json
+         # Do https query in case pubber is not configured, for testing port 443
+         curl -o /dev/null https://google.com
+         sleep 30
      done) &
 fi
 
