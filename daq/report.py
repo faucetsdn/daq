@@ -16,7 +16,6 @@ import weasyprint
 
 import gcp
 import logger
-
 LOGGER = logger.get_logger('report')
 
 class ResultType(Enum):
@@ -306,6 +305,7 @@ class ReportGenerator:
         return self._module_config.get('tests', {}).get(test_name, {})
 
     def _write_repitems(self):
+        from host import get_test_config  # Deferring import
         for (test_name, result_dict) in self._repitems.items():
             # To not write a module header if there is nothing to report
             def writeln(line, test_name=test_name):
@@ -318,7 +318,8 @@ class ReportGenerator:
                 writeln(self._TEST_SUBHEADER % "Report")
                 self._append_file(result_dict[ResultType.REPORT_PATH])
             if ResultType.MODULE_CONFIG in result_dict:
-                config = result_dict[ResultType.MODULE_CONFIG].get("modules", {}).get(test_name)
+                module_configs = result_dict[ResultType.MODULE_CONFIG]
+                config = get_test_config(module_configs, test_name)
                 if config and len(config) > 0:
                     writeln(self._TEST_SUBHEADER % "Module Config")
                     table = MdTable(["Attribute", "Value"])

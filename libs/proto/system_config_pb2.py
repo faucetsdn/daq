@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x1d\x64\x61q/proto/system_config.proto\"\xfb\x07\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x11\n\tfail_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xe2\x01\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\x05\x12\x0f\n\x07lo_addr\x18\x0f \x01(\t\x12\x11\n\tmods_addr\x18\x10 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x62\x06proto3'
+  serialized_pb=b'\n\x1d\x64\x61q/proto/system_config.proto\"\x99\x08\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x11\n\tfail_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x12\x1c\n\tusi_setup\x18\x31 \x01(\x0b\x32\t.USISetup\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x17\n\x08USISetup\x12\x0b\n\x03url\x18\x01 \x01(\t\"\xf4\x01\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\x05\x12\x10\n\x08\x61lt_port\x18\x10 \x01(\x05\x12\x0f\n\x07lo_addr\x18\x12 \x01(\t\x12\x11\n\tmods_addr\x18\x14 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x62\x06proto3'
 )
 
 
@@ -57,8 +57,8 @@ _DAQCONFIG_INTERFACESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=941,
-  serialized_end=1002,
+  serialized_start=971,
+  serialized_end=1032,
 )
 
 _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
@@ -94,8 +94,8 @@ _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1004,
-  serialized_end=1053,
+  serialized_start=1034,
+  serialized_end=1083,
 )
 
 _DAQCONFIG = _descriptor.Descriptor(
@@ -357,6 +357,13 @@ _DAQCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='usi_setup', full_name='DaqConfig.usi_setup', index=36,
+      number=49, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -370,7 +377,38 @@ _DAQCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=34,
-  serialized_end=1053,
+  serialized_end=1083,
+)
+
+
+_USISETUP = _descriptor.Descriptor(
+  name='USISetup',
+  full_name='USISetup',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='url', full_name='USISetup.url', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1085,
+  serialized_end=1108,
 )
 
 
@@ -410,56 +448,63 @@ _SWITCHSETUP = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='lo_addr', full_name='SwitchSetup.lo_addr', index=4,
-      number=15, type=9, cpp_type=9, label=1,
+      name='alt_port', full_name='SwitchSetup.alt_port', index=4,
+      number=16, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='lo_addr', full_name='SwitchSetup.lo_addr', index=5,
+      number=18, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='mods_addr', full_name='SwitchSetup.mods_addr', index=5,
-      number=16, type=9, cpp_type=9, label=1,
+      name='mods_addr', full_name='SwitchSetup.mods_addr', index=6,
+      number=20, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='of_dpid', full_name='SwitchSetup.of_dpid', index=6,
+      name='of_dpid', full_name='SwitchSetup.of_dpid', index=7,
       number=41, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='data_intf', full_name='SwitchSetup.data_intf', index=7,
+      name='data_intf', full_name='SwitchSetup.data_intf', index=8,
       number=42, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='ext_br', full_name='SwitchSetup.ext_br', index=8,
+      name='ext_br', full_name='SwitchSetup.ext_br', index=9,
       number=43, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='model', full_name='SwitchSetup.model', index=9,
+      name='model', full_name='SwitchSetup.model', index=10,
       number=44, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='username', full_name='SwitchSetup.username', index=10,
+      name='username', full_name='SwitchSetup.username', index=11,
       number=45, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='password', full_name='SwitchSetup.password', index=11,
+      name='password', full_name='SwitchSetup.password', index=12,
       number=46, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -477,8 +522,8 @@ _SWITCHSETUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1056,
-  serialized_end=1282,
+  serialized_start=1111,
+  serialized_end=1355,
 )
 
 
@@ -515,8 +560,8 @@ _INTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1284,
-  serialized_end=1323,
+  serialized_start=1357,
+  serialized_end=1396,
 )
 
 _DAQCONFIG_INTERFACESENTRY.fields_by_name['value'].message_type = _INTERFACE
@@ -525,7 +570,9 @@ _DAQCONFIG_FAILMODULEENTRY.containing_type = _DAQCONFIG
 _DAQCONFIG.fields_by_name['switch_setup'].message_type = _SWITCHSETUP
 _DAQCONFIG.fields_by_name['interfaces'].message_type = _DAQCONFIG_INTERFACESENTRY
 _DAQCONFIG.fields_by_name['fail_module'].message_type = _DAQCONFIG_FAILMODULEENTRY
+_DAQCONFIG.fields_by_name['usi_setup'].message_type = _USISETUP
 DESCRIPTOR.message_types_by_name['DaqConfig'] = _DAQCONFIG
+DESCRIPTOR.message_types_by_name['USISetup'] = _USISETUP
 DESCRIPTOR.message_types_by_name['SwitchSetup'] = _SWITCHSETUP
 DESCRIPTOR.message_types_by_name['Interface'] = _INTERFACE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -552,6 +599,13 @@ DaqConfig = _reflection.GeneratedProtocolMessageType('DaqConfig', (_message.Mess
 _sym_db.RegisterMessage(DaqConfig)
 _sym_db.RegisterMessage(DaqConfig.InterfacesEntry)
 _sym_db.RegisterMessage(DaqConfig.FailModuleEntry)
+
+USISetup = _reflection.GeneratedProtocolMessageType('USISetup', (_message.Message,), {
+  'DESCRIPTOR' : _USISETUP,
+  '__module__' : 'daq.proto.system_config_pb2'
+  # @@protoc_insertion_point(class_scope:USISetup)
+  })
+_sym_db.RegisterMessage(USISetup)
 
 SwitchSetup = _reflection.GeneratedProtocolMessageType('SwitchSetup', (_message.Message,), {
   'DESCRIPTOR' : _SWITCHSETUP,

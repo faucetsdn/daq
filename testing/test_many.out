@@ -4,6 +4,9 @@ DAQ stress test
 Enough results: 1
 Enough DHCP timeouts: 1
 Enough static ips: 1
+Enough ipaddr tests: 1
+Enough alternate subnet ips: 1
+Enough ipaddr timeouts: 1
 Redacted soak diff
 No soak report diff
 Done with many

@@ -6,14 +6,19 @@ source etc/config_base.sh
 
 ext_intf=$switch_setup_data_intf
 ext_dpid=$switch_setup_of_dpid
-ext_ofpt=$switch_setup_lo_port
 ext_brid=$switch_setup_ext_br
 ext_brpt=$switch_setup_uplink_port
 
 ext_pri=${ext_intf}
 ext_sec=${ext_intf%-pri}-sec
 
-echo ext_dpid is $ext_dpid
+if [ -z "$switch_setup_alt_port" ]; then
+    ext_ofpt=$switch_setup_lo_port
+else
+    ext_ofpt=$switch_setup_alt_port
+fi
+
+echo ext_dpid is $ext_dpid on port $ext_ofpt
 echo network_config is $network_config
 
 dpid=$(printf %016x $ext_dpid)

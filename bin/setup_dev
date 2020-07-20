@@ -75,10 +75,6 @@ $AG install \
     python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python emacs-nox python$PVERSION-venv
 
-# Jump through some hoops for mininet, which still has some python2 deps.
-$AG install python-pip
-python2 -m pip install setuptools
-
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
     targetrev=$(cd mininet; git rev-parse $MININETV)
@@ -137,8 +133,9 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-api-core==1.16.0 \
     google-cloud-storage==1.16.1 \
     google-cloud-firestore==1.6.0 \
-    google-cloud-logging==1.14.0
-
+    google-cloud-logging==1.14.0 \
+    grpcio-tools==1.30.0
+    
 $PIP freeze
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache

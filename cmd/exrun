@@ -44,6 +44,7 @@ FAUCET=$(realpath $ROOT/faucet)
 FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
 LIBS=$(realpath $ROOT/libs)
+PROTO=$(realpath $ROOT/libs/proto)
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found, try running bin/setup_dev.
@@ -66,10 +67,10 @@ if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
-export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS
+export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS:$PROTO
 
 mkdir -p $INSTDIR
-rm -f $INSTDIR/faucet* $cleanup_file
+rm -rf $INSTDIR/faucet* $cleanup_file
 
 docker ps > /dev/null 2>&1 || service docker start
 
@@ -81,7 +82,8 @@ sudo rm -f $cleanup_file
 function autostart {
     tmp=`mktemp`
     echo DAQ autostart $@
-    eval $@ | tee $tmp
+    eval $@ > $tmp # Don't use "eval $@ | tee $tmp" here; breaks cmd/usi.
+    cat $tmp
     grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file || true
 }
 
@@ -99,11 +101,18 @@ if [ -n "$switch_setup_ext_br" ]; then
     autostart bin/external_ovs
 fi
 
+if [ -n "$switch_setup_alt_port" ]; then
+    autostart bin/alt_faucet
+fi
+
 if [ -n "$switch_setup_model" ]; then
     autostart bin/physical_sec
 else
     echo No external switch model specified.
 fi
+
+docker rm -f daq-usi || true
+autostart cmd/usi
 
 # Kill any gateways so that they don't prematurely assign an IP address.
 gwids=$(docker ps --format '{{ .Image }} {{ .Names }}' | fgrep daqf/networking | awk '{print $2}') || true
