@@ -136,7 +136,8 @@ elif [ -n "${options[bacnetfail]}" ]; then
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
-# Queries the NTP server learnt from DHCP.
+# NTPv4 query to the NTP server learnt from DHCP.
+# NTPv3 query to the IP of time.google.com (since resolv.conf is modified by other tests)
 if [ -n "${options[ntpv4]}" ]; then
     (while date; do
     	dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
@@ -147,8 +148,8 @@ if [ -n "${options[ntpv4]}" ]; then
     done) &
 elif [ -n "${options[ntpv3]}" ]; then
     (while date; do
-    	echo Transmitting NTP query to time.google.com using NTPv3
-    	ntpdate -q -o 3 time.google.com || true
+    	echo Transmitting NTP query to 216.239.35.8 using NTPv3
+    	ntpdate -q -o 3 216.239.35.8 || true
 	sleep 5
     done) &
 fi
