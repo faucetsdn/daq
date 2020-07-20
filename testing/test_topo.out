@@ -2,7 +2,6 @@ Running testing/test_topo.sh
 Topology Tests
 mudacl tests
 Mudacl exit code 0
-Validator exit code 0
 Running open 3
 check_socket 01 02 1 1
 check_socket 02 01 1 1

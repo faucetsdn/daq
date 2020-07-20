@@ -1,13 +1,13 @@
 {
   "pointset": {
     "points": {
-      "filter_alarm_pressure_status": {
+      "faulty_finding": {
         "units": "Bars"
       },
-      "filter_differential_pressure_sensor": {
+      "recalcitrant_angle": {
         "units": "Degrees-Celsius"
       },
-      "filter_differential_pressure_setpoint": {
+      "superimposition_reading": {
         "units": "No-units"
       }
     }

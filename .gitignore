@@ -24,6 +24,7 @@ validations/
 /inst/
 /faucet/
 /forch/
+/udmi/
 /mininet/
 /local/
 /firebase/.firebaserc

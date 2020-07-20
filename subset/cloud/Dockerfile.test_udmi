@@ -9,11 +9,13 @@ FROM daqf/aardvark:latest
 RUN $AG update && $AG install openjdk-11-jre
 RUN $AG update && $AG install openjdk-11-jdk git
 
-COPY validator/ validator/
+COPY udmi/validator/ validator/
 RUN validator/bin/build
 
-COPY schemas/udmi/ schemas/udmi/
+COPY udmi/schema/ schema/
 
 COPY subset/cloud/test_udmi .
+
+COPY resources/test_site/ local/
 
 CMD ./test_udmi
