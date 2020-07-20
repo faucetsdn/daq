@@ -33,7 +33,7 @@ public class NtpMessage {
             + (unsignedByteToShort(array[6]) / 256.0)
             + (unsignedByteToShort(array[7]) / 65536.0);
 
-   rootDispersion = (unsignedByteToShort(array[8]) * 256.0)
+    rootDispersion = (unsignedByteToShort(array[8]) * 256.0)
             + unsignedByteToShort(array[9])
             + (unsignedByteToShort(array[10]) / 256.0)
             + (unsignedByteToShort(array[11]) / 65536.0);
@@ -53,11 +53,11 @@ public class NtpMessage {
    * Constructs a new NtpMessage in client -> server mode, and sets the
    * transmit timestamp to the current time.
    */
-  public NtpMessage(double SECONDS_FROM_01_01_1900_TO_01_01_1970, byte leapIndicator, byte version) {
+  public NtpMessage(double secondsDiff, byte leapIndicator, byte version) {
     this.mode = 3;
     this.leapIndicator = leapIndicator;
     this.version = version;
-    this.transmitTimestamp = (System.currentTimeMillis() / 1000.0) + SECONDS_FROM_01_01_1900_TO_01_01_1970;
+    this.transmitTimestamp = (System.currentTimeMillis() / 1000.0) + secondsDiff;
   }
 
   /**
@@ -100,14 +100,14 @@ public class NtpMessage {
   }
 
   /**
-   * Returns a string representation of a NtpMessage
+   * Returns a string representation of a NtpMessage.
    */
   public String toString() {
     String precisionStr =
             new DecimalFormat("0.#E0").format(Math.pow(2, precision));
 
-    return "Leap indicator: " + leapIndicator + "\n" +
-            "Version: " + version + "\n"
+    return "Leap indicator: " + leapIndicator + "\n"
+            + "Version: " + version + "\n"
             + "Mode: " + mode + "\n"
             + "Stratum: " + stratum + "\n"
             + "Poll: " + pollInterval + "\n"
@@ -126,8 +126,12 @@ public class NtpMessage {
    * a byte is signed.
    */
   public static short unsignedByteToShort(byte b) {
-      if ((b & 0x80) == 0x80) return (short)(128 + (b & 0x7f));
-      else return (short) b;
+    if ((b & 0x80) == 0x80) {
+      return (short)(128 + (b & 0x7f));
+    }
+    else {
+      return (short) b;
+    }
   }
 
   /**
@@ -146,7 +150,7 @@ public class NtpMessage {
   }
 
   /**
-   * Encodes a timestamp in the specified position in the message
+   * Encodes a timestamp in the specified position in the message.
    */
   public static void encodeTimestamp(byte[] array, int pointer, double timestamp) {
     // Converts a double into a 64-bit fixed point
@@ -166,7 +170,9 @@ public class NtpMessage {
    * formatted date/time string.
    */
   public static String timestampToString(double timestamp) {
-    if (timestamp == 0) return "0";
+    if (timestamp == 0) {
+      return "0";
+    }
     double utc = timestamp - (2208988800.0);
     long ms = (long)(utc * 1000.0);
     String date = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(ms));
@@ -182,7 +188,8 @@ public class NtpMessage {
   public static String referenceIdentifierToString(byte[] ref, short stratum, byte version) {
     if (stratum == 0 || stratum == 1) {
       return new String(ref);
-    } else if (version == 3) {
+    } 
+    else if (version == 3) {
       return unsignedByteToShort(ref[0]) + "."
                 + unsignedByteToShort(ref[1]) + "."
                 + unsignedByteToShort(ref[2]) + "."

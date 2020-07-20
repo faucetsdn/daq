@@ -69,12 +69,6 @@ public class Main {
 
     // Process response
     NtpMessage msg = new NtpMessage(packet.getData());
-    double roundTripDelay = (destinationTimestamp - msg.originateTimestamp) -
-            (msg.transmitTimestamp - msg.receiveTimestamp);
-    double localClockOffset =
-            ((msg.receiveTimestamp - msg.originateTimestamp)
-                    + (msg.transmitTimestamp - destinationTimestamp)) / 2;
-
     if (localClockOffset * 1000 < 128) {
       leapIndicator = 0;
     }
@@ -84,8 +78,13 @@ public class Main {
     System.out.println(msg.toString());
     System.out.println("Dest. timestamp: "
             + NtpMessage.timestampToString(destinationTimestamp));
+    double roundTripDelay = (destinationTimestamp - msg.originateTimestamp)
+            - (msg.transmitTimestamp - msg.receiveTimestamp);
     System.out.println("Round-trip delay: "
             + new DecimalFormat("0.00").format(roundTripDelay * 1000) + " ms");
+    double localClockOffset =
+            ((msg.receiveTimestamp - msg.originateTimestamp)
+                    + (msg.transmitTimestamp - destinationTimestamp)) / 2;
     System.out.println("Local clock offset: "
             + new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
   }
