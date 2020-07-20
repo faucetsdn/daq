@@ -39,7 +39,9 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     "ipaddr": {
       "enabled": true,
       "port_flap_timeout_sec": 20,
-      "dhcp_ranges": [["192.168.0.1", "192.168.255.254", 16], ["10.255.255.1", "10.255.255.255", 24], ["172.16.0.1", "172.16.0.200", 24]]
+      "dhcp_ranges": [{"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16}, 
+        {"start": "10.255.255.1", "end": "10.255.255.255", "prefix_length": 24},
+        {"start": "172.16.0.1", "end": "172.16.0.200", "prefix_length": 24}]
     }
   }
 }

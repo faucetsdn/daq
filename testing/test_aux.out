@@ -95,11 +95,11 @@ port-01 module_config modules
   },
   "ipaddr": {
     "dhcp_ranges": [
-      [
-        "192.168.0.1",
-        "192.168.255.254",
-        16
-      ]
+      {
+        "end": "192.168.255.254",
+        "prefix_length": 16,
+        "start": "192.168.0.1"
+      }
     ],
     "enabled": false,
     "port_flap_timeout_sec": 20,
@@ -155,11 +155,11 @@ port-02 module_config modules
   },
   "ipaddr": {
     "dhcp_ranges": [
-      [
-        "192.168.0.1",
-        "192.168.255.254",
-        16
-      ]
+      {
+        "end": "192.168.255.254",
+        "prefix_length": 16,
+        "start": "192.168.0.1"
+      }
     ],
     "enabled": false,
     "port_flap_timeout_sec": 20,
