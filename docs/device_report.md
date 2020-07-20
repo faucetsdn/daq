@@ -145,17 +145,6 @@ RESULT pass base.target.ping target reached
 
 ```
 
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-|timeout_sec|300|
-|port_flap_timeout_sec|20|
-
 ## Module nmap
 
 

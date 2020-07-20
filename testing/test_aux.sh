@@ -68,7 +68,7 @@ interfaces:
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client
 long_dhcp_response_sec: 0
-monitor_scan_sec: 0
+monitor_scan_sec: 20
 EOF
 
 if [ -f "$gcp_cred" ]; then
@@ -121,7 +121,7 @@ more inst/run-port-*/scans/ip_triggers.txt | cat
 dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
 dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
-     $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
+     $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
