@@ -20,8 +20,7 @@ public class NtpMessage {
     /**
      * Constructs a new NtpMessage from an array of bytes.
      */
-	public NtpMessage(byte[] array) {
-        // See the packet format diagram in RFC 2030 for details
+    public NtpMessage(byte[] array) {
         leapIndicator = (byte)((array[0] >> 6) & 0x3);
         version = (byte)((array[0] >> 3) & 0x7);
         mode = (byte)(array[0] & 0x7);
@@ -29,15 +28,15 @@ public class NtpMessage {
         pollInterval = array[2];
         precision = array[3];
 
-        rootDelay = (array[4] * 256.0) +
-                unsignedByteToShort(array[5]) +
-                (unsignedByteToShort(array[6]) / 256.0) +
-                (unsignedByteToShort(array[7]) / 65536.0);
+        rootDelay = (array[4] * 256.0)
+                + unsignedByteToShort(array[5])
+                + (unsignedByteToShort(array[6]) / 256.0)
+                + (unsignedByteToShort(array[7]) / 65536.0);
 
-        rootDispersion = (unsignedByteToShort(array[8]) * 256.0) +
-                unsignedByteToShort(array[9]) +
-                (unsignedByteToShort(array[10]) / 256.0) +
-                (unsignedByteToShort(array[11]) / 65536.0);
+        rootDispersion = (unsignedByteToShort(array[8]) * 256.0)
+                + unsignedByteToShort(array[9])
+                + (unsignedByteToShort(array[10]) / 256.0)
+                + (unsignedByteToShort(array[11]) / 65536.0);
 
         referenceIdentifier[0] = array[12];
         referenceIdentifier[1] = array[13];
@@ -48,30 +47,29 @@ public class NtpMessage {
         originateTimestamp = decodeTimestamp(array, 24);
         receiveTimestamp = decodeTimestamp(array, 32);
         transmitTimestamp = decodeTimestamp(array, 40);
-	}
+    }
 
     /**
      * Constructs a new NtpMessage in client -> server mode, and sets the
      * transmit timestamp to the current time.
      */
-	public NtpMessage(double SECONDS_FROM_01_01_1900_TO_01_01_1970, byte leapIndicator, byte version) {
+    public NtpMessage(double SECONDS_FROM_01_01_1900_TO_01_01_1970, byte leapIndicator, byte version) {
         this.mode = 3;
         this.leapIndicator = leapIndicator;
         this.version = version;
         this.transmitTimestamp = (System.currentTimeMillis() / 1000.0) + SECONDS_FROM_01_01_1900_TO_01_01_1970;
-	}
+    }
 
     /**
      * This method constructs the data bytes of a raw NTP packet.
      */
     public byte[] toByteArray() {
-        // All bytes are automatically set to 0
         byte[] p = new byte[48];
 
         p[0] = (byte)(leapIndicator << 6 | version << 3 | mode);
-        p[1] = (byte)stratum;
-        p[2] = (byte)pollInterval;
-        p[3] = (byte)precision;
+        p[1] = (byte) stratum;
+        p[2] = (byte) pollInterval;
+        p[3] = (byte) precision;
 
         // root delay is a signed 16.16-bit FP, in Java an int is 32-bits
         int l = (int)(rootDelay * 65536.0);
@@ -109,18 +107,18 @@ public class NtpMessage {
                 new DecimalFormat("0.#E0").format(Math.pow(2, precision));
 
         return "Leap indicator: " + leapIndicator + "\n" +
-                "Version: " + version + "\n" +
-                "Mode: " + mode + "\n" +
-                "Stratum: " + stratum + "\n" +
-                "Poll: " + pollInterval + "\n" +
-                "Precision: " + precision + " (" + precisionStr + " seconds)\n" +
-                "Root delay: " + new DecimalFormat("0.00").format(rootDelay * 1000) + " ms\n" +
-                "Root dispersion: " + new DecimalFormat("0.00").format(rootDispersion * 1000) + " ms\n" +
-                "Reference identifier: " + referenceIdentifierToString(referenceIdentifier, stratum, version) + "\n" +
-                "Reference timestamp: " + timestampToString(referenceTimestamp) + "\n" +
-                "Originate timestamp: " + timestampToString(originateTimestamp) + "\n" +
-                "Receive timestamp:   " + timestampToString(receiveTimestamp) + "\n" +
-                "Transmit timestamp:  " + timestampToString(transmitTimestamp);
+                "Version: " + version + "\n"
+                + "Mode: " + mode + "\n"
+                + "Stratum: " + stratum + "\n"
+                + "Poll: " + pollInterval + "\n"
+                + "Precision: " + precision + " (" + precisionStr + " seconds)\n"
+                + "Root delay: " + new DecimalFormat("0.00").format(rootDelay * 1000) + " ms\n"
+                + "Root dispersion: " + new DecimalFormat("0.00").format(rootDispersion * 1000) + " ms\n"
+                + "Reference identifier: " + referenceIdentifierToString(referenceIdentifier, stratum, version) + "\n"
+                + "Reference timestamp: " + timestampToString(referenceTimestamp) + "\n"
+                + "Originate timestamp: " + timestampToString(originateTimestamp) + "\n"
+                + "Receive timestamp:   " + timestampToString(receiveTimestamp) + "\n"
+                + "Transmit timestamp:  " + timestampToString(transmitTimestamp);
     }
 
     /**
@@ -128,8 +126,8 @@ public class NtpMessage {
      * a byte is signed.
      */
     public static short unsignedByteToShort(byte b) {
-        if((b & 0x80) == 0x80) return (short)(128 + (b & 0x7f));
-        else return (short)b;
+        if ((b & 0x80) == 0x80) return (short)(128 + (b & 0x7f));
+        else return (short) b;
     }
 
     /**
@@ -140,8 +138,7 @@ public class NtpMessage {
     public static double decodeTimestamp(byte[] array, int pointer) {
         double r = 0.0;
 
-        for(int i = 0; i < 8; i++)
-        {
+        for (int i = 0; i < 8; i++) {
             r += unsignedByteToShort(array[pointer + i]) * Math.pow(2, (3 - i) * 8);
         }
 
@@ -153,7 +150,7 @@ public class NtpMessage {
      */
     public static void encodeTimestamp(byte[] array, int pointer, double timestamp) {
         // Converts a double into a 64-bit fixed point
-        for(int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             // 2^24, 2^16, 2^8, .. 2^-32
             double base = Math.pow(2, (3 - i) * 8);
             // Capture byte value
@@ -169,11 +166,11 @@ public class NtpMessage {
      * formatted date/time string.
      */
     public static String timestampToString(double timestamp) {
-        if(timestamp == 0) return "0";
+        if (timestamp == 0) return "0";
         double utc = timestamp - (2208988800.0);
         long ms = (long)(utc * 1000.0);
         String date = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(ms));
-        double fraction = timestamp - ((long)timestamp);
+        double fraction = timestamp - ((long) timestamp);
         String fractionSting = new DecimalFormat(".000000").format(fraction);
         return date + fractionSting;
     }
@@ -183,25 +180,21 @@ public class NtpMessage {
      * to the rules set out in RFC 2030.
      */
     public static String referenceIdentifierToString(byte[] ref, short stratum, byte version) {
-        if(stratum == 0 || stratum == 1)
-        {
+        if (stratum == 0 || stratum == 1) {
             return new String(ref);
-        }
-        else if(version == 3)
-        {
-            return unsignedByteToShort(ref[0]) + "." +
-                    unsignedByteToShort(ref[1]) + "." +
-                    unsignedByteToShort(ref[2]) + "." +
-                    unsignedByteToShort(ref[3]);
+        } else if (version == 3) {
+            return unsignedByteToShort(ref[0]) + "."
+                    + unsignedByteToShort(ref[1]) + "."
+                    + unsignedByteToShort(ref[2]) + "."
+                    + unsignedByteToShort(ref[3]);
         }
         // In NTP Version 4 secondary servers, this is the low order 32 bits
         // of the latest transmit timestamp of the reference source.
-        else if(version == 4)
-        {
-            return "" + ((unsignedByteToShort(ref[0]) / 256.0) +
-                    (unsignedByteToShort(ref[1]) / 65536.0) +
-                    (unsignedByteToShort(ref[2]) / 16777216.0) +
-                    (unsignedByteToShort(ref[3]) / 4294967296.0));
+        else if (version == 4) {
+            return "" + ((unsignedByteToShort(ref[0]) / 256.0)
+                    + (unsignedByteToShort(ref[1]) / 65536.0)
+                    + (unsignedByteToShort(ref[2]) / 16777216.0)
+                    + (unsignedByteToShort(ref[3]) / 4294967296.0));
         }
         return "";
     }

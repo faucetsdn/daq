@@ -1,18 +1,25 @@
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.text.DecimalFormat;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
 public class Main {
+
     static final double SECONDS_FROM_01_01_1900_TO_01_01_1970 = 2208988800.0;
     static String serverName = "time.google.com";
     static byte version = 3;
     static int port = 123;
     static int timerPeriod = 10;
     static byte leapIndicator = 3;
+
+    /**
+     * Constructs and sends NTP packets to
+     * target NTP server
+     */
 
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -65,11 +72,11 @@ public class Main {
 
         // Process response
         NtpMessage msg = new NtpMessage(packet.getData());
-        double roundTripDelay = (destinationTimestamp-msg.originateTimestamp) -
-                (msg.transmitTimestamp-msg.receiveTimestamp);
+        double roundTripDelay = (destinationTimestamp - msg.originateTimestamp) -
+                (msg.transmitTimestamp - msg.receiveTimestamp);
         double localClockOffset =
-                ((msg.receiveTimestamp - msg.originateTimestamp) +
-                        (msg.transmitTimestamp - destinationTimestamp)) / 2;
+                ((msg.receiveTimestamp - msg.originateTimestamp)
+                        + (msg.transmitTimestamp - destinationTimestamp)) / 2;
 
         if (localClockOffset * 1000 < 128) {
             leapIndicator = 0;
@@ -78,11 +85,11 @@ public class Main {
         // Display response
         System.out.println("NTP server: " + serverName);
         System.out.println(msg.toString());
-        System.out.println("Dest. timestamp:     " +
-                NtpMessage.timestampToString(destinationTimestamp));
-        System.out.println("Round-trip delay: " +
-                new DecimalFormat("0.00").format(roundTripDelay * 1000) + " ms");
-        System.out.println("Local clock offset: " +
-                new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
+        System.out.println("Dest. timestamp: "
+                + NtpMessage.timestampToString(destinationTimestamp));
+        System.out.println("Round-trip delay: "
+                + new DecimalFormat("0.00").format(roundTripDelay * 1000) + " ms");
+        System.out.println("Local clock offset: "
+                + new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
     }
 }
