@@ -77,7 +77,7 @@ public class Cisco9300 extends BaseSwitchController {
   private String[] portManagementCommand(int interfacePort, boolean enabled) {
     return new String[] {
         "configure terminal",
-        "interface FastEthernet0/" + interfacePort,
+        "interface gigabitethernet1/0/" + interfacePort,
         (enabled ? "no " : "") + "shutdown",
         "end"
     };
@@ -148,11 +148,11 @@ public class Cisco9300 extends BaseSwitchController {
     synchronized (this) {
       commandPending = true;
       responseHandler = data -> {
-        Map<String, String> powerMap = processPowerStatusInline(data);
-        powerResponseHandler.receiveData(buildPowerResponse(powerMap));
         synchronized (this) {
           commandPending = false;
         }
+        Map<String, String> powerMap = processPowerStatusInline(data);
+        powerResponseHandler.receiveData(buildPowerResponse(powerMap));
       };
       telnetClientSocket.writeData(command + "\n");
     }
@@ -168,11 +168,11 @@ public class Cisco9300 extends BaseSwitchController {
     synchronized (this) {
       commandPending = true;
       responseHandler = data -> {
-        Map<String, String> interfaceMap = processInterfaceStatus(data);
-        handler.receiveData(buildInterfaceResponse(interfaceMap));
         synchronized (this) {
           commandPending = false;
         }
+        Map<String, String> interfaceMap = processInterfaceStatus(data);
+        handler.receiveData(buildInterfaceResponse(interfaceMap));
       };
       telnetClientSocket.writeData(command + "\n");
     }
