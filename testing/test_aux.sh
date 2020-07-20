@@ -121,7 +121,7 @@ more inst/run-port-*/scans/ip_triggers.txt | cat
 dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
 dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
-     $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
+     $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
