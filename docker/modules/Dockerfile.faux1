@@ -18,44 +18,17 @@ RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-bran
 COPY pubber/ pubber/
 RUN pubber/bin/build
 
-# Dockerfile to build older version of SSH and SSL
+# Seperate stage to build older version of SSH and SSL
 FROM daqf/aardvark:latest as ssh_build
 
 RUN $AG update && $AG install wget make build-essential gcc libz-dev ca-certificates
 
 # Build SSH, OpenSSL from source and configure
-RUN wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz && \
-      tar -xzf openssl-1.0.2g.tar.gz && \
-      cd openssl-1.0.2g && \
-      ./config --prefix=/usr/local/openssl --openssldir=/usr/local/openssl && \
-      make -s && \ 
-      make -s install && \
-      cd .. && \
-      mkdir /etc/ssh && \
-      mkdir /var/empty && \
-      chown root:sys /var/empty && \
-      chmod 755 /var/empty && \
-      groupadd sshd && \
-      useradd -g sshd -c 'sshd privsep' -d /var/empty -s /bin/false sshd && \
-      wget https://mirrors.mit.edu/pub/OpenBSD/OpenSSH/portable/openssh-7.2p1.tar.gz && \
-      tar -xzf openssh-7.2p1.tar.gz && \
-      cd openssh-7.2p1 && \
-      ./configure --with-ssl-dir=/usr/local/openssl --with-ssh1 && \
-      make -s && \ 
-      make -s install
 
+COPY subset/security/sshfaux/*.sh ./
+RUN sh ssh_build.sh
+    
 FROM daqf/aardvark:latest
-
-COPY --from=ssh_build /usr/local/openssl/* /usr/local/openssl/
-COPY --from=ssh_build /usr/local/sbin/* /usr/local/sbin/
-COPY --from=ssh_build /usr/local/bin/* /usr/local/bin/
-COPY --from=ssh_build /usr/local/etc/* /usr/local/etc/
-
-RUN mkdir /var/empty && \
-    chown root:sys /var/empty && \
-    chmod 755 /var/empty && \
-    groupadd sshd && \
-    useradd -g sshd -c 'sshd privsep' -d /var/empty -s /bin/false sshd
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
@@ -72,8 +45,6 @@ COPY subset/network/TransportClient TransportClient
 
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
-
-RUN /usr/local/bin/ssh-keygen -A
 
 COPY docker/include/bin/start_faux docker/include/bin/failing bin/
 
@@ -95,6 +66,15 @@ RUN cd bacnetTests && ./gradlew build
 COPY subset/security/nginxpass.conf /root/nginx/
 COPY subset/security/nginxfail.conf /root/nginx/
 COPY subset/security/nginx-site /var/www/nginx-site
+
+COPY --from=ssh_build /usr/local/openssl/* /usr/local/openssl/
+COPY --from=ssh_build /usr/local/sbin/* /usr/local/sbin/
+COPY --from=ssh_build /usr/local/bin/* /usr/local/bin/
+COPY --from=ssh_build /usr/local/etc/* /usr/local/etc/
+
+COPY subset/security/sshfaux/ssh_privsep.sh ssh_privsep.sh
+RUN sh ssh_privsep.sh
+RUN /usr/local/bin/ssh-keygen -A
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
