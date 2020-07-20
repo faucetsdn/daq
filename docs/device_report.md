@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|2|0|0|0|
-|Other|2|3|22|2|
+|Other|3|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
