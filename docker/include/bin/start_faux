@@ -138,6 +138,7 @@ fi
 
 # NTPv4 query to the NTP server learnt from DHCP.
 # NTPv3 query to the IP of time.google.com (since resolv.conf is modified by other tests)
+STATIC_NTP_SERVER=216.239.35.8
 if [ -n "${options[ntpv4]}" ]; then
     (while date; do
     	dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
@@ -148,8 +149,8 @@ if [ -n "${options[ntpv4]}" ]; then
     done) &
 elif [ -n "${options[ntpv3]}" ]; then
     (while date; do
-    	echo Transmitting NTP query to 216.239.35.8 using NTPv3
-    	ntpdate -q -o 3 216.239.35.8
+    	echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
+    	ntpdate -q -o 3 $STATIC_NTP_SERVER
 	sleep 5
     done) &
 fi
