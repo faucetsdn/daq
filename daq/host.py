@@ -714,7 +714,8 @@ class ConnectedHost:
     def _topology_hook(self):
         if self._topology_hook_script:
             update_dir = self._NETWORK_DIR
-            self.logger.info('Executing topology_hook: %s %s', self._topology_hook_script, update_dir)
+            self.logger.info('Executing topology_hook: %s %s',
+                             self._topology_hook_script, update_dir)
             os.system('%s %s 2>&1 > %s/update.out' %
                       (self._topology_hook_script, update_dir, update_dir))
 
