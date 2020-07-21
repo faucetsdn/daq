@@ -40,7 +40,7 @@ class BaseSwitchControllerTest {
         "class", "0", "max", "15400 [C]");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
     for (String key : response.keySet()) {
-      assertEquals(response.get(key), expected.get(key));
+      assertEquals(expected.get(key), response.get(key));
     }
   }
 
@@ -51,12 +51,11 @@ class BaseSwitchControllerTest {
     String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
     String[] mapNames =       {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
     Map<String, String> expected = Map.of("interface", "Gi1/0/1", "name", "", "status",
-        "Connected", "vlan", "routed", "Duplex", "a-full", "speed", "a-100",
+        "connected", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
         "type", "10/100/1000BaseTX");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
-    System.out.println(response);
     for (String key : response.keySet()) {
-      assertEquals(response.get(key), expected.get(key));
+      assertEquals(expected.get(key), response.get(key));
     }
   }
 }

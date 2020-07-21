@@ -127,6 +127,9 @@ port-01 module_config modules
     "dictionary_dir": "resources/faux",
     "enabled": true
   },
+  "ssh": {
+    "enabled": false
+  },
   "switch": {
     "enabled": true,
     "poe": {
@@ -188,6 +191,9 @@ port-02 module_config modules
   "password": {
     "dictionary_dir": "resources/faux",
     "enabled": true
+  },
+  "ssh": {
+    "enabled": false
   },
   "switch": {
     "enabled": true

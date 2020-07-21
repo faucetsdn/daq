@@ -62,7 +62,7 @@ The password test runs a dictionary brute force on protocols HTTP, HTTPS, SSH an
    
 ### Available Configurations:
 The password test can be run from DAQ without specifying any further configurations, but it is possible to tweak these to your needs by modifying the password field in your local copy of module_config.json to have the following, for example:
-```
+
 # Note these are the default values used by the password test, regardless of whether you have set them in this file or not.
 "password": {
       "enabled": true,
@@ -72,4 +72,11 @@ The password test can be run from DAQ without specifying any further configurati
       "ssh_port": 22,  # Port to use when brute forcing SSH
       "telnet_port": 23  # Port to use when brute forcing Telnet
     }
-```
+
+## test_ssh
+The SSH test will check that if a device has an SSH server, this only supports SSHv2
+
+### Conditions for seucrity.ssh.version
+- pass -> If the device runs an SSH server which only supports SSHv2
+- fail -> If the device runs an SSH server which supports SSHv1
+- skip -> If the device does not run an SSH server
