@@ -43,3 +43,11 @@ The functional test code is included in the `tlstest/src/main/java` folder.
  - pass -> If the device responds to a connection with TLS 1.3 support and provides a valid certificate.
  - fail -> If the device responds to a connection with TLS 1.3 support and provides an invalid certificate.
  - skip -> If no connection to the device can be established.
+
+## test_ssh
+The SSH test will check that if a device has an SSH server, this only supports SSHv2
+
+### Conditions for seucrity.ssh.version
+- pass -> If the device runs an SSH server which only supports SSHv2
+- fail -> If the device runs an SSH server which supports SSHv1
+- skip -> If the device does not run an SSH server

@@ -82,8 +82,7 @@ sudo rm -f $cleanup_file
 function autostart {
     tmp=`mktemp`
     echo DAQ autostart $@
-    eval $@ > $tmp # Don't use "eval $@ | tee $tmp" here; breaks cmd/usi.
-    cat $tmp
+    eval $@ | tee $tmp
     grep -e '^\s*DAQ autoclean\s' $tmp >> $cleanup_file || true
 }
 
