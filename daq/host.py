@@ -108,7 +108,7 @@ class ConnectedHost:
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._finish_hook_script = config.get('finish_hook')
-        self._update_hook_script = config.get('update_hook')
+        self._topology_hook_script = config.get('topology_hook')
         self._usi_url = config.get('usi_setup', {}).get('url')
         self._mirror_intf_name = None
         self._monitor_ref = None
@@ -264,7 +264,7 @@ class ConnectedHost:
         self._initialize_config()
         network = self.runner.network
         self._mirror_intf_name = network.create_mirror_interface(self.target_port)
-        self._update_hook()
+        self._topology_hook()
         if self.config['test_list']:
             self._start_run()
         else:
@@ -711,12 +711,12 @@ class ConnectedHost:
             os.system('%s %s 2>&1 > %s/finish.out' %
                       (self._finish_hook_script, finish_dir, finish_dir))
 
-    def _update_hook(self):
-        if self._update_hook_script:
+    def _topology_hook(self):
+        if self._topology_hook_script:
             update_dir = self._NETWORK_DIR
-            self.logger.info('Executing update_hook: %s %s', self._update_hook_script, update_dir)
+            self.logger.info('Executing topology_hook: %s %s', self._topology_hook_script, update_dir)
             os.system('%s %s 2>&1 > %s/update.out' %
-                      (self._update_hook_script, update_dir, update_dir))
+                      (self._topology_hook_script, update_dir, update_dir))
 
     def _module_callback(self, return_code=None, exception=None):
         host_name = self._host_name()

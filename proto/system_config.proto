@@ -94,11 +94,8 @@ message DaqConfig {
   // Set port-debounce for flaky connections. Zero to disable.
   int32 port_debounce_sec = 29;
 
-  // Hook for failure diagnostics.
-  string fail_hook = 30;
-
-  // Hook for network updates.
-  string update_hook = 50;
+  // Hook for device topology updates.
+  string topology_hook = 30;
 
   // Directory of defaults for new devices.
   string device_template = 31;
