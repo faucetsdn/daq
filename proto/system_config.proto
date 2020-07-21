@@ -97,6 +97,9 @@ message DaqConfig {
   // Hook for failure diagnostics.
   string fail_hook = 30;
 
+  // Hook for network updates.
+  string update_hook = 50;
+
   // Directory of defaults for new devices.
   string device_template = 31;
 
