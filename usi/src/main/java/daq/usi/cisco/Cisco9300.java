@@ -50,6 +50,7 @@ public class Cisco9300 extends BaseSwitchController {
     super(remoteIpAddress, user, password);
     this.username = user == null ? "admin" : user;
     this.password = password == null ? "password" : password;
+    commandPending = true;
   }
 
   /**
@@ -95,6 +96,7 @@ public class Cisco9300 extends BaseSwitchController {
       telnetClientSocket.writeData(password + "\n");
     } else if (containsPrompt(consoleData)) {
       userEnabled = true;
+      commandPending = false;
     } else if (consoleData.contains("% Bad passwords")) {
       telnetClientSocket.disposeConnection();
       throw new Exception("Could not Enable the User, Bad Password");
