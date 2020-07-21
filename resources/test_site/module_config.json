@@ -20,6 +20,9 @@
     },
     "ntp": {
       "enabled": true
+    },
+    "ssh": {
+      "enabled": false
     }
   },
   "process": {

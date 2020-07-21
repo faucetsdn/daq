@@ -31,4 +31,10 @@ Testing nmap bacnet
 RESULT pass security.ports.nmap Only allowed ports found open.
 Testing nmap telnet
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
+Testing ssh
+RESULT skip security.ssh.version Device is not running an SSH server
+Testing ssh ssh
+RESULT pass security.ssh.version Device only supports SSHv2
+Testing ssh sshv1
+RESULT fail security.ssh.version Device supports SSHv1
 Testing complete.
