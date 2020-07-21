@@ -38,6 +38,9 @@ long_dhcp_response_sec: 105
 # finish hook: executed at the end of every test
 finish_hook: bin/dump_network
 
+# update hook: executed when devices come and go
+update_hook: bin/dump_network
+
 # usi url for DAQ to connect to
 usi_setup: 
   url: localhost:5000
