@@ -68,6 +68,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
+    _GRPC_TIMEOUT_SEC = 10
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
     _MODULE_CONFIG = "module_config.json"
@@ -107,7 +108,7 @@ class ConnectedHost:
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._finish_hook_script = config.get('finish_hook')
-        self._usi_url = config.get('usi_setup', {}).get('url')
+        self._usi_config = config.get('usi_setup', {})
         self._mirror_intf_name = None
         self._monitor_ref = None
         self._monitor_start = None
@@ -327,12 +328,13 @@ class ConnectedHost:
             self.logger.info('No switch model found, skipping port connect')
             return False
         try:
-            with grpc.insecure_channel(self._usi_url) as channel:
+            with grpc.insecure_channel(self._usi_config.get('url')) as channel:
+                timeout = self._usi_config.get('grpc_timeout_sec', self._GRPC_TIMEOUT_SEC)
                 stub = usi_service.USIServiceStub(channel)
                 if connect:
-                    res = stub.connect(switch_info)
+                    res = stub.connect(switch_info, timeout=timeout)
                 else:
-                    res = stub.disconnect(switch_info)
+                    res = stub.disconnect(switch_info, timeout=timeout)
                 self.logger.info('Target port %s %s successful? %s', self.target_port, "connect"
                                  if connect else "disconnect", res.success)
         except Exception as e:
