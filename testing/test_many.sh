@@ -80,7 +80,7 @@ echo DAQ stress test | tee -a $TEST_RESULTS
 
 start_time=`date -u -Isec`
 cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
-end_time=`date -u -Isec`
+end_time=`date -u -Isec --date="+5min"` # Adding additional time to account for slower cloud function calls for updating timestamp.
 
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
