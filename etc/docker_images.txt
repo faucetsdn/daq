@@ -24,4 +24,4 @@ daqf/test_ssh 054efbf1b3c3
 daqf/test_switch bfca153bb3fe
 daqf/test_tls 50bf58dd9a6f
 daqf/test_udmi 41c2ab08ec86
-daqf/usi 7c759bd7b941
+daqf/usi ab9976d57693
