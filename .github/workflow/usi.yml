@@ -3,9 +3,8 @@
 
 name: USI Java CI with Maven
 
-on:
-  push:
-    branches: [ master, feature/* ]
+on: 
+  push
   pull_request:
     branches: [ master ]
 
