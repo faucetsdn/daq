@@ -4,10 +4,7 @@
 
 name: USI Java CI with Maven
 
-on: 
-  push:
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
