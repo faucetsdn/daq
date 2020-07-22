@@ -68,7 +68,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
-    _GRPC_TIMEOUT_SEC = 10
+    _RPC_TIMEOUT_SEC = 10
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
     _NETWORK_DIR = "inst/network"
@@ -332,7 +332,7 @@ class ConnectedHost:
             return False
         try:
             with grpc.insecure_channel(self._usi_config.get('url')) as channel:
-                timeout = self._usi_config.get('grpc_timeout_sec', self._GRPC_TIMEOUT_SEC)
+                timeout = self._usi_config.get('rpc_timeout_sec', self._RPC_TIMEOUT_SEC)
                 stub = usi_service.USIServiceStub(channel)
                 if connect:
                     res = stub.connect(switch_info, timeout=timeout)

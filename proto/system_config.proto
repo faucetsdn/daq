@@ -124,7 +124,7 @@ message DaqConfig {
 **/
 message USISetup {
   string url = 1;
-  int32 grpc_timeout_sec = 2;
+  int32 rpc_timeout_sec = 2;
 }
 
 /*
