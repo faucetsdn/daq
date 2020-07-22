@@ -1,4 +1,7 @@
 # Changelog
+* 1.8.2
+  * GRPC timeouts + usi first command wait fix. (#555)
+  * Numerous renovate bot updates.
 * 1.8.0
   * add security.ssh.version test  (#523)
   * Refactor UDMI to external repo (#544)
