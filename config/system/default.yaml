@@ -44,3 +44,4 @@ topology_hook: bin/dump_network
 # usi url for DAQ to connect to
 usi_setup: 
   url: localhost:5000
+  rpc_timeout_sec: 10
