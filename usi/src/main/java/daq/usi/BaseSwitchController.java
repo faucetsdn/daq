@@ -62,11 +62,11 @@ public abstract class BaseSwitchController implements SwitchController {
       String rawPacket, String[] colNames, String[] mapNames) {
     HashMap<String, String> colMap = new HashMap<>();
     String[] lines = rawPacket.split("\n");
-    if (lines.length > 0) {
+    if (lines.length >= 2) {
       String header = lines[0].trim();
       String values = lines[1].trim();
       int lastSectionEnd = 0;
-      for (int i = 0; i < colNames.length; ++i) {
+      for (int i = 0; i < colNames.length; i++) {
         int secStart = lastSectionEnd;
         int secEnd;
         if ((i + 1) >= colNames.length) {
@@ -81,11 +81,13 @@ public abstract class BaseSwitchController implements SwitchController {
               getIndexOfNonWhitespaceAfterWhitespace(values.substring(firstWhiteSpace))
                   + firstWhiteSpace;
           int nextHeaderStart = header.indexOf(colNames[i + 1]);
-          secEnd = Math.min(lastWhiteSpace, nextHeaderStart);
+          secEnd = Math.max(lastWhiteSpace, nextHeaderStart);
         }
         lastSectionEnd = secEnd;
-        String sectionRaw = values.substring(secStart, secEnd).trim();
-        colMap.put(mapNames[i], sectionRaw);
+        // \u00A0 is non-breaking space which trim ignores.
+        String rawString = values.substring(secStart, secEnd)
+            .replace('\u00A0', ' ').trim();
+        colMap.put(mapNames[i], rawString);
       }
     }
     return colMap;

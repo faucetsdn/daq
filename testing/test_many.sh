@@ -80,7 +80,7 @@ echo DAQ stress test | tee -a $TEST_RESULTS
 
 start_time=`date -u -Isec`
 cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
-end_time=`date -u -Isec`
+end_time=`date -u -Isec --date="+5min"` # Adding additional time to account for slower cloud function calls for updating timestamp.
 
 cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
@@ -126,8 +126,7 @@ if [ -f "$gcp_cred" ]; then
     bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time \
         count=2 from_gcp=true
     echo GCP results diff | tee -a $GCP_RESULTS
-    # TODO: Re-enable as per b/161529445
-    # diff inst/reports/combo_*.md out/report_local.md | tee -a $GCP_RESULTS
+    diff inst/reports/combo_*.md out/report_local.md | tee -a $GCP_RESULTS
 fi
 
 echo Done with many | tee -a $TEST_RESULTS

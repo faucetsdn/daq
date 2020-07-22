@@ -61,7 +61,7 @@ def _get_local_reports(device, reports_dir, start, end, count):
     LOGGER.info('Looking for reports locally')
     report_re = re.compile(r'^report_%s_(\d{4}-\d{2}-\d{2}T\d{6})\.json$' % device)
     json_files = [f for f in os.listdir(reports_dir) if report_re.match(f)]
-    json_files.sort()
+    json_files.sort(reverse=True)  # Match gcp behavior
     if count and len(json_files) > count:
         json_files = json_files[len(json_files) - count:]
     for json_file in json_files:

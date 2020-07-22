@@ -1,18 +1,12 @@
 #!/bin/bash -e
-TMP_DIR=/tmp/usi
 
-function dump_ovs_interfaces {
-    while true; do
-        sudo ovs-ofctl show sec > $TMP_DIR/ovs_output.txt || true
-        sleep 5
-    done
-}
+ROOT=$(realpath $(dirname $0)/..)
+USI_DIR=$ROOT/inst/network
 
 echo Starting USI
-mkdir -p $TMP_DIR
-dump_ovs_interfaces &
-PID=$!
-docker run -d -v /tmp/usi:/ovs --privileged --network=host --name daq-usi daqf/usi
+
+rm -rf $USI_DIR
+mkdir -p $USI_DIR
+docker run -d -v $USI_DIR:/ovs --privileged --network=host --name daq-usi daqf/usi
 
 echo DAQ autoclean docker kill daq-usi 
-echo DAQ autoclean kill $PID 
