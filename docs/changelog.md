@@ -1,10 +1,22 @@
 # Changelog
+* 1.8.0
+  * add security.ssh.version test  (#523)
+  * Refactor UDMI to external repo (#544)
+  * Additional DHCP test part 3: IP change test (#543)
+  * Additional DHCP test part 2: Multisubnet test (#539)
+  * Additional DHCP test part 1 (#532)
+  * Support for alternate sec switch (not managed by DAQ) (#531)
+  * Add troubleshooting script (#529)
+  * Using usi in daq (#520)
+  * Use trunk rather than stack between switches (#526)
+  * NTPv4 support (#487)
+  * Feature/usi OVS switch (#521)
 * 1.7.0
- * Add DAQ version to origin summary (#522)
- * Add check for git version tag in Travis (#519)
- * Minor UDMI updates for pubber keygen
- * Update Minimum Send Test (#498)
- * Universal Switch Interface (USI) (#496)
+  * Add DAQ version to origin summary (#522)
+  * Add check for git version tag in Travis (#519)
+  * Minor UDMI updates for pubber keygen
+  * Update Minimum Send Test (#498)
+  * Universal Switch Interface (USI) (#496)
 * 1.6.1
   * fix image pull in cmd/build (#503)
 * 1.6.0
