@@ -66,8 +66,9 @@ class IpAddrTest:
             self._next_test()
             return
         dhcp_range = self.test_dhcp_ranges.pop(0)
-        self.log('Testing dhcp range: ' + ",".join([str(arg) for arg in dhcp_range]))
-        self.host.gateway.change_dhcp_range(*dhcp_range)
+        self.log('Testing dhcp range: ' + str(dhcp_range))
+        args = (dhcp_range["start"], dhcp_range["end"], dhcp_range["prefix_length"])
+        self.host.gateway.change_dhcp_range(*args)
         self._ip_callback = self._multi_subnet_test if self.test_dhcp_ranges else self._next_test
 
     def _ip_change_test(self):

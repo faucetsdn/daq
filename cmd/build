@@ -124,7 +124,11 @@ if [ "$1" == -f ]; then
 fi
 
 target_version=$(cat etc/FAUCET_VERSION)
-target_commit=$(cd faucet; git rev-parse $target_version)
+target_commit=$(cd faucet; git rev-list -n 1 $target_version) || true
+if [ -z "$target_commit" ]; then
+    echo No valid faucet commit found, try running bin/setup_dev.
+    false
+fi
 if [ "$target_commit" != "$local_version" ]; then
     echo Local faucet commit is at: $local_version
     echo Mismatch with etc/FAUCET_VERSION: $target_version
@@ -134,7 +138,11 @@ fi
 
 local_version=$(cd udmi; git rev-list -n 1 HEAD)
 target_version=$(cat etc/UDMI_VERSION)
-target_commit=$(cd udmi; git rev-parse $target_version)
+target_commit=$(cd udmi; git rev-list -n 1 $target_version) || true
+if [ -z "$target_commit" ]; then
+    echo No valid udmi commit found, try running bin/setup_dev.
+    false
+fi
 if [ "$target_commit" != "$local_version" ]; then
     echo Local udmi commit is at: $local_version
     echo Mismatch with etc/UDMI_VERSION: $target_version

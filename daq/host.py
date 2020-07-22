@@ -68,8 +68,10 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
+    _RPC_TIMEOUT_SEC = 10
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
+    _NETWORK_DIR = "inst/network"
     _MODULE_CONFIG = "module_config.json"
     _CONTROL_PATH = "control/port-%s"
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
@@ -107,7 +109,8 @@ class ConnectedHost:
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
         self._finish_hook_script = config.get('finish_hook')
-        self._usi_url = config.get('usi_setup', {}).get('url')
+        self._usi_config = config.get('usi_setup', {})
+        self._topology_hook_script = config.get('topology_hook')
         self._mirror_intf_name = None
         self._monitor_ref = None
         self._monitor_start = None
@@ -262,6 +265,7 @@ class ConnectedHost:
         self._initialize_config()
         network = self.runner.network
         self._mirror_intf_name = network.create_mirror_interface(self.target_port)
+        self._topology_hook()
         if self.config['test_list']:
             self._start_run()
         else:
@@ -327,12 +331,13 @@ class ConnectedHost:
             self.logger.info('No switch model found, skipping port connect')
             return False
         try:
-            with grpc.insecure_channel(self._usi_url) as channel:
+            with grpc.insecure_channel(self._usi_config.get('url')) as channel:
+                timeout = self._usi_config.get('rpc_timeout_sec', self._RPC_TIMEOUT_SEC)
                 stub = usi_service.USIServiceStub(channel)
                 if connect:
-                    res = stub.connect(switch_info)
+                    res = stub.connect(switch_info, timeout=timeout)
                 else:
-                    res = stub.disconnect(switch_info)
+                    res = stub.disconnect(switch_info, timeout=timeout)
                 self.logger.info('Target port %s %s successful? %s', self.target_port, "connect"
                                  if connect else "disconnect", res.success)
         except Exception as e:
@@ -707,6 +712,14 @@ class ConnectedHost:
             self.logger.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
             os.system('%s %s 2>&1 > %s/finish.out' %
                       (self._finish_hook_script, finish_dir, finish_dir))
+
+    def _topology_hook(self):
+        if self._topology_hook_script:
+            update_dir = self._NETWORK_DIR
+            self.logger.info('Executing topology_hook: %s %s',
+                             self._topology_hook_script, update_dir)
+            os.system('%s %s 2>&1 > %s/update.out' %
+                      (self._topology_hook_script, update_dir, update_dir))
 
     def _module_callback(self, return_code=None, exception=None):
         host_name = self._host_name()

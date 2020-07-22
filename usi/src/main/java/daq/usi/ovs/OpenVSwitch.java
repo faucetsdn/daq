@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class OpenVSwitch implements SwitchController {
 
-  private static final String OVS_OUTPUT_FILE = "ovs_output.txt";
+  private static final String OVS_OUTPUT_FILE = "sec.ofctl";
 
   protected String getInterfaceByPort(int devicePort) throws IOException {
     URL file = OpenVSwitch.class.getClassLoader().getResource(OVS_OUTPUT_FILE);
