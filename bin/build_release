@@ -44,23 +44,25 @@ cmd/build force $VERSION
 
 cmd/build push
 
-cat > /tmp/git_expected.txt <<EOF
+cat > /tmp/git_expected.expected <<EOF
  M etc/docker_images.txt
  M etc/docker_images.ver
 EOF
 
-git status --porcelain > /tmp/git_status.txt
+git status --porcelain > /tmp/git_status.found
 
-if ! diff /tmp/git_expected.txt /tmp/git_status.txt; then
+if ! diff /tmp/git_status.expected /tmp/git_status.found; then
     echo Expected build images not found. Something went wrong.
     false
 fi
+rm -f /tmp/git_status.*
 
 git commit -a -m "$VERSION release"
 git tag -a $VERSION -m "$VERSION release"
 git push
 git push --tags
 
+# Check to see if a remote 'faucet' is defined, and if so, also update that.
 faucetgit=`git config remote.faucet.url`
 if [ -n "$faucetgit" ]; then
     git push faucet
