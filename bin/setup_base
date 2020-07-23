@@ -61,6 +61,7 @@ echo Adding username to docker group...
 sudo groupadd docker || true
 sudo usermod -aG docker $user
 
+sudo route -n | fgrep UG
 DEF_IFACE=`sudo route -n | fgrep UG | awk '{print $8}'`
 if [ -n "$DEF_IFACE" ]; then
     echo Allowing docker external access through interface $DEF_IFACE...
