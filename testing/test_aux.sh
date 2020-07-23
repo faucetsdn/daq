@@ -4,11 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-# Runs lint checks and some similar things
-echo Lint checks | tee -a $TEST_RESULTS
-bin/check_style
-echo check_style exit code $? | tee -a $TEST_RESULTS
-
 # Function to create pubber config files (for use in cloud tests)
 
 function make_pubber {

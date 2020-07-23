@@ -1,3 +1,7 @@
+![DAQ unit test](https://github.com/henry54809/daq/workflows/DAQ%20unit%20test/badge.svg?branch=master)
+![DAQ integration tests](https://github.com/henry54809/daq/workflows/DAQ%20integration%20tests/badge.svg?branch=master)
+![USI Java CI with Maven](https://github.com/henry54809/daq/workflows/USI%20Java%20CI%20with%20Maven/badge.svg?branch=master)
+
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
 DAQ is a framework designed to test and operate IoT devices in an enterprise IoT environment.
