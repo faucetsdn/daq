@@ -15,7 +15,6 @@ function delay_finish {
 
 if [ -n "$CI" ]; then
     trap delay_finish EXIT
-    sudo iptables --list-rules
 fi
 
 ROOT=$(realpath $(dirname $0)/..)
