@@ -53,10 +53,6 @@ if [ -z "$PIP" ]; then
     PIP="python$PVERSION -m pip"
 fi
 
-if [ -n "$TRAVIS" ]; then
-    DAQ_CONTAINER=travis
-fi
-
 echo AG is $AG
 echo PIP is $PIP
 echo Setup root is $PWD
@@ -111,17 +107,10 @@ else
     touch mininet/.the_house_that_daq_built
 fi
 
-# Can't use venv inside of containers because of absolute paths.
-if [ -n "$DAQ_CONTAINER" ]; then
-    echo Skipping venv activation.
-    mkdir -p venv/bin
-    touch venv/bin/activate
-else
-    # Fix permissions in case they have wandered...
-    test -f venv && sudo chown `stat . -c %u:%g` -R venv/
-    python$PVERSION -m venv venv
-    source venv/bin/activate
-fi
+# Fix permissions in case they have wandered...
+test -f venv && sudo chown `stat . -c %u:%g` -R venv/
+python$PVERSION -m venv venv
+source venv/bin/activate
 
 which python
 python --version
