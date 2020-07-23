@@ -9,6 +9,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         test: [base, many, aux, topo, modules, dhcp]
     steps:
@@ -25,7 +26,6 @@ jobs:
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
-        GITHUB_ACTIONS: 1
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
       run: |
         DAQ_TEST=${{ matrix.test }} bin/test_daq

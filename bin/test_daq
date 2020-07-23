@@ -13,7 +13,7 @@ function delay_finish {
     sleep 10
 }
 
-if [ -n "$GITHUB_ACTIONS" ]; then
+if [ -n "$CI" ]; then
     trap delay_finish EXIT
 fi
 

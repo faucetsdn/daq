@@ -107,10 +107,17 @@ else
     touch mininet/.the_house_that_daq_built
 fi
 
-# Fix permissions in case they have wandered...
-test -f venv && sudo chown `stat . -c %u:%g` -R venv/
-python$PVERSION -m venv venv
-source venv/bin/activate
+# Can't use venv inside of containers because of absolute paths.
+if [ -n "$CI" ]; then
+    echo Skipping venv activation.
+    mkdir -p venv/bin
+    touch venv/bin/activate
+else
+    # Fix permissions in case they have wandered...
+    test -f venv && sudo chown `stat . -c %u:%g` -R venv/
+    python$PVERSION -m venv venv
+    source venv/bin/activate
+fi
 
 which python
 python --version
