@@ -15,11 +15,11 @@ function delay_finish {
 
 if [ -n "$CI" ]; then
     trap delay_finish EXIT
+    sudo iptables --list-rules
 fi
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-sudo iptables --list
 
 # Out with the old, in with the new (use faucet instead).
 sudo /etc/init.d/openvswitch-controller stop || true
