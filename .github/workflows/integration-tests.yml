@@ -13,10 +13,15 @@ jobs:
         test: [base, many, aux, topo, modules, dhcp]
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
         python-version: 3.7
+    - name: Installing dependencies
+      run: |
+        bin/setup_daq
     - name: Running ${{ matrix.test }} test
       run: |
         DAQ_TEST=${{ matrix.test }} bin/test_daq
