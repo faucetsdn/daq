@@ -28,5 +28,4 @@ jobs:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
       run: |
-        export GCP_BASE64_CRED="$GCP_BASE64_CRED" 
         DAQ_TEST=${{ matrix.test }} bin/test_daq
