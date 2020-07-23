@@ -1,0 +1,82 @@
+#!/bin/bash -e
+
+if [ $# != 1 ]; then
+    echo $0 RELEASE_VERSION
+    false
+fi
+
+VERSION=$1
+shift
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+changes=`git status --porcelain`
+if [ -n "$changes" ]; then
+    echo Working tree not clean.
+    false
+fi
+
+git checkout master
+
+changed=`git diff --name-only release_stable docs/changelog.md`
+if [ -z "$changed" ]; then
+    git log release_stable..HEAD --pretty=oneline | sed -e 's/[a-z0-9]+/\*/g'
+    echo docs/changelog.md has not been updated since last release_stable
+    echo Use the log lines above for inspiration.
+    false
+fi
+
+tagged=`git rev-list -n 1 $VERSION 2>/dev/null` || true
+if [ -n "$tagged" ]; then
+    echo Tag $VERSION already exists. Try the next version.
+    false
+fi
+
+source etc/config_base.sh
+
+if [ "$host_tests" != config/modules/all.conf ]; then
+    echo Configure your system with host_tests=config/modules/all.conf
+    false
+fi
+
+cmd/build force $VERSION
+
+cmd/build push
+
+cat > /tmp/git_expected.expected <<EOF
+ M etc/docker_images.txt
+ M etc/docker_images.ver
+EOF
+
+git status --porcelain > /tmp/git_status.found
+
+if ! diff /tmp/git_status.expected /tmp/git_status.found; then
+    echo Expected build images not found. Something went wrong.
+    false
+fi
+rm -f /tmp/git_status.*
+
+git commit -a -m "$VERSION release"
+git tag -a $VERSION -m "$VERSION release"
+git push
+git push --tags
+
+# Check to see if a remote 'faucet' is defined, and if so, also update that.
+faucetgit=`git config remote.faucet.url`
+if [ -n "$faucetgit" ]; then
+    git push faucet
+    git push faucet --tags
+fi
+
+firebase/deploy.sh bos-daq-testing
+git checkout release_testing && git reset --hard $VERSION
+
+if [ -n "$faucetgit" ]; then
+    git push faucet
+fi
+
+# QA pass to make sure everything is ok.
+# `firebase/deploy.sh daq-qualification-labs`
+# `git checkout release_stable && git reset --hard $VERSION`
+# `git push`
