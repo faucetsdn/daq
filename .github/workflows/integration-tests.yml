@@ -23,7 +23,7 @@ jobs:
       run: |
         bin/setup_daq
     - name: Running ${{ matrix.test }} test
-      with:
+      env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
         GITHUB_ACTIONS: 1
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
