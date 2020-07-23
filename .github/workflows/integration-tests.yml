@@ -13,6 +13,8 @@ jobs:
         test: [base, many, aux, topo, modules, dhcp]
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
