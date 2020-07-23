@@ -9,8 +9,9 @@ LOG=/tmp/udmi.log
 route add default gw $GATEWAY_IP
 
 route -n
+ping -c 2 $GATEWAY_IP || true
 ping -c 2 172.217.164.106 || true
-arp -n
+arp -n || true
 ip addr
 
 gcp_cred=/config/inst/gcp_service_account.json
