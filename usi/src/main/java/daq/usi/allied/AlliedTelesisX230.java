@@ -65,6 +65,7 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     super(remoteIpAddress, user, password, debug);
     this.username = user == null ? "manager" : user;
     this.password = password == null ? "friend" : password;
+    commandPending = true;
   }
 
   @Override
@@ -115,11 +116,11 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     synchronized (this) {
       commandPending = true;
       responseHandler = data -> {
-        Map<String, String> powerMap = processPowerStatusInline(data);
-        handler.receiveData(buildPowerResponse(powerMap));
         synchronized (this) {
           commandPending = false;
         }
+        Map<String, String> powerMap = processPowerStatusInline(data);
+        handler.receiveData(buildPowerResponse(powerMap));
       };
       telnetClientSocket.writeData(command + "\n");
     }
@@ -135,11 +136,11 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     synchronized (this) {
       commandPending = true;
       responseHandler = data -> {
-        Map<String, String> interfaceMap = processInterfaceStatus(data);
-        handler.receiveData(buildInterfaceResponse(interfaceMap));
         synchronized (this) {
           commandPending = false;
         }
+        Map<String, String> interfaceMap = processInterfaceStatus(data);
+        handler.receiveData(buildInterfaceResponse(interfaceMap));
       };
       telnetClientSocket.writeData(command + "\n");
     }
@@ -248,6 +249,7 @@ public class AlliedTelesisX230 extends BaseSwitchController {
   public void handleEnableMessage(String consoleData) throws Exception {
     if (containsPrompt(consoleData)) {
       userEnabled = true;
+      commandPending = false;
     }
   }
 

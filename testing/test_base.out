@@ -36,15 +36,6 @@ Overall device result PASS
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 
 
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|timeout_sec|300|
-
 ## Module pass
 
 
@@ -152,6 +143,8 @@ RESULT pass base.switch.ping target %% 192.0.2.138:2
 Switch test with target 192.0.2.138:2
 Monolog processing base.switch.ping...
 switch ping 2
+%%%%%%%%%%%%%%%%%%%%%% Alt switch tests
+XXX faucet.valve INFO     DPID 1 (0x1) pri L2 learned on Port 1 9a:02:57:1e:8f:00 (L2 type 0x0800, L2 dst ff:ff:ff:ff:ff:ff, L3 src X.X.X.X, L3 dst 255.255.255.255) Port 1 VLAN 1002 (1 hosts total)
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 01: [] 02: [] 03: []
 device open 1 1 1

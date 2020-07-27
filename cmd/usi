@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+USI_DIR=$ROOT/inst/network
+
+echo Starting USI
+
+rm -rf $USI_DIR
+mkdir -p $USI_DIR
+docker run -d -v $USI_DIR:/ovs --privileged --network=host --name daq-usi daqf/usi
+
+echo DAQ autoclean docker kill daq-usi 

@@ -31,13 +31,14 @@ class FaucetTopology:
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
     PORTSET_ACL_FORMAT = "dp_%s_portset_%d_acl"
     LOCAL_ACL_FORMAT = "dp_%s_local_acl"
-    _DEFAULT_STACK_PORT_NAME = "stack_sec"
+    _DEFAULT_SEC_TRUNK_NAME = "trunk_sec"
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
     _VLAN_BASE = 1000
     PRI_DPID = 1
-    PRI_STACK_PORT = 1
+    PRI_TRUNK_PORT = 1
+    PRI_TRUNK_NAME = 'trunk_pri'
     _NO_VLAN = "0x0000/0x1000"
 
     def __init__(self, config):
@@ -92,7 +93,7 @@ class FaucetTopology:
         return self.sec_dpid
 
     def get_sec_port(self):
-        """Return the secondary stacking port"""
+        """Return the secondary trunk port"""
         return self.sec_port
 
     def get_device_intfs(self):
@@ -173,19 +174,22 @@ class FaucetTopology:
     def _port_set_vlan(self, port_set=None):
         return self._VLAN_BASE + (port_set if port_set else 0)
 
-    def _make_pri_stack_interface(self):
+    def _make_pri_trunk_interface(self):
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.pri_name
-        interface['stack'] = {'dp': self.sec_name, 'port': self.sec_port}
-        interface['name'] = 'stack_pri'
+        interface['tagged_vlans'] = self._vlan_tags()
+        interface['name'] = self.PRI_TRUNK_NAME
         return interface
 
-    def _make_sec_stack_interface(self):
+    def _make_sec_trunk_interface(self):
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.sec_name
-        interface['stack'] = {'dp': self.pri_name, 'port': self.PRI_STACK_PORT}
-        interface['name'] = self.get_ext_intf() or self._DEFAULT_STACK_PORT_NAME
+        interface['tagged_vlans'] = self._vlan_tags()
+        interface['name'] = self.get_ext_intf() or self._DEFAULT_SEC_TRUNK_NAME
         return interface
+
+    def _vlan_tags(self):
+        return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
 
     def _make_default_acl_rules(self):
         rules = []
@@ -201,7 +205,7 @@ class FaucetTopology:
 
     def _make_pri_interfaces(self):
         interfaces = {}
-        interfaces[self.PRI_STACK_PORT] = self._make_pri_stack_interface()
+        interfaces[self.PRI_TRUNK_PORT] = self._make_pri_trunk_interface()
         for port_set in range(1, self.sec_port):
             for port in self._get_gw_ports(port_set):
                 interfaces[port] = self._make_gw_interface(port_set)
@@ -212,7 +216,7 @@ class FaucetTopology:
 
     def _make_sec_interfaces(self):
         interfaces = {}
-        interfaces[self.sec_port] = self._make_sec_stack_interface()
+        interfaces[self.sec_port] = self._make_sec_trunk_interface()
         for port in range(1, self.sec_port):
             interfaces[port] = self._make_sec_port_interface(port)
         return interfaces
@@ -227,23 +231,24 @@ class FaucetTopology:
     def _make_pri_topology(self):
         pri_dp = {}
         pri_dp['dp_id'] = self.PRI_DPID
-        pri_dp['name'] = self.pri_name
-        pri_dp['stack'] = {'priority':1}
         pri_dp['interfaces'] = self._make_pri_interfaces()
         return pri_dp
 
     def _make_sec_topology(self):
         sec_dp = {}
         sec_dp['dp_id'] = self.sec_dpid
-        sec_dp['name'] = self.sec_name
         sec_dp['interfaces'] = self._make_sec_interfaces()
         return sec_dp
+
+    def _has_sec_switch(self):
+        return self.sec_dpid and self.sec_port
 
     def _make_base_network_topology(self):
         assert self.pri, 'pri dataplane not configured'
         dps = {}
         dps['pri'] = self._make_pri_topology()
-        dps['sec'] = self._make_sec_topology()
+        if self._has_sec_switch():
+            dps['sec'] = self._make_sec_topology()
         topology = {}
         topology['dps'] = dps
         topology['vlans'] = self._make_vlan_description(10)

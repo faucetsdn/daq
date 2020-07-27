@@ -57,7 +57,10 @@ RESULT pass security.passwords.telnet Default passwords have been changed.
 RESULT pass security.passwords.ssh Default passwords have been changed.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
-dhcp requests 1 1 0 1
+RESULT pass connection.network.ntp_support Using NTPv4.
+RESULT fail connection.network.ntp_support Not using NTPv4.
+RESULT skip connection.network.ntp_support No NTP packets received.
+dhcp requests 1 1 1 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']
 03: []
@@ -91,7 +94,16 @@ port-01 module_config modules
     "enabled": false
   },
   "ipaddr": {
-    "timeout_sec": 300
+    "dhcp_ranges": [
+      {
+        "end": "192.168.255.254",
+        "prefix_length": 16,
+        "start": "192.168.0.1"
+      }
+    ],
+    "enabled": false,
+    "port_flap_timeout_sec": 20,
+    "timeout_sec": 900
   },
   "macoui": {
     "enabled": true
@@ -105,11 +117,17 @@ port-01 module_config modules
   "nmap": {
     "enabled": true
   },
+  "ntp": {
+    "enabled": true
+  },
   "pass": {
     "enabled": true
   },
   "password": {
     "enabled": true
+  },
+  "ssh": {
+    "enabled": false
   },
   "switch": {
     "enabled": true,
@@ -139,7 +157,16 @@ port-02 module_config modules
     "enabled": true
   },
   "ipaddr": {
-    "timeout_sec": 300
+    "dhcp_ranges": [
+      {
+        "end": "192.168.255.254",
+        "prefix_length": 16,
+        "start": "192.168.0.1"
+      }
+    ],
+    "enabled": false,
+    "port_flap_timeout_sec": 20,
+    "timeout_sec": 900
   },
   "macoui": {
     "enabled": true,
@@ -154,11 +181,17 @@ port-02 module_config modules
   "nmap": {
     "enabled": true
   },
+  "ntp": {
+    "enabled": true
+  },
   "pass": {
     "enabled": false
   },
   "password": {
     "enabled": true
+  },
+  "ssh": {
+    "enabled": false
   },
   "switch": {
     "enabled": true

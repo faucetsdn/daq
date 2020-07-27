@@ -129,7 +129,7 @@ public class SwitchTelnetClientSocket implements TelnetNotificationHandler, Runn
           }
           rxTemp = rxTemp.replace(MORE_INDICATOR, "");
           rxData.append(rxTemp);
-        } else if (interrogator.userAuthorised
+        } else if ((interrogator.userAuthorised && interrogator.userEnabled)
             && !interrogator.promptReady((rxData.toString() + rxTemp).trim())) {
           rxData.append(rxTemp);
           if (debug) {

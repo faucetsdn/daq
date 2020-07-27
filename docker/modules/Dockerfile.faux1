@@ -15,16 +15,26 @@ ENV BACHASH=94a794a756ee0d37c6a2e53e08747ee021415aa8
 RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch \
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
 
-COPY pubber/ pubber/
+COPY udmi/pubber/ pubber/
 RUN pubber/bin/build
 
+# Seperate stage to build older version of SSH and SSL
+FROM daqf/aardvark:latest as ssh_build
+
+RUN $AG update && $AG install wget make build-essential gcc libz-dev ca-certificates
+
+# Build SSH, OpenSSL from source and configure
+
+COPY subset/security/sshfaux/*.sh ./
+RUN sh ssh_build.sh
+    
 FROM daqf/aardvark:latest
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
 RUN $AG update && $AG install openjdk-8-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
-    python ifupdown openssl ssh nano apache2-utils ntpdate
+    python ifupdown openssl nano apache2-utils ntpdate 
 
 # Additional OS dependencies
 RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
@@ -42,7 +52,7 @@ COPY --from=java_build /root/bacnet4j/*.jar bacnet4j/
 COPY docker/include/bin/bacnet_discover bin/
 
 COPY --from=java_build /root/pubber/build/libs/*.jar pubber/build/libs/
-COPY pubber/bin/run pubber/bin/
+COPY udmi/pubber/bin/run pubber/bin/
 
 COPY subset/pentests/brute_server.py pentests/
 COPY subset/security/tlsfaux tlsfaux/
@@ -52,17 +62,19 @@ COPY subset/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
 COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
 RUN cd bacnetTests && ./gradlew build
 
-# SSH dependency
-COPY subset/security/ssh_additions.config ssh_additions.config
-RUN cat ssh_additions.config >> /etc/ssh/sshd_config
-
 # HTTP/HTTPS dependency
 COPY subset/security/nginxpass.conf /root/nginx/
 COPY subset/security/nginxfail.conf /root/nginx/
 COPY subset/security/nginx-site /var/www/nginx-site
 
-# SSH login fix. Otherwise user is kicked off after login
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+COPY --from=ssh_build /usr/local/openssl/* /usr/local/openssl/
+COPY --from=ssh_build /usr/local/sbin/* /usr/local/sbin/
+COPY --from=ssh_build /usr/local/bin/* /usr/local/bin/
+COPY --from=ssh_build /usr/local/etc/* /usr/local/etc/
+
+COPY subset/security/sshfaux/ssh_privsep.sh ssh_privsep.sh
+RUN sh ssh_privsep.sh
+RUN /usr/local/bin/ssh-keygen -A
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump

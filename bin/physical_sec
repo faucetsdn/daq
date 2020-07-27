@@ -119,6 +119,9 @@ else
     sudo ip addr flush dev $ext_ctrl
 fi
 
+echo Warmup ping for $ext_addr
+ping -n -c 2 $ext_addr || true
+
 echo Checking external connection to $ext_addr
 if ! ping -n -c 2 $ext_addr; then
     echo

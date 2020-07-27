@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+REPORT=/tmp/report.txt
+
+STARTUP=/scans/startup.pcap
+
+python ntp_tests.py connection.network.ntp_support $STARTUP
+
+cat report.txt >> $REPORT

@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# Checks if a device only support SSHv2
+# Runs NMAP to check if SSH is available
+# Uses the 'sshv_1' nmap script to check if the server supports SSHv1
+
+source reporting.sh
+
+TEST_NAME="security.ssh.version"
+TEST_DESCRIPTION="Check that device only support SSHv2"
+REPORT=/tmp/report.txt
+LOG=/tmp/nmap_log.txt
+
+nmap -sV -sC $TARGET_IP > $LOG
+
+nmap_log=$(cat $LOG )
+
+sshv1=$(grep 'sshv1: Server supports SSHv1' $LOG)
+
+if [[ -z "${sshv1}" ]]; then
+  #No SSHv1, but is there an SSHv2 server running ?
+  sshv2=$(grep -P '^\d+\/tcp\s+open  ssh.*protocol 2.0\)$' $LOG)
+
+  if [[ -z "${sshv2}" ]]; then
+    test_outcome="skip"
+    test_summary="Device is not running an SSH server"
+  else
+    test_outcome="pass"
+    test_summary="Device only supports SSHv2"
+  fi
+
+else
+  test_outcome="fail"
+  test_summary="Device supports SSHv1"
+fi
+
+result_and_summary="RESULT ${test_outcome} ${TEST_NAME} ${test_summary}"
+
+write_out_result $REPORT \
+            "$TEST_NAME" \
+            "$TEST_DESCRIPTION" \
+            "$sshv2" \
+            "$result_and_summary"
+            

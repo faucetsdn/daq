@@ -126,6 +126,15 @@ if [ -n "${options[telnet]}" ]; then
     (while true; do echo Telnet `hostname`; nc -nvlt -p 23 -e `which hostname`; done) &
 fi
 
+if [ -n "${options[ssh]}" ]; then
+    echo Starting SSH server
+    /usr/local/sbin/sshd
+elif [ -n "${options[sshv1]}" ]; then
+    echo Starting SSHv1 server
+    echo 'Protocol 1' >> /usr/local/etc/sshd_config
+    /usr/local/sbin/sshd
+fi
+
 if [ -n "${options[bacnet]}" ]; then
     echo Starting bacnet loop device.
     java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
@@ -136,9 +145,23 @@ elif [ -n "${options[bacnetfail]}" ]; then
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
-if [ -n "${options[ntp_client]}" ]; then
-    echo Starting ntp client.
-    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar "time.google.com" "123" "3" &
+# NTPv4 query to the NTP server learnt from DHCP.
+# NTPv3 query to the IP of time.google.com (since resolv.conf is modified by other tests)
+STATIC_NTP_SERVER=216.239.35.8
+if [ -n "${options[ntpv4]}" ]; then
+    (while date; do
+    	dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
+    	ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
+    	echo Transmitting NTP query to $ntp_server using NTPv4
+    	ntpdate -q -o 4 $ntp_server
+	sleep 5
+    done) &
+elif [ -n "${options[ntpv3]}" ]; then
+    (while date; do
+    	echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
+    	ntpdate -q -o 3 $STATIC_NTP_SERVER
+	sleep 5
+    done) &
 fi
 
 # ntp_pass queries the NTP server learnt from DHCP. ntp_fail sends to time.google.com
@@ -155,7 +178,7 @@ if [ -n "${options[ntp_pass]}" -o -n "${options[ntp_fail]}" ]; then
         fi
         echo Transmitting NTP query to $ntp_server
         ntpdate -q -p 1 $ntp_server
-        sleep 10
+        sleep 5
      done) &
 fi
 
@@ -201,10 +224,10 @@ fi
 if [ -n "${options[pubber]}" ]; then
     echo Running cloud pubber tool...
     (while date; do
-	 pubber/bin/run
-	 # Do https query in case pubber is not configured, for testing port 443
-	 curl -o /dev/null https://google.com
-	 sleep 30
+         pubber/bin/run local/pubber.json
+         # Do https query in case pubber is not configured, for testing port 443
+         curl -o /dev/null https://google.com
+         sleep 30
      done) &
 fi
 

@@ -37,3 +37,11 @@ long_dhcp_response_sec: 105
 
 # finish hook: executed at the end of every test
 finish_hook: bin/dump_network
+
+# topology hook: executed when device topology changes
+topology_hook: bin/dump_network
+
+# usi url for DAQ to connect to
+usi_setup: 
+  url: localhost:5000
+  rpc_timeout_sec: 10

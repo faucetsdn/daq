@@ -88,8 +88,8 @@ echo Done with basic connectivity tests | tee -a $MONO_LOG
 
 echo Checking startup NTP
 ntp_target=${TARGET_IP%.*}.2
-ntp_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 123 | wc -l`
-ntp_proper=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 123 and dst host $ntp_target | wc -l`
+ntp_request=`tcpdump -env -c 1 -r /scans/monitor.pcap dst port 123 | wc -l`
+ntp_proper=`tcpdump -env -c 1 -r /scans/monitor.pcap dst port 123 and dst host $ntp_target | wc -l`
 if [ "$ntp_request" == 0 ]; then
     ntp_result=skip
     ntp_summary="No NTP traffic detected"

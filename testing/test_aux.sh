@@ -31,6 +31,7 @@ function make_pubber {
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
     "extraField": $fail,
+    "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
   }
@@ -62,13 +63,13 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntp_pass
+    opts: brute broadcast_client ntpv4
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntp_fail opendns
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
 long_dhcp_response_sec: 0
-monitor_scan_sec: 0
+monitor_scan_sec: 20
 EOF
 
 if [ -f "$gcp_cred" ]; then
@@ -84,7 +85,7 @@ if [ -f "$gcp_cred" ]; then
     make_pubber AHU-1 daq-faux-2 null null
     make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
-    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred bin/registrar $project_id
+    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar $project_id inst/test_site
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
     fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
@@ -114,13 +115,14 @@ capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
+capture_test_results ntp
 
 # Capture peripheral logs
 more inst/run-port-*/scans/ip_triggers.txt | cat
 dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
 dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
-     $((dhcp_long > 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
+     $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test

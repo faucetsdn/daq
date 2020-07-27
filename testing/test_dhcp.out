@@ -1,12 +1,15 @@
 Running testing/test_dhcp.sh
 DHCP Tests
 01: []
-02: ['02:ipaddr:TimeoutError']
+02: ['02:acquire:TimeoutError']
 03: []
 04: []
+05: []
 Device 1 ip triggers: 1 0
 Device 2 ip triggers: 0 0
 Device 3 long ip triggers: 1
 Device 4 ip triggers: 1
-Number of ips: 2
+Device 4 subnet 1 ip: 1 subnet 2 ip: 1 subnet 3 ip: 2
+Device 5 ip triggers: 1
+Device 5 num of ips: 2
 Done with tests
