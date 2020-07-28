@@ -18,7 +18,7 @@ Manual tests including results are inserted into the device's
         "enabled": true,
         "type": "manual",
         "result": "required",   
-        "outcome": "pass"   
+        "outcome": "pass",   
         "summary" : "summary note in results table",
         "test_log" : "additional information in report appendix"
     }
