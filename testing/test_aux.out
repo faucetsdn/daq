@@ -58,8 +58,11 @@ RESULT pass security.passwords.telnet Was not able to brute force using dictiona
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass connection.network.ntp_support Using NTPv4.
+RESULT pass connection.network.ntp_update Device clock synchronized.
 RESULT fail connection.network.ntp_support Not using NTPv4.
+RESULT fail connection.network.ntp_update Device clock not synchronized with local NTP server.
 RESULT skip connection.network.ntp_support No NTP packets received.
+RESULT skip connection.network.ntp_update Not enough NTP packets received.
 dhcp requests 1 1 1 1
 01: []
 02: ['02:macoui:TimeoutError', '02:ping:TimeoutError']

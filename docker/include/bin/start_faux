@@ -149,18 +149,16 @@ fi
 # NTPv3 query to the IP of time.google.com (since resolv.conf is modified by other tests)
 STATIC_NTP_SERVER=216.239.35.8
 if [ -n "${options[ntpv4]}" ]; then
-    (while date; do
-    	dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
-    	ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
-    	echo Transmitting NTP query to $ntp_server using NTPv4
-    	ntpdate -q -o 4 $ntp_server
-	sleep 5
-    done) &
+    dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
+    ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
+    echo Transmitting NTP query to $ntp_server using NTPv4
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 2 &
+    sleep 5
 elif [ -n "${options[ntpv3]}" ]; then
     (while date; do
     	echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
-    	ntpdate -q -o 3 $STATIC_NTP_SERVER
-	sleep 5
+    	java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 2 &
+	    sleep 5
     done) &
 fi
 
