@@ -9,7 +9,7 @@ test_request = str(arguments[1])
 cap_pcap_file = str(arguments[2])
 device_address = str(arguments[3])
 
-report_filename = 'report.txt'
+report_filename = 'network_tests.txt'
 min_packet_length_bytes = 20
 max_packets_in_report = 10
 port_list = []
@@ -69,7 +69,7 @@ def packets_received_count(shell_result):
     else:
         return decode_shell_result(shell_result)
 
-        
+
 def get_scan_length(config_file):
     """ Gets length of the monitor.pcap scan
 
