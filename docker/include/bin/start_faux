@@ -195,7 +195,12 @@ fi
 
 if [ -n "${options[curl]}" ]; then
     echo Starting curl loop.
-    (while true; do curl -o - http://google.com; sleep 1; done) &
+    (while true; do curl -o - http://google.com; sleep 2; done) &
+fi
+
+if [ -n "${options[arp]}" ]; then
+    echo Starting arpsend loop.
+    (while true; do arpsend -D -e 10.20.254.254; sleep 2 done) &
 fi
 
 if [ -n "${options[brute]}" ]; then
