@@ -59,15 +59,15 @@ RESULT pass connection.min_send ARP packets received. Data packets were sent at 
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass connection.network.ntp_support Using NTPv4.
 RESULT pass connection.network.ntp_update Device clock synchronized.
-RESULT fail connection.mac_oui Manufacturer prefix not found!$
-RESULT pass connection.min_send Data packets were sent at a frequency of less than 5 minutes$
+RESULT fail connection.mac_oui Manufacturer prefix not found!
+RESULT pass connection.min_send Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.type.broadcast Unicast packets received.
 RESULT fail connection.network.ntp_support Not using NTPv4.
 RESULT fail connection.network.ntp_update Device clock not synchronized with local NTP server.
-RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0b
 RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
+RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 dhcp requests 1 1 1 1
