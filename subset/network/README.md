@@ -1,6 +1,25 @@
-# NTP testing
+# Network Tests
 
-## test_ntp
+## General Network Tests
+
+### connection.min_send
+- Located in network_tests.py, started up in test_network.
+- Check if a device sends any data packet at a frequency of less than five minutes.
+
+#### Result cases:
+- PASS: The time between packets is measured - pass if time between any two packets is less than five minutes (deals with case where a monitor scan is long)
+- FAIL: If data packets are sent, and there are packets with time interval of less than five minutes found, then fail.
+- SKIP: If no data packets are sent and the monitor scan period is short, the test will skip instead of failing.
+
+### communication.type.broadcast
+- Located in network_tests.py, started up in test_network.
+- This test counts the number of unicast, broadcast and multicast packets sent out by reading from the .pcap file that DAQ has created during runtime.
+
+#### Result cases:
+This is an 'info' test, it does not have a pass/fail/skip case.
+
+
+## NTP Tests
 The NTP tests inspect the client NTP version and the device's ability to update its clock precisely.
 
 ### Note for test developers 
