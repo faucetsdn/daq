@@ -1,8 +1,10 @@
 #!/bin/bash -e 
 source reporting.sh
 
-REPORT=$0
-LOCAL_REPORT=test_macoui.txt
+TARGET_MAC=$1
+REPORT=$2
+
+LOCAL_REPORT=/report/macoui.txt
 CONFIG=/config/device/module_config.json
 LOG=/tmp/nmap.log
 RESULT_LINES=/tmp/result_lines.txt

@@ -2,9 +2,8 @@
 
 REPORT=/tmp/report.txt
 
+STARTUP=/scans/startup.pcap
 MONITOR=/scans/monitor.pcap
-MODULE_CONFIG=/config/device/module_config.json
-EXCLUDES=infastructure_excludes.json
 
 # General Network Tests
 python network_tests.py connection.min_send $MONITOR $TARGET_IP
@@ -19,5 +18,5 @@ python ntp_tests.py connection.network.ntp_update $STARTUP $MONITOR
 cat ntp_tests.txt >> $REPORT
 
 # MACOUI Test
-sh run_macoui_test $REPORT
+./run_macoui_test $TARGET_MAC $REPORT
 

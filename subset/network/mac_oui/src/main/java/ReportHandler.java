@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class ReportHandler {
   String report = "Mac OUI Test\n";
-  File reportFile = new File("test_macoui.txt");
+  File reportFile = new File("/report/macoui.txt");
 
   public void addText(String text) {
     report += text + '\n';
