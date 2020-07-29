@@ -27,6 +27,7 @@ SECONDS_BETWEEN_1900_1970 = 2208988800
 OFFSET_ALLOWANCE = 0.128
 LEAP_ALARM = 3
 
+
 def write_report(string_to_append):
     with open(report_filename, 'a+') as file_open:
         file_open.write(string_to_append)
