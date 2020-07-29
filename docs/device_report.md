@@ -52,11 +52,11 @@ Overall device result FAIL
 |Other|1/2|
 |Connectivity|n/a|
 
-|Expectation|pass|fail|skip|gone|
-|---|---|---|---|---|
-|Required|1|0|0|0|
-|Recommended|2|0|0|0|
-|Other|4|2|22|2|
+|Expectation|pass|fail|skip|info|gone|
+|---|---|---|---|---|---|
+|Required|1|0|0|0|0|
+|Recommended|2|0|0|0|0|
+|Other|4|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -67,8 +67,8 @@ Overall device result FAIL
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
-|pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
+|pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
@@ -544,6 +544,7 @@ RESULT pass manual.test.travis Manual test - for testing
 #### Report
 
 ```
+--------------------
 connection.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
@@ -569,7 +570,17 @@ Device sends unicast or broadcast packets.
 
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 --------------------
-580a584,593
+connection.network.ntp_support
+--------------------
+Device supports NTP version 4.
+--------------------
+RESULT pass connection.network.ntp_support Using NTPv4.
+--------------------
+connection.network.ntp_update
+--------------------
+Device synchronizes its time to the NTP server.
+--------------------
+RESULT pass connection.network.ntp_update Device clock synchronized.
 --------------------
 connection.mac_oui
 --------------------
