@@ -72,7 +72,7 @@ Overall device result FAIL
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
-|pass|manual.test.travis|Security|Recommended|Manual test - for testing|
+|pass|manual.test.name|Security|Recommended|Manual test - for testing|
 |skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
 |skip|poe.power|Other|Other|No local IP has been set, check system config|
 |skip|poe.support|Other|Other|No local IP has been set, check system config|
@@ -544,13 +544,13 @@ RESULT skip cloud.udmi.system No device id
 
 ```
 --------------------
-manual.test.travis
+manual.test.name
 --------------------
 
 --------------------
 No additional information provided
 --------------------
-RESULT pass manual.test.travis Manual test - for testing
+RESULT pass manual.test.name Manual test - for testing
 
 ```
 
