@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|
 |Required|1|0|0|0|
 |Recommended|2|0|0|0|
-|Other|3|2|22|2|
+|Other|4|2|22|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -66,6 +66,8 @@ Overall device result FAIL
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
+|info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
+|pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
@@ -266,30 +268,6 @@ RESULT skip poe.support No local IP has been set, check system config
 |---|---|
 |enabled|True|
 |poe|{'enabled': True}|
-
-## Module macoui
-
-
-#### Report
-
-```
---------------------
-connection.mac_oui
---------------------
-Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer
---------------------
-Using the host hardware address 9a:02:57:1e:8f:01
-Mac OUI Test
---------------------
-RESULT fail connection.mac_oui Manufacturer prefix not found!
-
-```
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
 
 ## Module bacext
 
@@ -560,24 +538,48 @@ RESULT pass manual.test.travis Manual test - for testing
 |---|---|
 |enabled|True|
 
-## Module ntp
+## Module network
 
 
 #### Report
 
 ```
+connection.min_send
 --------------------
-connection.network.ntp_support
+Device sends data at a frequency of less than 5 minutes.
 --------------------
-Device supports NTP version 4.
+
+
+
+
+
+
+
+
+
+
+
+RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 --------------------
-RESULT pass connection.network.ntp_support Using NTPv4.
+communication.type.broadcast
 --------------------
-connection.network.ntp_update
+Device sends unicast or broadcast packets.
 --------------------
-Device synchronizes its time to the NTP server.
+
+
+RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 --------------------
-RESULT pass connection.network.ntp_update Device clock synchronized.
+580a584,593
+--------------------
+connection.mac_oui
+--------------------
+Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer
+--------------------
+Using the host hardware address 9a:02:57:1e:8f:01
+Mac OUI Test
+--------------------
+RESULT fail connection.mac_oui Manufacturer prefix not found!
+
 ```
 
 #### Module Config
