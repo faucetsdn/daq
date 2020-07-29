@@ -200,7 +200,7 @@ fi
 
 if [ -n "${options[arp]}" ]; then
     echo Starting arpsend loop.
-    arpsend -D -e 10.20.254.254 faux-eth0 &
+    (while true; do arpsend -D -e 10.20.254.254 $intf_name; sleep 2; done)&
 fi
 
 if [ -n "${options[brute]}" ]; then
