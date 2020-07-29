@@ -30,9 +30,6 @@
     "ipaddr": {
       "timeout_sec": 120
     },
-    "macoui": {
-      "enabled": true
-    },
     "mudgee": {
       "enabled": true
     },

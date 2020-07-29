@@ -12,12 +12,6 @@
     "nmap": {
       "enabled": true
     },
-    "network": {
-      "enabled": true
-    },
-    "macoui": {
-      "enabled": true
-    },
     "switch": {
       "enabled": true
     },
