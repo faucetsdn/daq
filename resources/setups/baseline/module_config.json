@@ -12,6 +12,9 @@
     "nmap": {
       "enabled": true
     },
+    "network": {
+      "enabled": true
+    },
     "macoui": {
       "enabled": true
     },
@@ -34,9 +37,6 @@
       "enabled": true
     },
     "network": {
-      "enabled": true
-    },
-    "ntp": {
       "enabled": true
     }
   }

@@ -21,10 +21,10 @@
     "mudgee": {
       "enabled": true
     },
-    "nmap": {
+    "network": {
       "enabled": true
     },
-    "ntp": {
+    "nmap": {
       "enabled": true
     },
     "switch": {
