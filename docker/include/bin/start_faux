@@ -68,6 +68,13 @@ elif [ -n "${options[passwordfail]}" ]; then
     service ssh start
 fi
 
+# security.nmap.http faux device setup
+if [ -n "${options[http]}" ]; then
+    cp /root/nginx/nginxpass.conf /etc/nginx/nginx.conf
+    sed -i 's/listen 80;/listen 12345; listen 54321;/' /etc/nginx/nginx.conf
+    service nginx start
+fi
+
 # To capture all the data in/out of the faux device for debugging, uncomment
 # the following lines. The pcap file will end up in inst/faux/{hostname}.pcap
 # on the DAQ controller.
