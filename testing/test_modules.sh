@@ -17,6 +17,7 @@ tls alt expiredtls
 nmap
 nmap bacnet
 nmap telnet
+nmap http
 ssh
 ssh ssh
 ssh sshv1
