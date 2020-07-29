@@ -39,9 +39,6 @@
     "nmap": {
       "enabled": true
     },
-    "ntp": {
-      "enabled": true
-    },
     "switch": {
       "enabled": true,
       "poe": {

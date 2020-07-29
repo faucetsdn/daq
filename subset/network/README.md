@@ -46,3 +46,22 @@ The following criteria are used to determine whether a DUT has synced its clock 
  - The calculated offset is less than 0.128 seconds and the final poll does not have a leap indicator of 3 (unsynchronized).
 
 When calculating the offset, the latest valid poll is inspected. A value of 0.128s is the maximum offset used to determine whether a device is considered in-sync with the NTP server because NTPv4 is capable of accuracy of tens of milliseconds.
+
+
+## MAC OUI
+The MAC OUI test looks up the manufacturer information for the mac address of the device under test.
+
+### Note for test developers 
+The functional test code is included in the `mac_oui/src/main/java` folder.
+
+The `macList.txt` file containing the MAC OUI database is downloaded at build time by the container specified in
+the `Dockerfile.test_macoui` file.
+
+If java code requires debugging in an IDE, then it will require the `macList.txt` to be placed under the 
+`mac_oui/src/main/resources/` folder. Use the curl command from the `Dockerfile.test_macoui` file to download and 
+place the file locally into your project. This `.txt` file is git ignored to avoid being included as a 
+static resource on the source code repo.
+
+### Conditions for mac_oui
+ - pass -> if the MAC OUI matches the mac prefix IEEE registration.
+ - fail -> if the MAC OUI does not match with any of the mac prefixes.

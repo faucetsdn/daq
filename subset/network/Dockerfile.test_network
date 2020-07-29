@@ -2,10 +2,16 @@ FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install python python-setuptools python-pip netcat
 
+RUN $AG update && $AG install curl
+
 RUN pip install scapy
 
-COPY subset/network/network_tests.py .
-COPY subset/network/ntp_tests.py .
-COPY subset/network/test_network .
+COPY subset/network/ .
+
+RUN mkdir -p mac_oui/src/main/resources
+
+RUN curl https://svn.nmap.org/nmap/nmap-mac-prefixes > mac_oui/src/main/resources/macList.txt
+
+RUN cd mac_oui && ./gradlew shadowJar 
 
 CMD ["./test_network"]

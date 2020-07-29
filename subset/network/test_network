@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-# NOTE THIS IS OVVERALL REPORT
 REPORT=/tmp/report.txt
 
 MONITOR=/scans/monitor.pcap
@@ -18,4 +17,7 @@ python ntp_tests.py connection.network.ntp_support $STARTUP $MONITOR
 python ntp_tests.py connection.network.ntp_update $STARTUP $MONITOR
 
 cat ntp_tests.txt >> $REPORT
- 
+
+# MACOUI Test
+sh run_macoui_test $REPORT
+
