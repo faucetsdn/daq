@@ -39,9 +39,9 @@ RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat cur
 # Additional OS dependencies
 RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
 
-COPY subset/network/NTPClient NTPClient
+COPY docker/include/network/NTPClient NTPClient
 RUN cd NTPClient && ./gradlew build
-COPY subset/network/TransportClient TransportClient
+COPY docker/include/network/TransportClient TransportClient
 
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~

@@ -198,11 +198,6 @@ if [ -n "${options[curl]}" ]; then
     (while true; do curl -o - http://google.com; sleep 2; done) &
 fi
 
-if [ -n "${options[arp]}" ]; then
-    echo Starting arpsend loop.
-    (while true; do arpsend -D -e 10.20.254.254 $intf_name; sleep 2; done)&
-fi
-
 if [ -n "${options[brute]}" ]; then
     echo Starting brute server.
     (python pentests/brute_server.py bad 10000; echo Brute done.) &
@@ -233,6 +228,12 @@ if [ -n "${options[pubber]}" ]; then
          sleep 30
      done) &
 fi
+
+# Periodically send ARP packets 
+# to ensure connection.network.min_send result is consistant 
+echo Starting arpsend loop.
+(while true; do arpsend -D -e 10.20.254.254 $intf_name; sleep 2; done)&
+
 
 conf_file=/config/start/start_faux.sh
 if [ -f $conf_file ]; then
