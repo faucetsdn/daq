@@ -26,14 +26,15 @@ Overall device result PASS
 
 |Expectation|pass|skip|
 |---|---|---|
-|Other|3|1|
+|Other|4|1|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Other|Other|target reached|
-|pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
+|pass|security.nmap.http|Other|Other|No running http servers have been found.|
+|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
 
 
 ## Module pass
@@ -94,7 +95,7 @@ RESULT pass base.target.ping target reached
 
 ```
 --------------------
-security.ports.nmap
+security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
@@ -103,8 +104,19 @@ Automatic TCP/UDP port scan using nmap
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
-RESULT pass security.ports.nmap Only allowed ports found open.
+RESULT pass security.nmap.ports Only allowed ports found open.
 
+--------------------
+security.nmap.http
+--------------------
+Check that the device does not have open ports exposing an unencrypted web interface using HTTP
+--------------------
+# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG /tmp/http.log X.X.X.X
+# Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
+# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
+No running http servers have been found.
+--------------------
+RESULT pass security.nmap.http No running http servers have been found.
 ```
 
 #### Module Config
@@ -125,15 +137,15 @@ terminated
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 01: ['01:hold:DaqException']
-|fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
-security.ports.nmap
-RESULT fail security.ports.nmap Some disallowed ports are open: 23
+|fail|security.nmap.ports|Other|Other|Some disallowed ports are open: 23.|
+security.nmap.ports
+RESULT fail security.nmap.ports Some disallowed ports are open: 23.
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
 DAQ result code 0
 01: []
-|pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
-security.ports.nmap
-RESULT pass security.ports.nmap Only allowed ports found open.
+|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
+security.nmap.ports
+RESULT pass security.nmap.ports Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
 02: []
     dp_id: 1
