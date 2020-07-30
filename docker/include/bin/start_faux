@@ -193,11 +193,6 @@ if [ -n "${options[discover]}" ]; then
     bin/bacnet_discover loop &
 fi
 
-if [ -n "${options[curl]}" ]; then
-    echo Starting curl loop.
-    (while true; do curl -o - http://google.com; sleep 2; done) &
-fi
-
 if [ -n "${options[brute]}" ]; then
     echo Starting brute server.
     (python pentests/brute_server.py bad 10000; echo Brute done.) &
@@ -229,11 +224,11 @@ if [ -n "${options[pubber]}" ]; then
      done) &
 fi
 
-# Periodically send ARP packets 
-# to ensure connection.network.min_send result is consistant 
-echo Starting arpsend loop.
-(while true; do arpsend -D -e 10.20.254.254 $intf_name; sleep 2; done)&
-
+# Periodically send ARP and Data packets 
+# to ensure connection.network.min_send result is predictable 
+echo Starting arpsend and Curl loops.
+(while true; do arpsend -D -e 10.20.254.254 $intf_name; sleep 2; done) &
+(while true; do curl -o - http://google.com; sleep 2; done) &
 
 conf_file=/config/start/start_faux.sh
 if [ -f $conf_file ]; then
