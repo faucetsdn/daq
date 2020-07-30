@@ -137,15 +137,9 @@ terminated
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 01: ['01:hold:DaqException']
-|fail|security.nmap.ports|Other|Other|Some disallowed ports are open: 23.|
-security.nmap.ports
-RESULT fail security.nmap.ports Some disallowed ports are open: 23.
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
 DAQ result code 0
 01: []
-|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
-security.nmap.ports
-RESULT pass security.nmap.ports Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
 02: []
     dp_id: 1
