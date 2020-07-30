@@ -57,10 +57,10 @@ COPY udmi/pubber/bin/run pubber/bin/
 COPY docker/include/pentests/brute_server.py pentests/
 COPY docker/include/security/tlsfaux tlsfaux/
 
-COPY docker/include/bacnet/bacnetTests/ bacnetTests
-COPY docker/include/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
-COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
-RUN cd bacnetTests && ./gradlew build
+COPY docker/include/bacnet/bacnetFaux/ bacnetFaux
+COPY docker/include/bacnet/bacnetFaux/src/main/resources/Faux*.json tmp/
+COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetFaux/libs/
+RUN cd bacnetFaux && ./gradlew build
 
 # HTTP/HTTPS dependency
 COPY docker/include/security/nginxpass.conf /root/nginx/
