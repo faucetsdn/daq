@@ -11,8 +11,8 @@ understand the manual test pipeline before engaging with the automated setup.
 The overall device-to-cloud pipeline looks something like the following:
 
 * Device sends data to the cloud. There's two kinds of devices:
-  * A faux _reference design_ device called [pubber](pubber.md), which is a completely contained
-  software device.
+  * A faux _reference design_ device called [pubber](https://github.com/faucetsdn/udmi/blob/master/docs/pubber.md),
+  which is a completely contained software device.
   * An actual physical device. The setup and configuration of that device will be manufacturer
   dependent and so is out of scope for this (DAQ) documentation.
 * A configured GCP IoT Core project, registry, and device entry. The
@@ -22,12 +22,16 @@ cloud device entry.
 * The IoT Core registry is configured with a _PubSub topic_ (not to be confused with an _MQTT topic_),
 that provides the bridge between incoming data and consumers of that data. See the GCP documentation
 on PubSub for more details.
+* (optional) Some devices might need a gateway that communicates with IoT Core
+  on their behalf. In this case the Gateway should be added to the IoT Core as
+  well and the devices bound to it.
 * (optional) The `gcloud` command line can be used to validate that data is being sent from the
 device to the cloud. Something like
 `gcloud pubsub subscriptions pull --auto-ack projects/{project}/subscriptions/{sub_id}`.
 (Complete documentation for how to use `gcloud` commands is out of scope of this documentation.)
-* The [validator tool](validator.md) is what programmatically validates a device data stream, and
-is what is ultimately used by `test_udmi` to validate device-cloud communication.
+* The [validator tool](https://github.com/faucetsdn/udmi/blob/master/docs/validator.md) is what
+programmatically validates a device data stream, and is what is ultimately used by `test_udmi`
+to validate device-cloud communication.
 
 ## Base Local Test Setup
 
@@ -54,7 +58,8 @@ This contains all the site-specific information about devices needed for testing
 * `{site_path}/mac_addrs/{mac_addr}/module_config.json` needs to have a `device_id` defined, e.g.
 as in `resources/test_site/mac_addrs/3c5ab41e8f0b/module_config.json`.
 * The GCP IoT Core setup needs to have a proper registry and device configred. This can either
-be done manually or using the [registrar tool](registrar.md) tool.
+be done manually or using the [registrar
+tool](https://github.com/faucetsdn/udmi/blob/master/docs/registrar.md) tool.
 
 ## Integration Testing
 
@@ -76,12 +81,12 @@ iOiAiaHR0cHM6Ly93LWRhcS10ZXN0aW5nLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9Cg==
 
 ### Travis CI Testing
 
-* Run the [registrar tool](registrar.md) to properly configure the cloud project.
+* Run the [registrar tool](https://github.com/faucetsdn/udmi/blob/master/docs/registrar.md) to properly configure the cloud project.
 * `gcp_topic` config to `local/system.conf` as described in this doc.
 * Configure test subsystem with proper cloud endpoint in `{test_site}/cloud_iot_config.json`.
 * Configure the DUT with the proper cloud device credentials (device specific). For _faux_ devices, this means copying
 the associated `rsa_private.pkcs8` file to something like `inst/faux/daq-faux-2/local/` (exact path depends on which faux).
-* Test with `bin/registrar`, `pubber/bin/run`, and `bin/validate` manually, before integrated testing through DAQ.
+* Test with `udmi/bin/registrar`, `udmi/pubber/bin/run`, and `udmi/bin/validator` manually, before integrated testing through DAQ.
 
 ### Is my Travis set up correctly?
 

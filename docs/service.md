@@ -4,7 +4,7 @@ Many functions of DAQ require a standard GCP service account, rather than person
 Once created, there's a limited set of permissions that can be granted to enable various bits
 and pieces of functionality.
 
-Each individual install of DAQ should have it's own service account. The accound name is
+Each individual install of DAQ should have it's own service account. The account name is
 assumed to be unique, and having multiple installs with the same account will cause confusion
 and unpredictable results.
 
