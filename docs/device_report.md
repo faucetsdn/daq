@@ -174,12 +174,13 @@ Check that the device does not have open ports exposing an unencrypted web inter
 --------------------
 # Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG /tmp/http.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 10000/open/tcp//snet-sensor-mgmt?///	Seq Index: 261	IP ID Seq: All zeros
+Host: X.X.X.X (daq-faux-1)	Status: Up
+Host: X.X.X.X (daq-faux-1)	Ports: 10000/open/tcp//snet-sensor-mgmt?///	
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No running http servers have been found.
 --------------------
 RESULT pass security.nmap.http No running http servers have been found.
+
 ```
 
 #### Module Config

@@ -35,7 +35,7 @@ Testing nmap telnet
 RESULT fail security.nmap.ports Some disallowed ports are open: 23.
 RESULT pass security.nmap.http No running http servers have been found.
 Testing nmap http
-RESULT fail security.nmap.ports Some disallowed ports are open: 443.
+RESULT fail security.nmap.ports Some disallowed ports are open: 443,12345,54321.
 RESULT fail security.nmap.http Some ports are running http servers: 12345,54321.
 Testing ssh
 RESULT skip security.ssh.version Device is not running an SSH server
