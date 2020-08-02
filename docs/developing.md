@@ -28,16 +28,9 @@ faster than continually working with physical components (unless actively debugg
 problems that only manifest themselves physically). If there is a problem in the 'real'
 world, then the first step is typically to try and reproduce it virtually.
 
-## Travis CI
+## Github Actions CI
 
-Travis is used as the primary CI testing point for DAQ. The
-[facuetsdn/daq dashboard](https://travis-ci.com/faucetsdn/daq/branches) shows the
-status of the current master branch. It is generally recommended to set up
-Travis on your personal repos to test any branches you push/commit. PRs will
-automatically be tested under the destination repo.
-
-Travis runs a suite of tests defined in the `.travis.yml` file. Each `DAQ_TEST`
-entry triggers a separate run through the `bin/test_daq` script. E.g. `DAQ_TEST=many`
+The `.github/workflows` folder contains information for the tests themselves. There are 2 workflows currently in place -- one for main DAQ integration tests and unit tests, and the other for USI related tests. Each workflow file is further broken down into jobs. In the case of tests.yml, there are the `integration_tests` and `unit_tests` jobs. Primarily listed under the `matrix:` subsection shows all the various tested configurations for the `integration_tests`. Each matrix entry triggers a separate run through the `bin/test_daq` script. E.g. `DAQ_TEST=many`
 ultimately runs `testing/test_many.sh`.  The test output results are compared against
 the golden `.out` file (e.g. `testing/test_many.out`) and the tests pass if there
 is no difference. (Look in `bin/test_daq` to see exactly what it's doing.)
@@ -45,25 +38,26 @@ is no difference. (Look in `bin/test_daq` to see exactly what it's doing.)
 If there are unexplained differences in the `.out` file, then the test output log
 itself should be checked to see what actually went wrong, since there's likely
 not enough information in the `.out` files to diagnose effectively. The complete
-log output is avaliable from a Travis run (or locally when you run locally), and
-the triggering line from the `.out` difference should be there as well (search for it!).
+log output is avaliable from a [Github actions](https://github.com/faucetsdn/daq/actions) run (or locally when you run locally), and the triggering line from the `.out` difference should be there as well (search for it!).
+
+<b>Note all integration tests assume a fully installed environment (as setup with `bin/setup_daq`).</b>
 
 ## Local Integration Tests
 
-Tests can be run locally with something like `sudo testing/test_aux.sh`, and the output
-will be generated into, e.g., `out/test_aux.out`, that can be compared against the
-corresponding golden `.out` file, e.g., `testing/test_aux.out`. Running tests locally is
-not always 100% exactly the same as running things in a real (against physical devices
+Individual integration tests can be run locally by
+appending `bin/test_daq` to a `sudo` line of shell environment settings, e.g. as taken from one matrix entry:
+<pre>
+~/daq$ <b>sudo DAQ_TEST=base bin/test_daq</b>
+&hellip;
+<em>or directly with:</em>
+~/daq$ <b>sudo testing/test_base.sh</b>
+&hellip;
+</pre>
+
+Running tests locally is not always 100% exactly the same as running things in a real (against physical devices
 on a physical switch) or CI environment, but in most cases it provides a workable method.
 
-It is recommended to start from a clear DAQ configuration by running `rm -rf local`
-from the main DAQ folder before running the local integration tests.
-
-When developing a new test, the output should appear in the corresponding `.out` file,
-which should be updated appropriatley. The easiest way to migrate in new changes is to
-just copy the `out/` file to `testing/`, but care must be taken that only expected
-changes are included with a new PR. Ultimately the Travis CI tests must pass, not the
-local tests, to guard against any local filesystem changes.
+When developing a new test, the output should appear in the corresponding `.out` file, which should be updated appropriatley. The easiest way to migrate in new changes is to just copy the `out/` file to `testing/`, but care must be taken that only expected changes are included with a new PR. Ultimately the [Github actions](https://github.com/faucetsdn/daq/actions) tests must pass, not the local tests, to guard against any local filesystem changes.
 
 ## Aux Golden Device Report
 
@@ -85,7 +79,9 @@ as the new golden file (i.e., copy it from `out/report_9a02571e8f01_???.md` to
 
 ## Lint Checks
 
-Lint checks are performed as part of the `testing/test_aux.sh` script. They are extra
-tricky because they are typically very sensitive to the exact version of every package
-installed, so they're somewhat unreliable except when run through a pristine environment
-on Travis.
+To make sure changes to DAQ adheres to the existing code checkstyle, a pre commit hook can be setup to run [bin/check_style](https://github.com/faucetsdn/daq/blob/master/bin/check_style) before a commit. To enable this, simply run the following line under your daq root directory.
+<pre>
+~/daq$ <b>echo "bin/check_style" > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit</b>
+</pre>
+
+Lint checks are performed as part of the unit_test job on [Github actions](https://github.com/faucetsdn/daq/actions) as well as on [stickler-ci](https://stickler-ci.com/repositories/51649-faucetsdn-daq) when for every PR.

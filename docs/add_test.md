@@ -112,7 +112,7 @@ However, with great flexibility comes great responsibility.
 Tests should:
 
 - Test _one_ thing well
-- Include an integration test for Travis CI
+- Include an integration test for [Github actions](https://github.com/faucetsdn/daq/actions)
 - Adhere to the Google style guide of your chosen language: https://google.github.io/styleguide/
 - Have the smallest amount of code possible for the greatest utility for the framework. Keep docker images lean!
 - Not add things like the following to the repository:
@@ -124,9 +124,9 @@ Tests should:
 - Include the test name and a description of the test in the report output
 - Include an informative line in the summary table
 
-Integration tests don't need to be tedious and, if you're developing one test and seeing a consistent failure on Travis CI, isolate your problem and run _just that part_ of the integration test both locally and on Travis CI.
+Integration tests don't need to be tedious and, if you're developing one test and seeing a consistent failure on [Github actions](https://github.com/faucetsdn/daq/actions), isolate your problem and run _just that part_ of the integration test both locally and on [Github actions](https://github.com/faucetsdn/daq/actions).
 
-The pass/fail state of an integration test corresponds to the result of a `diff` between expected and actual device report output. You can follow the steps in the _Integration Testing Workflow_ section below to mimic the exact process that Travis CI follows. Or, if your local machine builds Docker images slowly, simply modify the test_*.out by hand, amending it to what your report should look like. Then, see if Travis CI agrees.
+The pass/fail state of an integration test corresponds to the result of a `diff` between expected and actual device report output. You can follow the steps in the _Integration Testing Workflow_ section below to mimic the exact process that [Github actions](https://github.com/faucetsdn/daq/actions) follows. Or, if your local machine builds Docker images slowly, simply modify the test_*.out by hand, amending it to what your report should look like. Then, see if [Github actions](https://github.com/faucetsdn/daq/actions) agrees.
 
 Similarly, if you're writing one test and running it within DAQ locally, run _only the test you're developing_. Try not to bloat your precious development hours by waiting for tests to run that you don't care about. Building unnecessary tests is a very efficient time sink.
 
@@ -145,7 +145,7 @@ All of the commands in these steps are run as the root user by typing "sudo -i" 
 6. Run `testing/test_x.sh` 
 7. Copy `out/test_x.out` to `testing/test_x.out` 
 8. Run `testing/test_x.sh` to check the integration tests now execute successfully in the local machine.
-9. Commit to GitHub to sync local codebase with remote codebase and to trigger the final Travis CI tests
-10. Test should now pass the Travis CI integration tests.
+9. Commit to GitHub to sync local codebase with remote codebase and to trigger the final [Github actions](https://github.com/faucetsdn/daq/actions) tests
+10. Test should now pass the [Github actions](https://github.com/faucetsdn/daq/actions) integration tests.
 
 TODO: write note about hold_tests 
