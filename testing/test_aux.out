@@ -1,7 +1,5 @@
 Running testing/test_aux.sh
 Aux Tests
-Lint checks
-check_style exit code 0
 RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached

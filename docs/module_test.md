@@ -80,7 +80,7 @@ RESULT fail security.x509
 ## Continous Testing
 
 Continuous testing of module-specific builds is handled through the `testing/test_modules.sh`
-script (as invoked by Travis). Execution results are compared against the
+script (as invoked by [Github actions](https://github.com/faucetsdn/daq/actions)). Execution results are compared against the
 `testing/test_modules.out` file. To add a new test, add a few lines to the top of the test script
 and expected results to the output file. Every test module is required to be continously tested
 somewhere, either as part of `test_modules.sh` or elsewhere.
