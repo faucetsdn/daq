@@ -124,9 +124,9 @@ Tests should:
 - Include the test name and a description of the test in the report output
 - Include an informative line in the summary table
 
-Integration tests don't need to be tedious and, if you're developing one test and seeing a consistent failure on [Github actions](https://github.com/faucetsdn/daq/actions), isolate your problem and run _just that part_ of the integration test both locally and on [Github actions](https://github.com/faucetsdn/daq/actions).
+Integration tests don't need to be tedious and, if you're developing one test and seeing a consistent failure on Github actions, isolate your problem and run _just that part_ of the integration test both locally and on Github actions.
 
-The pass/fail state of an integration test corresponds to the result of a `diff` between expected and actual device report output. You can follow the steps in the _Integration Testing Workflow_ section below to mimic the exact process that [Github actions](https://github.com/faucetsdn/daq/actions) follows. Or, if your local machine builds Docker images slowly, simply modify the test_*.out by hand, amending it to what your report should look like. Then, see if [Github actions](https://github.com/faucetsdn/daq/actions) agrees.
+The pass/fail state of an integration test corresponds to the result of a `diff` between expected and actual device report output. You can follow the steps in the _Integration Testing Workflow_ section below to mimic the exact process that Github actions follows. Or, if your local machine builds Docker images slowly, simply modify the test_*.out by hand, amending it to what your report should look like. Then, see if Github actions agrees.
 
 Similarly, if you're writing one test and running it within DAQ locally, run _only the test you're developing_. Try not to bloat your precious development hours by waiting for tests to run that you don't care about. Building unnecessary tests is a very efficient time sink.
 

@@ -5,13 +5,6 @@ source reporting.sh
 REPORT=/tmp/report.txt
 LOG=/tmp/udmi.log
 
-function delay_finish {
-    # Travis doesn't always wait for buffer to flush on exit, so give some time.
-    sleep 10
-}
-
-trap delay_finish EXIT
-
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
 

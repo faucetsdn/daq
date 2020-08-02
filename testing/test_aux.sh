@@ -121,9 +121,9 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
-head inst/gw*/nodes/gw*/activate.log
-cat inst/run-port-*/nodes/*/activate.log
-cat inst/run-port-*/nodes/*/tmp/report.txt
+head -20 inst/gw*/nodes/gw*/activate.log
+head -20 inst/run-port-*/nodes/*/activate.log
+haed -20 inst/run-port-*/nodes/*/tmp/report.txt
 ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file
