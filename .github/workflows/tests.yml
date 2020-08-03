@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: DAQ main tests
+name: DAQ push/pull tests
 
 on: [push, pull_request]
 
@@ -51,3 +51,14 @@ jobs:
     - name: Unit test
       run: |
         testing/run_unit_tests.sh
+
+  usi_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.11
+    - name: Build with Maven
+      run: mvn -B clean compile test assembly:single --file usi/pom.xml
