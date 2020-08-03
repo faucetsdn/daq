@@ -26,9 +26,9 @@ COPY docker/include/bin/start_faux docker/include/bin/failing bin/
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 
-COPY subset/security/tlsfaux tlsfaux/
-COPY subset/security/nginxpass.conf /root/nginx/
-COPY subset/security/nginxfail.conf /root/nginx/
-COPY subset/security/nginx-site /var/www/nginx-site
+COPY docker/include/security/tlsfaux tlsfaux/
+COPY docker/include/security/nginxpass.conf /root/nginx/
+COPY docker/include/security/nginxfail.conf /root/nginx/
+COPY docker/include/security/nginx-site /var/www/nginx-site
 
 ENTRYPOINT ["bin/start_faux"]
