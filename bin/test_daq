@@ -8,13 +8,12 @@ if [ -z "$DAQ_TEST" ]; then
     false
 fi
 
-function delay_finish {
-    # Travis doesn't always wait for buffer to flush on exit, so give some time.
-    sleep 10
+function test_finish {
+    echo Exiting test script.
 }
 
 if [ -n "$CI" ]; then
-    trap delay_finish EXIT
+    trap test_finish EXIT
 fi
 
 ROOT=$(realpath $(dirname $0)/..)
@@ -36,7 +35,7 @@ if ! git show $TAGGED_VERSION > /dev/null; then
     echo
     echo Tagged version $TAGGED_VERSION not found.
     echo Maybe you need to fetch tags: git fetch --tags.
-    echo If this is on Travis, ensure tags were pushed to your repo.
+    echo If this happens during CI testing, ensure tags were pushed to your repo.
     echo
     false
 fi
@@ -69,7 +68,6 @@ GCP_RESULTS=inst/test_$DAQ_TEST.gcp
 CRED_FILE=inst/config/gcp_service_account.json
 
 echo Running test script $TEST_SCRIPT
-# Combine stderr & stdout b/c travis has problems processing both.
 sudo PATH=$PATH TEST_RESULTS=$TEST_RESULTS GCP_RESULTS=$GCP_RESULTS \
      DAQ_CODECOV=y GCP_BASE64_CRED="$GCP_BASE64_CRED" $TEST_SCRIPT  2>&1
 

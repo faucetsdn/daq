@@ -24,10 +24,7 @@ fi
 
 echo AG is $AG
 
-# Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
-# Need to remove the || true at the end of the update line. Same as for instance below. Also in bin/setup_dev.
-$AG update || true
-$AG install realpath || true  # On newer versions this is included elsewhere.
+$AG update
 $AG install expect lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent net-tools
 
 retry=bin/retry_cmd
@@ -46,9 +43,7 @@ else
      echo "deb http://packages.wand.net.nz $release main" | sudo tee /etc/apt/sources.list.d/wand.list
      $retry sudo curl http://packages.wand.net.nz/keyring.gpg -o /etc/apt/trusted.gpg.d/wand.gpg
 
-     # Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
-     #Need to remove the || true at the end of the update line. Same as for instance above. Also in bin/setup_dev.
-     $AG update || true
+     $AG update
      $AG install docker-ce${DOCKER_VERSION}
 fi
 

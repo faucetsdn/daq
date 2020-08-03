@@ -1,5 +1,4 @@
-![Main tests](https://github.com/faucetsdn/daq/workflows/DAQ%20main%20tests/badge.svg?branch=master)
-![USI Java CI with Maven](https://github.com/faucetsdn/daq/workflows/USI%20Java%20CI%20with%20Maven/badge.svg?branch=master)
+![CI Tests](https://github.com/faucetsdn/daq/workflows/DAQ%20push%2Fpull%20tests/badge.svg?branch=master)
 
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
