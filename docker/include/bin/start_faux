@@ -137,11 +137,11 @@ fi
 
 if [ -n "${options[bacnet]}" ]; then
     echo Starting bacnet loop device.
-    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+    java -cp bacnetFaux/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Pass.json"  &
 elif [ -n "${options[bacnetfail]}" ]; then
     echo Starting bacnet loop device.
-    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+    java -cp bacnetFaux/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
