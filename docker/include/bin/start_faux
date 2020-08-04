@@ -234,6 +234,7 @@ if [ -n "${options[curl]}" ]; then
     echo Starting curl loop.
     (while true; do curl -o - http://google.com; sleep 1; done) &
 fi
+
 conf_file=/config/start/start_faux.sh
 if [ -f $conf_file ]; then
     echo Loading $conf_file...
