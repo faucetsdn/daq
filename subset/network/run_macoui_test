@@ -1,8 +1,10 @@
 #!/bin/bash -e 
 source reporting.sh
 
-REPORT=/tmp/report.txt
-LOCAL_REPORT=report/report.txt
+TARGET_MAC=$1
+REPORT=$2
+
+LOCAL_REPORT=/report/macoui.txt
 CONFIG=/config/device/module_config.json
 LOG=/tmp/nmap.log
 RESULT_LINES=/tmp/result_lines.txt
@@ -18,8 +20,6 @@ java -jar mac_oui/build/libs/mac_oui-all.jar $TARGET_MAC
 RESULT_AND_SUMMARY="$(grep "RESULT" $LOCAL_REPORT)"
 grep -v "RESULT" $LOCAL_REPORT >> $REDACTED_LOG
 
-# For testing module timeout.
-sleep 10
 
 TEST_RESULT=$(cat $REDACTED_LOG)
 

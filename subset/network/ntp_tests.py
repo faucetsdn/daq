@@ -9,7 +9,7 @@ test_request = str(arguments[1])
 startup_pcap_file = str(arguments[2])
 monitor_pcap_file = str(arguments[3])
 
-report_filename = 'report.txt'
+report_filename = 'ntp_tests.txt'
 ignore = '%%'
 summary_text = ''
 result = 'fail'
@@ -26,6 +26,7 @@ YEAR_2500 = 16725225600
 SECONDS_BETWEEN_1900_1970 = 2208988800
 OFFSET_ALLOWANCE = 0.128
 LEAP_ALARM = 3
+
 
 def write_report(string_to_append):
     with open(report_filename, 'a+') as file_open:
