@@ -1,4 +1,12 @@
 # Changelog
+* 1.9.0
+  * Test infrastructure cleanup (#572)
+  * Remove faux dependencies from subset directory (#567)
+  * Github actions (#558)
+  * misc updates to docs (#568)
+  * Incorporate manual test comments (#499)
+  * NTP Update (#525)
+  * Automatic build script (#557)
 * 1.8.2
   * GRPC timeouts + usi first command wait fix. (#555)
   * Numerous renovate bot updates.
