@@ -2,7 +2,7 @@ name: DAQ perodic tests
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 */2 * * *'
 
 jobs:
   integration_tests:
