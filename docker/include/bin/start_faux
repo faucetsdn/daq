@@ -87,7 +87,23 @@ if [ -n "${options[xdhcp]}" ]; then
     fi
     ip addr show $intf_name
 
-    (while true; do ping -c 1 10.20.0.1; sleep 5; done) &
+    if [ -n "${options[opendns]}" ]; then
+        route add -net 172.17.0.0/16 $intf_name  # default docker ip range.
+        dhcp_dns=8.8.8.8
+        echo nameserver ${dhcp_dns#DNS=} > /etc/resolv.conf
+        # There is no deterministic way to find out the default gateway ip where running more than 1 faux device.
+        (
+            while true; do
+                if [ `route -n | grep UG | wc -l` -eq '1' ]; then 
+                    timeout 1 ping -c 1 `route -n | grep UG ` && continue
+                fi 
+                for IP in {1..12}
+                do
+                    timeout 1 ping -c 1 172.17.0.$IP  && route add default gw 172.17.0.$IP $intf_name && break
+                done
+            done
+        ) &
+    fi
 else
     echo Running dhclient...
     dhclient -v
