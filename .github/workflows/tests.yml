@@ -3,7 +3,11 @@
 
 name: DAQ push/pull tests
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 */2 * * *'
 
 jobs:
   integration_tests:
