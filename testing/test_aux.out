@@ -39,18 +39,18 @@ RESULT pass security.tls.v1_2 Certificate active for current date and public key
 RESULT pass security.tls.v1_2.x509 Certificate active for current date and public key length > 2048.
 RESULT pass security.tls.v1_3 Certificate active for current date and public key length > 2048.
 RESULT pass security.tls.v1_3.x509 Certificate active for current date and public key length > 2048.
-RESULT skip security.passwords.http Port 80 is not open on target device.
-RESULT skip security.passwords.https Port 443 is not open on target device.
-RESULT skip security.passwords.telnet Port 23 is not open on target device.
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
-RESULT fail security.passwords.http Default passwords have not been changed.
-RESULT fail security.passwords.https Default passwords have not been changed.
-RESULT fail security.passwords.telnet Default passwords have not been changed.
-RESULT fail security.passwords.ssh Default passwords have not been changed.
-RESULT pass security.passwords.http Default passwords have been changed.
-RESULT pass security.passwords.https Default passwords have been changed.
-RESULT pass security.passwords.telnet Default passwords have been changed.
-RESULT pass security.passwords.ssh Default passwords have been changed.
+RESULT skip security.passwords.http Port 80 not open on target device.
+RESULT skip security.passwords.https Port 443 not open on target device.
+RESULT skip security.passwords.ssh Port 22 not open on target device.
+RESULT skip security.passwords.telnet Port 23 not open on target device.
+RESULT fail security.passwords.http Was able to brute force using dictionary.
+RESULT fail security.passwords.https Was able to brute force using dictionary.
+RESULT fail security.passwords.ssh Was able to brute force using dictionary.
+RESULT fail security.passwords.telnet Was able to brute force using dictionary.
+RESULT pass security.passwords.http Was not able to brute force using dictionary.
+RESULT pass security.passwords.https Was not able to brute force using dictionary.
+RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
+RESULT pass security.passwords.telnet Was not able to brute force using dictionary.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
@@ -126,6 +126,7 @@ port-01 module_config modules
     "enabled": true
   },
   "password": {
+    "dictionary_dir": "resources/faux",
     "enabled": true
   },
   "ssh": {
@@ -183,6 +184,7 @@ port-02 module_config modules
     "enabled": false
   },
   "password": {
+    "dictionary_dir": "resources/faux",
     "enabled": true
   },
   "ssh": {
