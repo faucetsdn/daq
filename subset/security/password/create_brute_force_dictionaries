@@ -1,0 +1,148 @@
+#!/bin/bash
+
+# A script to retrieve, and collate several raw brute force dictionaries into a colon separated file with format :username:password, and also to two separate username and password lists.
+#
+# Make sure this script is run in the password directory.
+#
+# Usage ./create_brute_force_dictionaries
+
+RAW_DICTIONARY_DIR="resources/raw"
+DEFAULT_DICTIONARY_DIR="resources/default"
+
+MANUFACTURER_DEFAULTS_DICTIONARY="$RAW_DICTIONARY_DIR/manufacturer.csv"
+SSH_DICTIONARY="$RAW_DICTIONARY_DIR/ssh.txt"
+TELNET_DICTIONARY="$RAW_DICTIONARY_DIR/telnet.txt"
+
+OUTPUT_DICTIONARY="$DEFAULT_DICTIONARY_DIR/dictionary.txt"
+TMP_DICTIONARY="$DEFAULT_DICTIONARY_DIR/tmp_dictionary.txt"
+USERNAMES_LIST="$DEFAULT_DICTIONARY_DIR/usernames.txt"
+PASSWORDS_LIST="$DEFAULT_DICTIONARY_DIR/passwords.txt"
+
+# Retrieve the raw dictionary files from the gitlab source.
+# $1 Manufacturer dictionary
+# $2 SSH dictionary
+# $3 Telnet dictionary
+# $4 Raw directory
+function retrieve_raw_dictionaries() {
+  mkdir -p $4
+
+  curl "https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/default-passwords.csv" \
+    --create-dirs --output $1
+  curl "https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/ssh-betterdefaultpasslist.txt" \
+    --create-dirs --output $2
+  curl "https://gitlab.com/kalilinux/packages/seclists/-/raw/094459e5d757faccfcb44375a2e4c9602d5984d4/Passwords/Default-Credentials/telnet-betterdefaultpasslist.txt" \
+    --create-dirs --output $3
+}
+
+# Create the temporary and output dictionaries, and remove existing ones.
+# $1 Temporary dictionary file
+# $2 Output dictionary file
+# $3 Default dictionary directory
+function create_dictionary() {
+  mkdir -p $3
+
+  if [ -f $1 ]; then
+    rm $1
+  fi
+
+  if [ -f $2 ]; then
+    rm $2
+  fi
+
+  touch $1
+  touch $2
+}
+
+# Helps avoid certain special characters which cause grep to fail
+# $1 Line string in file
+function line_is_invalid_csv() {
+  echo $1 | grep -sqE "^\".*\"|\s|,,"
+}
+
+# Helps avoid certain special usernames/passwords which cause grep to fail.
+# $1 Username or password string
+function username_or_password_is_invalid() {
+  echo $1 | grep -sqE "<BLANK>|<N/A>"
+}
+
+# Append the username and password pair into the output dictionary with colon separation.
+# $1 Username
+# $2 Password
+# $3 Output dictionary
+function add_colon_pair_to_output_dictionary() {
+  if ! username_or_password_is_invalid $1; then
+    if ! username_or_password_is_invalid $2; then
+      echo "$1:$2" >> $3
+    fi
+  fi
+}
+
+# Convert lines in the manufacturer csv file into colon separated username:password pairs, then append them to file.
+# $1 Raw dictionary
+# $2 Output dictionary
+function append_manufacturer_csv_to_output_dictionary() {
+  while read LINE
+  do
+    if ! line_is_invalid_csv "$LINE"; then
+      IFS=',' read -ra CREDENTIAL_ARRAY <<< "$LINE"
+      USERNAME="${CREDENTIAL_ARRAY[1]}"
+      PASSWORD="${CREDENTIAL_ARRAY[2]}"
+      add_colon_pair_to_output_dictionary $USERNAME $PASSWORD $2
+    fi
+  done < $1
+}
+
+# Add colon separated txt file into the output dictionary.
+# $1 Output dictionary file
+# $2 Colon separated file
+function append_colon_separated_file_to_output_dictionary() {
+  cat $2 >> $1
+}
+
+# Runs a few cleanup commands which do the following:
+# - Remove trailing whitespace
+# - Sort and remove duplicates
+# - Finally, add a colon at the start of each line to make it suitable for use in medusa
+#
+# $1 Temporary dictionary file
+# $2 Output dictionary file
+function clean_output_dictionary() {
+  cat $1 | sed -E 's/\s+$//' | sort -u | sed -E 's/^/:/' > $2
+}
+
+# Removes the necessary bits from the full dictionary to create separate files for usernames and passwords.
+# $1 Output dictionary
+# $2 Usernames file
+# $3 Passwords file
+function create_username_and_password_list_from_dictionary() {
+  cat $1 | sed -E 's/^://' | sed -E 's/:.*$//' > $2
+  cat $1 | sed -E 's/^.*://' > $3
+}
+
+# Main function:
+
+echo Creating credential files...
+create_dictionary $TMP_DICTIONARY $OUTPUT_DICTIONARY $DEFAULT_DICTIONARY_DIR
+
+echo Retrieving raw dictionaries from sources
+retrieve_raw_dictionaries $MANUFACTURER_DEFAULTS_DICTIONARY $SSH_DICTIONARY $TELNET_DICTIONARY $RAW_DICTIONARY_DIR
+
+echo Parsing CSV file...
+append_manufacturer_csv_to_output_dictionary $MANUFACTURER_DEFAULTS_DICTIONARY $TMP_DICTIONARY
+
+echo Parsing SSH passwords file...
+append_colon_separated_file_to_output_dictionary $TMP_DICTIONARY $SSH_DICTIONARY
+
+echo Parsing telnet passwords file...
+append_colon_separated_file_to_output_dictionary $TMP_DICTIONARY $TELNET_DICTIONARY
+
+echo Cleaning up output dictionary...
+clean_output_dictionary $TMP_DICTIONARY $OUTPUT_DICTIONARY
+
+echo Creating extra dictionaries...
+create_username_and_password_list_from_dictionary $OUTPUT_DICTIONARY $USERNAMES_LIST $PASSWORDS_LIST
+
+echo Removing temporary dictionary...
+rm $TMP_DICTIONARY
+
+echo Done!

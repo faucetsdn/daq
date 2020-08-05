@@ -81,10 +81,10 @@ Overall device result FAIL
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
-|skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
-|skip|security.passwords.https|Other|Other|Port 443 is not open on target device.|
-|skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
-|skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
+|skip|security.passwords.http|Other|Other|Port 80 not open on target device.|
+|skip|security.passwords.https|Other|Other|Port 443 not open on target device.|
+|skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
+|skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
 |pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
 |skip|security.tls.v1|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
@@ -379,92 +379,80 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 
 ```
 --------------------
-security.passwords.http
+security.admin.password.http
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: http, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+80/tcp closed http
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.http Port 80 is not open on target device.
+RESULT skip security.passwords.http Port 80 not open on target device.
 
 --------------------
-security.passwords.https
+security.admin.password.https
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: https, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT    STATE  SERVICE
+443/tcp closed https
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.https Port 443 is not open on target device.
+RESULT skip security.passwords.https Port 443 not open on target device.
 
 --------------------
-security.passwords.telnet
+security.admin.password.ssh
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: ssh, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+22/tcp closed ssh
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.telnet Port 23 is not open on target device.
+RESULT skip security.passwords.ssh Port 22 not open on target device.
 
 --------------------
-security.passwords.ssh
+security.admin.password.telnet
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: telnet, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+23/tcp closed telnet
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
+RESULT skip security.passwords.telnet Port 23 not open on target device.
 
 ```
 
@@ -473,6 +461,7 @@ RESULT skip security.passwords.ssh Port 22 is not open on target device.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|dictionary_dir|resources/faux|
 
 ## Module udmi
 
