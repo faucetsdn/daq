@@ -94,11 +94,11 @@ if [ -n "${options[xdhcp]}" ]; then
         # There is no deterministic way to find out the default gateway ip where running more than 1 faux device.
         (
             while true; do
-                if [ `route -n | grep UG | wc -l` -eq '1' ]; then 
-                    timeout 1 ping -c 1 `route -n | grep UG ` && continue
+                if [ `route -n | grep UG | wc -l` -gt '0' ]; then 
+                    timeout 1 ping -c 1 `route -n | grep UG | awk '{print $2}'` && continue
+                    route del default gw `route -n | grep UG | awk '{print $2}'`
                 fi 
-                for IP in {1..12}
-                do
+                for IP in {1..12}; do
                     timeout 1 ping -c 1 172.17.0.$IP  && route add default gw 172.17.0.$IP $intf_name && break
                 done
             done
