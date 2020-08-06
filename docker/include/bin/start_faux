@@ -87,7 +87,11 @@ if [ -n "${options[xdhcp]}" ]; then
     fi
     ip addr show $intf_name
 
-    (while true; do ping -c 1 10.20.0.1; sleep 5; done) &
+    if [ -n "${options[opendns]}" ]; then
+        dhcp_dns=8.8.8.8
+        echo nameserver ${dhcp_dns#DNS=} > /etc/resolv.conf
+        route add default gw 10.20.255.254 $intf_name # fixed IP in start_networking
+    fi
 else
     echo Running dhclient...
     dhclient -v
