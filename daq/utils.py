@@ -1,8 +1,7 @@
 """Utility functions for DAQ"""
 
-import yaml
-
 from google.protobuf import json_format
+import yaml
 
 
 def yaml_proto(file_name, proto_func):

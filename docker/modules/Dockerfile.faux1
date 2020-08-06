@@ -25,7 +25,7 @@ RUN $AG update && $AG install wget make build-essential gcc libz-dev ca-certific
 
 # Build SSH, OpenSSL from source and configure
 
-COPY subset/security/sshfaux/*.sh ./
+COPY docker/include/security/sshfaux/*.sh ./
 RUN sh ssh_build.sh
     
 FROM daqf/aardvark:latest
@@ -34,14 +34,14 @@ FROM daqf/aardvark:latest
 RUN $AG update && $AG install openjdk-8-jre
 RUN $AG update && $AG install openjdk-8-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
-    python ifupdown openssl nano apache2-utils ntpdate 
+    python ifupdown openssl nano apache2-utils ntpdate vzctl
 
 # Additional OS dependencies
 RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
 
-COPY subset/ntp/NTPClient NTPClient
+COPY docker/include/network/NTPClient NTPClient
 RUN cd NTPClient && ./gradlew build
-COPY subset/network/TransportClient TransportClient
+COPY docker/include/network/TransportClient TransportClient
 
 # Prefetch resolvconf to dynamically install at runtime in start_faux.
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
@@ -54,25 +54,25 @@ COPY docker/include/bin/bacnet_discover bin/
 COPY --from=java_build /root/pubber/build/libs/*.jar pubber/build/libs/
 COPY udmi/pubber/bin/run pubber/bin/
 
-COPY subset/pentests/brute_server.py pentests/
-COPY subset/security/tlsfaux tlsfaux/
+COPY docker/include/pentests/brute_server.py pentests/
+COPY docker/include/security/tlsfaux tlsfaux/
 
-COPY subset/bacnet/bacnetTests/ bacnetTests
-COPY subset/bacnet/bacnetTests/src/main/resources/Faux*.json tmp/
-COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetTests/libs/
-RUN cd bacnetTests && ./gradlew build
+COPY docker/include/bacnet/bacnetFaux/ bacnetFaux
+COPY docker/include/bacnet/bacnetFaux/src/main/resources/Faux*.json tmp/
+COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetFaux/libs/
+RUN cd bacnetFaux && ./gradlew build
 
 # HTTP/HTTPS dependency
-COPY subset/security/nginxpass.conf /root/nginx/
-COPY subset/security/nginxfail.conf /root/nginx/
-COPY subset/security/nginx-site /var/www/nginx-site
+COPY docker/include/security/nginxpass.conf /root/nginx/
+COPY docker/include/security/nginxfail.conf /root/nginx/
+COPY docker/include/security/nginx-site /var/www/nginx-site
 
 COPY --from=ssh_build /usr/local/openssl/* /usr/local/openssl/
 COPY --from=ssh_build /usr/local/sbin/* /usr/local/sbin/
 COPY --from=ssh_build /usr/local/bin/* /usr/local/bin/
 COPY --from=ssh_build /usr/local/etc/* /usr/local/etc/
 
-COPY subset/security/sshfaux/ssh_privsep.sh ssh_privsep.sh
+COPY docker/include/security/sshfaux/ssh_privsep.sh ssh_privsep.sh
 RUN sh ssh_privsep.sh
 RUN /usr/local/bin/ssh-keygen -A
 

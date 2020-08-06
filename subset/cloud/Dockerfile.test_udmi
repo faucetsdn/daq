@@ -9,6 +9,8 @@ FROM daqf/aardvark:latest
 RUN $AG update && $AG install openjdk-11-jre
 RUN $AG update && $AG install openjdk-11-jdk git
 
+RUN $AG update && $AG install curl
+
 COPY udmi/validator/ validator/
 RUN validator/bin/build
 

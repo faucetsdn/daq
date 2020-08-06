@@ -4,11 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-# Runs lint checks and some similar things
-echo Lint checks | tee -a $TEST_RESULTS
-bin/check_style
-echo check_style exit code $? | tee -a $TEST_RESULTS
-
 # Function to create pubber config files (for use in cloud tests)
 
 function make_pubber {
@@ -54,20 +49,25 @@ cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
+
+# Add extra configs to a copy of the baseline module config for the password test to select which dictionaries to use.
+cat resources/setups/baseline/module_config.json | jq '.modules.password += {"dictionary_dir":"resources/faux"}' > local/module_config.json
+
 cat <<EOF > local/system.yaml
 ---
 include: config/system/all.conf
+base_conf: local/module_config.json
 finish_hook: bin/dump_network
 test_config: resources/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4
+    opts: brute broadcast_client ntpv4 
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh 
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh 
 long_dhcp_response_sec: 0
 monitor_scan_sec: 20
 EOF
@@ -126,9 +126,9 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
-head inst/gw*/nodes/gw*/activate.log
-head inst/run-port-*/nodes/*/activate.log
-head inst/run-port-*/nodes/*/tmp/report.txt
+head -20 inst/gw*/nodes/gw*/activate.log
+head -20 inst/run-port-*/nodes/*/activate.log
+haed -20 inst/run-port-*/nodes/*/tmp/report.txt
 ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file

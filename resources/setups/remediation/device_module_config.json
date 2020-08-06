@@ -26,16 +26,13 @@
     "ipaddr": {
       "timeout_sec": 120
     },
-    "macoui": {
-      "enabled": true
-    },
     "mudgee": {
       "enabled": true
     },
-    "nmap": {
+    "network": {
       "enabled": true
     },
-    "ntp": {
+    "nmap": {
       "enabled": true
     },
     "switch": {
