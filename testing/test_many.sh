@@ -27,8 +27,8 @@ for iface in $(seq 1 $NUM_DEVICES); do
     intf_mac="9a02571e8f0$iface"
     mkdir -p local/site/mac_addrs/$intf_mac
     if [[ $iface -le $NUM_NO_DHCP_DEVICES ]]; then
-        ip="10.20.0.$((iface+5))"
-        xdhcp="xdhcp=$ip"
+        ip="10.20.255.$((iface+5))"
+        xdhcp="xdhcp=$ip opendns ntp_fail"
         if [[ $iface -gt $NUM_TIMEOUT_DEVICES ]]; then
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
@@ -91,7 +91,8 @@ alternate_subnet_ip=$(fgrep "ip notification 192.168" inst/run-port-*/nodes/ipad
 
 cat inst/run-port-*/scans/ip_triggers.txt
 static_ips=$(fgrep nope inst/run-port-*/scans/ip_triggers.txt | wc -l)
-
+ntp_traffic=$(fgrep "RESULT fail base.startup.ntp" inst/run-port-*/nodes/ping*/tmp/result_lines.txt | wc -l)
+dns_traffic=$(fgrep "RESULT fail base.startup.dns" inst/run-port-*/nodes/ping*/tmp/result_lines.txt | wc -l)
 more inst/run-port-*/nodes/ping*/activate.log | cat
 more inst/run-port-*/nodes/ipaddr*/activate.log | cat
 
@@ -104,6 +105,7 @@ echo Enough results: $((results >= 5*RUN_LIMIT/10)) | tee -a $TEST_RESULTS
 # $timeouts should strictly equal $NUM_TIMEOUT_DEVICES when dhcp step is fixed.
 echo Enough DHCP timeouts: $((timeouts >= NUM_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 echo Enough static ips: $((static_ips >= (NUM_NO_DHCP_DEVICES - NUM_TIMEOUT_DEVICES))) | tee -a $TEST_RESULTS
+echo Found NTP and DNS traffic for static ip devices: $((ntp_traffic > 0)) $((dns_traffic > 0)) | tee -a $TEST_RESULTS
 
 echo Enough ipaddr tests: $((ip_notifications >= (NUM_IPADDR_TEST_DEVICES - NUM_IPADDR_TEST_TIMEOUT_DEVICES) * 2 )) | tee -a $TEST_RESULTS
 echo Enough alternate subnet ips: $((alternate_subnet_ip >= (NUM_IPADDR_TEST_DEVICES - NUM_IPADDR_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
