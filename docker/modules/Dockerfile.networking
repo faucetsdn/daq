@@ -7,7 +7,7 @@ FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install dnsmasq ethtool iptables netcat ntp python curl
 
-COPY docker/include/networking_scripts/* ./
+COPY docker/include/network/scripts/* ./
 RUN mkdir -p /etc
 COPY docker/include/etc/ntp.conf /etc
 
