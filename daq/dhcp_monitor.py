@@ -57,10 +57,12 @@ class DhcpMonitor():
         if match:
             if match.group(2):
                 self.target_ip = match.group(2)
-            if match.group(4) == "ACK":
-                self._dhcp_success()
             if match.group(6):
                 self.target_mac = match.group(6)
+            if match.group(4) == "ACK":
+                if not self.target_ip or not self.target_mac:
+                    LOGGER.warning('dhcp ACK incomplete: %s', dhcp_line)
+                self._dhcp_success()
 
     def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
