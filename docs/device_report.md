@@ -211,7 +211,7 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 |enabled|True|
 |timeout_sec|900|
 |port_flap_timeout_sec|20|
-|dhcp_ranges|[{'start': 'X.X.X.X', 'end': '192.168.255.254', 'prefix_length': 16}]|
+|dhcp_ranges|[{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 16}]|
 
 ## Module switch
 
