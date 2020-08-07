@@ -65,7 +65,7 @@ interfaces:
   faux-1:
     opts: brute broadcast_client ntpv4 
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh 
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh xdhcp=10.20.0.7
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client ssh 
 long_dhcp_response_sec: 0
@@ -114,6 +114,7 @@ capture_test_results macoui
 capture_test_results tls
 capture_test_results password
 capture_test_results discover
+capture_test_results dhcp
 capture_test_results network
 capture_test_results ntp
 

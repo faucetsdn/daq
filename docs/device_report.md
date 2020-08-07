@@ -69,6 +69,7 @@ Overall device result FAIL
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
+|pass|connection.network.dhcp_short|Other|Other|DHCP request received.|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
@@ -199,6 +200,18 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 |Attribute|Value|
 |---|---|
 |enabled|True|
+
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|900|
+|port_flap_timeout_sec|20|
+|dhcp_ranges|[{'start': 'X.X.X.X', 'end': '192.168.255.254', 'prefix_length': 16}]|
 
 ## Module switch
 
@@ -519,6 +532,26 @@ No additional information provided
 --------------------
 RESULT pass manual.test.name Manual test - for testing
 
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module dhcp
+
+
+#### Report
+
+```
+--------------------
+connection.network.dhcp_short
+--------------------
+Reconnect device and check for DHCP request.
+--------------------
+RESULT pass connection.network.dhcp_short DHCP request received.
 ```
 
 #### Module Config

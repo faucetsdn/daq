@@ -5,7 +5,7 @@ RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached
 RESULT pass base.startup.ntp Correct NTP server address
 RESULT skip base.startup.dns No dns traffic detected
-RESULT pass base.startup.dhcp
+RESULT skip base.startup.dhcp Using static IP 10.20.0.7
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached
 RESULT fail base.startup.ntp Invalid NTP server address
@@ -53,6 +53,8 @@ RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
 RESULT pass security.passwords.telnet Was not able to brute force using dictionary.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
+RESULT pass connection.network.dhcp_short DHCP request received.
+RESULT fail connection.network.dhcp_short No DHCP request received.
 RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass connection.network.ntp_support Using NTPv4.
@@ -68,9 +70,9 @@ RESULT info communication.type.broadcast Broadcast packets received. Unicast pac
 RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
-dhcp requests 1 1 1 1
+dhcp requests 1 1 1 0
 01: []
-02: ['02:ping:TimeoutError']
+02: ['02:ipaddr:TimeoutError', '02:ping:TimeoutError']
 03: []
 arp.txt
 dp_port_acls.yaml
@@ -95,6 +97,9 @@ port-01 module_config modules
   "brute": {
     "enabled": true
   },
+  "dhcp": {
+    "enabled": true
+  },
   "discover": {
     "enabled": true
   },
@@ -109,7 +114,7 @@ port-01 module_config modules
         "start": "192.168.0.1"
       }
     ],
-    "enabled": false,
+    "enabled": true,
     "port_flap_timeout_sec": 20,
     "timeout_sec": 900
   },
@@ -156,6 +161,9 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
+  "dhcp": {
+    "enabled": true
+  },
   "hold": {
     "enabled": true
   },
@@ -167,9 +175,9 @@ port-02 module_config modules
         "start": "192.168.0.1"
       }
     ],
-    "enabled": false,
+    "enabled": true,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 900
+    "timeout_sec": 1
   },
   "manual": {
     "enabled": true
@@ -223,11 +231,13 @@ inst/gw01/nodes/gw01/activate.log
 inst/gw02/nodes/gw02/activate.log
 inst/gw03/nodes/gw03/activate.log
 inst/run-port-01/nodes/fail01/activate.log
+inst/run-port-01/nodes/ipaddr01/activate.log
 inst/run-port-01/nodes/nmap01/activate.log
 inst/run-port-01/nodes/pass01/activate.log
 inst/run-port-01/nodes/ping01/activate.log
 inst/run-port-02/nodes/fail02/activate.log
 inst/run-port-02/nodes/hold02/activate.log
+inst/run-port-02/nodes/ipaddr02/activate.log
 inst/run-port-02/nodes/nmap02/activate.log
 inst/run-port-02/nodes/pass02/activate.log
 inst/run-port-02/nodes/ping02/activate.log
