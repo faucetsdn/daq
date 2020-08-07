@@ -137,7 +137,6 @@ terminated
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 01: ['01:hold:DaqException']
-02: ['02:ipaddr:TimeoutError']
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
@@ -148,7 +147,7 @@ DAQ result code 0
 security.ports.nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
-02: []
+02: ['02:ipaddr:TimeoutError']
     dp_id: 1
     dp_id: 4886718345
 Switch test with target 192.0.2.138:2
