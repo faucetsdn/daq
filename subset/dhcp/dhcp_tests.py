@@ -1,8 +1,6 @@
 from __future__ import absolute_import
-import time
 import sys
-import os
-from scapy.all import rdpcap, DHCP, BOOTP
+from scapy.all import rdpcap, DHCP
 
 arguments = sys.argv
 test_request = str(arguments[1])
@@ -26,13 +24,13 @@ def write_report(string_to_append):
 
 
 def add_summary(text):
-        global summary_text
-        summary_text = summary_text + " " + text if summary_text else text
+    global summary_text
+    summary_text = summary_text + " " + text if summary_text else text
 
 
 def get_dhcp_type(capture, dhcp_type, after=None):
     for packet in capture:
-        if not DHCP in packet:
+        if DHCP not in packet:
             continue
         if packet[DHCP].options[0][1] == dhcp_type:
             if after is None:
@@ -40,6 +38,7 @@ def get_dhcp_type(capture, dhcp_type, after=None):
             if packet.time > after:
                 return packet
     return None
+
 
 def get_dhcp_option(packet, option):
     for opt in packet[DHCP].options:
@@ -56,6 +55,7 @@ def test_dhcp_short():
         return 'fail'
     add_summary('DHCP request received.')
     return 'pass'
+
 
 def test_dhcp_long():
     capture = rdpcap(scan_file)
@@ -80,7 +80,7 @@ write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 if test_request == 'connection.network.dhcp_short':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_short))
     result = test_dhcp_short()
-    
+
 elif test_request == 'connection.network.dhcp_long':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_long))
     result = test_dhcp_long()
