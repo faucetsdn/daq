@@ -113,6 +113,18 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 |---|---|
 |enabled|True|
 
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|900|
+|port_flap_timeout_sec|20|
+|dhcp_ranges|[{'start': 'X.X.X.X', 'end': '192.168.255.254', 'prefix_length': 16}]|
+
 ## Module hold
 
 
@@ -125,6 +137,7 @@ terminated
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 01: ['01:hold:DaqException']
+02: ['02:ipaddr:TimeoutError']
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
