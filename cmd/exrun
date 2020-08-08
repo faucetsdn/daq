@@ -74,6 +74,12 @@ rm -rf $INSTDIR/faucet* $cleanup_file
 
 docker ps > /dev/null 2>&1 || service docker start
 
+bridges=`ovs-vsctl list-br`
+for bridge in $bridges; do
+    echo Cleaning bridge $bridge...
+    timeout 10 ovs-vsctl --if-exists del-br $bridge || true
+    ovs-vsctl --if-exists del-br $bridge
+done
 ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 

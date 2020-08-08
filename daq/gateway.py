@@ -182,9 +182,8 @@ class Gateway():
         if not target:
             return False
         target_mac = target['mac']
-        for target_port in self.targets:
-            if self.targets[target_port]['mac'] == target_mac:
-                return True
+        if target_mac in self.targets:
+            return True
         LOGGER.warning('No target match found for %s in %s', target_mac, self.name)
         return False
 
@@ -192,7 +191,7 @@ class Gateway():
         if exception:
             LOGGER.error('Gateway DHCP exception %s', exception)
         if self._is_target_expected(target) or exception:
-            self.runner.ip_notify(state, target, self.port_set, exception=exception)
+            self.runner.ip_notify(state, target, self, exception=exception)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join('inst', base_name)
@@ -201,26 +200,26 @@ class Gateway():
         os.makedirs(tmpdir)
         return tmpdir
 
-    def attach_target(self, target_port, target):
+    def attach_target(self, device):
         """Attach the given target to this gateway; return number of attached targets."""
-        assert target_port not in self.targets, 'target already attached to gw'
-        LOGGER.info('Attaching target %d to gateway group %s', target_port, self.name)
-        self.targets[target_port] = target
+        assert device.mac not in self.targets, 'target %s already attached to gw' % device.mac
+        LOGGER.info('Attaching target %s to gateway group %s', device.mac, self.name)
+        self.targets[device.mac] = device
         return len(self.targets)
 
-    def detach_target(self, target_port):
+    def detach_target(self, device):
         """Detach the given target from this gateway; return number of remaining targets."""
-        assert target_port in self.targets, 'target not attached to gw'
-        LOGGER.info('Detach target %d from gateway group %s: %s',
-                    target_port, self.name, list(self.targets.keys()))
-        del self.targets[target_port]
+        assert device.mac in self.targets, 'target %s not attached to gw' % device.mac
+        LOGGER.info('Detach target %s from gateway group %s: %s',
+                    device.mac, self.name, list(self.targets.keys()))
+        del self.targets[device.mac]
         return len(self.targets)
 
-    def target_ready(self, target_mac):
+    def target_ready(self, device):
         """Mark a target ready, and return set of ready targets"""
-        if not target_mac in self.ready:
-            LOGGER.info('Ready target %s from gateway group %s', target_mac, self.name)
-            self.ready.add(target_mac)
+        if device not in self.ready:
+            LOGGER.info('Ready target %s from gateway group %s', device, self.name)
+            self.ready.add(device)
         return self.ready
 
     def get_targets(self):
@@ -253,3 +252,6 @@ class Gateway():
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)
+
+    def __repr__(self):
+        return 'Gateway group %s set %d' % (self.name, self.port_set)

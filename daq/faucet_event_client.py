@@ -184,11 +184,12 @@ class FaucetEventClient():
     def as_port_learn(self, event):
         """Convert to port learning info, if applicable"""
         if not event or 'L2_LEARN' not in event:
-            return (None, None, None)
+            return [None] * 4
         dpid = event['dp_id']
         port_no = int(event['L2_LEARN']['port_no'])
         eth_src = event['L2_LEARN']['eth_src']
-        return (dpid, port_no, eth_src)
+        vid = event['L2_LEARN']['vid']
+        return (dpid, port_no, eth_src, vid)
 
     def close(self):
         """Close the faucet event socket"""

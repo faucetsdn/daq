@@ -1,10 +1,10 @@
 Running testing/test_dhcp.sh
 DHCP Tests
-01: []
-02: ['02:acquire:TimeoutError']
-03: []
-04: []
-05: []
+9a:02:57:1e:8f:01: []
+9a:02:57:1e:8f:02: ['9a:02:57:1e:8f:02:acquire:TimeoutError']
+9a:02:57:1e:8f:03: []
+9a:02:57:1e:8f:04: []
+9a:02:57:1e:8f:05: []
 Device 1 ip triggers: 1 0
 Device 2 ip triggers: 0 0
 Device 3 long ip triggers: 1
