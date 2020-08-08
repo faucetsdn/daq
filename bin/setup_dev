@@ -53,10 +53,6 @@ if [ -z "$PIP" ]; then
     PIP="python$PVERSION -m pip"
 fi
 
-if [ -n "$TRAVIS" ]; then
-    DAQ_CONTAINER=travis
-fi
-
 echo AG is $AG
 echo PIP is $PIP
 echo Setup root is $PWD
@@ -66,10 +62,8 @@ if [ "$DAQ_BUILD" == "no" ]; then
     exit 0
 fi
 
-# Hacky workaround for https://travis-ci.community/t/sometimes-build-fails-when-apt-is-updating-postgresql-apt-repository/4872/17
-# Need to remove the || true at the end of the update line. Also in bin/setup_base.
 echo $AG update
-$AG update || true
+$AG update
 
 echo $AG install
 $AG install lsb-release
@@ -112,7 +106,7 @@ else
 fi
 
 # Can't use venv inside of containers because of absolute paths.
-if [ -n "$DAQ_CONTAINER" ]; then
+if [ -n "$CI" ]; then
     echo Skipping venv activation.
     mkdir -p venv/bin
     touch venv/bin/activate
@@ -138,11 +132,12 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     pylint==2.4.2 cryptography requests netifaces codecov coverage setuptools \
     pyyaml cairocffi==1.0.2 WeasyPrint==50 pypandoc==1.4 \
     firebase-admin==2.16.0 \
-    google-cloud-pubsub==0.40.0 \
     google-api-core==1.16.0 \
-    google-cloud-storage==1.16.1 \
+    google-cloud-core==1.3.0 \
     google-cloud-firestore==1.6.0 \
     google-cloud-logging==1.14.0 \
+    google-cloud-pubsub==0.40.0 \
+    google-cloud-storage==1.16.1 \
     grpcio-tools==1.30.0
     
 $PIP freeze

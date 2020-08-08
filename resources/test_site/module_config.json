@@ -18,9 +18,6 @@
     "manual": {
       "enabled": true
     },
-    "ntp": {
-      "enabled": true
-    },
     "ssh": {
       "enabled": false
     }
@@ -50,7 +47,7 @@
       "category": "Security",
       "expected": "Recommended"
     },
-    "manual.test.travis": {
+    "manual.test.name": {
       "required": "pass",
       "category": "Security",
       "expected": "Recommended",

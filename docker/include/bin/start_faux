@@ -87,7 +87,11 @@ if [ -n "${options[xdhcp]}" ]; then
     fi
     ip addr show $intf_name
 
-    (while true; do ping -c 1 10.20.0.1; sleep 5; done) &
+    if [ -n "${options[opendns]}" ]; then
+        dhcp_dns=8.8.8.8
+        echo nameserver ${dhcp_dns#DNS=} > /etc/resolv.conf
+        route add default gw 10.20.255.254 $intf_name # fixed IP in start_networking
+    fi
 else
     echo Running dhclient...
     dhclient -v
@@ -137,11 +141,11 @@ fi
 
 if [ -n "${options[bacnet]}" ]; then
     echo Starting bacnet loop device.
-    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+    java -cp bacnetFaux/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Pass.json"  &
 elif [ -n "${options[bacnetfail]}" ]; then
     echo Starting bacnet loop device.
-    java -cp bacnetTests/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
+    java -cp bacnetFaux/build/libs/bacnet-1.0-SNAPSHOT-all.jar \
          FauxDeviceEngine.EntryPoint $local_ip $broadcast_ip "Faux-Device-Fail.json"  &
 fi
 
@@ -149,18 +153,16 @@ fi
 # NTPv3 query to the IP of time.google.com (since resolv.conf is modified by other tests)
 STATIC_NTP_SERVER=216.239.35.8
 if [ -n "${options[ntpv4]}" ]; then
-    (while date; do
-    	dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
-    	ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
-    	echo Transmitting NTP query to $ntp_server using NTPv4
-    	ntpdate -q -o 4 $ntp_server
-	sleep 5
-    done) &
+    dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
+    ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
+    echo Transmitting NTP query to $ntp_server using NTPv4
+    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 2 &
+    sleep 5
 elif [ -n "${options[ntpv3]}" ]; then
     (while date; do
     	echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
-    	ntpdate -q -o 3 $STATIC_NTP_SERVER
-	sleep 5
+    	java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 2 &
+	    sleep 5
     done) &
 fi
 
@@ -183,21 +185,16 @@ if [ -n "${options[ntp_pass]}" -o -n "${options[ntp_fail]}" ]; then
 fi
 
 if [ -n "${options[broadcast_client]}" ]; then
-    echo Starting broatcast client.
-    cip_port=41794
+    echo Starting broadcast client.
+    port=41794
     cycle_seconds=20
     duration_seconds=360
-    python TransportClient/client.py $broadcast_ip $cip_port broadcast $duration_seconds $cycle_seconds &
+    python TransportClient/client.py $broadcast_ip $port broadcast $duration_seconds $cycle_seconds &
 fi
 
 if [ -n "${options[discover]}" ]; then
     echo Starting bacnet discover loop.
     bin/bacnet_discover loop &
-fi
-
-if [ -n "${options[curl]}" ]; then
-    echo Starting curl loop.
-    (while true; do curl -o - http://google.com; sleep 1; done) &
 fi
 
 if [ -n "${options[brute]}" ]; then
@@ -229,6 +226,17 @@ if [ -n "${options[pubber]}" ]; then
          curl -o /dev/null https://google.com
          sleep 30
      done) &
+fi
+
+# Periodically sends ARP packets
+if [ -z "${options[xarp]}" ]; then
+    echo Starting arp send loop.
+    (while true; do arpsend -D -e 10.20.254.254 $intf_name; sleep 2; done) &
+fi
+
+if [ -n "${options[curl]}" ]; then
+    echo Starting curl loop.
+    (while true; do curl -o - http://google.com; sleep 1; done) &
 fi
 
 conf_file=/config/start/start_faux.sh

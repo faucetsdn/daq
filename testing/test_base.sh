@@ -19,7 +19,7 @@ MARKER=inst/run-9a02571e8f00/nodes/hold*/activate.log
 monitor_marker $MARKER "sudo ip link set pri-eth1 down"
 cmd/run -b -k -s site_path=inst/tmp_site
 echo DAQ result code $? | tee -a $TEST_RESULTS
-more inst/result.log | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
 
 echo Redacted report for 9a02571e8f00:
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
@@ -38,7 +38,7 @@ DAQ_TARGETS=test_hold cmd/build
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
 cmd/run -s interfaces.faux.opts=telnet device_specs=resources/device_specs/simple.json
 echo DAQ result code $? | tee -a $TEST_RESULTS
-more inst/result.log | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 

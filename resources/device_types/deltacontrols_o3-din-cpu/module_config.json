@@ -15,16 +15,10 @@
     "bacnet": {
       "enabled": true
     },
-    "macoui": {
-      "enabled": true
-    },
     "mudgee": {
       "enabled": true
     },
     "nmap": {
-      "enabled": true
-    },
-    "ntp": {
       "enabled": true
     },
     "switch": {
