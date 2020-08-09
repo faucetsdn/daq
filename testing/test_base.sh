@@ -29,7 +29,7 @@ echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
 docker rmi daqf/test_hold:latest # Check case of missing image
 cmd/run -s -k interfaces.faux.opts=telnet
 echo DAQ result code $? | tee -a $TEST_RESULTS
-more inst/result.log | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 DAQ_TARGETS=test_hold cmd/build
