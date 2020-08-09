@@ -21,17 +21,20 @@ import logger
 
 LOGGER = logger.get_logger('runner')
 
+
 class PortInfo():
     """Simple container for device port info"""
     active = False
     flapping_start = None
     port_no = None
 
+
 class IpInfo():
     """Simple container for device ip info"""
     ip_addr = None
     state = None
     delta_sec = None
+
 
 class Device:
     """Simple container for device info"""
@@ -46,6 +49,7 @@ class Device:
 
     def __repr__(self):
         return self.mac
+
 
 class Devices:
     """Container for all devices"""
@@ -86,7 +90,7 @@ class Devices:
 
     def get_all_devices(self):
         """Get all devices"""
-        return self._devices.values()
+        return list(self._devices.values())
 
     def get_triggered_devices(self):
         """Get devices with hosts"""
@@ -593,8 +597,7 @@ class DAQRunner:
             LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
             return gateway, False
 
-        hosts = map(lambda device: device.host, ready_devices)
-        ready_trigger = all(map(lambda host: host.trigger_ready(), hosts))
+        ready_trigger = all(map(lambda host: device.host.trigger_ready(), ready_devices))
         if not ready_trigger:
             LOGGER.info('DHCP device group %s not ready to trigger', group_name)
             return gateway, False
