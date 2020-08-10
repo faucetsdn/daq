@@ -3,7 +3,7 @@ Many Tests
 DAQ stress test
 Enough results: 1
 Enough DHCP timeouts: 1
-Enough static ips: 1
+Enough static ips: 0
 Found NTP and DNS traffic for static ip devices: 1 1
 Enough ipaddr tests: 1
 Enough alternate subnet ips: 1
