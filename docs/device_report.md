@@ -55,8 +55,8 @@ Overall device result FAIL
 |Expectation|pass|fail|skip|info|gone|
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
-|Recommended|2|0|0|0|0|
-|Other|4|2|22|1|2|
+|Recommended|1|0|0|0|1|
+|Other|6|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -82,11 +82,12 @@ Overall device result FAIL
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |pass|security.nmap.http|Other|Other|No running http servers have been found.|
+|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
 |skip|security.passwords.http|Other|Other|Port 80 not open on target device.|
 |skip|security.passwords.https|Other|Other|Port 443 not open on target device.|
 |skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
-|pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
+|gone|security.ports.nmap|Security|Recommended||
 |skip|security.tls.v1|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1_2|Other|Other|IOException unable to connect to server|
