@@ -3,6 +3,8 @@
 # Catch errors in diff piped through cat
 set -o pipefail
 
+DAQ_TEST=aux
+
 if [ -z "$DAQ_TEST" ]; then
     echo DAQ_TEST not defined.
     false

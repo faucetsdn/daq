@@ -114,6 +114,7 @@ capture_test_results macoui
 capture_test_results tls
 capture_test_results password
 capture_test_results discover
+capture_test_results dhcp
 capture_test_results network
 capture_test_results ntp
 

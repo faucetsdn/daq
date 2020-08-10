@@ -1,0 +1,10 @@
+{
+  "modules": {
+    "ipaddr": {
+      "enabled": false
+    },
+    "dhcp": {
+      "enabled": false
+    }
+  }
+}
