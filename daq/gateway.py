@@ -202,16 +202,16 @@ class Gateway():
 
     def attach_target(self, device):
         """Attach the given target to this gateway; return number of attached targets."""
-        assert device.mac not in self.targets, 'target %s already attached to gw' % device.mac
-        LOGGER.info('Attaching target %s to gateway group %s', device.mac, self.name)
+        assert device.mac not in self.targets, 'target %s already attached to gw' % device
+        LOGGER.info('Attaching target %s to gateway group %s', device, self.name)
         self.targets[device.mac] = device
         return len(self.targets)
 
     def detach_target(self, device):
         """Detach the given target from this gateway; return number of remaining targets."""
-        assert device.mac in self.targets, 'target %s not attached to gw' % device.mac
+        assert device.mac in self.targets, 'target %s not attached to gw' % device
         LOGGER.info('Detach target %s from gateway group %s: %s',
-                    device.mac, self.name, list(self.targets.keys()))
+                    device, self.name, list(self.targets.keys()))
         del self.targets[device.mac]
         return len(self.targets)
 

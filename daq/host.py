@@ -225,7 +225,7 @@ class ConnectedHost:
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
-        self.logger.info('Configuring device %s as type %s', self.target_mac, device_type)
+        self.logger.info('Configuring device %s as type %s', self.device, device_type)
         site_path = self.config.get('site_path')
         type_path = os.path.abspath(os.path.join(site_path, 'device_types', device_type))
         return type_path
@@ -794,12 +794,12 @@ class ConnectedHost:
         return str(exception)
 
     def _control_updated(self, control_config):
-        self.logger.info('Updated control config: %s %s', self.target_mac, control_config)
+        self.logger.info('Updated control config: %s %s', self, control_config)
         paused = control_config.get('paused')
         if not paused and self.is_ready():
             self._start_run()
         elif paused and not self.is_ready():
-            self.logger.warning('Inconsistent control state for update of %s', self.target_mac)
+            self.logger.warning('Inconsistent control state for update of %s', self)
 
     def reload_config(self):
         """Trigger a config reload due to an external config change."""
@@ -808,12 +808,12 @@ class ConnectedHost:
         if device_ready:
             self._loaded_config = new_config
         config_bundle = self._make_config_bundle(new_config)
-        self.logger.info('Device config reloaded: %s %s', device_ready, self.target_mac)
+        self.logger.info('Device config reloaded: %s %s', device_ready, self)
         self._record_result(None, run_info=device_ready, config=config_bundle)
         return new_config
 
     def _dev_config_updated(self, dev_config):
-        self.logger.info('Device config update: %s %s', self.target_mac, dev_config)
+        self.logger.info('Device config update: %s %s', self, dev_config)
         self._write_module_config(dev_config, self._device_base)
         self.reload_config()
 
@@ -833,4 +833,4 @@ class ConnectedHost:
             self._gcp.release_config(self._CONTROL_PATH % self.target_port)
 
     def __repr__(self):
-        return self.target_mac + " on port %d" % self.target_port if self.target_port else ""
+        return str(self.device) + (" on port %d" % self.target_port if self.target_port else "")

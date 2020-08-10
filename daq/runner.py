@@ -22,14 +22,14 @@ import logger
 LOGGER = logger.get_logger('runner')
 
 
-class PortInfo():
+class PortInfo:
     """Simple container for device port info"""
     active = False
     flapping_start = None
     port_no = None
 
 
-class IpInfo():
+class IpInfo:
     """Simple container for device ip info"""
     ip_addr = None
     state = None
@@ -48,7 +48,7 @@ class Device:
         self.ip_info = IpInfo()
 
     def __repr__(self):
-        return self.mac
+        return self.mac.replace(":", "")
 
 
 class Devices:
@@ -504,7 +504,7 @@ class DAQRunner:
             LOGGER.info('Gateway for existing device group %s is %s', group_name, existing)
             return existing
 
-        set_num = self._find_gateway_set()
+        set_num = self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
         gateway = gateway_manager.Gateway(self, group_name, set_num, self.network)
@@ -611,10 +611,12 @@ class DAQRunner:
         for device in gateway_devices:
             self.target_set_error(device, DaqException('terminated'))
 
-    def _find_gateway_set(self):
+    def _find_gateway_set(self, device):
         if not self.gateway_sets:
             raise Exception('Could not allocate open gateway set')
-
+        if device.port.port_no in self.gateway_sets:
+            self.gateway_sets.remove(device.port.port_no)
+            return device.port.port_no
         return self.gateway_sets.pop()
 
     @staticmethod

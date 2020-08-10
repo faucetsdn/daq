@@ -69,9 +69,9 @@ RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 dhcp requests 1 1 1 1
-3c:5a:b4:1e:8f:0a: []
-3c:5a:b4:1e:8f:0b: ['3c:5a:b4:1e:8f:0b:ping:TimeoutError']
-9a:02:57:1e:8f:01: []
+3c5ab41e8f0a: []
+3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']
+9a02571e8f01: []
 arp.txt
 dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
@@ -216,9 +216,9 @@ Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
-9a:02:57:1e:8f:01: ['9a:02:57:1e:8f:01:ping:Exception']
-9a:02:57:1e:8f:02: ['9a:02:57:1e:8f:02:hold:Exception']
-9a:02:57:1e:8f:03: ['9a:02:57:1e:8f:03:hold:DaqException', '9a:02:57:1e:8f:03:ping:ValueError']
+9a02571e8f01: ['9a02571e8f01:ping:Exception']
+9a02571e8f02: ['9a02571e8f02:hold:Exception']
+9a02571e8f03: ['9a02571e8f03:hold:DaqException', '9a02571e8f03:ping:ValueError']
 Enough port disconnects: 1
-9a:02:57:1e:8f:00: ['9a:02:57:1e:8f:00:hold:DaqException']
+9a02571e8f00: ['9a02571e8f00:hold:DaqException']
 Done with tests

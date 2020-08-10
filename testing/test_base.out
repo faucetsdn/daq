@@ -2,7 +2,7 @@ Running testing/test_base.sh
 Base Tests
 %%%%%%%%%%%%%%%%%%%%%% Base tests
 DAQ result code 1
-9a:02:57:1e:8f:00: ['9a:02:57:1e:8f:00:hold:DaqException']
+9a02571e8f00: ['9a02571e8f00:hold:DaqException']
 # Device 9a02571e8f00, XXX to XXX
 
 Sample device description.
@@ -124,18 +124,18 @@ terminated
 
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
-9a:02:57:1e:8f:00: ['9a:02:57:1e:8f:00:hold:DaqException']
+9a02571e8f00: ['9a02571e8f00:hold:DaqException']
 |fail|security.ports.nmap|Other|Other|Some disallowed ports are open: 23|
 security.ports.nmap
 RESULT fail security.ports.nmap Some disallowed ports are open: 23
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
 DAQ result code 0
-9a:02:57:1e:8f:00: []
+9a02571e8f00: []
 |pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
 security.ports.nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
-9a:02:57:1e:8f:00: []
+9a02571e8f00: []
     dp_id: 1
     dp_id: 4886718345
 Switch test with target 192.0.2.138:2
@@ -146,22 +146,22 @@ switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Alt switch tests
 XXX faucet.valve INFO     DPID 1 (0x1) pri L2 learned on Port 1 9a:02:57:1e:8f:00 (L2 type 0x0800, L2 dst ff:ff:ff:ff:ff:ff, L3 src X.X.X.X, L3 dst 255.255.255.255) Port 1 VLAN 1002 (1 hosts total)
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
-result open 9a:02:57:1e:8f:01: [] 9a:02:57:1e:8f:02: [] 9a:02:57:1e:8f:03: []
+result open 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
 device open 1 1 1
 cntrlr open 1 1 1
-result base 9a:02:57:1e:8f:01: [] 9a:02:57:1e:8f:02: [] 9a:02:57:1e:8f:03: []
+result base 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
 device base 1 1 0
 cntrlr base 1 1 0
-result todev 9a:02:57:1e:8f:01: ['9a:02:57:1e:8f:01:ping:1'] 9a:02:57:1e:8f:02: ['9a:02:57:1e:8f:02:ping:1'] 9a:02:57:1e:8f:03: []
+result todev 9a02571e8f01: ['9a02571e8f01:ping:1'] 9a02571e8f02: ['9a02571e8f02:ping:1'] 9a02571e8f03: []
 device todev 0 0 0
 cntrlr todev 0 0 0
-result frdev 9a:02:57:1e:8f:01: [] 9a:02:57:1e:8f:02: ['9a:02:57:1e:8f:02:ping:1'] 9a:02:57:1e:8f:03: []
+result frdev 9a02571e8f01: [] 9a02571e8f02: ['9a02571e8f02:ping:1'] 9a02571e8f03: []
 device frdev 1 0 0
 cntrlr frdev 1 0 0
-result none 9a:02:57:1e:8f:01: ['9a:02:57:1e:8f:01:ping:1'] 9a:02:57:1e:8f:02: ['9a:02:57:1e:8f:02:ping:1'] 9a:02:57:1e:8f:03: []
+result none 9a02571e8f01: ['9a02571e8f01:ping:1'] 9a02571e8f02: ['9a02571e8f02:ping:1'] 9a02571e8f03: []
 device none 0 0 0
 cntrlr none 0 0 0
-result star 9a:02:57:1e:8f:01: [] 9a:02:57:1e:8f:02: [] 9a:02:57:1e:8f:03: []
+result star 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
 device star 1 1 1
 cntrlr star 1 1 0
 %%%%%%%%%%%%%%%%%%%%%% Done with tests

@@ -25,10 +25,9 @@ class DockerTest:
         self.tmpdir = tmpdir
         self.test_name = test_name
         self.runner = host.runner
-        # Host name can't be more than 15 characters.
-        # The name is also used to create interface in mininet
-        self.host_name = '%s_%s' % (test_name[:6], ''.join(
-            random.choice(string.ascii_letters) for i in range(3)))
+        # Host name can't be more than 15 characters
+        # because it is also used to create an interface in mininet.
+        self.host_name = '%s_%s' % (test_name[:6], self._get_random_string(3))
         self.docker_log = None
         self.docker_host = None
         self.callback = None
@@ -38,7 +37,7 @@ class DockerTest:
 
     def start(self, port, params, callback, finish_hook):
         """Start the docker test"""
-        LOGGER.debug('Target device %s starting docker test %s', self.device, self.test_name)
+        LOGGER.debug('%s starting docker test', self)
 
         self.start_time = datetime.datetime.now()
         self.callback = callback
@@ -64,7 +63,7 @@ class DockerTest:
         self._map_if_exists(vol_maps, params, 'type')
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
-        LOGGER.debug("Target device %s running docker test %s", self.device, image)
+        LOGGER.debug("%s running docker test %s", self, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         # Work around an instability in the faucet/clib/docker library, b/152520627.
         setattr(cls, 'pullImage', self._check_image)
@@ -77,20 +76,20 @@ class DockerTest:
             raise wrappers.DaqException(e)
 
         try:
-            LOGGER.debug("Target device %s activating docker test %s", self.device, image)
+            LOGGER.debug("%s activating docker test %s", self, image)
             pipe = host.activate(log_name=None)
             # Docker tests don't use DHCP, so manually set up DNS.
             host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
             if self._should_raise_test_exception('initialize'):
-                LOGGER.error('Target device %s inducing initialization failure', self.device)
+                LOGGER.error('%s inducing initialization failure', self)
                 raise Exception('induced initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
                                        error=self._docker_error)
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
-                LOGGER.error('Target device %s will induce callback failure', self.device)
+                LOGGER.error('%s will induce callback failure', self)
                 # Closing this now will cause error when attempting to write output.
                 self.docker_log.close()
         except Exception as e:
@@ -101,7 +100,7 @@ class DockerTest:
                 self.runner.monitor_forget(self.pipe.stdout)
                 self.pipe = None
             raise e
-        LOGGER.info("Target device %s test %s running", self.device, self.test_name)
+        LOGGER.info("%s running", self)
 
     def _check_image(self):
         lines = subprocess.check_output(["docker", "images", "--format",
@@ -171,6 +170,9 @@ class DockerTest:
             LOGGER.info("%s passed %ss",
                         self, delay)
         self.callback(return_code=return_code, exception=exception)
+
+    def _get_random_string(self, length):
+        return ''.join(random.choice(string.ascii_letters) for _ in range(length))
 
     def __repr__(self):
         return "Target device %s test %s" % (self.device, self.test_name)

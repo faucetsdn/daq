@@ -184,14 +184,15 @@ fail_module:
 EOF
 
 function kill_gateway {
-    pid=$(ps ax | fgrep tcpdump | egrep gw.*-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
-    echo Killing gateway eth0 dhcp tcpdump pid $pid
+    GW=$1
+    pid=$(ps ax | fgrep tcpdump | fgrep $GW-eth0 | fgrep -v docker | fgrep -v /tmp/ | awk '{print $1}')
+    echo Killing $GW-eth dhcp tcpdump pid $pid
     kill $pid
 }
 
 # Check that killing the dhcp monitor aborts the run.
 MARKER=inst/run-9a02571e8f03/nodes/hold*/activate.log
-monitor_marker $MARKER "kill_gateway"
+monitor_marker $MARKER "kill_gateway gw03"
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting hold test run
 rm -r inst/run-*
@@ -212,7 +213,7 @@ port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF
 monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 5; sudo ifconfig faux up"
-monitor_log "Target device 9a:02:57:1e:8f:00 test hold running" "sudo ifconfig faux down"
+monitor_log "Target device 9a02571e8f00 test hold running" "sudo ifconfig faux down"
 rm -r inst/run-*
 cmd/run -s -k
 disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
