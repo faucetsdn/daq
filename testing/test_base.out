@@ -138,15 +138,9 @@ terminated
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 9a02571e8f00: ['9a02571e8f00:hold:DaqException']
-|fail|security.nmap.ports|Other|Other|Some disallowed ports are open: 23|
-security.nmap.ports
-RESULT fail security.nmap.ports Some disallowed ports are open: 23
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
-DAQ result code 0
-9a02571e8f00: []
-|pass|security.ports.nmap|Other|Other|Only allowed ports found open.|
-security.ports.nmap
-RESULT pass security.ports.nmap Only allowed ports found open.
+DAQ result code 1
+9a02571e8f00: ['9a02571e8f00:nmap:TimeoutError']
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
 9a02571e8f00: []
     dp_id: 1
