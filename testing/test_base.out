@@ -147,7 +147,7 @@ DAQ result code 0
 security.ports.nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
-9a02571e8f00: []
+9a02571e8f00: ['9a02571e8f00:ipaddr:TimeoutError']
     dp_id: 1
     dp_id: 4886718345
 Switch test with target 192.0.2.138:2
