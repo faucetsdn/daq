@@ -69,9 +69,9 @@ RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 dhcp requests 1 1 1 1
-01: []
-02: ['02:ping:TimeoutError']
-03: []
+3c5ab41e8f0a: []
+3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']
+9a02571e8f01: []
 arp.txt
 dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
@@ -216,26 +216,9 @@ Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
 Redacted docs diff
 No report diff
-01: ['01:ping:Exception']
-02: ['02:hold:Exception']
-03: ['03:hold:DaqException', '03:ping:ValueError']
-inst/gw01/nodes/gw01/activate.log
-inst/gw02/nodes/gw02/activate.log
-inst/gw03/nodes/gw03/activate.log
-inst/run-port-01/nodes/fail01/activate.log
-inst/run-port-01/nodes/nmap01/activate.log
-inst/run-port-01/nodes/pass01/activate.log
-inst/run-port-01/nodes/ping01/activate.log
-inst/run-port-02/nodes/fail02/activate.log
-inst/run-port-02/nodes/hold02/activate.log
-inst/run-port-02/nodes/nmap02/activate.log
-inst/run-port-02/nodes/pass02/activate.log
-inst/run-port-02/nodes/ping02/activate.log
-inst/run-port-03/nodes/fail03/activate.log
-inst/run-port-03/nodes/hold03/activate.log
-inst/run-port-03/nodes/nmap03/activate.log
-inst/run-port-03/nodes/pass03/activate.log
-inst/run-port-03/nodes/ping03/activate.log
+9a02571e8f01: ['9a02571e8f01:ping:Exception']
+9a02571e8f02: ['9a02571e8f02:hold:Exception']
+9a02571e8f03: ['9a02571e8f03:hold:DaqException', '9a02571e8f03:ping:ValueError']
 Enough port disconnects: 1
-01: ['01:hold:DaqException']
+9a02571e8f00: ['9a02571e8f00:hold:DaqException']
 Done with tests
