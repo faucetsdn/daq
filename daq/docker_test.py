@@ -3,6 +3,8 @@
 import datetime
 import os
 import subprocess
+import string
+import random
 
 import logger
 from clib import docker_host
@@ -18,13 +20,14 @@ class DockerTest:
     TAGGED_IMAGE_FORMAT = IMAGE_NAME_FORMAT + ':latest'
     CONTAINER_PREFIX = 'daq'
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, host, target_port, tmpdir, test_name, module_config):
-        self.target_port = target_port
+    def __init__(self, host, tmpdir, test_name, module_config):
+        self.device = host.device
         self.tmpdir = tmpdir
         self.test_name = test_name
         self.runner = host.runner
-        self.host_name = '%s%02d' % (test_name, self.target_port)
+        # Host name can't be more than 15 characters
+        # because it is also used to create an interface in mininet.
+        self.host_name = '%s_%s' % (test_name[:6], self._get_random_string(3))
         self.docker_log = None
         self.docker_host = None
         self.callback = None
@@ -34,7 +37,7 @@ class DockerTest:
 
     def start(self, port, params, callback, finish_hook):
         """Start the docker test"""
-        LOGGER.debug('Target port %d starting docker test %s', self.target_port, self.test_name)
+        LOGGER.debug('%s starting docker test', self)
 
         self.start_time = datetime.datetime.now()
         self.callback = callback
@@ -60,7 +63,7 @@ class DockerTest:
         self._map_if_exists(vol_maps, params, 'type')
 
         image = self.IMAGE_NAME_FORMAT % self.test_name
-        LOGGER.debug("Target port %d running docker test %s", self.target_port, image)
+        LOGGER.debug("%s running docker test %s", self, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)
         # Work around an instability in the faucet/clib/docker library, b/152520627.
         setattr(cls, 'pullImage', self._check_image)
@@ -73,20 +76,20 @@ class DockerTest:
             raise wrappers.DaqException(e)
 
         try:
-            LOGGER.debug("Target port %d activating docker test %s", self.target_port, image)
+            LOGGER.debug("%s activating docker test %s", self, image)
             pipe = host.activate(log_name=None)
             # Docker tests don't use DHCP, so manually set up DNS.
             host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
             self.docker_log = host.open_log()
             if self._should_raise_test_exception('initialize'):
-                LOGGER.error('Target port %d inducing initialization failure', self.target_port)
+                LOGGER.error('%s inducing initialization failure', self)
                 raise Exception('induced initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.docker_log,
                                        hangup=self._docker_complete,
                                        error=self._docker_error)
             self.pipe = pipe
             if self._should_raise_test_exception('callback'):
-                LOGGER.error('Target port %d will induce callback failure', self.target_port)
+                LOGGER.error('%s will induce callback failure', self)
                 # Closing this now will cause error when attempting to write output.
                 self.docker_log.close()
         except Exception as e:
@@ -97,7 +100,7 @@ class DockerTest:
                 self.runner.monitor_forget(self.pipe.stdout)
                 self.pipe = None
             raise e
-        LOGGER.info("Target port %d test %s running", self.target_port, self.test_name)
+        LOGGER.info("%s running", self)
 
     def _check_image(self):
         lines = subprocess.check_output(["docker", "images", "--format",
@@ -108,7 +111,7 @@ class DockerTest:
 
     def terminate(self):
         """Forcibly terminate this container"""
-        LOGGER.info("Target port %d test %s terminating", self.target_port, self.test_name)
+        LOGGER.info("%s terminating", self)
         return self._docker_finalize()
 
     def _map_if_exists(self, vol_maps, params, kind):
@@ -116,18 +119,18 @@ class DockerTest:
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             vol_maps += ['%s:/config/%s' % (abs_base, kind)]
-            LOGGER.info('Target port %d mapping %s to /config/%s', self.target_port, abs_base, kind)
+            LOGGER.info('%s mapping %s to /config/%s', self, abs_base, kind)
 
     def _docker_error(self, exception):
-        LOGGER.error('Target port %d docker error: %s', self.target_port, str(exception))
+        LOGGER.error('%s docker error: %s', self, str(exception))
         if self._docker_finalize() is None:
-            LOGGER.warning('Target port %d docker already terminated.', self.target_port)
+            LOGGER.warning('%s docker already terminated.', self)
         else:
             self.callback(exception=exception)
 
     def _docker_finalize(self):
-        assert self.docker_host, 'docker host %s already finalized' % self.target_port
-        LOGGER.info('Target port %d docker finalize', self.target_port)
+        assert self.docker_host, 'docker host %s already finalized' % self
+        LOGGER.info('%s docker finalize', self)
         if self._finish_hook:
             self._finish_hook()
         self.runner.remove_host(self.docker_host)
@@ -139,12 +142,12 @@ class DockerTest:
         self.docker_log.close()
         self.docker_log = None
         if self._should_raise_test_exception('finalize'):
-            LOGGER.error('Target port %d inducing finalize failure', self.target_port)
+            LOGGER.error('%s inducing finalize failure', self)
             raise Exception('induced finalize failure')
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):
-        key = '%s_%02d' % (self.test_name, self.target_port)
+        key = "%s_%s" % (self.test_name, self.device.mac.replace(':', ''))
         return self.runner.config.get('fail_module', {}).get(key) == trigger_value
 
     def _docker_complete(self):
@@ -158,15 +161,21 @@ class DockerTest:
             exception = e
             LOGGER.exception(e)
         delay = (datetime.datetime.now() - self.start_time).total_seconds()
-        LOGGER.debug("Target port %d docker complete, return=%d (%s)",
-                     self.target_port, return_code, exception)
+        LOGGER.debug("%s docker complete, return=%d (%s)",
+                     self, return_code, exception)
         if return_code:
-            LOGGER.info("Target port %d test %s failed %ss: %s %s",
-                        self.target_port, self.test_name, delay, return_code, exception)
+            LOGGER.info("%s failed %ss: %s %s",
+                        self, delay, return_code, exception)
         else:
-            LOGGER.info("Target port %d test %s passed %ss",
-                        self.target_port, self.test_name, delay)
+            LOGGER.info("%s passed %ss",
+                        self, delay)
         self.callback(return_code=return_code, exception=exception)
+
+    def _get_random_string(self, length):
+        return ''.join(random.choice(string.ascii_letters) for _ in range(length))
+
+    def __repr__(self):
+        return "Target device %s test %s" % (self.device, self.test_name)
 
     def ip_listener(self, target_ip):
         """Do nothing b/c docker tests don't care about ip notifications"""
