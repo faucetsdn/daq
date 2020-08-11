@@ -63,7 +63,7 @@ def _get_local_reports(device, reports_dir, start, end, count):
     json_files = [f for f in os.listdir(reports_dir) if report_re.match(f)]
     json_files.sort(reverse=True)  # Match gcp behavior
     if count and len(json_files) > count:
-        json_files = json_files[len(json_files) - count:]
+        json_files = json_files[:count]
     for json_file in json_files:
         timestamp = report_re.search(json_file).group(1)
         start_str = _iso_to_fname(start)
