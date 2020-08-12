@@ -64,9 +64,9 @@ RESULT fail connection.network.ntp_support Not using NTPv4.
 RESULT fail connection.network.ntp_update Device clock not synchronized with local NTP server.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0b
 RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
-RESULT info communication.type.broadcast Broadcast packets received.
+RESULT info communication.type.broadcast Broadcast packets received. 
 RESULT skip connection.network.ntp_support No NTP packets received.
-RESULT skip connection.network.ntp_update Not enough NTP packets received.
+RESULT skip connection.network.ntp_update Not enough NTP packets received. Unicast packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
@@ -212,10 +212,10 @@ port-02 module_config modules
   `\.-''__.-' \ (     \_
     `'''       `\__   /\
                 ')
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 10000/open/tcp//snet-sensor-mgmt?/// Ignored State: closed (65534) 
+Host: X.X.X.X () Status: Up
+Host: X.X.X.X () Ports: 47808/closed/udp//bacnet/// Ignored State: closed (3)
+Host: X.X.X.X () Status: Up
+Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?/// Ignored State: closed (65534)
 Redacted docs diff
 No report diff
 9a02571e8f01: ['9a02571e8f01:ping:Exception']
