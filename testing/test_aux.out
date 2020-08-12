@@ -215,7 +215,7 @@ port-02 module_config modules
 Host: X.X.X.X () Status: Up
 Host: X.X.X.X () Ports: 47808/closed/udp//bacnet/// Ignored State: closed (3)
 Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///
+Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?/// Ignored State: closed (65534) 
 Redacted docs diff
 9a02571e8f01: ['9a02571e8f01:ping:Exception']
 9a02571e8f02: ['9a02571e8f02:hold:Exception']
