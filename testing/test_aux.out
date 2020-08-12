@@ -54,7 +54,9 @@ RESULT pass security.passwords.telnet Was not able to brute force using dictiona
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass connection.network.dhcp_short DHCP request received.
+RESULT pass connection.network.dhcp_long DHCP request received after lease expiry.
 RESULT fail connection.network.dhcp_short No DHCP request received.
+RESULT fail connection.network.dhcp_long No DHCP request received after lease expiry.
 RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass connection.network.ntp_support Using NTPv4.

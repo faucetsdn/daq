@@ -22,10 +22,12 @@ class IpAddrTest:
         self.host_name = '%s_%s' % (test_name, self.device.mac)
         self.log_path = os.path.join(self.tmpdir, 'nodes', self.host_name, 'activate.log')
         self.log_file = None
+        self.lease_time = self.host.config.get('dhcp_lease_time')
         self.callback = None
         self._ip_callback = None
         self.tests = [
             ('dhcp port_toggle test', self._dhcp_port_toggle_test),
+            ('dhcp lease_wait test', self._dhcp_lease_wait_test),
             ('dhcp multi subnet test', self._multi_subnet_test),
             ('ip change test', self._ip_change_test),
             ('finalize', self._finalize)
@@ -57,6 +59,15 @@ class IpAddrTest:
             self.log('disconnect port not enabled')
             return
         time.sleep(self.host.config.get("port_debounce_sec", 0) + 1)
+        self.host.connect_port(True)
+        self._ip_callback = self._next_test
+
+    def _dhcp_lease_wait_test(self):
+        if not self.host.connect_port(False):
+            self.log('disconnect port not enabled')
+            return
+        lease = int(self.lease_time[:-1])
+        time.sleep(lease*2 + 5)
         self.host.connect_port(True)
         self._ip_callback = self._next_test
 

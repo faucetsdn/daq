@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|2|0|0|0|0|
-|Other|5|2|22|1|2|
+|Other|6|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -70,6 +70,7 @@ Overall device result FAIL
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|connection.network.dhcp_short|Other|Other|DHCP request received.|
+|pass|connection.network.dhcp_long|Other|Other|DHCP request received after lease expiry.|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
@@ -613,6 +614,12 @@ connection.network.dhcp_short
 Reconnect device and check for DHCP request.
 --------------------
 RESULT pass connection.network.dhcp_short DHCP request received.
+--------------------
+connection.network.dhcp_long
+--------------------
+Wait for lease expiry and check for DHCP request.
+--------------------
+RESULT pass connection.network.dhcp_long DHCP request received after lease expiry.
 ```
 
 #### Module Config
