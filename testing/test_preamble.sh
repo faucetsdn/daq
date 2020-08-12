@@ -63,7 +63,7 @@ function redact {
         -e 's/open\|filtered/closed/' \
         -e 's/DAQ version.*//' \
         -e 's/Seq Index.*//' \
-        -e 's/\t/ /' \
+        -e 's/\t/ /g' \
         -e 's/Not shown: .* ports//' \
         -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
 }
