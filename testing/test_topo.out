@@ -17,7 +17,7 @@ check_socket 01 04 0 0
 check_socket 01 02 0 0
 check_socket 04 01 0 0
 check_bacnet 01 02 1 1 1 1
-check_bacnet 01 04 0 1 1 1
+check_bacnet 01 04 1 1 1 1
 check_bacnet 02 03 0 1 1 1
 check_bacnet 02 04 1 1 1 1
 check_bacnet 03 01 0 1 1 1
