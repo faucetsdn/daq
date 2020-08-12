@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|2|0|0|0|0|
-|Other|4|2|22|1|2|
+|Other|5|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -200,18 +200,6 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 |Attribute|Value|
 |---|---|
 |enabled|True|
-
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-|timeout_sec|900|
-|port_flap_timeout_sec|20|
-|dhcp_ranges|[{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 16}]|
 
 ## Module switch
 
@@ -540,26 +528,6 @@ RESULT pass manual.test.name Manual test - for testing
 |---|---|
 |enabled|True|
 
-## Module dhcp
-
-
-#### Report
-
-```
---------------------
-connection.network.dhcp_short
---------------------
-Reconnect device and check for DHCP request.
---------------------
-RESULT pass connection.network.dhcp_short DHCP request received.
-```
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-
 ## Module network
 
 
@@ -613,6 +581,38 @@ Mac OUI Test
 --------------------
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module ipaddr
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|900|
+|port_flap_timeout_sec|20|
+|dhcp_ranges|[{'start': '192.168.0.1', 'end': '192.168.255.254', 'prefix_length': 16}, {'start': '10.0.0.1', 'end': '10.255.255.254', 'prefix_length': 8}, {'start': '172.16.0.1', 'end': '172.31.255.254', 'prefix_length': 12}]|
+
+## Module dhcp
+
+
+#### Report
+
+```
+--------------------
+connection.network.dhcp_short
+--------------------
+Reconnect device and check for DHCP request.
+--------------------
+RESULT pass connection.network.dhcp_short DHCP request received.
 ```
 
 #### Module Config
