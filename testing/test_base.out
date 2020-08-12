@@ -113,18 +113,6 @@ RESULT pass security.ports.nmap Only allowed ports found open.
 |---|---|
 |enabled|True|
 
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-|timeout_sec|900|
-|port_flap_timeout_sec|20|
-|dhcp_ranges|[{'start': 'X.X.X.X', 'end': '192.168.255.254', 'prefix_length': 16}]|
-
 ## Module hold
 
 
@@ -147,7 +135,7 @@ DAQ result code 0
 security.ports.nmap
 RESULT pass security.ports.nmap Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
-9a02571e8f00: ['9a02571e8f00:ipaddr:TimeoutError']
+9a02571e8f00: []
     dp_id: 1
     dp_id: 4886718345
 Switch test with target 192.0.2.138:2
