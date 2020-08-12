@@ -133,6 +133,7 @@ class DAQRunner:
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
+        self.run_trigger_type = config.get('run_trigger_type', 'PORT')
         self.run_tests = True
         self.stream_monitor = None
         self.exception = None
@@ -242,7 +243,10 @@ class DAQRunner:
                 return
             (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
             if dpid and port and vid:
-                self._handle_port_learn(dpid, port, vid, target_mac)
+                if self.run_trigger_type == "PORT":
+                    self._handle_port_learn(dpid, port, vid, target_mac)
+                elif self.run_trigger_type == "VLAN" and self.network.is_system_port(dpid, port):
+                    self._handle_device_learn(vid, target_mac)
                 return
             (dpid, restart_type) = self.faucet_events.as_config_change(event)
             if dpid is not None:
@@ -304,6 +308,14 @@ class DAQRunner:
             self._target_set_trigger(self._devices.get(target_mac))
         else:
             LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
+
+    def _handle_device_learn(self, vid, target_mac):
+        LOGGER.info('%s learned on vid %s', target_mac, vid)
+        if not self._devices.get(target_mac):
+            device = self._devices.new_device(target_mac)
+        else:
+            device = self._devices.get(target_mac)
+        self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
         with self._callback_lock:
