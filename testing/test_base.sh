@@ -56,7 +56,8 @@ echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
 cp config/system/alt.yaml local/system.yaml
 # TODO: Replace this with proper test once VLAN-triggers are added.
 timeout 120s cmd/run -s
-fgrep 'Port 1 9a:02:57:1e:8f:00' inst/faucet.log | redact | tee -a $TEST_RESULTS
+fgrep '9a:02:57:1e:8f:00 learned on vid 1001' inst/cmdrun.log | head -1 | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS # ping test should fail since there are no dhcp packets captured
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
 cp config/system/muddy.conf local/system.conf

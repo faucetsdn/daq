@@ -117,6 +117,14 @@ message DaqConfig {
 
   // USI url
   USISetup usi_setup = 49;
+
+  // Configures events that trigger DAQ tests
+  TestTriggerType test_trigger_type = 50;
+}
+
+enum TestTriggerType {
+  PORT = 0;
+  VLAN = 1;
 }
 
 /**

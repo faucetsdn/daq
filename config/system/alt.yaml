@@ -18,3 +18,6 @@ interfaces:
   faux:
     opts: 
     port: 2
+
+# use vlan trigger
+test_trigger_type: VLAN

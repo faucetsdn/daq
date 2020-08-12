@@ -144,7 +144,8 @@ Switch test with target 192.0.2.138:2
 Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Alt switch tests
-XXX faucet.valve INFO     DPID 1 (0x1) pri L2 learned on Port 1 9a:02:57:1e:8f:00 (L2 type 0x0800, L2 dst ff:ff:ff:ff:ff:ff, L3 src X.X.X.X, L3 dst 255.255.255.255) Port 1 VLAN 1002 (1 hosts total)
+9a:02:57:1e:8f:00 learned on vid 1001
+9a02571e8f00: ['9a02571e8f00:ping:1']
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
 device open 1 1 1
