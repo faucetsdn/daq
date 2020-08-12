@@ -20,4 +20,4 @@ interfaces:
     port: 2
 
 # use vlan trigger
-test_trigger_type: VLAN
+run_trigger_type: VLAN

@@ -133,7 +133,7 @@ class DAQRunner:
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
-        self.test_trigger_type = config.get('test_trigger_type', 'PORT')
+        self.run_trigger_type = config.get('run_trigger_type', 'PORT')
         self.run_tests = True
         self.stream_monitor = None
         self.exception = None
@@ -243,9 +243,9 @@ class DAQRunner:
                 return
             (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
             if dpid and port and vid:
-                if self.test_trigger_type == "PORT":
+                if self.run_trigger_type == "PORT":
                     self._handle_port_learn(dpid, port, vid, target_mac)
-                elif self.test_trigger_type == "VLAN" and self.network.is_system_port(dpid, port):
+                elif self.run_trigger_type == "VLAN" and self.network.is_system_port(dpid, port):
                     self._handle_device_learn(vid, target_mac)
                 return
             (dpid, restart_type) = self.faucet_events.as_config_change(event)
