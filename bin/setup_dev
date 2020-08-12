@@ -20,7 +20,7 @@ FORCHB=${DAQ_FORCH_BRANCH}
 FORCHX=$(cat etc/FORCH_VERSION)
 FORCHV=${DAQ_FORCH_VER:-$FORCHX}
 
-UDMIR=${DAQ_UDMI_REPO:-https://github.com/faucetsdn/udmi}
+UDMIR=${DAQ_UDMI_REPO:-https://github.com/grafnu/udmi}
 UDMIB=${DAQ_UDMI_BRANCH}
 UDMIX=$(cat etc/UDMI_VERSION)
 UDMIV=${DAQ_UDMI_VER:-$UDMIX}
