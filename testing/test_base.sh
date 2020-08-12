@@ -15,7 +15,7 @@ bin/build_proto check || exit 1
 echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml local/system.conf
 # Check that bringing down the trunk interface terminates DAQ.
-MARKER=inst/run-port-01/nodes/hold01/activate.log
+MARKER=inst/run-9a02571e8f00/nodes/hold*/activate.log
 monitor_marker $MARKER "sudo ip link set pri-eth1 down"
 cmd/run -b -k -s site_path=inst/tmp_site
 echo DAQ result code $? | tee -a $TEST_RESULTS
@@ -30,7 +30,7 @@ docker rmi daqf/test_hold:latest # Check case of missing image
 cmd/run -s -k interfaces.faux.opts=telnet
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
-cat inst/run-port-01/nodes/nmap01/activate.log
+cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 DAQ_TARGETS=test_hold cmd/build
 
@@ -40,16 +40,16 @@ cmd/run -s interfaces.faux.opts=telnet device_specs=resources/device_specs/simpl
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
-cat inst/run-port-01/nodes/nmap01/activate.log
+cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
 cp config/system/ext.yaml local/system.yaml
 cmd/run -s
 cat inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
-fgrep -i switch inst/run-port-02/nodes/ping02/activate.log | tee -a $TEST_RESULTS
-cat -vet inst/run-port-02/nodes/ping02/activate.log
-count=$(fgrep icmp_seq=5 inst/run-port-02/nodes/ping02/activate.log | wc -l)
+fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | tee -a $TEST_RESULTS
+cat -vet inst/run-9a02571e8f00/nodes/ping*/activate.log
+count=$(fgrep icmp_seq=5 inst/run-9a02571e8f00/nodes/ping*/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
@@ -61,11 +61,11 @@ echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
 cp config/system/muddy.conf local/system.conf
 
-device_traffic="tcpdump -en -r inst/run-port-01/scans/monitor.pcap port 47808"
+device_traffic="tcpdump -en -r inst/run-9a02571e8f01/scans/monitor.pcap port 47808"
 device_bcast="$device_traffic and ether broadcast"
 device_ucast="$device_traffic and ether dst 9a:02:57:1e:8f:02"
 device_xcast="$device_traffic and ether dst 9a:02:57:1e:8f:03"
-cntrlr_traffic="tcpdump -en -r inst/run-port-02/scans/monitor.pcap port 47808"
+cntrlr_traffic="tcpdump -en -r inst/run-9a02571e8f02/scans/monitor.pcap port 47808"
 cntrlr_bcast="$cntrlr_traffic and ether broadcast"
 cntrlr_ucast="$cntrlr_traffic and ether dst 9a:02:57:1e:8f:01"
 cntrlr_xcast="$cntrlr_traffic and ether dst 9a:02:57:1e:8f:03"
@@ -83,7 +83,7 @@ function test_mud {
     ucast=$($cntrlr_ucast | wc -l)
     xcast=$($cntrlr_xcast | wc -l)
     echo cntrlr $type $(($bcast > 2)) $(($ucast > 2)) $(($xcast > 0)) | tee -a $TEST_RESULTS
-    more inst/run-port-*/nodes/*/activate.log | cat
+    more inst/run-*/nodes/*/activate.log | cat
 }
 
 test_mud open
