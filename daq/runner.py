@@ -556,7 +556,7 @@ class DAQRunner:
             self._check_and_activate_gateway(device)
 
     def _get_active_ports(self):
-        return [p for p in self._ports.values() if p.active]
+        return [p.port_no for p in self._ports.values() if p.active]
 
     def _check_and_activate_gateway(self, device):
         # Host ready to be activated and DHCP happened / Static IP

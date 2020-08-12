@@ -125,7 +125,11 @@ echo Redacted soak diff | tee -a $TEST_RESULTS
 
 if [ -f "$gcp_cred" ]; then
     mv inst/reports/combo_*.md out/report_local.md
-    echo Pulling reports from gcp...
+    echo Pulling reports from gcp... from $start_time to $end_time
+    echo \n******Local reports******
+    ls -l inst/reports/report_9a02571e8f05*.md
+    echo *************************\n
+
     bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time \
         count=2 from_gcp=true
     echo GCP results diff | tee -a $GCP_RESULTS
