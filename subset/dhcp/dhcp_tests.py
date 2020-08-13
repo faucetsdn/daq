@@ -124,7 +124,6 @@ write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 if test_request == 'connection.network.dhcp_short':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_short))
     result = test_dhcp_short()
-
 elif test_request == 'connection.network.dhcp_long':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_long))
     result = test_dhcp_long()
