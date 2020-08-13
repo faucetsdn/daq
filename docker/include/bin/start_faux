@@ -69,7 +69,7 @@ elif [ -n "${options[passwordfail]}" ]; then
 fi
 
 # security.nmap.http faux device setup
-if [ -n "${options[http]}" ]; then
+if [ -n "${options[ohttp]}" ]; then
     cp /root/nginx/nginxpass.conf /etc/nginx/nginx.conf
     sed -i 's/listen 80;/listen 12345; listen 54321;/' /etc/nginx/nginx.conf
     service nginx start
