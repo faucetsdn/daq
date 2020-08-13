@@ -1,21 +1,30 @@
 from __future__ import absolute_import
 import sys
+import json
 from scapy.all import rdpcap, DHCP
 
 arguments = sys.argv
 test_request = str(arguments[1])
 
 scan_file = '/scans/test_ipaddr.pcap'
+module_config_file = '/config/device/module_config.json'
+dhcp_ranges = []
 report_filename = 'report.txt'
 ignore = '%%'
 summary_text = ''
 dash_break_line = '--------------------\n'
 description_dhcp_short = 'Reconnect device and check for DHCP request.'
 description_dhcp_long = 'Wait for lease expiry and check for DHCP request.'
+description_private_address = 'Device supports all private address ranges.'
 result = None
 
 dhcp_request = 3
 dhcp_acknowledge = 5
+
+
+with open(module_config_file) as json_file:
+    json_data = json.load(json_file)
+    dhcp_ranges = json_data['modules']['ipaddr']['dhcp_ranges']
 
 
 def write_report(string_to_append):
@@ -74,6 +83,41 @@ def test_dhcp_long():
     return 'pass'
 
 
+def to_ipv4(ip):
+    return tuple(int(n) for n in ip.split('.'))
+
+
+def in_range(ip, start, end):
+    return to_ipv4(start) < to_ipv4(ip) < to_ipv4(end)
+
+
+def supports_range(capture, start, end):
+    found_request = False
+    for packet in capture:
+        if DHCP not in packet:
+            continue
+        if not packet[DHCP].options[0][1] == dhcp_request:
+            continue
+        if get_dhcp_option(packet, 'requested_addr') is None:
+            continue
+        if in_range(get_dhcp_option(packet, 'requested_addr'), start, end):
+            found_request = True
+    return found_request
+
+
+def test_private_address():
+    capture = rdpcap(scan_file)
+    passing = True
+    for dhcp_range in dhcp_ranges:
+        if not supports_range(capture, dhcp_range['start'], dhcp_range['end']):
+            passing = False
+    if passing:
+        add_summary('All private address ranges are supported.')
+        return 'pass'
+    add_summary('Not all private address ranges are supported.')
+    return 'fail'
+
+
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
 
@@ -84,5 +128,8 @@ if test_request == 'connection.network.dhcp_short':
 elif test_request == 'connection.network.dhcp_long':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_long))
     result = test_dhcp_long()
+elif test_request == 'connection.dhcp.private_address':
+    write_report("{d}\n{b}".format(b=dash_break_line, d=description_private_address))
+    result = test_private_address()
 
 write_report("RESULT {r} {t} {s}\n".format(r=result, t=test_request, s=summary_text.strip()))

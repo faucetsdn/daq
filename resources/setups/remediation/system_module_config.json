@@ -74,6 +74,16 @@
       "required": "pass",
       "expected": "Required Pass"
     },
+    "connection.dhcp.private_address": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.network.dhcp_short": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
     "connection.network.dhcp_long": {
       "category": "Connection",
       "required": "pass",
