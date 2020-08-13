@@ -69,8 +69,8 @@ Overall device result FAIL
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
-|pass|connection.network.dhcp_short|Other|Other|DHCP request received.|
 |pass|connection.network.dhcp_long|Other|Other|DHCP request received after lease expiry.|
+|pass|connection.network.dhcp_short|Other|Other|DHCP request received.|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
