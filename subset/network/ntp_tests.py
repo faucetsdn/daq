@@ -63,9 +63,12 @@ def ntp_payload(packet):
 
 
 def test_ntp_support():
-    capture = rdpcap(startup_pcap_file)
-    if len(capture) > 0:
-        version = ntp_client_version(capture)
+    packets = ntp_packets(startup_capture)
+    if os.path.isfile(monitor_pcap_file):
+        monitor_capture = rdpcap(monitor_pcap_file)
+        packets += ntp_packets(monitor_capture)
+    if len(packets) > 0:
+        version = ntp_client_version(packets)
         if version is None:
             add_summary("No NTP packets received.")
             return 'skip'
