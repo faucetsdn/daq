@@ -41,6 +41,8 @@ finish_hook: bin/dump_network
 # topology hook: executed when device topology changes
 topology_hook: bin/dump_network
 
+run_trigger_type: PORT
+
 # usi url for DAQ to connect to
 usi_setup: 
   url: localhost:5000
