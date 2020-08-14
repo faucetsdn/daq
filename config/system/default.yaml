@@ -32,7 +32,7 @@ site_path: local/site/
 
 # DHCP lease time parameters
 initial_dhcp_lease_time: 120s
-dhcp_lease_time: 120s
+dhcp_lease_time: 500s
 long_dhcp_response_sec: 105
 
 # finish hook: executed at the end of every test
