@@ -63,6 +63,7 @@ def ntp_payload(packet):
 
 
 def test_ntp_support():
+    startup_capture = rdpcap(startup_pcap_file)
     packets = ntp_packets(startup_capture)
     if os.path.isfile(monitor_pcap_file):
         monitor_capture = rdpcap(monitor_pcap_file)
