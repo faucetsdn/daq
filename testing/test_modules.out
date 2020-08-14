@@ -26,11 +26,17 @@ RESULT fail security.tls.v1_2.x509 Certificate is expired.
 RESULT fail security.tls.v1_3 Certificate could not be validated.
 RESULT fail security.tls.v1_3.x509 Certificate could not be validated.
 Testing nmap
-RESULT pass security.ports.nmap Only allowed ports found open.
+RESULT pass security.nmap.ports Only allowed ports found open.
+RESULT pass security.nmap.http No running http servers have been found.
 Testing nmap bacnet
-RESULT pass security.ports.nmap Only allowed ports found open.
+RESULT pass security.nmap.ports Only allowed ports found open.
+RESULT pass security.nmap.http No running http servers have been found.
 Testing nmap telnet
-RESULT fail security.ports.nmap Some disallowed ports are open: 23
+RESULT fail security.nmap.ports Some disallowed ports are open: 23.
+RESULT pass security.nmap.http No running http servers have been found.
+Testing nmap ohttp
+RESULT fail security.nmap.ports Some disallowed ports are open: 443,12345,54321.
+RESULT fail security.nmap.http Some ports are running http servers: 12345,54321.
 Testing ssh
 RESULT skip security.ssh.version Device is not running an SSH server
 Testing ssh ssh

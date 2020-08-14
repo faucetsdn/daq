@@ -47,7 +47,7 @@ cp config/system/ext.yaml local/system.yaml
 cmd/run -s
 cat inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
-fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | tee -a $TEST_RESULTS
+fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | sed -e "s/\r//g" | tee -a $TEST_RESULTS
 cat -vet inst/run-9a02571e8f00/nodes/ping*/activate.log
 count=$(fgrep icmp_seq=5 inst/run-9a02571e8f00/nodes/ping*/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
