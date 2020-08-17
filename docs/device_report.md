@@ -48,14 +48,14 @@ Overall device result FAIL
 
 |Category|Result|
 |---|---|
-|Security|PASS|
+|Security|1/2|
 |Other|1/2|
 |Connectivity|n/a|
 
 |Expectation|pass|fail|skip|info|gone|
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
-|Recommended|2|0|0|0|0|
+|Recommended|1|0|0|0|1|
 |Other|6|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
@@ -83,11 +83,13 @@ Overall device result FAIL
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
+|pass|security.nmap.http|Other|Other|No running http servers have been found.|
+|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
 |skip|security.passwords.http|Other|Other|Port 80 not open on target device.|
 |skip|security.passwords.https|Other|Other|Port 443 not open on target device.|
 |skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
-|pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
+|gone|security.ports.nmap|Security|Recommended||
 |skip|security.tls.v1|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1_2|Other|Other|IOException unable to connect to server|
@@ -156,18 +158,32 @@ RESULT pass base.target.ping target reached
 
 ```
 --------------------
-security.ports.nmap
+security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
 # Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
-RESULT pass security.ports.nmap Only allowed ports found open.
+RESULT pass security.nmap.ports Only allowed ports found open.
+
+--------------------
+security.nmap.http
+--------------------
+Check that the device does not have open ports exposing an unencrypted web interface using HTTP
+--------------------
+# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG /tmp/http.log X.X.X.X
+# Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
+Host: X.X.X.X () Status: Up
+Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?/// 
+# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
+No running http servers have been found.
+--------------------
+RESULT pass security.nmap.http No running http servers have been found.
 
 ```
 
