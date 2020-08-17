@@ -117,6 +117,14 @@ message DaqConfig {
 
   // USI url
   USISetup usi_setup = 49;
+
+  // Configures events that trigger a DAQ run 
+  RunTriggerType run_trigger_type = 50;
+}
+
+enum RunTriggerType {
+  PORT = 0;
+  VLAN = 1;
 }
 
 /**

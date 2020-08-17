@@ -62,7 +62,10 @@ function redact {
         -e 's/0\.[0-9]+s latency/XXX/' \
         -e 's/open\|filtered/closed/' \
         -e 's/DAQ version.*//' \
+        -e 's/Seq Index.*//' \
+        -e 's/Ignored State.*//' \
         -e 's/Not shown: .* ports//' \
+        -e 's/\t/ /g' \
         -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
 }
 
