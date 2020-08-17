@@ -47,7 +47,7 @@ cp config/system/ext.yaml local/system.yaml
 cmd/run -s
 cat inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
-fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | tee -a $TEST_RESULTS
+fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | sed -e "s/\r//g" | tee -a $TEST_RESULTS
 cat -vet inst/run-9a02571e8f00/nodes/ping*/activate.log
 count=$(fgrep icmp_seq=5 inst/run-9a02571e8f00/nodes/ping*/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
@@ -55,8 +55,9 @@ echo switch ping $count | tee -a $TEST_RESULTS
 echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
 cp config/system/alt.yaml local/system.yaml
 # TODO: Replace this with proper test once VLAN-triggers are added.
-timeout 120s cmd/run -s
-fgrep 'Port 1 9a:02:57:1e:8f:00' inst/faucet.log | redact | tee -a $TEST_RESULTS
+timeout 1200s cmd/run -s
+fgrep '9a:02:57:1e:8f:00 learned on vid 1001' inst/cmdrun.log | head -1 | redact | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS # ping test should fail since there are no dhcp packets captured
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
 cp config/system/muddy.conf local/system.conf
