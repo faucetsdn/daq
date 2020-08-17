@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|6|2|22|1|2|
+|Other|7|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -613,7 +613,7 @@ RESULT fail connection.mac_oui Manufacturer prefix not found!
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|timeout_sec|1200|
+|timeout_sec|2000|
 |port_flap_timeout_sec|20|
 |dhcp_ranges|[{'start': '192.168.0.1', 'end': '192.168.255.254', 'prefix_length': 16}, {'start': '10.0.0.1', 'end': '10.255.255.254', 'prefix_length': 8}, {'start': '172.16.0.1', 'end': '172.31.255.254', 'prefix_length': 12}]|
 
