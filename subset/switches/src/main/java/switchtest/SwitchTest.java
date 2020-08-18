@@ -95,6 +95,7 @@ public class SwitchTest {
       captureResult("poe.power", Result.SKIP, "This test is disabled");
       captureResult("poe.negotiation", Result.SKIP, "This test is disabled");
       captureResult("poe.support", Result.SKIP, "This test is disabled");
+      return;
     }
 
     POEStatus poeStatus = powerResponse.getPoeStatus();
