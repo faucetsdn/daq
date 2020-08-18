@@ -6,8 +6,7 @@ import os
 arguments = sys.argv
 
 test_request = str(arguments[1])
-startup_pcap_file = str(arguments[2])
-monitor_pcap_file = str(arguments[3])
+pcap_file = str(arguments[2])
 
 report_filename = 'ntp_tests.txt'
 ignore = '%%'
@@ -63,11 +62,8 @@ def ntp_payload(packet):
 
 
 def test_ntp_support():
-    startup_capture = rdpcap(startup_pcap_file)
-    packets = ntp_packets(startup_capture)
-    if os.path.isfile(monitor_pcap_file):
-        monitor_capture = rdpcap(monitor_pcap_file)
-        packets += ntp_packets(monitor_capture)
+    capture = rdpcap(pcap_file)
+    packets = ntp_packets(capture)
     if len(packets) > 0:
         version = ntp_client_version(packets)
         if version is None:
@@ -85,11 +81,8 @@ def test_ntp_support():
 
 
 def test_ntp_update():
-    startup_capture = rdpcap(startup_pcap_file)
-    packets = ntp_packets(startup_capture)
-    if os.path.isfile(monitor_pcap_file):
-        monitor_capture = rdpcap(monitor_pcap_file)
-        packets += ntp_packets(monitor_capture)
+    capture = rdpcap(pcap_file)
+    packets = ntp_packets(capture)
     if len(packets) < 2:
         add_summary("Not enough NTP packets received.")
         return 'skip'
