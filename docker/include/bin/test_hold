@@ -1,11 +1,5 @@
 #!/bin/bash -e
 
-echo TAP TAP
-
-env
-
-ip link
-
 if [ -n "$LOCAL_IP" ]; then
     ip addr add $LOCAL_IP dev `hostname`-eth0
 fi

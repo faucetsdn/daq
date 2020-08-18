@@ -19,8 +19,7 @@ class HostModule:
         self.runner = host.runner
         # Host name can't be more than 15 characters
         # because it is also used to create an interface in mininet.
-        port_set = host.gateway.port_set
-        self.host_name = '%s%02d' % (test_name, port_set)
+        self.host_name = '%s%02d' % (test_name, host.device.set_id)
         self.callback = None
         self._finish_hook = None
         self.start_time = None
