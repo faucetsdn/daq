@@ -699,12 +699,6 @@ class ConnectedHost:
             'password': self.switch_setup.get('password')
         }
 
-    def _get_usi_config(self):
-        return {
-            'url': self._usi_config.get('url'),
-            'rpc_timeout_sec': self._usi_config.get('rpc_timeout_sec')
-        }
-
     def _host_name(self):
         return self.test_host.host_name if self.test_host else 'unknown'
 
@@ -747,7 +741,7 @@ class ConnectedHost:
             'mac_addr': self.target_mac,
             'started': gcp.get_timestamp(),
             'switch': self._get_switch_config(),
-            'usi': self._get_usi_config()
+            'usi': self._usi_config
         }
         config['run_info'].update(self.runner.get_run_info())
 

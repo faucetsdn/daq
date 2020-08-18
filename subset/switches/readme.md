@@ -68,6 +68,10 @@ Example of all necessary parameters in the system.conf related to physical switc
 	#Define the password for the switch. This parameter is optional.
 	switch_setup.password=switch_p@55
 
+    #Define the usi url using your docker0's ip and port 5000, and re-run bin/setup_base if you're upgrading from versions before 1.9.0
+    #Make sure docker's ip range doesn't conflict with that of the switch. Default docker0 ip is 172.17.0.1. 
+    usi.url=172.17.0.1:5000
+
 ## Conditions for connection.port_duplex
  - pass -> If the duplex mode is detected as full
  - fail -> If the duplex mode is detected but not full or if the duplex mode cannot be detected
