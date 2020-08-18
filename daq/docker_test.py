@@ -119,7 +119,6 @@ class DockerTest(HostModule):
 
     def _docker_finalize(self):
         assert self.docker_host, 'docker host %s already finalized' % self
-        LOGGER.info('%s docker finalize', self)
         if self._finish_hook:
             self._finish_hook()
         self.runner.remove_host(self.docker_host)
@@ -127,6 +126,7 @@ class DockerTest(HostModule):
             self.runner.monitor_forget(self.pipe.stdout)
             self.pipe = None
         return_code = self.docker_host.terminate()
+        LOGGER.info('%s docker finalize %d', self, return_code)
         self.docker_host = None
         self.docker_log.close()
         self.docker_log = None

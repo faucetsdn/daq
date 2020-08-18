@@ -10,10 +10,6 @@ LOGGER = logger.get_logger('module')
 class HostModule:
     """Base class for host test modules"""
 
-    callback = None
-    _finish_hook = None
-    start_time = None
-
     def __init__(self, host, tmpdir, test_name, module_config):
         self.host = host
         self.tmpdir = tmpdir
@@ -25,6 +21,9 @@ class HostModule:
         # because it is also used to create an interface in mininet.
         port_set = host.gateway.port_set
         self.host_name = '%s%02d' % (test_name, port_set)
+        self.callback = None
+        self._finish_hook = None
+        self.start_time = None
 
     def start(self, port, params, callback, finish_hook):
         """Start a test module"""
