@@ -64,10 +64,7 @@ class Devices:
         device = Device()
         device.mac = mac
         self._devices[mac] = device
-        if port_info:
-            device.port = port_info
-        else:
-            device.port = PortInfo()
+        device.port = port_info if port_info else PortInfo()
         port_no = device.port.port_no
         set_id = port_no if port_no else self._allocate_set_id()
         assert set_id not in self._set_ids, "Duplicate device set id %d" % set_id
