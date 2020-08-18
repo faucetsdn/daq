@@ -34,6 +34,7 @@ class _STATE:
     TERM = 'Host terminated'
 
 
+
 class MODE:
     """Test module modes for state reporting."""
     INIT = 'init'
@@ -109,7 +110,6 @@ class ConnectedHost:
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', 0))
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
-        self._finish_hook_script = config.get('finish_hook')
         self._usi_config = config.get('usi_setup', {})
         self._topology_hook_script = config.get('topology_hook')
         self._mirror_intf_name = None
@@ -698,7 +698,7 @@ class ConnectedHost:
             'username': self.switch_setup.get('username'),
             'password': self.switch_setup.get('password')
         }
-    
+
     def _get_usi_config(self):
         return {
             'url': self._usi_config.get('url'),
@@ -715,13 +715,13 @@ class ConnectedHost:
         return os.path.join(self._host_dir_path(), 'tmp')
 
     def _finish_hook(self):
-        if self._finish_hook_script:
+        script = self.config.get('finish_hook')
+        if script:
             finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
-            self.logger.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
-            os.system('%s %s 2>&1 > %s/finish.out' %
-                      (self._finish_hook_script, finish_dir, finish_dir))
+            self.logger.info('Executing finish_hook: %s %s', script, finish_dir)
+            os.system('%s %s 2>&1 > %s/finish.out' % (script, finish_dir, finish_dir))
 
     def _topology_hook(self):
         if self._topology_hook_script:

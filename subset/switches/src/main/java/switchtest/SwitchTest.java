@@ -30,7 +30,8 @@ public class SwitchTest {
    * @param deviceConfigPoeEnabled poe config from module_config
    * @param debug print debug output
    */
-  public SwitchTest(Channel channel, int rpcTimeoutSec, boolean deviceConfigPoeEnabled, boolean debug) {
+  public SwitchTest(Channel channel, int rpcTimeoutSec, boolean deviceConfigPoeEnabled,
+                    boolean debug) {
     this.debug = debug;
     blockingStub = USIServiceGrpc.newBlockingStub(channel);
     this.deviceConfigPoeEnabled = deviceConfigPoeEnabled;
@@ -142,8 +143,10 @@ public class SwitchTest {
    * @param switchInfo SwitchInfo from the USI proto file
    */
   public void test(SwitchInfo switchInfo) {
-    PowerResponse powerResponse = blockingStub.withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getPower(switchInfo);
-    InterfaceResponse interfaceResponse = blockingStub.withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getInterface(switchInfo);
+    PowerResponse powerResponse = blockingStub
+        .withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getPower(switchInfo);
+    InterfaceResponse interfaceResponse = blockingStub
+        .withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getInterface(switchInfo);
     String report = testLink(interfaceResponse)
         + testSpeed(interfaceResponse)
         + testDuplex(interfaceResponse)

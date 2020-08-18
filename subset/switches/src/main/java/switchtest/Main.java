@@ -15,7 +15,7 @@ public class Main {
 
     if (args.length < 5) {
       throw new IllegalArgumentException(
-          "Expected usiUrl, switchIpAddress && port && supportPOE && switchModel as arguments");
+          "usiUrl, rpcTimeoutSec switchIpAddress, port, supportPOE, switchModel [username] [password] as arguments");
     }
 
     String usiUrl = args[0];

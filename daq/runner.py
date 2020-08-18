@@ -43,9 +43,10 @@ class Device:
         self.host = None
         self.gateway = None
         self.group = None
-        self.port = PortInfo()
+        self.port = None
         self.dhcp_ready = False
         self.ip_info = IpInfo()
+        self.set_id = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -55,19 +56,33 @@ class Devices:
     """Container for all devices"""
     def __init__(self):
         self._devices = {}
+        self._set_ids = set()
 
-    def new_device(self, mac):
+    def new_device(self, mac, port_info=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
         device = Device()
         device.mac = mac
         self._devices[mac] = device
+        device.port = port_info if port_info else PortInfo()
+        port_no = device.port.port_no
+        set_id = port_no if port_no else self._allocate_set_id()
+        assert set_id not in self._set_ids, "Duplicate device set id %d" % set_id
+        self._set_ids.add(set_id)
+        device.set_id = set_id
         return device
+
+    def _allocate_set_id(self):
+        set_id = 1
+        while set_id in self._set_ids:
+            set_id += 1
+        return set_id
 
     def remove(self, device):
         """Removing a device"""
         assert self.contains(device), "Device %s not found." % device
         del self._devices[device.mac]
+        self._set_ids.remove(device.set_id)
 
     def get(self, device_mac):
         """Get a device using its mac address"""
@@ -303,8 +318,7 @@ class DAQRunner:
                 self._ports[port] = PortInfo()
                 self._ports[port].port_no = port
             if not self._devices.get(target_mac):
-                device = self._devices.new_device(target_mac)
-                device.port = self._ports[port]
+                self._devices.new_device(target_mac, port_info=self._ports[port])
             self._target_set_trigger(self._devices.get(target_mac))
         else:
             LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
