@@ -6,7 +6,7 @@ import subprocess
 import string
 import random
 
-from host import HostModule
+from module import HostModule
 
 import logger
 from clib import docker_host

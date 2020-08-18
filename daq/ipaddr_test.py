@@ -6,7 +6,8 @@ import os
 import copy
 import logger
 
-from host import HostModule
+
+from module import HostModule
 
 LOGGER = logger.get_logger('ipaddr')
 
