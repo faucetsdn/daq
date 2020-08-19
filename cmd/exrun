@@ -16,6 +16,7 @@ export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
 export DAQ_SYS_UNAME=$(uname -a)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
+uri_url_override=""
 run_args="$@"
 
 if [ `whoami` != root ]; then
@@ -118,7 +119,6 @@ else
 fi
 
 docker rm -f daq-usi || true
-uri_url_override=""
 if [ "$usi_setup_url" == "localhost:5000" ]; then
     autostart cmd/usi
     docker0_ip=`ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
