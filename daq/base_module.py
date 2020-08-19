@@ -19,9 +19,10 @@ class HostModule:
         self.device = host.device
         self.test_config = module_config.get('modules').get(test_name)
         self.runner = host.runner
-        # Host name can't be more than 15 characters
-        # because it is also used to create an interface in mininet.
         self.host_name = '%s%02d' % (test_name, host.device.set_id)
+        # Host name can't be more than 10 characters because it is also used to create a
+        # network interface with -eth0 on the end and there's a hard linux limit on length.
+        assert len(self.host_name) <= 10, 'Hostname %s too long'
         self.callback = None
         self._finish_hook = None
         self.start_time = None
