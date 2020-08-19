@@ -740,7 +740,8 @@ class ConnectedHost:
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
             'started': gcp.get_timestamp(),
-            'switch': self._get_switch_config()
+            'switch': self._get_switch_config(),
+            'usi': self._usi_config
         }
         config['run_info'].update(self.runner.get_run_info())
 

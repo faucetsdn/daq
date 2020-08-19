@@ -4,6 +4,7 @@ import daq.usi.BaseSwitchController;
 import daq.usi.ResponseHandler;
 import grpc.InterfaceResponse;
 import grpc.LinkStatus;
+import grpc.POENegotiation;
 import grpc.POEStatus;
 import grpc.POESupport;
 import grpc.PowerResponse;
@@ -28,6 +29,8 @@ public class AlliedTelesisX230 extends BaseSwitchController {
   // TODO Not certain about AT power "Deny" status string. Can't find a device to produce that state
   private static final Map<String, POESupport> poeSupportMap = Map.of("Enabled",
       POESupport.ENABLED, "Disabled", POESupport.DISABLED);
+  private static final Map<String, POENegotiation> poeNegotiationMap = Map.of("Enabled",
+      POENegotiation.NEGOTIATION_ENABLED, "Disabled", POENegotiation.NEGOTIATION_DISABLED);
   private static final Map<Pattern, String> interfaceProcessMap =
       Map.of(Pattern.compile("Link is (\\w+)"), "link",
           Pattern.compile("current duplex (\\w+)"), "duplex",
@@ -211,8 +214,9 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     }
     String poeSupport = powerMap.getOrDefault("admin", null);
     String poeStatus = powerMap.getOrDefault("oper", null);
-    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.OFF))
-        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.DISABLED))
+    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, null))
+        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, null))
+        .setPoeNegotiation(poeNegotiationMap.getOrDefault(poeSupport, null))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }
