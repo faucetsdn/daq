@@ -47,7 +47,7 @@ cmd/build force $VERSION
 
 cmd/build push
 
-cat > /tmp/git_expected.expected <<EOF
+cat > /tmp/git_status.expected <<EOF
  M etc/docker_images.txt
  M etc/docker_images.ver
 EOF
@@ -55,7 +55,7 @@ EOF
 git status --porcelain > /tmp/git_status.found
 
 if ! diff /tmp/git_status.expected /tmp/git_status.found; then
-    echo Expected build images not found. Something went wrong.
+    echo Expected build index changes not found. Something went wrong.
     false
 fi
 rm -f /tmp/git_status.*
