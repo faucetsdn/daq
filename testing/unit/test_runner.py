@@ -43,7 +43,7 @@ class TestRunner(unittest.TestCase):
     def test_reap_stale_ports(self):
         """Test port flap timeout config override"""
         self.runner.target_set_error = MagicMock()
-        device = self.runner._devices.new_device("0000000000")
+        device = self.runner._devices.new_device("0000000000", None)
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
         ConnectedHost.__init__ = MagicMock(return_value=None)

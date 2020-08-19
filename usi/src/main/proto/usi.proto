@@ -24,6 +24,7 @@ message PowerResponse {
   float max_power_consumption = 2;
   POESupport poe_support = 3;
   POEStatus poe_status = 4;
+  POENegotiation poe_negotiation = 5;
 }
 
 message InterfaceResponse {
@@ -53,6 +54,11 @@ enum POEStatus {
   OFF = 1;
   FAULT = 2;
   DENY = 3;
+}
+
+enum POENegotiation {
+  NEGOTIATION_ENABLED = 0;
+  NEGOTIATION_DISABLED = 1;
 }
 
 /*

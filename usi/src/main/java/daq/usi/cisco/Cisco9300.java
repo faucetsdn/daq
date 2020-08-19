@@ -4,6 +4,7 @@ import daq.usi.BaseSwitchController;
 import daq.usi.ResponseHandler;
 import grpc.InterfaceResponse;
 import grpc.LinkStatus;
+import grpc.POENegotiation;
 import grpc.POEStatus;
 import grpc.POESupport;
 import grpc.PowerResponse;
@@ -33,6 +34,8 @@ public class Cisco9300 extends BaseSwitchController {
       "off", POEStatus.OFF, "fault", POEStatus.FAULT, "power-deny", POEStatus.DENY);
   private static final Map<String, POESupport> poeSupportMap = Map.of("auto", POESupport.ENABLED,
       "off", POESupport.DISABLED);
+  private static final Map<String, POENegotiation> poeNegotiationtMap = Map.of("auto",
+      POENegotiation.NEGOTIATION_ENABLED, "off", POENegotiation.NEGOTIATION_DISABLED);
   private static final int WAIT_MS = 100;
   private ResponseHandler<String> responseHandler;
 
@@ -244,6 +247,7 @@ public class Cisco9300 extends BaseSwitchController {
     String poeStatus = powerMap.getOrDefault("oper", null);
     return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, null))
         .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, null))
+        .setPoeNegotiation(poeNegotiationtMap.getOrDefault(poeStatus, null))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }

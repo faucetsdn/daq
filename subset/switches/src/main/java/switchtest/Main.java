@@ -1,50 +1,47 @@
 package switchtest;
 
-import switchtest.allied.AlliedTelesisX230;
-import switchtest.cisco.Cisco9300;
+import grpc.SwitchInfo;
+import grpc.SwitchModel;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 
 public class Main {
 
-  public static void main(String[] args) throws Exception {
+  /**
+   * Switch test runner.
+   * @param args args
+   */
+  public static void main(String[] args) {
 
-    if (args.length < 4) {
+    if (args.length < 6) {
       throw new IllegalArgumentException(
-          "Expected ipAddress && port && supportPOE && switchModel as arguments");
+          "args: usiUrl rpcTimeoutSec switchIpAddress port supportPOE switchModel"
+              + " [username] [password]");
     }
 
-    String ipAddress = args[0];
+    String usiUrl = args[0];
+    int rpcTimeoutSec = Integer.parseInt(args[1]);
+    String ipAddress = args[2];
 
-    int interfacePort = Integer.parseInt(args[1]);
-
-    boolean supportsPOE = args[2].equals("true");
-
-    SupportedSwitchModelsEnum switchModel = null;
-    try {
-      switchModel = SupportedSwitchModelsEnum.valueOf(args[3]);
-    } catch (Exception e) {
-      System.out.println("Unknown Switch Model: " + args[3]);
-      throw e;
+    int interfacePort = Integer.parseInt(args[3]);
+    boolean supportsPoe = args[4].equals("true");
+    SwitchModel switchModel = SwitchModel.valueOf(args[5]);
+    String username = "";
+    String password = "";
+    if (args.length > 6) {
+      username = args[6];
     }
-
-    String user = null;
-    if (args.length >= 5) {
-      user = args[4];
+    if (args.length > 7) {
+      password = args[7];
     }
-    String password = null;
-    if (args.length >= 6) {
-      password = args[5];
-    }
-
-    SwitchInterrogator switchInterrogator = null;
-    switch (switchModel) {
-      case CISCO_9300:
-        switchInterrogator = new Cisco9300(ipAddress, interfacePort, supportsPOE, user, password);
-        break;
-      case ALLIED_TELESIS_X230:
-        switchInterrogator =
-            new AlliedTelesisX230(ipAddress, interfacePort, supportsPOE, user, password);
-    }
-    Thread switchInterrogatorThread = new Thread(switchInterrogator);
-    switchInterrogatorThread.start();
+    SwitchInfo switchInfo = SwitchInfo.newBuilder()
+        .setDevicePort(interfacePort)
+        .setIpAddr(ipAddress)
+        .setModel(switchModel)
+        .setUsername(username)
+        .setPassword(password).build();
+    ManagedChannel channel = ManagedChannelBuilder.forTarget(usiUrl).usePlaintext().build();
+    SwitchTest switchTest = new SwitchTest(channel, rpcTimeoutSec, supportsPoe, false);
+    switchTest.test(switchInfo);
   }
 }
