@@ -3,10 +3,6 @@
   "modules": {
     "hold": {
       "enabled": true
-    },
-    "macoui": {
-      "enabled": true,
-      "timeout_sec": 1
     }
   }
 }

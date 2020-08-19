@@ -120,9 +120,9 @@ function run_test {
         test -d $conf_dir || (mkdir -p $conf_dir; echo sleep 30 >> $cmd_file)
     done
     cmd/run -s
-    cat inst/run-port-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
-    cat inst/run-port-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
-    more inst/run-port-*/nodes/ping*/activate.log | cat
+    cat inst/run-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
+    cat inst/run-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
+    more inst/run-*/nodes/ping*/activate.log | cat
     more inst/gw0*/nodes/gw0*/activate.log | cat
     more inst/gw0*/dhcp_monitor.txt | cat
 }

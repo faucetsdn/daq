@@ -15,16 +15,13 @@
     "ipaddr": {
       "timeout_sec": 120
     },
-    "macoui": {
-      "enabled": true
-    },
     "mudgee": {
       "enabled": true
     },
-    "nmap": {
+    "network": {
       "enabled": true
     },
-    "ntp": {
+    "nmap": {
       "enabled": true
     },
     "switch": {
@@ -85,6 +82,11 @@
       "expected": "Required Pass"
     },
     "connection.network.ntp_support": {
+      "category": "Network Time",
+      "required": "pass",
+      "expected": "Recommended Pass"
+    },
+    "connection.network.ntp_update": {
       "category": "Network Time",
       "required": "pass",
       "expected": "Recommended Pass"

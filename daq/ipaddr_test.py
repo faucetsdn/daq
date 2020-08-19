@@ -6,24 +6,20 @@ import os
 import copy
 import logger
 
+
+from base_module import HostModule
+
 LOGGER = logger.get_logger('ipaddr')
 
 
-class IpAddrTest:
+class IpAddrTest(HostModule):
     """Module for inline ipaddr tests"""
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, host, target_port, tmpdir, test_name, module_config):
-        self.host = host
-        self.target_port = target_port
-        self.tmpdir = tmpdir
-        self.test_config = module_config.get('modules').get('ipaddr')
+    def __init__(self, host, tmpdir, test_name, module_config):
+        super().__init__(host, tmpdir, test_name, module_config)
         self.test_dhcp_ranges = copy.copy(self.test_config.get('dhcp_ranges', []))
-        self.test_name = test_name
-        self.host_name = '%s%02d' % (test_name, self.target_port)
         self.log_path = os.path.join(self.tmpdir, 'nodes', self.host_name, 'activate.log')
         self.log_file = None
-        self.callback = None
         self._ip_callback = None
         self.tests = [
             ('dhcp port_toggle test', self._dhcp_port_toggle_test),
@@ -34,8 +30,8 @@ class IpAddrTest:
 
     def start(self, port, params, callback, finish_hook):
         """Start the ip-addr tests"""
-        self.callback = callback
-        LOGGER.debug('Target port %d starting ipaddr test %s', self.target_port, self.test_name)
+        super().start(port, params, callback, finish_hook)
+        LOGGER.debug('Target device %s starting ipaddr test %s', self.device, self.test_name)
         self.log_file = open(self.log_path, 'w')
         self._next_test()
 

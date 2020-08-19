@@ -48,15 +48,15 @@ Overall device result FAIL
 
 |Category|Result|
 |---|---|
-|Security|PASS|
+|Security|1/2|
 |Other|1/2|
 |Connectivity|n/a|
 
-|Expectation|pass|fail|skip|gone|
-|---|---|---|---|---|
-|Required|1|0|0|0|
-|Recommended|2|0|0|0|
-|Other|2|2|22|2|
+|Expectation|pass|fail|skip|info|gone|
+|---|---|---|---|---|---|
+|Required|1|0|0|0|0|
+|Recommended|1|0|0|0|1|
+|Other|6|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -66,23 +66,28 @@ Overall device result FAIL
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
+|info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
+|pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
+|pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
-|pass|manual.test.travis|Security|Recommended|Manual test - for testing|
+|pass|manual.test.name|Security|Recommended|Manual test - for testing|
 |skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
 |skip|poe.power|Other|Other|No local IP has been set, check system config|
 |skip|poe.support|Other|Other|No local IP has been set, check system config|
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
-|skip|security.passwords.http|Other|Other|Port 80 is not open on target device.|
-|skip|security.passwords.https|Other|Other|Port 443 is not open on target device.|
-|skip|security.passwords.ssh|Other|Other|Port 22 is not open on target device.|
-|skip|security.passwords.telnet|Other|Other|Port 23 is not open on target device.|
-|pass|security.ports.nmap|Security|Recommended|Only allowed ports found open.|
+|pass|security.nmap.http|Other|Other|No running http servers have been found.|
+|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
+|skip|security.passwords.http|Other|Other|Port 80 not open on target device.|
+|skip|security.passwords.https|Other|Other|Port 443 not open on target device.|
+|skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
+|skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
+|gone|security.ports.nmap|Security|Recommended||
 |skip|security.tls.v1|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
 |skip|security.tls.v1_2|Other|Other|IOException unable to connect to server|
@@ -151,18 +156,32 @@ RESULT pass base.target.ping target reached
 
 ```
 --------------------
-security.ports.nmap
+security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
 # Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	Ignored State: closed (3)
+Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
-RESULT pass security.ports.nmap Only allowed ports found open.
+RESULT pass security.nmap.ports Only allowed ports found open.
+
+--------------------
+security.nmap.http
+--------------------
+Check that the device does not have open ports exposing an unencrypted web interface using HTTP
+--------------------
+# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG /tmp/http.log X.X.X.X
+# Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
+Host: X.X.X.X () Status: Up
+Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?/// 
+# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
+No running http servers have been found.
+--------------------
+RESULT pass security.nmap.http No running http servers have been found.
 
 ```
 
@@ -265,30 +284,6 @@ RESULT skip poe.support No local IP has been set, check system config
 |---|---|
 |enabled|True|
 |poe|{'enabled': True}|
-
-## Module macoui
-
-
-#### Report
-
-```
---------------------
-connection.mac_oui
---------------------
-Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer
---------------------
-Using the host hardware address 9a:02:57:1e:8f:01
-Mac OUI Test
---------------------
-RESULT fail connection.mac_oui Manufacturer prefix not found!
-
-```
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
 
 ## Module bacext
 
@@ -400,92 +395,80 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 
 ```
 --------------------
-security.passwords.http
+security.admin.password.http
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: http, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: http]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+80/tcp closed http
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.http Port 80 is not open on target device.
+RESULT skip security.passwords.http Port 80 not open on target device.
 
 --------------------
-security.passwords.https
+security.admin.password.https
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: https, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: https]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT    STATE  SERVICE
+443/tcp closed https
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.https Port 443 is not open on target device.
+RESULT skip security.passwords.https Port 443 not open on target device.
 
 --------------------
-security.passwords.telnet
+security.admin.password.ssh
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: ssh, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: telnet]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+22/tcp closed ssh
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.telnet Port 23 is not open on target device.
+RESULT skip security.passwords.ssh Port 22 not open on target device.
 
 --------------------
-security.passwords.ssh
+security.admin.password.telnet
 --------------------
-Verify all default passwords are updated and new Google provided passwords are set.
+Verify all device manufacturer default passwords are changed for protocol: telnet, and new passwords are set.
 --------------------
-[STARTING WITH IP:X.X.X.X, MAC:9a:02:57:1e:8f:01, PROTOCOL: ssh]
-Starting NMAP check...
 
 Starting Nmap 7.60 ( https://nmap.org ) at XXX
 Nmap scan report for daq-faux-1 (X.X.X.X)
 Host is up (XXX).
 
-PORT      STATE SERVICE
-10000/tcp open  snet-sensor-mgmt
+PORT   STATE  SERVICE
+23/tcp closed telnet
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 
 Nmap done: 1 IP address (1 host up) scanned in XXX
-nmap X.X.X.X
-Done.
+Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.ssh Port 22 is not open on target device.
+RESULT skip security.passwords.telnet Port 23 not open on target device.
 
 ```
 
@@ -494,6 +477,7 @@ RESULT skip security.passwords.ssh Port 22 is not open on target device.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|dictionary_dir|resources/faux|
 
 ## Module udmi
 
@@ -543,13 +527,13 @@ RESULT skip cloud.udmi.system No device id
 
 ```
 --------------------
-manual.test.travis
+manual.test.name
 --------------------
 
 --------------------
 No additional information provided
 --------------------
-RESULT pass manual.test.travis Manual test - for testing
+RESULT pass manual.test.name Manual test - for testing
 
 ```
 
@@ -559,18 +543,59 @@ RESULT pass manual.test.travis Manual test - for testing
 |---|---|
 |enabled|True|
 
-## Module ntp
+## Module network
 
 
 #### Report
 
 ```
 --------------------
+connection.min_send
+--------------------
+Device sends data at a frequency of less than 5 minutes.
+--------------------
+
+
+
+
+
+
+
+
+
+
+
+RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
+--------------------
+communication.type.broadcast
+--------------------
+Device sends unicast or broadcast packets.
+--------------------
+
+
+RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
+--------------------
 connection.network.ntp_support
 --------------------
 Device supports NTP version 4.
 --------------------
 RESULT pass connection.network.ntp_support Using NTPv4.
+--------------------
+connection.network.ntp_update
+--------------------
+Device synchronizes its time to the NTP server.
+--------------------
+RESULT pass connection.network.ntp_update Device clock synchronized.
+--------------------
+connection.mac_oui
+--------------------
+Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer
+--------------------
+Using the host hardware address 9a:02:57:1e:8f:01
+Mac OUI Test
+--------------------
+RESULT fail connection.mac_oui Manufacturer prefix not found!
+
 ```
 
 #### Module Config

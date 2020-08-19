@@ -4,11 +4,6 @@ source testing/test_preamble.sh
 
 echo Aux Tests >> $TEST_RESULTS
 
-# Runs lint checks and some similar things
-echo Lint checks | tee -a $TEST_RESULTS
-bin/check_style
-echo check_style exit code $? | tee -a $TEST_RESULTS
-
 # Function to create pubber config files (for use in cloud tests)
 
 function make_pubber {
@@ -41,7 +36,9 @@ EOF
 
 function capture_test_results {
     module_name=$1
-    fgrep -h RESULT inst/run-port-*/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
+    for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do 
+      fgrep -h RESULT inst/run-$mac/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
+    done
 }
 
 # Setup an instance test site
@@ -54,20 +51,25 @@ cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
+
+# Add extra configs to a copy of the baseline module config for the password test to select which dictionaries to use.
+cat resources/setups/baseline/module_config.json | jq '.modules.password += {"dictionary_dir":"resources/faux"}' > local/module_config.json
+
 cat <<EOF > local/system.yaml
 ---
 include: config/system/all.conf
+base_conf: local/module_config.json
 finish_hook: bin/dump_network
 test_config: resources/runtime_configs/long_wait
 site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4
+    opts: brute broadcast_client ntpv4 
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh 
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh 
 long_dhcp_response_sec: 0
 monitor_scan_sec: 20
 EOF
@@ -85,7 +87,7 @@ if [ -f "$gcp_cred" ]; then
     make_pubber AHU-1 daq-faux-2 null null
     make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
-    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar $project_id inst/test_site
+    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar inst/test_site $project_id
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
     fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
@@ -105,45 +107,46 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
 # Capture RESULT lines from ping activation logs (not generated report).
-fgrep -h RESULT inst/run-port*/nodes/ping*/activate.log \
+for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do 
+  fgrep -h RESULT inst/run-$mac/nodes/ping*/activate.log \
     | sed -e 's/\s*\(%%.*\)*$//' | tee -a $TEST_RESULTS
-
+done
 # Add the RESULT lines from all aux test report files.
 capture_test_results bacext
 capture_test_results macoui
 capture_test_results tls
-capture_test_results password
-capture_test_results discover
-capture_test_results network
+capture_test_results passwo # test host names are truncated to 6 characters
+capture_test_results discov
+capture_test_results networ
 capture_test_results ntp
 
 # Capture peripheral logs
-more inst/run-port-*/scans/ip_triggers.txt | cat
-dhcp_done=$(fgrep done inst/run-port-01/scans/ip_triggers.txt | wc -l)
-dhcp_long=$(fgrep long inst/run-port-01/scans/ip_triggers.txt | wc -l)
+more inst/run-*/scans/ip_triggers.txt | cat
+dhcp_done=$(fgrep done inst/run-9a02571e8f01/scans/ip_triggers.txt | wc -l)
+dhcp_long=$(fgrep long inst/run-9a02571e8f01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
      $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
-head inst/gw*/nodes/gw*/activate.log
-head inst/run-port-*/nodes/*/activate.log
-head inst/run-port-*/nodes/*/tmp/report.txt
-ls inst/run-port-01/finish/fail01/ | tee -a $TEST_RESULTS
+head -20 inst/gw*/nodes/gw*/activate.log
+head -20 inst/run-*/nodes/*/activate.log
+head -20 inst/run-*/nodes/*/tmp/report.txt
+ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
 
 # Add the port-01 and port-02 module config into the file
 echo port-01 module_config modules | tee -a $TEST_RESULTS
-jq .modules inst/run-port-01/nodes/ping01/tmp/module_config.json | tee -a $TEST_RESULTS
+jq .modules inst/run-9a02571e8f01/nodes/ping*/tmp/module_config.json | tee -a $TEST_RESULTS
 echo port-02 module_config modules | tee -a $TEST_RESULTS
-jq .modules inst/run-port-02/nodes/ping02/tmp/module_config.json | tee -a $TEST_RESULTS
+jq .modules inst/run-3c5ab41e8f0b/nodes/ping*/tmp/module_config.json | tee -a $TEST_RESULTS
 
 # Add a lovely snake and a lizard into this file for testing device/type mappings.
-cat inst/run-port-03/nodes/ping03/tmp/snake.txt | tee -a $TEST_RESULTS
-cat inst/run-port-03/nodes/ping03/tmp/lizard.txt | tee -a $TEST_RESULTS
+cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/snake.txt | tee -a $TEST_RESULTS
+cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 
 # Add the results for cloud tests into a different file, since cloud tests may not run if
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
-fgrep -h RESULT inst/run-port-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
+fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
@@ -175,9 +178,9 @@ cat <<EOF > local/system.yaml
 ---
 include: config/system/multi.conf
 fail_module:
-  ping_01: finalize
-  hold_02: initialize
-  ping_03: callback
+  ping_9a02571e8f01: finalize
+  hold_9a02571e8f02: initialize
+  ping_9a02571e8f03: callback
 EOF
 
 function kill_gateway {
@@ -188,20 +191,20 @@ function kill_gateway {
 }
 
 # Check that killing the dhcp monitor aborts the run.
-MARKER=inst/run-port-03/nodes/hold03/activate.log
+MARKER=inst/run-9a02571e8f03/nodes/hold*/activate.log
 monitor_marker $MARKER "kill_gateway gw03"
 
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting hold test run
+rm -r inst/run-*
 cmd/run -k -s finish_hook=bin/dump_network
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
-find inst/ -name activate.log | sort | tee -a $TEST_RESULTS
-head inst/run-port-*/nodes/nmap*/activate.log
-head inst/run-port-*/finish/nmap*/*
+head inst/run-*/nodes/nmap*/activate.log
+head inst/run-*/finish/nmap*/*
 
-tcpdump -en -r inst/run-port-01/scans/test_nmap.pcap icmp or arp
+tcpdump -en -r inst/run-9a02571e8f01/scans/test_nmap.pcap icmp or arp
 
-
+echo %%%%%%%%%%%%%%%%%%%%%%%%% Running port toggle test
 # Check port toggling does not cause a shutdown
 cat <<EOF > local/system.yaml
 ---
@@ -210,7 +213,8 @@ port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF
 monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 5; sudo ifconfig faux up"
-monitor_log "Target port 1 test hold running" "sudo ifconfig faux down"
+monitor_log "Target device 9a02571e8f00 test hold running" "sudo ifconfig faux down"
+rm -r inst/run-*
 cmd/run -s -k
 disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
 echo Enough port disconnects: $((disconnections >= 2)) | tee -a $TEST_RESULTS

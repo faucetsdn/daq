@@ -1,4 +1,22 @@
 # Changelog
+* 1.9.1
+  Feature/convert switchtests (#601)
+  Do not infinite spawn ntp (#598)
+  security.nmap.http test (#563)
+  Update registrar tool for latest UDMI version (#596)
+  Feature/vlan trigger (#588)
+  fix gcp combine report test (#587)
+  Adding default dns for static ip faux devices (#576)
+  Add perodic tests (#575)
+  security.admin.password changes (#461)
+* 1.9.0
+  * Test infrastructure cleanup (#572)
+  * Remove faux dependencies from subset directory (#567)
+  * Github actions (#558)
+  * misc updates to docs (#568)
+  * Incorporate manual test comments (#499)
+  * NTP Update (#525)
+  * Automatic build script (#557)
 * 1.8.2
   * GRPC timeouts + usi first command wait fix. (#555)
   * Numerous renovate bot updates.

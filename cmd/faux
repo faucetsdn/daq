@@ -123,6 +123,7 @@ else
     sudo ip link del $intf 2>/dev/null || true
 
     echo Adding new interface to $pid...
+
     sudo ip link add $intf type veth peer name faux-eth0 addr $intf_mac netns $pid
     sudo ip link set $intf up
 fi
