@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 set -o pipefail
+
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 INSTLOCK=$INSTDIR/startup.lock
