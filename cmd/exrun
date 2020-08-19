@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
 set -o pipefail
-
 ROOT=$(realpath $(dirname $0)/..)
 INSTDIR=$ROOT/inst
 INSTLOCK=$INSTDIR/startup.lock
@@ -118,7 +117,12 @@ else
 fi
 
 docker rm -f daq-usi || true
-autostart cmd/usi
+uri_url_override=""
+if [ "$usi_setup_url" == "localhost:5000" ]; then
+    autostart cmd/usi
+    docker0_ip=`ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
+    uri_url_override="usi_setup.url=$docker0_ip:5000"
+fi
 
 # Kill any gateways so that they don't prematurely assign an IP address.
 gwids=$(docker ps --format '{{ .Image }} {{ .Names }}' | fgrep daqf/networking | awk '{print $2}') || true
@@ -164,7 +168,7 @@ export OVSVSCTL_ORIG=`which ovs-vsctl`
 export PATH=$ROOT/binhack:$PATH
 
 exit_code=0
-$runcmd daq/daq.py $conf_file $@ 2>&1 || exit_code=$?
+$runcmd daq/daq.py $conf_file $uri_url_override $@ 2>&1 || exit_code=$?
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file
