@@ -120,6 +120,9 @@ message DaqConfig {
 
   // Configures events that trigger a DAQ run 
   RunTriggerType run_trigger_type = 50;
+
+  // verbose output
+  bool debug_mode = 51;
 }
 
 enum RunTriggerType {
