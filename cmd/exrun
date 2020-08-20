@@ -16,6 +16,7 @@ export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
 export DAQ_SYS_UNAME=$(uname -a)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
+uri_url_override=""
 run_args="$@"
 
 if [ `whoami` != root ]; then
@@ -117,8 +118,18 @@ else
     echo No external switch model specified.
 fi
 
+# USI related setup
 docker rm -f daq-usi || true
-autostart cmd/usi
+docker0_ip=`sudo ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
+if [ -z "$usi_setup_url" -o "$usi_setup_url" == "localhost:5000" -o "$usi_setup_url" == "$docker0_ip:5000" ]; then
+    sudo iptables -C INPUT -i docker0 -j ACCEPT
+    if [  $? == "1" ]; then
+        sudo iptables -A INPUT -i docker0 -j ACCEPT
+    fi
+    autostart cmd/usi
+    docker0_ip=`sudo ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
+    uri_url_override="usi_setup.url=$docker0_ip:5000"
+fi
 
 # Kill any gateways so that they don't prematurely assign an IP address.
 gwids=$(docker ps --format '{{ .Image }} {{ .Names }}' | fgrep daqf/networking | awk '{print $2}') || true
@@ -164,7 +175,7 @@ export OVSVSCTL_ORIG=`which ovs-vsctl`
 export PATH=$ROOT/binhack:$PATH
 
 exit_code=0
-$runcmd daq/daq.py $conf_file $@ 2>&1 || exit_code=$?
+$runcmd daq/daq.py $conf_file $uri_url_override $@ 2>&1 || exit_code=$?
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file
