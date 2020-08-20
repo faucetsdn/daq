@@ -115,8 +115,8 @@ done
 capture_test_results bacext
 capture_test_results macoui
 capture_test_results tls
-capture_test_results passwo # test host names are truncated to 6 characters
-capture_test_results discov
+capture_test_results password
+capture_test_results discover
 capture_test_results networ
 capture_test_results ntp
 
