@@ -118,10 +118,16 @@ else
     echo No external switch model specified.
 fi
 
+# USI related setup
 docker rm -f daq-usi || true
-if [ "$usi_setup_url" == "localhost:5000" ]; then
+docker0_ip=`sudo ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
+if [ -z "$usi_setup_url" -o "$usi_setup_url" == "localhost:5000" -o "$usi_setup_url" == "$docker0_ip:5000" ]; then
+    sudo iptables -C INPUT -i docker0 -j ACCEPT
+    if [  $? == "1" ]; then
+        sudo iptables -A INPUT -i docker0 -j ACCEPT
+    fi
     autostart cmd/usi
-    docker0_ip=`ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
+    docker0_ip=`sudo ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
     uri_url_override="usi_setup.url=$docker0_ip:5000"
 fi
 
