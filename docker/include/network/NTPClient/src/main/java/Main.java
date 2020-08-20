@@ -15,7 +15,7 @@ public class Main {
   static byte version = 3;
   static int port = 123;
   static int timerPeriod = 10;
-  static byte leapIndicator = 3;
+  static byte leapIndicator = 0;
 
   /**
    * Constructs and sends NTP packets to target NTP server.
@@ -79,8 +79,5 @@ public class Main {
                     + (msg.transmitTimestamp - destinationTimestamp)) / 2;
     System.out.println("Local clock offset: "
             + new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
-    if (localClockOffset * 1000 < 128) {
-      leapIndicator = 0;
-    }
   }
 }
