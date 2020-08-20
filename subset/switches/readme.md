@@ -62,11 +62,16 @@ Example of all necessary parameters in the system.conf related to physical switc
 	# Define the model of the switch to use. This parameter is required.
     switch_setup.model=CISCO_9300
 
-	#Define the username for the switch. This parameter is optional.
+	# Define the username for the switch. This parameter is optional.
     switch_setup.username=tester
 
-	#Define the password for the switch. This parameter is optional.
+	# Define the password for the switch. This parameter is optional.
 	switch_setup.password=switch_p@55
+
+    # If you're using a custom docker network bridge or hosting USI somewhere other than the DAQ machine, do the following: 
+    # Define the usi url using your docker0's ip and port 5000, and re-run bin/setup_base if you're upgrading from versions before 1.9.0
+    # Make sure docker's ip range doesn't conflict with that of the switch. Default docker ip range is 172.17.0.0/16. Default switch ip range is 192.168.0.0/16
+    usi_setup.url=172.17.0.1:5000
 
 ## Conditions for connection.port_duplex
  - pass -> If the duplex mode is detected as full
