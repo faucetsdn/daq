@@ -55,7 +55,7 @@ public class UsiServer {
    * @throws Exception Maybe a refactor is needed to throw more specific exceptions.
    */
   public static void main(String[] args) throws Exception {
-    final boolean debug = args.length > 0 ? args[0].trim().equals("debug") : false;
+    final boolean debug = args.length > 0 ? args[0].equals("debug") : false;
     final UsiServer server = new UsiServer();
     server.start(debug);
     server.blockUntilShutdown();

@@ -14,8 +14,13 @@ import java.util.Map;
 
 public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   private final Map<String, SwitchController> switchControllers;
-  private boolean debug;
+  private final boolean debug;
 
+  /**
+   * UsiImpl.
+   *
+   * @param debug           for verbose output
+   */
   public UsiImpl(boolean debug) {
     super();
     switchControllers = new HashMap<>();
