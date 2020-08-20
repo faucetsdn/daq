@@ -2,11 +2,17 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 USI_DIR=$ROOT/inst/network
+DEBUG=""
+if [ -n $debug_mode ]; then
+    DEBUG="debug"
+    echo Starting USI in debug mode
+else
+    echo Starting USI
+fi
 
-echo Starting USI
 
 rm -rf $USI_DIR
 mkdir -p $USI_DIR
-docker run -d -v $USI_DIR:/ovs --privileged --network=host --name daq-usi daqf/usi
+docker run -d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
 
 echo DAQ autoclean docker kill daq-usi 

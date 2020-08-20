@@ -61,7 +61,7 @@ if [ -n "$DEF_IFACE" ]; then
     echo Allowing docker external access through interface $DEF_IFACE...
     sudo iptables -o docker0 -i $DEF_IFACE -A FORWARD -j ACCEPT
     sudo iptables -i docker0 -o $DEF_IFACE -A FORWARD -j ACCEPT
-    sudo iptables -A INPUT -i docker0 -j ACCEPT
 fi
+sudo iptables -A INPUT -i docker0 -j ACCEPT
 
 echo Logout and log back in to run tutorials without sudo!

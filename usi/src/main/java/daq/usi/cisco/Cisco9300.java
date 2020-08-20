@@ -50,7 +50,22 @@ public class Cisco9300 extends BaseSwitchController {
       String remoteIpAddress,
       String user,
       String password) {
-    super(remoteIpAddress, user, password);
+    this(remoteIpAddress, user, password, false);
+  }
+
+  /**
+   * Cisco 9300 Switch Controller.
+   *
+   * @param remoteIpAddress switch ip
+   * @param user            switch username
+   * @param password        switch password
+   * @param debug           for verbose output
+   */
+  public Cisco9300(
+      String remoteIpAddress,
+      String user,
+      String password, boolean debug) {
+    super(remoteIpAddress, user, password, debug);
     this.username = user == null ? "admin" : user;
     this.password = password == null ? "password" : password;
     commandPending = true;
