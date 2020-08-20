@@ -796,7 +796,7 @@ class DAQRunner:
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
 
     def _load_base_config(self, register=True):
-        base_conf = self.config.get('base_conf'))
+        base_conf = self.config.get('base_conf')
         LOGGER.info('Loading base config from %s', base_conf)
         base = self.configurator.load_and_merge({}, base_conf)
         site_path = self.config.get('site_path')

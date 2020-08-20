@@ -216,7 +216,7 @@ class ConnectedHost:
 
     def _load_config(self, name, config, path):
         if name:
-            LOGGER.info('Loading %s config from %s', name, path)
+            self.logger.info('Loading %s config from %s', name, path)
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
 
     def _write_module_config(self, config, path):
