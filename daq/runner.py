@@ -797,10 +797,10 @@ class DAQRunner:
 
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
-        LOGGER.info('Loading base config from %s', base_conf)
+        LOGGER.info('Loading base module config from %s', base_conf)
         base = self.configurator.load_and_merge({}, base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site config from %s', base_conf)
+        LOGGER.info('Loading site module config from %s', base_conf)
         site_config = self.configurator.load_config(site_path, self._MODULE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
