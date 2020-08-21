@@ -37,6 +37,8 @@ jobs:
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
       run: |
         bin/test_daq ${{matrix.test}}
+    - name: Generated test report
+      run: cat out/test_${{matrix.test}}.out
 
   unit_tests:
     runs-on: ubuntu-latest

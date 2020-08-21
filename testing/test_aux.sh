@@ -36,7 +36,7 @@ EOF
 
 function capture_test_results {
     module_name=$1
-    for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do 
+    for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
       fgrep -h RESULT inst/run-$mac/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
     done
 }
@@ -65,11 +65,11 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4 
+    opts: brute broadcast_client ntpv4
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh 
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh 
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
 long_dhcp_response_sec: 0
 monitor_scan_sec: 20
 EOF
@@ -107,7 +107,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
 # Capture RESULT lines from ping activation logs (not generated report).
-for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do 
+for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
   fgrep -h RESULT inst/run-$mac/nodes/ping*/activate.log \
     | sed -e 's/\s*\(%%.*\)*$//' | tee -a $TEST_RESULTS
 done
@@ -166,8 +166,13 @@ cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
-(diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \
-    | tee -a $TEST_RESULTS
+diff out/redacted_docs.md out/redacted_file.md > out/redacted_file.diff
+cat -vet out/redacted_file.diff
+cat out/redacted_file.diff >> $TEST_RESULTS
+diff_lines=`cat out/redacted_file | wc -l`
+if [ $diff_lines == 0 ]; then
+    echo No report diff | tee -a $TEST_RESULTS
+fi
 
 # Make sure there's no file pollution from the test run.
 git status --porcelain | tee -a $TEST_RESULTS
