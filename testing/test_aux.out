@@ -130,7 +130,7 @@ port-01 module_config modules
     ],
     "enabled": true,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 2000
+    "timeout_sec": 3000
   },
   "manual": {
     "enabled": true
