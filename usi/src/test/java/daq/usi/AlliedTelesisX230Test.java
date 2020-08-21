@@ -2,7 +2,6 @@ package daq.usi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 import daq.usi.allied.AlliedTelesisX230;
 import grpc.POENegotiation;
 import grpc.POEStatus;
