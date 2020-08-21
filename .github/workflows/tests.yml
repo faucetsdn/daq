@@ -36,9 +36,10 @@ jobs:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
       run: |
-        bin/test_daq ${{matrix.test}}
+        bin/test_daq ${{ matrix.test }}
     - name: Generated test report
-      run: cat inst/test_${{matrix.test}}.out
+      if: ${{ always() }}
+      run: cat inst/test_${{ matrix.test }}.out
 
   unit_tests:
     runs-on: ubuntu-latest
