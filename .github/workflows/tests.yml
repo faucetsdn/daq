@@ -38,7 +38,7 @@ jobs:
       run: |
         bin/test_daq ${{matrix.test}}
     - name: Generated test report
-      run: cat out/test_${{matrix.test}}.out
+      run: cat inst/test_${{matrix.test}}.out
 
   unit_tests:
     runs-on: ubuntu-latest
