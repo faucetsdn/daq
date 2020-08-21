@@ -124,6 +124,7 @@ RESULT pass security.nmap.http No running http servers have been found.
 
 |Attribute|Value|
 |---|---|
+|timeout_sec|600|
 |enabled|True|
 
 ## Module hold
@@ -138,9 +139,15 @@ terminated
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 9a02571e8f00: ['9a02571e8f00:hold:DaqException']
+|fail|security.nmap.ports|Other|Other|Some disallowed ports are open: 23.|
+security.nmap.ports
+RESULT fail security.nmap.ports Some disallowed ports are open: 23.
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
-DAQ result code 1
+DAQ result code 0
 9a02571e8f00: []
+|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
+security.nmap.ports
+RESULT pass security.nmap.ports Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
 9a02571e8f00: []
     dp_id: 1
