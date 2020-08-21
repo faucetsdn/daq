@@ -140,7 +140,7 @@ DAQ result code 1
 9a02571e8f00: ['9a02571e8f00:hold:DaqException']
 %%%%%%%%%%%%%%%%%%%%%% Default MUD
 DAQ result code 1
-9a02571e8f00: ['9a02571e8f00:nmap:TimeoutError']
+9a02571e8f00: []
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
 9a02571e8f00: []
     dp_id: 1
