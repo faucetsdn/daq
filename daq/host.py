@@ -214,14 +214,16 @@ class ConnectedHost:
         partial = os.path.join('tests', self.test_name, base) if self.test_name else base
         return os.path.join('run_id', self.run_id, partial)
 
-    def _load_config(self, config, path):
+    def _load_config(self, name, config, path):
+        if name:
+            self.logger.info('Loading %s module config from %s', name, path)
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
 
     def _write_module_config(self, config, path):
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
     def _type_path(self):
-        dev_config = self._load_config({}, self._device_base)
+        dev_config = self._load_config(None, {}, self._device_base)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -749,9 +751,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        self._load_config(config, self._type_path())
-        self._load_config(config, self._device_base)
-        self._load_config(config, self._port_base)
+        self._load_config('type', config, self._type_path())
+        self._load_config('device', config, self._device_base)
+        self._load_config('port', config, self._port_base)
         return config
 
     def record_result(self, name, **kwargs):
@@ -819,7 +821,7 @@ class ConnectedHost:
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = self._load_config({}, self._device_base)
+        dev_config = self._load_config('base', {}, self._device_base)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         if self.target_port:
