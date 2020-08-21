@@ -190,6 +190,7 @@ RESULT pass security.nmap.http No running http servers have been found.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|timeout_sec|600|
 
 ## Module discover
 
