@@ -33,9 +33,9 @@ class AlliedTelesisX230Test {
     at.getPower(1, new ResponseHandler<PowerResponse>() {
       @Override
       public void receiveData(PowerResponse data) throws Exception {
-        assertEquals(data.getPoeSupport(), POESupport.POE_SUPPORT_UNKNOWN);
-        assertEquals(data.getPoeNegotiation(), POENegotiation.NEGOTIATION_UNKNOWN);
-        assertEquals(data.getPoeStatus(), POEStatus.POE_STATUS_UNKNOWN);
+        assertEquals(data.getPoeSupport(), POESupport.State.UNKNOWN);
+        assertEquals(data.getPoeNegotiation(), POENegotiation.State.UNKNOWN);
+        assertEquals(data.getPoeStatus(), POEStatus.State.UNKNOWN);
         assertEquals(data.getCurrentPowerConsumption(), 0);
         assertEquals(data.getMaxPowerConsumption(), 0);
       }

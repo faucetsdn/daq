@@ -22,13 +22,13 @@ message SwitchActionResponse {
 message PowerResponse {
   float current_power_consumption = 1;
   float max_power_consumption = 2;
-  POESupport poe_support = 3;
-  POEStatus poe_status = 4;
-  POENegotiation poe_negotiation = 5;
+  POESupport.State poe_support = 3;
+  POEStatus.State poe_status = 4;
+  POENegotiation.State poe_negotiation = 5;
 }
 
 message InterfaceResponse {
-  LinkStatus link_status = 1;
+  LinkStatus.State link_status = 1;
   int32 link_speed = 2;
   string duplex = 3;
 }
@@ -39,30 +39,37 @@ enum SwitchModel {
   OVS_SWITCH = 2;
 }
 
-enum LinkStatus {
-  LINK_STATUS_UNKNOWN = 0;
-  DOWN = 1;
-  UP = 2;
+message LinkStatus {
+  enum State {
+    UNKNOWN = 0;
+    DOWN = 1;
+    UP = 2;
+  }
+}
+message POESupport {
+  enum State {
+    UNKNOWN = 0;
+    ENABLED = 1;
+    DISABLED = 2;
+  }
 }
 
-enum POESupport {
-  POE_SUPPORT_UNKNOWN = 0;
-  ENABLED = 1;
-  DISABLED = 2;
+message POEStatus {
+  enum State {
+    UNKNOWN = 0;
+    ON = 1;
+    OFF = 2;
+    FAULT = 3;
+    DENY = 4;
+  }
 }
 
-enum POEStatus {
-  POE_STATUS_UNKNOWN = 0;
-  ON = 1;
-  OFF = 2;
-  FAULT = 3;
-  DENY = 4;
-}
-
-enum POENegotiation {
-  NEGOTIATION_UNKNOWN = 0;
-  NEGOTIATION_ENABLED = 1;
-  NEGOTIATION_DISABLED = 2;
+message POENegotiation {
+  enum State {
+    UNKNOWN = 0;
+    ENABLED = 1;
+    DISABLED = 2;
+  }
 }
 
 /*

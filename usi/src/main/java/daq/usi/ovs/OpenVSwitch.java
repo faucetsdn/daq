@@ -42,7 +42,8 @@ public class OpenVSwitch implements SwitchController {
   @Override
   public void getPower(int devicePort, ResponseHandler<PowerResponse> handler) throws Exception {
     PowerResponse.Builder response = PowerResponse.newBuilder();
-    PowerResponse power = response.setPoeStatus(POEStatus.OFF).setPoeSupport(POESupport.DISABLED)
+    PowerResponse power = response.setPoeStatus(POEStatus.State.OFF)
+        .setPoeSupport(POESupport.State.DISABLED)
         .build();
     handler.receiveData(power);
   }
@@ -52,7 +53,7 @@ public class OpenVSwitch implements SwitchController {
       throws Exception {
     InterfaceResponse.Builder response = InterfaceResponse.newBuilder();
     InterfaceResponse iface =
-        response.setLinkStatus(LinkStatus.UP).build();
+        response.setLinkStatus(LinkStatus.State.UP).build();
     handler.receiveData(iface);
   }
 

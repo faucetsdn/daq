@@ -24,13 +24,14 @@ public class AlliedTelesisX230 extends BaseSwitchController {
       {"dev_interface", "admin", "pri", "oper", "power", "device", "dev_class", "max"};
   private static final String[] showPowerExpected =
       {"Interface", "Admin", "Pri", "Oper", "Power", "Device", "Class", "Max"};
-  private static final Map<String, POEStatus> poeStatusMap = Map.of("Powered", POEStatus.ON,
-      "Off", POEStatus.OFF, "Fault", POEStatus.FAULT, "Deny", POEStatus.DENY);
+  private static final Map<String, POEStatus.State> poeStatusMap = Map.of("Powered",
+      POEStatus.State.ON, "Off", POEStatus.State.OFF,
+      "Fault", POEStatus.State.FAULT, "Deny", POEStatus.State.DENY);
   // TODO Not certain about AT power "Deny" status string. Can't find a device to produce that state
-  private static final Map<String, POESupport> poeSupportMap = Map.of("Enabled",
-      POESupport.ENABLED, "Disabled", POESupport.DISABLED);
-  private static final Map<String, POENegotiation> poeNegotiationMap = Map.of("Enabled",
-      POENegotiation.NEGOTIATION_ENABLED, "Disabled", POENegotiation.NEGOTIATION_DISABLED);
+  private static final Map<String, POESupport.State> poeSupportMap = Map.of("Enabled",
+      POESupport.State.ENABLED, "Disabled", POESupport.State.DISABLED);
+  private static final Map<String, POENegotiation.State> poeNegotiationMap = Map.of("Enabled",
+      POENegotiation.State.ENABLED, "Disabled", POENegotiation.State.DISABLED);
   private static final Map<Pattern, String> interfaceProcessMap =
       Map.of(Pattern.compile("Link is (\\w+)"), "link",
           Pattern.compile("current duplex (\\w+)"), "duplex",
@@ -196,7 +197,8 @@ public class AlliedTelesisX230 extends BaseSwitchController {
       return response.build();
     }
     String linkStatus = interfaceMap.getOrDefault("link", "");
-    return response.setLinkStatus(linkStatus.equals("UP") ? LinkStatus.UP : LinkStatus.DOWN)
+    return response
+        .setLinkStatus(linkStatus.equals("UP") ? LinkStatus.State.UP : LinkStatus.State.DOWN)
         .setDuplex(duplex)
         .setLinkSpeed(speed)
         .build();
@@ -215,10 +217,10 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     }
     String poeSupport = powerMap.getOrDefault("admin", "");
     String poeStatus = powerMap.getOrDefault("oper", "");
-    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.POE_STATUS_UNKNOWN))
-        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.POE_SUPPORT_UNKNOWN))
-        .setPoeNegotiation(
-            poeNegotiationMap.getOrDefault(poeSupport, POENegotiation.NEGOTIATION_UNKNOWN))
+    return response
+        .setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.State.UNKNOWN))
+        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.State.UNKNOWN))
+        .setPoeNegotiation(poeNegotiationMap.getOrDefault(poeSupport, POENegotiation.State.UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }

@@ -30,12 +30,13 @@ public class Cisco9300 extends BaseSwitchController {
       "Device Type", "device",
       "IEEE Class", "dev_class",
       "Power available to the device", "max");
-  private static final Map<String, POEStatus> poeStatusMap = Map.of("on", POEStatus.ON,
-      "off", POEStatus.OFF, "fault", POEStatus.FAULT, "power-deny", POEStatus.DENY);
-  private static final Map<String, POESupport> poeSupportMap = Map.of("auto", POESupport.ENABLED,
-      "off", POESupport.DISABLED);
-  private static final Map<String, POENegotiation> poeNegotiationtMap = Map.of("auto",
-      POENegotiation.NEGOTIATION_ENABLED, "off", POENegotiation.NEGOTIATION_DISABLED);
+  private static final Map<String, POEStatus.State> poeStatusMap = Map.of("on",
+      POEStatus.State.ON, "off", POEStatus.State.OFF, "fault", POEStatus.State.FAULT,
+      "power-deny", POEStatus.State.DENY);
+  private static final Map<String, POESupport.State> poeSupportMap = Map.of("auto",
+      POESupport.State.ENABLED, "off", POESupport.State.DISABLED);
+  private static final Map<String, POENegotiation.State> poeNegotiationtMap = Map.of("auto",
+      POENegotiation.State.ENABLED, "off", POENegotiation.State.DISABLED);
   private static final int WAIT_MS = 100;
   private ResponseHandler<String> responseHandler;
 
@@ -254,7 +255,8 @@ public class Cisco9300 extends BaseSwitchController {
     }
 
     String linkStatus = interfaceMap.getOrDefault("status", "");
-    return response.setLinkStatus(linkStatus.equals("connected") ? LinkStatus.UP : LinkStatus.DOWN)
+    return response
+        .setLinkStatus(linkStatus.equals("connected") ? LinkStatus.State.UP : LinkStatus.State.DOWN)
         .setDuplex(duplex)
         .setLinkSpeed(speedNum)
         .build();
@@ -274,10 +276,11 @@ public class Cisco9300 extends BaseSwitchController {
 
     String poeSupport = powerMap.getOrDefault("admin", "");
     String poeStatus = powerMap.getOrDefault("oper", "");
-    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.POE_STATUS_UNKNOWN))
-        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.POE_SUPPORT_UNKNOWN))
+    return response
+        .setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.State.UNKNOWN))
+        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.State.UNKNOWN))
         .setPoeNegotiation(
-            poeNegotiationtMap.getOrDefault(poeStatus, POENegotiation.NEGOTIATION_UNKNOWN))
+            poeNegotiationtMap.getOrDefault(poeStatus, POENegotiation.State.UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }

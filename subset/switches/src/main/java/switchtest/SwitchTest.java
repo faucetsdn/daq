@@ -53,7 +53,7 @@ public class SwitchTest {
 
   protected void testLink(InterfaceResponse interfaceResponse) {
     final String testName = "connection.port_link";
-    if (interfaceResponse.getLinkStatus() == LinkStatus.UP) {
+    if (interfaceResponse.getLinkStatus() == LinkStatus.State.UP) {
       captureResult(testName, Result.PASS, "Link is up");
     } else {
       captureResult(testName, Result.FAIL, "Link is down");
@@ -98,17 +98,17 @@ public class SwitchTest {
       return;
     }
 
-    POEStatus poeStatus = powerResponse.getPoeStatus();
+    POEStatus.State poeStatus = powerResponse.getPoeStatus();
     // Determine PoE power test result
-    if (poeStatus == POEStatus.ON) {
+    if (poeStatus == POEStatus.State.ON) {
       if (powerResponse.getMaxPowerConsumption() >= powerResponse.getCurrentPowerConsumption()) {
         captureResult("poe.power", Result.PASS, "PoE is applied to device");
       } else {
         captureResult("poe.power", Result.FAIL, "device wattage exceeds the max wattage");
       }
-    } else if (poeStatus == POEStatus.OFF) {
+    } else if (poeStatus == POEStatus.State.OFF) {
       captureResult("poe.power", Result.FAIL, "No poE is applied");
-    } else if (poeStatus == POEStatus.FAULT) {
+    } else if (poeStatus == POEStatus.State.FAULT) {
       captureResult("poe.power", Result.FAIL,
           "Device detection or a powered device is in a faulty state");
     } else {
@@ -118,14 +118,14 @@ public class SwitchTest {
     }
 
     // Determine PoE auto negotiation result
-    if (powerResponse.getPoeNegotiation() == POENegotiation.NEGOTIATION_ENABLED) {
+    if (powerResponse.getPoeNegotiation() == POENegotiation.State.ENABLED) {
       captureResult("poe.negotiation", Result.PASS, "PoE auto-negotiated successfully");
     } else {
       captureResult("poe.negotiation", Result.FAIL, "Incorrect privilege for negotiation");
     }
 
     // Determine PoE support result
-    if (powerResponse.getPoeSupport() == POESupport.ENABLED) {
+    if (powerResponse.getPoeSupport() == POESupport.State.ENABLED) {
       captureResult("poe.support", Result.PASS, "PoE is supported and enabled");
     } else {
       captureResult("poe.support", Result.FAIL,
