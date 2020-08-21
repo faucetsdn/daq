@@ -190,9 +190,10 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     String duplex = interfaceMap.getOrDefault("duplex", "");
     int speed = 0;
     try {
-      speed = Integer.parseInt(interfaceMap.get("speed"));
+      speed = Integer.parseInt(interfaceMap.getOrDefault("speed", ""));
     } catch (NumberFormatException e) {
       System.out.println("Could not parse int: " + interfaceMap.get("speed"));
+      return response.build();
     }
     String linkStatus = interfaceMap.getOrDefault("link", "");
     return response.setLinkStatus(linkStatus.equals("UP") ? LinkStatus.UP : LinkStatus.DOWN)
@@ -206,17 +207,18 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     float maxPower = 0;
     float currentPower = 0;
     try {
-      maxPower = Float.parseFloat(powerMap.get("max"));
-      currentPower = Float.parseFloat(powerMap.get("power"));
+      maxPower = Float.parseFloat(powerMap.getOrDefault("max", ""));
+      currentPower = Float.parseFloat(powerMap.getOrDefault("power", ""));
     } catch (NumberFormatException e) {
       System.out.println(
           "Could not parse float: " + powerMap.get("max") + " or " + powerMap.get("power"));
     }
-    String poeSupport = powerMap.getOrDefault("admin", null);
-    String poeStatus = powerMap.getOrDefault("oper", null);
-    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, null))
-        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, null))
-        .setPoeNegotiation(poeNegotiationMap.getOrDefault(poeSupport, null))
+    String poeSupport = powerMap.getOrDefault("admin", "");
+    String poeStatus = powerMap.getOrDefault("oper", "");
+    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.POE_STATUS_UNKNOWN))
+        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.POE_SUPPORT_UNKNOWN))
+        .setPoeNegotiation(
+            poeNegotiationMap.getOrDefault(poeSupport, POENegotiation.NEGOTIATION_UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }

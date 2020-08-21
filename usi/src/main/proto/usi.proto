@@ -40,25 +40,29 @@ enum SwitchModel {
 }
 
 enum LinkStatus {
-  UP = 0;
+  LINK_STATUS_UNKNOWN = 0;
   DOWN = 1;
+  UP = 2;
 }
 
 enum POESupport {
-  ENABLED = 0;
-  DISABLED = 1;
+  POE_SUPPORT_UNKNOWN = 0;
+  ENABLED = 1;
+  DISABLED = 2;
 }
 
 enum POEStatus {
-  ON = 0;
-  OFF = 1;
-  FAULT = 2;
-  DENY = 3;
+  POE_STATUS_UNKNOWN = 0;
+  ON = 1;
+  OFF = 2;
+  FAULT = 3;
+  DENY = 4;
 }
 
 enum POENegotiation {
-  NEGOTIATION_ENABLED = 0;
-  NEGOTIATION_DISABLED = 1;
+  NEGOTIATION_UNKNOWN = 0;
+  NEGOTIATION_ENABLED = 1;
+  NEGOTIATION_DISABLED = 2;
 }
 
 /*

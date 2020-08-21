@@ -245,24 +245,39 @@ public class Cisco9300 extends BaseSwitchController {
     if (speed.startsWith("a-")) { // Interface in Auto Speed
       speed = speed.replaceFirst("a-", "");
     }
+    int speedNum = 0;
+    try {
+      speedNum = Integer.parseInt(speed);
+    } catch (NumberFormatException e) {
+      System.out.println("Could not parse int for interface speed: " + speed);
+      return response.build();
+    }
 
     String linkStatus = interfaceMap.getOrDefault("status", "");
     return response.setLinkStatus(linkStatus.equals("connected") ? LinkStatus.UP : LinkStatus.DOWN)
         .setDuplex(duplex)
-        .setLinkSpeed(Integer.parseInt(speed))
+        .setLinkSpeed(speedNum)
         .build();
   }
 
   private PowerResponse buildPowerResponse(Map<String, String> powerMap) {
     PowerResponse.Builder response = PowerResponse.newBuilder();
-    float maxPower = Float.parseFloat(powerMap.get("max"));
-    float currentPower = Float.parseFloat(powerMap.get("power"));
+    float maxPower = 0;
+    float currentPower = 0;
+    try {
+      maxPower = Float.parseFloat(powerMap.getOrDefault("max", ""));
+      currentPower = Float.parseFloat(powerMap.getOrDefault("power", ""));
+    } catch (NumberFormatException e) {
+      System.out.println(
+          "Could not parse float: " + powerMap.get("max") + " or " + powerMap.get("power"));
+    }
 
-    String poeSupport = powerMap.getOrDefault("admin", null);
-    String poeStatus = powerMap.getOrDefault("oper", null);
-    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, null))
-        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, null))
-        .setPoeNegotiation(poeNegotiationtMap.getOrDefault(poeStatus, null))
+    String poeSupport = powerMap.getOrDefault("admin", "");
+    String poeStatus = powerMap.getOrDefault("oper", "");
+    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.POE_STATUS_UNKNOWN))
+        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.POE_SUPPORT_UNKNOWN))
+        .setPoeNegotiation(
+            poeNegotiationtMap.getOrDefault(poeStatus, POENegotiation.NEGOTIATION_UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }
