@@ -65,7 +65,6 @@ function redact {
         -e 's/Seq Index.*//' \
         -e 's/Ignored State.*//' \
         -e 's/Not shown: .* ports//' \
-        -e 's/\t/ /g' \
         -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
 }
 
