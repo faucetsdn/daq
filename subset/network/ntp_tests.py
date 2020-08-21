@@ -81,8 +81,8 @@ def test_ntp_support():
 
 
 def test_ntp_update():
-        capture = rdpcap(monitor_pcap_file)
-        packets = ntp_packets(capture)
+    capture = rdpcap(monitor_pcap_file)
+    packets = ntp_packets(capture)
     if len(packets) < 2:
         add_summary("Not enough NTP packets received.")
         return 'skip'
