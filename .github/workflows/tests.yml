@@ -36,7 +36,14 @@ jobs:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
       run: |
-        DAQ_TEST=${{ matrix.test }} bin/test_daq
+        bin/test_daq ${{ matrix.test }}
+    - name: Generated test report
+      if: ${{ always() }}
+      run: |
+        echo '************* Use sed to filter out timestamp prefix *************'
+        echo 'Download log archive, find the right job, and use:'
+        echo "  sed -e 's/^[-:.0-9TZ]\+ //' 7_Generated\ test\ report.txt"
+        cat inst/test_${{ matrix.test }}.out
 
   unit_tests:
     runs-on: ubuntu-latest
