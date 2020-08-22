@@ -121,7 +121,7 @@ port-01 module_config modules
   },
   "nmap": {
     "enabled": true,
-    "timeout_sec": 600s
+    "timeout_sec": 600
   },
   "pass": {
     "enabled": true
@@ -180,7 +180,7 @@ port-02 module_config modules
   },
   "nmap": {
     "enabled": true,
-    "timeout_sec": 600s
+    "timeout_sec": 600
   },
   "pass": {
     "enabled": false
