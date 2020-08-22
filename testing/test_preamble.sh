@@ -65,7 +65,11 @@ function redact {
         -e 's/Seq Index.*//' \
         -e 's/Ignored State.*//' \
         -e 's/Not shown: .* ports//' \
+        -e 's/[ \t]*$//' \
+        -e 's/\t/ /g' \
         -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
+
+    # NOTE: Whitespace redaction (\t) is because many IDEs automatically strip/convert tabs to spaces.
 }
 
 function monitor_log {
