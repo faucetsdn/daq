@@ -22,7 +22,7 @@ daqf/test_pass 62dd10381336
 daqf/test_password d318555d2d3e
 daqf/test_ping fe8e4dd5ddc2
 daqf/test_ssh 054efbf1b3c3
-daqf/test_switch 5daf5774fb11
+daqf/test_switch e5bb16e85362
 daqf/test_tls 17de1ebf13ce
 daqf/test_udmi b6d5381f32f0
-daqf/usi 3e773df34234
+daqf/usi 348d54ddbb7c
