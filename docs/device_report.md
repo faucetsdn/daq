@@ -189,6 +189,7 @@ RESULT pass security.nmap.http No running http servers have been found.
 
 |Attribute|Value|
 |---|---|
+|timeout_sec|600|
 |enabled|True|
 
 ## Module discover
@@ -476,8 +477,8 @@ RESULT skip security.passwords.telnet Port 23 not open on target device.
 
 |Attribute|Value|
 |---|---|
-|enabled|True|
 |dictionary_dir|resources/faux|
+|enabled|True|
 
 ## Module udmi
 
