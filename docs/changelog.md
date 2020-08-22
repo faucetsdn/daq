@@ -1,4 +1,8 @@
 # Changelog
+* 1.9.5
+  * Increase nmap module timeout (#611)
+  * Improvements for test development debugging (#609)
+  * Add module config system logging (#607)
 * 1.9.4
   * Feature/convert switchtests (#601)
   * Do not infinite spawn ntp (#598)
