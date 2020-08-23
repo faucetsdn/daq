@@ -129,8 +129,9 @@ if [ -f "$gcp_cred" ]; then
     ls -l inst/reports/report_9a02571e8f05*.md
     echo '*************************'
 
-    echo Pulling reports from gcp... from $start_time to $end_time
-    cmd="bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time"
+    daq_run_id=$(< inst/daq_run_id.txt)
+    echo Pulling reports from gcp for daq RUN id $daq_run_id
+    cmd="bin/combine_reports device=9a:02:57:1e:8f:05 daq_run_id=$daq_run_id
     cmd="$cmd count=2 from_gcp=true"
     echo $cmd
     $cmd
