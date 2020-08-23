@@ -3,6 +3,8 @@
 ROOT=$(realpath $(dirname $0)/..)
 USI_DIR=$ROOT/inst/network
 DEBUG=""
+log_driver=""
+debug_mode="true" #Always in debug mode for now
 if [ -n $debug_mode ]; then
     DEBUG="debug"
     echo Starting USI in debug mode
@@ -10,9 +12,14 @@ else
     echo Starting USI
 fi
 
+if [ -f "$gcp_cred" ]; then
+    origin=`jq -r '.client_email' $gcp_cred | sed 's/@.*//'`
+    log_driver="--log-driver=gcplogs --log-opt labels=origin --label origin=$origin"
+fi
 
 rm -rf $USI_DIR
 mkdir -p $USI_DIR
-docker run -d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
+GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred docker run -d $log_driver -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
 
+echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/usi-logs.txt
 echo DAQ autoclean docker kill daq-usi 
