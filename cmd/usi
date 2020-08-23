@@ -16,5 +16,5 @@ rm -rf $USI_DIR
 mkdir -p $USI_DIR
 GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred docker run -d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
 
-echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/usi-logs.txt
+echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/cmdusi.log
 echo DAQ autoclean docker kill daq-usi 
