@@ -14,12 +14,20 @@ fi
 
 if [ -f "$gcp_cred" ]; then
     origin=`jq -r '.client_email' $gcp_cred | sed 's/@.*//'`
-    log_driver="--log-driver=gcplogs --log-opt labels=origin --label origin=$origin"
+    project=`jq -r '.project_id' $gcp_cred | sed 's/@.*//'`
+    log_driver="--log-driver=gcplogs --log-opt labels=origin --label origin=$origin --log-opt gcp-project=$project"
+    sudo mkdir -p /etc/systemd/system/docker.service.d 
+cat <<EOF > /etc/systemd/system/docker.service.d/docker-override.conf 
+[Service]
+Environment="GOOGLE_APPLICATION_CREDENTIALS=`realpath $gcp_cred`"
+EOF
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
 fi
 
 rm -rf $USI_DIR
 mkdir -p $USI_DIR
-GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred docker run -d $log_driver -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
+docker run -d $log_driver -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi || docker run -d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
 
 echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/usi-logs.txt
 echo DAQ autoclean docker kill daq-usi 

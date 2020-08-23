@@ -25,7 +25,7 @@ if [ -n "$build_tests" ]; then
     cmd/build $build_mode
 fi
 
-bin/build_hash check
+#bin/build_hash check
 
 if [ -f "$gcp_cred" ]; then
     echo Installing $gcp_cred into inst/config...
