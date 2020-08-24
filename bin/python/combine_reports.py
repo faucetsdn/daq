@@ -146,7 +146,7 @@ Usage: combine_reports.py
     [to_time='YYYY-MM-DDThh:mm:ss']
     [daq_run_id=<nonce>]
     [count=N]
-    [from_gcp='true/false']
+    [from_gcp='true']
 """
     FROM_TIME = _convert_iso(CONFIG.get('from_time'))
     TO_TIME = _convert_iso(CONFIG.get('to_time'))
