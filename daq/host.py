@@ -776,6 +776,7 @@ class ConnectedHost:
         result = {
             'name': name,
             'runid': (self.run_id if run_info else None),
+            'daq_run_id': self.runner.daq_run_id,
             'device_id': self.target_mac,
             'started': self.test_start,
             'timestamp': current if current else gcp.get_timestamp(),
