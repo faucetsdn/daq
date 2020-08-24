@@ -264,9 +264,9 @@ class GcpManager:
         blob = self._bucket.blob(report_blob)
         return json.loads(str(blob.download_as_string(), 'utf-8'))
 
-    def get_reports_from_date_range(self, device: str, start=None, end=None,
-                                    count=None, daq_run_id=None):
-        """Combine test results from reports within a date range"""
+    # pylint: disable=too-many-arguments
+    def get_reports(self, device: str, start=None, end=None, count=None, daq_run_id=None):
+        """Get filtered list of reports"""
         if not self._firestore:
             LOGGER.error('Firestore not initialized.')
             return

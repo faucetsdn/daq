@@ -11,7 +11,7 @@ import configurator
 from gcp import GcpManager
 from report import MdTable
 
-LOGGER = logger.get_logger('combine_reports_from_date_range')
+LOGGER = logger.get_logger('combine')
 DEFAULT_REPORTS_DIR = os.path.join('inst', 'reports')
 
 
@@ -86,8 +86,8 @@ def main(device, start=None, end=None, gcp=None, reports_dir=DEFAULT_REPORTS_DIR
     report_source = 'gcp' if gcp else 'local'
     if gcp:
         device_full = ":".join([device[i:i + 2] for i in range(0, len(device), 2)])
-        json_reports = gcp.get_reports_from_date_range(device_full, start=start, end=end,
-                                                       count=count, daq_run_id=daq_run_id)
+        json_reports = gcp.get_reports(device_full, start=start, end=end,
+                                       count=count, daq_run_id=daq_run_id)
     else:
         assert not daq_run_id, 'daq_run_id not supported for local queries'
         json_reports = _get_local_reports(device, reports_dir, start, end, count)
@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
     assert 'device' in CONFIG, """
 Combines reports under inst/reports(default) or from GCP
-Usage: combine_reports_from_date_range.py
+Usage: combine_reports.py
     [local/system.yaml]
     device=xx:xx:xx:xx:xx:xx
     [from_time='YYYY-MM-DDThh:mm:ss']
@@ -152,4 +152,5 @@ Usage: combine_reports_from_date_range.py
     TO_TIME = _convert_iso(CONFIG.get('to_time'))
     COUNT = int(CONFIG.get('count', 0))
     DAQ_RUN_ID = CONFIG.get('daq_run_id')
-    main(CONFIG.get('device'), start=FROM_TIME, end=TO_TIME, gcp=GCP, count=COUNT, daq_run_id=DAQ_RUN_ID)
+    main(CONFIG.get('device'), start=FROM_TIME, end=TO_TIME, gcp=GCP,
+         count=COUNT, daq_run_id=DAQ_RUN_ID)
