@@ -740,7 +740,6 @@ class ConnectedHost:
     def _merge_run_info(self, config):
         config['run_info'] = {
             'run_id': self.run_id,
-            'daq_run_id': self.runner.daq_run_id,
             'mac_addr': self.target_mac,
             'started': gcp.get_timestamp(),
             'switch': self._get_switch_config(),
@@ -777,6 +776,7 @@ class ConnectedHost:
         result = {
             'name': name,
             'runid': (self.run_id if run_info else None),
+            'daq_run_id': self.runner.daq_run_id,
             'device_id': self.target_mac,
             'started': self.test_start,
             'timestamp': current if current else gcp.get_timestamp(),

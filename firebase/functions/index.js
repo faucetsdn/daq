@@ -147,7 +147,7 @@ function handleTestResult(origin, siteName, message) {
     }
 
     console.log('Test Result: ', timestamp, origin, siteName, message.port,
-      message.runid, message.name, message.device_id, message.state);
+        message.runid, message.daq_run_id, message.name, message.device_id, message.state);
     const runDoc = originDoc.collection('runid').doc(message.runid);
     const lastDoc = originDoc.collection('last').doc(message.name);
     const resultDoc = runDoc.collection('test').doc(message.name);
@@ -168,6 +168,7 @@ function handleTestResult(origin, siteName, message) {
       }
       return Promise.all([
         runDoc.set({ 'updated': timestamp,
+                     'daq_run_id': message.daq_run_id,
                      'last_name': message.name
                    }, { merge: true }),
         resultDoc.set(message),
