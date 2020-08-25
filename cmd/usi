@@ -15,7 +15,7 @@ fi
 if [ -f "$gcp_cred" ]; then
     origin=`jq -r '.client_email' $gcp_cred | sed 's/@.*//'`
     project=`jq -r '.project_id' $gcp_cred | sed 's/@.*//'`
-    log_driver="--log-driver=gcplogs ---log-opt gcp-project=$project -log-opt labels=origin --label origin=$origin"
+    log_driver="--log-driver=gcplogs --log-opt gcp-project=$project --log-opt labels=origin --label origin=$origin"
     sudo mkdir -p /etc/systemd/system/docker.service.d 
 cat <<EOF > /etc/systemd/system/docker.service.d/docker-override.conf 
 [Service]
