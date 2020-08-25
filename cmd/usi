@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 USI_DIR=$ROOT/inst/network
 DEBUG=""
-log_driver=""
+
 debug_mode="true" #Always in debug mode for now
 if [ -n $debug_mode ]; then
     DEBUG="debug"
@@ -30,5 +30,5 @@ mkdir -p $USI_DIR
 args="-d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi"
 docker run $log_driver $args || docker run $args 
 
-echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/usi-logs.txt
+echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/cmdusi.log
 echo DAQ autoclean docker kill daq-usi 

@@ -112,8 +112,9 @@ echo Enough ipaddr tests: $((ip_notifications >= (NUM_IPADDR_TEST_DEVICES - NUM_
 echo Enough alternate subnet ips: $((alternate_subnet_ip >= (NUM_IPADDR_TEST_DEVICES - NUM_IPADDR_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
 echo Enough ipaddr timeouts: $((ipaddr_timeouts >= NUM_IPADDR_TEST_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 
-echo bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
-bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
+combine_cmd="bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2"
+echo $combine_cmd
+$combine_cmd
 
 cat inst/reports/combo_*.md
 
@@ -129,11 +130,11 @@ if [ -f "$gcp_cred" ]; then
     ls -l inst/reports/report_9a02571e8f05*.md
     echo '*************************'
 
-    echo Pulling reports from gcp... from $start_time to $end_time
-    cmd="bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time"
-    cmd="$cmd count=2 from_gcp=true"
-    echo $cmd
-    $cmd
+    daq_run_id=$(< inst/daq_run_id.txt)
+    echo Pulling reports from gcp for daq RUN id $daq_run_id
+    gcp_extras="daq_run_id=$daq_run_id from_gcp=true"
+    echo $combine_cmd $gcp_extras
+    $combine_cmd $gcp_extras
     echo GCP results diff | tee -a $GCP_RESULTS
     diff inst/reports/combo_*.md out/report_local.md | tee -a $GCP_RESULTS
 fi
