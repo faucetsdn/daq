@@ -15,7 +15,7 @@ fi
 if [ -f "$gcp_cred" ]; then
     origin=`jq -r '.client_email' $gcp_cred | sed 's/@.*//'`
     project=`jq -r '.project_id' $gcp_cred | sed 's/@.*//'`
-    log_driver="--log-driver=gcplogs --log-opt labels=origin --label origin=$origin --log-opt gcp-project=$project"
+    log_driver="--log-driver=gcplogs ---log-opt gcp-project=$project -log-opt labels=origin --label origin=$origin"
     sudo mkdir -p /etc/systemd/system/docker.service.d 
 cat <<EOF > /etc/systemd/system/docker.service.d/docker-override.conf 
 [Service]
@@ -27,7 +27,8 @@ fi
 
 rm -rf $USI_DIR
 mkdir -p $USI_DIR
-docker run -d $log_driver -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi || docker run -d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi
+args="-d -v $USI_DIR:/ovs --privileged --network=host -e DEBUG=$DEBUG --name daq-usi daqf/usi"
+docker run $log_driver $args || docker run $args 
 
 echo DAQ autoclean docker cp daq-usi:/root/logs.txt inst/usi-logs.txt
 echo DAQ autoclean docker kill daq-usi 

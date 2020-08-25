@@ -209,7 +209,10 @@ public class AlliedTelesisX230 extends BaseSwitchController {
     float maxPower = 0;
     float currentPower = 0;
     try {
-      maxPower = Float.parseFloat(powerMap.getOrDefault("max", ""));
+      // AT switch may add trailing "[C]" in power output.
+      String maxPowerString = powerMap.getOrDefault("max", "")
+          .replaceAll("\\[.*\\]", "");
+      maxPower = Float.parseFloat(maxPowerString);
       currentPower = Float.parseFloat(powerMap.getOrDefault("power", ""));
     } catch (NumberFormatException e) {
       System.out.println(
