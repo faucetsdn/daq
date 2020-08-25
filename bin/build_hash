@@ -10,7 +10,7 @@ build_built=.build_built
 faucet_version=$(cd faucet; git rev-list -n 1 HEAD)
 echo "$faucet_version  faucet/HEAD" > $build_files
 
-find docker/ subset/ -type f | sort | xargs sha1sum >> $build_files
+find docker/ subset/ usi/ -type f | sort | xargs sha1sum >> $build_files
 build_hash=`cat $build_files | sha256sum | awk '{print $1}'`
 
 if [ "$1" == check ]; then
