@@ -170,6 +170,11 @@
       "required": "pass",
       "expected": "Recommended Pass"
     },
+    "security.discover.firmware": {
+      "category": "Security",
+      "required": "info",
+      "expected": "Information"
+    },
     "security.manual.java_interface": {
       "category": "Security",
       "required": "pass",
