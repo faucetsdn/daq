@@ -14,8 +14,8 @@ description_dhcp_short = 'Reconnect device and check for DHCP request.'
 description_dhcp_long = 'Wait for lease expiry and check for DHCP request.'
 result = None
 
-dhcp_request = 3
-dhcp_acknowledge = 5
+DHCP_REQUEST = 3
+DHCP_ACKNOWLEDGE = 5
 
 
 def write_report(string_to_append):
@@ -49,7 +49,7 @@ def get_dhcp_option(packet, option):
 
 def test_dhcp_short():
     capture = rdpcap(scan_file)
-    dhcp_req = get_dhcp_type(capture, dhcp_request)
+    dhcp_req = get_dhcp_type(capture, DHCP_REQUEST)
     if dhcp_req is None:
         add_summary('No DHCP request received.')
         return 'fail'
@@ -59,14 +59,14 @@ def test_dhcp_short():
 
 def test_dhcp_long():
     capture = rdpcap(scan_file)
-    dhcp_ack = get_dhcp_type(capture, dhcp_acknowledge)
+    dhcp_ack = get_dhcp_type(capture, DHCP_ACKNOWLEDGE)
     if dhcp_ack is None:
         add_summary('No DHCP request received after lease expiry.')
         return 'fail'
     lease_time = get_dhcp_option(dhcp_ack, 'lease_time')
     expiry = dhcp_ack.time + lease_time
 
-    dhcp_req = get_dhcp_type(capture, dhcp_request, expiry)
+    dhcp_req = get_dhcp_type(capture, DHCP_REQUEST, expiry)
     if dhcp_req is None:
         add_summary('No DHCP request received after lease expiry.')
         return 'fail'

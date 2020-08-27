@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.text.DecimalFormat;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
@@ -14,33 +15,26 @@ public class Main {
   static byte version = 3;
   static int port = 123;
   static int timerPeriod = 10;
-  static byte leapIndicator = 3;
+  static byte leapIndicator = 0;
 
   /**
    * Constructs and sends NTP packets to target NTP server.
    */
 
   public static void main(String[] args) {
-    if (args.length < 2) {
-      throw new IllegalArgumentException("Usage: server_name port version timerPeriod");
+    if (args.length < 3) {
+      throw new IllegalArgumentException("Usage: server_name port version");
     }
     serverName = args[0];
     port = Integer.parseInt(args[1]);
     version = Byte.parseByte(args[2]);
-    timerPeriod = Integer.parseInt(args[3]);
 
-    Runnable senderRunnable = new Runnable() {
-      @Override
-        public void run() {
-          try {
-            sendRequest();
-          } catch (IOException e) {
-            System.out.println(e.getMessage());
-          }
-        }
-    };
-    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    executor.scheduleAtFixedRate(senderRunnable, 0, timerPeriod, TimeUnit.SECONDS);
+    try {
+      sendRequest();
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
+
   }
 
   private static void sendRequest() throws IOException {
@@ -85,8 +79,5 @@ public class Main {
                     + (msg.transmitTimestamp - destinationTimestamp)) / 2;
     System.out.println("Local clock offset: "
             + new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
-    if (localClockOffset * 1000 < 128) {
-      leapIndicator = 0;
-    }
   }
 }
