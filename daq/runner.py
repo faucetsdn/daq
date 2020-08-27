@@ -43,9 +43,10 @@ class Device:
         self.host = None
         self.gateway = None
         self.group = None
-        self.port = PortInfo()
+        self.port = None
         self.dhcp_ready = False
         self.ip_info = IpInfo()
+        self.set_id = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -55,19 +56,33 @@ class Devices:
     """Container for all devices"""
     def __init__(self):
         self._devices = {}
+        self._set_ids = set()
 
-    def new_device(self, mac):
+    def new_device(self, mac, port_info=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
         device = Device()
         device.mac = mac
         self._devices[mac] = device
+        device.port = port_info if port_info else PortInfo()
+        port_no = device.port.port_no
+        set_id = port_no if port_no else self._allocate_set_id()
+        assert set_id not in self._set_ids, "Duplicate device set id %d" % set_id
+        self._set_ids.add(set_id)
+        device.set_id = set_id
         return device
+
+    def _allocate_set_id(self):
+        set_id = 1
+        while set_id in self._set_ids:
+            set_id += 1
+        return set_id
 
     def remove(self, device):
         """Removing a device"""
         assert self.contains(device), "Device %s not found." % device
         del self._devices[device.mac]
+        self._set_ids.remove(device.set_id)
 
     def get(self, device_mac):
         """Get a device using its mac address"""
@@ -143,16 +158,16 @@ class DAQRunner:
         self.result_log = self._open_result_log()
         self._system_active = False
         logging_client = self.gcp.get_logging_client()
-        self._daq_run_id = uuid.uuid4()
+        self.daq_run_id = self._init_daq_run_id()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
-                                          labels={"daq_run_id": str(self._daq_run_id)})
+                                          labels={"daq_run_id": self.daq_run_id})
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
         if self.config.get('keep_hold'):
             LOGGER.info('Appending test_hold to master test list')
             test_list.append('hold')
         config['test_list'] = test_list
-        LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
+        LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
         LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
         LOGGER.info('DAQ version %s' % self._daq_version)
         LOGGER.info('LSB release %s' % self._lsb_release)
@@ -164,6 +179,12 @@ class DAQRunner:
     def _get_states(self):
         states = connected_host.pre_states() + self.config['test_list']
         return states + connected_host.post_states()
+
+    def _init_daq_run_id(self):
+        daq_run_id = str(uuid.uuid4())
+        with open('inst/daq_run_id.txt', 'w') as output_stream:
+            output_stream.write(daq_run_id + '\n')
+        return daq_run_id
 
     def _send_heartbeat(self):
         message = {
@@ -182,7 +203,7 @@ class DAQRunner:
             'version': self._daq_version,
             'lsb': self._lsb_release,
             'uname': self._sys_uname,
-            'daq_run_id': str(self._daq_run_id)
+            'daq_run_id': self.daq_run_id
         }
         data_retention_days = self.config.get('run_data_retention_days',
                                               self._DEFAULT_RETENTION_DAYS)
@@ -303,8 +324,7 @@ class DAQRunner:
                 self._ports[port] = PortInfo()
                 self._ports[port].port_no = port
             if not self._devices.get(target_mac):
-                device = self._devices.new_device(target_mac)
-                device.port = self._ports[port]
+                self._devices.new_device(target_mac, port_info=self._ports[port])
             self._target_set_trigger(self._devices.get(target_mac))
         else:
             LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
@@ -782,9 +802,12 @@ class DAQRunner:
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
 
     def _load_base_config(self, register=True):
-        base = self.configurator.load_and_merge({}, self.config.get('base_conf'))
-        site_config = self.configurator.load_config(self.config.get('site_path'),
-                                                    self._MODULE_CONFIG, optional=True)
+        base_conf = self.config.get('base_conf')
+        LOGGER.info('Loading base module config from %s', base_conf)
+        base = self.configurator.load_and_merge({}, base_conf)
+        site_path = self.config.get('site_path')
+        LOGGER.info('Loading site module config from %s', base_conf)
+        site_config = self.configurator.load_config(site_path, self._MODULE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)

@@ -6,6 +6,8 @@ import subprocess
 import string
 import random
 
+from base_module import HostModule
+
 import logger
 from clib import docker_host
 import wrappers
@@ -13,7 +15,7 @@ import wrappers
 LOGGER = logger.get_logger('docker')
 
 
-class DockerTest:
+class DockerTest(HostModule):
     """Class for running docker tests"""
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'
@@ -21,27 +23,14 @@ class DockerTest:
     CONTAINER_PREFIX = 'daq'
 
     def __init__(self, host, tmpdir, test_name, module_config):
-        self.device = host.device
-        self.tmpdir = tmpdir
-        self.test_name = test_name
-        self.runner = host.runner
-        # Host name can't be more than 15 characters
-        # because it is also used to create an interface in mininet.
-        self.host_name = '%s_%s' % (test_name[:6], self._get_random_string(3))
+        super().__init__(host, tmpdir, test_name, module_config)
         self.docker_log = None
         self.docker_host = None
-        self.callback = None
-        self.start_time = None
         self.pipe = None
-        self._finish_hook = None
 
     def start(self, port, params, callback, finish_hook):
         """Start the docker test"""
-        LOGGER.debug('%s starting docker test', self)
-
-        self.start_time = datetime.datetime.now()
-        self.callback = callback
-        self._finish_hook = finish_hook
+        super().start(port, params, callback, finish_hook)
 
         def opt_param(key):
             return params.get(key) or ''  # Substitute empty string for None
@@ -130,7 +119,6 @@ class DockerTest:
 
     def _docker_finalize(self):
         assert self.docker_host, 'docker host %s already finalized' % self
-        LOGGER.info('%s docker finalize', self)
         if self._finish_hook:
             self._finish_hook()
         self.runner.remove_host(self.docker_host)
@@ -138,6 +126,7 @@ class DockerTest:
             self.runner.monitor_forget(self.pipe.stdout)
             self.pipe = None
         return_code = self.docker_host.terminate()
+        LOGGER.info('%s docker finalize %d', self, return_code)
         self.docker_host = None
         self.docker_log.close()
         self.docker_log = None
@@ -173,9 +162,6 @@ class DockerTest:
 
     def _get_random_string(self, length):
         return ''.join(random.choice(string.ascii_letters) for _ in range(length))
-
-    def __repr__(self):
-        return "Target device %s test %s" % (self.device, self.test_name)
 
     def ip_listener(self, target_ip):
         """Do nothing b/c docker tests don't care about ip notifications"""

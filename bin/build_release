@@ -17,11 +17,14 @@ if [ -n "$changes" ]; then
     false
 fi
 
+git checkout release_stable
+git fetch faucet
+git merge faucet/release_stable
 git checkout master
 
 changed=`git diff --name-only release_stable docs/changelog.md`
 if [ -z "$changed" ]; then
-    git log release_stable..HEAD --pretty=oneline | sed -e 's/[a-z0-9]+/\*/g'
+    git log release_stable..HEAD --pretty=oneline | sed -e 's/^[a-z0-9]\+ //g'
     echo docs/changelog.md has not been updated since last release_stable
     echo Use the log lines above for inspiration.
     false
@@ -44,21 +47,10 @@ cmd/build force $VERSION
 
 cmd/build push
 
-cat > /tmp/git_expected.expected <<EOF
- M etc/docker_images.txt
- M etc/docker_images.ver
-EOF
-
-git status --porcelain > /tmp/git_status.found
-
-if ! diff /tmp/git_status.expected /tmp/git_status.found; then
-    echo Expected build images not found. Something went wrong.
-    false
-fi
-rm -f /tmp/git_status.*
-
 git commit -a -m "$VERSION release"
 git tag -a $VERSION -m "$VERSION release"
+firebase/deploy.sh bos-daq-testing
+
 git push
 git push --tags
 
@@ -69,12 +61,13 @@ if [ -n "$faucetgit" ]; then
     git push faucet --tags
 fi
 
-firebase/deploy.sh bos-daq-testing
 git checkout release_testing && git reset --hard $VERSION
-
+git push
 if [ -n "$faucetgit" ]; then
     git push faucet
 fi
+
+git log -n 1
 
 # QA pass to make sure everything is ok.
 # `firebase/deploy.sh daq-qualification-labs`

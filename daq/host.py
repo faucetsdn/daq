@@ -34,6 +34,7 @@ class _STATE:
     TERM = 'Host terminated'
 
 
+
 class MODE:
     """Test module modes for state reporting."""
     INIT = 'init'
@@ -109,7 +110,6 @@ class ConnectedHost:
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', 0))
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
-        self._finish_hook_script = config.get('finish_hook')
         self._usi_config = config.get('usi_setup', {})
         self._topology_hook_script = config.get('topology_hook')
         self._mirror_intf_name = None
@@ -214,14 +214,16 @@ class ConnectedHost:
         partial = os.path.join('tests', self.test_name, base) if self.test_name else base
         return os.path.join('run_id', self.run_id, partial)
 
-    def _load_config(self, config, path):
+    def _load_config(self, name, config, path):
+        if name:
+            self.logger.info('Loading %s module config from %s', name, path)
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
 
     def _write_module_config(self, config, path):
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
     def _type_path(self):
-        dev_config = self._load_config({}, self._device_base)
+        dev_config = self._load_config(None, {}, self._device_base)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -709,13 +711,13 @@ class ConnectedHost:
         return os.path.join(self._host_dir_path(), 'tmp')
 
     def _finish_hook(self):
-        if self._finish_hook_script:
+        script = self.config.get('finish_hook')
+        if script:
             finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
-            self.logger.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
-            os.system('%s %s 2>&1 > %s/finish.out' %
-                      (self._finish_hook_script, finish_dir, finish_dir))
+            self.logger.info('Executing finish_hook: %s %s', script, finish_dir)
+            os.system('%s %s 2>&1 > %s/finish.out' % (script, finish_dir, finish_dir))
 
     def _topology_hook(self):
         if self._topology_hook_script:
@@ -740,7 +742,8 @@ class ConnectedHost:
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
             'started': gcp.get_timestamp(),
-            'switch': self._get_switch_config()
+            'switch': self._get_switch_config(),
+            'usi': self._usi_config
         }
         config['run_info'].update(self.runner.get_run_info())
 
@@ -748,9 +751,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        self._load_config(config, self._type_path())
-        self._load_config(config, self._device_base)
-        self._load_config(config, self._port_base)
+        self._load_config('type', config, self._type_path())
+        self._load_config('device', config, self._device_base)
+        self._load_config('port', config, self._port_base)
         return config
 
     def record_result(self, name, **kwargs):
@@ -773,6 +776,7 @@ class ConnectedHost:
         result = {
             'name': name,
             'runid': (self.run_id if run_info else None),
+            'daq_run_id': self.runner.daq_run_id,
             'device_id': self.target_mac,
             'started': self.test_start,
             'timestamp': current if current else gcp.get_timestamp(),
@@ -818,7 +822,7 @@ class ConnectedHost:
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = self._load_config({}, self._device_base)
+        dev_config = self._load_config('base', {}, self._device_base)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         if self.target_port:

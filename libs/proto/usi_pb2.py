@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\004grpcB\010USIProtoP\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\tusi.proto\x12\x03usi\"\'\n\x14SwitchActionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x9b\x01\n\rPowerResponse\x12!\n\x19\x63urrent_power_consumption\x18\x01 \x01(\x02\x12\x1d\n\x15max_power_consumption\x18\x02 \x01(\x02\x12$\n\x0bpoe_support\x18\x03 \x01(\x0e\x32\x0f.usi.POESupport\x12\"\n\npoe_status\x18\x04 \x01(\x0e\x32\x0e.usi.POEStatus\"]\n\x11InterfaceResponse\x12$\n\x0blink_status\x18\x01 \x01(\x0e\x32\x0f.usi.LinkStatus\x12\x12\n\nlink_speed\x18\x02 \x01(\x05\x12\x0e\n\x06\x64uplex\x18\x03 \x01(\t\"w\n\nSwitchInfo\x12\x0f\n\x07ip_addr\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_port\x18\x03 \x01(\x05\x12\x1f\n\x05model\x18\x04 \x01(\x0e\x32\x10.usi.SwitchModel\x12\x10\n\x08username\x18\x05 \x01(\t\x12\x10\n\x08password\x18\x06 \x01(\t*F\n\x0bSwitchModel\x12\x17\n\x13\x41LLIED_TELESIS_X230\x10\x00\x12\x0e\n\nCISCO_9300\x10\x01\x12\x0e\n\nOVS_SWITCH\x10\x02*\x1e\n\nLinkStatus\x12\x06\n\x02UP\x10\x00\x12\x08\n\x04\x44OWN\x10\x01*\'\n\nPOESupport\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01*1\n\tPOEStatus\x12\x06\n\x02ON\x10\x00\x12\x07\n\x03OFF\x10\x01\x12\t\n\x05\x46\x41ULT\x10\x02\x12\x08\n\x04\x44\x45NY\x10\x03\x32\xef\x01\n\nUSIService\x12\x31\n\x08GetPower\x12\x0f.usi.SwitchInfo\x1a\x12.usi.PowerResponse\"\x00\x12\x39\n\x0cGetInterface\x12\x0f.usi.SwitchInfo\x1a\x16.usi.InterfaceResponse\"\x00\x12:\n\ndisconnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x12\x37\n\x07\x63onnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x42\x12\n\x04grpcB\x08USIProtoP\x01\x62\x06proto3'
+  serialized_pb=b'\n\tusi.proto\x12\x03usi\"\'\n\x14SwitchActionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xc9\x01\n\rPowerResponse\x12!\n\x19\x63urrent_power_consumption\x18\x01 \x01(\x02\x12\x1d\n\x15max_power_consumption\x18\x02 \x01(\x02\x12$\n\x0bpoe_support\x18\x03 \x01(\x0e\x32\x0f.usi.POESupport\x12\"\n\npoe_status\x18\x04 \x01(\x0e\x32\x0e.usi.POEStatus\x12,\n\x0fpoe_negotiation\x18\x05 \x01(\x0e\x32\x13.usi.POENegotiation\"]\n\x11InterfaceResponse\x12$\n\x0blink_status\x18\x01 \x01(\x0e\x32\x0f.usi.LinkStatus\x12\x12\n\nlink_speed\x18\x02 \x01(\x05\x12\x0e\n\x06\x64uplex\x18\x03 \x01(\t\"w\n\nSwitchInfo\x12\x0f\n\x07ip_addr\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_port\x18\x03 \x01(\x05\x12\x1f\n\x05model\x18\x04 \x01(\x0e\x32\x10.usi.SwitchModel\x12\x10\n\x08username\x18\x05 \x01(\t\x12\x10\n\x08password\x18\x06 \x01(\t*F\n\x0bSwitchModel\x12\x17\n\x13\x41LLIED_TELESIS_X230\x10\x00\x12\x0e\n\nCISCO_9300\x10\x01\x12\x0e\n\nOVS_SWITCH\x10\x02*\x1e\n\nLinkStatus\x12\x06\n\x02UP\x10\x00\x12\x08\n\x04\x44OWN\x10\x01*\'\n\nPOESupport\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01*1\n\tPOEStatus\x12\x06\n\x02ON\x10\x00\x12\x07\n\x03OFF\x10\x01\x12\t\n\x05\x46\x41ULT\x10\x02\x12\x08\n\x04\x44\x45NY\x10\x03*C\n\x0ePOENegotiation\x12\x17\n\x13NEGOTIATION_ENABLED\x10\x00\x12\x18\n\x14NEGOTIATION_DISABLED\x10\x01\x32\xef\x01\n\nUSIService\x12\x31\n\x08GetPower\x12\x0f.usi.SwitchInfo\x1a\x12.usi.PowerResponse\"\x00\x12\x39\n\x0cGetInterface\x12\x0f.usi.SwitchInfo\x1a\x16.usi.InterfaceResponse\"\x00\x12:\n\ndisconnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x12\x37\n\x07\x63onnect\x12\x0f.usi.SwitchInfo\x1a\x19.usi.SwitchActionResponse\"\x00\x42\x12\n\x04grpcB\x08USIProtoP\x01\x62\x06proto3'
 )
 
 _SWITCHMODEL = _descriptor.EnumDescriptor(
@@ -48,8 +48,8 @@ _SWITCHMODEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=433,
-  serialized_end=503,
+  serialized_start=479,
+  serialized_end=549,
 )
 _sym_db.RegisterEnumDescriptor(_SWITCHMODEL)
 
@@ -74,8 +74,8 @@ _LINKSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=505,
-  serialized_end=535,
+  serialized_start=551,
+  serialized_end=581,
 )
 _sym_db.RegisterEnumDescriptor(_LINKSTATUS)
 
@@ -100,8 +100,8 @@ _POESUPPORT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=537,
-  serialized_end=576,
+  serialized_start=583,
+  serialized_end=622,
 )
 _sym_db.RegisterEnumDescriptor(_POESUPPORT)
 
@@ -136,12 +136,38 @@ _POESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=578,
-  serialized_end=627,
+  serialized_start=624,
+  serialized_end=673,
 )
 _sym_db.RegisterEnumDescriptor(_POESTATUS)
 
 POEStatus = enum_type_wrapper.EnumTypeWrapper(_POESTATUS)
+_POENEGOTIATION = _descriptor.EnumDescriptor(
+  name='POENegotiation',
+  full_name='usi.POENegotiation',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='NEGOTIATION_ENABLED', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='NEGOTIATION_DISABLED', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=675,
+  serialized_end=742,
+)
+_sym_db.RegisterEnumDescriptor(_POENEGOTIATION)
+
+POENegotiation = enum_type_wrapper.EnumTypeWrapper(_POENEGOTIATION)
 ALLIED_TELESIS_X230 = 0
 CISCO_9300 = 1
 OVS_SWITCH = 2
@@ -153,6 +179,8 @@ ON = 0
 OFF = 1
 FAULT = 2
 DENY = 3
+NEGOTIATION_ENABLED = 0
+NEGOTIATION_DISABLED = 1
 
 
 
@@ -224,6 +252,13 @@ _POWERRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='poe_negotiation', full_name='usi.PowerResponse.poe_negotiation', index=4,
+      number=5, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -237,7 +272,7 @@ _POWERRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=60,
-  serialized_end=215,
+  serialized_end=261,
 )
 
 
@@ -282,8 +317,8 @@ _INTERFACERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=217,
-  serialized_end=310,
+  serialized_start=263,
+  serialized_end=356,
 )
 
 
@@ -342,12 +377,13 @@ _SWITCHINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=312,
-  serialized_end=431,
+  serialized_start=358,
+  serialized_end=477,
 )
 
 _POWERRESPONSE.fields_by_name['poe_support'].enum_type = _POESUPPORT
 _POWERRESPONSE.fields_by_name['poe_status'].enum_type = _POESTATUS
+_POWERRESPONSE.fields_by_name['poe_negotiation'].enum_type = _POENEGOTIATION
 _INTERFACERESPONSE.fields_by_name['link_status'].enum_type = _LINKSTATUS
 _SWITCHINFO.fields_by_name['model'].enum_type = _SWITCHMODEL
 DESCRIPTOR.message_types_by_name['SwitchActionResponse'] = _SWITCHACTIONRESPONSE
@@ -358,6 +394,7 @@ DESCRIPTOR.enum_types_by_name['SwitchModel'] = _SWITCHMODEL
 DESCRIPTOR.enum_types_by_name['LinkStatus'] = _LINKSTATUS
 DESCRIPTOR.enum_types_by_name['POESupport'] = _POESUPPORT
 DESCRIPTOR.enum_types_by_name['POEStatus'] = _POESTATUS
+DESCRIPTOR.enum_types_by_name['POENegotiation'] = _POENEGOTIATION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 SwitchActionResponse = _reflection.GeneratedProtocolMessageType('SwitchActionResponse', (_message.Message,), {
@@ -398,8 +435,8 @@ _USISERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=630,
-  serialized_end=869,
+  serialized_start=745,
+  serialized_end=984,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetPower',
