@@ -1,16 +1,16 @@
 #!/bin/bash -e
-source reporting.sh
+source $TEST_ROOT/reporting.sh
 
-RESULT_LINES=/tmp/result_lines.txt
-MONO_LOG=/tmp/mono-log.txt
-MANIFEST=./module_manifest.json
-REPORT_FILE=/tmp/report.txt
-MODULE_CONFIG=/config/device/module_config.json
+RESULT_LINES=$TEST_ROOT/tmp/result_lines.txt
+MONO_LOG=$TEST_ROOT/tmp/mono-log.txt
+MANIFEST=$TEST_ROOT/module_manifest.json
+REPORT_FILE=$TEST_ROOT/tmp/report.txt
+MODULE_CONFIG=$TEST_ROOT/config/device/module_config.json
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
 # This is a check that the startup.pcap file exists and is proper.
-tcpdump -en -r /scans/startup.pcap ip
+tcpdump -en -r $TEST_ROOT/scans/startup.pcap ip
 
 echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
@@ -26,8 +26,8 @@ else
     req=pass
     ack=pass
     echo
-    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
-    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
+    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
+    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
     if [ $req = "fail" ] || [ $ack = "fail" ]; then
         status=fail
         echo RESULT fail base.startup.dhcp missing dhcp packets| tee -a $RESULT_LINES

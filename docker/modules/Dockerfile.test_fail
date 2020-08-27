@@ -1,4 +1,0 @@
-FROM daqf/aardvark:latest
-
-CMD false
-

@@ -3,13 +3,14 @@
 from __future__ import absolute_import
 
 import datetime
+from abc import ABC
 import logger
 
 
 LOGGER = logger.get_logger('module')
 
 
-class HostModule:
+class HostModule(ABC):
     """Base class for host test modules"""
 
     def __init__(self, host, tmpdir, test_name, module_config):
@@ -33,6 +34,9 @@ class HostModule:
         self.callback = callback
         self._finish_hook = finish_hook
         self.start_time = datetime.datetime.now()
+
+    def ip_listener(self, target_ip):
+        """Defaults to do nothing about ip notifications"""
 
     def __repr__(self):
         return "Target device %s test %s" % (self.device, self.test_name)

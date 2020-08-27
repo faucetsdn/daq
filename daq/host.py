@@ -14,9 +14,8 @@ from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
 
 import configurator
-import docker_test
+from test_modules import DockerTest, IpAddrTest, NativeTest
 import gcp
-import ipaddr_test
 import logger
 
 
@@ -79,6 +78,11 @@ class ConnectedHost:
     _AUX_DIR = "aux/"
     _CONFIG_DIR = "config/"
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
+    _NATIVE_TESTS_MAPPING = {
+        "pass": ("subset/pass", "entrypoint"),
+        "fail": ("subset/fail", "entrypoint"),
+        "ping": ("subset/ping", "test_ping")
+    }
 
     # pylint: disable=too-many-statements
     def __init__(self, runner, device, config):
@@ -616,7 +620,12 @@ class ConnectedHost:
         return path
 
     def _new_test(self, test_name):
-        clazz = ipaddr_test.IpAddrTest if test_name == 'ipaddr' else docker_test.DockerTest
+        if test_name in self._NATIVE_TESTS_MAPPING:
+            basedir, startup_script = self._NATIVE_TESTS_MAPPING[test_name]
+            basedir = os.path.abspath(basedir)
+            return NativeTest(self, self.devdir, test_name, self._loaded_config, basedir,
+                              startup_script)
+        clazz = IpAddrTest if test_name == 'ipaddr' else DockerTest
         return clazz(self, self.devdir, test_name, self._loaded_config)
 
     def _run_test(self, test_name):
