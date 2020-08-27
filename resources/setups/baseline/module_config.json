@@ -13,6 +13,7 @@
       "enabled": true
     },
     "nmap": {
+      "timeout_sec": 600,
       "enabled": true
     },
     "switch": {
@@ -22,6 +23,7 @@
       "enabled": true
     },
     "password": {
+      "dictionary_dir": "resources/faux",
       "enabled": true
     },
     "bacext": {
