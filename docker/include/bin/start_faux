@@ -163,14 +163,14 @@ if [ -n "${options[ntpv4]}" ]; then
     ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
     (while true; do
         echo Transmitting NTP query to $ntp_server using NTPv4
-        java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 > ntp.log &
+        java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 > ntp.log
         sleep 8
     done) &
 elif [ -n "${options[ntpv3]}" ]; then
     STATIC_NTP_SERVER=216.239.35.8
     (while true; do
         echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
-        java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 > ntp.log &
+        java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 > ntp.log
         sleep 8
     done) &
 fi
