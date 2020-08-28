@@ -172,13 +172,16 @@ class ReportGenerator:
             if ResultType.REPORT_PATH not in result_dict:
                 continue
             path = result_dict[ResultType.REPORT_PATH]
+            results = []
             with open(path) as stream:
                 for line in stream:
                     match = re.search(self._RESULT_REGEX, line)
                     if match:
-                        result, test_name, extra = match.group(1), match.group(2), match.group(3)
-                        self._accumulate_result(test_name, result, extra, module_name=module_name)
-                        module_result["tests"][test_name] = self._results[test_name]
+                        name, result, description = (match.group(2), match.group(1), match.group(3))
+                        results.append((name, result, description))
+                for result in results:
+                    self._accumulate_result(*result, module_name=module_name)
+                    module_result["tests"][result[0]] = self._results[result[0]]
         self._all_results['timestamp'] = gcp.get_timestamp()
         self._all_results['missing_tests'] = self._find_missing_test_results()
 
@@ -209,7 +212,7 @@ class ReportGenerator:
         self._write_test_tables()
 
     def _accumulate_result(self, test_name, result, extra='', module_name=None):
-        assert test_name not in self._results, 'result already exists'
+        assert test_name not in self._results, 'result already exists: %s' % test_name
 
         if result not in self._result_headers:
             self._result_headers.append(result)

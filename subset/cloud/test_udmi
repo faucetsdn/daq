@@ -39,7 +39,7 @@ fi
 
 if [ -n "$skip" ]; then
     echo Skipping udmi test because $skip
-    for message_type in $message_types; do
+    for message_type in provision $message_types; do
         TEST_NAME="cloud.udmi.$message_type"
         TEST_DESCRIPTION="Validates device $message_type payload."
         RESULT_AND_SUMMARY="RESULT skip $TEST_NAME $skip"
@@ -62,6 +62,21 @@ echo Extracted service $service_id
 echo Configured topic is $gcp_topic
 echo Target device is $device_id
 echo
+
+more /gw/nodes/*/activate.log | cat
+if fgrep "Processing provisioning request for device $device_id" /gw/nodes/*/activate.log; then
+    result=pass
+    detail="Found provisioning request"
+else
+    result=fail
+    detail="No provisioning request"
+fi
+TEST_NAME="cloud.udmi.provision"
+TEST_DESCRIPTION="Validates dynamic provisioning request"
+RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
+write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                 "$skip" "$RESULT_AND_SUMMARY"
+
 
 timeout 90 validator/bin/validate $project_id $schema_path pubsub $subscription local/ || true
 
@@ -87,6 +102,7 @@ function message_report {
     write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
                      "$skip" "$RESULT_AND_SUMMARY"
 }
+
 
 for message_type in $message_types; do
     message_report $message_type

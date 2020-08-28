@@ -46,6 +46,7 @@ class DockerTest(HostModule):
             ]
 
         vol_maps = [params['scan_base'] + ":/scans"]
+        vol_maps += [params['gw_base'] + ":/gw"]
         self._map_if_exists(vol_maps, params, 'inst')
         self._map_if_exists(vol_maps, params, 'port')
         self._map_if_exists(vol_maps, params, 'device')

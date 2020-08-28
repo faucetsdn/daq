@@ -17,7 +17,7 @@ done
 
 # Enable a web-server for configuration access.
 mkdir -p /tmp/public
-(cd /tmp/public; python -m SimpleHTTPServer &)
+(cd /tmp/public; python3 -m http.server &)
 
 # Enable NAT to the outside world, through the docker bridge.
 echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -45,6 +45,20 @@ echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
 
 # Start the NTP server
 service ntp start
+
+# For cloud-based provisioning tests.
+GCP_CRED_FILE=/config/inst/gcp_service_account.json
+if [ -f /config/inst/gcp_service_account.json ]; then
+    echo Activating pagent with $GCP_CRED_FILE
+    (
+        gcloud auth activate-service-account --key-file $GCP_CRED_FILE
+        gcloud auth list
+        project_id=`jq -r .project_id $GCP_CRED_FILE`
+        cd udmi
+        echo bin/pagent test_site $project_id
+        bin/pagent test_site $project_id
+    ) &
+fi
 
 echo Blocking for all eternity.
 ./autorestart_dnsmasq

@@ -9,10 +9,10 @@ echo Aux Tests >> $TEST_RESULTS
 function make_pubber {
     device=$1
     faux=$2
-    fail=$3
+    extra=$3
     gateway=$4
     local_dir=inst/faux/$faux/local/
-    echo Creating $device with $fail/$gateway in $local_dir
+    echo Creating $device with $extra/$gateway in $local_dir
     mkdir -p $local_dir
     if [ "$gateway" == null ]; then
         cp resources/test_site/devices/$device/rsa_private.pkcs8 $local_dir
@@ -25,7 +25,7 @@ function make_pubber {
     "projectId": "$project_id",
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
-    "extraField": $fail,
+    "extraField": $extra,
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
