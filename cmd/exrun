@@ -122,11 +122,8 @@ fi
 docker rm -f daq-usi || true
 docker0_ip=`sudo ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
 if [ -z "$usi_setup_url" -o "$usi_setup_url" == "localhost:5000" -o "$usi_setup_url" == "$docker0_ip:5000" ]; then
-    sudo iptables -C INPUT -i docker0 -j ACCEPT
-    if [  $? == "1" ]; then
-        sudo iptables -A INPUT -i docker0 -j ACCEPT
-    fi
-    autostart cmd/usi
+    sudo iptables -C INPUT -i docker0 -j ACCEPT || sudo iptables -A INPUT -i docker0 -j ACCEPT
+    autostart gcp_cred=$gcp_cred cmd/usi
     docker0_ip=`sudo ifconfig docker0 | grep 'inet ' | awk '{print $2}'`
     uri_url_override="usi_setup.url=$docker0_ip:5000"
 fi

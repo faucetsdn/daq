@@ -19,10 +19,6 @@ More details about the goals and objectives behind this can be found in the IEEE
 [SDN capabilities](https://queue.acm.org/detail.cfm?id=2560327), such as the
 [FAUCET OpenFlow controller](https://faucet.nz/), to orchestrate "microsegmentation" on
 the network for improved security.
-* [_Universal Device Management Interface (UDMI)_](schemas/udmi/README.md): An interface
-specification designed to normalize the management of IoT devices from different manufacturers.
-This is a simple standard that provides for many of the common features not present in
-existing protocols (e.g. BACnet).
 * _Device Management Tools_: A suite of tools, consoles, and dashboards that help operate
 a robust ecosystem of IoT devices. (Details forthcoming.)
 

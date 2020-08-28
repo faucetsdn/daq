@@ -1,4 +1,4 @@
-"""Unit tests for combine_reports_from_date_range"""
+"""Unit tests for combine_reports"""
 
 import unittest
 import sys
@@ -8,8 +8,8 @@ from datetime import datetime
 from unittest.mock import MagicMock, mock_open, patch
 
 import daq
-import combine_reports_from_date_range
-from combine_reports_from_date_range import _render_results, main, os
+import combine_reports
+from combine_reports import _render_results, main, os
 from daq.report import MdTable
 
 
@@ -18,7 +18,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.script_path = os.path.dirname(os.path.realpath(__file__))
-        mock_path = os.path.join(self.script_path, 'mock', 'test_combine_reports_from_date_range')
+        mock_path = os.path.join(self.script_path, 'mock', 'test_combine_reports')
         self.mocks = {'empty': ''}
         for filename in os.listdir(mock_path):
             with open(os.path.join(mock_path, filename)) as f:
@@ -93,7 +93,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
                 raise Exception(report + ' is not expected')
             return mock_open(read_data=self.mocks[mock_name]).return_value
 
-        combine_reports_from_date_range._render_results = MagicMock(return_value="fake results")
+        combine_reports._render_results = MagicMock(return_value="fake results")
         with patch("builtins.open", new=custom_open):
             main('device1', start=datetime.fromisoformat('2020-05-29'))
         expected_results = {
@@ -110,8 +110,8 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
                 'report_1_timestamp': True,
                 'report_2_timestamp': True
             }}
-        combine_reports_from_date_range._render_results.assert_called()
-        call_args = combine_reports_from_date_range._render_results.call_args[0][0]
+        combine_reports._render_results.assert_called()
+        call_args = combine_reports._render_results.call_args[0][0]
         assert self._dict_compare(call_args, expected_results)
 
 
