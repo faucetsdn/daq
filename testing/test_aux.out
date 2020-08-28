@@ -21,21 +21,24 @@ RESULT info protocol.bacnet.version Protocol version: 1
 RESULT skip protocol.bacnet.pic BACnet device found, but pics.csv not found in device type directory.
 RESULT info protocol.bacnet.version Protocol version: 1
 RESULT pass protocol.bacnet.pic The devices matches the PICS
-RESULT skip security.tlsv1.server IOException unable to connect to server.
-RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
-RESULT skip security.tlsv1_2.server IOException unable to connect to server.
-RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
-RESULT skip security.tlsv1_3.server IOException unable to connect to server.
-RESULT fail security.tlsv1.server Certificate is expired. Certificate has not been signed by a CA.
-RESULT pass security.tlsv1_2.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_2.server Certificate is expired. Certificate has not been signed by a CA.
-RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
-RESULT fail security.tlsv1_3.server Certificate public key length is < 2048. Certificate could not be validated. Certificate has not been signed by a CA.
-RESULT fail security.tlsv1.server Certificate public key length is < 2048. Certificate has not been signed by a CA.
-RESULT pass security.tlsv1_2.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_2.server Certificate public key length is < 2048. Certificate has not been signed by a CA.
-RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
-RESULT fail security.tlsv1_3.server Certificate public key length is < 2048. Certificate has not been signed by a CA.
+RESULT skip security.tls.v1 IOException unable to connect to server
+RESULT skip security.tls.v1.x509 IOException unable to connect to server
+RESULT skip security.tls.v1_2 IOException unable to connect to server
+RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
+RESULT skip security.tls.v1_3 IOException unable to connect to server
+RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
+RESULT fail security.tls.v1 Certificate is expired.
+RESULT fail security.tls.v1.x509 Certificate is expired.
+RESULT fail security.tls.v1_2 Certificate is expired.
+RESULT fail security.tls.v1_2.x509 Certificate is expired.
+RESULT fail security.tls.v1_3 Certificate could not be validated.
+RESULT fail security.tls.v1_3.x509 Certificate could not be validated.
+RESULT pass security.tls.v1 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_2 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_2.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_3 Certificate active for current date and public key length > 2048.
+RESULT pass security.tls.v1_3.x509 Certificate active for current date and public key length > 2048.
 RESULT skip security.passwords.http Port 80 not open on target device.
 RESULT skip security.passwords.https Port 443 not open on target device.
 RESULT skip security.passwords.ssh Port 22 not open on target device.
