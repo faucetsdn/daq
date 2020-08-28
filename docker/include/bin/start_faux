@@ -215,10 +215,14 @@ if [ -n "${options[tls]}" ]; then
     echo Starting tls server on port 443 https.
     mv /root/nginx/nginxpass.conf /etc/nginx/nginx.conf
     service nginx start
+    python tlsfaux/client.py 1.2 google.com &
+    python tlsfaux/client.py 1.3 google.com &
 elif [ -n "${options[expiredtls]}" ]; then
     echo Starting expired tls server on port 443 https.
     mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
     service nginx start
+    python tlsfaux/client.py 1.2 not-a-good-url.google.com/ &
+    python tlsfaux/client.py 1.3 not-a-good-url.google.com &
 fi
 
 if [ -n "${options[pubber]}" ]; then

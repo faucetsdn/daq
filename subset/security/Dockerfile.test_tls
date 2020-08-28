@@ -3,7 +3,7 @@ FROM daqf/aardvark:latest
 # Do this alone first so it can be re-used by other build files.
 RUN $AG update && $AG install openjdk-11-jre
 
-RUN $AG update && $AG install openjdk-11-jdk git
+RUN $AG update && $AG install openjdk-11-jdk git tshark
 
 COPY subset/switches/module_manifest.json .
 COPY subset/security/ .

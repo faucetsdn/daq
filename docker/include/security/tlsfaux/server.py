@@ -16,26 +16,31 @@ context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 context.load_cert_chain(certfile=filename_cert, keyfile=filename_key)
 
 bind_socket = socket.socket()
+bind_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 bind_socket.bind((hostname,port))
 bind_socket.listen(5)
 
 def test_data(connstream,data):
-	print("test_data:",data)
-	return false
+        print("test_data:",data)
+        return false
 
 def read_client_data(connstream):
-	data = connstream.read()
-	while data:
-		if not test_data(connstream,data):
-			break
-		data = connstream.read()
+        data = connstream.read()
+        while data:
+                if not test_data(connstream,data):
+                        break
+                data = connstream.read()
 
 print("SSL Server started...")
 while True:
-	newsocket, fromaddr = bind_socket.accept()
-	connstream = context.wrap_socket(newsocket, server_side=True)
-	try:
-		read_client_data(connstream)
-	finally:
-		connstream.shutdown(socket.SHUT_RDWR)
-		connstream.close()
+        newsocket, fromaddr = bind_socket.accept()
+        connstream = context.wrap_socket(newsocket, server_side=True)
+        print(connstream.cipher())
+        print(connstream.version())
+        try:
+                read_client_data(connstream)
+        except:
+                pass
+        finally:
+                connstream.shutdown(socket.SHUT_RDWR)
+                connstream.close()
