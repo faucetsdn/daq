@@ -47,14 +47,13 @@ class BaseSwitchControllerTest {
   @Test
   void mapSimpleTableSampleInputCisco9300() {
     String raw = "Port         Name               Status       Vlan       Duplex  Speed Type\n"
-               + "Gi1/0/1                         connected    routed     a-full  a-100 10/100/1000BaseTX";
+        + "Gi1/0/1                         connected    routed     a-full  a-100 10/100/1000BaseTX";
     String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
     String[] mapNames =  {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
     Map<String, String> expected = Map.of("interface", "Gi1/0/1", "name", "", "status",
         "connected", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
         "type", "10/100/1000BaseTX");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
-    System.out.println(response);
     for (String key : response.keySet()) {
       assertEquals(expected.get(key), response.get(key));
     }
