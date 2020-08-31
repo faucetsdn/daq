@@ -62,9 +62,10 @@ public abstract class BaseSwitchController implements SwitchController {
       String rawPacket, String[] colNames, String[] mapNames) {
     HashMap<String, String> colMap = new HashMap<>();
     String[] lines = rawPacket.split("\n");
-    if (lines.length >= 2) {
-      String header = lines[0].trim();
-      String values = lines[1].trim();
+    int headerLine = 0;
+    if (lines.length >= headerLine + 2) {
+      String header = lines[headerLine].trim();
+      String values = lines[headerLine + 1].trim();
       int lastSectionEnd = 0;
       for (int i = 0; i < colNames.length; i++) {
         int secStart = lastSectionEnd;
@@ -77,6 +78,11 @@ public abstract class BaseSwitchController implements SwitchController {
           // correct values based off of the sections in between white spaces
           int firstWhiteSpace =
               getFirstWhiteSpace(values.substring(lastSectionEnd)) + lastSectionEnd;
+          // Wrong table header line
+          if (firstWhiteSpace < 0) {
+            headerLine++;
+            break;
+          }
           int lastWhiteSpace =
               getIndexOfNonWhitespaceAfterWhitespace(values.substring(firstWhiteSpace))
                   + firstWhiteSpace;
