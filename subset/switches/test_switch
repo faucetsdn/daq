@@ -68,16 +68,4 @@ else
                      "$SKIP_REASON" \
                      "RESULT $RESULT poe.power $SUMMARY"
 
-    write_out_result $REPORT \
-                     "poe.negotiation" \
-                     "$(jq -r '.["poe.negotiation"].description' $MANIFEST)" \
-                     "$SKIP_REASON" \
-                     "RESULT $RESULT poe.negotiation $SUMMARY"
-
-    write_out_result $REPORT \
-                     "poe.support" \
-                     "$(jq -r '.["poe.support"].description' $MANIFEST)" \
-                     "$SKIP_REASON" \
-                     "RESULT $RESULT poe.support $SUMMARY"
-
 fi
