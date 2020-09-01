@@ -2,7 +2,6 @@ package daq.usi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 import daq.usi.cisco.Cisco9300;
 import grpc.InterfaceResponse;
 import grpc.LinkStatus;

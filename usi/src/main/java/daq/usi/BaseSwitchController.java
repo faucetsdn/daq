@@ -87,7 +87,7 @@ public abstract class BaseSwitchController implements SwitchController {
               getIndexOfNonWhitespaceAfterWhitespace(values.substring(firstWhiteSpace))
                   + firstWhiteSpace;
           int nextHeaderStart = header.indexOf(colNames[i + 1]);
-          if(nextHeaderStart >= firstWhiteSpace) {
+          if (nextHeaderStart >= firstWhiteSpace) {
             secEnd = nextHeaderStart;
           } else {
             secEnd = Math.max(lastWhiteSpace, nextHeaderStart);
