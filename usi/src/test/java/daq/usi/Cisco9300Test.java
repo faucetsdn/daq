@@ -53,8 +53,8 @@ class Cisco9300Test {
   @Test
   void testSampleInterfaceResponse() throws Exception {
     final String output = "show interface gigabitethernet1/0/2 status\n\n\n"
-        + "Port         Name               Status       Vlan       Duplex  Speed Type\n"
-        + "Gi1/0/1                         connected    routed     a-full  a-100 10/100/1000BaseTX"
+        + "Port      Name               Status       Vlan       Duplex  Speed Type\n"
+        + "Gi1/0/4                      connected    trunk      a-full  a-100 10/100/1000BaseTX\n"
         + "daq#\n";
     fakeLogin();
     at.getInterface(1, new ResponseHandler<InterfaceResponse>() {

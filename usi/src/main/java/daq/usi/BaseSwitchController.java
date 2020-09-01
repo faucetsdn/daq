@@ -66,6 +66,8 @@ public abstract class BaseSwitchController implements SwitchController {
     if (lines.length >= headerLine + 2) {
       String header = lines[headerLine].trim();
       String values = lines[headerLine + 1].trim();
+      System.out.println(header);
+      System.out.println(values);
       int lastSectionEnd = 0;
       for (int i = 0; i < colNames.length; i++) {
         int secStart = lastSectionEnd;
@@ -87,7 +89,11 @@ public abstract class BaseSwitchController implements SwitchController {
               getIndexOfNonWhitespaceAfterWhitespace(values.substring(firstWhiteSpace))
                   + firstWhiteSpace;
           int nextHeaderStart = header.indexOf(colNames[i + 1]);
-          secEnd = Math.max(lastWhiteSpace, nextHeaderStart);
+          if(nextHeaderStart >= firstWhiteSpace) {
+            secEnd = nextHeaderStart;
+          } else {
+            secEnd = Math.max(lastWhiteSpace, nextHeaderStart);
+          }
         }
         lastSectionEnd = secEnd;
         // \u00A0 is non-breaking space which trim ignores.
