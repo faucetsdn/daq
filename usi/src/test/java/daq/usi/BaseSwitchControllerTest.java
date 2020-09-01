@@ -69,7 +69,6 @@ class BaseSwitchControllerTest {
         "", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
         "type", "10/100/1000BaseTX");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
-    System.out.println(response);
     for (String key : response.keySet()) {
       assertEquals(expected.get(key), response.get(key));
     }
@@ -85,7 +84,6 @@ class BaseSwitchControllerTest {
         "connected", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
         "type", "10/100/1000BaseTX");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
-    System.out.println(response);
     for (String key : response.keySet()) {
       assertEquals(expected.get(key), response.get(key));
     }

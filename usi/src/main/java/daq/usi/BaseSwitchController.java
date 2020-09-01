@@ -66,8 +66,6 @@ public abstract class BaseSwitchController implements SwitchController {
     if (lines.length >= headerLine + 2) {
       String header = lines[headerLine].trim();
       String values = lines[headerLine + 1].trim();
-      System.out.println(header);
-      System.out.println(values);
       int lastSectionEnd = 0;
       for (int i = 0; i < colNames.length; i++) {
         int secStart = lastSectionEnd;

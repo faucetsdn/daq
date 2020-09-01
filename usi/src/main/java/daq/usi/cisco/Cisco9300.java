@@ -280,7 +280,7 @@ public class Cisco9300 extends BaseSwitchController {
         .setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.State.UNKNOWN))
         .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.State.UNKNOWN))
         .setPoeNegotiation(
-            poeNegotiationtMap.getOrDefault(poeStatus, POENegotiation.State.UNKNOWN))
+            poeNegotiationtMap.getOrDefault(poeSupport, POENegotiation.State.UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }
