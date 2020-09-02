@@ -63,9 +63,9 @@ else
                      "RESULT $RESULT connection.port_duplex $SUMMARY"
 
     write_out_result $REPORT \
-                     "poe.power" \
-                     "$(jq -r '.["poe.power"].description' $MANIFEST)" \
+                     "poe.switch.power" \
+                     "$(jq -r '.["poe.switch.power"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
-                     "RESULT $RESULT poe.power $SUMMARY"
+                     "RESULT $RESULT poe.switch.power $SUMMARY"
 
 fi
