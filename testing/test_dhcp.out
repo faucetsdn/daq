@@ -5,11 +5,11 @@ DHCP Tests
 9a02571e8f03: []
 9a02571e8f04: []
 9a02571e8f05: []
-Device 1 ip triggers: 1 0
+Device 1 ip triggers: 1 1
 Device 2 ip triggers: 0 0
 Device 3 long ip triggers: 1
-Device 4 ip triggers: 0
-Device 4 subnet 1 ip: 0 subnet 2 ip: 0 subnet 3 ip: 0
-Device 5 ip triggers: 0
-Device 5 num of ips: 1
+Device 4 ip triggers: 1
+Device 4 subnet 1 ip: 3 subnet 2 ip: 1 subnet 3 ip: 2
+Device 5 ip triggers: 1
+Device 5 num of ips: 2
 Done with tests
