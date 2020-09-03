@@ -76,12 +76,7 @@ class IpAddrTest(HostModule):
         dhcp_range = self.test_dhcp_ranges.pop(0)
         self.log('Testing dhcp range: ' + str(dhcp_range))
         args = (dhcp_range["start"], dhcp_range["end"], dhcp_range["prefix_length"])
-        if not self.host.connect_port(False):
-            self.log('disconnect port not enabled')
-            return
         self.host.gateway.change_dhcp_range(*args)
-        time.sleep(self.host.config.get("port_debounce_sec", 0) + 1)
-        self.host.connect_port(True)
         self._ip_callback = self._multi_subnet_test if self.test_dhcp_ranges else self._next_test
 
     def _ip_change_test(self):

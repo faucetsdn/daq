@@ -49,6 +49,8 @@ cmd/build push
 
 git commit -a -m "$VERSION release"
 git tag -a $VERSION -m "$VERSION release"
+firebase/deploy.sh bos-daq-testing
+
 git push
 git push --tags
 
@@ -59,12 +61,13 @@ if [ -n "$faucetgit" ]; then
     git push faucet --tags
 fi
 
-firebase/deploy.sh bos-daq-testing
 git checkout release_testing && git reset --hard $VERSION
-
+git push
 if [ -n "$faucetgit" ]; then
     git push faucet
 fi
+
+git log -n 1
 
 # QA pass to make sure everything is ok.
 # `firebase/deploy.sh daq-qualification-labs`

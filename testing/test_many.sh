@@ -7,10 +7,10 @@ NUM_DEVICES=9
 RUN_LIMIT=20
 # num of timeout devices need to be less or equal to num dhcp devices
 NUM_NO_DHCP_DEVICES=4
-NUM_TIMEOUT_DEVICES=2
+NUM_TIMEOUT_DEVICES=1
 
 # Extended DHCP tests
-NUM_IPADDR_TEST_DEVICES=2
+NUM_IPADDR_TEST_DEVICES=1
 NUM_IPADDR_TEST_TIMEOUT_DEVICES=1
 
 echo Many Tests >> $TEST_RESULTS
@@ -21,6 +21,7 @@ echo monitor_scan_sec=5 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
 echo gcp_cred=$gcp_cred >> local/system.conf
 echo dhcp_lease_time=120s >> local/system.conf
+echo host_tests=config/modules/many.conf >> local/system.conf
 
 for iface in $(seq 1 $NUM_DEVICES); do
     xdhcp=""
@@ -33,7 +34,12 @@ for iface in $(seq 1 $NUM_DEVICES); do
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
-        "static_ip": "$ip"
+        "static_ip": "$ip",
+        "modules": {
+            "ipaddr": {
+              "enabled": false
+            }
+        }
     }
 EOF
         else
@@ -112,8 +118,9 @@ echo Enough ipaddr tests: $((ip_notifications >= (NUM_IPADDR_TEST_DEVICES - NUM_
 echo Enough alternate subnet ips: $((alternate_subnet_ip >= (NUM_IPADDR_TEST_DEVICES - NUM_IPADDR_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
 echo Enough ipaddr timeouts: $((ipaddr_timeouts >= NUM_IPADDR_TEST_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 
-echo bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
-bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
+combine_cmd="bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2"
+echo $combine_cmd
+$combine_cmd
 
 cat inst/reports/combo_*.md
 
@@ -129,11 +136,11 @@ if [ -f "$gcp_cred" ]; then
     ls -l inst/reports/report_9a02571e8f05*.md
     echo '*************************'
 
-    echo Pulling reports from gcp... from $start_time to $end_time
-    cmd="bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time"
-    cmd="$cmd count=2 from_gcp=true"
-    echo $cmd
-    $cmd
+    daq_run_id=$(< inst/daq_run_id.txt)
+    echo Pulling reports from gcp for daq RUN id $daq_run_id
+    gcp_extras="daq_run_id=$daq_run_id from_gcp=true"
+    echo $combine_cmd $gcp_extras
+    $combine_cmd $gcp_extras
     echo GCP results diff | tee -a $GCP_RESULTS
     diff inst/reports/combo_*.md out/report_local.md | tee -a $GCP_RESULTS
 fi

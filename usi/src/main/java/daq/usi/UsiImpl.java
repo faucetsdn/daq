@@ -14,10 +14,17 @@ import java.util.Map;
 
 public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   private final Map<String, SwitchController> switchControllers;
+  private final boolean debug;
 
-  public UsiImpl() {
+  /**
+   * UsiImpl.
+   *
+   * @param debug           for verbose output
+   */
+  public UsiImpl(boolean debug) {
     super();
     switchControllers = new HashMap<>();
+    this.debug = debug;
   }
 
   private SwitchController createController(SwitchInfo switchInfo) {
@@ -25,12 +32,12 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
     switch (switchInfo.getModel()) {
       case ALLIED_TELESIS_X230: {
         newController = new AlliedTelesisX230(switchInfo.getIpAddr(), switchInfo.getUsername(),
-            switchInfo.getPassword());
+            switchInfo.getPassword(), debug);
         break;
       }
       case CISCO_9300: {
         newController = new Cisco9300(switchInfo.getIpAddr(), switchInfo.getUsername(),
-            switchInfo.getPassword());
+            switchInfo.getPassword(), debug);
         break;
       }
       case OVS_SWITCH: {
@@ -53,9 +60,15 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
 
   @Override
   public void getPower(SwitchInfo request, StreamObserver<PowerResponse> responseObserver) {
+    System.out.println("Received request in getPower");
     SwitchController sc = getSwitchController(request);
     try {
       sc.getPower(request.getDevicePort(), data -> {
+        System.out.println("Sent response in getPower");
+        if (debug) {
+          System.out.println(data);
+        }
+        System.out.println("Received request in getPower");
         responseObserver.onNext(data);
         responseObserver.onCompleted();
       });
@@ -67,9 +80,14 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
 
   @Override
   public void getInterface(SwitchInfo request, StreamObserver<InterfaceResponse> responseObserver) {
+    System.out.println("Received request in getInterface");
     SwitchController sc = getSwitchController(request);
     try {
       sc.getInterface(request.getDevicePort(), data -> {
+        System.out.println("Sent response in getInterface");
+        if (debug) {
+          System.out.println(data);
+        }
         responseObserver.onNext(data);
         responseObserver.onCompleted();
       });
@@ -81,9 +99,14 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
 
   @Override
   public void connect(SwitchInfo request, StreamObserver<SwitchActionResponse> responseObserver) {
+    System.out.println("Received request in connect");
     SwitchController sc = getSwitchController(request);
     try {
       sc.connect(request.getDevicePort(), data -> {
+        System.out.println("Sent response in connect");
+        if (debug) {
+          System.out.println(data);
+        }
         responseObserver.onNext(data);
         responseObserver.onCompleted();
       });
@@ -96,9 +119,14 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
   @Override
   public void disconnect(SwitchInfo request,
                          StreamObserver<SwitchActionResponse> responseObserver) {
+    System.out.println("Received request in disconnect");
     SwitchController sc = getSwitchController(request);
     try {
       sc.disconnect(request.getDevicePort(), data -> {
+        System.out.println("Sent response in disconnect");
+        if (debug) {
+          System.out.println(data);
+        }
         responseObserver.onNext(data);
         responseObserver.onCompleted();
       });
