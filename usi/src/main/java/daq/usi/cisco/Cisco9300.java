@@ -280,14 +280,14 @@ public class Cisco9300 extends BaseSwitchController {
         .setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.State.UNKNOWN))
         .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.State.UNKNOWN))
         .setPoeNegotiation(
-            poeNegotiationtMap.getOrDefault(poeStatus, POENegotiation.State.UNKNOWN))
+            poeNegotiationtMap.getOrDefault(poeSupport, POENegotiation.State.UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }
 
   private Map<String, String> processInterfaceStatus(String response) {
     String filtered = Arrays.stream(response.split("\n"))
-        .filter(s -> !containsPrompt(s))
+        .filter(s -> !containsPrompt(s) && !s.contains("show interface") && s.length() > 0)
         .collect(Collectors.joining("\n"));
     return mapSimpleTable(filtered, showInterfaceExpected, interfaceExpected);
   }
