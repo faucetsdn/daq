@@ -120,7 +120,8 @@ port-01 module_config modules
     "enabled": true
   },
   "nmap": {
-    "enabled": true
+    "enabled": true,
+    "timeout_sec": 600
   },
   "pass": {
     "enabled": true
@@ -178,7 +179,8 @@ port-02 module_config modules
     "enabled": true
   },
   "nmap": {
-    "enabled": true
+    "enabled": true,
+    "timeout_sec": 600
   },
   "pass": {
     "enabled": false
@@ -213,9 +215,9 @@ port-02 module_config modules
     `'''       `\__   /\
                 ')
 Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 47808/closed/udp//bacnet/// 
+Host: X.X.X.X () Ports: 47808/closed/udp//bacnet///
 Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?/// 
+Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///
 Redacted docs diff
 No report diff
 9a02571e8f01: ['9a02571e8f01:ping:Exception']

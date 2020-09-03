@@ -30,12 +30,13 @@ public class Cisco9300 extends BaseSwitchController {
       "Device Type", "device",
       "IEEE Class", "dev_class",
       "Power available to the device", "max");
-  private static final Map<String, POEStatus> poeStatusMap = Map.of("on", POEStatus.ON,
-      "off", POEStatus.OFF, "fault", POEStatus.FAULT, "power-deny", POEStatus.DENY);
-  private static final Map<String, POESupport> poeSupportMap = Map.of("auto", POESupport.ENABLED,
-      "off", POESupport.DISABLED);
-  private static final Map<String, POENegotiation> poeNegotiationtMap = Map.of("auto",
-      POENegotiation.NEGOTIATION_ENABLED, "off", POENegotiation.NEGOTIATION_DISABLED);
+  private static final Map<String, POEStatus.State> poeStatusMap = Map.of("on",
+      POEStatus.State.ON, "off", POEStatus.State.OFF, "fault", POEStatus.State.FAULT,
+      "power-deny", POEStatus.State.DENY);
+  private static final Map<String, POESupport.State> poeSupportMap = Map.of("auto",
+      POESupport.State.ENABLED, "off", POESupport.State.DISABLED);
+  private static final Map<String, POENegotiation.State> poeNegotiationtMap = Map.of("auto",
+      POENegotiation.State.ENABLED, "off", POENegotiation.State.DISABLED);
   private static final int WAIT_MS = 100;
   private ResponseHandler<String> responseHandler;
 
@@ -245,31 +246,48 @@ public class Cisco9300 extends BaseSwitchController {
     if (speed.startsWith("a-")) { // Interface in Auto Speed
       speed = speed.replaceFirst("a-", "");
     }
+    int speedNum = 0;
+    try {
+      speedNum = Integer.parseInt(speed);
+    } catch (NumberFormatException e) {
+      System.out.println("Could not parse int for interface speed: " + speed);
+      return response.build();
+    }
 
     String linkStatus = interfaceMap.getOrDefault("status", "");
-    return response.setLinkStatus(linkStatus.equals("connected") ? LinkStatus.UP : LinkStatus.DOWN)
+    return response
+        .setLinkStatus(linkStatus.equals("connected") ? LinkStatus.State.UP : LinkStatus.State.DOWN)
         .setDuplex(duplex)
-        .setLinkSpeed(Integer.parseInt(speed))
+        .setLinkSpeed(speedNum)
         .build();
   }
 
   private PowerResponse buildPowerResponse(Map<String, String> powerMap) {
     PowerResponse.Builder response = PowerResponse.newBuilder();
-    float maxPower = Float.parseFloat(powerMap.get("max"));
-    float currentPower = Float.parseFloat(powerMap.get("power"));
+    float maxPower = 0;
+    float currentPower = 0;
+    try {
+      maxPower = Float.parseFloat(powerMap.getOrDefault("max", ""));
+      currentPower = Float.parseFloat(powerMap.getOrDefault("power", ""));
+    } catch (NumberFormatException e) {
+      System.out.println(
+          "Could not parse float: " + powerMap.get("max") + " or " + powerMap.get("power"));
+    }
 
-    String poeSupport = powerMap.getOrDefault("admin", null);
-    String poeStatus = powerMap.getOrDefault("oper", null);
-    return response.setPoeStatus(poeStatusMap.getOrDefault(poeStatus, null))
-        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, null))
-        .setPoeNegotiation(poeNegotiationtMap.getOrDefault(poeStatus, null))
+    String poeSupport = powerMap.getOrDefault("admin", "");
+    String poeStatus = powerMap.getOrDefault("oper", "");
+    return response
+        .setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.State.UNKNOWN))
+        .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.State.UNKNOWN))
+        .setPoeNegotiation(
+            poeNegotiationtMap.getOrDefault(poeSupport, POENegotiation.State.UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }
 
   private Map<String, String> processInterfaceStatus(String response) {
     String filtered = Arrays.stream(response.split("\n"))
-        .filter(s -> !containsPrompt(s))
+        .filter(s -> !containsPrompt(s) && !s.contains("show interface") && s.length() > 0)
         .collect(Collectors.joining("\n"));
     return mapSimpleTable(filtered, showInterfaceExpected, interfaceExpected);
   }
