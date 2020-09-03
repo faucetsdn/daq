@@ -1,17 +1,18 @@
-"""A docker-based mininet host"""
+"""A native module mininet host"""
+from __future__ import absolute_import
+
 import os
 from subprocess import PIPE, STDOUT
 
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
-from mininet.log import error, debug
+from mininet.log import debug
 from mininet.node import Host
-from mininet.util import quietRun, errRun
 
 from clib.mininet_test_util import DEVNULL
 
-DEFAULT_PREFIX = 'mininet'
 STARTUP_TIMEOUT_MS = 20000
+
 
 class NativeHost(Host):
     """Mininet host that encapsulates a shell"""
@@ -23,6 +24,8 @@ class NativeHost(Host):
         self.tmpdir = tmpdir
         self.env_vars = env_vars if env_vars is not None else []
         self.vol_maps = vol_maps if vol_maps is not None else []
+        self.vol_maps.append((os.path.abspath(os.path.join(self.tmpdir, 'tmp')),
+                              os.path.join(self.basedir, 'tmp')))
         self.name = name
         self.startup_script = os.path.join(self.basedir, startup_script)
         self.active_pipe = None
@@ -37,14 +40,11 @@ class NativeHost(Host):
         """Active a container and return STDOUT to it."""
         assert not self.active_pipe, '%s already activated' % self.name
 
-        for env_var in self.env_vars:
-            self.cmd('export %s="%s"' % env_var)
-
+        env = dict(self.env_vars)
         self.cmd('mkdir %s' % os.path.join(self.basedir, "config"))
 
         for vol_map in self.vol_maps:
             self.cmd('ln -s %s %s' % vol_map)
-
         if log_name:
             stdout = self.open_log(log_name)
             self.active_log = stdout
@@ -53,7 +53,7 @@ class NativeHost(Host):
             self.active_log = None
 
         self.active_pipe = self.popen(self.startup_script, stdin=DEVNULL, stdout=stdout,
-                                      stderr=STDOUT)
+                                      stderr=STDOUT, env=env)
         pipe_out = self.active_pipe.stdout
         out_fd = pipe_out.fileno() if pipe_out else None
         debug('Active_pipe container pid %s fd %s' %
@@ -63,25 +63,27 @@ class NativeHost(Host):
     def terminate(self):
         """Override Mininet terminate() to partially avoid pty leak."""
         for vol_map in self.vol_maps:
-            self.cmd('rm -r %s' % vol_map[1])
+            self.cmd('rm -f %s' % vol_map[1])
         self.cmd('rm -r %s' % os.path.join(self.basedir, 'config'))
 
-        super().terminate()
         debug('Terminating container shell %s, pipe %s' % (
             self.shell, self.active_pipe))
+        active_pipe_returncode = None
         if self.active_pipe:
             if self.active_pipe.stdout:
                 self.active_pipe.stdout.close()
             if self.active_pipe.returncode is None:
                 self.active_pipe.kill()
                 self.active_pipe.poll()
-            active_pipe_returncode = self.active_pipe.returncode
+            # return code can still be None here
+            active_pipe_returncode = self.active_pipe.returncode or 0
             self.active_pipe = None
             if self.active_log:
                 self.active_log.close()
                 self.active_log = None
-            return active_pipe_returncode
-        return None
+        super().terminate()
+        return active_pipe_returncode
+
 
 def make_native_host(basedir, startup_script):
     """Utility function to create a native-host class that can be passed to mininet"""
@@ -91,7 +93,7 @@ def make_native_host(basedir, startup_script):
 
         def __init__(self, *args, **kwargs):
             host_name = args[0]
-            assert kwargs['tmpdir'], 'tmpdir required for docker host'
+            assert kwargs['tmpdir'], 'tmpdir required for native host'
             kwargs['tmpdir'] = os.path.join(kwargs['tmpdir'], host_name)
             kwargs['basedir'] = basedir
             kwargs['startup_script'] = startup_script

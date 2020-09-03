@@ -1,4 +1,5 @@
-"""Module for running docker-container tests"""
+"""Class for running non inline modules"""
+from __future__ import absolute_import
 
 import datetime
 import abc
@@ -10,11 +11,11 @@ import wrappers
 from .base_module import HostModule
 
 
-LOGGER = logger.get_logger('external_test')
+LOGGER = logger.get_logger('external_module')
 
 
-class ExternalTest(HostModule):
-    """Class for running docker tests"""
+class ExternalModule(HostModule):
+    """Class for running non inline modules"""
 
     # pylint: disable=too-many-arguments
     def __init__(self, host, tmpdir, test_name, module_config, basedir="/"):
@@ -25,13 +26,13 @@ class ExternalTest(HostModule):
         self.basedir = basedir
 
     @abc.abstractmethod
-    def _get_test_class(self):
+    def _get_module_class(self):
         pass
 
     def start(self, port, params, callback, finish_hook):
-        """Start the external test"""
+        """Start the external module"""
         super().start(port, params, callback, finish_hook)
-        cls = self._get_test_class()
+        cls = self._get_module_class()
         env_vars = self._get_env_vars(params)
         vol_maps = self._get_vol_maps(params)
 
@@ -68,7 +69,7 @@ class ExternalTest(HostModule):
         LOGGER.info("%s running", self)
 
     def terminate(self):
-        """Forcibly terminate this container"""
+        """Forcibly terminate this module"""
         LOGGER.info("%s terminating", self)
         return self._finalize()
 
@@ -88,9 +89,9 @@ class ExternalTest(HostModule):
         return env_vars
 
     def _get_vol_maps(self, params):
-        vol_maps = [(params['scan_base'], self.basedir + "/scans")]
+        vol_maps = [(params['scan_base'], os.path.join(self.basedir, "scans"))]
         kinds = ('inst', 'port', 'device', 'type')
-        maps = map(lambda kind: self._map_if_exists(params, kind), kinds)
+        maps = list(map(lambda kind: self._map_if_exists(params, kind), kinds))
         vol_maps.extend(filter(lambda vol_map: vol_map, maps))
         return vol_maps
 
@@ -98,8 +99,9 @@ class ExternalTest(HostModule):
         base = params.get('%s_base' % kind)
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
-            LOGGER.info('%s mapping %s to %s/config/%s', self, abs_base, self.basedir, kind)
-            return (abs_base, '%s/config/%s' % (self.basedir, kind))
+            dst = os.path.join(self.basedir, 'config', kind)
+            LOGGER.info('%s mapping %s to %s', self, abs_base, dst)
+            return (abs_base, dst)
         return None
 
     def _error(self, exception):
@@ -118,7 +120,7 @@ class ExternalTest(HostModule):
             self.runner.monitor_forget(self.pipe.stdout)
             self.pipe = None
         return_code = self.host.terminate()
-        LOGGER.info('%s test host finalize %d', self, return_code)
+        LOGGER.info('%s test host finalize %s', self, return_code)
         self.host = None
         self.log.close()
         self.log = None

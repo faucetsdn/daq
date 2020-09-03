@@ -1,0 +1,51 @@
+#!/bin/bash -e
+
+# Set this so docker build will fail even though piped through tee.
+set -o pipefail
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+source etc/config_base.sh
+
+build_root=build
+sudo rm -rf $build_root .build_hash .build_files
+mkdir -p $build_root
+inline=
+
+if [ "$1" == "inline" ]; then
+    inline=y
+    shift
+fi
+
+native_modules=$(find . -name '*.daqmodule')
+for file in $native_modules; do
+    if [ ${file%\~} != ${file} ]; then
+        continue
+    fi
+    module=$(jq -r .name $file)
+    if [ -z "$module" ]; then
+        echo "module name not defined in $file."
+        false
+    fi
+    logfile=$build_root/native_build.$module
+    install_script=$(jq -r .installScript $file)
+    failed=
+    echo $install_script
+    echo Build $file, log to $logfile...
+    if [ -z "$install_script" -o "$install_script" == "null" ]; then
+        echo "Skipping install for $module. Install script is not defined in $file."
+        continue
+    fi
+    install_script=$(dirname $file)/$install_script
+    if [ -n "$inline" ]; then
+        bin/retry_cmd $install_script 2>&1 | tee -a $logfile || failed=y
+    else
+        bin/retry_cmd $install_script >> $logfile 2>&1 || failed=y
+    fi
+    if [ -n "$failed" ]; then
+        tail $logfile
+        echo Build failed, see $logfile for complete log.
+        false
+    fi
+    echo Build complete. >> $logfile
+done

@@ -14,7 +14,7 @@ from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
 
 import configurator
-from test_modules import DockerTest, IpAddrTest, NativeTest
+from test_modules import DockerModule, IpAddrModule, NativeModule
 import gcp
 import logger
 
@@ -620,12 +620,20 @@ class ConnectedHost:
         return path
 
     def _new_test(self, test_name):
-        if test_name in self._NATIVE_TESTS_MAPPING:
-            basedir, startup_script = self._NATIVE_TESTS_MAPPING[test_name]
+        if test_name in self.config['test_metadata']:
+            metadatum = self.config['test_metadata'][test_name]
+            basedir, startup_script = metadatum['basedir'], metadatum['startup_script']
             basedir = os.path.abspath(basedir)
-            return NativeTest(self, self.devdir, test_name, self._loaded_config, basedir,
-                              startup_script)
-        clazz = IpAddrTest if test_name == 'ipaddr' else DockerTest
+            new_root = os.path.abspath(os.path.join(self.devdir, 'test_root'))
+            if os.path.isdir(new_root):
+                shutil.rmtree(new_root)
+            os.makedirs(new_root)
+            for src_file in os.listdir(basedir):
+                src_full = os.path.join(basedir, src_file)
+                os.symlink(src_full, os.path.join(new_root, src_file))
+            return NativeModule(self, self.devdir, test_name, self._loaded_config, new_root,
+                                startup_script)
+        clazz = IpAddrModule if test_name == 'ipaddr' else DockerModule
         return clazz(self, self.devdir, test_name, self._loaded_config)
 
     def _run_test(self, test_name):

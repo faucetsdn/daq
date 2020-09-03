@@ -66,7 +66,9 @@ function redact {
         -e 's/Ignored State.*//' \
         -e 's/Not shown: .* ports//' \
         -e 's/\t/ /g' \
-        -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
+        -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/' \
+        -e 's/-oG .*\/tmp/-oG \/tmp/' \
+        -e 's/# Nmap [0-9]{1,4}\.[0-9]{1,4}/\# Nmap/'
 }
 
 function monitor_log {

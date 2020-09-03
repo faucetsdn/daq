@@ -1,0 +1,4 @@
+{
+    "name": "fail",
+    "startupScript": "entrypoint"
+}

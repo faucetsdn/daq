@@ -7,6 +7,8 @@ import threading
 import time
 import traceback
 import uuid
+import json
+import pathlib
 from datetime import datetime, timedelta, timezone
 
 import configurator
@@ -167,6 +169,7 @@ class DAQRunner:
             LOGGER.info('Appending test_hold to master test list')
             test_list.append('hold')
         config['test_list'] = test_list
+        config['test_metadata'] = self._get_test_metadata()
         LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
         LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
         LOGGER.info('DAQ version %s' % self._daq_version)
@@ -520,6 +523,22 @@ class DAQRunner:
                     LOGGER.warning('Unknown test list command %s', cmd_name)
                 line = file.readline()
         return test_list
+
+    def _get_test_metadata(self, extension=".daqmodule", root="."):
+        metadata = {}
+        for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
+            if str(meta_file).startswith('inst') or str(meta_file).startswith('local'):
+                continue
+            with open(meta_file) as fd:
+                metadatum = json.loads(fd.read())
+                assert "name" in metadatum and "startupScript" in metadatum
+                module = metadatum["name"]
+                assert module not in metadata, "Duplicate module definition for %s" % module
+                metadata[module] = {
+                    "startup_script": metadatum["startupScript"],
+                    "basedir": meta_file.parent
+                }
+        return metadata
 
     def _activate_device_group(self, device):
         group_name = device.group

@@ -1,27 +1,28 @@
-"""Module for running docker-container tests"""
+"""Module for running docker-container modules"""
+from __future__ import absolute_import
 
 import subprocess
 import logger
 from clib import docker_host
 
-from .external_test import ExternalTest
+from .external_module import ExternalModule
 
 
 LOGGER = logger.get_logger('docker')
 
 
-class DockerTest(ExternalTest):
-    """Class for running docker tests"""
+class DockerModule(ExternalModule):
+    """Class for running docker modules"""
 
     IMAGE_NAME_FORMAT = 'daqf/test_%s'
     TAGGED_IMAGE_FORMAT = IMAGE_NAME_FORMAT + ':latest'
     CONTAINER_PREFIX = 'daq'
 
     def start(self, port, params, callback, finish_hook):
-        """Start the docker test"""
+        """Start the docker module"""
         super().start(port, params, callback, finish_hook)
         LOGGER.debug("%s activating docker test %s", self)
-        # Docker tests don't use DHCP, so manually set up DNS.
+        # Docker modules don't use DHCP, so manually set up DNS.
         if self.host:
             self.host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
 
@@ -33,7 +34,7 @@ class DockerTest(ExternalTest):
         vol_maps = super()._get_vol_maps(params)
         return ["%s:%s" % vol_map for vol_map in vol_maps]
 
-    def _get_test_class(self):
+    def _get_module_class(self):
         image = self.IMAGE_NAME_FORMAT % self.test_name
         LOGGER.debug("%s running docker test %s", self, image)
         cls = docker_host.make_docker_host(image, prefix=self.CONTAINER_PREFIX)

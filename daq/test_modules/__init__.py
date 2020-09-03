@@ -1,4 +1,4 @@
 """Device Automated Qualification test module"""
-from .ipaddr_test import IpAddrTest
-from .docker_test import DockerTest
-from .native_test import NativeTest
+from .ipaddr_module import IpAddrModule
+from .docker_module import DockerModule
+from .native_module import NativeModule

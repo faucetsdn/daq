@@ -12,7 +12,7 @@ from .base_module import HostModule
 LOGGER = logger.get_logger('ipaddr')
 
 
-class IpAddrTest(HostModule):
+class IpAddrModule(HostModule):
     """Module for inline ipaddr tests"""
 
     def __init__(self, host, tmpdir, test_name, module_config):
