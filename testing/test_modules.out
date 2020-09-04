@@ -11,11 +11,11 @@ RESULT skip security.tlsv1_2.server IOException unable to connect to server.
 RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
 RESULT skip security.tlsv1_3.server IOException unable to connect to server.
 Testing tls alt tls
-RESULT pass security.tlsv1.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA.
+RESULT pass security.tlsv1.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher Valid.
 RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
-RESULT pass security.tlsv1_2.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA.
+RESULT pass security.tlsv1_2.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher Valid.
 RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
-RESULT pass security.tlsv1_3.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA.
+RESULT pass security.tlsv1_3.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher check not required.
 Testing tls alt expiredtls
 RESULT fail security.tlsv1.server Certificate is expired. Certificate has not been signed by a CA.
 RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
