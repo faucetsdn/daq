@@ -46,12 +46,7 @@ if [ -n "$LOCAL_IP" ]; then
     LOCAL_ONLY=${LOCAL_IP%/*}
     LOCAL_INDEX=${LOCAL_ONLY##*.}
     echo Using IP index $LOCAL_INDEX
-    LOCAL_MAC=ca:50:20:b1:4f:$(printf %02x $LOCAL_INDEX)
-    echo Using local MAC address $LOCAL_MAC
-
-    LOCAL_IFACE=`hostname`-eth0
-    ip link set dev $LOCAL_IFACE addr $LOCAL_MAC
-    ip addr add $LOCAL_IP dev $LOCAL_IFACE
+    ip addr add $LOCAL_IP dev lo
 
     ping -n -c 2 $SWITCH_IP || true
 
@@ -128,7 +123,7 @@ write_out_monolog $REPORT_FILE \
 ping_runtime=$TEST_ROOT/config/port/ping_runtime.sh
 if [ -f $ping_runtime ]; then
     echo Executing $ping_runtime
-    source $ping_runtime
+    TEST_ROOT=$TEST_ROOT source $ping_runtime
 else
     echo $ping_runtime not found.
 fi

@@ -10,14 +10,9 @@ cp config/system/all.conf local/system.conf
 TEST_LIST=/tmp/module_tests.txt
 
 cat > $TEST_LIST <<EOF
-ping
 tls alt
 tls alt tls
 tls alt expiredtls
-nmap
-nmap bacnet
-nmap telnet
-nmap ohttp
 ssh
 ssh ssh
 ssh sshv1

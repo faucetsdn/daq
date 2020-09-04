@@ -30,7 +30,6 @@ for file in $native_modules; do
     logfile=$build_root/native_build.$module
     install_script=$(jq -r .installScript $file)
     failed=
-    echo $install_script
     echo Build $file, log to $logfile...
     if [ -z "$install_script" -o "$install_script" == "null" ]; then
         echo "Skipping install for $module. Install script is not defined in $file."
