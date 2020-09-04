@@ -18,7 +18,7 @@ public class Main {
     Server tlsServer1_0 = new Server(ipAddress, 443,"1",caFile,caUrl);
     Server tlsServer1_2 = new Server(ipAddress, 443,"1.2",caFile,caUrl);
     Server tlsServer1_3 = new Server(ipAddress, 443,"1.3",caFile,caUrl);
-    Client client = new Client(ipAddress,443,new String[]{"1.2","1.3"});
+    Client client = new Client(ipAddress,new int[]{443,8883},new String[]{"1.2","1.3"});
     //Client client_1_3 = new Client(ipAddress,443,"1.3");
     //Run the tests
     tlsReport += validateServerTls(tlsServer1_0);
@@ -61,5 +61,3 @@ public class Main {
     }
   }
 }
-
-

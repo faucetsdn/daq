@@ -10,16 +10,16 @@ import java.util.List;
 
 public class Client {
     private final String clientIpAddress;
-    private final int port;
+    private final int[] ports;
     private final String[] tlsVersion;
     private String captureFile = "/scans/test_tls.pcap";
     private String clientReport = "";
     private int totalScans = 0;
     private int maxScans = 10;
 
-    public Client(String clientIpAddress, int port,String[] tlsVersion) {
+    public Client(String clientIpAddress, int[] ports,String[] tlsVersion) {
         this.clientIpAddress = clientIpAddress;
-        this.port = port;
+        this.ports = ports;
         this.tlsVersion = tlsVersion;
     }
 
@@ -163,17 +163,11 @@ public class Client {
     /**
      * Inspect the capture file for all hello messages from the client device (DUT)
      * on specified port.
-     * 0x0301 -> TLS 1.0
-     * 0x0302 -> TLS 1.1
      * 0x0303 -> TLS 1.2
      * 0x0304 -> TLS 1.3
      * @return JsonArray of all client Hello packets resolved
      */
     private JsonArray getClientHelloPackets(String tlsVersion){
-        String tls1_0Filter = "!tls.handshake.extensions.supported_version==0x0301";
-        String tls1_1Filter = "!tls.handshake.extensions.supported_version==0x0302";
-        String tls1_2Filter = "tls.handshake.extensions.supported_version==0x0303";
-        String tls1_3Filter = "tls.handshake.extensions.supported_version==0x0304";
         List<String> commands = new LinkedList<String>();
         commands.add("tshark");
         commands.add("-r");
@@ -184,17 +178,13 @@ public class Client {
         commands.add("and");
         commands.add("ip.src=="+clientIpAddress);
         commands.add("and");
-        commands.add("tcp.port=="+port);
-        commands.add("and");
-        commands.add(tls1_0Filter);
-        commands.add("and");
-        commands.add(tls1_1Filter);
+        commands.add(getPortsFilter());
         commands.add("and");
         if(tlsVersion == "1.2"){
-            commands.add(tls1_2Filter);
+            commands.add("ssl.handshake.version==0x0303");
         }
-        else if(tlsVersion == "1.3"){
-            commands.add(tls1_3Filter);
+        else{
+            commands.add("tls.handshake.extensions.supported_version==0x0304");
         }
         String procRes = runCommand(commands.toArray(new String[0]),false);
         //The process can potentially get run as root so account for
@@ -202,6 +192,17 @@ public class Client {
         procRes = procRes.substring(procRes.indexOf('['));
         JsonElement e = JsonParser.parseString(procRes);
         return e.getAsJsonArray();
+    }
+
+    private String getPortsFilter(){
+        StringBuilder sb  = new StringBuilder();
+        sb.append("(");
+        for(int i = 0;i<ports.length;++i){
+            sb.append(i>0?" or ":"");
+            sb.append("tcp.port=="+ports[i]);
+        }
+        sb.append(")");
+        return sb.toString();
     }
 
     /**
@@ -232,34 +233,13 @@ public class Client {
     }
 
     /**
-     * Create the wireshark filter needed to find completed TLS 1.3 handshakes
-     *
-     * ssl.handshake.type==2 -> ServerHello indicating handshake has completed for TLS 1.3
-     * @param serverIp IP address for the server side of the connection
-     * @return
-     */
-    private String[] handshakeCompleteMessageTls1_2(String serverIp){
-        return new String[]{"tshark",
-                "-r",
-                captureFile,
-                "ssl.handshake.type==2",
-                "and",
-                "ip.src=="+serverIp,
-                " and ",
-                "ip.dst=="+clientIpAddress,
-                "and",
-                "tcp.port=="+port
-        };
-    }
-
-    /**
      * Create the wireshark filter needed to find completed TLS 1.2 handshakes
      *
      * ssl.handshake.type==14 -> ServerHelloDone indicating handshake has completed for TLS 1.2
      * @param serverIp IP address for the server side of the connection
      * @return
      */
-    private String[] handshakeCompleteMessageTls1_3(String serverIp){
+    private String[] handshakeCompleteMessageTls1_2(String serverIp){
         return new String[]{"tshark",
                 "-r",
                 captureFile,
@@ -269,7 +249,28 @@ public class Client {
                 " and ",
                 "ip.dst=="+clientIpAddress,
                 "and",
-                "tcp.port=="+port
+                getPortsFilter()
+        };
+    }
+
+    /**
+     * Create the wireshark filter needed to find completed TLS 1.3 handshakes
+     *
+     * ssl.handshake.type==2 -> ServerHello indicating handshake has completed for TLS 1.3
+     * @param serverIp IP address for the server side of the connection
+     * @return
+     */
+    private String[] handshakeCompleteMessageTls1_3(String serverIp){
+        return new String[]{"tshark",
+                "-r",
+                captureFile,
+                "ssl.handshake.type==2",
+                "and",
+                "ip.src=="+serverIp,
+                " and ",
+                "ip.dst=="+clientIpAddress,
+                "and",
+                getPortsFilter()
         };
     }
 
