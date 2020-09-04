@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|6|2|22|1|2|
+|Other|6|2|20|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -75,9 +75,7 @@ Overall device result FAIL
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
 |pass|manual.test.name|Security|Recommended|Manual test - for testing|
-|skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
-|skip|poe.power|Other|Other|No local IP has been set, check system config|
-|skip|poe.support|Other|Other|No local IP has been set, check system config|
+|skip|poe.switch.power|Other|Other|No local IP has been set, check system config|
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
@@ -251,31 +249,13 @@ LOCAL_IP not configured, assuming no network switch.
 RESULT skip connection.port_duplex No local IP has been set, check system config
 
 --------------------
-poe.power
+poe.switch.power
 --------------------
 Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.power No local IP has been set, check system config
-
---------------------
-poe.negotiation
---------------------
-Verify the device autonegotiates power requirements
---------------------
-LOCAL_IP not configured, assuming no network switch.
---------------------
-RESULT skip poe.negotiation No local IP has been set, check system config
-
---------------------
-poe.support
---------------------
-Verify if the device supports PoE
---------------------
-LOCAL_IP not configured, assuming no network switch.
---------------------
-RESULT skip poe.support No local IP has been set, check system config
+RESULT skip poe.switch.power No local IP has been set, check system config
 
 ```
 
