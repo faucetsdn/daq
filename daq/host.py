@@ -78,11 +78,6 @@ class ConnectedHost:
     _AUX_DIR = "aux/"
     _CONFIG_DIR = "config/"
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
-    _NATIVE_TESTS_MAPPING = {
-        "pass": ("subset/pass", "entrypoint"),
-        "fail": ("subset/fail", "entrypoint"),
-        "ping": ("subset/ping", "test_ping")
-    }
 
     # pylint: disable=too-many-statements
     def __init__(self, runner, device, config):
