@@ -105,7 +105,7 @@ public class SwitchTest {
         captureResult("poe.switch.power", Result.FAIL, "device wattage exceeds the max wattage");
       }
     } else if (poeStatus == POEStatus.State.OFF) {
-      captureResult("poe.switch.power", Result.FAIL, "No poE is applied");
+      captureResult("poe.switch.power", Result.FAIL, "No PoE is applied");
     } else if (poeStatus == POEStatus.State.FAULT) {
       captureResult("poe.switch.power", Result.FAIL,
           "Device detection or a powered device is in a faulty state");
