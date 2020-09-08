@@ -1,4 +1,8 @@
 # Changelog
+* 1.9.6
+  * Switch poe updates (#605) - Alignment of PoE test to test plan.
+  * Cisco Switches parsing fix (#623)
+  * usi logs gcp and local capture (#613)
 * 1.9.5
   * Increase nmap module timeout (#611)
   * Improvements for test development debugging (#609)
