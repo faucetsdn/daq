@@ -1,48 +1,54 @@
 # Security testing
 
 ## test_tls
-The TLS test attempts to verify various versions of TLS support.  Separate connections will be attempted with different SSL context with the associated TLS support, 1.0, 1.2 and 1.3.
+The TLS test attempts to verify various versions of TLS support.  Separate connections will be attempted with different SSL context with the associated TLS support, 1.0, 1.2 and 1.3 to teset devices server TLS capabilities.  A 5 min max scan period is also used to capture TLS client level capabilities for TLS 1.2 and 1.3.
  
-### Testing procedure
+### Testing procedure for server testing
 After establishing connections to devices, the test will proceed to validate the available certificates with the following criteria:
  1. The certificate is in the x509 format
- 2. The public key length is at least 2048.  Currently handles both RSA and DSA public key formats.
- 3. The certificate is not expired and active for the current date.
-The cipher suite used is also checked but does not currently affect the outcome of the results.  Currently the expected cipher suites are ECDH and ECSA.  If these are not present, a warning message will be logged in the activate.log of the switch node.
+ 2. The public key length is at the correct bit length
+    - If public key is RSA format - Key length must be at least 2048
+    - If public key is EC format - key length must be at least 224
+ 3. The certificate is not expired and active for the current date
+ 4. The cipher suite is valid:(only for TLS < 1.3)
+    - If RSA public key format - No cipher check is required
+    - If EC pubic key format - Check if cipher suites ECDH and ECSA are present
 
- 
+### Testing procedure for client testing
+A 5 minute maximum scan period is utilized to analyze outbound traffic from the device.  A thirty second wait period between scans is utilized to allow for early completion of the test and not require the full 5 minutes if possible. The results expec the following criteria to pass for TLS 1.2 and 1.3 success.
+
+1. Device initiates handshake on ports 443(HTTPS) or 8883 (MQTT)
+2. Server completes the handshake
+3. Device is supports ECDH and ECDSA ciphers.  Only checked for TLS 1.2
+
 ### Note for test developers 
-The functional test code is included in the `tlstest/src/main/java` folder.
+The functional test code is included in the `tlstest/src/main/java` folder
 
- ### Conditions for security.tls.v1
- - pass -> If the device responds to a connection with TLS 1.0 support and provides a valid certificate.
- - fail -> If the device responds to a connection with TLS 1.0 support and provides an invalid certificate.
+ ### Conditions for security.tls.v1.server
+ - pass -> If the device responds to a connection with TLS 1.0, support and provides a valid certificate, has a valid key length and has a valid cipher suite.
+ - fail -> If the device responds to a connection with TLS 1.0 support and provides an invalid certificate or provides an invalid key length or an invalid cipher suite.
  - skip -> If no connection to the device can be established.
 
-### Conditions for security.tls.v1.x509
- - pass -> If the device responds to a connection with TLS 1.0 support and provides a valid certificate.
- - fail -> If the device responds to a connection with TLS 1.0 support and provides an invalid certificate.
+ ### Conditions for security.tls.v1_2.server
+ - pass -> If the device responds to a connection with TLS 1.2, support and provides a valid certificate, has a valid key length and has a valid cipher suite.
+ - fail -> If the device responds to a connection with TLS 1.2 support and provides an invalid certificate or provides an invalid key length or an invalid cipher suite.
  - skip -> If no connection to the device can be established.
 
-### Conditions for security.tls.v1_2
- - pass -> If the device responds to a connection with TLS 1.2 support and provides a valid certificate.
- - fail -> If the device responds to a connection with TLS 1.2 support and provides an invalid certificate.
- - skip -> If no connection to the device can be established.
-
-### Conditions for security.tls.v1_2.x509
- - pass -> If the device responds to a connection with TLS 1.2 support and provides a valid certificate.
- - fail -> If the device responds to a connection with TLS 1.2 support and provides an invalid certificate.
+ ### Conditions for security.tls.v1_3.server
+ - pass -> If the device responds to a connection with TLS 1.3, support and provides a valid certificate and has a valid key length.
+ - fail -> If the device responds to a connection with TLS 1.3 support and provides an invalid certificate or provides an invalid key length.
  - skip -> If no connection to the device can be established.
  
-### Conditions for security.tls.v1_3
- - pass -> If the device responds to a connection with TLS 1.3 support and provides a valid certificate.
- - fail -> If the device responds to a connection with TLS 1.3 support and provides an invalid certificate.
- - skip -> If no connection to the device can be established.
+ ### Conditions for security.tls.v1_2.client
+ - pass -> If the device makes a TLS 1.2 connection to an external server and the server completes the handshake. The device must support the ECDH and ECDSA cipher suites during the handshake.
+ - fail -> If the attemps to make a TLS 1.2 connection to an external server and the server does not complete the handshake or if the handshake does not includes the ECDH and ECDSA cipher suite support. 
+ - skip -> If no TLS 1.2 device initiated connection can be detected.
+ 
+  ### Conditions for security.tls.v1_3.client
+ - pass -> If the device makes a TLS 1.3 connection to an external server and the server completes the handshake.
+ - fail -> If the attemps to make a TLS 1.3 connection to an external server and the server does not complete the handshake.
+ - skip -> If no TLS 1.3 device initiated connection can be detected.
 
-### Conditions for security.tls.v1_3.x509
- - pass -> If the device responds to a connection with TLS 1.3 support and provides a valid certificate.
- - fail -> If the device responds to a connection with TLS 1.3 support and provides an invalid certificate.
- - skip -> If no connection to the device can be established.
  
 ## test_password
 The password test runs a dictionary brute force on protocols HTTP, HTTPS, SSH and Telnet to check if the device has changed login credentials from defaults to a more secure combination.
