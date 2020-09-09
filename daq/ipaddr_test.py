@@ -1,11 +1,12 @@
 """Test module encapsulating ip-address tests (including DHCP)"""
 
 from __future__ import absolute_import
+import logging
+
 import time
 import os
 import copy
 import logger
-import logging
 
 from base_module import HostModule
 
