@@ -5,6 +5,7 @@ import sys
 
 TEST_REQUEST = str(sys.argv[1])
 
+
 def main():
     """main"""
     ipaddr_log = '/tmp/activate.log'
@@ -21,10 +22,8 @@ def main():
     def _test_dhcp_short():
         return 'fail'
 
-
     def _test_dhcp_long():
         return 'fail'
-
 
     _write_report("{b}{t}\n{b}".format(b=dash_break_line, t=TEST_REQUEST))
     summary = ""
@@ -40,6 +39,7 @@ def main():
         result = _test_dhcp_long()
 
     _write_report("RESULT {r} {t} \n".format(r=result, t=TEST_REQUEST))
+
 
 if __name__ == "__main__":
     main()
