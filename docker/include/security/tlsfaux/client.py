@@ -15,10 +15,10 @@ except Exception:
 SSL_VERSION = None
 if(VERSION == "1.2"):
     # Force TLS 1.2
-    SSL_VERSION=ssl.PROTOCOL_TLSv1_2  
+    SSL_VERSION = ssl.PROTOCOL_TLSv1_2
 elif(VERSION == "1.3"):
-    # Pick highest version which should be 1.3  
-    SSL_VERSION=ssl.PROTOCOL_TLS
+    # Pick highest version which should be 1.3
+    SSL_VERSION = ssl.PROTOCOL_TLS
 
 
 print("SSL Client Started...")
