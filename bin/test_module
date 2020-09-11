@@ -58,6 +58,7 @@ sudo tcpdump -c 3 -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || t
 
 echo Staring module pcap... 
 sudo tcpdump -U -eni $faux_intf -Z root -w $module_dir/scans/test_$module.pcap &
+pid=$1
 sleep 5
 echo Module pcap started
 
@@ -122,7 +123,6 @@ fi
 
 #now interrupt the process.  get its PID:
 echo Stopping module pcap...
-pid=$(ps -e | pgrep tcpdump)  
 echo $pid  
 #interrupt it:  
 sudo kill -2 $pid
