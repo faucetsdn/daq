@@ -5,7 +5,7 @@ RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached
 RESULT pass base.startup.ntp Correct NTP server address
 RESULT skip base.startup.dns No dns traffic detected
-RESULT pass base.startup.dhcp
+RESULT skip base.startup.dhcp Using static ip 10.20.0.7
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached
 RESULT fail base.startup.ntp Invalid NTP server address
@@ -68,9 +68,10 @@ RESULT info communication.type.broadcast Broadcast packets received. Unicast pac
 RESULT skip connection.network.ntp_support No NTP packets received.
 RESULT skip connection.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
+RESULT pass connection.network.dhcp_short DHCP request received.
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
-3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']
+3c5ab41e8f0b: ['3c5ab41e8f0b:ipaddr:TimeoutError', '3c5ab41e8f0b:ping:TimeoutError']
 9a02571e8f01: []
 arp.txt
 dp_port_acls.yaml
@@ -109,7 +110,7 @@ port-01 module_config modules
         "start": "192.168.0.1"
       }
     ],
-    "enabled": false,
+    "enabled": true,
     "port_flap_timeout_sec": 20,
     "timeout_sec": 900
   },
@@ -168,9 +169,9 @@ port-02 module_config modules
         "start": "192.168.0.1"
       }
     ],
-    "enabled": false,
+    "enabled": true,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 900
+    "timeout_sec": 1
   },
   "manual": {
     "enabled": true

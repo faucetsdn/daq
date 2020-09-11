@@ -16,6 +16,8 @@ interfaces.faux-5.opts=
 monitor_scan_sec=1
 EOF
 
+echo host_tests=config/modules/dhcp.conf >> local/system.conf
+
 intf_mac="9a02571e8f03"
 rm -rf local/site
 mkdir -p local/site/mac_addrs/$intf_mac

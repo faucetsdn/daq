@@ -19,6 +19,9 @@
     },
     "switch": {
       "enabled": true
+    },
+    "ipaddr": {
+      "enabled": false
     }
   },
   "servers": {

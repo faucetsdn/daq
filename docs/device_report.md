@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|6|2|20|1|2|
+|Other|7|2|20|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -69,6 +69,7 @@ Overall device result FAIL
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
+|pass|connection.network.dhcp_short|Other|Other|DHCP request received.|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
@@ -584,6 +585,29 @@ RESULT fail connection.mac_oui Manufacturer prefix not found!
 |Attribute|Value|
 |---|---|
 |enabled|True|
+
+## Module ipaddr
+
+
+#### Report
+
+```
+--------------------
+connection.network.dhcp_short
+--------------------
+Reconnect device and check for DHCP request.
+--------------------
+RESULT pass connection.network.dhcp_short DHCP request received.
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|900|
+|port_flap_timeout_sec|20|
+|dhcp_ranges|[{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 16}]|
 
 ## Report complete
 
