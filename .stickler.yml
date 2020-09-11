@@ -6,7 +6,6 @@ linters:
   pep8:
     python: 3
     max-line-length: 100
-    ignore: E1601
   py3k:
     ignore: E1601
   checkstyle:
