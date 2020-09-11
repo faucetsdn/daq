@@ -29,10 +29,8 @@ The functional test code is included in the `tlstest/src/main/java` folder
 The tls test requires specifying the CA certificate used to sign the signature for validation. If this is not added, DAQ will still run the test but will always show failure results for the server tests. To do this, you need to add the name of the ca_file to the modules section of the device config_module.json.  See the below example:
 ```
   "modules": {
-    "security": {
-      "tls": {
-        "ca_file": "ca.pem"
-      }
+    "tls": {
+      "ca_file": "ca.pem"
     }
   }
 ```
