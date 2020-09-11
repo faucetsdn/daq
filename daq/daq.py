@@ -48,6 +48,7 @@ class DAQ:
 
     def validate_config(self):
         """Validate DAQ configuration"""
+        print('testing')
         errors = False
         for old_key in _CONFIG_MIGRATIONS:
             if old_key in self.config:
