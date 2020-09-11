@@ -35,6 +35,7 @@ class IpAddrTest(HostModule):
         formatter = logging.Formatter(_LOG_FORMAT)
         self._file_handler.setFormatter(formatter)
         self._logger.addHandler(self._file_handler)
+        self._force_terminated = False
 
     def start(self, port, params, callback, finish_hook):
         """Start the ip-addr tests"""
@@ -74,6 +75,7 @@ class IpAddrTest(HostModule):
         self._ip_callback = self._next_test
 
     def _analyze(self):
+        self._ip_callback = None
         self.docker_host.start(self.port, self.params,
                                self._finalize, self._finish_hook)
 
@@ -81,11 +83,13 @@ class IpAddrTest(HostModule):
         self._logger.info('Module finalizing')
         self._ip_callback = None
         self._file_handler.close()
-        self.callback(return_code=None, exception=exception)
+        if not self._force_terminated:
+            self.callback(return_code=None, exception=exception)
 
     def terminate(self):
         """Terminate this set of tests"""
         self._logger.info('Module terminating')
+        self._force_terminated = True
         if self.docker_host.start_time:
             self.docker_host.terminate()
         self._finalize()
