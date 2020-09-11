@@ -33,6 +33,7 @@ class Forchestrator:
             pass
 
     def _handle_faucet_events(self):
+        print('handle')
         while self._faucet_events:
             event = self._faucet_events.next_event()
             LOGGER.debug('Faucet event %s', event)

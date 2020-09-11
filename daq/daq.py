@@ -48,7 +48,6 @@ class DAQ:
 
     def validate_config(self):
         """Validate DAQ configuration"""
-        print('testing')
         errors = False
         for old_key in _CONFIG_MIGRATIONS:
             if old_key in self.config:
@@ -71,7 +70,6 @@ class DAQ:
 
     def configure_logging(self):
         """Configure logging"""
-        print('testing')
         config = self.config
         log_def = 'debug' if config.get('debug_mode') else 'info'
         daq_env = config.get('daq_loglevel', log_def)
@@ -142,6 +140,3 @@ def _execute():
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
     sys.exit(_execute())
-
-
-print('hello')
