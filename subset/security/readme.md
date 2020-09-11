@@ -13,6 +13,7 @@ After establishing connections to devices, the test will proceed to validate the
  4. The cipher suite is valid:(only for TLS < 1.3)
     - If RSA public key format - No cipher check is required
     - If EC pubic key format - Check if cipher suites ECDH and ECSA are present
+5. The certificat is signed by a CA.  This can be a local CA from the manufacturer and does not require an official CA signature.
 
 ### Testing procedure for client testing
 A 5 minute maximum scan period is utilized to analyze outbound traffic from the device.  A thirty second wait period between scans is utilized to allow for early completion of the test and not require the full 5 minutes if possible. The results expec the following criteria to pass for TLS 1.2 and 1.3 success.
@@ -23,6 +24,19 @@ A 5 minute maximum scan period is utilized to analyze outbound traffic from the 
 
 ### Note for test developers 
 The functional test code is included in the `tlstest/src/main/java` folder
+
+### Available Configurations:
+The tls test requires specifying the CA certificate used to sign the signature for validation. If this is not added, DAQ will still run the test but will always show failure results for the server tests. To do this, you need to add the name of the ca_file to the modules section of the device config_module.json.  See the below example:
+```
+  "modules": {
+    "security": {
+      "tls": {
+        "ca_file": "ca.pem"
+      }
+    }
+  }
+```
+The file must be loaded into the aux directory of the device, i.e local/site/mac_addres/<mac>/aux/ca.pem
 
  ### Conditions for security.tls.v1.server
  - pass -> If the device responds to a connection with TLS 1.0, support and provides a valid certificate, has a valid key length and has a valid cipher suite.
