@@ -16,8 +16,7 @@ if [ -n "$TARGET_IP" ]; then
     export CA_URL="None"
     if [ -f "$MODULE_CONFIG" ]; then
       echo "Module Config present"
-      CA_FILE=`jq -r .modules.security.tls.ca_file $MODULE_CONFIG`
-      CA_URL=`jq -r .modules.security.tls.ca_url $MODULE_CONFIG`
+      CA_FILE=`jq -r .modules.tls.ca_file $MODULE_CONFIG`
     elif [ -f "$DEVICE_CONFIG/CA_Faux.pem" ]; then
       echo "CA Faux found"
       #Module test won't have a module_config file but injects the CA file

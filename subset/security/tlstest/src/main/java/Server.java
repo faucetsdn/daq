@@ -17,7 +17,6 @@ public class Server {
   private final int port;
   private final String tlsVersion;
   private final String caFile;
-  private final String caUrl;
 
   private CertificateStatus serverCertStatus = CertificateStatus.CERTIFICATE_INVALID;
   private KeyLengthStatus serverKeyLengthStatus = KeyLengthStatus.PUBLIC_KEY_INVALID_LENGTH;
@@ -27,12 +26,11 @@ public class Server {
   private String certificateReport = "";
   boolean skip = false;
 
-  public Server(String ipAddress, int port,String tlsVersion,String caFile,String caUrl) {
+  public Server(String ipAddress, int port,String tlsVersion,String caFile) {
     this.ipAddress = ipAddress;
     this.port = port;
     this.tlsVersion = tlsVersion;
     this.caFile = caFile;
-    this.caUrl = caUrl;
   }
 
   public String validate(){
@@ -336,7 +334,6 @@ public class Server {
   private CertificateSignatureStatus validateSignature(Certificate[] certificates) {
     appendReport("Checking Certificate Signature...");
     System.out.println("CA File: " + caFile);
-    System.out.println("CA URL: " + caUrl);
     appendReport("Certificates found: " + certificates.length);
     try {
       File certFile = writePemFile(certificates, tlsVersion + "_cert.pem");
@@ -421,12 +418,6 @@ public class Server {
         return caFile;
       }
     }
-//    caFile = resolveCAFromUrl();
-//    if(caFile!=null){
-//      if(caFile.exists()){
-//        return caFile;
-//      }
-//    }
     return null;
   }
 
@@ -441,28 +432,6 @@ public class Server {
       f = new File("/config/device/"+caFile);
     }
     return f;
-  }
-
-  private File resolveCAFromUrl(){
-      try {
-        if(caUrl!=null) {
-          System.out.println("Resoling CA from URL: " + caUrl);
-          SSLSocket socket = makeSSLSocket(caUrl, port, "TLSv" + tlsVersion);
-          Certificate[] certificates = getServerCertificates(socket);
-          for (Certificate certificate : certificates) {
-            if (certificate instanceof X509Certificate) {
-              X509Certificate x509Certificate = (X509Certificate) certificate;
-              System.out.println("CA File Resolved: " + x509Certificate);
-              writePemFile(x509Certificate, "tmp/" + tlsVersion + "_ca.pem");
-              return new File("tmp/" + tlsVersion + "_ca.pem");
-            }
-          }
-        }
-    }
-    catch(Exception e){
-      e.printStackTrace();
-    }
-    return null;
   }
 
   /**

@@ -9,15 +9,13 @@ public class Main {
     }
     String ipAddress = args[0];
     String caFile = "None".equals(args[1])?null:args[1];
-    String caUrl = "None".equals(args[2])?null:args[2];
     System.out.println("Args:");
     System.out.println("IP Address: " + ipAddress);
     System.out.println("CA File: " + caFile);
-    System.out.println("CA URL: " + caUrl);
     //Generate the Client/Server test objects
-    Server tlsServer1_0 = new Server(ipAddress, 443,"1",caFile,caUrl);
-    Server tlsServer1_2 = new Server(ipAddress, 443,"1.2",caFile,caUrl);
-    Server tlsServer1_3 = new Server(ipAddress, 443,"1.3",caFile,caUrl);
+    Server tlsServer1_0 = new Server(ipAddress, 443,"1",caFile);
+    Server tlsServer1_2 = new Server(ipAddress, 443,"1.2",caFile);
+    Server tlsServer1_3 = new Server(ipAddress, 443,"1.3",caFile);
     Client client = new Client(ipAddress,new int[]{443,8883},new String[]{"1.2","1.3"});
     //Client client_1_3 = new Client(ipAddress,443,"1.3");
     //Run the tests
