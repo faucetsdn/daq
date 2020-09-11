@@ -25,11 +25,15 @@ class HostModule:
         assert len(self.host_name) <= 10, 'Hostname %s too long'
         self.callback = None
         self._finish_hook = None
+        self.port = None
+        self.params = None
         self.start_time = None
 
     def start(self, port, params, callback, finish_hook):
         """Start a test module"""
         LOGGER.debug('Starting test module %s', self)
+        self.port = port
+        self.params = params
         self.callback = callback
         self._finish_hook = finish_hook
         self.start_time = datetime.datetime.now()
