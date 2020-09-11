@@ -71,6 +71,7 @@ class DAQ:
 
     def configure_logging(self):
         """Configure logging"""
+        print('testing')
         config = self.config
         log_def = 'debug' if config.get('debug_mode') else 'info'
         daq_env = config.get('daq_loglevel', log_def)
