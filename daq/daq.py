@@ -140,3 +140,6 @@ def _execute():
 if __name__ == '__main__':
     assert os.getuid() == 0, 'Must run DAQ as root.'
     sys.exit(_execute())
+
+
+print('hello')
