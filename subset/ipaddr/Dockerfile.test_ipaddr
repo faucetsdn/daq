@@ -6,4 +6,3 @@ COPY subset/ipaddr/dhcp_tests.py .
 COPY subset/ipaddr/test_dhcp .
 
 CMD ["./test_dhcp"]
-
