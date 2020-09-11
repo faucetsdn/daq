@@ -145,6 +145,8 @@ public class SwitchTest {
         .withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getPower(switchInfo);
     final InterfaceResponse interfaceResponse = blockingStub
         .withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getInterface(switchInfo);
+    results.add(interfaceResponse.getRawOutput());
+    results.add(powerResponse.getRawOutput());
     testLink(interfaceResponse);
     testSpeed(interfaceResponse);
     testDuplex(interfaceResponse);
