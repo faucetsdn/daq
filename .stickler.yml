@@ -9,6 +9,7 @@ linters:
     max-line-length: 100
     ignore: E1601
   py3k:
+    ignore: E1601
   checkstyle:
     config: ./.checkstyle.xml
 files:
