@@ -34,12 +34,10 @@ DNS_SERVER_HOST = '.2'
 
 
 def write_report(string_to_append):
-"""
-Write
-"""
     print(string_to_append.strip())
     with open(report_filename, 'a+') as file_open:
         file_open.write(string_to_append)
+
 
 def exec_tcpdump(tcpdump_filter, capture_file = None):
 """
@@ -97,11 +95,10 @@ Returns
     True/False if the device has communicated with an IP from the
     DNS response after it has recieved it
 """
-
     response_time = datetime.datetime.strptime(response_line[:26], TCPDUMP_DATE_FORMAT)
 
     # Use regex to extract all IP addresses in the response
-    matches = re.findall(IP_REGEX,response_line)
+    matches = re.findall(IP_REGEX, response_line)
 
     # The first two IP addresses are the source/destination
     ip_addresses = matches[2:]
@@ -116,7 +113,7 @@ Returns
     return False
 
 
-def test_dns(device_address):
+def test_dns(target_ip):
 """ Runs the dns.hostname_connect test
 
 Checks that:
@@ -125,23 +122,24 @@ Checks that:
     iii) the device uses an IP address recieved from the DNS server
 
 Args
-    device_address: IP address of the device 
+    target_ip: IP address of the device
 """
 
     # Get server IP of the DHCP server
-    dhcp_dns_ip = get_dns_server_from_ip(device_address)
+    dhcp_dns_ip = get_dns_server_from_ip(target_ip)
 
     # Check if the device has sent any DNS results at 
-    filter_to_dns = 'dst port 53 and src host {}'.format(device_address)
+    filter_to_dns = 'dst port 53 and src host {}'.format(target_ip)
     to_dns = exec_tcpdump(filter_to_dns)
     num_query_dns = len(to_dns)
 
     if num_query_dns == 0:
         add_summary('Device did not send any DNS requests')
-        return 'skip' 
+        return 'skip'
 
     # Check if the device only sent DNS requests to the DHCP Server    
-    filter_to_dhcp_dns = 'dst port 53 and src host {} and dst host {}'.format(device_address, dhcp_dns_ip)
+    filter_to_dhcp_dns = 'dst port 53 and src host {} '
+                         'and dst host {}'.format(target_ip, dhcp_dns_ip)
     to_dhcp_dns = exec_tcpdump(filter_to_dhcp_dns)
     num_query_dhcp_dns = len(to_dhcp_dns)
 
@@ -149,7 +147,7 @@ Args
         add_summary('Device sent DNS requests to servers other than the DHCP provided server')
         return 'fail'
 
-    # Retrieve responses from DNS, 
+    # Retrieve responses from DNS
     filter_dns_response = 'src port 53 and src host {}'.format(dhcp_dns_ip)
     dns_responses = exec_tcpdump(filter_dns_response)
 
@@ -175,6 +173,6 @@ write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
 if test_request == 'dns.hostname_connect':
     write_report("{d}\n{b}".format(b=dash_break_line, d=DESCRIPTION_HOSTNAME_CONNECT))
-    result = test_dns('2')
+    result = test_dns(device_address)
 
 write_report("RESULT {r} {t} {s}\n".format(r=result, t=test_request, s=summary_text.strip()))
