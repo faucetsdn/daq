@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|6|2|20|1|2|
+|Other|6|2|21|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -67,6 +67,7 @@ Overall device result FAIL
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
+|skip|connection.dns.hostname_connect|Other|Other|Device did not send any DNS requests|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
@@ -577,6 +578,12 @@ Mac OUI Test
 --------------------
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 
+--------------------
+connection.dns.hostname_connect
+--------------------
+Check device uses the DNS server from DHCP and resolves hostnames
+--------------------
+RESULT skip connection.dns.hostname_connect Device did not send any DNS requests
 ```
 
 #### Module Config

@@ -65,9 +65,9 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4
+    opts: brute broadcast_client ntpv4 curl
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
 long_dhcp_response_sec: 0
@@ -117,8 +117,7 @@ capture_test_results macoui
 capture_test_results tls
 capture_test_results password
 capture_test_results discover
-capture_test_results networ
-capture_test_results ntp
+capture_test_results network
 
 # Capture peripheral logs
 more inst/run-*/scans/ip_triggers.txt | cat
