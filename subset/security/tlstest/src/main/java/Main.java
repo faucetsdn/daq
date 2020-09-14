@@ -4,8 +4,8 @@ public class Main {
     String tlsReport = "";
     Report report = new Report();
 
-    if (args.length != 3) {
-      throw new IllegalArgumentException("Expected 3 args, only " + args.length + " detected.");
+    if (args.length != 2) {
+      throw new IllegalArgumentException("Expected 2 args, only " + args.length + " detected.");
     }
     String ipAddress = args[0];
     String caFile = "None".equals(args[1])?null:args[1];
