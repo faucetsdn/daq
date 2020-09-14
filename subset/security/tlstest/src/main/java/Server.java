@@ -355,6 +355,10 @@ public class Server {
           appendReport("Certificate Signature Validation Failed");
         }
       }
+      else{
+        System.out.println("CA File not  resolved");
+        appendReport("CA File not Resolved:");
+      }
     }
     catch(Exception e){
       System.out.println("Certificate Signature Validation Error: " + e.getMessage());
