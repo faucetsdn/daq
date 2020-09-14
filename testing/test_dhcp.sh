@@ -80,9 +80,9 @@ for iface in $(seq 1 5); do
       echo "Device $iface num of ips: $num_ips" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
-      subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/activate.log | wc -l)
-      subnet2_ip=$(fgrep "ip notification 10.255.255" inst/run-*/nodes/ipaddr*/activate.log | wc -l)
-      subnet3_ip=$(fgrep "ip notification 172.16.0" inst/run-*/nodes/ipaddr*/activate.log | wc -l)
+      subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
+      subnet2_ip=$(fgrep "ip notification 10.255.255" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
+      subnet3_ip=$(fgrep "ip notification 172.16.0" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
       echo "Device $iface subnet 1 ip: $subnet_ip subnet 2 ip: $subnet2_ip subnet 3 ip: $subnet3_ip" | tee -a $TEST_RESULTS
     elif [ $iface == 3 ]; then
       echo "Device $iface long ip triggers: $((long_triggers > 0))" | tee -a $TEST_RESULTS
