@@ -92,9 +92,7 @@ public class SwitchTest {
 
   protected void testPower(PowerResponse powerResponse) {
     if (!deviceConfigPoeEnabled) {
-      captureResult("poe.power", Result.SKIP, "This test is disabled");
-      captureResult("poe.negotiation", Result.SKIP, "This test is disabled");
-      captureResult("poe.support", Result.SKIP, "This test is disabled");
+      captureResult("poe.switch.power", Result.SKIP, "This test is disabled");
       return;
     }
 
@@ -102,34 +100,19 @@ public class SwitchTest {
     // Determine PoE power test result
     if (poeStatus == POEStatus.State.ON) {
       if (powerResponse.getMaxPowerConsumption() >= powerResponse.getCurrentPowerConsumption()) {
-        captureResult("poe.power", Result.PASS, "PoE is applied to device");
+        captureResult("poe.switch.power", Result.PASS, "PoE is applied to device");
       } else {
-        captureResult("poe.power", Result.FAIL, "device wattage exceeds the max wattage");
+        captureResult("poe.switch.power", Result.FAIL, "device wattage exceeds the max wattage");
       }
     } else if (poeStatus == POEStatus.State.OFF) {
-      captureResult("poe.power", Result.FAIL, "No poE is applied");
+      captureResult("poe.switch.power", Result.FAIL, "No PoE is applied");
     } else if (poeStatus == POEStatus.State.FAULT) {
-      captureResult("poe.power", Result.FAIL,
+      captureResult("poe.switch.power", Result.FAIL,
           "Device detection or a powered device is in a faulty state");
     } else {
-      captureResult("poe.power", Result.FAIL, "A powered device is detected, "
+      captureResult("poe.switch.power", Result.FAIL, "A powered device is detected, "
           + "but no PoE is available, or the maximum wattage exceeds the "
           + "detected powered-device maximum.");
-    }
-
-    // Determine PoE auto negotiation result
-    if (powerResponse.getPoeNegotiation() == POENegotiation.State.ENABLED) {
-      captureResult("poe.negotiation", Result.PASS, "PoE auto-negotiated successfully");
-    } else {
-      captureResult("poe.negotiation", Result.FAIL, "Incorrect privilege for negotiation");
-    }
-
-    // Determine PoE support result
-    if (powerResponse.getPoeSupport() == POESupport.State.ENABLED) {
-      captureResult("poe.support", Result.PASS, "PoE is supported and enabled");
-    } else {
-      captureResult("poe.support", Result.FAIL,
-          "The switch does not support PoE or it is disabled");
     }
   }
 
@@ -162,6 +145,8 @@ public class SwitchTest {
         .withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getPower(switchInfo);
     final InterfaceResponse interfaceResponse = blockingStub
         .withDeadlineAfter(rpcTimeoutSec, TimeUnit.SECONDS).getInterface(switchInfo);
+    results.add(interfaceResponse.getRawOutput());
+    results.add(powerResponse.getRawOutput());
     testLink(interfaceResponse);
     testSpeed(interfaceResponse);
     testDuplex(interfaceResponse);
@@ -169,3 +154,4 @@ public class SwitchTest {
     writeReport();
   }
 }
+
