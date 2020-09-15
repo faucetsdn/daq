@@ -148,13 +148,6 @@ RESULT pass base.target.ping target reached
 
 ```
 
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-|manifest|{'base.startup.dhcp': {'description': 'Check the base DHCP startup exchange'}, 'base.switch.ping': {'description': 'Attempt to ping access switch (if configured)'}, 'base.target.ping': {'description': 'Attempt to ping the Device Under Test'}}|
-
 ## Module nmap
 
 
@@ -272,7 +265,6 @@ RESULT skip poe.switch.power No local IP has been set, check system config
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|manifest|{'connection.port_link': {'description': 'Connect the device to the network switch. Check the device and the switch for the green connection light & no errors'}, 'connection.port_speed': {'description': 'Verify the device auto-negotiates connection speed'}, 'connection.port_duplex': {'description': 'Verify the device supports full duplex'}, 'poe.switch.power': {'description': 'Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at'}}|
 |poe|{'enabled': True}|
 
 ## Module bacext
@@ -377,7 +369,6 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|manifest|{'security.tls.v1_3': {'description': 'Verify the device supports TLS 1.3 (as a client)'}, 'security.tls.v1_3.x509': {'description': 'Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile'}, 'security.tls.v1_2': {'description': 'Verify the device supports TLS 1.2 (as a client)'}, 'security.tls.v1_2.x509': {'desc': 'Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile'}, 'security.tls.v1': {'description': 'Verify the device supports TLS 1.0 (as a client)'}, 'security.tls.v1.x509': {'description': 'Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile'}}|
 
 ## Module password
 

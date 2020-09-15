@@ -88,13 +88,6 @@ RESULT pass base.target.ping target reached
 
 ```
 
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-|manifest|{'base.startup.dhcp': {'description': 'Check the base DHCP startup exchange'}, 'base.switch.ping': {'description': 'Attempt to ping access switch (if configured)'}, 'base.target.ping': {'description': 'Attempt to ping the Device Under Test'}}|
-
 ## Module nmap
 
 

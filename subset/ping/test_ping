@@ -5,10 +5,8 @@ RESULT_LINES=$TEST_ROOT/tmp/result_lines.txt
 MONO_LOG=$TEST_ROOT/tmp/mono-log.txt
 REPORT_FILE=$TEST_ROOT/tmp/report.txt
 MODULE_CONFIG=$TEST_ROOT/config/device/module_config.json
-MANIFEST=$TEST_ROOT/tmp/module_manifest.json
+MANIFEST=$TEST_ROOT/module_manifest.json
 status=pass
-
-jq -r .modules.ping.manifest $MODULE_CONFIG > $MANIFEST
 
 echo Baseline ping test report | tee -a $MONO_LOG
 # This is a check that the startup.pcap file exists and is proper.

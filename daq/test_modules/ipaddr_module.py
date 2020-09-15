@@ -54,7 +54,7 @@ class IpAddrModule(HostModule):
 
     def _dhcp_port_toggle_test(self):
         if not self.host.connect_port(False):
-            self.log('disconnect port not enabled')
+            self._logger('disconnect port not enabled')
             return
         time.sleep(self.host.config.get("port_debounce_sec", 0) + 1)
         self.host.connect_port(True)
