@@ -1,4 +1,4 @@
 {
     "name": "pass",
-    "startupScript": "entrypoint"
+    "startup_script": "/bin/true"
 }

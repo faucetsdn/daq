@@ -34,8 +34,6 @@ class NativeModule(ExternalModule):
 
         # Common testing tools
         vol_maps.append((os.path.abspath('bin/retry_cmd'), '/bin/retry_cmd'))
-        vol_maps.append((os.path.abspath('resources/setups/baseline/module_manifest.json'),
-                         os.path.join(self.basedir, 'module_manifest.json')))
         vol_maps.append((os.path.abspath('docker/include/utils/reporting.sh'),
                          os.path.join(self.basedir, 'reporting.sh')))
         return vol_maps

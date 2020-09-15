@@ -619,8 +619,8 @@ class ConnectedHost:
     def _new_test(self, test_name):
         if test_name in self.config['test_metadata']:
             metadatum = self.config['test_metadata'][test_name]
-            basedir, startup_script = metadatum['basedir'], metadatum['startup_script']
-            basedir = os.path.abspath(basedir)
+            startup_script = metadatum['startup_script']
+            basedir = os.path.abspath(metadatum['basedir'])
             new_root = os.path.abspath(os.path.join(self.devdir, 'test_root'))
             if os.path.isdir(new_root):
                 shutil.rmtree(new_root)

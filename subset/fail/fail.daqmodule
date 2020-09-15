@@ -1,4 +1,4 @@
 {
     "name": "fail",
-    "startupScript": "entrypoint"
+    "startup_script": "/bin/false"
 }

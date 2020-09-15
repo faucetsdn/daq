@@ -3,10 +3,12 @@ source $TEST_ROOT/reporting.sh
 
 RESULT_LINES=$TEST_ROOT/tmp/result_lines.txt
 MONO_LOG=$TEST_ROOT/tmp/mono-log.txt
-MANIFEST=$TEST_ROOT/module_manifest.json
 REPORT_FILE=$TEST_ROOT/tmp/report.txt
 MODULE_CONFIG=$TEST_ROOT/config/device/module_config.json
+MANIFEST=$TEST_ROOT/tmp/module_manifest.json
 status=pass
+
+jq -r .modules.ping.manifest $MODULE_CONFIG > $MANIFEST
 
 echo Baseline ping test report | tee -a $MONO_LOG
 # This is a check that the startup.pcap file exists and is proper.
@@ -15,7 +17,7 @@ tcpdump -en -r $TEST_ROOT/scans/startup.pcap ip
 echo %% $(tcpdump -n -r $TEST_ROOT/scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
 
-STATIC_IP=`jq -r .static_ip $TEST_ROOT/config/device/module_config.json`
+STATIC_IP=`jq -r .static_ip $MODULE_CONFIG`
 if [ "$STATIC_IP" == null ]; then
     STATIC_IP=
 fi

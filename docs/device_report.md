@@ -149,6 +149,13 @@ RESULT pass base.target.ping target reached
 
 ```
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|manifest|{'base.startup.dhcp': {'description': 'Check the base DHCP startup exchange'}, 'base.switch.ping': {'description': 'Attempt to ping access switch (if configured)'}, 'base.target.ping': {'description': 'Attempt to ping the Device Under Test'}}|
+
 ## Module nmap
 
 
@@ -160,7 +167,7 @@ security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG XXX/tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	
@@ -174,7 +181,7 @@ security.nmap.http
 --------------------
 Check that the device does not have open ports exposing an unencrypted web interface using HTTP
 --------------------
-# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG /tmp/http.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X ()	Status: Up
 Host: X.X.X.X ()	Ports: 10000/open/tcp//snet-sensor-mgmt?///	
@@ -284,6 +291,8 @@ RESULT skip poe.support No local IP has been set, check system config
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|manifest|{'connection.port_link': {'description': 'Connect the device to the network switch. Check the device and the switch for the green connection light & no errors'}, 'connection.port_speed': {'description': 'Verify the device auto-negotiates connection speed'}, 'connection.port_duplex': {'description': 'Verify the device supports full duplex'}, 'poe.power': {'description': 'Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at'}, 'poe.negotiation': {'description': 'Verify the device autonegotiates power requirements'}, 'poe.support': {'description': 'Verify if the device supports PoE'}}|
+
 |poe|{'enabled': True}|
 
 ## Module bacext
@@ -388,6 +397,7 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|manifest|{'security.tls.v1_3': {'description': 'Verify the device supports TLS 1.3 (as a client)'}, 'security.tls.v1_3.x509': {'description': 'Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile'}, 'security.tls.v1_2': {'description': 'Verify the device supports TLS 1.2 (as a client)'}, 'security.tls.v1_2.x509': {'desc': 'Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile'}, 'security.tls.v1': {'description': 'Verify the device supports TLS 1.0 (as a client)'}, 'security.tls.v1.x509': {'description': 'Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile'}}|
 
 ## Module password
 

@@ -158,8 +158,6 @@ docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash ot
 done
 echo Push images to update etc/$DOCKER_IMAGE_LIST
 
-bin/native_build $inline
-
 echo Updating .build_hash
 bin/build_hash write
 mv -f .build_files .build_built

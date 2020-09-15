@@ -1,4 +1,4 @@
 {
     "name": "ping",
-    "startupScript": "test_ping"
+    "startup_script": "test_ping"
 }

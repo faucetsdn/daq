@@ -122,7 +122,7 @@ function run_test {
     cmd/run -s
     cat inst/run-*/nodes/ping*/tmp/$(basename $socket_file) | tee -a $TEST_RESULTS
     cat inst/run-*/nodes/ping*/tmp/$(basename $bacnet_file) | tee -a $TEST_RESULTS
-    more inst/run-*/nodes/ping*/activate.log | cat
-    more inst/gw0*/nodes/gw0*/activate.log | cat
-    more inst/gw0*/dhcp_monitor.txt | cat
+    # more inst/run-*/nodes/ping*/activate.log | cat
+    # more inst/gw0*/nodes/gw0*/activate.log | cat
+    # more inst/gw0*/dhcp_monitor.txt | cat
 }
