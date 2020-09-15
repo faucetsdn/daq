@@ -30,7 +30,7 @@ RESULT fail security.tlsv1.server Certificate is expired. Certificate has not be
 RESULT pass security.tlsv1_2.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
 RESULT fail security.tlsv1_2.server Certificate is expired. Certificate has not been signed by a CA.
 RESULT pass security.tlsv1_3.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_3.server Certificate public key length too short. Certificate could not be validated. Certificate has not been signed by a CA.
+RESULT fail security.tlsv1_3.server Certificate is expired. Certificate has not been signed by a CA.
 RESULT fail security.tlsv1.server Certificate has not been signed by a CA. Cipher Valid.
 RESULT pass security.tlsv1_2.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
 RESULT fail security.tlsv1_2.server Certificate has not been signed by a CA. Cipher Valid.

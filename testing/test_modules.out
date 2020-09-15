@@ -21,7 +21,7 @@ RESULT fail security.tlsv1.server Certificate is expired. Certificate has not be
 RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
 RESULT fail security.tlsv1_2.server Certificate is expired. Certificate has not been signed by a CA.
 RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
-RESULT fail security.tlsv1_3.server Certificate public key length too short. Certificate could not be validated. Certificate has not been signed by a CA.
+RESULT fail security.tlsv1_3.server Certificate is expired. Certificate has not been signed by a CA.
 Testing nmap
 RESULT pass security.nmap.ports Only allowed ports found open.
 RESULT pass security.nmap.http No running http servers have been found.
