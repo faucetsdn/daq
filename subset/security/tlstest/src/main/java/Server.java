@@ -128,6 +128,7 @@ public class Server {
     } catch (SSLHandshakeException e) {
       System.out.println("SSLHandshakeException: Unable to complete handshake:" + e.getMessage());
       e.printStackTrace();
+      skip = true;
     } catch (Exception e) {
       System.out.println("Certificate Validation Failed: " + e.getMessage());
       e.printStackTrace();
