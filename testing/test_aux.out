@@ -77,9 +77,6 @@ dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
 dp_sec_port_2_acl.yaml
 dp_sec_port_3_acl.yaml
-dp_sec_port_4_acl.yaml
-dp_sec_port_5_acl.yaml
-dp_sec_port_6_acl.yaml
 faucet.log
 faucet.yaml
 finish.out
