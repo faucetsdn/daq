@@ -25,7 +25,7 @@
         "connection.port_duplex": {
           "description": "Verify the device supports full duplex"
         },
-        "poe.power": {
+        "poe.switch.power": {
           "description": "Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at"
         }
       }

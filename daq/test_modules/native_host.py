@@ -27,8 +27,8 @@ class NativeHost(Host):
         self.vol_maps.append((os.path.abspath(os.path.join(self.tmpdir, 'tmp')),
                               os.path.join(self.basedir, 'tmp')))
         self.name = name
-        self.startup_script = startup_script if startup_script.startswith('/') \
-            else os.path.join(self.basedir, startup_script)
+        script_full_path = os.path.join(self.basedir, startup_script)
+        self.startup_script = startup_script if startup_script.startswith('/') else script_full_path
         self.active_pipe = None
         self.active_log = None
         Host.__init__(self, name, **kwargs)

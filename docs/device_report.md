@@ -272,8 +272,7 @@ RESULT skip poe.switch.power No local IP has been set, check system config
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|manifest|{'connection.port_link': {'description': 'Connect the device to the network switch. Check the device and the switch for the green connection light & no errors'}, 'connection.port_speed': {'description': 'Verify the device auto-negotiates connection speed'}, 'connection.port_duplex': {'description': 'Verify the device supports full duplex'}, 'poe.power': {'description': 'Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at'}, 'poe.negotiation': {'description': 'Verify the device autonegotiates power requirements'}, 'poe.support': {'description': 'Verify if the device supports PoE'}}|
-
+|manifest|{'connection.port_link': {'description': 'Connect the device to the network switch. Check the device and the switch for the green connection light & no errors'}, 'connection.port_speed': {'description': 'Verify the device auto-negotiates connection speed'}, 'connection.port_duplex': {'description': 'Verify the device supports full duplex'}, 'poe.switch.power': {'description': 'Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at'}}|
 |poe|{'enabled': True}|
 
 ## Module bacext

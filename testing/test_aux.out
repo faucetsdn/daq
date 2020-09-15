@@ -162,14 +162,8 @@ port-01 module_config modules
       "connection.port_speed": {
         "description": "Verify the device auto-negotiates connection speed"
       },
-      "poe.negotiation": {
-        "description": "Verify the device autonegotiates power requirements"
-      },
-      "poe.power": {
+      "poe.switch.power": {
         "description": "Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at"
-      },
-      "poe.support": {
-        "description": "Verify if the device supports PoE"
       }
     },
     "poe": {
@@ -275,14 +269,8 @@ port-02 module_config modules
       "connection.port_speed": {
         "description": "Verify the device auto-negotiates connection speed"
       },
-      "poe.negotiation": {
-        "description": "Verify the device autonegotiates power requirements"
-      },
-      "poe.power": {
+      "poe.switch.power": {
         "description": "Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at"
-      },
-      "poe.support": {
-        "description": "Verify if the device supports PoE"
       }
     }
   },
