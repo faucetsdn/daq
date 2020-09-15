@@ -435,7 +435,7 @@ class FaucetTopology:
         return target_mac
 
     def _write_port_acl(self, port, rules, filename):
-        LOGGER.debug("Writing port acl file %s", filename)
+        LOGGER.info("Writing port acl file %s", filename)
         acl_name = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port)
         acls = {}
         acls[acl_name] = rules
