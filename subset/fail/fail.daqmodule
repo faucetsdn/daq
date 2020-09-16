@@ -1,0 +1,4 @@
+{
+    "name": "fail",
+    "startup_script": "/bin/false"
+}

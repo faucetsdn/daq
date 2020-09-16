@@ -8,8 +8,8 @@ echo mudacl tests | tee -a $TEST_RESULTS
 mudacl/bin/test.sh
 echo Mudacl exit code $? | tee -a $TEST_RESULTS
 
-bacnet_file=/tmp/bacnet_result.txt
-socket_file=/tmp/socket_result.txt
+bacnet_file='$TEST_ROOT/tmp/bacnet_result.txt'
+socket_file='$TEST_ROOT/tmp/socket_result.txt'
 
 MAC_BASE=9a:02:57:1e:8f
 

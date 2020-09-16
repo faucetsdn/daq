@@ -2,7 +2,7 @@
 source reporting.sh
 REPORT=/tmp/report.txt
 LOCAL_REPORT=tmp/report.txt
-MANIFEST=./module_manifest.json
+MANIFEST=./switches/module_manifest.json
 MONO_LOG=/tmp/monolog.switch.txt
 RESULT_LINES=/tmp/results.switch.txt
 MODULE_CONFIG=/config/device/module_config.json
