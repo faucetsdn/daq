@@ -1,9 +1,5 @@
 Running testing/test_modules.sh
 Base Tests
-Testing ping
-RESULT skip base.startup.dhcp Using static ip 10.20.0.5
-RESULT skip base.switch.ping No local IP has been set, check system config
-RESULT pass base.target.ping target reached %% 10.20.0.5
 Testing tls alt
 RESULT skip security.tls.v1 IOException unable to connect to server
 RESULT skip security.tls.v1.x509 IOException unable to connect to server
@@ -25,18 +21,6 @@ RESULT fail security.tls.v1_2 Certificate is expired.
 RESULT fail security.tls.v1_2.x509 Certificate is expired.
 RESULT fail security.tls.v1_3 Certificate could not be validated.
 RESULT fail security.tls.v1_3.x509 Certificate could not be validated.
-Testing nmap
-RESULT pass security.nmap.ports Only allowed ports found open.
-RESULT pass security.nmap.http No running http servers have been found.
-Testing nmap bacnet
-RESULT pass security.nmap.ports Only allowed ports found open.
-RESULT pass security.nmap.http No running http servers have been found.
-Testing nmap telnet
-RESULT fail security.nmap.ports Some disallowed ports are open: 23.
-RESULT pass security.nmap.http No running http servers have been found.
-Testing nmap ohttp
-RESULT fail security.nmap.ports Some disallowed ports are open: 443,12345,54321.
-RESULT fail security.nmap.http Some ports are running http servers: 12345,54321.
 Testing ssh
 RESULT skip security.ssh.version Device is not running an SSH server
 Testing ssh ssh

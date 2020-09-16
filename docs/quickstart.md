@@ -22,7 +22,7 @@ $ cmd/build
 ## (Optional) Physical Switch Setup
 ### AT x230 series with factory setting
 1. Plug one ethernet cable into the last port of the switch.
-2. If the switch has more than 8 ethernet ports, change **interface port1.0.1-1.0.7** in  **etc/switch_configs/at.cfg** to **interface port1.0.1-1.0.(number of ports - 1)**. Everything else can stay the same.
+2. If the switch has more than 8 ethernet ports, change **interface port1.0.1-1.0.7** in  **etc/switch_configs/at_8ports.cfg** to **interface port1.0.1-1.0.(number of ports - 1)**. Everything else can stay the same.
 3. Find interface name that's connected to switch e.g. enx00e04c68036b
 4. run <pre>$ sudo bin/setup_switch enx00e04c68036b </pre> replace enx00e04c68036b with your interface name. After about 2 mins, the switch is ready to be used by DAQ.
 5. Confirm you can ping switch at 192.168.1.1

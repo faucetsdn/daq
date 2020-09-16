@@ -173,7 +173,7 @@ public class Cisco9300 extends BaseSwitchController {
           commandPending = false;
         }
         Map<String, String> powerMap = processPowerStatusInline(data);
-        powerResponseHandler.receiveData(buildPowerResponse(powerMap));
+        powerResponseHandler.receiveData(buildPowerResponse(powerMap, data));
       };
       telnetClientSocket.writeData(command + "\n");
     }
@@ -193,7 +193,7 @@ public class Cisco9300 extends BaseSwitchController {
           commandPending = false;
         }
         Map<String, String> interfaceMap = processInterfaceStatus(data);
-        handler.receiveData(buildInterfaceResponse(interfaceMap));
+        handler.receiveData(buildInterfaceResponse(interfaceMap, data));
       };
       telnetClientSocket.writeData(command + "\n");
     }
@@ -235,8 +235,11 @@ public class Cisco9300 extends BaseSwitchController {
     managePort(devicePort, handler, false);
   }
 
-  private InterfaceResponse buildInterfaceResponse(Map<String, String> interfaceMap) {
+  private InterfaceResponse buildInterfaceResponse(Map<String, String> interfaceMap, String raw) {
     InterfaceResponse.Builder response = InterfaceResponse.newBuilder();
+    if (raw != null) {
+      response.setRawOutput(raw);
+    }
     String duplex = interfaceMap.getOrDefault("duplex", "");
     if (duplex.startsWith("a-")) { // Interface in Auto Duplex
       duplex = duplex.replaceFirst("a-", "");
@@ -262,8 +265,11 @@ public class Cisco9300 extends BaseSwitchController {
         .build();
   }
 
-  private PowerResponse buildPowerResponse(Map<String, String> powerMap) {
+  private PowerResponse buildPowerResponse(Map<String, String> powerMap, String raw) {
     PowerResponse.Builder response = PowerResponse.newBuilder();
+    if (raw != null) {
+      response.setRawOutput(raw);
+    }
     float maxPower = 0;
     float currentPower = 0;
     try {
@@ -280,14 +286,14 @@ public class Cisco9300 extends BaseSwitchController {
         .setPoeStatus(poeStatusMap.getOrDefault(poeStatus, POEStatus.State.UNKNOWN))
         .setPoeSupport(poeSupportMap.getOrDefault(poeSupport, POESupport.State.UNKNOWN))
         .setPoeNegotiation(
-            poeNegotiationtMap.getOrDefault(poeStatus, POENegotiation.State.UNKNOWN))
+            poeNegotiationtMap.getOrDefault(poeSupport, POENegotiation.State.UNKNOWN))
         .setMaxPowerConsumption(maxPower)
         .setCurrentPowerConsumption(currentPower).build();
   }
 
   private Map<String, String> processInterfaceStatus(String response) {
     String filtered = Arrays.stream(response.split("\n"))
-        .filter(s -> !containsPrompt(s))
+        .filter(s -> !containsPrompt(s) && !s.contains("show interface") && s.length() > 0)
         .collect(Collectors.joining("\n"));
     return mapSimpleTable(filtered, showInterfaceExpected, interfaceExpected);
   }

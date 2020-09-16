@@ -76,7 +76,7 @@ $AG install \
     ca-certificates sudo net-tools tcpdump build-essential pango-1.0 \
     isc-dhcp-client network-manager netcat gnupg2 strace libffi-dev \
     python$PVERSION python3-pkg-resources python3-setuptools \
-    python$PVERSION-dev python3-pip python emacs-nox python$PVERSION-venv
+    python$PVERSION-dev python3-pip python emacs-nox python$PVERSION-venv nmap
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
