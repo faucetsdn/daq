@@ -28,7 +28,7 @@
     },
     "tls": {
       "enabled": true,
-      "ca_file": "ca.pem"
+      "ca_file": "CA_Faux.pem"
     },
     "udmi": {
       "enabled": true

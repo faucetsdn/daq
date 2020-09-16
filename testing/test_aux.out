@@ -140,6 +140,7 @@ port-01 module_config modules
     }
   },
   "tls": {
+    "ca_file": CA_Faux.pem",
     "enabled": true
   },
   "typeconf": {
@@ -196,6 +197,7 @@ port-02 module_config modules
     "enabled": true
   },
   "tls": {
+    "ca_file": "CA_Faux.pem",
     "enabled": true
   },
   "udmi": {
