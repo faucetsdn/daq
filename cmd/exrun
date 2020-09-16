@@ -100,10 +100,6 @@ function DAQ {
     $@ || true
 }
 
-if [ -z `which ifconfig` ]; then
-    export PATH=/sbin:$PATH
-fi
-
 if [ -n "$switch_setup_ext_br" ]; then
     autostart bin/external_ovs
 fi
@@ -158,6 +154,14 @@ fi
 if [ -d venv ]; then
     echo Entering virtual python environment...
     source venv/bin/activate
+fi
+
+if [ -z `which ifconfig` ]; then
+    export PATH=/sbin:$PATH
+fi
+
+if [ -z `which tcpdump` ]; then
+    export PATH=/usr/sbin:$PATH
 fi
 
 echo Using python3 at `which python3`

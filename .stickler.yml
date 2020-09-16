@@ -13,3 +13,4 @@ linters:
 files:
   ignore:
     - 'libs/proto/*'
+    - '*__init__.py'

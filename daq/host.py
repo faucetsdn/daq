@@ -14,9 +14,8 @@ from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
 
 import configurator
-import docker_test
+from test_modules import DockerModule, IpAddrModule, NativeModule
 import gcp
-import ipaddr_test
 import logger
 
 
@@ -618,7 +617,20 @@ class ConnectedHost:
         return path
 
     def _new_test(self, test_name):
-        clazz = ipaddr_test.IpAddrTest if test_name == 'ipaddr' else docker_test.DockerTest
+        if test_name in self.config['test_metadata']:
+            metadatum = self.config['test_metadata'][test_name]
+            startup_script = metadatum['startup_script']
+            basedir = os.path.abspath(metadatum['basedir'])
+            new_root = os.path.abspath(os.path.join(self.devdir, 'test_root'))
+            if os.path.isdir(new_root):
+                shutil.rmtree(new_root)
+            os.makedirs(new_root)
+            for src_file in os.listdir(basedir):
+                src_full = os.path.join(basedir, src_file)
+                os.symlink(src_full, os.path.join(new_root, src_file))
+            return NativeModule(self, self.devdir, test_name, self._loaded_config, new_root,
+                                startup_script)
+        clazz = IpAddrModule if test_name == 'ipaddr' else DockerModule
         return clazz(self, self.devdir, test_name, self._loaded_config)
 
     def _run_test(self, test_name):

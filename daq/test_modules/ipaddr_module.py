@@ -7,18 +7,18 @@ import time
 import os
 import copy
 import logger
-import docker_test
+from .docker_module import DockerModule
 
-from base_module import HostModule
+from .base_module import HostModule
 
 _LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
 
-class IpAddrTest(HostModule):
+class IpAddrModule(HostModule):
     """Module for inline ipaddr tests"""
 
     def __init__(self, host, tmpdir, test_name, module_config):
         super().__init__(host, tmpdir, test_name, module_config)
-        self.docker_host = docker_test.DockerTest(host, tmpdir, test_name, module_config)
+        self.docker_host = DockerModule(host, tmpdir, test_name, module_config)
         self.test_dhcp_ranges = copy.copy(self.test_config.get('dhcp_ranges', []))
         self._ip_callback = None
         self.tests = [
@@ -54,7 +54,7 @@ class IpAddrTest(HostModule):
 
     def _dhcp_port_toggle_test(self):
         if not self.host.connect_port(False):
-            self.log('disconnect port not enabled')
+            self._logger('disconnect port not enabled')
             return
         time.sleep(self.host.config.get("port_debounce_sec", 0) + 1)
         self.host.connect_port(True)

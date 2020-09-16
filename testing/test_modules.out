@@ -1,9 +1,5 @@
 Running testing/test_modules.sh
 Base Tests
-Testing ping
-RESULT skip base.startup.dhcp Using static ip 10.20.0.5
-RESULT skip base.switch.ping No local IP has been set, check system config
-RESULT pass base.target.ping target reached %% 10.20.0.5
 Testing tls alt
 RESULT skip security.tlsv1.server IOException unable to connect to server.
 RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
