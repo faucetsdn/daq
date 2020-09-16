@@ -60,6 +60,7 @@ if [ -d local ]; then
 fi
 
 mkdir -p local inst
+rm -rf inst/port_acls
 
 echo I am g`whoami`
 
