@@ -56,13 +56,14 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|6|2|21|1|2|
+|Other|6|2|22|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Connectivity|Required|target reached|
+|skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
@@ -467,6 +468,15 @@ RESULT skip security.passwords.telnet Port 23 not open on target device.
 #### Report
 
 ```
+--------------------
+cloud.udmi.provision
+--------------------
+Validates device provision payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.provision No device id
+
 --------------------
 cloud.udmi.state
 --------------------
