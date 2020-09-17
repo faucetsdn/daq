@@ -7,22 +7,19 @@ Running testing/test_aux.sh
     "SNS-4" : "True"
   },
   "Version" : {
-    "main" : "1.1.0-8-ga4f8738"
+    "main" : "1.2.0"
   }
 }
 inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "175e704a"
 inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf0ba5fa"
 inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "cbcf045e"
 inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "879557b4"
-RESULT fail cloud.udmi.provision No provisioning request
 RESULT pass cloud.udmi.state Payload successfully validated
 RESULT fail cloud.udmi.pointset "Unrecognized field \"extraField\" (class com.google.daq.mqtt.registrar.UdmiSchema$PointsetMessage), not marked as ignorable (3 known properties: \"version\", \"points\", \"timestamp\"])\n at [Source: UNKNOWN; line: -1, column: -1] (through reference chain: com.google.daq.mqtt.registrar.UdmiSchema$PointsetMessage[\"extraField\"])"
 RESULT pass cloud.udmi.system Payload successfully validated
-RESULT pass cloud.udmi.provision Found provisioning request
 RESULT pass cloud.udmi.state Payload successfully validated
 RESULT pass cloud.udmi.pointset Payload successfully validated
 RESULT pass cloud.udmi.system Payload successfully validated
-RESULT skip cloud.udmi.provision No device id
 RESULT skip cloud.udmi.state No device id
 RESULT skip cloud.udmi.pointset No device id
 RESULT skip cloud.udmi.system No device id
