@@ -510,6 +510,7 @@ class DAQRunner:
         head = []
         body = []
         tail = []
+
         def get_test_list(test_file):
             LOGGER.info('Reading test definition file %s', test_file)
             with open(test_file) as file:
