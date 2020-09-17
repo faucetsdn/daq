@@ -18,18 +18,6 @@ RESULT skip security.tlsv1_2.client No client initiated TLS communication detect
 RESULT fail security.tlsv1_2.server Certificate is expired. Certificate has not been signed by a CA.
 RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
 RESULT fail security.tlsv1_3.server Certificate is expired. Certificate has not been signed by a CA.
-Testing nmap
-RESULT pass security.nmap.ports Only allowed ports found open.
-RESULT pass security.nmap.http No running http servers have been found.
-Testing nmap bacnet
-RESULT pass security.nmap.ports Only allowed ports found open.
-RESULT pass security.nmap.http No running http servers have been found.
-Testing nmap telnet
-RESULT fail security.nmap.ports Some disallowed ports are open: 23.
-RESULT pass security.nmap.http No running http servers have been found.
-Testing nmap ohttp
-RESULT fail security.nmap.ports Some disallowed ports are open: 443,12345,54321.
-RESULT fail security.nmap.http Some ports are running http servers: 12345,54321.
 Testing ssh
 RESULT skip security.ssh.version Device is not running an SSH server
 Testing ssh ssh
