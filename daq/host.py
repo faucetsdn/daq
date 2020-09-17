@@ -383,6 +383,8 @@ class ConnectedHost:
     def heartbeat(self):
         """Checks module run time for each event loop"""
         timeout_sec = self._get_test_timeout(self.test_name)
+        if self.test_host:
+            self.test_host.heartbeat()
         if not timeout_sec or not self.test_start:
             return
         timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)

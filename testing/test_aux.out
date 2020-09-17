@@ -114,7 +114,7 @@ port-01 module_config modules
     ],
     "enabled": false,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 900
+    "timeout_sec": 0
   },
   "manual": {
     "enabled": true
@@ -173,7 +173,7 @@ port-02 module_config modules
     ],
     "enabled": false,
     "port_flap_timeout_sec": 20,
-    "timeout_sec": 900
+    "timeout_sec": 0
   },
   "manual": {
     "enabled": true

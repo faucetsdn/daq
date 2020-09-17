@@ -7,12 +7,13 @@ echo DHCP Tests >> $TEST_RESULTS
 cat <<EOF > local/system.conf
 source config/system/default.yaml
 site_description="Multi-Device Configuration"
-switch_setup.uplink_port=6
+switch_setup.uplink_port=7
 interfaces.faux-1.opts=
 interfaces.faux-2.opts=xdhcp
 interfaces.faux-3.opts=
 interfaces.faux-4.opts=
 interfaces.faux-5.opts=
+interfaces.faux-6.opts=
 monitor_scan_sec=1
 EOF
 
@@ -62,7 +63,31 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 }
 EOF
 
+# DHCP times out in extended DHCP tests
+intf_mac="9a02571e8f06"
+mkdir -p local/site/mac_addrs/$intf_mac
+cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+{
+  "modules": {
+    "ipaddr": {
+      "enabled": true,
+      "timeout_sec": 0,
+      "port_flap_timeout_sec": 20,
+      "dhcp_ranges": []
+    }
+  }
+}
+EOF
 
+function kill_dhcp_client {
+    CONTAINER=$1
+    pid=$(docker exec $CONTAINER ps aux | grep dhclient | awk '{print $2}')
+    echo Killing dhcp client in $CONTAINER pid $pid
+    docker exec $CONTAINER kill $pid
+}
+
+# Check that killing the dhcp client on a device times out the ipaddr test.
+monitor_log "Target port 6 connect successful" "kill_dhcp_client daq-faux-6"
 cmd/run -b -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS

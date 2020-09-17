@@ -42,5 +42,8 @@ class HostModule(ABC):
     def ip_listener(self, target_ip):
         """Defaults to do nothing about ip notifications"""
 
+    def heartbeat(self):
+        """For modules that need to do periodic checks"""
+
     def __repr__(self):
         return "Target device %s test %s" % (self.device, self.test_name)
