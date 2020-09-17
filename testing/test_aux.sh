@@ -128,7 +128,7 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
-head -20 inst/gw*/nodes/gw*/activate.log
+head -50 inst/gw*/nodes/gw*/activate.log
 head -20 inst/run-*/nodes/*/activate.log
 head -20 inst/run-*/nodes/*/tmp/report.txt
 ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
