@@ -379,6 +379,7 @@ RESULT skip security.tlsv1_3.server IOException unable to connect to server.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|ca_file|CA_Faux.pem|
 
 ## Module password
 

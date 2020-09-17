@@ -140,7 +140,7 @@ port-01 module_config modules
     }
   },
   "tls": {
-    "ca_file": CA_Faux.pem",
+    "ca_file": "CA_Faux.pem",
     "enabled": true
   },
   "typeconf": {
