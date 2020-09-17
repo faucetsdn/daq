@@ -502,7 +502,7 @@ class DAQRunner:
         except Exception as e:
             self.target_set_error(device, e)
 
-    def _get_test_list(self, test_file, test_list):
+    def _get_test_list(self, test_file, test_list, pointer=0):
         no_test = self.config.get('no_test', False)
         if no_test:
             LOGGER.warning('Suppressing configured tests because no_test')
@@ -514,15 +514,23 @@ class DAQRunner:
                 cmd = re.sub(r'#.*', '', line).strip().split()
                 cmd_name = cmd[0] if cmd else None
                 argument = cmd[1] if len(cmd) > 1 else None
+                ordering = cmd[2] if len(cmd) > 2 else None
                 if cmd_name == 'add':
                     LOGGER.debug('Adding test %s from %s', argument, test_file)
-                    test_list.append(argument)
+                    if ordering == "first":
+                        test_list.prepend(argument)
+                        pointer += 1
+                    elif ordering == "last":
+                        test_list.append(argument)
+                    else:
+                        test_list.insert(pointer, argument)
+                        pointer += 1
                 elif cmd_name == 'remove':
                     if argument in test_list:
                         LOGGER.debug('Removing test %s from %s', argument, test_file)
                         test_list.remove(argument)
                 elif cmd_name == 'include':
-                    self._get_test_list(argument, test_list)
+                    self._get_test_list(argument, test_list, pointer=pointer)
                 elif cmd_name == 'build' or not cmd_name:
                     pass
                 else:
