@@ -63,8 +63,8 @@ Overall device result FAIL
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
 |pass|base.target.ping|Connectivity|Required|target reached|
-|skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
+|skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
