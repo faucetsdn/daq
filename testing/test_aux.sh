@@ -150,7 +150,7 @@ fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num 2>&1 | head -n 100
+    docker logs daq-faux-$num 2>&1 | head -n 200
 done
 echo done with docker logs
 
