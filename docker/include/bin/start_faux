@@ -222,12 +222,13 @@ elif [ -n "${options[expiredtls]}" ]; then
 fi
 
 if [ -n "${options[pubber]}" ]; then
-    extraField=`jq .extraField local/pubber.json` || true
+    extraField=`jq .extraField local/pubber.json`
     if [ "$extraField" == null ]; then
         deviceId=`jq -r .deviceId local/pubber.json`
         gateway=`ip route | sed -rn 's/default via (.*) dev.*/\1/p'`
         echo Contacting pagent $gateway for new device key for $deviceId
-        curl http://$gateway:8192?device=$deviceId > pagent.json
+        curl http://$gateway:8192?device=$deviceId > pagent.json || echo pagent error
+        echo pagent reply:
         cat pagent.json
         jq -r '."rsa_private.pem"' pagent.json > local/rsa_private.pem
         openssl pkcs8 -topk8 -inform PEM -outform DER -in local/rsa_private.pem -nocrypt > local/rsa_private.pkcs8
