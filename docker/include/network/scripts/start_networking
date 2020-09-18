@@ -48,6 +48,8 @@ service ntp start
 
 # For cloud-based provisioning tests.
 GCP_CRED_FILE=/config/inst/gcp_service_account.json
+SITE_MODEL=$PWD/test_site
+
 if [ -f /config/inst/gcp_service_account.json ]; then
     echo Activating pagent with $GCP_CRED_FILE
     (
@@ -55,8 +57,8 @@ if [ -f /config/inst/gcp_service_account.json ]; then
         gcloud auth list
         project_id=`jq -r .project_id $GCP_CRED_FILE`
         cd udmi
-        echo bin/pagent test_site $project_id
-        bin/pagent test_site $project_id
+        echo bin/pagent $SITE_MODEL $project_id
+        bin/pagent $SITE_MODEL $project_id
     ) &
 fi
 

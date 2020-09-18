@@ -111,6 +111,7 @@ for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
   fgrep -h RESULT inst/run-$mac/nodes/ping*/activate.log \
     | sed -e 's/\s*\(%%.*\)*$//' | tee -a $TEST_RESULTS
 done
+
 # Add the RESULT lines from all aux test report files.
 capture_test_results bacext
 capture_test_results macoui
