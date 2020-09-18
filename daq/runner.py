@@ -164,10 +164,11 @@ class DAQRunner:
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
-        test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
+        test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE))
         if self.config.get('keep_hold'):
             LOGGER.info('Appending test_hold to master test list')
-            test_list.append('hold')
+            if 'hold' not in test_list:
+                test_list.append('hold')
         config['test_list'] = test_list
         config['test_metadata'] = self._get_test_metadata()
         LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
@@ -502,33 +503,46 @@ class DAQRunner:
         except Exception as e:
             self.target_set_error(device, e)
 
-    def _get_test_list(self, test_file, test_list):
+    def _get_test_list(self, test_file):
         no_test = self.config.get('no_test', False)
         if no_test:
             LOGGER.warning('Suppressing configured tests because no_test')
-            return test_list
-        LOGGER.info('Reading test definition file %s', test_file)
-        with open(test_file) as file:
-            line = file.readline()
-            while line:
-                cmd = re.sub(r'#.*', '', line).strip().split()
-                cmd_name = cmd[0] if cmd else None
-                argument = cmd[1] if len(cmd) > 1 else None
-                if cmd_name == 'add':
-                    LOGGER.debug('Adding test %s from %s', argument, test_file)
-                    test_list.append(argument)
-                elif cmd_name == 'remove':
-                    if argument in test_list:
-                        LOGGER.debug('Removing test %s from %s', argument, test_file)
-                        test_list.remove(argument)
-                elif cmd_name == 'include':
-                    self._get_test_list(argument, test_list)
-                elif cmd_name == 'build' or not cmd_name:
-                    pass
-                else:
-                    LOGGER.warning('Unknown test list command %s', cmd_name)
+            return ['hold']
+        head = []
+        body = []
+        tail = []
+
+        def get_test_list(test_file):
+            LOGGER.info('Reading test definition file %s', test_file)
+            with open(test_file) as file:
                 line = file.readline()
-        return test_list
+                while line:
+                    cmd = re.sub(r'#.*', '', line).strip().split()
+                    cmd_name = cmd[0] if cmd else None
+                    argument = cmd[1] if len(cmd) > 1 else None
+                    ordering = cmd[2] if len(cmd) > 2 else None
+                    if cmd_name == 'add':
+                        LOGGER.debug('Adding test %s from %s', argument, test_file)
+                        if ordering == "first":
+                            head.append(argument)
+                        elif ordering == "last":
+                            tail.append(argument)
+                        else:
+                            body.append(argument)
+                    elif cmd_name == 'remove':
+                        LOGGER.debug('Removing test %s from %s', argument, test_file)
+                        for section in (head, body, tail):
+                            if argument in section:
+                                section.remove(argument)
+                    elif cmd_name == 'include':
+                        get_test_list(argument)
+                    elif cmd_name == 'build' or not cmd_name:
+                        pass
+                    else:
+                        LOGGER.warning('Unknown test list command %s', cmd_name)
+                    line = file.readline()
+        get_test_list(test_file)
+        return [*head, *body, *tail]
 
     def _get_test_metadata(self, extension=".daqmodule", root="."):
         metadata = {}
