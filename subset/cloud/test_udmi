@@ -63,8 +63,9 @@ echo Configured topic is $gcp_topic
 echo Target device is $device_id
 echo
 
-more /gw/nodes/*/activate.log | cat
-if fgrep "Processing provisioning request for device $device_id" /gw/nodes/*/activate.log; then
+ACTIVATE_LOG=/config/gw/nodes/gw*/activate.log
+more $ACTIVATE_LOG | cat
+if fgrep "Processing provisioning request for device $device_id" $ACTIVATE_LOG; then
     result=pass
     detail="Found provisioning request"
 else

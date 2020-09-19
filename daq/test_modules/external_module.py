@@ -100,7 +100,7 @@ class ExternalModule(HostModule):
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             dst = os.path.join(self.basedir, 'config', kind)
-            LOGGER.info('%s mapping %s to %s', self, abs_base, dst)
+            LOGGER.debug('%s mapping %s to %s', self, abs_base, dst)
             return (abs_base, dst)
         return None
 
