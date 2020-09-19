@@ -90,7 +90,7 @@ class ExternalModule(HostModule):
 
     def _get_vol_maps(self, params):
         vol_maps = [(params['scan_base'], os.path.join(self.basedir, "scans"))]
-        kinds = ('inst', 'port', 'device', 'type')
+        kinds = ('inst', 'port', 'device', 'type', 'gw')
         maps = list(map(lambda kind: self._map_if_exists(params, kind), kinds))
         vol_maps.extend(filter(lambda vol_map: vol_map, maps))
         return vol_maps
