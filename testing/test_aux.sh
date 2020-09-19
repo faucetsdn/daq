@@ -131,9 +131,11 @@ sort inst/result.log | tee -a $TEST_RESULTS
 echo TAP1
 cat inst/run-*/nodes/udmi02/activate.log
 echo TAP2
+cat inst/gw02/nodes/gw02/activate.log
+echo TAP3
 
 # Show partial logs from each test
-head -50 inst/gw*/nodes/gw*/activate.log
+head -20 inst/gw*/nodes/gw*/activate.log
 head -20 inst/run-*/nodes/*/activate.log
 head -20 inst/run-*/nodes/*/tmp/report.txt
 ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
