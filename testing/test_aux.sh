@@ -128,12 +128,6 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
      $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
-echo TAP1
-cat inst/run-*/nodes/udmi02/activate.log
-echo TAP2
-cat inst/gw02/nodes/gw02/activate.log
-echo TAP3
-
 # Show partial logs from each test
 head -20 inst/gw*/nodes/gw*/activate.log
 head -20 inst/run-*/nodes/*/activate.log
@@ -156,7 +150,7 @@ fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num 2>&1 | head -n 200
+    docker logs daq-faux-$num 2>&1 | head -n 100
 done
 echo done with docker logs
 
