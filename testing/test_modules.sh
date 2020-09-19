@@ -18,7 +18,7 @@ ssh ssh
 ssh sshv1
 EOF
 
-DAQ_TARGETS=aardvark,faux1,faux2 bin/docker_build force inline
+DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 bin/docker_build force inline
 
 mkdir -p inst/modules/tls/config
 cp resources/setups/baseline/module_config.json inst/modules/tls/config/module_config.json
