@@ -99,7 +99,6 @@ function message_report {
                      "$skip" "$RESULT_AND_SUMMARY"
 }
 
-
 for message_type in $message_types; do
     message_report $message_type
 done
