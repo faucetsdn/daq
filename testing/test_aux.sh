@@ -128,6 +128,10 @@ echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
      $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
+echo TAP1
+cat inst/run-*/nodes/udmi02/activate.log
+echo TAP2
+
 # Show partial logs from each test
 head -50 inst/gw*/nodes/gw*/activate.log
 head -20 inst/run-*/nodes/*/activate.log
