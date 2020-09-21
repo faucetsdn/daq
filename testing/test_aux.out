@@ -126,8 +126,7 @@ port-01 module_config modules
       }
     ],
     "enabled": true,
-    "port_flap_timeout_sec": 20,
-    "timeout_sec": 0
+    "port_flap_timeout_sec": 20
   },
   "manual": {
     "enabled": true

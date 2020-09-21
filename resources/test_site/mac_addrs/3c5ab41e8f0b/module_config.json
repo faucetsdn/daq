@@ -4,9 +4,6 @@
   "modules": {
     "hold": {
       "enabled": true
-    },
-    "ipaddr": {
-      "timeout_sec": 1
     }
   }
 }

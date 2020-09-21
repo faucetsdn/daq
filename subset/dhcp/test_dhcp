@@ -1,7 +1,0 @@
-#!/bin/bash -e
-source reporting.sh
-REPORT=/tmp/report.txt
-
-python dhcp_tests.py connection.network.dhcp_short
-
-cat report.txt >> $REPORT
