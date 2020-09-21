@@ -1,7 +1,7 @@
 {
   "modules": {
     "ipaddr": {
-      "enabled": false,
+      "enabled": true,
       "timeout_sec": 0,
       "port_flap_timeout_sec": 20,
       "dhcp_ranges": [

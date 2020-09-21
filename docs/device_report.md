@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|7|2|22|1|2|
+|Other|7|2|20|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -623,7 +623,7 @@ RESULT pass connection.network.dhcp_short DHCP request received.
 |Attribute|Value|
 |---|---|
 |enabled|True|
-|timeout_sec|900|
+|timeout_sec|0|
 |port_flap_timeout_sec|20|
 |dhcp_ranges|[{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 16}]|
 
