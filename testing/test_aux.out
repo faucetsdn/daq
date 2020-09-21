@@ -98,9 +98,6 @@ port-01 module_config modules
   "brute": {
     "enabled": true
   },
-  "dhcp": {
-    "enabled": true
-  },
   "discover": {
     "enabled": true
   },
@@ -171,9 +168,6 @@ port-02 module_config modules
     "enabled": true
   },
   "brute": {
-    "enabled": true
-  },
-  "dhcp": {
     "enabled": true
   },
   "hold": {
