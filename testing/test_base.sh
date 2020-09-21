@@ -62,6 +62,10 @@ echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
 cp config/system/muddy.conf local/system.conf
 
+if [ -z `which tcpdump` ]; then
+    export PATH=/usr/sbin:$PATH
+fi
+
 device_traffic="tcpdump -en -r inst/run-9a02571e8f01/scans/monitor.pcap port 47808"
 device_bcast="$device_traffic and ether broadcast"
 device_ucast="$device_traffic and ether dst 9a:02:57:1e:8f:02"

@@ -25,12 +25,14 @@ message PowerResponse {
   POESupport.State poe_support = 3;
   POEStatus.State poe_status = 4;
   POENegotiation.State poe_negotiation = 5;
+  string raw_output = 6;
 }
 
 message InterfaceResponse {
   LinkStatus.State link_status = 1;
   int32 link_speed = 2;
   string duplex = 3;
+  string raw_output = 4;
 }
 
 enum SwitchModel {

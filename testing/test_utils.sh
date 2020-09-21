@@ -46,14 +46,14 @@ function check_setup {
     cat >> $cmd_file <<EOF
 sleep 30
 function test_bacnet {
-    bacnet_base="tcpdump -en -r /scans/test_ping.pcap port 47808"
+    bacnet_base="tcpdump -en -r \$TEST_ROOT/scans/test_ping.pcap port 47808"
     echo \$((\$(\$bacnet_base and \$@ | wc -l ) > 0))
 }
 function test_tcp {
     src_mac=$MAC_BASE:$(printf %02x $src_dev)
     dst_mac=$MAC_BASE:\$(printf %02x \$1)
     # Check for TCP ACKs, since that means the network is allowing it.
-    tcp_base="tcpdump -en -r /scans/test_ping.pcap tcp and ether dst \$src_mac"
+    tcp_base="tcpdump -en -r \$TEST_ROOT/scans/test_ping.pcap tcp and ether dst \$src_mac"
     filter="ether src \$dst_mac and src port \$2"
     echo \$((\$(\$tcp_base and \$filter | wc -l ) > 0))
 }
@@ -120,8 +120,8 @@ function run_test {
         test -d $conf_dir || (mkdir -p $conf_dir; echo sleep 30 >> $cmd_file)
     done
     cmd/run -s
-    cat inst/run-*/nodes/ping*${socket_file} | tee -a $TEST_RESULTS
-    cat inst/run-*/nodes/ping*${bacnet_file} | tee -a $TEST_RESULTS
+    cat inst/run-*/nodes/ping*/tmp/$(basename $socket_file) | tee -a $TEST_RESULTS
+    cat inst/run-*/nodes/ping*/tmp/$(basename $bacnet_file) | tee -a $TEST_RESULTS
     more inst/run-*/nodes/ping*/activate.log | cat
     more inst/gw0*/nodes/gw0*/activate.log | cat
     more inst/gw0*/dhcp_monitor.txt | cat

@@ -1,8 +1,8 @@
 {
   "modules": {
     "ipaddr": {
-      "enabled": true,
-      "timeout_sec": 900,
+      "enabled": false,
+      "timeout_sec": 0,
       "port_flap_timeout_sec": 20,
       "dhcp_ranges": [{"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16}]
     },
@@ -27,7 +27,8 @@
       "enabled": true
     },
     "tls": {
-      "enabled": true
+      "enabled": true,
+      "ca_file": "CA_Faux.pem"
     },
     "udmi": {
       "enabled": true
