@@ -4,7 +4,9 @@
       "enabled": false,
       "timeout_sec": 0,
       "port_flap_timeout_sec": 20,
-      "dhcp_ranges": [{"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16}]
+      "dhcp_ranges": [
+        {"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16}
+      ]
     },
     "pass": {
       "enabled": true
