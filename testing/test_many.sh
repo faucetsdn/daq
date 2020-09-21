@@ -36,9 +36,9 @@ for iface in $(seq 1 $NUM_DEVICES); do
     {
         "static_ip": "$ip",
         "modules": {
-          "ipaddr": {
-            "enabled": false
-          }
+            "ipaddr": {
+              "enabled": false
+            }
         }
     }
 EOF

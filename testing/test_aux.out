@@ -50,6 +50,8 @@ RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
 RESULT pass security.passwords.telnet Was not able to brute force using dictionary.
 RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
+RESULT pass connection.network.dhcp_short DHCP request received.
+RESULT fail connection.network.dhcp_short No DHCP request received.
 RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
 RESULT pass connection.network.ntp_support Using NTPv4.
@@ -96,6 +98,9 @@ port-01 module_config modules
   "brute": {
     "enabled": true
   },
+  "dhcp": {
+    "enabled": true
+  },
   "discover": {
     "enabled": true
   },
@@ -108,6 +113,16 @@ port-01 module_config modules
         "end": "192.168.255.254",
         "prefix_length": 16,
         "start": "192.168.0.1"
+      },
+      {
+        "end": "10.255.255.254",
+        "prefix_length": 8,
+        "start": "10.0.0.1"
+      },
+      {
+        "end": "172.31.255.254",
+        "prefix_length": 12,
+        "start": "172.16.0.1"
       }
     ],
     "enabled": true,
@@ -159,6 +174,9 @@ port-02 module_config modules
   "brute": {
     "enabled": true
   },
+  "dhcp": {
+    "enabled": true
+  },
   "hold": {
     "enabled": true
   },
@@ -168,6 +186,16 @@ port-02 module_config modules
         "end": "192.168.255.254",
         "prefix_length": 16,
         "start": "192.168.0.1"
+      },
+      {
+        "end": "10.255.255.254",
+        "prefix_length": 8,
+        "start": "10.0.0.1"
+      },
+      {
+        "end": "172.31.255.254",
+        "prefix_length": 12,
+        "start": "172.16.0.1"
       }
     ],
     "enabled": true,

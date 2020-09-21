@@ -8,6 +8,9 @@
         {"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16}
       ]
     },
+    "dhcp": {
+      "enabled": true
+    },
     "pass": {
       "enabled": true
     },
