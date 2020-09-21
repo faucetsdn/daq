@@ -110,14 +110,14 @@ port-01 module_config modules
   "ipaddr": {
     "dhcp_ranges": [
       {
-        "end": "192.168.255.254",
-        "prefix_length": 16,
-        "start": "192.168.0.1"
-      },
-      {
         "end": "10.255.255.254",
         "prefix_length": 8,
         "start": "10.0.0.1"
+      },
+      {
+        "end": "192.168.255.254",
+        "prefix_length": 16,
+        "start": "192.168.0.1"
       },
       {
         "end": "172.31.255.254",
@@ -182,14 +182,14 @@ port-02 module_config modules
   "ipaddr": {
     "dhcp_ranges": [
       {
-        "end": "192.168.255.254",
-        "prefix_length": 16,
-        "start": "192.168.0.1"
-      },
-      {
         "end": "10.255.255.254",
         "prefix_length": 8,
         "start": "10.0.0.1"
+      },
+      {
+        "end": "192.168.255.254",
+        "prefix_length": 16,
+        "start": "192.168.0.1"
       },
       {
         "end": "172.31.255.254",
