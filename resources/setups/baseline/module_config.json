@@ -6,11 +6,8 @@
       "dhcp_ranges": [
         {"start": "10.0.0.1", "end": "10.255.255.254", "prefix_length": 8},
         {"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16},
-        {"start": "172.16.0.1", "end": "172.31.255.254", "prefix_length": 12},
+        {"start": "172.16.0.1", "end": "172.31.255.254", "prefix_length": 12}
       ]
-    },
-    "dhcp": {
-      "enabled": true
     },
     "pass": {
       "enabled": true

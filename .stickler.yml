@@ -7,7 +7,7 @@ linters:
     python: 3
     max-line-length: 100
   py3k:
-    ignore: E1601
+    ignore: E1601, F821
   checkstyle:
     config: ./.checkstyle.xml
 files:

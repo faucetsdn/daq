@@ -29,16 +29,14 @@ def main():
                 if after is None:
                     return packet
                 if packet.time > after:
-                     return packet
+                    return packet
         return None
-
 
     def _get_dhcp_option(packet, option):
         for opt in packet[DHCP].options:
             if opt[0] == option:
                 return opt[1]
         return None
-
 
     def _test_dhcp_short():
         fd = open(ipaddr_log, 'r')
@@ -57,8 +55,7 @@ def main():
 
     if TEST_REQUEST == 'connection.network.dhcp_short':
         result, summary = _test_dhcp_short()
-        _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_short,
-                                               s=summary))
+        _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_short))
 
     _write_report("RESULT {r} {t} {s}\n".format(r=result, t=TEST_REQUEST, s=summary))
 
