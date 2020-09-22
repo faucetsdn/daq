@@ -2,6 +2,7 @@ import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.bouncycastle.openssl.PEMWriter;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -508,10 +509,9 @@ public class Server {
   private SSLSocket makeSSLSocket(String host, int port, String protocol)
       throws NoSuchAlgorithmException, KeyManagementException, IOException {
     SSLSocketFactory factory = makeSSLFactory(trustAllManager(), protocol);
-
-    SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
+    SSLSocket socket = (SSLSocket)factory.createSocket();
+    socket.connect(new InetSocketAddress(host, port), 10000);
     socket.setEnabledProtocols(new String[] {protocol});
-    //socket.setEnabledCipherSuites(getSupportedCiphers());
     return socket;
   }
 
