@@ -7,7 +7,7 @@ Running testing/test_aux.sh
     "SNS-4" : "True"
   },
   "Version" : {
-    "main" : "1.1.0"
+    "main" : "1.2.0"
   }
 }
 inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "175e704a"
