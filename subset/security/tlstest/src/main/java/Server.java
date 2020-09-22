@@ -18,6 +18,7 @@ public class Server {
   private final int port;
   private final String tlsVersion;
   private final String caFile;
+  private static final int CONNECT_TIMEOUT_MS = 10000;
 
   private CertificateStatus serverCertStatus = CertificateStatus.CERTIFICATE_INVALID;
   private KeyLengthStatus serverKeyLengthStatus = KeyLengthStatus.PUBLIC_KEY_INVALID_LENGTH;
@@ -510,7 +511,7 @@ public class Server {
       throws NoSuchAlgorithmException, KeyManagementException, IOException {
     SSLSocketFactory factory = makeSSLFactory(trustAllManager(), protocol);
     SSLSocket socket = (SSLSocket)factory.createSocket();
-    socket.connect(new InetSocketAddress(host, port), 10000);
+    socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT_MS);
     socket.setEnabledProtocols(new String[] {protocol});
     return socket;
   }
