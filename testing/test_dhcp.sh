@@ -26,7 +26,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 {
   "modules": {
     "ipaddr": {
-      "timeout_sec": 320,
+      "timeout_sec": 900,
       "dhcp_mode": "long_response"
     }
   }
