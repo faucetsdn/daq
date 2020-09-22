@@ -23,7 +23,7 @@ LEASE_TIME_UNITS_CONVERTER = {
 
 class IpAddrModule(HostModule):
     """Module for inline ipaddr tests"""
-    _TIMEOUT_EXCEPTION = TimeoutError('DHCP Timeout expired')
+    _TIMEOUT_EXCEPTION = TimeoutError('DHCP analysis step timeout expired')
 
     def __init__(self, host, tmpdir, test_name, module_config):
         super().__init__(host, tmpdir, test_name, module_config)
@@ -130,6 +130,10 @@ class IpAddrModule(HostModule):
 
     def heartbeat(self):
         if self._timeout and datetime.now() >= self._timeout:
-            self._logger.error('DHCP times out after %ds lease time.' % self._lease_time_seconds)
-            self.terminate()
-            self.callback(exception=self._TIMEOUT_EXCEPTION)
+            if self.docker_host.start_time:
+                self.terminate()
+                self.callback(exception=self._TIMEOUT_EXCEPTION)
+            else:
+                self._logger.error('DHCP times out after %ds lease time' % self._lease_time_seconds)
+                self.tests = self.tests[-1:]
+                self._next_test()
