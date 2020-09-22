@@ -623,6 +623,7 @@ RESULT pass connection.network.dhcp_short DHCP request received.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|timeout_sec|0|
 |port_flap_timeout_sec|20|
 |dhcp_ranges|[{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 16},{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 12},{'start': 'X.X.X.X', 'end': 'X.X.X.X', 'prefix_length': 8}]|
 
