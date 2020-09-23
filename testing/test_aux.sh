@@ -67,7 +67,7 @@ interfaces:
   faux-1:
     opts: brute broadcast_client ntpv4
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl xdhcp=10.20.0.7
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl
 long_dhcp_response_sec: 0
@@ -118,7 +118,6 @@ capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
-capture_test_results ipaddr
 
 # Capture peripheral logs
 more inst/run-*/scans/ip_triggers.txt | cat
