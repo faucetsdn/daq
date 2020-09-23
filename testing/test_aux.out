@@ -69,9 +69,10 @@ RESULT skip connection.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 RESULT pass connection.dns.hostname_connect Device sends DNS requests and resolves host names
 RESULT pass connection.network.dhcp_short DHCP request received.
+RESULT fail connection.network.dhcp_short No DHCP request received.
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
-3c5ab41e8f0b: ['3c5ab41e8f0b:ipaddr:TimeoutError', '3c5ab41e8f0b:ping:TimeoutError']
+3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']
 9a02571e8f01: []
 arp.txt
 dp_port_acls.yaml
