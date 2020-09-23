@@ -62,7 +62,9 @@ class Gateway():
         # Work around an instability in the faucet/clib/docker library, b/152520627.
         if getattr(cls, 'pullImage'):
             setattr(cls, 'pullImage', lambda x: True)
-        host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
+        vol_maps = [os.path.abspath('inst/config') + ':/config/inst']
+        host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir,
+                                    vol_maps=vol_maps)
         host.activate()
         self.host = host
         self._change_lease_time(self.runner.config.get('initial_dhcp_lease_time'))
@@ -104,6 +106,10 @@ class Gateway():
         self._change_lease_time(self.runner.config.get("dhcp_lease_time"))
         self.activated = True
         self._scan_finalize()
+
+    def get_base_dir(self):
+        """Return the gateways base directory for instance files"""
+        return os.path.abspath(self.tmpdir)
 
     def _change_lease_time(self, lease_time):
         LOGGER.info('Gateway %s change lease time to %s', self.port_set, lease_time)

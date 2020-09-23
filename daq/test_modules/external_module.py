@@ -11,7 +11,7 @@ import wrappers
 from .base_module import HostModule
 
 
-LOGGER = logger.get_logger('external_module')
+LOGGER = logger.get_logger('exmodule')
 
 
 class ExternalModule(HostModule):
@@ -90,7 +90,7 @@ class ExternalModule(HostModule):
 
     def _get_vol_maps(self, params):
         vol_maps = [(params['scan_base'], os.path.join(self.basedir, "scans"))]
-        kinds = ('inst', 'port', 'device', 'type')
+        kinds = ('inst', 'port', 'device', 'type', 'gw')
         maps = list(map(lambda kind: self._map_if_exists(params, kind), kinds))
         vol_maps.extend(filter(lambda vol_map: vol_map, maps))
         return vol_maps
@@ -100,7 +100,7 @@ class ExternalModule(HostModule):
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             dst = os.path.join(self.basedir, 'config', kind)
-            LOGGER.info('%s mapping %s to %s', self, abs_base, dst)
+            LOGGER.debug('%s mapping %s to %s', self, abs_base, dst)
             return (abs_base, dst)
         return None
 

@@ -209,7 +209,7 @@ class ReportGenerator:
         self._write_test_tables()
 
     def _accumulate_result(self, test_name, result, extra='', module_name=None):
-        assert test_name not in self._results, 'result already exists'
+        assert test_name not in self._results, 'result already exists: ' % test_name
 
         if result not in self._result_headers:
             self._result_headers.append(result)
