@@ -7,7 +7,7 @@ NUM_DEVICES=9
 RUN_LIMIT=20
 # num of timeout devices need to be less or equal to num dhcp devices
 NUM_NO_DHCP_DEVICES=4
-NUM_TIMEOUT_DEVICES=1
+NUM_TIMEOUT_DEVICES=2
 
 # Extended DHCP tests
 NUM_IPADDR_TEST_DEVICES=1
@@ -21,7 +21,6 @@ echo monitor_scan_sec=5 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
 echo gcp_cred=$gcp_cred >> local/system.conf
 echo dhcp_lease_time=120s >> local/system.conf
-echo host_tests=config/modules/many.conf >> local/system.conf
 
 for iface in $(seq 1 $NUM_DEVICES); do
     xdhcp=""
@@ -34,12 +33,7 @@ for iface in $(seq 1 $NUM_DEVICES); do
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
     {
-        "static_ip": "$ip",
-        "modules": {
-            "ipaddr": {
-              "enabled": false
-            }
-        }
+        "static_ip": "$ip"
     }
 EOF
         else

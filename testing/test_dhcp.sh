@@ -17,8 +17,6 @@ interfaces.faux-6.opts=
 monitor_scan_sec=1
 EOF
 
-echo host_tests=config/modules/dhcp.conf >> local/system.conf
-
 intf_mac="9a02571e8f03"
 rm -rf local/site
 mkdir -p local/site/mac_addrs/$intf_mac
@@ -26,7 +24,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 {
   "modules": {
     "ipaddr": {
-      "timeout_sec": 900,
+      "timeout_sec": 320,
       "dhcp_mode": "long_response"
     }
   }

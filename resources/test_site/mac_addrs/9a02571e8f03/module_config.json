@@ -1,7 +1,0 @@
-{
-  "modules": {
-    "ipaddr": {
-      "enabled": false
-    }
-  }
-}

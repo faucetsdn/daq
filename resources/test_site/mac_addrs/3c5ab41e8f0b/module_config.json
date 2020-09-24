@@ -1,6 +1,5 @@
 {
   "device_id": "AHU-1",
-  "static_ip": "10.20.0.7",
   "modules": {
     "hold": {
       "enabled": true

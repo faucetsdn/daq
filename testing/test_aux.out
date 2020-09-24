@@ -5,7 +5,7 @@ RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached
 RESULT pass base.startup.ntp Correct NTP server address
 RESULT skip base.startup.dns No dns traffic detected
-RESULT skip base.startup.dhcp Using static ip 10.20.0.7
+RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass base.target.ping target reached
 RESULT fail base.startup.ntp Invalid NTP server address
