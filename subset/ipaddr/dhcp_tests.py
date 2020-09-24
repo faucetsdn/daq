@@ -18,7 +18,6 @@ def main():
     description_dhcp_short = 'Reconnect device and check for DHCP request.'
     description_private_address = 'Device supports all private address ranges.'
     running_port_toggle = 'Running dhcp port_toggle test'
-    running_multi_subnet = 'Running dhcp multi_subnet test'
     ip_notification = 'ip notification'
     result = None
     summary = None
