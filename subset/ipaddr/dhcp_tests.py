@@ -13,6 +13,7 @@ def main():
     description_dhcp_short = 'Reconnect device and check for DHCP request.'
     description_dhcp_long = 'Wait for lease expiry and check for DHCP request.'
     running_port_toggle = 'Running dhcp port_toggle test'
+    running_dhcp_long = 'Running dhcp long_wait test'
     ip_notification = 'ip notification'
     result = None
     summary = None
@@ -51,11 +52,28 @@ def main():
         fd.close()
         return 'fail', 'No DHCP request received.'
 
+    def _test_dhcp_long():
+        fd = open(ipaddr_log, 'r')
+        run_dhcp_long = False
+        for line in fd:
+            if run_dhcp_long:
+                if ip_notification in line:
+                    fd.close()
+                    return 'pass', 'DHCP request received after lease expiry.'
+            if running_dhcp_long in line:
+                run_dhcp_long = True
+        fd.close()
+        return 'fail', 'No DHCP request received after lease expiry.'
+
     _write_report("{b}{t}\n{b}".format(b=dash_break_line, t=TEST_REQUEST))
 
     if TEST_REQUEST == 'connection.network.dhcp_short':
         result, summary = _test_dhcp_short()
         _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_short))
+    elif TEST_REQUEST == 'connection.network.dhcp_long':
+        result, summary = _test_dhcp_long()
+        _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_long))
+    
 
     _write_report("RESULT {r} {t} {s}\n".format(r=result, t=TEST_REQUEST, s=summary))
 

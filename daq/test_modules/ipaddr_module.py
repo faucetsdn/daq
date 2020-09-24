@@ -33,6 +33,7 @@ class IpAddrModule(HostModule):
         self._lease_time_seconds = self._get_lease_time()
         self.tests = [
             ('dhcp port_toggle test', self._dhcp_port_toggle_test),
+            ('dhcp long_wait test', self._dhcp_long_wait_test),
             ('dhcp multi subnet test', self._multi_subnet_test),
             ('ip change test', self._ip_change_test),
             ('analyze results', self._analyze)
@@ -82,6 +83,15 @@ class IpAddrModule(HostModule):
             self._logger('disconnect port not enabled')
             return
         time.sleep(self.host.config.get("port_debounce_sec", 0) + 1)
+        self.host.connect_port(True)
+        self._ip_callback = self._next_test
+
+    def _dhcp_long_wait_test(self):
+        self._set_timeout()
+        if not self.host.connect_port(False):
+            self._logger('disconnect port not enabled')
+            return
+        time.sleep(self._get_lease_time())
         self.host.connect_port(True)
         self._ip_callback = self._next_test
 
