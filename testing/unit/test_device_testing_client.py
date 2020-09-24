@@ -1,7 +1,9 @@
 """Unit tests for device testing client"""
 
-import grpc
+import time
 import unittest
+
+import grpc
 
 from forch.device_testing_server import DeviceTestingServer
 
@@ -20,7 +22,7 @@ class DeviceTestingClientTestBase(unittest.TestCase):
         self._client = None
 
     def setUp(self):
-        """setup fixture for each test method"""
+        """Setup fixture for each test method"""
         channel = grpc.insecure_channel(f'{self._SERVER_ADDRESS}:{self._SERVER_PORT}')
         self._client = DeviceTestingClient(channel)
 
@@ -29,7 +31,7 @@ class DeviceTestingClientTestBase(unittest.TestCase):
         self._server.start()
 
     def tearDown(self):
-        """cleanup after each test method finishes"""
+        """Cleanup after each test method finishes"""
         self._server.stop()
 
 
@@ -57,4 +59,5 @@ class DeviceTestingClientBasicTestCase(DeviceTestingClientTestBase):
             print('Sending device testing state: %s', testing_state)
             self._client.send_testing_result(testing_state[0], testing_state[1])
 
+        time.sleep(2)
         self.assertEqual(self._received_states, expected_testing_states)
