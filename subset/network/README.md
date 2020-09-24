@@ -65,3 +65,12 @@ static resource on the source code repo.
 ### Conditions for mac_oui
  - pass -> if the MAC OUI matches the mac prefix IEEE registration.
  - fail -> if the MAC OUI does not match with any of the mac prefixes.
+
+
+## DNS Tests
+Check Device uses the DNS server from DHCP and resolves hostnames
+
+### Conditions for connection.dns.hostname_connect
+ - pass -> if the device uses the DNS server from DHCP, and resolves a hostname
+ - fail -> device uses a DNS serveer other than the server fron DHCP
+ - skip -> device did not send any DNS requests

@@ -56,14 +56,33 @@ docker_args+=" -v $module_dir/scans:/scans"
 echo Capturing fake startup.pcap...
 sudo tcpdump -c 3 -eni $faux_intf -Z root -w $module_dir/scans/startup.pcap || true
 
+echo Staring module pcap... 
+sudo tcpdump -U -eni $faux_intf -Z root -w $module_dir/scans/test_$module.pcap &
+pid=$1
+sleep 5
+echo Module pcap started
+
 docker_args+=" --env TARGET_IP=$faux_ip"
 docker_args+=" --env TARGET_MAC=01:02:03:04:05:06"
+
 
 mkdir -p $config_dir
 docker_args+=" -v $config_dir:/config/inst"
 docker_args+=" -v $config_dir:/config/port"
 docker_args+=" -v $config_dir:/config/device"
 docker_args+=" -v $config_dir:/config/type"
+
+# If testing the tls module, we need a few
+# additional things setup
+if [[ "$module" == "tls" ]]; then
+  #CA file is neededto validate the certs properly so we need to
+  #extract it from the faux device
+  CA_FILE=$(docker exec daq-$faux_intf cat ./tlsfaux/certs/CA_Faux.pem)
+
+  #Write the contents of the CA file to the module_config location which
+  #will be mounted later for reference within test module
+  echo "$CA_FILE" > $config_dir/CA_Faux.pem
+fi
 
 docker rm -f $container || true
 cid=$(
@@ -101,6 +120,13 @@ if [ -n "$failed" ]; then
     echo Module execution failed.
     false
 fi
+
+#now interrupt the process.  get its PID:
+echo Stopping module pcap...
+echo $pid  
+#interrupt it:  
+sudo kill -2 $pid
+echo Module pcap stopped
 
 echo Killed containers `docker kill $container` `docker kill daq-faux-$module`
 echo

@@ -1,21 +1,21 @@
 #!/bin/bash -e
-source reporting.sh
+source $TEST_ROOT/reporting.sh
 
-RESULT_LINES=/tmp/result_lines.txt
-MONO_LOG=/tmp/mono-log.txt
-MANIFEST=./module_manifest.json
-REPORT_FILE=/tmp/report.txt
-MODULE_CONFIG=/config/device/module_config.json
+RESULT_LINES=$TEST_ROOT/tmp/result_lines.txt
+MONO_LOG=$TEST_ROOT/tmp/mono-log.txt
+REPORT_FILE=$TEST_ROOT/tmp/report.txt
+MODULE_CONFIG=$TEST_ROOT/config/device/module_config.json
+MANIFEST=$TEST_ROOT/module_manifest.json
 status=pass
 
 echo Baseline ping test report | tee -a $MONO_LOG
 # This is a check that the startup.pcap file exists and is proper.
-tcpdump -en -r /scans/startup.pcap ip
+tcpdump -en -r $TEST_ROOT/scans/startup.pcap ip
 
-echo %% $(tcpdump -n -r /scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
+echo %% $(tcpdump -n -r $TEST_ROOT/scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo
 
-STATIC_IP=`jq -r .static_ip /config/device/module_config.json`
+STATIC_IP=`jq -r .static_ip $MODULE_CONFIG`
 if [ "$STATIC_IP" == null ]; then
     STATIC_IP=
 fi
@@ -26,8 +26,8 @@ else
     req=pass
     ack=pass
     echo
-    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
-    tcpdump -ven -r /scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
+    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
+    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
     if [ $req = "fail" ] || [ $ack = "fail" ]; then
         status=fail
         echo RESULT fail base.startup.dhcp missing dhcp packets| tee -a $RESULT_LINES
@@ -46,12 +46,7 @@ if [ -n "$LOCAL_IP" ]; then
     LOCAL_ONLY=${LOCAL_IP%/*}
     LOCAL_INDEX=${LOCAL_ONLY##*.}
     echo Using IP index $LOCAL_INDEX
-    LOCAL_MAC=ca:50:20:b1:4f:$(printf %02x $LOCAL_INDEX)
-    echo Using local MAC address $LOCAL_MAC
-
-    LOCAL_IFACE=`hostname`-eth0
-    ip link set dev $LOCAL_IFACE addr $LOCAL_MAC
-    ip addr add $LOCAL_IP dev $LOCAL_IFACE
+    ip addr add $LOCAL_IP dev lo
 
     ping -n -c 2 $SWITCH_IP || true
 
@@ -88,8 +83,8 @@ echo Done with basic connectivity tests | tee -a $MONO_LOG
 
 echo Checking startup NTP
 ntp_target=${TARGET_IP%.*}.2
-ntp_request=`tcpdump -env -c 1 -r /scans/monitor.pcap dst port 123 | wc -l`
-ntp_proper=`tcpdump -env -c 1 -r /scans/monitor.pcap dst port 123 and dst host $ntp_target | wc -l`
+ntp_request=`tcpdump -env -c 1 -r $TEST_ROOT/scans/monitor.pcap dst port 123 | wc -l`
+ntp_proper=`tcpdump -env -c 1 -r $TEST_ROOT/scans/monitor.pcap dst port 123 and dst host $ntp_target | wc -l`
 if [ "$ntp_request" == 0 ]; then
     ntp_result=skip
     ntp_summary="No NTP traffic detected"
@@ -104,8 +99,8 @@ echo RESULT $ntp_result base.startup.ntp $ntp_summary %% NTP server $ntp_target 
 
 echo Checking startup DNS activity...
 dns_target=${TARGET_IP%.*}.2
-dns_request=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 | wc -l`
-dns_proper=`tcpdump -env -c 1 -r /scans/startup.pcap dst port 53 and dst host $dns_target | wc -l`
+dns_request=`tcpdump -env -c 1 -r $TEST_ROOT/scans/startup.pcap dst port 53 | wc -l`
+dns_proper=`tcpdump -env -c 1 -r $TEST_ROOT/scans/startup.pcap dst port 53 and dst host $dns_target | wc -l`
 if [ "$dns_request" == 0 ]; then
     dns_result=skip
     dns_summary="No dns traffic detected"
@@ -125,10 +120,10 @@ write_out_monolog $REPORT_FILE \
                   $RESULT_LINES
 
 
-ping_runtime=/config/port/ping_runtime.sh
+ping_runtime=$TEST_ROOT/config/port/ping_runtime.sh
 if [ -f $ping_runtime ]; then
     echo Executing $ping_runtime
-    source $ping_runtime
+    TEST_ROOT=$TEST_ROOT source $ping_runtime
 else
     echo $ping_runtime not found.
 fi

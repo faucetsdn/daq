@@ -67,9 +67,9 @@ interfaces:
   faux-1:
     opts: brute broadcast_client ntpv4
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh xdhcp=10.20.0.7
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl
 long_dhcp_response_sec: 0
 monitor_scan_sec: 20
 EOF
@@ -117,16 +117,14 @@ capture_test_results macoui
 capture_test_results tls
 capture_test_results password
 capture_test_results discover
-capture_test_results dhcp
-capture_test_results networ
-capture_test_results ntp
+capture_test_results network
 
 # Capture peripheral logs
 more inst/run-*/scans/ip_triggers.txt | cat
 dhcp_done=$(fgrep done inst/run-9a02571e8f01/scans/ip_triggers.txt | wc -l)
 dhcp_long=$(fgrep long inst/run-9a02571e8f01/scans/ip_triggers.txt | wc -l)
 echo dhcp requests $((dhcp_done > 1)) $((dhcp_done < 3)) \
-     $((dhcp_long >= 1)) $((dhcp_long < 12)) | tee -a $TEST_RESULTS
+     $((dhcp_long >= 1)) $((dhcp_long < 4)) | tee -a $TEST_RESULTS
 sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test

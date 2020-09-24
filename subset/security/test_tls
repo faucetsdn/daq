@@ -5,12 +5,25 @@ LOCAL_REPORT=tmp/report.txt
 
 RESULT_LINES=/tmp/result_lines.txt
 MONO_LOG=/tmp/mono-log.txt
-MANIFEST=./module_manifest.json
+DEVICE_CONFIG=/config/device/
+MANIFEST=./tls.module_manifest.json
+MODULE_CONFIG=/config/device/module_config.json
 
 if [ -n "$TARGET_IP" ]; then
     echo Collecting TLS cert from target address %% $TARGET_IP > $MONO_LOG
 
-    java -jar tlstest/build/libs/tlstest.jar $TARGET_IP
+    export CA_FILE="None"
+    if [ -f "$MODULE_CONFIG" ]; then
+      echo "Module Config present"
+      CA_FILE=`jq -r .modules.tls.ca_file $MODULE_CONFIG`
+    elif [ -f "$DEVICE_CONFIG/CA_Faux.pem" ]; then
+      echo "CA Faux found"
+      #Module test won't have a module_config file but injects the CA file
+      #directly where it should be
+      CA_FILE="CA_Faux.pem"
+    fi
+
+    java -jar tlstest/build/libs/tlstest.jar $TARGET_IP $CA_FILE
 
     grep "RESULT" $LOCAL_REPORT | tee -a $RESULT_LINES
     grep -v "RESULT" $LOCAL_REPORT | tee -a $MONO_LOG
@@ -30,3 +43,4 @@ else
                       $RESULT_LINES
 
 fi
+

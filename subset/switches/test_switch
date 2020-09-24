@@ -2,7 +2,7 @@
 source reporting.sh
 REPORT=/tmp/report.txt
 LOCAL_REPORT=tmp/report.txt
-MANIFEST=./module_manifest.json
+MANIFEST=./switches/module_manifest.json
 MONO_LOG=/tmp/monolog.switch.txt
 RESULT_LINES=/tmp/results.switch.txt
 MODULE_CONFIG=/config/device/module_config.json
@@ -63,21 +63,9 @@ else
                      "RESULT $RESULT connection.port_duplex $SUMMARY"
 
     write_out_result $REPORT \
-                     "poe.power" \
-                     "$(jq -r '.["poe.power"].description' $MANIFEST)" \
+                     "poe.switch.power" \
+                     "$(jq -r '.["poe.switch.power"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
-                     "RESULT $RESULT poe.power $SUMMARY"
-
-    write_out_result $REPORT \
-                     "poe.negotiation" \
-                     "$(jq -r '.["poe.negotiation"].description' $MANIFEST)" \
-                     "$SKIP_REASON" \
-                     "RESULT $RESULT poe.negotiation $SUMMARY"
-
-    write_out_result $REPORT \
-                     "poe.support" \
-                     "$(jq -r '.["poe.support"].description' $MANIFEST)" \
-                     "$SKIP_REASON" \
-                     "RESULT $RESULT poe.support $SUMMARY"
+                     "RESULT $RESULT poe.switch.power $SUMMARY"
 
 fi

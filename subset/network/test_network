@@ -20,3 +20,7 @@ cat ntp_tests.txt >> $REPORT
 # MACOUI Test
 ./run_macoui_test $TARGET_MAC $REPORT
 
+# DNS Tests
+python dns_tests.py connection.dns.hostname_connect $MONITOR $TARGET_IP
+
+cat dns_tests.txt >> $REPORT
