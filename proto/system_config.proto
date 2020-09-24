@@ -123,6 +123,9 @@ message DaqConfig {
 
   // verbose output
   bool debug_mode = 51;
+
+  // Drop into console mode after test
+  bool use_console = 52;
 }
 
 enum RunTriggerType {

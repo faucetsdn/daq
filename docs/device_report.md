@@ -13,7 +13,7 @@
 |------------------|------------------------|
 | Test report start date | XXX |
 | Test report end date   | XXX |
-| 
+|
 | Attempt number   | 1 |
 
 ## Device Identification
@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|9|2|22|1|2|
+|Other|6|2|20|1|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -67,20 +67,16 @@ Overall device result FAIL
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
-|pass|connection.dhcp.private_address|Other|Other|All private address ranges are supported.|
+|skip|connection.dns.hostname_connect|Other|Other|Device did not send any DNS requests|
 |fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
-|pass|connection.network.dhcp_long|Other|Other|DHCP request received after lease expiry.|
-|pass|connection.network.dhcp_short|Other|Other|DHCP request received.|
 |pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
 |pass|manual.test.name|Security|Recommended|Manual test - for testing|
-|skip|poe.negotiation|Other|Other|No local IP has been set, check system config|
-|skip|poe.power|Other|Other|No local IP has been set, check system config|
-|skip|poe.support|Other|Other|No local IP has been set, check system config|
+|skip|poe.switch.power|Other|Other|No local IP has been set, check system config|
 |fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
 |skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
@@ -91,12 +87,11 @@ Overall device result FAIL
 |skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
 |skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
 |gone|security.ports.nmap|Security|Recommended||
-|skip|security.tls.v1|Other|Other|IOException unable to connect to server|
-|skip|security.tls.v1.x509|Other|Other|IOException unable to connect to server|
-|skip|security.tls.v1_2|Other|Other|IOException unable to connect to server|
-|skip|security.tls.v1_2.x509|Other|Other|IOException unable to connect to server|
-|skip|security.tls.v1_3|Other|Other|IOException unable to connect to server|
-|skip|security.tls.v1_3.x509|Other|Other|IOException unable to connect to server|
+|skip|security.tlsv1.server|Other|Other|IOException unable to connect to server.|
+|skip|security.tlsv1_2.client|Other|Other|No client initiated TLS communication detected|
+|skip|security.tlsv1_2.server|Other|Other|IOException unable to connect to server.|
+|skip|security.tlsv1_3.client|Other|Other|No client initiated TLS communication detected|
+|skip|security.tlsv1_3.server|Other|Other|IOException unable to connect to server.|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -163,10 +158,10 @@ security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG /tmp/nmap.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG XXX/tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 47808/closed/udp//bacnet///	
+Host: X.X.X.X () Status: Up
+Host: X.X.X.X () Ports: 47808/closed/udp//bacnet///
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
@@ -177,10 +172,10 @@ security.nmap.http
 --------------------
 Check that the device does not have open ports exposing an unencrypted web interface using HTTP
 --------------------
-# Nmap 7.60 scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG /tmp/http.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
-Host: X.X.X.X ()	Status: Up
-Host: X.X.X.X ()	Ports: 10000/open/tcp//snet-sensor-mgmt?///	
+Host: X.X.X.X () Status: Up
+Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No running http servers have been found.
 --------------------
@@ -254,31 +249,13 @@ LOCAL_IP not configured, assuming no network switch.
 RESULT skip connection.port_duplex No local IP has been set, check system config
 
 --------------------
-poe.power
+poe.switch.power
 --------------------
 Verify that the device draws less than the maximum power allocated by the port. This is 15.4W for 802.3af and 30W for 802.3at
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip poe.power No local IP has been set, check system config
-
---------------------
-poe.negotiation
---------------------
-Verify the device autonegotiates power requirements
---------------------
-LOCAL_IP not configured, assuming no network switch.
---------------------
-RESULT skip poe.negotiation No local IP has been set, check system config
-
---------------------
-poe.support
---------------------
-Verify if the device supports PoE
---------------------
-LOCAL_IP not configured, assuming no network switch.
---------------------
-RESULT skip poe.support No local IP has been set, check system config
+RESULT skip poe.switch.power No local IP has been set, check system config
 
 ```
 
@@ -330,59 +307,70 @@ RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was no
 --------------------
 Collecting TLS cert from target address
 
+Gathering TLS 1 Server Information....
+TLS 1Server Implementation Skipping Test, could not open connection
+TLS 1 Server Information Complete.
+
+
+Gathering TLS 1.2 Server Information....
+TLS 1.2Server Implementation Skipping Test, could not open connection
+TLS 1.2 Server Information Complete.
+
+
+Gathering TLS 1.3 Server Information....
+TLS 1.3Server Implementation Skipping Test, could not open connection
+TLS 1.3 Server Information Complete.
+
+
+Gathering TLS Client X.X.X.X Information....
+TLS Client Information Complete.
+Gathering TLS Client X.X.X.X Information....
+TLS Client Information Complete.
+
 --------------------
-security.tls.v1
+security.tlsv1.server
 --------------------
-Verify the device supports TLS 1.0 (as a client)
+Verify the device supports at least TLS 1.0 (as a server)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1 IOException unable to connect to server
+RESULT skip security.tlsv1.server IOException unable to connect to server.
 
 --------------------
-security.tls.v1.x509
---------------------
-Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
---------------------
-See log above
---------------------
-RESULT skip security.tls.v1.x509 IOException unable to connect to server
-
---------------------
-security.tls.v1_2
---------------------
-Verify the device supports TLS 1.2 (as a client)
---------------------
-See log above
---------------------
-RESULT skip security.tls.v1_2 IOException unable to connect to server
-
---------------------
-security.tls.v1_2.x509
+security.tlsv1_2.client
 --------------------
 null
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
+RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
 
 --------------------
-security.tls.v1_3
+security.tlsv1_2.server
 --------------------
-Verify the device supports TLS 1.3 (as a client)
+Verify the device supports TLS 1.2 (as a server)
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1_3 IOException unable to connect to server
+RESULT skip security.tlsv1_2.server IOException unable to connect to server.
 
 --------------------
-security.tls.v1_3.x509
+security.tlsv1_3.client
 --------------------
-Verify the devices supports RFC 2459 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile
+null
 --------------------
 See log above
 --------------------
-RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
+RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
+
+--------------------
+security.tlsv1_3.server
+--------------------
+Verify the device supports TLS 1.3 (as a server)
+--------------------
+See log above
+--------------------
+RESULT skip security.tlsv1_3.server IOException unable to connect to server.
 
 ```
 
@@ -391,6 +379,7 @@ RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|ca_file|CA_Faux.pem|
 
 ## Module password
 
@@ -600,50 +589,12 @@ Mac OUI Test
 --------------------
 RESULT fail connection.mac_oui Manufacturer prefix not found!
 
-```
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-
-## Module ipaddr
-
-
-#### Module Config
-
-|Attribute|Value|
-|---|---|
-|enabled|True|
-|timeout_sec|3000|
-|port_flap_timeout_sec|20|
-|dhcp_ranges|[{'start': '192.168.0.1', 'end': '192.168.255.254', 'prefix_length': 16}, {'start': '10.0.0.1', 'end': '10.255.255.254', 'prefix_length': 8}, {'start': '172.16.0.1', 'end': '172.31.255.254', 'prefix_length': 12}]|
-
-## Module dhcp
-
-
-#### Report
-
-```
 --------------------
-connection.network.dhcp_short
+connection.dns.hostname_connect
 --------------------
-Reconnect device and check for DHCP request.
+Check device uses the DNS server from DHCP and resolves hostnames
 --------------------
-RESULT pass connection.network.dhcp_short DHCP request received.
---------------------
-connection.network.dhcp_long
---------------------
-Wait for lease expiry and check for DHCP request.
---------------------
-RESULT pass connection.network.dhcp_long DHCP request received after lease expiry.
---------------------
-connection.dhcp.private_address
---------------------
-Device supports all private address ranges.
---------------------
-RESULT pass connection.dhcp.private_address All private address ranges are supported.
+RESULT skip connection.dns.hostname_connect Device did not send any DNS requests
 ```
 
 #### Module Config

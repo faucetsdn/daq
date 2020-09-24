@@ -4,17 +4,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Report {
-
-  boolean debug = true;
-
-  String reportFilename = "tmp/report.txt";
+  private final String reportFilename = "tmp/report.txt";
 
   public void writeReport(String certificateReport) {
     try {
-      if (debug) {
-        System.out.println(certificateReport);
-      }
-
       String[] directory = reportFilename.split("/");
 
       File dir = new File(directory[directory.length - 2]);
@@ -28,3 +21,4 @@ public class Report {
     }
   }
 }
+

@@ -19,12 +19,6 @@
     },
     "switch": {
       "enabled": true
-    },
-    "ipaddr": {
-      "enabled": false
-    },
-    "dhcp": {
-      "enabled": false
     }
   },
   "servers": {

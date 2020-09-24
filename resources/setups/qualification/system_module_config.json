@@ -15,9 +15,6 @@
     "ipaddr": {
       "timeout_sec": 120
     },
-    "dhcp": {
-      "enabled": true
-    },
     "mudgee": {
       "enabled": true
     },

@@ -1,8 +1,0 @@
-FROM daqf/aardvark:latest
-
-RUN $AG update && $AG install netcat
-
-COPY resources/setups/baseline/module_manifest.json .
-COPY docker/include/bin/test_ping .
-
-CMD ./test_ping

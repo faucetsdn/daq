@@ -1,0 +1,17 @@
+{
+  "security.tlsv1.server": {
+    "description": "Verify the device supports at least TLS 1.0 (as a server)"
+  },
+  "security.tlsv1_2.server": {
+    "description": "Verify the device supports TLS 1.2 (as a server)"
+  },
+  "security.tlsv1_3.server": {
+    "description": "Verify the device supports TLS 1.3 (as a server)"
+  },
+  "security.tlsv1_2.client": {
+    "desc": "Verify the device supports at least TLS 1.2 (as a client)"
+  },
+  "security.tlsv1_3.client": {
+    "desc": "Verify the device supports at least TLS 1.3 (as a client)"
+  }
+}
