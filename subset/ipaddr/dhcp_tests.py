@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import sys
+from scapy.all import DHCP
 
 TEST_REQUEST = str(sys.argv[1])
 DHCP_REQUEST = 3
