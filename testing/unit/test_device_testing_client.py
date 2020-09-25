@@ -23,8 +23,7 @@ class DeviceTestingClientTestBase(unittest.TestCase):
 
     def setUp(self):
         """Setup fixture for each test method"""
-        channel = grpc.insecure_channel(f'{self._SERVER_ADDRESS}:{self._SERVER_PORT}')
-        self._client = DeviceTestingClient(channel)
+        self._client = DeviceTestingClient()
 
         self._server = DeviceTestingServer(
             self._process_device_testing_state, self._SERVER_ADDRESS, self._SERVER_PORT)
@@ -56,8 +55,7 @@ class DeviceTestingClientBasicTestCase(DeviceTestingClientTestBase):
         ]
 
         for testing_state in expected_testing_states:
-            print('Sending device testing state: %s', testing_state)
-            self._client.send_testing_result(testing_state[0], testing_state[1])
+            print(f'Sending device testing state:\n{testing_state}')
+            self._client.send_testing_result(testing_state['mac'], testing_state['port_behavior'])
 
-        time.sleep(2)
         self.assertEqual(self._received_states, expected_testing_states)
