@@ -39,7 +39,7 @@ class BaseSwitchControllerTest {
         "Low", "oper", "Powered", "power", "3337", "device", "n/a",
         "class", "0", "max", "15400 [C]");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
-     for (String key : response.keySet()) {
+    for (String key : response.keySet()) {
       assertEquals(expected.get(key), response.get(key));
     }
   }
