@@ -3,5 +3,6 @@ source reporting.sh
 REPORT=/tmp/report.txt
 
 python dhcp_tests.py connection.network.dhcp_short
+python dhcp_tests.py connection.dhcp.ip_change
 
 cat report.txt >> $REPORT
