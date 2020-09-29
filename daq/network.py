@@ -3,6 +3,7 @@
 import os
 
 import logger
+import yaml
 from topology import FaucetTopology
 
 from mininet import node as mininet_node
@@ -37,6 +38,7 @@ class TestNetwork:
     MAX_INTERNAL_DPID = 100
     DEFAULT_OF_PORT = 6653
     _CTRL_PRI_IFACE = 'ctrl-pri'
+    INTERMEDIATE_FAUCET_FILE = "inst/faucet_intermediate.yaml"
     OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
 
     def __init__(self, config):
@@ -52,7 +54,8 @@ class TestNetwork:
         self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
         self.switch_links = {}
-        self.faucitizer = faucetizer.Faucetizer(None, None, self.OUTPUT_FAUCET_FILE)
+        self.faucitizer = faucetizer.Faucetizer(
+            None, self.INTERMEDIATE_FAUCET_FILE, self.OUTPUT_FAUCET_FILE)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -166,7 +169,7 @@ class TestNetwork:
         self.topology.start()
 
         LOGGER.info("Initializing faucitizer...")
-        self.faucitizer._process_structural_config(self.topology.get_network_topology())
+        self._generate_behavioral_config()
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
@@ -189,7 +192,12 @@ class TestNetwork:
         LOGGER.info('Directing traffic for %s on port %s to %s', target_mac, port, dest)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_port_traffic(target_mac, port, target)
-        self.faucitizer._process_structural_config(self.topology.get_network_topology())
+        self._generate_behavioral_config()
+
+    def _generate_behavioral_config(self):
+        with open(self.INTERMEDIATE_FAUCET_FILE, 'w') as file:
+            yaml.safe_dump(self.topology.get_network_topology(), file)
+        self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()
