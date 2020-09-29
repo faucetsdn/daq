@@ -36,6 +36,10 @@ class TestRunnerBase(unittest.TestCase):
         'long_dhcp_response_sec' : '105'
     }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.runner = None
+
     def setUp(self):
         os.environ = {
             **os.environ,
@@ -50,7 +54,7 @@ class TestRunnerBase(unittest.TestCase):
             self.runner = DAQRunner(self.config)
 
 
-class TestRunnerReapStatePorts(unittest.TestCase):
+class TestRunnerReapStatePorts(TestRunnerBase):
     """Test class for Configurator"""
 
     def test_reap_stale_ports(self):
