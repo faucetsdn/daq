@@ -1,9 +1,9 @@
 """Networking module"""
 
 import os
+import yaml
 
 import logger
-import yaml
 from topology import FaucetTopology
 
 from mininet import node as mininet_node
@@ -12,6 +12,7 @@ from mininet import link as mininet_link
 from mininet import cli as mininet_cli
 from mininet import util as mininet_util
 from forch import faucetizer
+from forch.proto.forch_configuration_pb2 import OrchestrationConfig
 
 LOGGER = logger.get_logger('network')
 
@@ -54,8 +55,9 @@ class TestNetwork:
         self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
         self.switch_links = {}
+        orch_config = OrchestrationConfig()
         self.faucitizer = faucetizer.Faucetizer(
-            None, self.INTERMEDIATE_FAUCET_FILE, self.OUTPUT_FAUCET_FILE)
+            orch_config, self.INTERMEDIATE_FAUCET_FILE, self.OUTPUT_FAUCET_FILE)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
