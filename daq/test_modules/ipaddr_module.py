@@ -63,7 +63,7 @@ class IpAddrModule(HostModule):
     def _set_timeout(self):
         if not self._lease_time_seconds:
             return
-        self._timeout = datetime.now() + timedelta(seconds=self._lease_time_seconds + 30)
+        self._timeout = datetime.now() + timedelta(seconds=self._lease_time_seconds)
         self._logger.info('Setting DHCP timeout at %s' % self._timeout)
 
     def _next_test(self):
