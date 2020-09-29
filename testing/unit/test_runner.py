@@ -109,11 +109,11 @@ class TestRunnerSendingTestingResult(TestRunnerBase):
 
     def test_target_device_complete(self):
         """Test behavior of the runner and testing client when a device testing finishes"""
-        device = self.runner._devices.new_device("0000000000", None)
+        device = self.runner._devices.new_device("0a:00:00:00:00:01", None)
         self.runner._target_set_finalize(device, {}, "Target device termination")
 
         time.sleep(2)
-        expected_testing_results = [("00:00:00:00:00:00", PortBehavior.passed)]
+        expected_testing_results = [("0a:00:00:00:00:01", PortBehavior.passed)]
         self.assertEqual(self._received_results, expected_testing_results)
 
 
