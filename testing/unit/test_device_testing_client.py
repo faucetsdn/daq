@@ -3,8 +3,6 @@
 import time
 import unittest
 
-import grpc
-
 from forch.device_testing_server import DeviceTestingServer
 
 from device_testing_client import DeviceTestingClient
@@ -58,4 +56,5 @@ class DeviceTestingClientBasicTestCase(DeviceTestingClientTestBase):
             print(f'Sending device testing state:\n{testing_state}')
             self._client.send_testing_result(testing_state['mac'], testing_state['port_behavior'])
 
+        time.sleep(2)
         self.assertEqual(self._received_states, expected_testing_states)
