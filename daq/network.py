@@ -52,7 +52,7 @@ class TestNetwork:
         self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
         self.switch_links = {}
-        self.faucitizer = faucetizer.Faucetizer(None, None)
+        self.faucitizer = faucetizer.Faucetizer(None, None, self.OUTPUT_FAUCET_FILE)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -166,8 +166,7 @@ class TestNetwork:
         self.topology.start()
 
         LOGGER.info("Initializing faucitizer...")
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self.faucitizer._process_structural_config(self.topology.get_network_topology())
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
@@ -190,8 +189,7 @@ class TestNetwork:
         LOGGER.info('Directing traffic for %s on port %s to %s', target_mac, port, dest)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_port_traffic(target_mac, port, target)
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self.faucitizer._process_structural_config(self.topology.get_network_topology())
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()
