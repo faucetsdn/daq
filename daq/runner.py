@@ -165,7 +165,7 @@ class DAQRunner:
         logging_client = self.gcp.get_logging_client()
         self.daq_run_id = self._init_daq_run_id()
         self._device_testing_client = None
-        if self.config.device_testing_server_port:
+        if self.config.get('device_testing_server_port'):
             self._init_device_testing_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
@@ -198,7 +198,7 @@ class DAQRunner:
 
     def _init_device_testing_client(self):
         self._device_testing_client = DeviceTestingClient(
-            server_port=self.config.device_testing_server_port)
+            server_port=self.config['device_testing_server_port'])
 
     def _send_heartbeat(self):
         message = {
