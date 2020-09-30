@@ -10,12 +10,8 @@ from daq.runner import DAQRunner, configurator, PortInfo
 from daq.host import ConnectedHost
 import network
 
-import grpc
-
 from forch.device_testing_server import DeviceTestingServer
 from forch.proto.shared_constants_pb2 import PortBehavior
-
-from device_testing_client import DeviceTestingClient
 
 logger = logging.getLogger()
 logger.level = logging.INFO
@@ -83,15 +79,12 @@ class TestRunnerSendingTestingResult(TestRunnerBase):
     """Test case to test the runner sending device testing result to the device testing server"""
 
     _SERVER_ADDRESS = '0.0.0.0'
-    _SERVER_PORT = 50051
+    _SERVER_PORT = 50070
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.config['device_testing_server_port'] = 50051
-
-        channel = grpc.insecure_channel(f'{self._SERVER_ADDRESS}:{self._SERVER_PORT}')
-        self._client = DeviceTestingClient(channel)
+        self.config['device_testing_server_port'] = self._SERVER_PORT
 
         self._server = DeviceTestingServer(
             self._process_device_testing_state, self._SERVER_ADDRESS, self._SERVER_PORT)
