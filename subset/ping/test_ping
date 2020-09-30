@@ -76,7 +76,7 @@ else
     summary="could not reach target"
 fi
 
-echo RESULT $local_status base.target.ping $summary %% $TARGET_IP | tee -a $RESULT_LINES
+echo RESULT $local_status connection.base.target_ping $summary %% $TARGET_IP | tee -a $RESULT_LINES
 
 echo | tee -a $MONO_LOG
 echo Done with basic connectivity tests | tee -a $MONO_LOG

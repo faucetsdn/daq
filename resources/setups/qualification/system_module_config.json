@@ -55,7 +55,7 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.switch.port_speed": {
+    "connection.switch.port_speedd": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"
@@ -85,12 +85,12 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.network.ntp_support": {
+    "ntp.network.ntp_support": {
       "category": "Network Time",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.network.ntp_update": {
+    "ntp.network.ntp_update": {
       "category": "Network Time",
       "required": "pass",
       "expected": "Required Pass"
@@ -120,32 +120,32 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "security.passwords.http": {
+    "security.password.http": {
       "category": "Security",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "security.passwords.https": {
+    "security.password.https": {
       "category": "Security",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "security.passwords.ssh": {
+    "security.password.ssh": {
       "category": "Security",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "security.passwords.telnet": {
+    "security.password.telnet": {
       "category": "Security",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "protocol.bacnet.pic": {
+    "protocol.bacext.pic": {
       "category": "Protocol",
       "required": "pass",
       "expected": "Required Pass for BACnet Devices"
     },
-    "protocol.bacnet.version": {
+    "protocol.bacext.version": {
       "category": "Protocol",
       "required": "info",
       "expected": "Information"

@@ -160,10 +160,10 @@ def add_summary(text):
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
 
-if test_request == 'connection.network.ntp_support':
+if test_request == 'ntp.network.ntp_support':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support))
     result = test_ntp_support()
-elif test_request == 'connection.network.ntp_update':
+elif test_request == 'ntp.network.ntp_update':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_update))
     result = test_ntp_update()
 

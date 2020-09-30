@@ -21,7 +21,7 @@ public class VersionTest {
   private String appendixText = "";
   private boolean testPassed = false;
   boolean bacnetSupported = false;
-  private String testName = "protocol.bacnet.version";
+  private String testName = "protocol.bacext.version";
   private String infoReportText = String.format("RESULT info %s", testName);
   private String skippedReportText = String.format("RESULT skip %s Bacnet device not found.", testName);
   private String errorPropertyMessage = "errorClass=Property, errorCode=Unknown property";

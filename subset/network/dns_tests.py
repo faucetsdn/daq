@@ -118,7 +118,7 @@ def check_communication_for_response(response_line):
 
 
 def test_dns(target_ip):
-    """ Runs the connection.dns.hostname_connect test
+    """ Runs the dns.network.hostname_resolution test
 
     Checks that:
         i) the device sends DNS requests
@@ -176,7 +176,7 @@ def test_dns(target_ip):
 
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
-if test_request == 'connection.dns.hostname_connect':
+if test_request == 'dns.network.hostname_resolution':
     write_report("{d}\n{b}".format(b=dash_break_line, d=DESCRIPTION_HOSTNAME_CONNECT))
     result = test_dns(device_address)
 

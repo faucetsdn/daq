@@ -29,7 +29,7 @@ def main():
     summary = ""
     with open(ipaddr_log, 'r') as fd:
         summary = fd.read()
-    if TEST_REQUEST == 'connection.network.dhcp_short':
+    if TEST_REQUEST == 'connection.dhcp.disconnect_short':
         _write_report("{d}\n{b} \n {s}".format(b=dash_break_line, d=description_dhcp_short,
                                                s=summary))
         result = _test_dhcp_short()

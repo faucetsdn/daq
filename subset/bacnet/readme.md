@@ -6,17 +6,17 @@ The bacext test module includes tests that assess the BACnet stack implementatio
 
 The tests included in this module are:
 
-- `protocol.bacnet.version`
-- `protocol.bacnet.pic`
+- `protocol.bacext.version`
+- `protocol.bacext.pic`
 
-### Conditions for `protocol.bacnet.version`:
+### Conditions for `protocol.bacext.version`:
 
 This test retrieves the BACnet protocol version from a BACnet device
 
 - `info` -> BACnet protocol version found from device
 - `skip` -> the device under testing is not a BACnet device, test skipped
 
-### Conditions for `protocol.bacnet.pic`:
+### Conditions for `protocol.bacext.pic`:
 
 This test verifies that the device BACnet protocol implementation is compliant to the device PIC statement.
 

@@ -100,7 +100,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
             'tests': {
                 'base.startup.dhcp': {'pass': 2},
                 'base.switch.ping': {'pass': 1, 'fail': 1},
-                'base.target.ping': {'fail': 2}
+                'connection.base.target_ping': {'fail': 2}
             }, 'categories': {
                 'Other1': {'pass': 1},
                 'Other': {'pass': 2, 'fail': 3}

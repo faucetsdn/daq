@@ -38,7 +38,7 @@
     "unknown.fake.monkey": {
       "required": "pass"
     },
-    "base.target.ping": {
+    "connection.base.target_ping": {
       "category": "Connectivity",
       "expected": "Required"
     },

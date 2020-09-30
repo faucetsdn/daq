@@ -62,37 +62,37 @@ Overall device result FAIL
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
-|pass|base.target.ping|Connectivity|Required|target reached|
+|pass|connection.base.target_ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
-|info|communication.type.broadcast|Other|Other|Broadcast packets received. Unicast packets received.|
-|skip|connection.dns.hostname_connect|Other|Other|Device did not send any DNS requests|
-|fail|connection.mac_oui|Other|Other|Manufacturer prefix not found!|
-|pass|connection.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
-|pass|connection.network.ntp_support|Other|Other|Using NTPv4.|
-|pass|connection.network.ntp_update|Other|Other|Device clock synchronized.|
+|info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
+|skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
+|fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
+|pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
+|pass|ntp.network.ntp_support|Other|Other|Using NTPv4.|
+|pass|ntp.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
-|skip|connection.port_link|Other|Other|No local IP has been set, check system config|
-|skip|connection.port_speed|Other|Other|No local IP has been set, check system config|
+|skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
+|skip|connection.switch.port_speed|Other|Other|No local IP has been set, check system config|
 |pass|manual.test.name|Security|Recommended|Manual test - for testing|
 |skip|poe.switch.power|Other|Other|No local IP has been set, check system config|
-|fail|protocol.bacnet.pic|Other|Other|PICS file defined however a BACnet device was not found.|
-|skip|protocol.bacnet.version|Other|Other|Bacnet device not found.|
-|skip|security.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
+|fail|protocol.bacext.pic|Other|Other|PICS file defined however a BACnet device was not found.|
+|skip|protocol.bacext.version|Other|Other|Bacnet device not found.|
+|skip|security.discover.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |pass|security.nmap.http|Other|Other|No running http servers have been found.|
 |pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
-|skip|security.passwords.http|Other|Other|Port 80 not open on target device.|
-|skip|security.passwords.https|Other|Other|Port 443 not open on target device.|
-|skip|security.passwords.ssh|Other|Other|Port 22 not open on target device.|
-|skip|security.passwords.telnet|Other|Other|Port 23 not open on target device.|
+|skip|security.password.http|Other|Other|Port 80 not open on target device.|
+|skip|security.password.https|Other|Other|Port 443 not open on target device.|
+|skip|security.password.ssh|Other|Other|Port 22 not open on target device.|
+|skip|security.password.telnet|Other|Other|Port 23 not open on target device.|
 |gone|security.ports.nmap|Security|Recommended||
-|skip|security.tlsv1.server|Other|Other|IOException unable to connect to server.|
-|skip|security.tlsv1_2.client|Other|Other|No client initiated TLS communication detected|
-|skip|security.tlsv1_2.server|Other|Other|IOException unable to connect to server.|
-|skip|security.tlsv1_3.client|Other|Other|No client initiated TLS communication detected|
-|skip|security.tlsv1_3.server|Other|Other|IOException unable to connect to server.|
+|skip|security.tls.v1_server|Other|Other|IOException unable to connect to server.|
+|skip|security.tls.v1_2_client|Other|Other|No client initiated TLS communication detected|
+|skip|security.tls.v1_2_server|Other|Other|IOException unable to connect to server.|
+|skip|security.tls.v1_3_client|Other|Other|No client initiated TLS communication detected|
+|skip|security.tls.v1_3_server|Other|Other|IOException unable to connect to server.|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -138,13 +138,13 @@ See log above
 RESULT skip base.switch.ping No local IP has been set, check system config
 
 --------------------
-base.target.ping
+connection.base.target_ping
 --------------------
 Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached
+RESULT pass connection.base.target_ping target reached
 
 ```
 
@@ -198,7 +198,7 @@ RESULT pass security.nmap.http No running http servers have been found.
 
 ```
 --------------------
-security.firmware
+security.discover.firmware
 --------------------
 Automatic bacnet firmware scan using nmap
 --------------------
@@ -206,7 +206,7 @@ PORT      STATE  SERVICE
 47808/udp closed bacnet
 MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 --------------------
-RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
+RESULT skip security.discover.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
 
 ```
 
@@ -223,22 +223,22 @@ RESULT skip security.firmware Could not retrieve a firmware version with nmap. C
 
 ```
 --------------------
-connection.port_link
+connection.switch.port_link
 --------------------
 Connect the device to the network switch. Check the device and the switch for the green connection light & no errors
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_link No local IP has been set, check system config
+RESULT skip connection.switch.port_link No local IP has been set, check system config
 
 --------------------
-connection.port_speed
+connection.switch.port_speed
 --------------------
 Verify the device auto-negotiates connection speed
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_speed No local IP has been set, check system config
+RESULT skip connection.switch.port_speed No local IP has been set, check system config
 
 --------------------
 connection.port_duplex
@@ -247,7 +247,7 @@ Verify the device supports full duplex
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.port_duplex No local IP has been set, check system config
+RESULT skip connection.switch.port_duplexNo local IP has been set, check system config
 
 --------------------
 poe.switch.power
@@ -274,22 +274,22 @@ RESULT skip poe.switch.power No local IP has been set, check system config
 
 ```
 --------------------
-protocol.bacnet.version
+protocol.bacext.version
 --------------------
 Verify and record version of Bacnet used by the device
 --------------------
  Bacnet device not found.
 --------------------
-RESULT skip protocol.bacnet.version Bacnet device not found.
+RESULT skip protocol.bacext.version Bacnet device not found.
 
 --------------------
-protocol.bacnet.pic
+protocol.bacext.pic
 --------------------
 Verify BACnet traffic is compliant to the PIC statement
 --------------------
 PICS file defined however a BACnet device was not found.
 --------------------
-RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
+RESULT fail protocol.bacext.pic PICS file defined however a BACnet device was not found.
 
 ```
 
@@ -329,49 +329,49 @@ Gathering TLS Client X.X.X.X Information....
 TLS Client Information Complete.
 
 --------------------
-security.tlsv1.server
+security.tls.v1_server
 --------------------
 Verify the device supports at least TLS 1.0 (as a server)
 --------------------
 See log above
 --------------------
-RESULT skip security.tlsv1.server IOException unable to connect to server.
+RESULT skip security.tls.v1_server IOException unable to connect to server.
 
 --------------------
-security.tlsv1_2.client
+security.tls.v1_2_client
 --------------------
 null
 --------------------
 See log above
 --------------------
-RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
+RESULT skip security.tls.v1_2_client No client initiated TLS communication detected
 
 --------------------
-security.tlsv1_2.server
+security.tls.v1_2_server
 --------------------
 Verify the device supports TLS 1.2 (as a server)
 --------------------
 See log above
 --------------------
-RESULT skip security.tlsv1_2.server IOException unable to connect to server.
+RESULT skip security.tls.v1_2_server IOException unable to connect to server.
 
 --------------------
-security.tlsv1_3.client
+security.tls.v1_3_client
 --------------------
 null
 --------------------
 See log above
 --------------------
-RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
+RESULT skip security.tls.v1_3_client No client initiated TLS communication detected
 
 --------------------
-security.tlsv1_3.server
+security.tls.v1_3_server
 --------------------
 Verify the device supports TLS 1.3 (as a server)
 --------------------
 See log above
 --------------------
-RESULT skip security.tlsv1_3.server IOException unable to connect to server.
+RESULT skip security.tls.v1_3_server IOException unable to connect to server.
 
 ```
 
@@ -405,7 +405,7 @@ MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.http Port 80 not open on target device.
+RESULT skip security.password.http Port 80 not open on target device.
 
 --------------------
 security.admin.password.https
@@ -424,7 +424,7 @@ MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.https Port 443 not open on target device.
+RESULT skip security.password.https Port 443 not open on target device.
 
 --------------------
 security.admin.password.ssh
@@ -443,7 +443,7 @@ MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.ssh Port 22 not open on target device.
+RESULT skip security.password.ssh Port 22 not open on target device.
 
 --------------------
 security.admin.password.telnet
@@ -462,7 +462,7 @@ MAC Address: 9A:02:57:1E:8F:01 (Unknown)
 Nmap done: 1 IP address (1 host up) scanned in XXX
 Could not connect to specified port on host.
 --------------------
-RESULT skip security.passwords.telnet Port 23 not open on target device.
+RESULT skip security.password.telnet Port 23 not open on target device.
 
 ```
 
@@ -553,7 +553,7 @@ RESULT pass manual.test.name Manual test - for testing
 
 ```
 --------------------
-connection.min_send
+communication.network.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
 --------------------
@@ -568,43 +568,43 @@ Device sends data at a frequency of less than 5 minutes.
 
 
 
-RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
+RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 --------------------
-communication.type.broadcast
+communication.network.type
 --------------------
 Device sends unicast or broadcast packets.
 --------------------
 
 
-RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
+RESULT info communication.network.type Broadcast packets received. Unicast packets received.
 --------------------
-connection.network.ntp_support
+ntp.network.ntp_support
 --------------------
 Device supports NTP version 4.
 --------------------
-RESULT pass connection.network.ntp_support Using NTPv4.
+RESULT pass ntp.network.ntp_support Using NTPv4.
 --------------------
-connection.network.ntp_update
+ntp.network.ntp_update
 --------------------
 Device synchronizes its time to the NTP server.
 --------------------
-RESULT pass connection.network.ntp_update Device clock synchronized.
+RESULT pass ntp.network.ntp_update Device clock synchronized.
 --------------------
-connection.mac_oui
+connection.network.mac_oui
 --------------------
 Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer
 --------------------
 Using the host hardware address 9a:02:57:1e:8f:01
 Mac OUI Test
 --------------------
-RESULT fail connection.mac_oui Manufacturer prefix not found!
+RESULT fail connection.network.mac_oui Manufacturer prefix not found!
 
 --------------------
-connection.dns.hostname_connect
+dns.network.hostname_resolution
 --------------------
 Check device uses the DNS server from DHCP and resolves hostnames
 --------------------
-RESULT skip connection.dns.hostname_connect Device did not send any DNS requests
+RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
 ```
 
 #### Module Config

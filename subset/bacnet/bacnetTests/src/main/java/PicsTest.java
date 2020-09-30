@@ -12,7 +12,7 @@ public class PicsTest {
   private Connection connection;
   private BacnetValidation validator;
   private BacnetPoints bacnetPoints = new BacnetPoints();
-  private String testName = "protocol.bacnet.pic";
+  private String testName = "protocol.bacext.pic";
   private String passedTestReport = String.format("RESULT pass %s The devices matches the PICS\n", testName);
   private String failedTestReport = String.format("RESULT fail %s ", testName);
   private String skippedTestReport = String.format("RESULT skip %s ", testName);

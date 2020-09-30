@@ -26,7 +26,7 @@ if [ -n "$LOCAL_IP" ]; then
     echo Switch test with model $SWITCH_MODEL
     echo Switch test with ip:port $SWITCH_IP:$TARGET_PORT
     echo Switch test with username:password $SWITCH_USERNAME:$SWITCH_PASSWORD
-    ping -n -c 10 $SWITCH_IP
+    ping -n -c 100 -W 50 $SWITCH_IP
     POE_ENABLED=`jq -r .modules.switch.poe.enabled $MODULE_CONFIG`
     java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $USI_URL $RPC_TIMEOUT $SWITCH_IP $TARGET_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
 
@@ -45,22 +45,22 @@ else
     SUMMARY="No local IP has been set, check system config"
 
     write_out_result $REPORT \
-                     "connection.port_link" \
-                     "$(jq -r '.["connection.port_link"].description' $MANIFEST)" \
+                     "connection.switch.port_link" \
+                     "$(jq -r '.["connection.switch.port_link"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
-                     "RESULT $RESULT connection.port_link $SUMMARY"
+                     "RESULT $RESULT connection.switch.port_link $SUMMARY"
 
     write_out_result $REPORT \
-                     "connection.port_speed" \
-                     "$(jq -r '.["connection.port_speed"].description' $MANIFEST)" \
+                     "connection.switch.port_speed" \
+                     "$(jq -r '.["connection.switch.port_speed"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
-                     "RESULT $RESULT connection.port_speed $SUMMARY"
+                     "RESULT $RESULT connection.switch.port_speed $SUMMARY"
 
     write_out_result $REPORT \
                      "connection.port_duplex" \
                      "$(jq -r '.["connection.port_duplex"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
-                     "RESULT $RESULT connection.port_duplex $SUMMARY"
+                     "RESULT $RESULT connection.switch.port_duplex$SUMMARY"
 
     write_out_result $REPORT \
                      "poe.switch.power" \

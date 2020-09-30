@@ -51,7 +51,7 @@ the common `cmdrun.log` file, the test-specific `activate.log`,
 `module_config.json`, and `report.txt` are the most helpul for
 diagnostics and troubleshooting.
 
-* Each test result (e.g. _protocol.bacnet.version_) is supplied by a _module_.
+* Each test result (e.g. _protocol.bacext.version_) is supplied by a _module_.
   * There is no obvious mapping from _test_ to _module_, so there might be
   some sleuthing involved.
 * Make sure the test's _module_ is properly configured/run in the `cmdrun.log`

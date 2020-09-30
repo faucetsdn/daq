@@ -1,13 +1,13 @@
 """
     This script can be called to run a specific network module test.
     Currently supports:
-    - connection.min_send
+    - communication.network.min_send
     - connection.dhcp_long
     - protocol.app_min_send
-    - communication.type.broadcast
+    - communication.network.type
     - network.ntp.support
     Usage: python network_tests.py <test_to_run> <monitor.pcap file> <target_ip>
-    E.g. python network_tests.py connection.min_send $MONITOR $TARGET_IP
+    E.g. python network_tests.py communication.network.min_send $MONITOR $TARGET_IP
 """
 import subprocess, time, sys, json
 
@@ -123,7 +123,7 @@ def add_summary(text):
 
 
 def test_connection_min_send():
-    """ Runs the connection.min_send test
+    """ Runs the communication.network.min_send test
 
     Tests if the device sends data packets of any type (inc data, NTP, etc)
     within a period of 5 minutes by looking through the monitor.pcap file
@@ -184,7 +184,7 @@ def test_connection_min_send():
 
 
 def test_communication_type_broadcast():
-    """ Runs the communication.type.broadcast DAQ test.
+    """ Runs the communication.network.type DAQ test.
     Counts the number of unicast, broadcast and multicast packets sent.
     """
 
@@ -211,10 +211,10 @@ def test_communication_type_broadcast():
 
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
-if test_request == 'connection.min_send':
+if test_request == 'communication.network.min_send':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_min_send))
     result = test_connection_min_send()
-elif test_request == 'communication.type.broadcast':
+elif test_request == 'communication.network.type':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_communication_type))
     result = test_communication_type_broadcast()
 
