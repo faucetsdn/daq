@@ -10,12 +10,8 @@ from daq.runner import DAQRunner, configurator, PortInfo
 from daq.host import ConnectedHost
 import network
 
-import grpc
-
 from forch.device_testing_server import DeviceTestingServer
 from forch.proto.shared_constants_pb2 import PortBehavior
-
-from device_testing_client import DeviceTestingClient
 
 logger = logging.getLogger()
 logger.level = logging.INFO
