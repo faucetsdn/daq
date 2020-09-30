@@ -67,7 +67,7 @@ function redact {
         -e 's/Not shown: .* ports//' \
         -e 's/[ \t]*$//' \
         -e 's/\t/ /g' \
-        -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/' \
+        -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/g' \
         -e 's/-oG .*\/tmp/-oG XXX\/tmp/' \
         -e 's/# Nmap [0-9]{1,4}\.[0-9]{1,4}/\# Nmap XXX/'
 
