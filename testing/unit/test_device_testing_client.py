@@ -19,6 +19,9 @@ class DeviceTestingClientTestBase(unittest.TestCase):
         self._server = None
         self._client = None
 
+    def _process_device_testing_state(self, device_testing_state):
+        pass
+
     def setUp(self):
         """Setup fixture for each test method"""
         self._client = DeviceTestingClient()
@@ -54,7 +57,10 @@ class DeviceTestingClientBasicTestCase(DeviceTestingClientTestBase):
 
         for testing_state in expected_testing_states:
             print(f'Sending device testing state:\n{testing_state}')
-            self._client.send_testing_result(testing_state['mac'], testing_state['port_behavior'])
+            mac = testing_state['mac']
+            testing_result = testing_state['port_behavior']
+            server_result = self._client.send_testing_result(mac, testing_result)
+            print(f'Received {server_result} from server')
 
         time.sleep(2)
         self.assertEqual(self._received_states, expected_testing_states)
