@@ -92,7 +92,7 @@ class TestRunnerSendingQualificationResult(TestRunnerBase):
     def setUp(self, *args, **kwargs):
         """Setup server before each test method"""
 
-        super().__init__(*args, **kwargs)
+        super().setUp(*args, **kwargs)
 
         self._received_results = []
         self._server = DeviceTestingServer(
