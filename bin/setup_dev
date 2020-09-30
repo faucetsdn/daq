@@ -6,8 +6,7 @@
 # If you just want to get up and go, see bin/setup_base.
 #
 
-ROOT=$(realpath $(dirname $0)/..)
-echo $ROOT
+ROOT=$(dirname $0)/..
 cd $ROOT
 
 PVERSION=3.7
@@ -168,11 +167,6 @@ else
     echo Setting forch version $FORCHV
     (cd forch; git fetch; git checkout $FORCHV)
 fi
-
-SITE_PACKAGES_PATH=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
-echo Package path: $SITE_PACKAGES_PATH
-rm -f $SITE_PACKAGES_PATH/forch
-ln -s $ROOT/forch/forch $SITE_PACKAGES_PATH/forch
 
 if [ -z "$UDMIV" ]; then
     echo No udmi version found, skipping.
