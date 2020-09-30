@@ -1,16 +1,16 @@
-"""Unit tests for device testing client"""
+"""Unit tests for device qualification client"""
 
 import time
 import unittest
 
 from forch.device_testing_server import DeviceTestingServer
 
-from device_testing_client import DeviceTestingClient
+from device_qualification_client import DeviceQualificationClient
 from utils import proto_dict
 
 
-class DeviceTestingClientTestBase(unittest.TestCase):
-    """Base class for device testing client unit test"""
+class DeviceQualificationClientTestBase(unittest.TestCase):
+    """Base class for device qualification client unit test"""
     _SERVER_ADDRESS = '0.0.0.0'
     _SERVER_PORT = 50071
 
@@ -19,15 +19,15 @@ class DeviceTestingClientTestBase(unittest.TestCase):
         self._server = None
         self._client = None
 
-    def _process_device_testing_state(self, device_testing_state):
+    def _process_result(self, result):
         pass
 
     def setUp(self):
         """Setup fixture for each test method"""
-        self._client = DeviceTestingClient(server_port=self._SERVER_PORT)
+        self._client = DeviceQualificationClient(server_port=self._SERVER_PORT)
 
         self._server = DeviceTestingServer(
-            self._process_device_testing_state, self._SERVER_ADDRESS, self._SERVER_PORT)
+            self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT)
         self._server.start()
 
     def tearDown(self):
@@ -35,19 +35,18 @@ class DeviceTestingClientTestBase(unittest.TestCase):
         self._server.stop()
 
 
-class DeviceTestingClientBasicTestCase(DeviceTestingClientTestBase):
-    """Basic test case for device testing client"""
+class DeviceQualificationClientBasicTestCase(DeviceQualificationClientTestBase):
+    """Basic test case for device qulification client"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._received_states = []
+        self._received_results = []
 
-    def _process_device_testing_state(self, device_testing_state):
-        self._received_states.append(
-            proto_dict(device_testing_state, including_default_value_fields=True))
+    def _process_result(self, result):
+        self._received_results.append(proto_dict(result, including_default_value_fields=True))
 
-    def test_sending_device_testing_states(self):
-        """Test behavior of the client and server when client sends device testing states"""
-        expected_testing_states = [
+    def test_sending_device_qualification_result(self):
+        """Test behavior of the client and server when client sends device qualification states"""
+        expected_results = [
             {'mac': '00:0X:00:00:00:01', 'port_behavior': 'unknown'},
             {'mac': '00:0Y:00:00:00:02', 'port_behavior': 'passed'},
             {'mac': '00:0Z:00:00:00:03', 'port_behavior': 'cleared'},
@@ -55,9 +54,9 @@ class DeviceTestingClientBasicTestCase(DeviceTestingClientTestBase):
             {'mac': '00:0B:00:00:00:05', 'port_behavior': 'unknown'}
         ]
 
-        for testing_state in expected_testing_states:
-            print(f'Sending device testing state:\n{testing_state}')
-            self._client.send_testing_result(testing_state['mac'], testing_state['port_behavior'])
+        for result in expected_results:
+            print(f'Sending result:\n{result}')
+            self._client.send_qualification_result(result['mac'], result['port_behavior'])
 
         time.sleep(2)
-        self.assertEqual(self._received_states, expected_testing_states)
+        self.assertEqual(self._received_results, expected_results)

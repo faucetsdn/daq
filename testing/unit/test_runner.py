@@ -37,6 +37,8 @@ class TestRunnerBase(unittest.TestCase):
         self.runner = None
 
     def setUp(self):
+        """Set up DAQRunner"""
+
         os.environ = {
             **os.environ,
             "DAQ_VERSION": "",
@@ -75,8 +77,8 @@ class TestRunnerReapStatePorts(TestRunnerBase):
         self.runner.target_set_error.assert_called()
 
 
-class TestRunnerSendingTestingResult(TestRunnerBase):
-    """Test case to test the runner sending device testing result to the device testing server"""
+class TestRunnerSendingQualificationResult(TestRunnerBase):
+    """Test case to test the runner sending device qualification result to the server"""
 
     _SERVER_ADDRESS = '0.0.0.0'
     _SERVER_PORT = 50070
@@ -84,30 +86,36 @@ class TestRunnerSendingTestingResult(TestRunnerBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.config['device_testing_server_port'] = self._SERVER_PORT
+        self.config['device_result_port'] = self._SERVER_PORT
+        self._received_results = None
 
-        self._server = DeviceTestingServer(
-            self._process_device_testing_state, self._SERVER_ADDRESS, self._SERVER_PORT)
-        self._server.start()
+    def setUp(self, *args, **kwargs):
+        """Setup server before each test method"""
+
+        super().__init__(*args, **kwargs)
 
         self._received_results = []
+        self._server = DeviceTestingServer(
+            self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT)
+        self._server.start()
 
-    def tearDown(self):
+    def tearDown(self, *args, **kwargs):
         """Cleanup after each test method finishes"""
+
+        super().__init__(*args, **kwargs)
         self._server.stop()
 
-    def _process_device_testing_state(self, device_testing_state):
-        self._received_results.append(
-            (device_testing_state.mac, device_testing_state.port_behavior))
+    def _process_result(self, result):
+        self._received_results.append((result.mac, result.port_behavior))
 
     def test_target_device_complete(self):
-        """Test behavior of the runner and testing client when a device testing finishes"""
+        """Test behavior of the runner and the client when a device qualification finishes"""
         device = self.runner._devices.new_device("0a:00:00:00:00:01", None)
         self.runner._target_set_finalize(device, {}, "Target device termination")
 
         time.sleep(2)
-        expected_testing_results = [("0a:00:00:00:00:01", PortBehavior.passed)]
-        self.assertEqual(self._received_results, expected_testing_results)
+        expected_results = [("0a:00:00:00:00:01", PortBehavior.passed)]
+        self.assertEqual(self._received_results, expected_results)
 
 
 if __name__ == '__main__':

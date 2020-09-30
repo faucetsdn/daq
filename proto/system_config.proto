@@ -128,7 +128,7 @@ message DaqConfig {
   bool use_console = 52;
 
   // Port of the server to receive device testing result
-  bool device_testing_server_port = 53;
+  bool device_result_port= 53;
 }
 
 enum RunTriggerType {
