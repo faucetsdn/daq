@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
-from device_testing_client import DeviceQualificationClient
+from device_qualification_client import DeviceQualificationClient
 import faucet_event_client
 import gateway as gateway_manager
 import gcp
