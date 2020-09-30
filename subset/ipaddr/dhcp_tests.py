@@ -21,7 +21,7 @@ def main():
     ip_notification = 'ip notification'
     result = None
     summary = None
-    
+
     with open(module_config_file) as json_file:
         json_data = json.load(json_file)
         dhcp_ranges = json_data['modules']['ipaddr']['dhcp_ranges']
