@@ -12,7 +12,7 @@ from utils import proto_dict
 class DeviceTestingClientTestBase(unittest.TestCase):
     """Base class for device testing client unit test"""
     _SERVER_ADDRESS = '0.0.0.0'
-    _SERVER_PORT = 50051
+    _SERVER_PORT = 50053
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,7 +24,7 @@ class DeviceTestingClientTestBase(unittest.TestCase):
 
     def setUp(self):
         """Setup fixture for each test method"""
-        self._client = DeviceTestingClient()
+        self._client = DeviceTestingClient(server_port=self._SERVER_PORT)
 
         self._server = DeviceTestingServer(
             self._process_device_testing_state, self._SERVER_ADDRESS, self._SERVER_PORT)

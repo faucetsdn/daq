@@ -83,15 +83,12 @@ class TestRunnerSendingTestingResult(TestRunnerBase):
     """Test case to test the runner sending device testing result to the device testing server"""
 
     _SERVER_ADDRESS = '0.0.0.0'
-    _SERVER_PORT = 50051
+    _SERVER_PORT = 50052
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.config['device_testing_server_port'] = 50051
-
-        channel = grpc.insecure_channel(f'{self._SERVER_ADDRESS}:{self._SERVER_PORT}')
-        self._client = DeviceTestingClient(channel)
+        self.config['device_testing_server_port'] = self._SERVER_PORT
 
         self._server = DeviceTestingServer(
             self._process_device_testing_state, self._SERVER_ADDRESS, self._SERVER_PORT)
