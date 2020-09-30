@@ -9,7 +9,7 @@ from host import MODE
 
 LOGGER = logger.get_logger('dhcp')
 
-class DhcpMonitor():
+class DhcpMonitor:
     """Class to handle DHCP monitoring"""
 
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
@@ -18,15 +18,17 @@ class DhcpMonitor():
     DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_IP_PATTERN, DHCP_TYPE_PATTERN, DHCP_MAC_PATTERN)
     DHCP_THRESHHOLD_SEC = 80
 
-    def __init__(self, runner, host, callback, log_file=None):
+    # pylint: disable=too-many-arguments
+    def __init__(self, runner, host, callback, log_file=None, intf_name=None):
         self.runner = runner
         self.callback = callback
         self.host = host
+        self.intf_name = intf_name if intf_name else host.intf().name
         self.name = host.name
         self.log_file = log_file
         self.dhcp_traffic = None
-        self.intf_name = None
         self.scan_start = None
+        self.device_dhcps = {}
         self.target_ip = None
         self.target_mac = None
         self.dhcp_log = None
@@ -41,7 +43,8 @@ class DhcpMonitor():
         # Because there's buffering somewhere, can't reliably filter out DHCP with "src port 67"
         tcp_filter = ""
         helper = tcpdump_helper.TcpdumpHelper(self.host, tcp_filter, packets=None,
-                                              timeout=None, blocking=False)
+                                              timeout=None, blocking=False,
+                                              intf_name=self.intf_name)
         self.dhcp_traffic = helper
         self.runner.monitor_stream(self.name, self.dhcp_traffic.stream(),
                                    self._dhcp_line, hangup=self._dhcp_hangup,
@@ -77,7 +80,7 @@ class DhcpMonitor():
     def _dhcp_success(self):
         assert self.target_ip, 'dhcp ACK missing ip address'
         assert self.target_mac, 'dhcp ACK missing mac address'
-        delta = int(time.time()) - self.scan_start
+        delta = int(time.time()) - self.device_dhcps.get(self.target_mac, self.scan_start)
         LOGGER.debug('DHCP monitor %s received reply after %ds: %s/%s',
                      self.name, delta, self.target_ip, self.target_mac)
         mode = MODE.LONG if delta > self.DHCP_THRESHHOLD_SEC else MODE.DONE
@@ -86,7 +89,7 @@ class DhcpMonitor():
             'mac': self.target_mac,
             'delta': delta
         }
-        self.scan_start = int(time.time())
+        self.device_dhcps[self.target_mac] = int(time.time())
         self.callback(mode, target)
         self.target_ip = None
         self.target_mac = None
