@@ -15,6 +15,10 @@ echo Clearing previous state...
 sudo rm -rf inst/reports inst/run-port-* $cmdrun_log
 sudo chown -f $USER -R inst || true
 
+if [ -n "$site_path" -a -f "$site_path/cloud_iot_config.json" ]; then
+    cp $site_path/cloud_iot_config.json inst/config/
+fi
+
 if [ -n "$build_tests" ]; then
     release_tag=`git describe --dirty || echo unknown`
     # If the current commit is a release tag, then pull images.

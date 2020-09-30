@@ -76,6 +76,11 @@ public abstract class BaseSwitchController implements SwitchController {
         } else {
           // Tabular data is not always reported in perfectly alignment, we need to calculate the
           // correct values based off of the sections in between white spaces
+          int nextHeaderStart = header.indexOf(colNames[i + 1]);
+          if (Character.isWhitespace(values.charAt(lastSectionEnd))
+              && lastSectionEnd < nextHeaderStart) {
+            lastSectionEnd++;
+          }
           int firstWhiteSpace =
               getFirstWhiteSpace(values.substring(lastSectionEnd)) + lastSectionEnd;
           // Wrong table header line
@@ -86,12 +91,18 @@ public abstract class BaseSwitchController implements SwitchController {
           int lastWhiteSpace =
               getIndexOfNonWhitespaceAfterWhitespace(values.substring(firstWhiteSpace))
                   + firstWhiteSpace;
-          int nextHeaderStart = header.indexOf(colNames[i + 1]);
-          if (nextHeaderStart >= firstWhiteSpace) {
+          // Account for empty values in a table.
+          if (nextHeaderStart >= firstWhiteSpace && nextHeaderStart <= lastWhiteSpace) {
             secEnd = nextHeaderStart;
           } else {
-            secEnd = Math.max(lastWhiteSpace, nextHeaderStart);
+            char beforeHead = values.charAt(nextHeaderStart - 1);
+            if (Character.isWhitespace(beforeHead)) {
+              secEnd = Math.max(lastWhiteSpace, nextHeaderStart);
+            } else {
+              secEnd = lastWhiteSpace;
+            }
           }
+
         }
         lastSectionEnd = secEnd;
         // \u00A0 is non-breaking space which trim ignores.

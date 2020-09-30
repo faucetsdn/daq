@@ -701,6 +701,7 @@ class ConnectedHost:
             'port_base': self._port_base,
             'device_base': self._device_aux_path(),
             'type_base': self._type_aux_path(),
+            'gw_base': self.gateway.get_base_dir(),
             'scan_base': self.scan_base
         }
         if ext_loip:
