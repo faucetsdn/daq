@@ -184,6 +184,54 @@
       "category": "Security",
       "required": "info",
       "expected": "Information"
+    },
+    "security.manual.java_interface": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass",
+      "type": "manual"
+    },
+    "security.manual.flash_interface": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass",
+      "type": "manual"
+    },
+    "security.manual.flash_functionality": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass",
+      "type": "manual"
+    },
+    "security.manual.http": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass",
+      "type": "manual"
+    },
+    "security.manual.web_passwords": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass",
+      "type": "manual"
+    },
+    "connection.manual.comms_down": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Recommended Pass",
+      "type": "manual"
+    },    
+    "connection.manual.sec_eth_port": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Recommended Pass",
+      "type": "manual"
+    },    
+    "connection.manual.sec_eth_port_no_ip": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Recommended Pass",
+      "type": "manual"
     }
   }
 }
