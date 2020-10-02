@@ -9,6 +9,7 @@ from host import MODE
 
 LOGGER = logger.get_logger('dhcp')
 
+
 class DhcpMonitor:
     """Class to handle DHCP monitoring"""
 
