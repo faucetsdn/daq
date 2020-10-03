@@ -18,6 +18,10 @@ interfaces:
   faux:
     opts: 
     port: 2
+  faux-3:
+    opts: -n 
+    port: 3
 
 # use vlan trigger
 run_trigger_type: VLAN
+default_timeout_sec: 120

@@ -55,8 +55,18 @@ echo switch ping $count | tee -a $TEST_RESULTS
 echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
 cp config/system/alt.yaml local/system.yaml
 # TODO: Replace this with proper test once VLAN-triggers are added.
+function run_cmds {
+    docker exec daq-networking-3 ifconfig eth0 down
+    docker exec daq-networking-3 ifconfig faux-eth0 up
+    docker exec daq-networking-3 ip addr add 10.20.255.254/16 dev faux-eth0
+    docker exec daq-networking-3 bash -c "echo dhcp-range=10.20.99.100,10.20.99.254 >> /etc/dnsmasq.conf"
+}
+
+monitor_log "Added link faux-3 as port 3 on alt-switch" run_cmds
+monitor_log "Target device 9a02571e8f00 waiting for ip" 'docker exec daq-networking-3 bash -c "./autorestart_dnsmasq &"'
 timeout 1200s cmd/run -s
 fgrep '9a:02:57:1e:8f:00 learned on vid 1001' inst/cmdrun.log | head -1 | redact | tee -a $TEST_RESULTS
+echo Correct IP: $(fgrep '10.20.99' inst/run-9a02571e8f00/scans/ip_triggers.txt | wc -l) | tee -a $TEST_RESULTS 
 cat inst/result.log | tee -a $TEST_RESULTS # ping test should fail since there are no dhcp packets captured
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml

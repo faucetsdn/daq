@@ -159,7 +159,9 @@ Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Alt switch tests
 XXX runner   INFO    9a:02:57:1e:8f:00 learned on vid 1001
+Correct IP: 1
 9a02571e8f00: ['9a02571e8f00:ping:1']
+9a02571e8f03: ['9a02571e8f03:acquire:TimeoutError']
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
 device open 1 1 1
