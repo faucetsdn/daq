@@ -56,8 +56,9 @@ class BaseGateway(ABC):
                     self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
         cls = self._get_host_class()
+        vol_maps = [os.path.abspath('inst/config') + ':/config/inst']
         host = self.runner.add_host(
-            host_name, port=host_port, cls=cls, tmpdir=self.tmpdir)
+            host_name, port=host_port, cls=cls, tmpdir=self.tmpdir, vol_maps=vol_maps)
         host.activate()
         self.host = host
         LOGGER.info("Added networking host %s on port %d at %s",
@@ -97,6 +98,10 @@ class BaseGateway(ABC):
     def activate(self):
         """Mark this gateway as activated once all hosts are present"""
         self.activated = True
+
+    def get_base_dir(self):
+        """Return the gateways base directory for instance files"""
+        return os.path.abspath(self.tmpdir)
 
     def allocate_test_port(self):
         """Get the test port to use for this gateway setup"""
