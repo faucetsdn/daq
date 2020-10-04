@@ -13,16 +13,18 @@ from datetime import datetime, timedelta, timezone
 
 import configurator
 import faucet_event_client
-import gateway as gateway_manager
+import container_gateway
+
+import external_gateway
 import gcp
 import host as connected_host
 import network
 import stream_monitor
 from wrappers import DaqException
 import logger
+from proto.system_config_pb2 import DHCPMode
 
 LOGGER = logger.get_logger('runner')
-
 
 class PortInfo:
     """Simple container for device port info"""
@@ -47,6 +49,7 @@ class Device:
         self.group = None
         self.port = None
         self.dhcp_ready = False
+        self.dhcp_mode = None
         self.ip_info = IpInfo()
         self.set_id = None
 
@@ -339,6 +342,7 @@ class DAQRunner:
             device = self._devices.new_device(target_mac)
         else:
             device = self._devices.get(target_mac)
+        device.dhcp_mode = DHCPMode.EXTERNAL
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
@@ -480,7 +484,8 @@ class DAQRunner:
 
         # Stops all DHCP response initially
         # Selectively enables dhcp response at ipaddr stage based on dhcp mode
-        gateway.stop_dhcp_response(device.mac)
+        if device.dhcp_mode != DHCPMode.EXTERNAL:
+            gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
         try:
@@ -572,7 +577,13 @@ class DAQRunner:
         set_num = self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
-        gateway = gateway_manager.Gateway(self, group_name, set_num, self.network)
+        if device.dhcp_mode == DHCPMode.EXTERNAL:
+            # TODO to be removed.
+            device.dhcp_mode = None
+            gateway = external_gateway.ExternalGateway(self, group_name, set_num)
+        else:
+            gateway = container_gateway.ContainerGateway(self, group_name, set_num)
+
         try:
             gateway.initialize()
         except Exception:

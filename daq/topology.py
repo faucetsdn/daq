@@ -5,7 +5,7 @@ import os
 import time
 import yaml
 
-from gateway import Gateway
+from base_gateway import BaseGateway
 
 import logger
 
@@ -271,8 +271,8 @@ class FaucetTopology:
         self._generate_port_acls()
 
     def _get_gw_ports(self, port_set):
-        base_port = Gateway.SET_SPACING * port_set
-        end_port = base_port + Gateway.NUM_SET_PORTS
+        base_port = BaseGateway.SET_SPACING * port_set
+        end_port = base_port + BaseGateway.NUM_SET_PORTS
         return list(range(base_port, end_port))
 
     def _get_bcast_ports(self, port_set):
