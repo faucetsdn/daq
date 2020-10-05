@@ -17,7 +17,9 @@ def main():
     dash_break_line = '--------------------\n'
     description_dhcp_short = 'Reconnect device and check for DHCP request.'
     description_private_address = 'Device supports all private address ranges.'
+    description_dhcp_change = 'Device receives new IP address after IP change and port toggle.'
     running_port_toggle = 'Running dhcp port_toggle test'
+    running_dhcp_change = 'Running dhcp change test'
     ip_notification = 'ip notification'
     result = None
     summary = None
@@ -91,6 +93,18 @@ def main():
             return 'pass', 'All private address ranges are supported.'
         return 'fail', 'Not all private address ranges are supported.'
 
+    def _test_dhcp_change():
+        fd = open(ipaddr_log, 'r')
+        run_dhcp_change = False
+        for line in fd:
+            if run_dhcp_change:
+                if ip_notification in line:
+                    return 'pass', 'Device has received new IP address.'
+            if running_dhcp_change in line:
+                run_dhcp_change = True
+        fd.close()
+        return 'fail', 'Device has not received new IP address.'
+
     _write_report("{b}{t}\n{b}".format(b=dash_break_line, t=TEST_REQUEST))
 
     if TEST_REQUEST == 'connection.network.dhcp_short':
@@ -99,6 +113,9 @@ def main():
     elif TEST_REQUEST == 'connection.dhcp.private_address':
         result, summary = _test_private_address()
         _write_report("{d}\n{b}".format(b=dash_break_line, d=description_private_address))
+    elif TEST_REQUEST == 'connection.network.dhcp_change':
+        result, summary = _test_dhcp_change()
+        _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_change))
 
     _write_report("RESULT {r} {t} {s}\n".format(r=result, t=TEST_REQUEST, s=summary))
 

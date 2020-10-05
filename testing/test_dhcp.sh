@@ -31,7 +31,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 }
 EOF
 
-# Multi subnet multi subnet tests
+# Multi subnet tests
 intf_mac="9a02571e8f04"
 mkdir -p local/site/mac_addrs/$intf_mac
 cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
@@ -48,7 +48,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 }
 EOF
 
-# ip change test
+# ip and dhcp change tests
 intf_mac="9a02571e8f05"
 mkdir -p local/site/mac_addrs/$intf_mac
 cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
