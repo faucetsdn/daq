@@ -133,6 +133,14 @@ enum RunTriggerType {
   VLAN = 1;
 }
 
+enum DHCPMode {
+  NORMAL = 0;
+  STATIC_IP = 1;
+  EXTERNAL = 2;
+  LONG_RESPONSE = 3;
+  IP_CHANGE = 4;
+}
+
 /**
  * USI paramters
 **/
