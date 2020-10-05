@@ -36,4 +36,7 @@ else
     new="dhcp-host=$mac_addr,$new_ip"
     flock /etc/dnsmasq.conf echo $new >> /etc/dnsmasq.conf
 fi
+
+source change_dhcp_range $(echo $new_ip | cut -d '.' -f 1,2,3).0 $(echo $new_ip | cut -d '.' -f 1,2,3).255 24
+
 echo $mac_addr current IP: $original_ip new IP: $new_ip
