@@ -3,10 +3,13 @@
 # Catch errors in diff piped through cat
 set -o pipefail
 
-if [ -z "$DAQ_TEST" ]; then
-    echo DAQ_TEST not defined.
+if [ $# != 1 ]; then
+    echo Usage: $0 test_name
     false
 fi
+
+DAQ_TEST=$1
+shift
 
 function test_finish {
     echo Exiting test script.
@@ -57,6 +60,7 @@ if [ -d local ]; then
 fi
 
 mkdir -p local inst
+rm -rf inst/port_acls
 
 echo I am g`whoami`
 

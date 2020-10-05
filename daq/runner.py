@@ -7,20 +7,24 @@ import threading
 import time
 import traceback
 import uuid
+import json
+import pathlib
 from datetime import datetime, timedelta, timezone
 
 import configurator
 import faucet_event_client
-import gateway as gateway_manager
+import container_gateway
+
+import external_gateway
 import gcp
 import host as connected_host
 import network
 import stream_monitor
 from wrappers import DaqException
 import logger
+from proto.system_config_pb2 import DHCPMode
 
 LOGGER = logger.get_logger('runner')
-
 
 class PortInfo:
     """Simple container for device port info"""
@@ -43,9 +47,11 @@ class Device:
         self.host = None
         self.gateway = None
         self.group = None
-        self.port = PortInfo()
+        self.port = None
         self.dhcp_ready = False
+        self.dhcp_mode = None
         self.ip_info = IpInfo()
+        self.set_id = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -55,19 +61,33 @@ class Devices:
     """Container for all devices"""
     def __init__(self):
         self._devices = {}
+        self._set_ids = set()
 
-    def new_device(self, mac):
+    def new_device(self, mac, port_info=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
         device = Device()
         device.mac = mac
         self._devices[mac] = device
+        device.port = port_info if port_info else PortInfo()
+        port_no = device.port.port_no
+        set_id = port_no if port_no else self._allocate_set_id()
+        assert set_id not in self._set_ids, "Duplicate device set id %d" % set_id
+        self._set_ids.add(set_id)
+        device.set_id = set_id
         return device
+
+    def _allocate_set_id(self):
+        set_id = 1
+        while set_id in self._set_ids:
+            set_id += 1
+        return set_id
 
     def remove(self, device):
         """Removing a device"""
         assert self.contains(device), "Device %s not found." % device
         del self._devices[device.mac]
+        self._set_ids.remove(device.set_id)
 
     def get(self, device_mac):
         """Get a device using its mac address"""
@@ -143,16 +163,18 @@ class DAQRunner:
         self.result_log = self._open_result_log()
         self._system_active = False
         logging_client = self.gcp.get_logging_client()
-        self._daq_run_id = uuid.uuid4()
+        self.daq_run_id = self._init_daq_run_id()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
-                                          labels={"daq_run_id": str(self._daq_run_id)})
-        test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE), [])
+                                          labels={"daq_run_id": self.daq_run_id})
+        test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE))
         if self.config.get('keep_hold'):
             LOGGER.info('Appending test_hold to master test list')
-            test_list.append('hold')
+            if 'hold' not in test_list:
+                test_list.append('hold')
         config['test_list'] = test_list
-        LOGGER.info('DAQ RUN id: %s' % self._daq_run_id)
+        config['test_metadata'] = self._get_test_metadata()
+        LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
         LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
         LOGGER.info('DAQ version %s' % self._daq_version)
         LOGGER.info('LSB release %s' % self._lsb_release)
@@ -164,6 +186,12 @@ class DAQRunner:
     def _get_states(self):
         states = connected_host.pre_states() + self.config['test_list']
         return states + connected_host.post_states()
+
+    def _init_daq_run_id(self):
+        daq_run_id = str(uuid.uuid4())
+        with open('inst/daq_run_id.txt', 'w') as output_stream:
+            output_stream.write(daq_run_id + '\n')
+        return daq_run_id
 
     def _send_heartbeat(self):
         message = {
@@ -182,7 +210,7 @@ class DAQRunner:
             'version': self._daq_version,
             'lsb': self._lsb_release,
             'uname': self._sys_uname,
-            'daq_run_id': str(self._daq_run_id)
+            'daq_run_id': self.daq_run_id
         }
         data_retention_days = self.config.get('run_data_retention_days',
                                               self._DEFAULT_RETENTION_DAYS)
@@ -303,8 +331,7 @@ class DAQRunner:
                 self._ports[port] = PortInfo()
                 self._ports[port].port_no = port
             if not self._devices.get(target_mac):
-                device = self._devices.new_device(target_mac)
-                device.port = self._ports[port]
+                self._devices.new_device(target_mac, port_info=self._ports[port])
             self._target_set_trigger(self._devices.get(target_mac))
         else:
             LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
@@ -315,6 +342,7 @@ class DAQRunner:
             device = self._devices.new_device(target_mac)
         else:
             device = self._devices.get(target_mac)
+        device.dhcp_mode = DHCPMode.EXTERNAL
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
@@ -456,7 +484,8 @@ class DAQRunner:
 
         # Stops all DHCP response initially
         # Selectively enables dhcp response at ipaddr stage based on dhcp mode
-        gateway.stop_dhcp_response(device.mac)
+        if device.dhcp_mode != DHCPMode.EXTERNAL:
+            gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
         try:
@@ -479,33 +508,62 @@ class DAQRunner:
         except Exception as e:
             self.target_set_error(device, e)
 
-    def _get_test_list(self, test_file, test_list):
+    def _get_test_list(self, test_file):
         no_test = self.config.get('no_test', False)
         if no_test:
             LOGGER.warning('Suppressing configured tests because no_test')
-            return test_list
-        LOGGER.info('Reading test definition file %s', test_file)
-        with open(test_file) as file:
-            line = file.readline()
-            while line:
-                cmd = re.sub(r'#.*', '', line).strip().split()
-                cmd_name = cmd[0] if cmd else None
-                argument = cmd[1] if len(cmd) > 1 else None
-                if cmd_name == 'add':
-                    LOGGER.debug('Adding test %s from %s', argument, test_file)
-                    test_list.append(argument)
-                elif cmd_name == 'remove':
-                    if argument in test_list:
-                        LOGGER.debug('Removing test %s from %s', argument, test_file)
-                        test_list.remove(argument)
-                elif cmd_name == 'include':
-                    self._get_test_list(argument, test_list)
-                elif cmd_name == 'build' or not cmd_name:
-                    pass
-                else:
-                    LOGGER.warning('Unknown test list command %s', cmd_name)
+            return ['hold']
+        head = []
+        body = []
+        tail = []
+
+        def get_test_list(test_file):
+            LOGGER.info('Reading test definition file %s', test_file)
+            with open(test_file) as file:
                 line = file.readline()
-        return test_list
+                while line:
+                    cmd = re.sub(r'#.*', '', line).strip().split()
+                    cmd_name = cmd[0] if cmd else None
+                    argument = cmd[1] if len(cmd) > 1 else None
+                    ordering = cmd[2] if len(cmd) > 2 else None
+                    if cmd_name == 'add':
+                        LOGGER.debug('Adding test %s from %s', argument, test_file)
+                        if ordering == "first":
+                            head.append(argument)
+                        elif ordering == "last":
+                            tail.append(argument)
+                        else:
+                            body.append(argument)
+                    elif cmd_name == 'remove':
+                        LOGGER.debug('Removing test %s from %s', argument, test_file)
+                        for section in (head, body, tail):
+                            if argument in section:
+                                section.remove(argument)
+                    elif cmd_name == 'include':
+                        get_test_list(argument)
+                    elif cmd_name == 'build' or not cmd_name:
+                        pass
+                    else:
+                        LOGGER.warning('Unknown test list command %s', cmd_name)
+                    line = file.readline()
+        get_test_list(test_file)
+        return [*head, *body, *tail]
+
+    def _get_test_metadata(self, extension=".daqmodule", root="."):
+        metadata = {}
+        for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
+            if str(meta_file).startswith('inst') or str(meta_file).startswith('local'):
+                continue
+            with open(meta_file) as fd:
+                metadatum = json.loads(fd.read())
+                assert "name" in metadatum and "startup_script" in metadatum
+                module = metadatum["name"]
+                assert module not in metadata, "Duplicate module definition for %s" % module
+                metadata[module] = {
+                    "startup_script": metadatum["startup_script"],
+                    "basedir": meta_file.parent
+                }
+        return metadata
 
     def _activate_device_group(self, device):
         group_name = device.group
@@ -519,7 +577,13 @@ class DAQRunner:
         set_num = self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
-        gateway = gateway_manager.Gateway(self, group_name, set_num, self.network)
+        if device.dhcp_mode == DHCPMode.EXTERNAL:
+            # TODO to be removed.
+            device.dhcp_mode = None
+            gateway = external_gateway.ExternalGateway(self, group_name, set_num)
+        else:
+            gateway = container_gateway.ContainerGateway(self, group_name, set_num)
+
         try:
             gateway.initialize()
         except Exception:
@@ -782,9 +846,12 @@ class DAQRunner:
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
 
     def _load_base_config(self, register=True):
-        base = self.configurator.load_and_merge({}, self.config.get('base_conf'))
-        site_config = self.configurator.load_config(self.config.get('site_path'),
-                                                    self._MODULE_CONFIG, optional=True)
+        base_conf = self.config.get('base_conf')
+        LOGGER.info('Loading base module config from %s', base_conf)
+        base = self.configurator.load_and_merge({}, base_conf)
+        site_path = self.config.get('site_path')
+        LOGGER.info('Loading site module config from %s', base_conf)
+        site_config = self.configurator.load_config(site_path, self._MODULE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)

@@ -31,7 +31,7 @@ cmd/run -s -k interfaces.faux.opts=telnet
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
-fgrep 'security.ports.nmap' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
+fgrep 'security.nmap.ports' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 DAQ_TARGETS=test_hold cmd/build
 
 # Except with a default MUD file that blocks the port.
@@ -39,7 +39,7 @@ echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
 cmd/run -s interfaces.faux.opts=telnet device_specs=resources/device_specs/simple.json
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
-fgrep 'security.ports.nmap'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
+fgrep 'security.nmap.ports'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
@@ -47,7 +47,7 @@ cp config/system/ext.yaml local/system.yaml
 cmd/run -s
 cat inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
-fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | tee -a $TEST_RESULTS
+fgrep -i switch inst/run-9a02571e8f00/nodes/ping*/activate.log | sed -e "s/\r//g" | tee -a $TEST_RESULTS
 cat -vet inst/run-9a02571e8f00/nodes/ping*/activate.log
 count=$(fgrep icmp_seq=5 inst/run-9a02571e8f00/nodes/ping*/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
@@ -61,6 +61,10 @@ cat inst/result.log | tee -a $TEST_RESULTS # ping test should fail since there a
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
 cp config/system/muddy.conf local/system.conf
+
+if [ -z `which tcpdump` ]; then
+    export PATH=/usr/sbin:$PATH
+fi
 
 device_traffic="tcpdump -en -r inst/run-9a02571e8f01/scans/monitor.pcap port 47808"
 device_bcast="$device_traffic and ether broadcast"

@@ -62,8 +62,16 @@ function redact {
         -e 's/0\.[0-9]+s latency/XXX/' \
         -e 's/open\|filtered/closed/' \
         -e 's/DAQ version.*//' \
+        -e 's/Seq Index.*//' \
+        -e 's/Ignored State.*//' \
         -e 's/Not shown: .* ports//' \
-        -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/'
+        -e 's/[ \t]*$//' \
+        -e 's/\t/ /g' \
+        -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/g' \
+        -e 's/-oG .*\/tmp/-oG XXX\/tmp/' \
+        -e 's/# Nmap [0-9]{1,4}\.[0-9]{1,4}/\# Nmap XXX/'
+
+    # NOTE: Whitespace redaction (\t) is because many IDEs automatically strip/convert tabs to spaces.
 }
 
 function monitor_log {

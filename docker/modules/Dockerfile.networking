@@ -5,11 +5,22 @@
 
 FROM daqf/aardvark:latest
 
-RUN $AG update && $AG install dnsmasq ethtool iptables netcat ntp python curl
+RUN $AG update && $AG install apt-transport-https ca-certificates curl gnupg2
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+    | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+RUN $AG update && $AG install dnsmasq ethtool iptables netcat ntp \
+    python3 python3-pip python3-setuptools gnupg google-cloud-sdk
 
 COPY docker/include/network/scripts/* ./
 RUN mkdir -p /etc
 COPY docker/include/etc/ntp.conf /etc
+RUN pip3 install pyyaml
+
+COPY resources/test_site/ test_site/
+COPY udmi/ udmi/
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump

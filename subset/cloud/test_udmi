@@ -21,14 +21,9 @@ message_types="state pointset system"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
 
-# Do basic network connectivity check
+# Enable dns for GCP lookup
 echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-cat /etc/resolv.conf
 
-ping -c 2 google.com || true #  blocked on github actions
-echo "********GOOGLE PAGE********"
-curl google.com
-echo "***************************"
 if [ "$device_id" == null ]; then
     skip="No device id"
 elif [ ! -f $gcp_cred ]; then
@@ -39,7 +34,7 @@ fi
 
 if [ -n "$skip" ]; then
     echo Skipping udmi test because $skip
-    for message_type in $message_types; do
+    for message_type in provision $message_types; do
         TEST_NAME="cloud.udmi.$message_type"
         TEST_DESCRIPTION="Validates device $message_type payload."
         RESULT_AND_SUMMARY="RESULT skip $TEST_NAME $skip"
@@ -62,6 +57,22 @@ echo Extracted service $service_id
 echo Configured topic is $gcp_topic
 echo Target device is $device_id
 echo
+
+ACTIVATE_LOG=/config/gw/nodes/gw*/activate.log
+more $ACTIVATE_LOG | cat
+if fgrep "Processing provisioning request for device $device_id" $ACTIVATE_LOG; then
+    result=pass
+    detail="Found provisioning request"
+else
+    result=fail
+    detail="No provisioning request"
+fi
+TEST_NAME="cloud.udmi.provision"
+TEST_DESCRIPTION="Validates dynamic provisioning request"
+RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
+write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                 "$skip" "$RESULT_AND_SUMMARY"
+
 
 timeout 90 validator/bin/validate $project_id $schema_path pubsub $subscription local/ || true
 

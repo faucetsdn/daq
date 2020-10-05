@@ -32,7 +32,7 @@ class BaseSwitchControllerTest {
   @Test
   void mapSimpleTableSampleInputAT() {
     String raw = "Interface   Admin    Pri  Oper     Power Device          Class Max       \n"
-        + "port1.0.1   Enabled  Low  Powered   3337 n/a                 0 15400 [C]";
+               + "port1.0.1   Enabled  Low  Powered   3337 n/a                 0 15400 [C]";
     String[] colNames = {"Interface", "Admin", "Pri", "Oper", "Power", "Device", "Class", "Max"};
     String[] mapNames = {"interface", "admin", "pri", "oper", "power", "device", "class", "max"};
     Map<String, String> expected = Map.of("interface", "port1.0.1", "admin", "Enabled", "pri",
@@ -47,10 +47,103 @@ class BaseSwitchControllerTest {
   @Test
   void mapSimpleTableSampleInputCisco9300() {
     String raw = "Port         Name               Status       Vlan       Duplex  Speed Type\n"
-        + "Gi1/0/1                         connected    routed     a-full  a-100 10/100/1000BaseTX";
+               + "Gi1/0/1                         connected    routed     a-full  a-100 10/100/1000BaseTX";
     String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
-    String[] mapNames =       {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
+    String[] mapNames =  {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
     Map<String, String> expected = Map.of("interface", "Gi1/0/1", "name", "", "status",
+        "connected", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
+        "type", "10/100/1000BaseTX");
+    Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
+    for (String key : response.keySet()) {
+      assertEquals(expected.get(key), response.get(key));
+    }
+  }
+
+  @Test
+  void mapSimpleTableSampleInput2Cisco9300() {
+    String raw =  "Port      Name               Status       Vlan       Duplex  Speed Type\n"
+                + "Gi1/0/5                      connected    trunk      a-full a-1000 10/100/1000BaseTX";
+    String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
+    String[] mapNames =  {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
+    Map<String, String> expected = Map.of("interface", "Gi1/0/5", "name", "", "status",
+        "connected", "vlan", "trunk", "duplex", "a-full", "speed", "a-1000",
+        "type", "10/100/1000BaseTX");
+    Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
+    for (String key : response.keySet()) {
+      assertEquals(expected.get(key), response.get(key));
+    }
+  }
+
+  @Test
+  void mapSimpleTableTestStartOffsetInputCisco9300() {
+    String raw =  "Port      Name               Status       Vlan       Duplex  Speed Type\n"
+                + "Gi1/0/5                     connected      trunk    a-full a-1000 10/100/1000BaseTX";
+    String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
+    String[] mapNames =  {"interface", "name",  "status", "vlan", "duplex", "speed", "type"};
+    Map<String, String> expected = Map.of("interface", "Gi1/0/5", "name", "", "status",
+        "connected", "vlan", "trunk", "duplex", "a-full", "speed", "a-1000",
+        "type", "10/100/1000BaseTX");
+    Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
+    System.out.println(response);
+    for (String key : response.keySet()) {
+      assertEquals(expected.get(key), response.get(key));
+    }
+  }
+
+  @Test
+  void mapSimpleTableTestStartOffsetInput2Cisco9300() {
+    String raw =  "Port      Name               Status       Vlan       Duplex  Speed Type\n"
+               + "Gi1/0/5                     connected     trunk    a-full a-1000 10/100/1000BaseTX";
+    String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
+    String[] mapNames =  {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
+    Map<String, String> expected = Map.of("interface", "Gi1/0/5", "name", "", "status",
+        "connected", "vlan", "trunk", "duplex", "a-full", "speed", "a-1000",
+        "type", "10/100/1000BaseTX");
+    Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
+    System.out.println(response);
+    for (String key : response.keySet()) {
+      assertEquals(expected.get(key), response.get(key));
+    }
+  }
+
+  @Test
+  void mapSimpleTableTestStartOffsetInput3Cisco9300() {
+    String raw =  "Port      Name               Status       Vlan       Duplex  Speed Type\n"
+                + "Gi1/0/5                     connected      trunk      a-full a-1000 10/100/1000BaseTX";
+    String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
+    String[] mapNames =  {"interface", "name",  "status", "vlan", "duplex", "speed", "type"};
+    Map<String, String> expected = Map.of("interface", "Gi1/0/5", "name", "", "status",
+        "connected", "vlan", "trunk", "duplex", "a-full", "speed", "a-1000",
+        "type", "10/100/1000BaseTX");
+    Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
+    System.out.println(response);
+    for (String key : response.keySet()) {
+      assertEquals(expected.get(key), response.get(key));
+    }
+  }
+
+  @Test
+  void mapSimpleTableMissingValues() {
+    String raw = "Port         Name               Status       Vlan       Duplex  Speed Type\n"
+               + "Gi1/0/1                                      routed     a-full  a-100 10/100/1000BaseTX";
+    String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
+    String[] mapNames =  {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
+    Map<String, String> expected = Map.of("interface", "Gi1/0/1", "name", "", "status",
+        "", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
+        "type", "10/100/1000BaseTX");
+    Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);
+    for (String key : response.keySet()) {
+      assertEquals(expected.get(key), response.get(key));
+    }
+  }
+
+  @Test
+  void mapSimpleTableMissingValuesInFront() {
+    String raw = "Port         Name               Status       Vlan       Duplex  Speed Type\n"
+               + "                                connected    routed     a-full  a-100 10/100/1000BaseTX";
+    String[] colNames =  {"Port", "Name", "Status", "Vlan", "Duplex", "Speed", "Type"};
+    String[] mapNames =  {"interface", "name", "status", "vlan", "duplex", "speed", "type"};
+    Map<String, String> expected = Map.of("interface", "", "name", "", "status",
         "connected", "vlan", "routed", "duplex", "a-full", "speed", "a-100",
         "type", "10/100/1000BaseTX");
     Map<String, String> response = BaseSwitchController.mapSimpleTable(raw, colNames, mapNames);

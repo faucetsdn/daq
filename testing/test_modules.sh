@@ -10,22 +10,18 @@ cp config/system/all.conf local/system.conf
 TEST_LIST=/tmp/module_tests.txt
 
 cat > $TEST_LIST <<EOF
-ping
 tls alt
 tls alt tls
 tls alt expiredtls
-nmap
-nmap bacnet
-nmap telnet
 ssh
 ssh ssh
 ssh sshv1
 EOF
 
-DAQ_TARGETS=aardvark,faux1,faux2 bin/docker_build force inline
+DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 bin/docker_build force inline
 
-mkdir -p inst/modules/ping/config
-echo '{"static_ip": "10.20.0.5"}' > inst/modules/ping/config/module_config.json
+mkdir -p inst/modules/tls/config
+cp resources/setups/baseline/module_config.json inst/modules/tls/config/module_config.json
 
 cat $TEST_LIST | while read module args; do
     if ! docker inspect daqf/test_$module:latest > /dev/null; then

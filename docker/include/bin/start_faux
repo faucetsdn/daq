@@ -68,6 +68,13 @@ elif [ -n "${options[passwordfail]}" ]; then
     service ssh start
 fi
 
+# security.nmap.http faux device setup
+if [ -n "${options[ohttp]}" ]; then
+    cp /root/nginx/nginxpass.conf /etc/nginx/nginx.conf
+    sed -i 's/listen 80;/listen 12345; listen 54321;/' /etc/nginx/nginx.conf
+    service nginx start
+fi
+
 # To capture all the data in/out of the faux device for debugging, uncomment
 # the following lines. The pcap file will end up in inst/faux/{hostname}.pcap
 # on the DAQ controller.
@@ -151,18 +158,20 @@ fi
 
 # NTPv4 query to the NTP server learnt from DHCP.
 # NTPv3 query to the IP of time.google.com (since resolv.conf is modified by other tests)
-STATIC_NTP_SERVER=216.239.35.8
 if [ -n "${options[ntpv4]}" ]; then
     dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
     ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
-    echo Transmitting NTP query to $ntp_server using NTPv4
-    java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 2 &
-    sleep 5
+    (while true; do
+        echo Transmitting NTP query to $ntp_server using NTPv4
+        java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 > ntp.log
+        sleep 8
+    done) &
 elif [ -n "${options[ntpv3]}" ]; then
-    (while date; do
-    	echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
-    	java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 2 &
-	    sleep 5
+    STATIC_NTP_SERVER=216.239.35.8
+    (while true; do
+        echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
+        timeout 5 java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 > ntp.log
+        sleep 8
     done) &
 fi
 
@@ -212,13 +221,30 @@ if [ -n "${options[tls]}" ]; then
     echo Starting tls server on port 443 https.
     mv /root/nginx/nginxpass.conf /etc/nginx/nginx.conf
     service nginx start
+    python tlsfaux/client.py 1.2 google.com &
+    python tlsfaux/client.py 1.3 google.com &
 elif [ -n "${options[expiredtls]}" ]; then
     echo Starting expired tls server on port 443 https.
     mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
     service nginx start
+    python tlsfaux/client.py 1.2 not-a-good-url.google.com &
+    python tlsfaux/client.py 1.3 not-a-good-url.google.com &
 fi
 
 if [ -n "${options[pubber]}" ]; then
+    extraField=`jq .extraField local/pubber.json`
+    if [ "$extraField" == null ]; then
+        deviceId=`jq -r .deviceId local/pubber.json`
+        gateway=`ip route | sed -rn 's/default via (.*) dev.*/\1/p'`
+        echo Contacting pagent $gateway for new device key for $deviceId
+        curl http://$gateway:8192?device=$deviceId > pagent.json || echo pagent error
+        echo pagent reply:
+        cat pagent.json
+        jq -r '."rsa_private.pem"' pagent.json > local/rsa_private.pem
+        openssl pkcs8 -topk8 -inform PEM -outform DER -in local/rsa_private.pem -nocrypt > local/rsa_private.pkcs8
+        echo Updated pubber private key from pagent for device $deviceId
+        ls -l local/rsa_*
+    fi
     echo Running cloud pubber tool...
     (while date; do
          pubber/bin/run local/pubber.json

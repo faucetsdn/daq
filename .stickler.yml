@@ -7,8 +7,10 @@ linters:
     python: 3
     max-line-length: 100
   py3k:
+    ignore: E1601
   checkstyle:
     config: ./.checkstyle.xml
 files:
   ignore:
     - 'libs/proto/*'
+    - '*__init__.py'

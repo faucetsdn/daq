@@ -12,13 +12,12 @@ from clib import tcpdump_helper
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
+from proto.system_config_pb2 import DHCPMode
 
 import configurator
-import docker_test
+from test_modules import DockerModule, IpAddrModule, NativeModule
 import gcp
-import ipaddr_test
 import logger
-
 
 class _STATE:
     """Host state enum for testing cycle"""
@@ -32,6 +31,7 @@ class _STATE:
     TESTING = 'Active test'
     DONE = 'Done with sequence'
     TERM = 'Host terminated'
+
 
 
 class MODE:
@@ -109,7 +109,6 @@ class ConnectedHost:
         self._monitor_scan_sec = int(config.get('monitor_scan_sec', 0))
         _default_timeout_sec = int(config.get('default_timeout_sec', 0))
         self._default_timeout_sec = _default_timeout_sec if _default_timeout_sec else None
-        self._finish_hook_script = config.get('finish_hook')
         self._usi_config = config.get('usi_setup', {})
         self._topology_hook_script = config.get('topology_hook')
         self._mirror_intf_name = None
@@ -207,21 +206,24 @@ class ConnectedHost:
         return self._loaded_config.get('static_ip')
 
     def _get_dhcp_mode(self):
-        return self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', 'normal')
+        mode_str = self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', "NORMAL")
+        return DHCPMode.Value(mode_str)
 
     def _get_unique_upload_path(self, file_name):
         base = os.path.basename(file_name)
         partial = os.path.join('tests', self.test_name, base) if self.test_name else base
         return os.path.join('run_id', self.run_id, partial)
 
-    def _load_config(self, config, path):
+    def _load_config(self, name, config, path):
+        if name:
+            self.logger.info('Loading %s module config from %s', name, path)
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
 
     def _write_module_config(self, config, path):
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
     def _type_path(self):
-        dev_config = self._load_config({}, self._device_base)
+        dev_config = self._load_config(None, {}, self._device_base)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -355,6 +357,7 @@ class ConnectedHost:
         static_ip = self._get_static_ip()
         if static_ip:
             self.logger.info('Target device %s using static ip', self)
+            self.device.dhcp_mode = DHCPMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
                 'mac': self.target_mac,
@@ -362,13 +365,16 @@ class ConnectedHost:
                 'delta': -1
             }, self.gateway)
         else:
-            dhcp_mode = self._get_dhcp_mode()
+            if not self.device.dhcp_mode:
+                dhcp_mode = self._get_dhcp_mode()
+                self.device.dhcp_mode = dhcp_mode
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
-                if dhcp_mode == 'long_response' else 0
+                if self.device.dhcp_mode == DHCPMode.LONG_RESPONSE else 0
             self.logger.info('Target device %s using %s DHCP mode, wait %s',
-                             self, dhcp_mode, wait_time)
-            self.gateway.change_dhcp_response_time(self.target_mac, wait_time)
+                             self, DHCPMode.Name(self.device.dhcp_mode), wait_time)
+            if self.device.dhcp_mode != DHCPMode.EXTERNAL:
+                self.gateway.change_dhcp_response_time(self.target_mac, wait_time)
         _ = [listener(self.device) for listener in self._dhcp_listeners]
 
     def _aux_module_timeout_handler(self):
@@ -382,6 +388,8 @@ class ConnectedHost:
     def heartbeat(self):
         """Checks module run time for each event loop"""
         timeout_sec = self._get_test_timeout(self.test_name)
+        if self.test_host:
+            self.test_host.heartbeat()
         if not timeout_sec or not self.test_start:
             return
         timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)
@@ -457,7 +465,7 @@ class ConnectedHost:
         delta_t = datetime.now() - self._startup_time
         if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
-        if self._get_dhcp_mode() == "ip_change":
+        if self._get_dhcp_mode() == DHCPMode.IP_CHANGE:
             return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         return True
 
@@ -616,7 +624,20 @@ class ConnectedHost:
         return path
 
     def _new_test(self, test_name):
-        clazz = ipaddr_test.IpAddrTest if test_name == 'ipaddr' else docker_test.DockerTest
+        if test_name in self.config['test_metadata']:
+            metadatum = self.config['test_metadata'][test_name]
+            startup_script = metadatum['startup_script']
+            basedir = os.path.abspath(metadatum['basedir'])
+            new_root = os.path.abspath(os.path.join(self.devdir, 'test_root'))
+            if os.path.isdir(new_root):
+                shutil.rmtree(new_root)
+            os.makedirs(new_root)
+            for src_file in os.listdir(basedir):
+                src_full = os.path.join(basedir, src_file)
+                os.symlink(src_full, os.path.join(new_root, src_file))
+            return NativeModule(self, self.devdir, test_name, self._loaded_config, new_root,
+                                startup_script)
+        clazz = IpAddrModule if test_name == 'ipaddr' else DockerModule
         return clazz(self, self.devdir, test_name, self._loaded_config)
 
     def _run_test(self, test_name):
@@ -685,6 +706,7 @@ class ConnectedHost:
             'port_base': self._port_base,
             'device_base': self._device_aux_path(),
             'type_base': self._type_aux_path(),
+            'gw_base': self.gateway.get_base_dir(),
             'scan_base': self.scan_base
         }
         if ext_loip:
@@ -709,13 +731,13 @@ class ConnectedHost:
         return os.path.join(self._host_dir_path(), 'tmp')
 
     def _finish_hook(self):
-        if self._finish_hook_script:
+        script = self.config.get('finish_hook')
+        if script:
             finish_dir = os.path.join(self.devdir, 'finish', self._host_name())
             shutil.rmtree(finish_dir, ignore_errors=True)
             os.makedirs(finish_dir)
-            self.logger.info('Executing finish_hook: %s %s', self._finish_hook_script, finish_dir)
-            os.system('%s %s 2>&1 > %s/finish.out' %
-                      (self._finish_hook_script, finish_dir, finish_dir))
+            self.logger.info('Executing finish_hook: %s %s', script, finish_dir)
+            os.system('%s %s 2>&1 > %s/finish.out' % (script, finish_dir, finish_dir))
 
     def _topology_hook(self):
         if self._topology_hook_script:
@@ -740,7 +762,8 @@ class ConnectedHost:
             'run_id': self.run_id,
             'mac_addr': self.target_mac,
             'started': gcp.get_timestamp(),
-            'switch': self._get_switch_config()
+            'switch': self._get_switch_config(),
+            'usi': self._usi_config
         }
         config['run_info'].update(self.runner.get_run_info())
 
@@ -748,9 +771,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        self._load_config(config, self._type_path())
-        self._load_config(config, self._device_base)
-        self._load_config(config, self._port_base)
+        self._load_config('type', config, self._type_path())
+        self._load_config('device', config, self._device_base)
+        self._load_config('port', config, self._port_base)
         return config
 
     def record_result(self, name, **kwargs):
@@ -773,6 +796,7 @@ class ConnectedHost:
         result = {
             'name': name,
             'runid': (self.run_id if run_info else None),
+            'daq_run_id': self.runner.daq_run_id,
             'device_id': self.target_mac,
             'started': self.test_start,
             'timestamp': current if current else gcp.get_timestamp(),
@@ -818,7 +842,7 @@ class ConnectedHost:
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = self._load_config({}, self._device_base)
+        dev_config = self._load_config('base', {}, self._device_base)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         if self.target_port:

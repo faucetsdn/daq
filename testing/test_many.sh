@@ -86,8 +86,8 @@ cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
 ipaddr_timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
-ip_notifications=$(fgrep "ip notification" inst/run-*/nodes/ipaddr*/activate.log | wc -l)
-alternate_subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/activate.log | wc -l)
+ip_notifications=$(fgrep "ip notification" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
+alternate_subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
 
 cat inst/run-*/scans/ip_triggers.txt
 static_ips=$(fgrep nope inst/run-*/scans/ip_triggers.txt | wc -l)
@@ -95,7 +95,7 @@ ntp_traffic=$(fgrep "RESULT fail base.startup.ntp" inst/run-*/nodes/ping*/tmp/re
 dns_traffic=$(fgrep "RESULT fail base.startup.dns" inst/run-*/nodes/ping*/tmp/result_lines.txt | wc -l)
 
 more inst/run-*/nodes/ping*/activate.log | cat
-more inst/run-*/nodes/ipaddr*/activate.log | cat
+more inst/run-*/nodes/ipaddr*/tmp/activate.log | cat
 
 echo Found $results clean runs, $timeouts timeouts, and $static_ips static_ips.
 echo ipaddr had $ip_notifications notifications and $ipaddr_timeouts timeouts.
@@ -112,8 +112,9 @@ echo Enough ipaddr tests: $((ip_notifications >= (NUM_IPADDR_TEST_DEVICES - NUM_
 echo Enough alternate subnet ips: $((alternate_subnet_ip >= (NUM_IPADDR_TEST_DEVICES - NUM_IPADDR_TEST_TIMEOUT_DEVICES) )) | tee -a $TEST_RESULTS
 echo Enough ipaddr timeouts: $((ipaddr_timeouts >= NUM_IPADDR_TEST_TIMEOUT_DEVICES)) | tee -a $TEST_RESULTS
 
-echo bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
-bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2
+combine_cmd="bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time count=2"
+echo $combine_cmd
+$combine_cmd
 
 cat inst/reports/combo_*.md
 
@@ -125,13 +126,15 @@ echo Redacted soak diff | tee -a $TEST_RESULTS
 
 if [ -f "$gcp_cred" ]; then
     mv inst/reports/combo_*.md out/report_local.md
-    echo Pulling reports from gcp... from $start_time to $end_time
-    echo \n******Local reports******
+    echo '******Local reports******'
     ls -l inst/reports/report_9a02571e8f05*.md
-    echo *************************\n
+    echo '*************************'
 
-    bin/combine_reports device=9a:02:57:1e:8f:05 from_time=$start_time to_time=$end_time \
-        count=2 from_gcp=true
+    daq_run_id=$(< inst/daq_run_id.txt)
+    echo Pulling reports from gcp for daq RUN id $daq_run_id
+    gcp_extras="daq_run_id=$daq_run_id from_gcp=true"
+    echo $combine_cmd $gcp_extras
+    $combine_cmd $gcp_extras
     echo GCP results diff | tee -a $GCP_RESULTS
     diff inst/reports/combo_*.md out/report_local.md | tee -a $GCP_RESULTS
 fi

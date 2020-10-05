@@ -62,11 +62,16 @@ Example of all necessary parameters in the system.conf related to physical switc
 	# Define the model of the switch to use. This parameter is required.
     switch_setup.model=CISCO_9300
 
-	#Define the username for the switch. This parameter is optional.
+	# Define the username for the switch. This parameter is optional.
     switch_setup.username=tester
 
-	#Define the password for the switch. This parameter is optional.
+	# Define the password for the switch. This parameter is optional.
 	switch_setup.password=switch_p@55
+
+    # If you're using a custom docker network bridge or hosting USI somewhere other than the DAQ machine, do the following: 
+    # Define the usi url using your docker0's ip and port 5000, and re-run bin/setup_base if you're upgrading from versions before 1.9.0
+    # Make sure docker's ip range doesn't conflict with that of the switch. Default docker ip range is 172.17.0.0/16. Default switch ip range is 192.168.0.0/16
+    usi_setup.url=172.17.0.1:5000
 
 ## Conditions for connection.port_duplex
  - pass -> If the duplex mode is detected as full
@@ -80,17 +85,8 @@ Example of all necessary parameters in the system.conf related to physical switc
  - pass -> If the speed of the port is auto-negotiated and determiend to be higher than 10 MBPS
  - fail ->If the speed of the port is determined to be <= 10MBPS
 
-## Conditions for poe.negotiation
- - pass -> If the PoE is able to be auto-negotiated with the device and PoE is enabled for the device.
- - fail ->If the PoE fails to be auto-negotiated with the device and is enabled for the device. This can also fail if associated power data fails to resolve correctly during switch interrogation.
- - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.
-
 ## Conditions for poe.power
  - pass -> If the a PoE device is connected and power has been detected and supplied to the device.
  - fail -> If the a PoE device is connected and *NO* power has been detected and supplied to the device.  Failure also occurs if the switch reports either a faulty PoE state or is denying power to the device. This can also fail if associated power data fails to resolve correctly during switch interrogation.
  - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.
 
- ## Conditions for poe.support
- - pass -> If the port the device is connected to supports PoE and it is enabled on that port.
- - fail -> If the a PoE device is connected to does not support PoE or it is disabled on that port.
- - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.

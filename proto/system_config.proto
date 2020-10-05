@@ -120,11 +120,25 @@ message DaqConfig {
 
   // Configures events that trigger a DAQ run 
   RunTriggerType run_trigger_type = 50;
+
+  // verbose output
+  bool debug_mode = 51;
+
+  // Drop into console mode after test
+  bool use_console = 52;
 }
 
 enum RunTriggerType {
   PORT = 0;
   VLAN = 1;
+}
+
+enum DHCPMode {
+  NORMAL = 0;
+  STATIC_IP = 1;
+  EXTERNAL = 2;
+  LONG_RESPONSE = 3;
+  IP_CHANGE = 4;
 }
 
 /**

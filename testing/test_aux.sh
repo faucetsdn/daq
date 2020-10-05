@@ -9,10 +9,10 @@ echo Aux Tests >> $TEST_RESULTS
 function make_pubber {
     device=$1
     faux=$2
-    fail=$3
+    extra=$3
     gateway=$4
     local_dir=inst/faux/$faux/local/
-    echo Creating $device with $fail/$gateway in $local_dir
+    echo Creating $device with $extra/$gateway in $local_dir
     mkdir -p $local_dir
     if [ "$gateway" == null ]; then
         cp resources/test_site/devices/$device/rsa_private.pkcs8 $local_dir
@@ -25,7 +25,7 @@ function make_pubber {
     "projectId": "$project_id",
     "cloudRegion": $cloud_region,
     "registryId": $registry_id,
-    "extraField": $fail,
+    "extraField": $extra,
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
@@ -36,7 +36,7 @@ EOF
 
 function capture_test_results {
     module_name=$1
-    for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do 
+    for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
       fgrep -h RESULT inst/run-$mac/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
     done
 }
@@ -65,11 +65,11 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4 
+    opts: brute broadcast_client ntpv4
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh 
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh 
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl
 long_dhcp_response_sec: 0
 monitor_scan_sec: 20
 EOF
@@ -87,7 +87,7 @@ if [ -f "$gcp_cred" ]; then
     make_pubber AHU-1 daq-faux-2 null null
     make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
 
-    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar $project_id inst/test_site
+    GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar inst/test_site $project_id
     cat inst/test_site/registration_summary.json | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
     fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
@@ -107,18 +107,18 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
 # Capture RESULT lines from ping activation logs (not generated report).
-for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do 
+for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
   fgrep -h RESULT inst/run-$mac/nodes/ping*/activate.log \
     | sed -e 's/\s*\(%%.*\)*$//' | tee -a $TEST_RESULTS
 done
+
 # Add the RESULT lines from all aux test report files.
 capture_test_results bacext
 capture_test_results macoui
 capture_test_results tls
-capture_test_results passwo # test host names are truncated to 6 characters
-capture_test_results discov
-capture_test_results networ
-capture_test_results ntp
+capture_test_results password
+capture_test_results discover
+capture_test_results network
 
 # Capture peripheral logs
 more inst/run-*/scans/ip_triggers.txt | cat
@@ -166,8 +166,12 @@ cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
-(diff out/redacted_docs.md out/redacted_file.md && echo No report diff) \
-    | tee -a $TEST_RESULTS
+diff out/redacted_docs.md out/redacted_file.md > out/redacted_file.diff
+cat -vet out/redacted_file.diff | tee -a $TEST_RESULTS
+diff_lines=`cat out/redacted_file.diff | wc -l`
+if [ $diff_lines == 0 ]; then
+    echo No report diff | tee -a $TEST_RESULTS
+fi
 
 # Make sure there's no file pollution from the test run.
 git status --porcelain | tee -a $TEST_RESULTS

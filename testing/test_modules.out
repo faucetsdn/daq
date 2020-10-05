@@ -1,36 +1,23 @@
 Running testing/test_modules.sh
 Base Tests
-Testing ping
-RESULT skip base.startup.dhcp Using static ip 10.20.0.5
-RESULT skip base.switch.ping No local IP has been set, check system config
-RESULT pass base.target.ping target reached %% 10.20.0.5
 Testing tls alt
-RESULT skip security.tls.v1 IOException unable to connect to server
-RESULT skip security.tls.v1.x509 IOException unable to connect to server
-RESULT skip security.tls.v1_2 IOException unable to connect to server
-RESULT skip security.tls.v1_2.x509 IOException unable to connect to server
-RESULT skip security.tls.v1_3 IOException unable to connect to server
-RESULT skip security.tls.v1_3.x509 IOException unable to connect to server
+RESULT skip security.tlsv1.server IOException unable to connect to server.
+RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
+RESULT skip security.tlsv1_2.server IOException unable to connect to server.
+RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
+RESULT skip security.tlsv1_3.server IOException unable to connect to server.
 Testing tls alt tls
-RESULT pass security.tls.v1 Certificate active for current date and public key length > 2048.
-RESULT pass security.tls.v1.x509 Certificate active for current date and public key length > 2048.
-RESULT pass security.tls.v1_2 Certificate active for current date and public key length > 2048.
-RESULT pass security.tls.v1_2.x509 Certificate active for current date and public key length > 2048.
-RESULT pass security.tls.v1_3 Certificate active for current date and public key length > 2048.
-RESULT pass security.tls.v1_3.x509 Certificate active for current date and public key length > 2048.
+RESULT pass security.tlsv1.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher Valid.
+RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
+RESULT pass security.tlsv1_2.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher Valid.
+RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
+RESULT pass security.tlsv1_3.server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher check not required.
 Testing tls alt expiredtls
-RESULT fail security.tls.v1 Certificate is expired.
-RESULT fail security.tls.v1.x509 Certificate is expired.
-RESULT fail security.tls.v1_2 Certificate is expired.
-RESULT fail security.tls.v1_2.x509 Certificate is expired.
-RESULT fail security.tls.v1_3 Certificate could not be validated.
-RESULT fail security.tls.v1_3.x509 Certificate could not be validated.
-Testing nmap
-RESULT pass security.ports.nmap Only allowed ports found open.
-Testing nmap bacnet
-RESULT pass security.ports.nmap Only allowed ports found open.
-Testing nmap telnet
-RESULT fail security.ports.nmap Some disallowed ports are open: 23
+RESULT fail security.tlsv1.server Certificate is expired. Certificate has not been signed by a CA.
+RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
+RESULT fail security.tlsv1_2.server Certificate is expired. Certificate has not been signed by a CA.
+RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
+RESULT fail security.tlsv1_3.server Certificate is expired. Certificate has not been signed by a CA.
 Testing ssh
 RESULT skip security.ssh.version Device is not running an SSH server
 Testing ssh ssh

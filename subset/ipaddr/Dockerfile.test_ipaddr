@@ -1,0 +1,11 @@
+FROM daqf/aardvark:latest
+
+RUN $AG update && $AG install python python-setuptools python-pip netcat
+
+RUN pip install --upgrade pip
+RUN pip install scapy
+
+COPY subset/ipaddr/dhcp_tests.py .
+COPY subset/ipaddr/test_dhcp .
+
+CMD ["./test_dhcp"]
