@@ -26,7 +26,9 @@ if [ -n "$LOCAL_IP" ]; then
     echo Switch test with model $SWITCH_MODEL
     echo Switch test with ip:port $SWITCH_IP:$TARGET_PORT
     echo Switch test with username:password $SWITCH_USERNAME:$SWITCH_PASSWORD
-    ping -n -c 10 $SWITCH_IP
+
+    # It may take up to 40 pings for it to go through for Cisco switch. Root cause is still unknown atm.
+    ping -n -c 100 $SWITCH_IP
     POE_ENABLED=`jq -r .modules.switch.poe.enabled $MODULE_CONFIG`
     java -jar switches/target/switchtest-0.0.1-jar-with-dependencies.jar $USI_URL $RPC_TIMEOUT $SWITCH_IP $TARGET_PORT $POE_ENABLED $SWITCH_MODEL $SWITCH_USERNAME $SWITCH_PASSWORD
 
