@@ -15,10 +15,10 @@ switch_setup:
 
 # Faux device connection for testing.
 interfaces:
-  faux:
+  faux-1:
     opts: 
     port: 2
-  faux-3:
+  faux-2:
     opts: -n 
     port: 3
 
