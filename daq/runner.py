@@ -556,11 +556,11 @@ class DAQRunner:
                 continue
             with open(meta_file) as fd:
                 metadatum = json.loads(fd.read())
-                assert "name" in metadatum and "startup_script" in metadatum
+                assert "name" in metadatum and "startup_cmd" in metadatum
                 module = metadatum["name"]
                 assert module not in metadata, "Duplicate module definition for %s" % module
                 metadata[module] = {
-                    "startup_script": metadatum["startup_script"],
+                    "startup_cmd": metadatum["startup_cmd"],
                     "basedir": meta_file.parent
                 }
         return metadata
