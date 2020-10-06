@@ -68,7 +68,7 @@ fi
 # First ping might fail b/c of warm-up delays.
 summary=""
 local_status=pass
-ping -n -c 10 $TARGET_IP || (local_status=fail && status=fail)
+ping -n -c 10 $TARGET_IP || local_status=fail && status=fail
 
 if [ $local_status == pass ]; then
     summary="target reached"
