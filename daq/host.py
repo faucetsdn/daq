@@ -68,7 +68,7 @@ class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
-    _RPC_TIMEOUT_SEC = 10
+    _RPC_TIMEOUT_SEC = 20
     _INST_DIR = "inst/"
     _DEVICE_PATH = "device/%s"
     _NETWORK_DIR = "inst/network"
