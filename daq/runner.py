@@ -578,8 +578,7 @@ class DAQRunner:
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
         if device.dhcp_mode == DHCPMode.EXTERNAL:
-            # TODO to be removed.
-            device.dhcp_mode = None
+            # Under vlan trigger, start a external gateway that doesn't utilize a DHCP server.
             gateway = external_gateway.ExternalGateway(self, group_name, set_num)
         else:
             gateway = container_gateway.ContainerGateway(self, group_name, set_num)
