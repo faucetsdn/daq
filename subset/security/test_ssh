@@ -41,3 +41,4 @@ write_out_result $REPORT \
             "$TEST_DESCRIPTION" \
             "$nmap_log" \
             "$result_and_summary"
+
