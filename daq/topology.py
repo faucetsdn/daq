@@ -1,10 +1,8 @@
 """Faucet-specific topology module"""
-
 import copy
 import os
 import time
 import yaml
-from itertools import chain
 
 from base_gateway import BaseGateway
 
@@ -201,10 +199,9 @@ class FaucetTopology:
         test_vlan_start = vlan_range_config.get("vlan_start")
         test_vlan_end = vlan_range_config.get("vlan_end")
         if test_vlan_start is not None and test_vlan_end is not None:
-            return list(chain(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port),
-                              range(test_vlan_start, test_vlan_end + 1)))
-        else:
-            return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
+            return [*range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port),
+                    *range(test_vlan_start, test_vlan_end + 1)]
+        return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
 
     def _make_default_acl_rules(self):
         rules = []
