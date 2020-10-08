@@ -28,7 +28,7 @@ while true; do
     fi
     checksum=$new_checksum
     echo Starting dnsmasq at $(date)
-    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
+    dnsmasq --dhcp-broadcast --log-facility=/tmp/dnsmasq.log --log-dhcp &
     while [ ! -f $PID_FILE ]; do
         echo Waiting for $PID_FILE...
         sleep 2

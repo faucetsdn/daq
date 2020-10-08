@@ -10,7 +10,7 @@ Device 1 ip triggers: 1 0
 Device 2 ip triggers: 0 0
 Device 3 long ip triggers: 1
 Device 4 ip triggers: 1
-Device 4 subnet 1 ip: 1 subnet 2 ip: 1 subnet 3 ip: 3
+Device 4 subnet 1 ip: 1 subnet 2 ip: 1 subnet 3 ip: 2 ip_changed: 1
 Device 5 ip triggers: 1
 Device 5 num of ips: 3
 DHCP timeouts: 1

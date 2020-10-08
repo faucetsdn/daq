@@ -46,4 +46,4 @@ run_trigger_type: PORT
 # usi url for DAQ to connect to
 usi_setup: 
   url: localhost:5000
-  rpc_timeout_sec: 10
+  rpc_timeout_sec: 20

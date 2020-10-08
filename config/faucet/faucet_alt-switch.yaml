@@ -7,7 +7,7 @@ dps:
       2:
         native_vlan: 1001
       3:
-        native_vlan: 1003
+        native_vlan: 1001
       4:
         native_vlan: 1004
       5:
