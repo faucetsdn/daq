@@ -199,6 +199,10 @@
                 </li>
               
                 <li>
+                  <a href="#TestVLANRange"><span class="badge">M</span>TestVLANRange</a>
+                </li>
+              
+                <li>
                   <a href="#USISetup"><span class="badge">M</span>USISetup</a>
                 </li>
               
@@ -518,6 +522,13 @@
                   <td><p>Drop into console mode after test </p></td>
                 </tr>
               
+                <tr>
+                  <td>test_vlan_range</td>
+                  <td><a href="#TestVLANRange">TestVLANRange</a></td>
+                  <td></td>
+                  <td><p>Test vlan range </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -695,7 +706,7 @@
                   <td>ext_br</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Name for external OVS bridge in liu of physical switch </p></td>
+                  <td><p>Name for external OVS bridge in lieu of physical switch </p></td>
                 </tr>
               
                 <tr>
@@ -717,6 +728,37 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Switch connect password </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="TestVLANRange">TestVLANRange</h3>
+        <p>Information for test vlan ranges.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>vlan_start</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>start of vlan range </p></td>
+                </tr>
+              
+                <tr>
+                  <td>vlan_end</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>end of vlan range </p></td>
                 </tr>
               
             </tbody>

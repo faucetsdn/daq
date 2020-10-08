@@ -161,7 +161,6 @@ switch ping 2
 XXX runner   INFO    9a:02:57:1e:8f:01 learned on vid 1001
 Correct IP: 1
 9a02571e8f01: ['9a02571e8f01:ping:1']
-9a02571e8f02: ['9a02571e8f02:acquire:TimeoutError']
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
 result open 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
 device open 1 1 1

@@ -65,7 +65,7 @@ function run_cmds {
 monitor_log "Added link faux-2 as port 3 on alt-switch" run_cmds
 monitor_log "Target device 9a02571e8f01 waiting for ip" 'docker exec daq-networking-2 bash -c "./autorestart_dnsmasq &"'
 timeout 1200s cmd/run -s
-fgrep '9a:02:57:1e:8f:01 learned on vid 1001' inst/cmdrun.log | head -1 | redact | tee -a $TEST_RESULTS
+fgrep '9a:02:57:1e:8f:01 learned on vid 2000' inst/cmdrun.log | head -1 | redact | tee -a $TEST_RESULTS
 echo Correct IP: $(fgrep '10.20.99' inst/run-9a02571e8f01/scans/ip_triggers.txt | wc -l) | tee -a $TEST_RESULTS 
 cat inst/result.log | tee -a $TEST_RESULTS # ping test should fail since there are no dhcp packets captured
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS

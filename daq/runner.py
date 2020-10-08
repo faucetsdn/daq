@@ -51,6 +51,7 @@ class Device:
         self.dhcp_ready = False
         self.dhcp_mode = None
         self.ip_info = IpInfo()
+        self.vlan = None
         self.set_id = None
 
     def __repr__(self):
@@ -63,13 +64,14 @@ class Devices:
         self._devices = {}
         self._set_ids = set()
 
-    def new_device(self, mac, port_info=None):
+    def new_device(self, mac, port_info=None, vlan=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
         device = Device()
         device.mac = mac
         self._devices[mac] = device
         device.port = port_info if port_info else PortInfo()
+        device.vlan = vlan
         port_no = device.port.port_no
         set_id = port_no if port_no else self._allocate_set_id()
         assert set_id not in self._set_ids, "Duplicate device set id %d" % set_id
@@ -339,7 +341,7 @@ class DAQRunner:
     def _handle_device_learn(self, vid, target_mac):
         LOGGER.info('%s learned on vid %s', target_mac, vid)
         if not self._devices.get(target_mac):
-            device = self._devices.new_device(target_mac)
+            device = self._devices.new_device(target_mac, vlan=vid)
         else:
             device = self._devices.get(target_mac)
         device.dhcp_mode = DHCPMode.EXTERNAL
@@ -504,6 +506,8 @@ class DAQRunner:
                     'mac': device.mac
                 }
                 self._direct_port_traffic(device.mac, device.port.port_no, target)
+            else:
+                self.network.direct_vlan_traffic(gateway.port_set, device.vlan)
             return True
         except Exception as e:
             self.target_set_error(device, e)
