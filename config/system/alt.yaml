@@ -27,4 +27,4 @@ default_timeout_sec: 120
 # use vlan trigger
 run_trigger:
   vlan_start: 2000
-  vlan_end: 2100
+  vlan_end: 2500
