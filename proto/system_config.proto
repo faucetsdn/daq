@@ -119,21 +119,13 @@ message DaqConfig {
   USISetup usi_setup = 49;
 
   // Configures events that trigger a DAQ run 
-  RunTriggerType run_trigger_type = 50;
+  RunTrigger run_trigger = 50;
 
   // verbose output
   bool debug_mode = 51;
 
   // Drop into console mode after test
   bool use_console = 52;
-
-  // Test vlan range
-  TestVLANRange test_vlan_range = 53;
-}
-
-enum RunTriggerType {
-  PORT = 0;
-  VLAN = 1;
 }
 
 enum DHCPMode {
@@ -200,7 +192,7 @@ message SwitchSetup {
 /*
  * Information for test vlan ranges.
  */
-message TestVLANRange {
+message RunTrigger {
   // start of vlan range
   int32 vlan_start = 1;
   

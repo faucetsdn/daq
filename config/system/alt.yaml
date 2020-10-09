@@ -25,7 +25,6 @@ interfaces:
 default_timeout_sec: 120
 
 # use vlan trigger
-run_trigger_type: VLAN
-test_vlan_range:
+run_trigger:
   vlan_start: 2000
   vlan_end: 2100

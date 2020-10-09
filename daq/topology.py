@@ -1,4 +1,5 @@
 """Faucet-specific topology module"""
+
 import copy
 import os
 import time
@@ -195,7 +196,7 @@ class FaucetTopology:
         return interface
 
     def _vlan_tags(self):
-        vlan_range_config = self.config.get("test_vlan_range", {})
+        vlan_range_config = self.config.get("run_trigger", {})
         test_vlan_start = vlan_range_config.get("vlan_start")
         test_vlan_end = vlan_range_config.get("vlan_end")
         if test_vlan_start is not None and test_vlan_end is not None:
