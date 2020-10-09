@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import sys
 import json
-from scapy.all import rdpcap, DHCP
+from scapy.all import rdpcap, DHCP, ICMP, IP
 
 TEST_REQUEST = str(sys.argv[1])
 DHCP_REQUEST = 3
@@ -96,13 +96,23 @@ def main():
     def _test_dhcp_change():
         fd = open(ipaddr_log, 'r')
         run_dhcp_change = False
+        dhcp_change_ip = None
         for line in fd:
             if run_dhcp_change:
                 if ip_notification in line:
-                    return 'pass', 'Device has received new IP address.'
+                    dhcp_change_ip = line.split(ip_notification + ' ')[1].rstrip()
+                    break
             if running_dhcp_change in line:
                 run_dhcp_change = True
         fd.close()
+
+        capture = rdpcap(scan_file)
+        pingFound = False
+        for packet in capture:
+            if ICMP in packet and packet[IP].src == dhcp_change_ip:
+                pingFound = True
+        if pingFound:
+            return 'pass', 'Device has received new IP address.'
         return 'fail', 'Device has not received new IP address.'
 
     _write_report("{b}{t}\n{b}".format(b=dash_break_line, t=TEST_REQUEST))
