@@ -14,6 +14,7 @@ fi
 while [ $(cat /etc/dnsmasq.conf | egrep "^dhcp-range=" | wc -l) == 0 ]; do 
     sleep 1
 done
+ip addr flush dev eth0 # Remove eth0 ip addr so there're no ip conflicts.
 ip addr add $range_start/$prefix_len dev $LOCAL_IF || true
 original=$(cat /etc/dnsmasq.conf | egrep "^dhcp-range=" | head -1)
 lease=$(echo $original | cut -d',' -f 3)

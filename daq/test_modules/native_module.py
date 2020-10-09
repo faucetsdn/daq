@@ -15,9 +15,9 @@ class NativeModule(ExternalModule):
     """Class for running native tests"""
 
     # pylint: disable=too-many-arguments
-    def __init__(self, host, tmpdir, test_name, module_config, basedir, startup_script):
+    def __init__(self, host, tmpdir, test_name, module_config, basedir, startup_cmd):
         super().__init__(host, tmpdir, test_name, module_config, basedir=basedir)
-        self.startup_script = startup_script
+        self.startup_cmd = startup_cmd
 
     def start(self, port, params, callback, finish_hook):
         """Start the native test"""
@@ -40,4 +40,4 @@ class NativeModule(ExternalModule):
 
     def _get_module_class(self):
         LOGGER.debug("%s running native test %s", self, self.test_name)
-        return make_native_host(self.basedir, self.startup_script)
+        return make_native_host(self.basedir, self.startup_cmd)
