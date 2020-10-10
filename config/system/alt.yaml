@@ -22,6 +22,9 @@ interfaces:
     opts: -n 
     port: 3
 
-# use vlan trigger
-run_trigger_type: VLAN
 default_timeout_sec: 120
+
+# use vlan trigger
+run_trigger:
+  vlan_start: 2000
+  vlan_end: 2050
