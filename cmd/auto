@@ -41,7 +41,7 @@ egrep $regex $CFILE | while read iopt; do
     key=${BASH_REMATCH[2]}
     val=${BASH_REMATCH[3]}
     if [ "$key" = opts ]; then
-        start_faux $iface $(eval echo $val)
+        start_faux $iface $val
     elif [ "$key" = port ]; then
         autostart bin/bridge_link $switch_setup_ext_br $iface $val
     fi

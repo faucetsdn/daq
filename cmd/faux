@@ -15,9 +15,17 @@ build=
 cd $ROOT
 source etc/config_base.sh
 
+# If the first argument is a number, then it's a port designation.
+if [[ "$1" =~ ^[0-9]+$ ]]; then
+    port_num=$1
+    postfix=-$port_num
+    intf_mac=9a:02:57:1e:8f:0$port_num
+    shift
+fi
+
 # If the argument is -n then create a networking container
 if [ "$1" == "-n" ]; then
-    networking=$1
+    networking=1
     shift
 fi
 
@@ -43,14 +51,6 @@ fi
 # If the first argument starts with @, then it's a postfix designator.
 if [ "${1#@}" != "$1" ]; then
     postfix=-${1#@}
-    shift
-fi
-
-# If the first argument is a number, then it's a port designation.
-if [[ "$1" =~ ^[0-9]+$ ]]; then
-    port_num=$1
-    postfix=-$port_num
-    intf_mac=9a:02:57:1e:8f:0$port_num
     shift
 fi
 
