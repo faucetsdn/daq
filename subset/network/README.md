@@ -25,7 +25,7 @@ The NTP tests inspect the client NTP version and the device's ability to update 
 ### Note for test developers 
 The functional test code is included in the `ntp_tests.py` file.
 
-The test reads packets from startup.pcap and monitor.pcap.
+The test reads packets from monitor.pcap.
 
 If the python code needs debugging, the pip module `scapy` is required (`pip install scapy`).
 
@@ -36,11 +36,10 @@ If the python code needs debugging, the pip module `scapy` is required (`pip ins
 | connection.network.ntp_update | Does the device demonstrate updating its clock using NTP? | Device clock is synchronized | Device clock is not synchronized | Not enough NTP packets are received |
 
 #### NTP Support ####
-The version of NTP used by the client is extracted from the fist client (outbound) NTP packets discovered in startup.pcap.
+The version of NTP used by the client is extracted from the first client (outbound) NTP packets discovered in monitor.pcap.
 
 #### NTP Update ####
 The following criteria are used to determine whether a DUT has synced its clock with the NTP server provided by DAQ:
- - A minimum of 2 NTP packets are present in startup.pcap and monitor.pcap (one potential poll).
  - A minimum of 2 NTP packets have been exchanged between the DUT and the DAQ-provided NTP server.
  - A valid NTP poll is present. Consisting of a client-server exchange.
  - The calculated offset is less than 0.128 seconds and the final poll does not have a leap indicator of 3 (unsynchronized).
