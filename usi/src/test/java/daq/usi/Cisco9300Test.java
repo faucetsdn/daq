@@ -9,6 +9,12 @@ import grpc.POENegotiation;
 import grpc.POEStatus;
 import grpc.POESupport;
 import grpc.PowerResponse;
+import java.io.FileReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +53,66 @@ class Cisco9300Test {
       }
     });
     at.receiveData("");
+  }
+
+  @Test
+  void testSamplePowerResponse1() throws Exception {
+    URL outputFile = Cisco9300Test.class.getClassLoader()
+        .getResource("cisco_power_response.txt");
+    String output = new String(Files.readAllBytes(Paths.get(outputFile.toURI())),
+        StandardCharsets.UTF_8);
+    fakeLogin();
+    at.getPower(1, new ResponseHandler<PowerResponse>() {
+      @Override
+      public void receiveData(PowerResponse data) throws Exception {
+        assertEquals(data.getPoeSupport(), POESupport.State.ENABLED);
+        assertEquals(data.getPoeNegotiation(), POENegotiation.State.ENABLED);
+        assertEquals(data.getPoeStatus(), POEStatus.State.OFF);
+        assertEquals(data.getCurrentPowerConsumption(), 0);
+        assertEquals(data.getMaxPowerConsumption(), 0);
+      }
+    });
+    at.receiveData(output);
+  }
+
+  @Test
+  void testSamplePowerResponse2() throws Exception {
+    URL outputFile = Cisco9300Test.class.getClassLoader()
+        .getResource("cisco_power_response2.txt");
+    String output = new String(Files.readAllBytes(Paths.get(outputFile.toURI())),
+        StandardCharsets.UTF_8);
+    fakeLogin();
+    at.getPower(1, new ResponseHandler<PowerResponse>() {
+      @Override
+      public void receiveData(PowerResponse data) throws Exception {
+        assertEquals(data.getPoeSupport(), POESupport.State.ENABLED);
+        assertEquals(data.getPoeNegotiation(), POENegotiation.State.ENABLED);
+        assertEquals(data.getPoeStatus(), POEStatus.State.ON);
+        assertEquals("" + data.getCurrentPowerConsumption(), "5.4");
+        assertEquals("" + data.getMaxPowerConsumption(), "30.0");
+      }
+    });
+    at.receiveData(output);
+  }
+
+  @Test
+  void testSamplePowerResponse3() throws Exception {
+    URL outputFile = Cisco9300Test.class.getClassLoader()
+        .getResource("cisco_power_response3.txt");
+    String output = new String(Files.readAllBytes(Paths.get(outputFile.toURI())),
+        StandardCharsets.UTF_8);
+    fakeLogin();
+    at.getPower(1, new ResponseHandler<PowerResponse>() {
+      @Override
+      public void receiveData(PowerResponse data) throws Exception {
+        assertEquals(data.getPoeSupport(), POESupport.State.ENABLED);
+        assertEquals(data.getPoeNegotiation(), POENegotiation.State.ENABLED);
+        assertEquals(data.getPoeStatus(), POEStatus.State.ON);
+        assertEquals("" + data.getCurrentPowerConsumption(), "5.4");
+        assertEquals("" + data.getMaxPowerConsumption(), "30.0");
+      }
+    });
+    at.receiveData(output);
   }
 
   @Test
