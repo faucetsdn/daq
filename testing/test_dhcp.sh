@@ -92,17 +92,25 @@ cmd/run -b -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 
-for iface in $(seq 1 5); do
+for iface in $(seq 1 6); do
     intf_mac=9a:02:57:1e:8f:0$iface
     ip_file=inst/run-9a02571e8f0$iface/scans/ip_triggers.txt
+    report_file=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/report.txt
     cat $ip_file
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
+    ip_change=$(cat $report_file | fgrep 'pass connection.dhcp.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
-    if [ $iface == 5 ]; then
+
+    if [ $iface == 6 ]; then
+      device_dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | fgrep "ipaddr_ipaddr0$iface" | wc -l)
+      echo "Device $iface DHCP timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
+      echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
+    elif [ $iface == 5 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 3))" | tee -a $TEST_RESULTS
       echo "Device $iface num of ips: $num_ips" | tee -a $TEST_RESULTS
+      echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
       subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
@@ -115,10 +123,7 @@ for iface in $(seq 1 5); do
     else
       echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
     fi
+
 done
 
-dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | wc -l)
-device_6_dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | fgrep 'ipaddr_ipaddr06' | wc -l)
-echo "DHCP timeouts: $dhcp_timeouts" | tee -a $TEST_RESULTS
-echo "Device 6 DHCP timeouts: $device_6_dhcp_timeouts" | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
