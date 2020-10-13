@@ -2,7 +2,7 @@
 source reporting.sh
 REPORT=/tmp/report.txt
 
-python dhcp_tests.py connection.dhcp.disconnect_short
-python dhcp_tests.py connection.dhcp.private_address
+python dhcp_tests.py connection.ipaddr.dhcp_disconnect
+python dhcp_tests.py connection.ipaddr.private_address
 
 cat report.txt >> $REPORT

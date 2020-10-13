@@ -71,7 +71,7 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.dhcp.private_address": {
+    "connection.ipaddr.private_address": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"

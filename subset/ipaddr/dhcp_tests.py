@@ -96,7 +96,7 @@ def main():
     if TEST_REQUEST == 'connection.network.dhcp_short':
         result, summary = _test_dhcp_short()
         _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_short))
-    elif TEST_REQUEST == 'connection.dhcp.private_address':
+    elif TEST_REQUEST == 'connection.ipaddr.private_address':
         result, summary = _test_private_address()
         _write_report("{d}\n{b}".format(b=dash_break_line, d=description_private_address))
 
