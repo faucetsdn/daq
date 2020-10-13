@@ -195,6 +195,10 @@
                 </li>
               
                 <li>
+                  <a href="#RunTrigger"><span class="badge">M</span>RunTrigger</a>
+                </li>
+              
+                <li>
                   <a href="#SwitchSetup"><span class="badge">M</span>SwitchSetup</a>
                 </li>
               
@@ -205,10 +209,6 @@
               
                 <li>
                   <a href="#DHCPMode"><span class="badge">E</span>DHCPMode</a>
-                </li>
-              
-                <li>
-                  <a href="#RunTriggerType"><span class="badge">E</span>RunTriggerType</a>
                 </li>
               
               
@@ -498,8 +498,8 @@
                 </tr>
               
                 <tr>
-                  <td>run_trigger_type</td>
-                  <td><a href="#RunTriggerType">RunTriggerType</a></td>
+                  <td>run_trigger</td>
+                  <td><a href="#RunTrigger">RunTrigger</a></td>
                   <td></td>
                   <td><p>Configures events that trigger a DAQ run </p></td>
                 </tr>
@@ -618,6 +618,37 @@
 
         
       
+        <h3 id="RunTrigger">RunTrigger</h3>
+        <p>Information for test vlan ranges.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>vlan_start</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>start of vlan range </p></td>
+                </tr>
+              
+                <tr>
+                  <td>vlan_end</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>end of vlan range </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="SwitchSetup">SwitchSetup</h3>
         <p>System configuraiton of the access switch. This is used by the system</p><p>to setup and configure the switch itself.</p>
 
@@ -695,7 +726,7 @@
                   <td>ext_br</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Name for external OVS bridge in liu of physical switch </p></td>
+                  <td><p>Name for external OVS bridge in lieu of physical switch </p></td>
                 </tr>
               
                 <tr>
@@ -794,29 +825,6 @@
               <tr>
                 <td>IP_CHANGE</td>
                 <td>4</td>
-                <td><p></p></td>
-              </tr>
-            
-          </tbody>
-        </table>
-      
-        <h3 id="RunTriggerType">RunTriggerType</h3>
-        <p></p>
-        <table class="enum-table">
-          <thead>
-            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
-          </thead>
-          <tbody>
-            
-              <tr>
-                <td>PORT</td>
-                <td>0</td>
-                <td><p></p></td>
-              </tr>
-            
-              <tr>
-                <td>VLAN</td>
-                <td>1</td>
                 <td><p></p></td>
               </tr>
             

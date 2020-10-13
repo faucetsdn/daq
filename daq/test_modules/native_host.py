@@ -19,7 +19,7 @@ class NativeHost(Host):
 
     # pylint: disable=too-many-arguments
     def __init__(self, name, basedir=None, tmpdir=None, env_vars=None, vol_maps=None,
-                 startup_script='entrypoint', **kwargs):
+                 startup_cmd='entrypoint', **kwargs):
         self.basedir = basedir
         self.tmpdir = tmpdir
         self.env_vars = env_vars if env_vars is not None else []
@@ -27,8 +27,8 @@ class NativeHost(Host):
         self.vol_maps.append((os.path.abspath(os.path.join(self.tmpdir, 'tmp')),
                               os.path.join(self.basedir, 'tmp')))
         self.name = name
-        script_full_path = os.path.join(self.basedir, startup_script)
-        self.startup_script = startup_script if startup_script.startswith('/') else script_full_path
+        script_full_path = os.path.join(self.basedir, startup_cmd)
+        self.startup_cmd = startup_cmd if startup_cmd.startswith('/') else script_full_path
         self.active_pipe = None
         self.active_log = None
         Host.__init__(self, name, **kwargs)
@@ -53,7 +53,7 @@ class NativeHost(Host):
             stdout = PIPE
             self.active_log = None
 
-        self.active_pipe = self.popen(self.startup_script, stdin=DEVNULL, stdout=stdout,
+        self.active_pipe = self.popen(self.startup_cmd, stdin=DEVNULL, stdout=stdout,
                                       stderr=STDOUT, env=env)
         pipe_out = self.active_pipe.stdout
         out_fd = pipe_out.fileno() if pipe_out else None
@@ -86,7 +86,7 @@ class NativeHost(Host):
         return active_pipe_returncode
 
 
-def make_native_host(basedir, startup_script):
+def make_native_host(basedir, startup_cmd):
     """Utility function to create a native-host class that can be passed to mininet"""
 
     class _NativeHost(NativeHost):
@@ -97,7 +97,7 @@ def make_native_host(basedir, startup_script):
             assert kwargs['tmpdir'], 'tmpdir required for native host'
             kwargs['tmpdir'] = os.path.join(kwargs['tmpdir'], host_name)
             kwargs['basedir'] = basedir
-            kwargs['startup_script'] = startup_script
+            kwargs['startup_cmd'] = startup_cmd
             super(_NativeHost, self).__init__(*args, **kwargs)
 
     return _NativeHost

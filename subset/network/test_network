@@ -2,7 +2,6 @@
 
 REPORT=/tmp/report.txt
 
-STARTUP=/scans/startup.pcap
 MONITOR=/scans/monitor.pcap
 
 # General Network Tests
@@ -12,8 +11,8 @@ python network_tests.py communication.network.type $MONITOR $TARGET_IP
 cat network_tests.txt >> $REPORT
 
 # NTP Tests
-python ntp_tests.py ntp.network.ntp_support $STARTUP $MONITOR
-python ntp_tests.py ntp.network.ntp_update $STARTUP $MONITOR
+python ntp_tests.py connection.network.ntp_support $MONITOR
+python ntp_tests.py connection.network.ntp_update $MONITOR
 
 cat ntp_tests.txt >> $REPORT
 

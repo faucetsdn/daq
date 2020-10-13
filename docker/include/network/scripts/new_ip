@@ -10,11 +10,16 @@ fi
 
 function get_next_ip() {
     cur_ip=$1
-    prefix=$(echo $cur_ip | cut -d '.' -f 1,2)
-    subnet=$(echo $cur_ip | cut -d '.' -f 3)
-    new_subnet=$((($subnet + 1) % 256))
+    prefix=$(echo $cur_ip | cut -d '.' -f 1,2,3)
     postfix=$(echo $cur_ip | cut -d '.' -f 4)
-    new_ip=$prefix.$new_subnet.$postfix
+    new_postfix=$((($postfix + 1) % 256))
+    while [ $(grep $prefix.$new_postfix /var/lib/misc/dnsmasq.leases | wc -l) -gt 0 ]; do
+        if [ $new_postfix -eq $postfix ]; then
+            break
+        fi
+        new_postfix=$((($new_postfix + 1) % 256))
+    done
+    new_ip=$prefix.$new_postfix
 }
 
 original=$(cat /etc/dnsmasq.conf | egrep "dhcp-host=$mac_addr,([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1)
