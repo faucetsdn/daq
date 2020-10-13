@@ -4,6 +4,6 @@ REPORT=/tmp/report.txt
 
 python dhcp_tests.py connection.ipaddr.dhcp_disconnect
 python dhcp_tests.py connection.ipaddr.private_address
-python dhcp_tests.py connection.dhcp.ip_change
+python dhcp_tests.py connection.ipaddr.ip_change
 
 cat report.txt >> $REPORT

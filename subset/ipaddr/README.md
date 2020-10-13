@@ -17,7 +17,7 @@ This is because the functional code included in ipaddr communicates with the ope
 #### Result Cases:
 - PASS: The device accepts all private address ranges specified.
 - FAIL: The device does not accept all private address ranges specified.
-### connection.dhcp.ip_change
+### connection.ipaddr.ip_change
 - Device communicates after IP change.
 #### Result Cases:
 - PASS: A ping reply is found after the IP address has been changed.

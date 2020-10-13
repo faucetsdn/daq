@@ -73,7 +73,7 @@ Overall device result FAIL
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|ntp.network.ntp_support|Other|Other|Using NTPv4.|
 |pass|ntp.network.ntp_update|Other|Other|Device clock synchronized.|
-|skip|connection.switch.port_duplex|Other|Other|No local IP has been set, check system config|
+|skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Other|Other|No local IP has been set, check system config|
 |pass|manual.test.name|Security|Recommended|Manual test - for testing|
@@ -241,7 +241,7 @@ LOCAL_IP not configured, assuming no network switch.
 RESULT skip connection.switch.port_speed No local IP has been set, check system config
 
 --------------------
-connection.switch.port_duplex
+connection.port_duplex
 --------------------
 Verify the device supports full duplex
 --------------------

@@ -12,7 +12,7 @@ cat network_tests.txt >> $REPORT
 
 # NTP Tests
 python ntp_tests.py ntp.network.ntp_support $MONITOR
-python ntp_tests.py ntp.network.ntp_update$MONITOR
+python ntp_tests.py ntp.network.ntp_update $MONITOR
 
 cat ntp_tests.txt >> $REPORT
 

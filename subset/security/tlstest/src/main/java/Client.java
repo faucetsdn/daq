@@ -281,15 +281,15 @@ public class Client {
     private void passClient(boolean handshake,boolean cipherValid,String tlsVersion) {
         if (handshake && cipherValid) {
             clientReport +=
-                    "\nRESULT pass security.tlsv"
+                    "\nRESULT pass security.tls.v"
                             +  tlsVersion.replace(".","_")
-                            + ".client"
+                            + "_client"
                             + " Client/Server completed handshake and ECDH/ECDSA supported ciphers.";
         } else {
             clientReport +=
-                    "\nRESULT fail security.tlsv"
+                    "\nRESULT fail security.tls.v"
                             +  tlsVersion.replace(".","_")
-                            + ".client";
+                            + "_client";
             clientReport+=handshake?"":" No completed SSL/TLS handshake detected.";
             clientReport+=cipherValid?"":" Cipher could not be validated.";
         }
@@ -299,7 +299,7 @@ public class Client {
         clientReport +=
                 "\nRESULT skip security.tlsv"
                         +  tlsVersion.replace(".","_")
-                        + ".client "
+                        + "_client "
                         + skipMessage;
     }
 

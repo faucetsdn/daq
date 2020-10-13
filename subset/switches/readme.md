@@ -85,7 +85,7 @@ Example of all necessary parameters in the system.conf related to physical switc
  - pass -> If the speed of the port is auto-negotiated and determiend to be higher than 10 MBPS
  - fail ->If the speed of the port is determined to be <= 10MBPS
 
-## Conditions for poe.power
+## Conditions for poe.switch.power
  - pass -> If the a PoE device is connected and power has been detected and supplied to the device.
  - fail -> If the a PoE device is connected and *NO* power has been detected and supplied to the device.  Failure also occurs if the switch reports either a faulty PoE state or is denying power to the device. This can also fail if associated power data fails to resolve correctly during switch interrogation.
  - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.
