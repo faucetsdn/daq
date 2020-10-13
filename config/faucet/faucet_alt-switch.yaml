@@ -5,15 +5,15 @@ dps:
       1:
         native_vlan: 1002
       2:
-        native_vlan: 1001
+        native_vlan: 2000 
       3:
-        native_vlan: 1001
+        native_vlan: 2000
       4:
         native_vlan: 1004
       5:
         native_vlan: 1005
       100:
-        tagged_vlans: [1001, 1002, 1003, 1004, 1005]
+        tagged_vlans: [1001, 1002, 1003, 1004, 1005, 2000]
 vlans:
   1001:
   1002:

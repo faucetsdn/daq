@@ -101,15 +101,17 @@ for iface in $(seq 1 6); do
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
     dhcp_change=$(cat $report_file | fgrep 'pass connection.network.dhcp_change' | wc -l)
-    dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | wc -l)
+    ip_change=$(cat $report_file | fgrep 'pass connection.dhcp.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
     if [ $iface == 6 ]; then
       device_dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | fgrep "ipaddr_ipaddr0$iface" | wc -l)
       echo "Device $iface DHCP timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
-      echo "Device $iface dhcp change: $((dhcp_change == false))" | tee -a $TEST_RESULTS
+      echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 5 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 3))" | tee -a $TEST_RESULTS
       echo "Device $iface num of ips: $num_ips" | tee -a $TEST_RESULTS
+      echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
       echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
@@ -123,7 +125,7 @@ for iface in $(seq 1 6); do
     else
       echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
     fi
+
 done
 
-echo "DHCP timeouts: $dhcp_timeouts" | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS

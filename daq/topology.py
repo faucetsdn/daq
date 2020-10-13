@@ -11,6 +11,7 @@ import logger
 
 LOGGER = logger.get_logger('topology')
 
+
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
 
@@ -106,6 +107,12 @@ class FaucetTopology:
             device_intfs.append(intf_names[port-1] if named_port else default_name)
         return device_intfs
 
+    def direct_vlan_traffic(self, port_set, vlan):
+        """Modify gateway set's vlan to match triggering vlan"""
+        interfaces = self.topology['dps'][self.pri_name]['interfaces']
+        for port in self._get_gw_ports(port_set):
+            interfaces[port]['native_vlan'] = vlan
+
     def direct_port_traffic(self, target_mac, port_no, target):
         """Direct traffic from a port to specified port set"""
         if target is None and port_no in self._port_targets:
@@ -189,6 +196,12 @@ class FaucetTopology:
         return interface
 
     def _vlan_tags(self):
+        vlan_range_config = self.config.get("run_trigger", {})
+        test_vlan_start = vlan_range_config.get("vlan_start")
+        test_vlan_end = vlan_range_config.get("vlan_end")
+        if test_vlan_start is not None and test_vlan_end is not None:
+            return [*range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port),
+                    *range(test_vlan_start, test_vlan_end + 1)]
         return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
 
     def _make_default_acl_rules(self):

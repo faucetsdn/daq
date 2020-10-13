@@ -22,3 +22,8 @@ This is because the functional code included in ipaddr communicates with the ope
 #### Result Cases:
 - PASS: Device received the new IP address.
 - FAIL: Device did not receive the new IP address.
+### connection.dhcp.ip_change
+- Device communicates after IP change.
+#### Result Cases:
+- PASS: A ping reply is found after the IP address has been changed.
+- FAIL: No ping reply is found after the IP address has been changed.
