@@ -73,7 +73,7 @@ Example of all necessary parameters in the system.conf related to physical switc
     # Make sure docker's ip range doesn't conflict with that of the switch. Default docker ip range is 172.17.0.0/16. Default switch ip range is 192.168.0.0/16
     usi_setup.url=172.17.0.1:5000
 
-## Conditions for connection.port_duplex
+## Conditions for connection.switch.port_duplex
  - pass -> If the duplex mode is detected as full
  - fail -> If the duplex mode is detected but not full or if the duplex mode cannot be detected
 

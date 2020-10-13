@@ -76,7 +76,7 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.network.dhcp_short": {
+    "connection.ipaddr.dhcp_disconnect": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"

@@ -58,8 +58,8 @@ else
                      "RESULT $RESULT connection.switch.port_speed $SUMMARY"
 
     write_out_result $REPORT \
-                     "connection.port_duplex" \
-                     "$(jq -r '.["connection.port_duplex"].description' $MANIFEST)" \
+                     "connection.switch.port_duplex" \
+                     "$(jq -r '.["connection.switch.port_duplex"].description' $MANIFEST)" \
                      "$SKIP_REASON" \
                      "RESULT $RESULT connection.switch.port_duplex$SUMMARY"
 

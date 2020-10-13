@@ -77,7 +77,7 @@ public class SwitchTest {
   }
 
   protected void testDuplex(InterfaceResponse interfaceResponse) {
-    final String testName = "connection.port_duplex";
+    final String testName = "connection.switch.port_duplex";
     String duplex = interfaceResponse.getDuplex();
     if (duplex != null) {
       if (duplex.equals("full")) {

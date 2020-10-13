@@ -5,7 +5,7 @@
     "connection.switch.port_speed" : {
         "description" : "Verify the device auto-negotiates connection speed"
     },
-    "connection.port_duplex" : {
+    "connection.switch.port_duplex" : {
         "description" : "Verify the device supports full duplex"
     },
     "poe.switch.power" : {
