@@ -125,6 +125,4 @@ for iface in $(seq 1 6); do
 
 done
 
-dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | wc -l)
-echo "DHCP timeouts: $dhcp_timeouts" | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
