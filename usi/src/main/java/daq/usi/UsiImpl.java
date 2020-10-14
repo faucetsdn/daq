@@ -68,7 +68,6 @@ public class UsiImpl extends USIServiceGrpc.USIServiceImplBase {
         if (debug) {
           System.out.println(data);
         }
-        System.out.println("Received request in getPower");
         responseObserver.onNext(data);
         responseObserver.onCompleted();
       });

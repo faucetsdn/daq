@@ -11,7 +11,7 @@ TEST_DESCRIPTION="Check that device only support SSHv2"
 REPORT=/tmp/report.txt
 LOG=/tmp/nmap_log.txt
 
-nmap -sV -sC $TARGET_IP > $LOG
+nmap -sV -sC --host-timeout=4m --open -p- $TARGET_IP 2>&1 | tee $LOG
 
 nmap_log=$(cat $LOG )
 
@@ -19,7 +19,7 @@ sshv1=$(grep 'sshv1: Server supports SSHv1' $LOG)
 
 if [[ -z "${sshv1}" ]]; then
   #No SSHv1, but is there an SSHv2 server running ?
-  sshv2=$(grep -P '^\d+\/tcp\s+open  ssh.*protocol 2.0\)$' $LOG)
+  sshv2=$(grep -P '^\d+\/tcp\s+open\s+ssh.*protocol 2.0\)$' $LOG)
 
   if [[ -z "${sshv2}" ]]; then
     test_outcome="skip"
@@ -39,6 +39,6 @@ result_and_summary="RESULT ${test_outcome} ${TEST_NAME} ${test_summary}"
 write_out_result $REPORT \
             "$TEST_NAME" \
             "$TEST_DESCRIPTION" \
-            "$sshv2" \
+            "$nmap_log" \
             "$result_and_summary"
-            
+

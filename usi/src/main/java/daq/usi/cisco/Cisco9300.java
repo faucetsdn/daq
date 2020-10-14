@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -29,6 +30,7 @@ public class Cisco9300 extends BaseSwitchController {
       "Measured at the port", "power",
       "Device Type", "device",
       "IEEE Class", "dev_class",
+      "Device Detected", "_",
       "Power available to the device", "max");
   private static final Map<String, POEStatus.State> poeStatusMap = Map.of("on",
       POEStatus.State.ON, "off", POEStatus.State.OFF, "fault", POEStatus.State.FAULT,
@@ -301,13 +303,26 @@ public class Cisco9300 extends BaseSwitchController {
   private Map<String, String> processPowerStatusInline(String response) {
     Map<String, String> powerMap = new HashMap<>();
     Arrays.stream(response.split("\n"))
+        .filter(s -> s.length() > 0)
         .forEach(
             line -> {
               String[] lineParts = line.trim().split(":");
-              if (lineParts.length > 1) {
-                String powerMapKey = powerInlineMap.getOrDefault(lineParts[0], null);
-                if (powerMapKey != null) {
-                  powerMap.put(powerMapKey, lineParts[1].trim());
+              Set<String> keys = powerInlineMap.keySet();
+              String pendingKey = null;
+              for (int i = 0; i < lineParts.length; i++) {
+                String part = lineParts[i];
+                for (String key : keys) {
+                  if (!part.contains(key)) {
+                    continue;
+                  }
+                  if (i < lineParts.length - 1) {
+                    powerMap.put(powerInlineMap.get(key), lineParts[i + 1].trim());
+                  }
+                  if (pendingKey != null) {
+                    powerMap.put(powerInlineMap.get(pendingKey), part.replace(key, "").trim());
+                  }
+                  pendingKey = key;
+                  break;
                 }
               }
             });

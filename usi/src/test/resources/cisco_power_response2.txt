@@ -1,0 +1,34 @@
+ Interface: Gi1/0/1
+
+ Inline Power Mode: auto Operational status: on
+ Device Detected: yes
+ Device Type: Ieee PD
+ IEEE Class: 4
+ Discovery mechanism used/configured: Ieee and Cisco
+ Police: off
+ Power Allocated 
+ Admin Value: 30.0
+ Power drawn from the source: 30.0
+ Power available to the device: 30.0
+ 
+ Actual consumption
+ Measured at the port: 5.4
+ Maximum Power drawn by the device since powered on: 8.5
+ 
+ Absent Counter: 0
+ Over Current Counter: 0
+ Short Current Counter: 0
+ Invalid Signature Counter: 0
+ Power Denied Counter: 0
+ Power Negotiation Used: None
+ LLDP Power Negotiation --Sent to PD--      --Rcvd from PD--
+   Power Type:          -                    -
+   Power Source:        -                    -
+   Power Priority:      -                    -
+   Requested Power(W):  -                    -
+   Allocated Power(W):  -                    -
+Four-Pair PoE Supported: No
+Spare Pair Power Enabled: No
+Four-Pair PD Architecture: N/A
+arup-daq-lab#
+
