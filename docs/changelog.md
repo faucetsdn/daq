@@ -1,5 +1,5 @@
 # Changelog
-* 1.9.9
+* 1.9.10
   * IP addr flush (#672)
   * Fix Cisco switch power response (#679)
   * Add SSH Reporting, SSH Bug Fixes  (#670)
