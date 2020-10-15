@@ -297,7 +297,7 @@ public class Client {
 
     private void skipClient(String skipMessage,String tlsVersion) {
         clientReport +=
-                "\nRESULT skip security.tlsv"
+                "\nRESULT skip security.tls.v"
                         +  tlsVersion.replace(".","_")
                         + "_client "
                         + skipMessage;

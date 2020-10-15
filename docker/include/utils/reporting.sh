@@ -1,7 +1,7 @@
 # reporting_utils
 # Helper functions written in bash for simplifying report writing
 
-_______REPORT_DIVIDER="\n--------------------"
+_______REPORT_DIVIDER="--------------------"
 
 # write_out_result
 # All inputs EXCEPT $REPORT are variables (not files)
@@ -44,15 +44,11 @@ function write_out_monolog() {
     echo $_______REPORT_DIVIDER | tee -a $_REPORT
     cat $_MONO_LOG | tee -a $_REPORT
     echo | tee -a $_REPORT
-    
-    echo $_RESULT_LINES
 
     for test_name in "${_TEST_ARR[@]}"; do
         echo Monolog processing $test_name...
         test_desc=$(jq --arg tn "$test_name" -r '.[$tn].description' $_MANIFEST)
-        echo $test_desc
         test_result=$(grep -E "^RESULT [a-z]+ $test_name( .*\$|\$)" $_RESULT_LINES)
-        echo $test_result
         write_out_result $_REPORT "$test_name" "$test_desc" "See log above" "$test_result"
     done
 }
