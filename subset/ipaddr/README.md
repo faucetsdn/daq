@@ -15,8 +15,13 @@ This is because the functional code included in ipaddr communicates with the ope
 ### connection.dhcp.private_address
 - Device supports all private address ranges.
 #### Result Cases:
-- PASS: The device accepts all private address ranges specified.
-- FAIL: The device does not accept all private address ranges specified.
+- PASS: A DHCP request was received for each private address range.
+- FAIL: A DHCP request was not received for each private address range.
+### connection.network.dhcp_change
+- Device receives new IP address after IP change and port toggle.
+#### Result Cases:
+- PASS: Device received the new IP address.
+- FAIL: Device did not receive the new IP address.
 ### connection.dhcp.ip_change
 - Device communicates after IP change.
 #### Result Cases:

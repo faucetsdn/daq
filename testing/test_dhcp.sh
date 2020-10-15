@@ -31,7 +31,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 }
 EOF
 
-# Multi subnet multi subnet tests
+# Multi subnet tests
 intf_mac="9a02571e8f04"
 mkdir -p local/site/mac_addrs/$intf_mac
 cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
@@ -48,7 +48,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
 }
 EOF
 
-# ip change test
+# ip and dhcp change tests
 intf_mac="9a02571e8f05"
 mkdir -p local/site/mac_addrs/$intf_mac
 cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
@@ -100,17 +100,19 @@ for iface in $(seq 1 6); do
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
+    dhcp_change=$(cat $report_file | fgrep 'pass connection.network.dhcp_change' | wc -l)
     ip_change=$(cat $report_file | fgrep 'pass connection.dhcp.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
-
     if [ $iface == 6 ]; then
       device_dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | fgrep "ipaddr_ipaddr0$iface" | wc -l)
       echo "Device $iface DHCP timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 5 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 3))" | tee -a $TEST_RESULTS
       echo "Device $iface num of ips: $num_ips" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
       subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)

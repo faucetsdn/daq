@@ -35,6 +35,7 @@ class IpAddrModule(HostModule):
             ('dhcp port_toggle test', self._dhcp_port_toggle_test),
             ('dhcp multi subnet test', self._multi_subnet_test),
             ('ip change test', self._ip_change_test),
+            ('dhcp change test', self._dhcp_change_test),
             ('analyze results', self._analyze)
         ]
         self._logger = logger.get_logger('ipaddr_%s' % self.host_name)
@@ -100,6 +101,15 @@ class IpAddrModule(HostModule):
     def _ip_change_test(self):
         self._set_timeout()
         self.host.gateway.request_new_ip(self.host.target_mac)
+        self._ip_callback = self._next_test
+
+    def _dhcp_change_test(self):
+        self._set_timeout()
+        if not self.host.connect_port(False):
+            self._logger.error('disconnect port not enabled')
+            return
+        self.host.gateway.request_new_ip(self.host.target_mac)
+        self.host.connect_port(True)
         self._ip_callback = self._next_test
 
     def _analyze(self):
