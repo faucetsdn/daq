@@ -1,5 +1,13 @@
 # Changelog
-* 1.9.8
+* 1.9.10
+  * IP addr flush (#672)
+  * Fix Cisco switch power response (#679)
+  * Add SSH Reporting, SSH Bug Fixes  (#670)
+  * IP Change (11) (#658)
+  * Update NTP support test fix #622 (#595)
+  * set gateway set vlan (#671)
+  * Update dependency jsoneditor to v9.1.1 (#654)
+  * External Gateway (#664)
   * New "new ip" assignment, extend rpc_timeout_sec and ping counts for Cisco switches (#666)
   * Update dependency commons-net:commons-net to v3.7.1 (#663)
   * gateway refactoring (#662)

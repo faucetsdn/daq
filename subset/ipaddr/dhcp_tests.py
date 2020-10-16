@@ -19,7 +19,9 @@ def main():
     description_dhcp_short = 'Reconnect device and check for DHCP request.'
     description_ip_change = 'Device communicates after IP change.'
     description_private_address = 'Device supports all private address ranges.'
+    description_dhcp_change = 'Device receives new IP address after IP change and port toggle.'
     running_port_toggle = 'Running dhcp port_toggle test'
+    running_dhcp_change = 'Running dhcp change test'
     running_ip_change = 'Running ip change test'
     ip_notification = 'ip notification'
     result = None
@@ -120,6 +122,28 @@ def main():
             return 'pass', 'All private address ranges are supported.'
         return 'fail', 'Not all private address ranges are supported.'
 
+    def _test_dhcp_change():
+        fd = open(ipaddr_log, 'r')
+        run_dhcp_change = False
+        dhcp_change_ip = None
+        for line in fd:
+            if run_dhcp_change:
+                if ip_notification in line:
+                    dhcp_change_ip = line.split(ip_notification + ' ')[1].rstrip()
+                    break
+            if running_dhcp_change in line:
+                run_dhcp_change = True
+        fd.close()
+
+        capture = rdpcap(scan_file)
+        pingFound = False
+        for packet in capture:
+            if ICMP in packet and packet[IP].src == dhcp_change_ip:
+                pingFound = True
+        if pingFound:
+            return 'pass', 'Device has received new IP address.'
+        return 'fail', 'Device has not received new IP address.'
+
     _write_report("{b}{t}\n{b}".format(b=dash_break_line, t=TEST_REQUEST))
 
     if TEST_REQUEST == 'connection.ipaddr.dhcp_disconnect':
@@ -131,6 +155,9 @@ def main():
     elif TEST_REQUEST == 'connection.ipaddr.private_address':
         result, summary = _test_private_address()
         _write_report("{d}\n{b}".format(b=dash_break_line, d=description_private_address))
+    elif TEST_REQUEST == 'connection.ipaddr.disconnect_ip_change':
+        result, summary = _test_dhcp_change()
+        _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_change))
 
     _write_report("RESULT {r} {t} {s}\n".format(r=result, t=TEST_REQUEST, s=summary))
 
