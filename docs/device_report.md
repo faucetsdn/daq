@@ -247,7 +247,7 @@ Verify the device supports full duplex
 --------------------
 LOCAL_IP not configured, assuming no network switch.
 --------------------
-RESULT skip connection.switch.port_duplexNo local IP has been set, check system config
+RESULT skip connection.switch.port_duplex No local IP has been set, check system config
 
 --------------------
 poe.switch.power
