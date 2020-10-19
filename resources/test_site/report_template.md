@@ -9,7 +9,7 @@
 
 ## Test Iteration
 
-| Test             |                        |
+| Test parameter   | Value                  |
 |------------------|------------------------|
 | Test report start date | {{ start_time }} |
 | Test report end date   | {{ end_time}} |

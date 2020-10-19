@@ -2,72 +2,72 @@ Running testing/test_aux.sh
 Aux Tests
 RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
-RESULT pass base.target.ping target reached
+RESULT pass connection.base.target_ping target reached
 RESULT pass base.startup.ntp Correct NTP server address
 RESULT skip base.startup.dns No dns traffic detected
 RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
-RESULT pass base.target.ping target reached
+RESULT pass connection.base.target_ping target reached
 RESULT fail base.startup.ntp Invalid NTP server address
 RESULT fail base.startup.dns Invalid DNS server address
 RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
-RESULT pass base.target.ping target reached
+RESULT pass connection.base.target_ping target reached
 RESULT skip base.startup.ntp No NTP traffic detected
 RESULT pass base.startup.dns Correct DNS server address
-RESULT skip protocol.bacnet.version Bacnet device not found.
-RESULT fail protocol.bacnet.pic PICS file defined however a BACnet device was not found.
-RESULT info protocol.bacnet.version Protocol version: 1
-RESULT skip protocol.bacnet.pic BACnet device found, but pics.csv not found in device type directory.
-RESULT info protocol.bacnet.version Protocol version: 1
-RESULT pass protocol.bacnet.pic The devices matches the PICS
-RESULT skip security.tlsv1.server IOException unable to connect to server.
-RESULT skip security.tlsv1_2.client No client initiated TLS communication detected
-RESULT skip security.tlsv1_2.server IOException unable to connect to server.
-RESULT skip security.tlsv1_3.client No client initiated TLS communication detected
-RESULT skip security.tlsv1_3.server IOException unable to connect to server.
-RESULT fail security.tlsv1.server Certificate is expired. Certificate has not been signed by a CA.
-RESULT pass security.tlsv1_2.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_2.server Certificate is expired. Certificate has not been signed by a CA.
-RESULT pass security.tlsv1_3.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_3.server Certificate is expired. Certificate has not been signed by a CA.
-RESULT fail security.tlsv1.server Certificate has not been signed by a CA. Cipher Valid.
-RESULT pass security.tlsv1_2.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_2.server Certificate has not been signed by a CA. Cipher Valid.
-RESULT pass security.tlsv1_3.client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
-RESULT fail security.tlsv1_3.server Certificate has not been signed by a CA.
-RESULT skip security.passwords.http Port 80 not open on target device.
-RESULT skip security.passwords.https Port 443 not open on target device.
-RESULT skip security.passwords.ssh Port 22 not open on target device.
-RESULT skip security.passwords.telnet Port 23 not open on target device.
-RESULT fail security.passwords.http Was able to brute force using dictionary.
-RESULT fail security.passwords.https Was able to brute force using dictionary.
-RESULT fail security.passwords.ssh Was able to brute force using dictionary.
-RESULT fail security.passwords.telnet Was able to brute force using dictionary.
-RESULT pass security.passwords.http Was not able to brute force using dictionary.
-RESULT pass security.passwords.https Was not able to brute force using dictionary.
-RESULT pass security.passwords.ssh Was not able to brute force using dictionary.
-RESULT pass security.passwords.telnet Was not able to brute force using dictionary.
-RESULT skip security.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
-RESULT pass security.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
-RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
-RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
-RESULT pass connection.network.ntp_support Using NTPv4.
-RESULT pass connection.network.ntp_update Device clock synchronized.
-RESULT fail connection.mac_oui Manufacturer prefix not found!
-RESULT skip connection.dns.hostname_connect Device did not send any DNS requests
-RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
-RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
-RESULT fail connection.network.ntp_support Not using NTPv4.
-RESULT fail connection.network.ntp_update Device clock not synchronized with local NTP server.
-RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0b
-RESULT fail connection.dns.hostname_connect Device sent DNS requests to servers other than the DHCP provided server
-RESULT pass connection.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
-RESULT info communication.type.broadcast Broadcast packets received. Unicast packets received.
-RESULT skip connection.network.ntp_support No NTP packets received.
-RESULT skip connection.network.ntp_update Not enough NTP packets received.
-RESULT pass connection.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
-RESULT pass connection.dns.hostname_connect Device sends DNS requests and resolves host names
+RESULT skip protocol.bacext.version Bacnet device not found.
+RESULT fail protocol.bacext.pic PICS file defined however a BACnet device was not found.
+RESULT info protocol.bacext.version Protocol version: 1
+RESULT skip protocol.bacext.pic BACnet device found, but pics.csv not found in device type directory.
+RESULT info protocol.bacext.version Protocol version: 1
+RESULT pass protocol.bacext.pic The devices matches the PICS
+RESULT skip security.tls.v1_2_client No client initiated TLS communication detected
+RESULT skip security.tls.v1_2_server IOException unable to connect to server.
+RESULT skip security.tls.v1_3_client No client initiated TLS communication detected
+RESULT skip security.tls.v1_3_server IOException unable to connect to server.
+RESULT skip security.tls.v1_server IOException unable to connect to server.
+RESULT pass security.tls.v1_2_client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
+RESULT fail security.tls.v1_2_server Certificate is expired. Certificate has not been signed by a CA.
+RESULT pass security.tls.v1_3_client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
+RESULT fail security.tls.v1_3_server Certificate is expired. Certificate has not been signed by a CA.
+RESULT fail security.tls.v1_server Certificate is expired. Certificate has not been signed by a CA.
+RESULT pass security.tls.v1_2_client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
+RESULT fail security.tls.v1_2_server Certificate has not been signed by a CA. Cipher Valid.
+RESULT pass security.tls.v1_3_client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
+RESULT fail security.tls.v1_3_server Certificate has not been signed by a CA.
+RESULT fail security.tls.v1_server Certificate has not been signed by a CA. Cipher Valid.
+RESULT skip security.password.http Port 80 not open on target device.
+RESULT skip security.password.https Port 443 not open on target device.
+RESULT skip security.password.ssh Port 22 not open on target device.
+RESULT skip security.password.telnet Port 23 not open on target device.
+RESULT fail security.password.http Was able to brute force using dictionary.
+RESULT fail security.password.https Was able to brute force using dictionary.
+RESULT fail security.password.ssh Was able to brute force using dictionary.
+RESULT fail security.password.telnet Was able to brute force using dictionary.
+RESULT pass security.password.http Was not able to brute force using dictionary.
+RESULT pass security.password.https Was not able to brute force using dictionary.
+RESULT pass security.password.ssh Was not able to brute force using dictionary.
+RESULT pass security.password.telnet Was not able to brute force using dictionary.
+RESULT skip security.discover.firmware Could not retrieve a firmware version with nmap. Check bacnet port.
+RESULT pass security.discover.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
+RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
+RESULT info communication.network.type Broadcast packets received. Unicast packets received.
+RESULT pass ntp.network.ntp_support Using NTPv4.
+RESULT pass ntp.network.ntp_update Device clock synchronized.
+RESULT fail connection.network.mac_oui Manufacturer prefix not found!
+RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
+RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
+RESULT info communication.network.type Broadcast packets received. Unicast packets received.
+RESULT fail ntp.network.ntp_support Not using NTPv4.
+RESULT fail ntp.network.ntp_update Device clock not synchronized with local NTP server.
+RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0b
+RESULT fail dns.network.hostname_resolution Device sent DNS requests to servers other than the DHCP provided server
+RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
+RESULT info communication.network.type Broadcast packets received. Unicast packets received.
+RESULT skip ntp.network.ntp_support No NTP packets received.
+RESULT skip ntp.network.ntp_update Not enough NTP packets received.
+RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
+RESULT pass dns.network.hostname_resolution Device sends DNS requests and resolves host names
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
 3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']

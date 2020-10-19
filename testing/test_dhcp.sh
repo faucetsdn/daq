@@ -100,8 +100,8 @@ for iface in $(seq 1 6); do
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
-    dhcp_change=$(cat $report_file | fgrep 'pass connection.network.dhcp_change' | wc -l)
-    ip_change=$(cat $report_file | fgrep 'pass connection.dhcp.ip_change' | wc -l)
+    dhcp_change=$(cat $report_file | fgrep 'pass connection.ipaddr.disconnect_ip_change' | wc -l)
+    ip_change=$(cat $report_file | fgrep 'pass connection.ipaddr.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
     if [ $iface == 6 ]; then
       device_dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | fgrep "ipaddr_ipaddr0$iface" | wc -l)

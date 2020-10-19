@@ -52,7 +52,7 @@ public class SwitchTest {
   }
 
   protected void testLink(InterfaceResponse interfaceResponse) {
-    final String testName = "connection.port_link";
+    final String testName = "connection.switch.port_link";
     if (interfaceResponse.getLinkStatus() == LinkStatus.State.UP) {
       captureResult(testName, Result.PASS, "Link is up");
     } else {
@@ -61,7 +61,7 @@ public class SwitchTest {
   }
 
   protected void testSpeed(InterfaceResponse interfaceResponse) {
-    final String testName = "connection.port_speed";
+    final String testName = "connection.switch.port_speed";
     int linkSpeed = interfaceResponse.getLinkSpeed();
     if (linkSpeed > 0) {
       if (linkSpeed >= 10) {
@@ -77,7 +77,7 @@ public class SwitchTest {
   }
 
   protected void testDuplex(InterfaceResponse interfaceResponse) {
-    final String testName = "connection.port_duplex";
+    final String testName = "connection.switch.port_duplex";
     String duplex = interfaceResponse.getDuplex();
     if (duplex != null) {
       if (duplex.equals("full")) {

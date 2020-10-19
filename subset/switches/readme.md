@@ -73,19 +73,19 @@ Example of all necessary parameters in the system.conf related to physical switc
     # Make sure docker's ip range doesn't conflict with that of the switch. Default docker ip range is 172.17.0.0/16. Default switch ip range is 192.168.0.0/16
     usi_setup.url=172.17.0.1:5000
 
-## Conditions for connection.port_duplex
+## Conditions for connection.switch.port_duplex
  - pass -> If the duplex mode is detected as full
  - fail -> If the duplex mode is detected but not full or if the duplex mode cannot be detected
 
-## Conditions for connection.port_link
+## Conditions for connection.switch.port_link
  - pass -> If the status of the port the device is plugged into is determined to be in a connected or "UP" state.
  - fail -> If the status of the port the device is plugged into is determined to be in a disconnected or "DOWN" state.
 
-## Conditions for connection.port_speed
+## Conditions for connection.switch.port_speed
  - pass -> If the speed of the port is auto-negotiated and determiend to be higher than 10 MBPS
  - fail ->If the speed of the port is determined to be <= 10MBPS
 
-## Conditions for poe.power
+## Conditions for poe.switch.power
  - pass -> If the a PoE device is connected and power has been detected and supplied to the device.
  - fail -> If the a PoE device is connected and *NO* power has been detected and supplied to the device.  Failure also occurs if the switch reports either a faulty PoE state or is denying power to the device. This can also fail if associated power data fails to resolve correctly during switch interrogation.
  - skip -> If the PoE option is disabled in the device module_config.json or if the switch reports no PoE support.

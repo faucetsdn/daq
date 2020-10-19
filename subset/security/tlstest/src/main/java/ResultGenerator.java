@@ -22,9 +22,9 @@ public class ResultGenerator {
     private static String generatePassResults(Server server){
         String report = "";
         report +=
-                "\nRESULT pass security.tlsv"
+                "\nRESULT pass security.tls.v"
                         + server.getTlsVersion().replace(".","_")
-                        + ".server "
+                        + "_server "
                         + getKeyLengthStatusMessage(server.getServerKeyLengthStatus()) + " "
                         + getCertStatusMessage(server.getServerCertStatus()) + " "
                         + getSignatureMessage(server.getSigStatus()) + " "
@@ -35,9 +35,9 @@ public class ResultGenerator {
     private static String generateFailResults(Server server){
         String report = "";
         report +=
-                "\nRESULT fail security.tlsv"
+                "\nRESULT fail security.tls.v"
                         + server.getTlsVersion().replace(".","_")
-                        + ".server";
+                        + "_server";
         if(server.getServerKeyLengthStatus() == KeyLengthStatus.PUBLIC_KEY_INVALID_LENGTH){
             report+=" " + getKeyLengthStatusMessage(server.getServerKeyLengthStatus());
         }
@@ -55,9 +55,9 @@ public class ResultGenerator {
 
     private static String generateServerSkipResult(Server server) {
         String report =
-                "\nRESULT skip security.tlsv"
+                "\nRESULT skip security.tls.v"
                 + server.getTlsVersion().replace(".","_")
-                + ".server"
+                + "_server"
                 + " IOException unable to connect to server.";
         return report;
     }

@@ -32,7 +32,7 @@ Overall device result PASS
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
-|pass|base.target.ping|Other|Other|target reached|
+|pass|connection.base.target_ping|Other|Other|target reached|
 |pass|security.nmap.http|Other|Other|No running http servers have been found.|
 |pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
 
@@ -78,13 +78,13 @@ See log above
 RESULT skip base.switch.ping No local IP has been set, check system config
 
 --------------------
-base.target.ping
+connection.base.target_ping
 --------------------
 Attempt to ping the Device Under Test
 --------------------
 See log above
 --------------------
-RESULT pass base.target.ping target reached
+RESULT pass connection.base.target_ping target reached
 
 ```
 
