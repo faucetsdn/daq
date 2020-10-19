@@ -35,7 +35,7 @@ RESULT pass security.tls.v1_2_client Client/Server completed handshake and ECDH/
 RESULT fail security.tls.v1_2_server Certificate has not been signed by a CA. Cipher Valid.
 RESULT pass security.tls.v1_3_client Client/Server completed handshake and ECDH/ECDSA supported ciphers.
 RESULT fail security.tls.v1_3_server Certificate has not been signed by a CA.
-RESULT fail security.tls.v1_server Certificate has not been signed by a CA. Cipher Valid
+RESULT fail security.tls.v1_server Certificate has not been signed by a CA. Cipher Valid.
 RESULT skip security.password.http Port 80 not open on target device.
 RESULT skip security.password.https Port 443 not open on target device.
 RESULT skip security.password.ssh Port 22 not open on target device.

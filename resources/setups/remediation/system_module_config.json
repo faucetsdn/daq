@@ -51,7 +51,7 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.switch.port_speedd": {
+    "connection.switch.port_speed": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"
