@@ -70,7 +70,7 @@ Overall device result FAIL
 |info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connectivity|Required|target reached|
 |fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
-|skip|connection.switch.port_duplexNo|Other|Other|local IP has been set, check system config|
+|skip|connection.switch.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Other|Other|No local IP has been set, check system config|
 |skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
@@ -241,7 +241,7 @@ LOCAL_IP not configured, assuming no network switch.
 RESULT skip connection.switch.port_speed No local IP has been set, check system config
 
 --------------------
-connection.port_duplex
+connection.switch.port_duplex
 --------------------
 Verify the device supports full duplex
 --------------------
