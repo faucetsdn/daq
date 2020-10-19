@@ -9,7 +9,7 @@
 
 ## Test Iteration
 
-| Test             |                        |
+| Test parameter   | Value                  |
 |------------------|------------------------|
 | Test report start date | XXX |
 | Test report end date   | XXX |
@@ -62,21 +62,21 @@ Overall device result FAIL
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
-|pass|connection.base.target_ping|Connectivity|Required|target reached|
 |skip|cloud.udmi.pointset|Other|Other|No device id|
 |skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
-|info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
-|skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
-|fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
-|pass|ntp.network.ntp_support|Other|Other|Using NTPv4.|
-|pass|ntp.network.ntp_update|Other|Other|Device clock synchronized.|
-|skip|connection.port_duplex|Other|Other|No local IP has been set, check system config|
+|info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
+|pass|connection.base.target_ping|Connectivity|Required|target reached|
+|fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
+|skip|connection.switch.port_duplexNo|Other|Other|local IP has been set, check system config|
 |skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Other|Other|No local IP has been set, check system config|
+|skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
 |pass|manual.test.name|Security|Recommended|Manual test - for testing|
+|pass|ntp.network.ntp_support|Other|Other|Using NTPv4.|
+|pass|ntp.network.ntp_update|Other|Other|Device clock synchronized.|
 |skip|poe.switch.power|Other|Other|No local IP has been set, check system config|
 |fail|protocol.bacext.pic|Other|Other|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacext.version|Other|Other|Bacnet device not found.|
@@ -88,11 +88,11 @@ Overall device result FAIL
 |skip|security.password.ssh|Other|Other|Port 22 not open on target device.|
 |skip|security.password.telnet|Other|Other|Port 23 not open on target device.|
 |gone|security.ports.nmap|Security|Recommended||
-|skip|security.tls.v1_server|Other|Other|IOException unable to connect to server.|
 |skip|security.tls.v1_2_client|Other|Other|No client initiated TLS communication detected|
 |skip|security.tls.v1_2_server|Other|Other|IOException unable to connect to server.|
 |skip|security.tls.v1_3_client|Other|Other|No client initiated TLS communication detected|
 |skip|security.tls.v1_3_server|Other|Other|IOException unable to connect to server.|
+|skip|security.tls.v1_server|Other|Other|IOException unable to connect to server.|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -329,18 +329,9 @@ Gathering TLS Client X.X.X.X Information....
 TLS Client Information Complete.
 
 --------------------
-security.tls.v1_server
---------------------
-Verify the device supports at least TLS 1.0 (as a server)
---------------------
-See log above
---------------------
-RESULT skip security.tls.v1_server IOException unable to connect to server.
-
---------------------
 security.tls.v1_2_client
 --------------------
-null
+Verify the device supports at least TLS 1.2 (as a client)
 --------------------
 See log above
 --------------------
@@ -358,7 +349,7 @@ RESULT skip security.tls.v1_2_server IOException unable to connect to server.
 --------------------
 security.tls.v1_3_client
 --------------------
-null
+Verify the device supports at least TLS 1.3 (as a client)
 --------------------
 See log above
 --------------------
@@ -372,6 +363,15 @@ Verify the device supports TLS 1.3 (as a server)
 See log above
 --------------------
 RESULT skip security.tls.v1_3_server IOException unable to connect to server.
+
+--------------------
+security.tls.v1_server
+--------------------
+Verify the device supports at least TLS 1.0 (as a server)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_server IOException unable to connect to server.
 
 ```
 
