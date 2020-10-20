@@ -13,9 +13,8 @@ X-Python3-Version: >= 3.6
 
 Package: python3-daq
 Architecture: all
+# TODO Need to audit the imported modules to complete dependancies
 Depends: python3-grpcio,
-         python3-prometheus-client (<< 0.7.2),
-         python3-prometheus-client (>= 0.7.1),
          python3-protobuf,
          python3-yaml
 Description: DAQ is a framework designed to test and operate IoT devices in an enterprise IoT environment.
