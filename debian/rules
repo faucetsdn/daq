@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=daq
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_strip:
+	dh_strip --no-automatic-dbgsym
+
+# TODO skip test until test_modules directory is renamed in the source
+override_dh_auto_test:
