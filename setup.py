@@ -3,6 +3,7 @@ from setuptools import setup
 
 version = os.popen('git describe').read().strip()
 version_content = f'''"""DAQ version file"""
+
 __version__ = '{version}'
 '''
 with open('daq/__version__.py', 'w+') as version_file:
