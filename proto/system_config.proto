@@ -127,7 +127,7 @@ message DaqConfig {
   // Drop into console mode after test
   bool use_console = 52;
 
-  // Port of the server to receive device testing result
+  // Port of the server to receive device result
   bool device_result_port= 53;
 }
 
