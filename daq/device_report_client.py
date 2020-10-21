@@ -24,7 +24,7 @@ class DeviceReportClient:
         """Send device result of a device to server"""
         devices_state = {
             'device_mac_behaviors': {
-                mac: DeviceBehavior(port_behavior=device_result)
+                mac: {'port_behavior': device_result}
             }
         }
         self._stub.ReportDevicesState(dict_proto(devices_state, DevicesState))

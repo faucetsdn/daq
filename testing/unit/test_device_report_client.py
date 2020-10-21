@@ -6,6 +6,7 @@ import unittest
 from forch.device_report_server import DeviceReportServer
 
 from device_report_client import DeviceReportClient
+from utils import proto_dict
 
 
 class DeviceReportClientTestBase(unittest.TestCase):
@@ -41,8 +42,9 @@ class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
         self._received_results = []
 
     def _process_result(self, result):
-        mac, device_behavior = result.device_mac_behaviors.popitem()
-        received_result = {'mac': mac, 'port_behavior': device_behavior.port_behavior}
+        devices_state_map = proto_dict(result, including_default_value_fields=True)
+        mac, device_behavior = devices_state_map['device_mac_behaviors'].popitem()
+        received_result = {'mac': mac, 'port_behavior': device_behavior['port_behavior']}
         self._received_results.append(received_result)
 
     def test_sending_device_result(self):
