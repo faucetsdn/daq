@@ -169,9 +169,7 @@ class DAQRunner:
         self._system_active = False
         logging_client = self.gcp.get_logging_client()
         self.daq_run_id = self._init_daq_run_id()
-        self._device_result_client = None
-        if self.config.get('device_result_port'):
-            self._init_device_result_client()
+        self._device_result_client = self._init_device_result_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
@@ -202,8 +200,10 @@ class DAQRunner:
         return daq_run_id
 
     def _init_device_result_client(self):
-        self._device_result_client = DeviceReportClient(
-            server_port=self.config['device_result_port'])
+        server_port=self.config.get('device_reporting', {}).get('server_port')
+        if server_port:
+            return DeviceReportClient(server_port=server_port)
+        return None
 
     def _send_heartbeat(self):
         message = {

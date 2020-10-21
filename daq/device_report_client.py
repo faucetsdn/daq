@@ -3,7 +3,7 @@
 import grpc
 
 from forch.proto.grpc.device_report_pb2_grpc import DeviceReportStub
-from forch.proto.devices_state_pb2 import DevicesState, DeviceBehavior
+from forch.proto.devices_state_pb2 import DevicesState
 
 from utils import dict_proto
 
