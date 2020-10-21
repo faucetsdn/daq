@@ -1,16 +1,16 @@
-"""Unit tests for device qualification client"""
+"""Unit tests for device report client"""
 
 import time
 import unittest
 
-from forch.device_testing_server import DeviceTestingServer
+from forch.device_report_server import DeviceReportServer
 
-from device_qualification_client import DeviceQualificationClient
+from device_report_client import DeviceReportClient
 from utils import proto_dict
 
 
-class DeviceQualificationClientTestBase(unittest.TestCase):
-    """Base class for device qualification client unit test"""
+class DeviceReportClientTestBase(unittest.TestCase):
+    """Base class for device report client unit test"""
     _SERVER_ADDRESS = '0.0.0.0'
     _SERVER_PORT = 50071
 
@@ -24,9 +24,9 @@ class DeviceQualificationClientTestBase(unittest.TestCase):
 
     def setUp(self):
         """Setup fixture for each test method"""
-        self._client = DeviceQualificationClient(server_port=self._SERVER_PORT)
+        self._client = DeviceReportClient(server_port=self._SERVER_PORT)
 
-        self._server = DeviceTestingServer(
+        self._server = DeviceReportServer(
             self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT)
         self._server.start()
 
@@ -35,17 +35,19 @@ class DeviceQualificationClientTestBase(unittest.TestCase):
         self._server.stop()
 
 
-class DeviceQualificationClientBasicTestCase(DeviceQualificationClientTestBase):
-    """Basic test case for device qulification client"""
+class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
+    """Basic test case for device report client"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._received_results = []
 
     def _process_result(self, result):
-        self._received_results.append(proto_dict(result, including_default_value_fields=True))
+        mac, device_behavior = result.device_mac_behaviors.popitem()
+        received_result = {'mac': mac, 'port_behavior': device_behavior.port_behavior}
+        self._received_results.append(received_result)
 
-    def test_sending_device_qualification_result(self):
-        """Test behavior of the client and server when client sends device qualification states"""
+    def test_sending_device_result(self):
+        """Test behavior of the client and server when client sends devices states"""
         expected_results = [
             {'mac': '00:0X:00:00:00:01', 'port_behavior': 'unknown'},
             {'mac': '00:0Y:00:00:00:02', 'port_behavior': 'passed'},
@@ -56,7 +58,7 @@ class DeviceQualificationClientBasicTestCase(DeviceQualificationClientTestBase):
 
         for result in expected_results:
             print(f'Sending result:\n{result}')
-            self._client.send_qualification_result(result['mac'], result['port_behavior'])
+            self._client.send_device_result(result['mac'], result['port_behavior'])
 
         time.sleep(2)
         self.assertEqual(self._received_results, expected_results)

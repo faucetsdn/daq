@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
-from device_qualification_client import DeviceQualificationClient
+from device_report_client import DeviceReportClient
 import faucet_event_client
 import gateway as gateway_manager
 import gcp
@@ -197,7 +197,7 @@ class DAQRunner:
         return daq_run_id
 
     def _init_device_qualification_client(self):
-        self._device_qualification_client = DeviceQualificationClient(
+        self._device_qualification_client = DeviceReportClient(
             server_port=self.config['device_result_port'])
 
     def _send_heartbeat(self):
@@ -750,7 +750,7 @@ class DAQRunner:
         self._result_sets[device] = result_set
 
         if self._device_qualification_client:
-            self._device_qualification_client.send_qualification_result(
+            self._device_qualification_client.send_device_result(
                 device.mac, PortBehavior.passed)
 
     def _target_set_cancel(self, device):
