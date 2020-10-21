@@ -200,7 +200,7 @@ class DAQRunner:
         return daq_run_id
 
     def _init_device_result_client(self):
-        server_port=self.config.get('device_reporting', {}).get('server_port')
+        server_port = self.config.get('device_reporting', {}).get('server_port')
         if server_port:
             return DeviceReportClient(server_port=server_port)
         return None
