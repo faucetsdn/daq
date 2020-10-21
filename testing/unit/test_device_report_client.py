@@ -6,7 +6,6 @@ import unittest
 from forch.device_report_server import DeviceReportServer
 
 from device_report_client import DeviceReportClient
-from utils import proto_dict
 
 
 class DeviceReportClientTestBase(unittest.TestCase):
