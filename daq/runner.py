@@ -164,9 +164,9 @@ class DAQRunner:
         self._system_active = False
         logging_client = self.gcp.get_logging_client()
         self.daq_run_id = self._init_daq_run_id()
-        self._device_qualification_client = None
+        self._device_result_client = None
         if self.config.get('device_result_port'):
-            self._init_device_qualification_client()
+            self._init_device_result_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
@@ -196,8 +196,8 @@ class DAQRunner:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
 
-    def _init_device_qualification_client(self):
-        self._device_qualification_client = DeviceReportClient(
+    def _init_device_result_client(self):
+        self._device_result_client = DeviceReportClient(
             server_port=self.config['device_result_port'])
 
     def _send_heartbeat(self):
@@ -749,8 +749,8 @@ class DAQRunner:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-        if self._device_qualification_client:
-            self._device_qualification_client.send_device_result(
+        if self._device_result_client:
+            self._device_result_client.send_device_result(
                 device.mac, PortBehavior.passed)
 
     def _target_set_cancel(self, device):
