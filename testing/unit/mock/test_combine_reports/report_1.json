@@ -18,9 +18,9 @@
                     "expected": "Other",
                     "result_description": "target "
                 },
-                "base.target.ping": {
+                "connection.base.target_ping": {
                     "result": "fail",
-                    "test_name": "base.target.ping",
+                    "test_name": "connection.base.target_ping",
                     "module_name": "ping",
                     "category": "Other",
                     "expected": "Other",

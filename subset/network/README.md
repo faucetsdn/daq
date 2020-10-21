@@ -2,7 +2,7 @@
 
 ## General Network Tests
 
-### connection.min_send
+### communication.network.min_send
 - Located in network_tests.py, started up in test_network.
 - Check if a device sends any data packet at a frequency of less than five minutes.
 
@@ -11,7 +11,7 @@
 - FAIL: If data packets are sent, and there are packets with time interval of less than five minutes found, then fail.
 - SKIP: If no data packets are sent and the monitor scan period is short, the test will skip instead of failing.
 
-### communication.type.broadcast
+### communication.network.type
 - Located in network_tests.py, started up in test_network.
 - This test counts the number of unicast, broadcast and multicast packets sent out by reading from the .pcap file that DAQ has created during runtime.
 
@@ -25,22 +25,21 @@ The NTP tests inspect the client NTP version and the device's ability to update 
 ### Note for test developers 
 The functional test code is included in the `ntp_tests.py` file.
 
-The test reads packets from startup.pcap and monitor.pcap.
+The test reads packets from monitor.pcap.
 
 If the python code needs debugging, the pip module `scapy` is required (`pip install scapy`).
 
 ### NTP Test conditions
 | Test ID |  Info | Pass | Fail | Skip |
 |---|---|---|---|---|
-| connection.network.ntp_support | Are the received NTP packets using NTP v4? | NTP version is 4 | NTP version is not 4 | No NTP packets are received |
-| connection.network.ntp_update | Does the device demonstrate updating its clock using NTP? | Device clock is synchronized | Device clock is not synchronized | Not enough NTP packets are received |
+| ntp.network.ntp_support | Are the received NTP packets using NTP v4? | NTP version is 4 | NTP version is not 4 | No NTP packets are received |
+| ntp.network.ntp_update | Does the device demonstrate updating its clock using NTP? | Device clock is synchronized | Device clock is not synchronized | Not enough NTP packets are received |
 
 #### NTP Support ####
-The version of NTP used by the client is extracted from the fist client (outbound) NTP packets discovered in startup.pcap.
+The version of NTP used by the client is extracted from the first client (outbound) NTP packets discovered in monitor.pcap.
 
 #### NTP Update ####
 The following criteria are used to determine whether a DUT has synced its clock with the NTP server provided by DAQ:
- - A minimum of 2 NTP packets are present in startup.pcap and monitor.pcap (one potential poll).
  - A minimum of 2 NTP packets have been exchanged between the DUT and the DAQ-provided NTP server.
  - A valid NTP poll is present. Consisting of a client-server exchange.
  - The calculated offset is less than 0.128 seconds and the final poll does not have a leap indicator of 3 (unsynchronized).
@@ -70,7 +69,7 @@ static resource on the source code repo.
 ## DNS Tests
 Check Device uses the DNS server from DHCP and resolves hostnames
 
-### Conditions for connection.dns.hostname_connect
+### Conditions for dns.network.hostname_resolution
  - pass -> if the device uses the DNS server from DHCP, and resolves a hostname
  - fail -> device uses a DNS serveer other than the server fron DHCP
  - skip -> device did not send any DNS requests

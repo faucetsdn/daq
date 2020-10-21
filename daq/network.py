@@ -201,6 +201,14 @@ class TestNetwork:
             yaml.safe_dump(self.topology.get_network_topology(), file)
         self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
 
+    def direct_vlan_traffic(self, port_set, vlan):
+        """Modify gateway set's vlan to match triggering vlan"""
+        LOGGER.info('Directing traffic for port set %s to vlan %s', port_set, vlan)
+        # TODO: Convert this to use faucitizer to change vlan
+        self.topology.direct_vlan_traffic(port_set, vlan)
+        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
+        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()
         LOGGER.info('Attaching switch interface %s on port %s', switch_intf_name, switch_port)

@@ -1,11 +1,11 @@
 {
-    "connection.port_link" : {
+    "connection.switch.port_link" : {
         "description" : "Connect the device to the network switch. Check the device and the switch for the green connection light & no errors"
     },
-    "connection.port_speed" : {
+    "connection.switch.port_speed" : {
         "description" : "Verify the device auto-negotiates connection speed"
     },
-    "connection.port_duplex" : {
+    "connection.switch.port_duplex" : {
         "description" : "Verify the device supports full duplex"
     },
     "poe.switch.power" : {

@@ -6,8 +6,7 @@ import os
 arguments = sys.argv
 
 test_request = str(arguments[1])
-startup_pcap_file = str(arguments[2])
-monitor_pcap_file = str(arguments[3])
+pcap_file = str(arguments[2])
 
 report_filename = 'ntp_tests.txt'
 ignore = '%%'
@@ -63,9 +62,10 @@ def ntp_payload(packet):
 
 
 def test_ntp_support():
-    capture = rdpcap(startup_pcap_file)
-    if len(capture) > 0:
-        version = ntp_client_version(capture)
+    capture = rdpcap(pcap_file)
+    packets = ntp_packets(capture)
+    if len(packets) > 0:
+        version = ntp_client_version(packets)
         if version is None:
             add_summary("No NTP packets received.")
             return 'skip'
@@ -81,11 +81,8 @@ def test_ntp_support():
 
 
 def test_ntp_update():
-    startup_capture = rdpcap(startup_pcap_file)
-    packets = ntp_packets(startup_capture)
-    if os.path.isfile(monitor_pcap_file):
-        monitor_capture = rdpcap(monitor_pcap_file)
-        packets += ntp_packets(monitor_capture)
+    capture = rdpcap(pcap_file)
+    packets = ntp_packets(capture)
     if len(packets) < 2:
         add_summary("Not enough NTP packets received.")
         return 'skip'
@@ -160,10 +157,10 @@ def add_summary(text):
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
 
-if test_request == 'connection.network.ntp_support':
+if test_request == 'ntp.network.ntp_support':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_support))
     result = test_ntp_support()
-elif test_request == 'connection.network.ntp_update':
+elif test_request == 'ntp.network.ntp_update':
     write_report("{d}\n{b}".format(b=dash_break_line, d=description_ntp_update))
     result = test_ntp_update()
 

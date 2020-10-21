@@ -9,7 +9,7 @@ CONFIG=/config/device/module_config.json
 LOG=/tmp/nmap.log
 RESULT_LINES=/tmp/result_lines.txt
 
-TEST_NAME="connection.mac_oui"
+TEST_NAME="connection.network.mac_oui"
 TEST_DESCRIPTION="Check Physical device address OUI against IEEE registration and verify it is registered with the correct manufacturer"
 REDACTED_LOG=/tmp/macoui.report.log
 

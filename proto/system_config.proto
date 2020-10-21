@@ -119,7 +119,7 @@ message DaqConfig {
   USISetup usi_setup = 49;
 
   // Configures events that trigger a DAQ run 
-  RunTriggerType run_trigger_type = 50;
+  RunTrigger run_trigger = 50;
 
   // verbose output
   bool debug_mode = 51;
@@ -131,9 +131,12 @@ message DaqConfig {
   bool device_result_port= 53;
 }
 
-enum RunTriggerType {
-  PORT = 0;
-  VLAN = 1;
+enum DHCPMode {
+  NORMAL = 0;
+  STATIC_IP = 1;
+  EXTERNAL = 2;
+  LONG_RESPONSE = 3;
+  IP_CHANGE = 4;
 }
 
 /**
@@ -176,7 +179,7 @@ message SwitchSetup {
   // Interface name for external switch data plane
   string data_intf = 42;
 
-  // Name for external OVS bridge in liu of physical switch
+  // Name for external OVS bridge in lieu of physical switch
   string ext_br = 43;
 
   // Switch model
@@ -189,6 +192,16 @@ message SwitchSetup {
   string password = 46;
 }
 
+/*
+ * Information for test vlan ranges.
+ */
+message RunTrigger {
+  // start of vlan range
+  int32 vlan_start = 1;
+  
+  // end of vlan range
+  int32 vlan_end = 2;
+}
 
 /*
  * Information for faux containers.

@@ -47,13 +47,13 @@ PICS_LOG=$(cat tmp/BacnetPICSTest_APPENDIX.txt)
 PICS_RESULT_AND_SUMMARY=$(cat tmp/BacnetPICSTestReport.txt)
 
 write_out_result $REPORT \
-                 "protocol.bacnet.version" \
+                 "protocol.bacext.version" \
                  "Verify and record version of Bacnet used by the device" \
                  "$VERSION_LOG" \
                  "$VERSION_RESULT_AND_SUMMARY"
 
 write_out_result $REPORT \
-                 "protocol.bacnet.pic" \
+                 "protocol.bacext.pic" \
                  "Verify BACnet traffic is compliant to the PIC statement" \
                  "$PICS_LOG" \
                  "$PICS_RESULT_AND_SUMMARY"

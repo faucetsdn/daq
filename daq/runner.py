@@ -16,16 +16,18 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 import configurator
 from device_report_client import DeviceReportClient
 import faucet_event_client
-import gateway as gateway_manager
+import container_gateway
+
+import external_gateway
 import gcp
 import host as connected_host
 import network
 import stream_monitor
 from wrappers import DaqException
 import logger
+from proto.system_config_pb2 import DHCPMode
 
 LOGGER = logger.get_logger('runner')
-
 
 class PortInfo:
     """Simple container for device port info"""
@@ -50,7 +52,9 @@ class Device:
         self.group = None
         self.port = None
         self.dhcp_ready = False
+        self.dhcp_mode = None
         self.ip_info = IpInfo()
+        self.vlan = None
         self.set_id = None
 
     def __repr__(self):
@@ -63,13 +67,14 @@ class Devices:
         self._devices = {}
         self._set_ids = set()
 
-    def new_device(self, mac, port_info=None):
+    def new_device(self, mac, port_info=None, vlan=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
         device = Device()
         device.mac = mac
         self._devices[mac] = device
         device.port = port_info if port_info else PortInfo()
+        device.vlan = vlan
         port_no = device.port.port_no
         set_id = port_no if port_no else self._allocate_set_id()
         assert set_id not in self._set_ids, "Duplicate device set id %d" % set_id
@@ -153,7 +158,7 @@ class DAQRunner:
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
-        self.run_trigger_type = config.get('run_trigger_type', 'PORT')
+        self.run_trigger = config.get('run_trigger', {})
         self.run_tests = True
         self.stream_monitor = None
         self.exception = None
@@ -278,10 +283,12 @@ class DAQRunner:
                 return
             (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
             if dpid and port and vid:
-                if self.run_trigger_type == "PORT":
+                is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
+                if is_vlan:
+                    if self.network.is_system_port(dpid, port):
+                        self._handle_device_learn(vid, target_mac)
+                else:
                     self._handle_port_learn(dpid, port, vid, target_mac)
-                elif self.run_trigger_type == "VLAN" and self.network.is_system_port(dpid, port):
-                    self._handle_device_learn(vid, target_mac)
                 return
             (dpid, restart_type) = self.faucet_events.as_config_change(event)
             if dpid is not None:
@@ -346,9 +353,10 @@ class DAQRunner:
     def _handle_device_learn(self, vid, target_mac):
         LOGGER.info('%s learned on vid %s', target_mac, vid)
         if not self._devices.get(target_mac):
-            device = self._devices.new_device(target_mac)
+            device = self._devices.new_device(target_mac, vlan=vid)
         else:
             device = self._devices.get(target_mac)
+        device.dhcp_mode = DHCPMode.EXTERNAL
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
@@ -490,7 +498,8 @@ class DAQRunner:
 
         # Stops all DHCP response initially
         # Selectively enables dhcp response at ipaddr stage based on dhcp mode
-        gateway.stop_dhcp_response(device.mac)
+        if device.dhcp_mode != DHCPMode.EXTERNAL:
+            gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
         try:
@@ -509,6 +518,8 @@ class DAQRunner:
                     'mac': device.mac
                 }
                 self._direct_port_traffic(device.mac, device.port.port_no, target)
+            else:
+                self.network.direct_vlan_traffic(gateway.port_set, device.vlan)
             return True
         except Exception as e:
             self.target_set_error(device, e)
@@ -561,11 +572,11 @@ class DAQRunner:
                 continue
             with open(meta_file) as fd:
                 metadatum = json.loads(fd.read())
-                assert "name" in metadatum and "startup_script" in metadatum
+                assert "name" in metadatum and "startup_cmd" in metadatum
                 module = metadatum["name"]
                 assert module not in metadata, "Duplicate module definition for %s" % module
                 metadata[module] = {
-                    "startup_script": metadatum["startup_script"],
+                    "startup_cmd": metadatum["startup_cmd"],
                     "basedir": meta_file.parent
                 }
         return metadata
@@ -582,7 +593,12 @@ class DAQRunner:
         set_num = self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
-        gateway = gateway_manager.Gateway(self, group_name, set_num, self.network)
+        if device.dhcp_mode == DHCPMode.EXTERNAL:
+            # Under vlan trigger, start a external gateway that doesn't utilize a DHCP server.
+            gateway = external_gateway.ExternalGateway(self, group_name, set_num)
+        else:
+            gateway = container_gateway.ContainerGateway(self, group_name, set_num)
+
         try:
             gateway.initialize()
         except Exception:

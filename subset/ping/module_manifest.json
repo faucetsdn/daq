@@ -5,7 +5,7 @@
     "base.switch.ping": {
         "description": "Attempt to ping access switch (if configured)"
     },
-    "base.target.ping": {
+    "connection.base.target_ping": {
         "description": "Attempt to ping the Device Under Test"
     }
 }

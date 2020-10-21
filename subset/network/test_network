@@ -2,18 +2,17 @@
 
 REPORT=/tmp/report.txt
 
-STARTUP=/scans/startup.pcap
 MONITOR=/scans/monitor.pcap
 
 # General Network Tests
-python network_tests.py connection.min_send $MONITOR $TARGET_IP
-python network_tests.py communication.type.broadcast $MONITOR $TARGET_IP
+python network_tests.py communication.network.min_send $MONITOR $TARGET_IP
+python network_tests.py communication.network.type $MONITOR $TARGET_IP
 
 cat network_tests.txt >> $REPORT
 
 # NTP Tests
-python ntp_tests.py connection.network.ntp_support $STARTUP $MONITOR
-python ntp_tests.py connection.network.ntp_update $STARTUP $MONITOR
+python ntp_tests.py ntp.network.ntp_support $MONITOR
+python ntp_tests.py ntp.network.ntp_update $MONITOR
 
 cat ntp_tests.txt >> $REPORT
 
@@ -21,6 +20,6 @@ cat ntp_tests.txt >> $REPORT
 ./run_macoui_test $TARGET_MAC $REPORT
 
 # DNS Tests
-python dns_tests.py connection.dns.hostname_connect $MONITOR $TARGET_IP
+python dns_tests.py dns.network.hostname_resolution $MONITOR $TARGET_IP
 
 cat dns_tests.txt >> $REPORT

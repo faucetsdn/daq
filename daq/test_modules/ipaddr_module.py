@@ -9,8 +9,8 @@ import os
 import copy
 import logger
 from .docker_module import DockerModule
-
 from .base_module import HostModule
+from proto.system_config_pb2 import DHCPMode
 
 _LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
 LEASE_TIME_UNITS_CONVERTER = {
@@ -35,6 +35,7 @@ class IpAddrModule(HostModule):
             ('dhcp port_toggle test', self._dhcp_port_toggle_test),
             ('dhcp multi subnet test', self._multi_subnet_test),
             ('ip change test', self._ip_change_test),
+            ('dhcp change test', self._dhcp_change_test),
             ('analyze results', self._analyze)
         ]
         self._logger = logger.get_logger('ipaddr_%s' % self.host_name)
@@ -51,6 +52,7 @@ class IpAddrModule(HostModule):
     def start(self, port, params, callback, finish_hook):
         """Start the ip-addr tests"""
         super().start(port, params, callback, finish_hook)
+        assert self.host.device.dhcp_mode != DHCPMode.EXTERNAL, "device DHCP is not enabled."
         self._logger.debug('Target device %s starting ipaddr test %s', self.device, self.test_name)
         self._next_test()
 
@@ -79,7 +81,7 @@ class IpAddrModule(HostModule):
     def _dhcp_port_toggle_test(self):
         self._set_timeout()
         if not self.host.connect_port(False):
-            self._logger('disconnect port not enabled')
+            self._logger.error('disconnect port not enabled')
             return
         time.sleep(self.host.config.get("port_debounce_sec", 0) + 1)
         self.host.connect_port(True)
@@ -99,6 +101,15 @@ class IpAddrModule(HostModule):
     def _ip_change_test(self):
         self._set_timeout()
         self.host.gateway.request_new_ip(self.host.target_mac)
+        self._ip_callback = self._next_test
+
+    def _dhcp_change_test(self):
+        self._set_timeout()
+        if not self.host.connect_port(False):
+            self._logger.error('disconnect port not enabled')
+            return
+        self.host.gateway.request_new_ip(self.host.target_mac)
+        self.host.connect_port(True)
         self._ip_callback = self._next_test
 
     def _analyze(self):
@@ -125,6 +136,7 @@ class IpAddrModule(HostModule):
     def ip_listener(self, target_ip):
         """Respond to a ip notification event"""
         self._logger.info('ip notification %s' % target_ip)
+        self.host.runner.ping_test(self.host.gateway.host, self.host.target_ip)
         if self._ip_callback:
             self._ip_callback()
 

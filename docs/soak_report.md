@@ -8,7 +8,7 @@ Source: local
 |---|---|---|
 |base.startup.dhcp|2|0|
 |base.switch.ping|0|2|
-|base.target.ping|2|0|
+|connection.base.target_ping|2|0|
 |security.nmap.ports|2|0|
 |security.nmap.http|2|0|
 
