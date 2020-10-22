@@ -75,8 +75,11 @@ dhcp requests 1 1 1 1
 arp.txt
 dp_port_acls.yaml
 dp_sec_port_1_acl.yaml
+dp_sec_port_1_acl_augmented.yaml
 dp_sec_port_2_acl.yaml
+dp_sec_port_2_acl_augmented.yaml
 dp_sec_port_3_acl.yaml
+dp_sec_port_3_acl_augmented.yaml
 faucet.log
 faucet.yaml
 finish.out
