@@ -217,8 +217,7 @@ class TestNetwork:
         LOGGER.info('Directing traffic for port set %s to vlan %s', port_set, vlan)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_vlan_traffic(port_set, vlan)
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self._generate_behavioral_config()
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()
