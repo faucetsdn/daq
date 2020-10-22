@@ -1,6 +1,7 @@
 """Networking module"""
 
 import os
+from shutil import copyfile
 import yaml
 
 import logger
@@ -198,7 +199,17 @@ class TestNetwork:
 
     def _generate_behavioral_config(self):
         with open(self.INTERMEDIATE_FAUCET_FILE, 'w') as file:
-            yaml.safe_dump(self.topology.get_network_topology(), file)
+            network_topology = self.topology.get_network_topology()
+            yaml.safe_dump(network_topology, file)
+
+        # TODO: temporary fix. Remove after Forch behavior is changed
+        dir_name = os.path.dirname(self.OUTPUT_FAUCET_FILE)
+        for included_file_name in network_topology.get('include', []):
+            base_name, ext = os.path.splitext(included_file_name)
+            src_name = os.path.join(dir_name, included_file_name)
+            dst_name = os.path.join(dir_name, base_name + '_augmented' + ext)
+            copyfile(src_name, dst_name)
+
         self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
 
     def direct_vlan_traffic(self, port_set, vlan):
