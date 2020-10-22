@@ -126,6 +126,9 @@ message DaqConfig {
 
   // Drop into console mode after test
   bool use_console = 52;
+
+  // Reporting device result
+  DeviceReporting device_reporting = 53;
 }
 
 enum DHCPMode {
@@ -209,4 +212,12 @@ message Interface {
 
   // Switch port for attching interface.
   int32 port = 2;
+}
+
+/*
+ * Configuration for device result reporting
+ */
+message DeviceReporting {
+  // Server port
+  int32 server_port = 1;
 }

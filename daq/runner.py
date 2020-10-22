@@ -11,7 +11,10 @@ import json
 import pathlib
 from datetime import datetime, timedelta, timezone
 
+from forch.proto.shared_constants_pb2 import PortBehavior
+
 import configurator
+from device_report_client import DeviceReportClient
 import faucet_event_client
 import container_gateway
 
@@ -166,6 +169,7 @@ class DAQRunner:
         self._system_active = False
         logging_client = self.gcp.get_logging_client()
         self.daq_run_id = self._init_daq_run_id()
+        self._device_result_client = self._init_device_result_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
@@ -194,6 +198,12 @@ class DAQRunner:
         with open('inst/daq_run_id.txt', 'w') as output_stream:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
+
+    def _init_device_result_client(self):
+        server_port = self.config.get('device_reporting', {}).get('server_port')
+        if server_port:
+            return DeviceReportClient(server_port=server_port)
+        return None
 
     def _send_heartbeat(self):
         message = {
@@ -754,6 +764,10 @@ class DAQRunner:
             if self.result_linger:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
+
+        if self._device_result_client:
+            self._device_result_client.send_device_result(
+                device.mac, PortBehavior.passed)
 
     def _target_set_cancel(self, device):
         target_host = device.host
