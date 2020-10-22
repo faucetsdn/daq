@@ -1,6 +1,8 @@
 """Networking module"""
 
 import os
+from shutil import copyfile
+import yaml
 
 import logger
 from topology import FaucetTopology
@@ -11,6 +13,7 @@ from mininet import link as mininet_link
 from mininet import cli as mininet_cli
 from mininet import util as mininet_util
 from forch import faucetizer
+from forch.proto.forch_configuration_pb2 import OrchestrationConfig
 
 LOGGER = logger.get_logger('network')
 
@@ -37,6 +40,7 @@ class TestNetwork:
     MAX_INTERNAL_DPID = 100
     DEFAULT_OF_PORT = 6653
     _CTRL_PRI_IFACE = 'ctrl-pri'
+    INTERMEDIATE_FAUCET_FILE = "inst/faucet_intermediate.yaml"
     OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
 
     def __init__(self, config):
@@ -52,7 +56,9 @@ class TestNetwork:
         self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
         self.switch_links = {}
-        self.faucitizer = faucetizer.Faucetizer(None, None)
+        orch_config = OrchestrationConfig()
+        self.faucitizer = faucetizer.Faucetizer(
+            orch_config, self.INTERMEDIATE_FAUCET_FILE, self.OUTPUT_FAUCET_FILE)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -166,8 +172,7 @@ class TestNetwork:
         self.topology.start()
 
         LOGGER.info("Initializing faucitizer...")
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self._generate_behavioral_config()
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
@@ -190,16 +195,29 @@ class TestNetwork:
         LOGGER.info('Directing traffic for %s on port %s to %s', target_mac, port, dest)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_port_traffic(target_mac, port, target)
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self._generate_behavioral_config()
+
+    def _generate_behavioral_config(self):
+        with open(self.INTERMEDIATE_FAUCET_FILE, 'w') as file:
+            network_topology = self.topology.get_network_topology()
+            yaml.safe_dump(network_topology, file)
+
+        # TODO: temporary fix. Remove after Forch behavior is changed
+        dir_name = os.path.dirname(self.OUTPUT_FAUCET_FILE)
+        for included_file_name in network_topology.get('include', []):
+            base_name, ext = os.path.splitext(included_file_name)
+            src_name = os.path.join(dir_name, included_file_name)
+            dst_name = os.path.join(dir_name, base_name + '_augmented' + ext)
+            copyfile(src_name, dst_name)
+
+        self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
 
     def direct_vlan_traffic(self, port_set, vlan):
         """Modify gateway set's vlan to match triggering vlan"""
         LOGGER.info('Directing traffic for port set %s to vlan %s', port_set, vlan)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_vlan_traffic(port_set, vlan)
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self._generate_behavioral_config()
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()
