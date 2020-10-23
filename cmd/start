@@ -1,5 +1,13 @@
 #!/bin/bash -e
 
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+export DAQ_VERSION=$(git describe --dirty)
+LSB_RAW=$(lsb_release -a)
+export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
+export DAQ_SYS_UNAME=$(uname -a)
+
 if [ -f .pdbrc ]; then
     echo Found .pdbrc file, using pdb...
     runcmd="python3 -m pdb"
