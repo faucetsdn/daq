@@ -9,7 +9,7 @@ FROM daqf/aardvark:latest
 RUN $AG update && $AG install openjdk-11-jre
 RUN $AG update && $AG install openjdk-11-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl \
-    python3.7 ifupdown openssl ssh nano apache2-utils ntpdate
+    python3.8 ifupdown openssl ssh nano apache2-utils ntpdate
 
 # Additional OS dependencies
 RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
@@ -18,7 +18,7 @@ RUN $AG update && $AG install -y telnetd && $AG install xinetd nginx
 RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv resolvconf_*.deb ~
 
 # Default to python3
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 2
 
 # Basic faux stuff
 COPY docker/include/bin/start_faux docker/include/bin/failing bin/
