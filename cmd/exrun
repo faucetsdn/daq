@@ -141,42 +141,8 @@ if [ -z "$skip_autostart" ]; then
     fi
 fi
 
-if [ -f .pdbrc ]; then
-    echo Found .pdbrc file, using pdb...
-    runcmd="python3 -m pdb"
-elif [ -n "$DAQ_CODECOV" ]; then
-    echo Running with codecov analysis...
-    runcmd="coverage run --source=daq -a"
-else
-    runcmd="python3"
-fi
-
-if [ -d venv ]; then
-    echo Entering virtual python environment...
-    source venv/bin/activate
-fi
-
-if [ -z `which ifconfig` ]; then
-    export PATH=/sbin:$PATH
-fi
-
-if [ -z `which tcpdump` ]; then
-    export PATH=/usr/sbin:$PATH
-fi
-
-echo Using python3 at `which python3`
-echo Executing: $runcmd daq/daq.py $conf_file $@
-
-export PYTHONDONTWRITEBYTECODE=True
-export PYTHONUNBUFFERED=True
-export TERM=dumb
-
-echo Prepending $ROOT/binhack to PATH
-export OVSVSCTL_ORIG=`which ovs-vsctl`
-export PATH=$ROOT/binhack:$PATH
-
 exit_code=0
-$runcmd daq/daq.py $conf_file $uri_url_override $@ 2>&1 || exit_code=$?
+cmd/start $conf_file $@ $uri_url_override || exit_code=$?
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file
