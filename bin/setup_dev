@@ -15,7 +15,7 @@ if [ "$1" == simple ]; then
     shift
 fi
 
-PVERSION=3.7
+PVERSION=3.8
 
 FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
 FAUCETX=$(cat etc/FAUCET_VERSION)
