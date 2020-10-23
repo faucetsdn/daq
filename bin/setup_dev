@@ -9,6 +9,12 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
+SIMPLE=
+if [ "$1" == simple ]; then
+    SIMPLE=y
+    shift
+fi
+
 PVERSION=3.8
 
 FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
@@ -143,6 +149,11 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
 $PIP freeze
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
+
+if [ -n "$SIMPLE" ]; then
+    echo Finished with simple setup.
+    exit 0
+fi
 
 if [ -z "$FAUCETV" ]; then
     echo No faucet version found, skipping.

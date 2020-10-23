@@ -1,7 +1,0 @@
-#!/bin/bash -e
-#
-# Setup daq for running inside of a docker container.
-#
-
-echo Hello.
-
