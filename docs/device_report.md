@@ -56,7 +56,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|
 |Required|1|0|0|0|0|
 |Recommended|1|0|0|0|1|
-|Other|6|2|21|1|2|
+|Other|6|2|21|2|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -69,6 +69,7 @@ Overall device result FAIL
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connectivity|Required|target reached|
+|info|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
 |fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
 |skip|connection.switch.port_duplex|Other|Other|No local IP has been set, check system config|
 |skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
@@ -598,6 +599,15 @@ Using the host hardware address 9a:02:57:1e:8f:01
 Mac OUI Test
 --------------------
 RESULT fail connection.network.mac_oui Manufacturer prefix not found!
+
+--------------------
+connection.network.mac_address
+--------------------
+Reports device MAC address
+--------------------
+Device MAC address is 9a:02:57:1e:8f:01
+--------------------
+RESULT info connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
 
 --------------------
 dns.network.hostname_resolution
