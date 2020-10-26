@@ -41,6 +41,7 @@ class FaucetTopology:
     PRI_TRUNK_PORT = 1
     PRI_TRUNK_NAME = 'trunk_pri'
     _NO_VLAN = "0x0000/0x1000"
+    _EXT_STACK = 'EXT_STACK'
 
     def __init__(self, config):
         self.config = config
@@ -52,6 +53,7 @@ class FaucetTopology:
         self.sec_dpid = int(switch_setup['of_dpid'], 0)
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
+        self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
         self._settle_sec = int(config['settle_sec'])
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
@@ -67,6 +69,9 @@ class FaucetTopology:
 
     def start(self):
         """Start this instance"""
+        if self._ext_faucet:
+            LOGGER.info('Relying on external faucet...')
+            return
         LOGGER.info("Starting faucet...")
         output = self.pri.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
