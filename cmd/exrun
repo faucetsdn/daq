@@ -67,7 +67,10 @@ fi
 export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS:$PROTO
 
 mkdir -p $INSTDIR
-rm -rf $INSTDIR/faucet* $cleanup_file
+rm -f $cleanup_file
+if [ "$switch_setup_model" != EXT_STACK ]; then
+    rm -rf $INSTDIR/faucet*
+fi
 
 docker ps > /dev/null 2>&1 || service docker start
 
@@ -104,7 +107,7 @@ if [ -n "$switch_setup_alt_port" ]; then
     autostart bin/alt_faucet
 fi
 
-if [ -n "$switch_setup_model" -a "$switch_setup_model" != EXT_FAUX ]; then
+if [ -n "$switch_setup_model" -a "$switch_setup_model" != EXT_STACK ]; then
     autostart bin/physical_sec
 else
     echo No external switch model specified.
