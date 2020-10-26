@@ -4,7 +4,7 @@
 include: config/system/default.yaml
 
 # Description for dashboard.
-site_description: "Alternate (not managed by DAQ) OVS switch configuration"
+site_description: "Alternate switch (not managed by DAQ) configuration"
 
 # Network switch configuration.
 switch_setup:
@@ -12,6 +12,7 @@ switch_setup:
   alt_port: 6669
   uplink_port: 100
   ext_br: alt-switch
+  model: EXT_STACK
 
 # Faux device connection for testing.
 interfaces:
