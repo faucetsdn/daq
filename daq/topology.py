@@ -36,7 +36,7 @@ class FaucetTopology:
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
-    _VLAN_BASE = 1000
+    _NEUTRAL_VLAN = 1000
     PRI_DPID = 1
     PRI_TRUNK_PORT = 1
     PRI_TRUNK_NAME = 'trunk_pri'
@@ -169,7 +169,7 @@ class FaucetTopology:
     def _make_switch_interface(self):
         interface = {}
         interface['name'] = 'local_switch'
-        interface['native_vlan'] = self._VLAN_BASE
+        interface['native_vlan'] = self._NEUTRAL_VLAN
         interface['acl_in'] = self.LOCAL_ACL_FORMAT % (self.pri_name)
         return interface
 
@@ -184,7 +184,7 @@ class FaucetTopology:
         interface['native_vlan'] = self._port_set_vlan(port_set)
 
     def _port_set_vlan(self, port_set=None):
-        return self._VLAN_BASE + (port_set if port_set else 0)
+        return self._NEUTRAL_VLAN + (port_set if port_set else 0)
 
     def _make_pri_trunk_interface(self):
         interface = {}
@@ -202,12 +202,11 @@ class FaucetTopology:
 
     def _vlan_tags(self):
         vlan_range_config = self.config.get("run_trigger", {})
-        test_vlan_start = vlan_range_config.get("vlan_start")
-        test_vlan_end = vlan_range_config.get("vlan_end")
-        if test_vlan_start is not None and test_vlan_end is not None:
-            return [*range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port),
-                    *range(test_vlan_start, test_vlan_end + 1)]
-        return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
+        vlan_start = vlan_range_config.get("vlan_start")
+        vlan_end = vlan_range_config.get("vlan_end")
+        if vlan_start is not None and vlan_end is not None:
+            return [*range(vlan_start, vlan_end + 1)]
+        return list(range(self._NEUTRAL_VLAN, self._NEUTRAL_VLAN + self.sec_port))
 
     def _make_default_acl_rules(self):
         rules = []

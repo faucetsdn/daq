@@ -201,6 +201,9 @@ message RunTrigger {
   
   // end of vlan range
   int32 vlan_end = 2;
+
+  // egress vlan
+  int32 egress_vlan = 3;
 }
 
 /*
