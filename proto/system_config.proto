@@ -131,7 +131,7 @@ message DaqConfig {
   DeviceReporting device_reporting = 53;
 }
 
-enum DHCPMode {
+enum DhcpMode {
   NORMAL = 0;
   STATIC_IP = 1;
   EXTERNAL = 2;
