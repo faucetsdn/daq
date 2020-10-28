@@ -3,16 +3,23 @@ dps:
     dp_id: 2
     interfaces:
       1:
-        native_vlan: 2000
+        native_vlan: 1001
       2:
-        native_vlan: 2001
+        native_vlan: 1002
       3:
-        native_vlan: 2002
+        native_vlan: 1003
       4:
-        native_vlan: 2003
+        native_vlan: 1004
       5:
-        native_vlan: 2004
+        native_vlan: 1005
       10:
-        tagged_vlans: [2000, 2001, 2002, 2003, 2004, 121]
+        tagged_vlans: [1001, 1002, 1003, 1004, 1005, 121]
       11:
         native_vlan: 121
+vlans:
+  121:
+  1001:
+  1002:
+  1003:
+  1004:
+  1005:
