@@ -116,7 +116,7 @@ message DaqConfig {
   int32 port_flap_timeout_sec = 48;
 
   // USI url
-  USISetup usi_setup = 49;
+  UsiSetup usi_setup = 49;
 
   // Configures events that trigger a DAQ run 
   RunTrigger run_trigger = 50;
@@ -142,7 +142,7 @@ enum DhcpMode {
 /**
  * USI paramters
 **/
-message USISetup {
+message UsiSetup {
   string url = 1;
   int32 rpc_timeout_sec = 2;
 }
