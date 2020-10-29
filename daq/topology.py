@@ -2,7 +2,6 @@
 
 import copy
 import os
-import time
 import yaml
 
 from base_gateway import BaseGateway
@@ -55,7 +54,6 @@ class FaucetTopology:
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
-        self._settle_sec = int(config['settle_sec'])
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self.topology = None
@@ -132,9 +130,7 @@ class FaucetTopology:
         self._generate_acls()
         port_set = target['port_set'] if target else None
         self._update_port_vlan(port_no, port_set)
-        if self._settle_sec:
-            LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
-            time.sleep(self._settle_sec)
+        self.direct_vlan_traffic(port_set, self._port_set_vlan(port_set))
 
     def _ensure_entry(self, root, key, value):
         if key not in root:

@@ -2,6 +2,7 @@
 
 import os
 from shutil import copyfile
+import time
 import yaml
 
 import logger
@@ -50,6 +51,7 @@ class TestNetwork:
         self.sec = None
         self.sec_dpid = None
         self.sec_port = None
+        self._settle_sec = int(config['settle_sec'])
         self.topology = FaucetTopology(self.config)
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
@@ -211,6 +213,9 @@ class TestNetwork:
             copyfile(src_name, dst_name)
 
         self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
+        if self._settle_sec:
+            LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
+            time.sleep(self._settle_sec)
 
     def direct_vlan_traffic(self, port_set, vlan):
         """Modify gateway set's vlan to match triggering vlan"""
