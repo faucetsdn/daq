@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [base]
+        test: [base, many, aux, topo, modules, dhcp]
     steps:
     - uses: actions/checkout@v2
       with:
