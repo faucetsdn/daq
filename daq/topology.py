@@ -2,7 +2,6 @@
 
 import copy
 import os
-import time
 import yaml
 
 from base_gateway import BaseGateway
@@ -36,7 +35,8 @@ class FaucetTopology:
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
-    _VLAN_BASE = 1000
+    _LOCAL_VLAN = 1000
+    _DUMP_VLAN = 999
     PRI_DPID = 1
     PRI_TRUNK_PORT = 1
     PRI_TRUNK_NAME = 'trunk_pri'
@@ -54,7 +54,6 @@ class FaucetTopology:
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
-        self._settle_sec = int(config['settle_sec'])
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self.topology = None
@@ -130,10 +129,8 @@ class FaucetTopology:
             return
         self._generate_acls()
         port_set = target['port_set'] if target else None
-        self._update_port_vlan(port_no, port_set)
-        if self._settle_sec:
-            LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
-            time.sleep(self._settle_sec)
+        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
+        interface['native_vlan'] = self._port_set_vlan(port_set)
 
     def _ensure_entry(self, root, key, value):
         if key not in root:
@@ -166,25 +163,22 @@ class FaucetTopology:
         interface['output_only'] = True
         return interface
 
-    def _make_switch_interface(self):
+    def _make_local_interface(self):
         interface = {}
         interface['name'] = 'local_switch'
-        interface['native_vlan'] = self._VLAN_BASE
+        interface['native_vlan'] = self._LOCAL_VLAN
         interface['acl_in'] = self.LOCAL_ACL_FORMAT % (self.pri_name)
         return interface
 
     def _make_gw_interface(self, port_set):
         interface = {}
         interface['acl_in'] = self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)
-        interface['native_vlan'] = self._port_set_vlan(port_set)
+        vlan_id = self._DUMP_VLAN if self._use_vlan_triggers() else self._port_set_vlan(port_set)
+        interface['native_vlan'] = vlan_id
         return interface
 
-    def _update_port_vlan(self, port_no, port_set):
-        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
-        interface['native_vlan'] = self._port_set_vlan(port_set)
-
-    def _port_set_vlan(self, port_set=None):
-        return self._VLAN_BASE + (port_set if port_set else 0)
+    def _port_set_vlan(self, port_set):
+        return self._LOCAL_VLAN + port_set if port_set else self._DUMP_VLAN
 
     def _make_pri_trunk_interface(self):
         interface = {}
@@ -200,14 +194,17 @@ class FaucetTopology:
         interface['name'] = self.get_ext_intf() or self._DEFAULT_SEC_TRUNK_NAME
         return interface
 
+    def _use_vlan_triggers(self):
+        vlan_range_config = self.config.get("run_trigger", {})
+        return bool(vlan_range_config.get("vlan_start"))
+
     def _vlan_tags(self):
         vlan_range_config = self.config.get("run_trigger", {})
-        test_vlan_start = vlan_range_config.get("vlan_start")
-        test_vlan_end = vlan_range_config.get("vlan_end")
-        if test_vlan_start is not None and test_vlan_end is not None:
-            return [*range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port),
-                    *range(test_vlan_start, test_vlan_end + 1)]
-        return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
+        vlan_start = vlan_range_config.get("vlan_start")
+        vlan_end = vlan_range_config.get("vlan_end")
+        if self._use_vlan_triggers():
+            return [*range(vlan_start, vlan_end + 1)] + [self._LOCAL_VLAN]
+        return list(range(self._LOCAL_VLAN, self._LOCAL_VLAN + self.sec_port))
 
     def _make_default_acl_rules(self):
         rules = []
@@ -218,7 +215,8 @@ class FaucetTopology:
     def _make_sec_port_interface(self, port_no):
         interface = {}
         interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port_no)
-        interface['native_vlan'] = self._port_set_vlan()
+        vlan_id = self._port_set_vlan(port_no) if self._use_vlan_triggers() else self._DUMP_VLAN
+        interface['native_vlan'] = vlan_id
         return interface
 
     def _make_pri_interfaces(self):
@@ -229,7 +227,7 @@ class FaucetTopology:
                 interfaces[port] = self._make_gw_interface(port_set)
             mirror_port = self.mirror_port(port_set)
             interfaces[mirror_port] = self._make_mirror_interface(port_set)
-        interfaces[self._SWITCH_LOCAL_PORT] = self._make_switch_interface()
+        interfaces[self._SWITCH_LOCAL_PORT] = self._make_local_interface()
         return interfaces
 
     def _make_sec_interfaces(self):

@@ -158,7 +158,7 @@ Switch test with target 192.0.2.138:2
 Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Alt switch tests
-XXX runner   INFO    9a:02:57:1e:8f:01 learned on vid 2000
+XXX runner   INFO    9a:02:57:1e:8f:01 learned on vid 1002
 Correct IP: 1
 9a02571e8f01: ['9a02571e8f01:ping:1']
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests

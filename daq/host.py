@@ -12,7 +12,7 @@ from clib import tcpdump_helper
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
-from proto.system_config_pb2 import DHCPMode
+from proto.system_config_pb2 import DhcpMode
 
 import configurator
 from test_modules import DockerModule, IpAddrModule, NativeModule
@@ -207,7 +207,7 @@ class ConnectedHost:
 
     def _get_dhcp_mode(self):
         mode_str = self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', "NORMAL")
-        return DHCPMode.Value(mode_str)
+        return DhcpMode.Value(mode_str)
 
     def _get_unique_upload_path(self, file_name):
         base = os.path.basename(file_name)
@@ -357,7 +357,7 @@ class ConnectedHost:
         static_ip = self._get_static_ip()
         if static_ip:
             self.logger.info('Target device %s using static ip', self)
-            self.device.dhcp_mode = DHCPMode.STATIC_IP
+            self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
                 'mac': self.target_mac,
@@ -370,10 +370,10 @@ class ConnectedHost:
                 self.device.dhcp_mode = dhcp_mode
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
-                if self.device.dhcp_mode == DHCPMode.LONG_RESPONSE else 0
+                if self.device.dhcp_mode == DhcpMode.LONG_RESPONSE else 0
             self.logger.info('Target device %s using %s DHCP mode, wait %s',
-                             self, DHCPMode.Name(self.device.dhcp_mode), wait_time)
-            if self.device.dhcp_mode != DHCPMode.EXTERNAL:
+                             self, DhcpMode.Name(self.device.dhcp_mode), wait_time)
+            if self.device.dhcp_mode != DhcpMode.EXTERNAL:
                 self.gateway.change_dhcp_response_time(self.target_mac, wait_time)
         _ = [listener(self.device) for listener in self._dhcp_listeners]
 
@@ -465,7 +465,7 @@ class ConnectedHost:
         delta_t = datetime.now() - self._startup_time
         if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
-        if self._get_dhcp_mode() == DHCPMode.IP_CHANGE:
+        if self._get_dhcp_mode() == DhcpMode.IP_CHANGE:
             return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         return True
 
