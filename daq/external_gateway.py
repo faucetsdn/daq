@@ -29,6 +29,7 @@ class ExternalGateway(BaseGateway):
     def _initialize(self):
         super()._initialize()
         log_file = os.path.join(self.tmpdir, 'dhcp_monitor.txt')
+        LOGGER.info('monitoring %s for dhcpon %s', self.runner.network.pri, self.runner.network.ext_intf)
         self.dhcp_monitor = dhcp_monitor.DhcpMonitor(self.runner, self.runner.network.pri,
                                                      self._dhcp_callback, log_file=log_file,
                                                      intf_name=self.runner.network.ext_intf)

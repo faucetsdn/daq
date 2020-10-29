@@ -36,7 +36,8 @@ class FaucetTopology:
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
-    _NEUTRAL_VLAN = 1000
+    _LOCAL_VLAN = 1000
+    _DUMP_VLAN = 999
     PRI_DPID = 1
     PRI_TRUNK_PORT = 1
     PRI_TRUNK_NAME = 'trunk_pri'
@@ -166,25 +167,25 @@ class FaucetTopology:
         interface['output_only'] = True
         return interface
 
-    def _make_switch_interface(self):
+    def _make_local_interface(self):
         interface = {}
         interface['name'] = 'local_switch'
-        interface['native_vlan'] = self._NEUTRAL_VLAN
+        interface['native_vlan'] = self._LOCAL_VLAN
         interface['acl_in'] = self.LOCAL_ACL_FORMAT % (self.pri_name)
         return interface
 
     def _make_gw_interface(self, port_set):
         interface = {}
         interface['acl_in'] = self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)
-        interface['native_vlan'] = self._port_set_vlan(port_set)
+        interface['native_vlan'] = self._DUMP_VLAN
         return interface
 
     def _update_port_vlan(self, port_no, port_set):
         interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
         interface['native_vlan'] = self._port_set_vlan(port_set)
 
-    def _port_set_vlan(self, port_set=None):
-        return self._NEUTRAL_VLAN + (port_set if port_set else 0)
+    def _port_set_vlan(self, port_set):
+        return self._LOCAL_VLAN + port_set
 
     def _make_pri_trunk_interface(self):
         interface = {}
@@ -205,8 +206,8 @@ class FaucetTopology:
         vlan_start = vlan_range_config.get("vlan_start")
         vlan_end = vlan_range_config.get("vlan_end")
         if vlan_start is not None and vlan_end is not None:
-            return [*range(vlan_start, vlan_end + 1)]
-        return list(range(self._NEUTRAL_VLAN, self._NEUTRAL_VLAN + self.sec_port))
+            return [*range(vlan_start, vlan_end + 1)] + [self._LOCAL_VLAN]
+        return list(range(self._LOCAL_VLAN, self._LOCAL_VLAN + self.sec_port))
 
     def _make_default_acl_rules(self):
         rules = []
@@ -217,7 +218,7 @@ class FaucetTopology:
     def _make_sec_port_interface(self, port_no):
         interface = {}
         interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port_no)
-        interface['native_vlan'] = self._port_set_vlan()
+        interface['native_vlan'] = self._port_set_vlan(port_no)
         return interface
 
     def _make_pri_interfaces(self):
@@ -228,7 +229,7 @@ class FaucetTopology:
                 interfaces[port] = self._make_gw_interface(port_set)
             mirror_port = self.mirror_port(port_set)
             interfaces[mirror_port] = self._make_mirror_interface(port_set)
-        interfaces[self._SWITCH_LOCAL_PORT] = self._make_switch_interface()
+        interfaces[self._SWITCH_LOCAL_PORT] = self._make_local_interface()
         return interfaces
 
     def _make_sec_interfaces(self):
