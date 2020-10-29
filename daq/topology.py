@@ -129,8 +129,8 @@ class FaucetTopology:
             return
         self._generate_acls()
         port_set = target['port_set'] if target else None
-        self._update_port_vlan(port_no, port_set)
-        self.direct_vlan_traffic(port_set, self._port_set_vlan(port_set))
+        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
+        interface['native_vlan'] = self._port_set_vlan(port_set)
 
     def _ensure_entry(self, root, key, value):
         if key not in root:
@@ -173,12 +173,9 @@ class FaucetTopology:
     def _make_gw_interface(self, port_set):
         interface = {}
         interface['acl_in'] = self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)
-        interface['native_vlan'] = self._DUMP_VLAN
+        vlan_id = self._DUMP_VLAN if self._use_vlan_triggers() else self._port_set_vlan(port_set)
+        interface['native_vlan'] = vlan_id
         return interface
-
-    def _update_port_vlan(self, port_no, port_set):
-        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
-        interface['native_vlan'] = self._port_set_vlan(port_set)
 
     def _port_set_vlan(self, port_set):
         return self._LOCAL_VLAN + port_set if port_set else self._DUMP_VLAN
@@ -197,11 +194,15 @@ class FaucetTopology:
         interface['name'] = self.get_ext_intf() or self._DEFAULT_SEC_TRUNK_NAME
         return interface
 
+    def _use_vlan_triggers(self):
+        vlan_range_config = self.config.get("run_trigger", {})
+        return bool(vlan_range_config.get("vlan_start"))
+
     def _vlan_tags(self):
         vlan_range_config = self.config.get("run_trigger", {})
         vlan_start = vlan_range_config.get("vlan_start")
         vlan_end = vlan_range_config.get("vlan_end")
-        if vlan_start is not None and vlan_end is not None:
+        if self._use_vlan_triggers():
             return [*range(vlan_start, vlan_end + 1)] + [self._LOCAL_VLAN]
         return list(range(self._LOCAL_VLAN, self._LOCAL_VLAN + self.sec_port))
 
@@ -214,7 +215,8 @@ class FaucetTopology:
     def _make_sec_port_interface(self, port_no):
         interface = {}
         interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port_no)
-        interface['native_vlan'] = self._port_set_vlan(port_no)
+        vlan_id = self._port_set_vlan(port_no) if self._use_vlan_triggers() else self._DUMP_VLAN
+        interface['native_vlan'] = vlan_id
         return interface
 
     def _make_pri_interfaces(self):
