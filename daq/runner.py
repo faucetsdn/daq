@@ -25,7 +25,7 @@ import network
 import stream_monitor
 from wrappers import DaqException
 import logger
-from proto.system_config_pb2 import DHCPMode
+from proto.system_config_pb2 import DhcpMode
 
 LOGGER = logger.get_logger('runner')
 
@@ -356,7 +356,7 @@ class DAQRunner:
             device = self._devices.new_device(target_mac, vlan=vid)
         else:
             device = self._devices.get(target_mac)
-        device.dhcp_mode = DHCPMode.EXTERNAL
+        device.dhcp_mode = DhcpMode.EXTERNAL
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
@@ -498,7 +498,7 @@ class DAQRunner:
 
         # Stops all DHCP response initially
         # Selectively enables dhcp response at ipaddr stage based on dhcp mode
-        if device.dhcp_mode != DHCPMode.EXTERNAL:
+        if device.dhcp_mode != DhcpMode.EXTERNAL:
             gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
@@ -593,7 +593,7 @@ class DAQRunner:
         set_num = self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
-        if device.dhcp_mode == DHCPMode.EXTERNAL:
+        if device.dhcp_mode == DhcpMode.EXTERNAL:
             # Under vlan trigger, start a external gateway that doesn't utilize a DHCP server.
             gateway = external_gateway.ExternalGateway(self, group_name, set_num)
         else:

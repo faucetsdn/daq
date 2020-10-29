@@ -116,7 +116,7 @@ message DaqConfig {
   int32 port_flap_timeout_sec = 48;
 
   // USI url
-  USISetup usi_setup = 49;
+  UsiSetup usi_setup = 49;
 
   // Configures events that trigger a DAQ run 
   RunTrigger run_trigger = 50;
@@ -131,7 +131,7 @@ message DaqConfig {
   DeviceReporting device_reporting = 53;
 }
 
-enum DHCPMode {
+enum DhcpMode {
   NORMAL = 0;
   STATIC_IP = 1;
   EXTERNAL = 2;
@@ -142,7 +142,7 @@ enum DHCPMode {
 /**
  * USI paramters
 **/
-message USISetup {
+message UsiSetup {
   string url = 1;
   int32 rpc_timeout_sec = 2;
 }
@@ -201,6 +201,9 @@ message RunTrigger {
   
   // end of vlan range
   int32 vlan_end = 2;
+
+  // egress vlan
+  int32 egress_vlan = 3;
 }
 
 /*
