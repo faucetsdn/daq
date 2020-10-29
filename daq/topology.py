@@ -185,7 +185,7 @@ class FaucetTopology:
         interface['native_vlan'] = self._port_set_vlan(port_set)
 
     def _port_set_vlan(self, port_set):
-        return self._LOCAL_VLAN + port_set
+        return self._LOCAL_VLAN + port_set if port_set else self._DUMP_VLAN
 
     def _make_pri_trunk_interface(self):
         interface = {}
