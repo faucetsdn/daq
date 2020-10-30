@@ -11,6 +11,7 @@ networking=
 alt_faux=
 image=daqf/faux1
 build=
+realintf=
 
 cd $ROOT
 source etc/config_base.sh
@@ -75,6 +76,7 @@ fi
 FAUX_ARGS="$*"
 
 CONTAINER=$container_prefix$postfix
+virtintf=faux$postfix
 
 if [ -z "$FAUX_ARGS" ]; then
     FAUX_ARGS="$faux_args"
@@ -105,7 +107,11 @@ elif [ -n "$test_config" ]; then
     echo Config dir $CONFIG_DIR not found.
 fi
 
-docker_args="$docker_args -e LOCAL_IF=$realintf"
+if [ -n "$realintf" ]; then
+    docker_args="$docker_args -e LOCAL_IF=$realintf"
+else
+    docker_args="$docker_args -e LOCAL_IF=faux-eth0"
+fi
 
 cid=$(docker run -d --privileged --name $CONTAINER --hostname $CONTAINER $net_opt $docker_args $image $FAUX_ARGS)
 pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
@@ -118,19 +124,19 @@ if [ -n "$realintf" ]; then
     docker exec $CONTAINER ip link set $realintf up
     docker exec $CONTAINER ip link show $realintf
 else
-    intf=faux$postfix
-    echo Removing old interface $intf
-    sudo ip link del $intf 2>/dev/null || true
+    echo Removing old interface $virtintf
+    sudo ip link del $virtintf 2>/dev/null || true
 
     echo Adding new interface to $pid...
 
-    sudo ip link add $intf type veth peer name faux-eth0 addr $intf_mac netns $pid
-    sudo ip link set $intf up
+    sudo ip link add $virtintf type veth peer name faux-eth0 addr $intf_mac netns $pid
+    sudo ip link set $virtintf up
+    docker exec $CONTAINER ip link set faux-eth0 up
 fi
 
 if [ -n "$create_local" ]; then
-    sudo ip addr add 10.20.0.1/16 broadcast 10.20.255.255 dev $intf
-    sudo ip addr show dev $intf
+    sudo ip addr add 10.20.0.1/16 broadcast 10.20.255.255 dev $virtintf
+    sudo ip addr show dev $virtintf
 fi
 
 echo Done with faux device launch.

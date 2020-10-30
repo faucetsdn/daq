@@ -40,8 +40,13 @@ if ! ip addr show dev $LOCAL_IF | fgrep -q 'inet '; then
   ip addr add 10.20.$subnet.1/16 dev $LOCAL_IF
 fi
 
-ip addr add 10.20.255.254/16 dev $LOCAL_IF #For static ip devices' default gateway IP
-echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
+# For static ip devices' default gateway IP
+ip addr add 10.20.255.254/16 dev $LOCAL_IF
+
+# Block execution until first host attaches unless being used as a faux device.
+if [ "$LOCAL_IF" != faux-eth0 ]; then
+    echo dhcp-host=*,ignore >> /etc/dnsmasq.conf
+fi
 
 # Start the NTP server
 service ntp start
