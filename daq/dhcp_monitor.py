@@ -59,14 +59,17 @@ class DhcpMonitor:
             self.dhcp_log.write(dhcp_line)
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
-            if match.group(2):
-                self.target_ip = match.group(2)
             if match.group(6):
                 self.target_mac = match.group(6)
-            if match.group(4) == "ACK":
-                if not self.target_ip or not self.target_mac:
-                    LOGGER.warning('dhcp ACK incomplete: %s', dhcp_line)
+                LOGGER.debug('Found mac %s', self.target_mac)
+            elif match.group(2):
+                self.target_ip = match.group(2)
+                LOGGER.debug('Found ip %s', self.target_ip)
                 self._dhcp_success()
+            elif match.group(4) == "ACK":
+                LOGGER.debug('Found ACK with %s, %s', self.target_mac, self.target_ip)
+                if self.target_mac and self.target_ip:
+                    self._dhcp_success()
 
     def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
@@ -79,8 +82,8 @@ class DhcpMonitor:
             self.dhcp_traffic = None
 
     def _dhcp_success(self):
-        assert self.target_ip, 'dhcp ACK missing ip address'
-        assert self.target_mac, 'dhcp ACK missing mac address'
+        assert self.target_ip, 'dhcp missing ip address'
+        assert self.target_mac, 'dhcp missing mac address'
         delta = int(time.time()) - self.device_dhcps.get(self.target_mac, self.scan_start)
         LOGGER.debug('DHCP monitor %s received reply after %ds: %s/%s',
                      self.name, delta, self.target_ip, self.target_mac)

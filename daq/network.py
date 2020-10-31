@@ -217,11 +217,12 @@ class TestNetwork:
             LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
             time.sleep(self._settle_sec)
 
-    def direct_vlan_traffic(self, port_set, vlan):
+    def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
-        LOGGER.info('Directing traffic for port set %s to vlan %s', port_set, vlan)
+        assert device.vlan
+        LOGGER.info('Directing traffic for vlan %s to port set %s', device.vlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
-        self.topology.direct_vlan_traffic(port_set, vlan)
+        self.topology.direct_device_traffic(device, port_set)
         self._generate_behavioral_config()
 
     def _attach_switch_interface(self, switch_intf_name):
@@ -252,9 +253,9 @@ class TestNetwork:
                            'set', 'interface', mirror_intf_name, 'ofport_request=%s' % mirror_port)
         return mirror_intf_name
 
-    def device_group_for(self, target_mac):
-        """Find the target device group for the given address."""
-        return self.topology.device_group_for(target_mac)
+    def device_group_for(self, device):
+        """Find the target device group for the given device."""
+        return self.topology.device_group_for(device)
 
     def device_group_size(self, group_name):
         """Return the size of the given group."""
