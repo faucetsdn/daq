@@ -63,7 +63,7 @@ class DhcpMonitor:
             self.dhcp_log.write(dhcp_line)
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
-            LOGGER.info('dhcp_line: %s', dhcp_line)
+            LOGGER.info('dhcp_line: %s', dhcp_line.strip())
             if match.group(1):
                 self.target_mac = None
                 self.target_ip = None
