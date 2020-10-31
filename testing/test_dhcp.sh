@@ -88,7 +88,7 @@ function kill_dhcp_client {
 
 # Check that killing the dhcp client on a device times out the ipaddr test.
 monitor_log "Target port 6 connect successful" "kill_dhcp_client daq-faux-6"
-cmd/run -b -s settle_sec=0 dhcp_lease_time=120s
+cmd/run -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 

@@ -622,24 +622,27 @@ class DAQRunner:
             self._terminate_gateway_set(gateway)
             return
 
+        target_type = target['type']
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('IP notify %s is %s on %s (%s/%d)', target_mac,
+        LOGGER.info('IP notify %s %s is %s on %s (%s/%d)', target_type, target_mac,
                     target_ip, gateway, state, delta_sec)
 
-        if not target_mac:
-            LOGGER.warning('IP target mac missing')
-            return
+        assert target_mac
+        assert target_ip
+        assert delta_sec
 
         device = self._devices.get(target_mac)
         device.ip_info.ip_addr = target_ip
         device.ip_info.state = state
         device.ip_info.delta_sec = delta_sec
         if device and device.host:
-            device.host.ip_notify(target_ip, state, delta_sec)
-            self._check_and_activate_gateway(device)
-            if device.vlan:
-                assert device.ip_info.ip_addr
-                self._direct_device_traffic(device, device.gateway.port_set)
+            if target_type == 'Offer':
+                if device.vlan:
+                    self._direct_device_traffic(device, device.gateway.port_set)
+
+            if target_type == 'ACK':
+                device.host.ip_notify(target_ip, state, delta_sec)
+                self._check_and_activate_gateway(device)
 
     def _get_active_ports(self):
         return [p.port_no for p in self._ports.values() if p.active]
