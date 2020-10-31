@@ -642,8 +642,7 @@ class DAQRunner:
             if target_type == 'Offer':
                 if device.vlan:
                     self._direct_device_traffic(device, device.gateway.port_set)
-
-            if target_type == 'ACK':
+            if target_type in ('ACK', 'STATIC'):
                 device.host.ip_notify(target_ip, state, delta_sec)
                 self._check_and_activate_gateway(device)
 
