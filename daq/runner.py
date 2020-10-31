@@ -632,7 +632,7 @@ class DAQRunner:
 
         assert target_mac
         assert target_ip
-        assert delta_sec
+        assert delta_sec is not None
 
         device = self._devices.get(target_mac)
         device.ip_info.ip_addr = target_ip
