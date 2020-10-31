@@ -5,6 +5,7 @@ CONTAINER=daq-faucet
 INSTDIR=$ROOT/inst
 IMAGE=daqf/faucet
 FAUCET_SOCK=faucet_event.sock
+FAUCET_LOG=faucet.log
 SYSTEM_CONF=system.conf
 LOCAL_CONFIG=local/$SYSTEM_CONF
 
@@ -51,6 +52,7 @@ fi
 echo Creating $IMAGE instance $CONTAINER on port $faucet_pt in $INSTDIR
 
 mkdir -p $INSTDIR
+rm -f $INSTDIR/$FAUCET_LOG
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
     echo -n "Clensing old container "

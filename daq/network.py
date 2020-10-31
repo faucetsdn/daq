@@ -219,6 +219,7 @@ class TestNetwork:
 
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
+        assert device.vlan
         LOGGER.info('Directing traffic for vlan %s to port set %s', device.vlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_device_traffic(device, port_set)
@@ -252,9 +253,9 @@ class TestNetwork:
                            'set', 'interface', mirror_intf_name, 'ofport_request=%s' % mirror_port)
         return mirror_intf_name
 
-    def device_group_for(self, target_mac):
-        """Find the target device group for the given address."""
-        return self.topology.device_group_for(target_mac)
+    def device_group_for(self, device):
+        """Find the target device group for the given device."""
+        return self.topology.device_group_for(device)
 
     def device_group_size(self, group_name):
         """Return the size of the given group."""

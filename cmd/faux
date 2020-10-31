@@ -64,6 +64,7 @@ if [ -n "$networking" ]; then
     container_prefix=daq-networking
     image=daqf/networking
     net_opt=
+    docker_args+=" -e IP_SUBNET=99"
 else
     container_prefix=daq-faux
     net_opt=--net=none
@@ -108,9 +109,9 @@ elif [ -n "$test_config" ]; then
 fi
 
 if [ -n "$realintf" ]; then
-    docker_args="$docker_args -e LOCAL_IF=$realintf"
+    docker_args+=" -e LOCAL_IF=$realintf"
 else
-    docker_args="$docker_args -e LOCAL_IF=faux-eth0"
+    docker_args+=" -e LOCAL_IF=faux-eth0"
 fi
 
 cid=$(docker run -d --privileged --name $CONTAINER --hostname $CONTAINER $net_opt $docker_args $image $FAUX_ARGS)

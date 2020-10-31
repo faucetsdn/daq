@@ -483,7 +483,7 @@ class DAQRunner:
             return False
 
         try:
-            group_name = self.network.device_group_for(device.mac)
+            group_name = self.network.device_group_for(device)
             device.group = group_name
             gateway = self._activate_device_group(device)
             if gateway.activated:
@@ -519,6 +519,7 @@ class DAQRunner:
                 }
                 self._direct_port_traffic(device.mac, device.port.port_no, target)
             else:
+                assert not device.ip_info.ip_addr
                 self._direct_device_traffic(device, gateway.port_set)
             return True
         except Exception as e:
@@ -636,6 +637,9 @@ class DAQRunner:
         if device and device.host:
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
+            if device.vlan:
+                assert device.ip_info.ip_addr
+                self._direct_device_traffic(device, device.gateway.port_set)
 
     def _get_active_ports(self):
         return [p.port_no for p in self._ports.values() if p.active]

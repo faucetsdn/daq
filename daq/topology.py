@@ -117,7 +117,6 @@ class FaucetTopology:
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
         device_set = device.gateway.port_set
-        assert bool(port_set) != bool(self._set_devices.get(device_set))
         assert port_set == device_set or not port_set
         vlan = device.vlan if port_set else self._DUMP_VLAN
         LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
@@ -360,14 +359,27 @@ class FaucetTopology:
             return
         for device in self._set_devices.values():
             if device:
+                LOGGER.info('dhcp reflect %s as %s', device.mac, device.ip_info.ip_addr)
+
+                # Rule for DHCP request to server. Convert device vlan to egress vlan.
                 self._add_acl_rule(acl_list, dl_type='0x800',
                                    nw_proto=17, udp_src=68, udp_dst=67,
                                    vlan_vid=device.vlan,
                                    swap_vid=self._egress_vlan, port=self._IN_PORT)
+                # After network services are ready, pass traffic back to device.
+                out_port = self._IN_PORT if device.ip_info.ip_addr else None
                 self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac,
                                    nw_proto=17, udp_src=67, udp_dst=68,
                                    vlan_vid=self._egress_vlan,
-                                   swap_vid=device.vlan, port=self._IN_PORT, allow=True)
+                                   swap_vid=device.vlan, port=out_port, allow=True)
+
+        # Deny any unrecognized replies.
+        self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
+                           nw_proto=17, udp_src=67, udp_dst=68)
+
+        # Deny any requests from the egress vlan.
+        self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
+                           nw_proto=17, udp_src=68, udp_dst=67, vlan_vid=self._egress_vlan)
 
     def _generate_main_acls(self):
         incoming_acl = []
@@ -415,7 +427,7 @@ class FaucetTopology:
 
     def _maybe_apply(self, target, keyword, origin, source=None):
         source_keyword = source if source else keyword
-        if source_keyword in origin:
+        if source_keyword in origin and origin[source_keyword] is not None:
             assert not keyword in target, 'duplicate acl rule keyword %s' % keyword
             target[keyword] = origin[source_keyword]
 
@@ -514,8 +526,11 @@ class FaucetTopology:
     def _sanitize_mac(self, mac_addr):
         return mac_addr.replace(':', '')
 
-    def device_group_for(self, target_mac):
-        """Find the target device group for the given address"""
+    def device_group_for(self, device):
+        """Return the target device group for the given device"""
+        if self._ext_faucet:
+            return 'vlan-%s' % device.vlan
+        target_mac = device.mac
         if not self._device_specs:
             return self._sanitize_mac(target_mac)
         mac_map = self._device_specs['macAddrs']
