@@ -307,11 +307,7 @@ class DAQRunner:
             LOGGER.debug('Unknown port %s on dpid %s is active %s', port, dpid, active)
             return
 
-        if port not in self._ports:
-            self._ports[port] = PortInfo()
-            self._ports[port].port_no = port
-
-        if active != self._ports[port].active:
+        if active != self._is_port_active(port):
             LOGGER.info('Port %s dpid %s is now %s', port, dpid, "active" if active else "inactive")
         if active:
             self._activate_port(port)
@@ -327,9 +323,15 @@ class DAQRunner:
         self._send_heartbeat()
 
     def _activate_port(self, port):
+        if port not in self._ports:
+            self._ports[port] = PortInfo()
+            self._ports[port].port_no = port
         port_info = self._ports[port]
         port_info.flapping_start = 0
         port_info.active = True
+
+    def _is_port_active(self, port):
+        return port in self._ports and self._ports[port].active
 
     def _deactivate_port(self, port):
         port_info = self._ports[port]
@@ -339,14 +341,10 @@ class DAQRunner:
         self.network.direct_port_traffic(mac, port, target)
 
     def _handle_port_learn(self, dpid, port, vid, target_mac):
-        if self.network.is_device_port(dpid, port):
+        if self.network.is_device_port(dpid, port) and self._is_port_active(port):
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
-            if port not in self._ports:
-                self._ports[port] = PortInfo()
-                self._ports[port].port_no = port
-            if not self._devices.get(target_mac):
-                self._devices.new_device(target_mac, port_info=self._ports[port])
-            self._target_set_trigger(self._devices.get(target_mac))
+            device = self._devices.new_device(target_mac, port_info=self._ports[port])
+            self._target_set_trigger(device)
         else:
             LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
