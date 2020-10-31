@@ -361,6 +361,7 @@ class ConnectedHost:
             self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
+                'type': 'STATIC',
                 'mac': self.target_mac,
                 'ip': static_ip,
                 'delta': -1
