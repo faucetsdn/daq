@@ -83,7 +83,9 @@ class Devices:
         return device
 
     def create_if_absent(self, mac, port_info=None, vlan=None):
-        return self._devices[mac] if mac in self._devices else self.new_device(mac, port_info=port_info, vlan=vlan)
+        """Create a new device if none found, else return the previous one"""
+        prev_device = self._devices.get(mac)
+        return prev_device if prev_device else self.new_device(mac, port_info=port_info, vlan=vlan)
 
     def _allocate_set_id(self):
         set_id = 1
