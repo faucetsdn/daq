@@ -93,7 +93,7 @@ class DhcpMonitor:
             self.dhcp_traffic = None
 
     def _dhcp_complete(self, dhcp_type):
-        if dhcp_type != 'ACK' and dhcp_type != 'Offer':
+        if dhcp_type not in ('ACK', 'Offer'):
             return
         assert self.target_ip, 'dhcp missing ip address'
         assert self.target_mac, 'dhcp missing mac address'
