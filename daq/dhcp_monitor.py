@@ -17,10 +17,10 @@ class DhcpMonitor:
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-z0-9:]+)'
     DHCP_TYPE_PATTERN = 'DHCP-Message Option 53, length 1: ([a-zA-Z]+)'
-    DHCP_PATTERN = '(%s)|(%s)|(%s)' % (DHCP_START_PATTERN,
-                                       DHCP_IP_PATTERN,
-                                       DHCP_MAC_PATTERN,
-                                       DHCP_TYPE_PATTERN)
+    DHCP_PATTERN = '(%s)|(%s)|(%s)|(%s)' % (DHCP_START_PATTERN,
+                                            DHCP_IP_PATTERN,
+                                            DHCP_MAC_PATTERN,
+                                            DHCP_TYPE_PATTERN)
     DHCP_THRESHHOLD_SEC = 80
 
     # pylint: disable=too-many-arguments
