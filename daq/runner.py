@@ -82,6 +82,9 @@ class Devices:
         device.set_id = set_id
         return device
 
+    def create_if_absent(self, mac, port_info=None, vlan=None):
+        return self._devices[mac] if mac in self._devices else self.new_device(mac, port_info=port_info, vlan=vlan)
+
     def _allocate_set_id(self):
         set_id = 1
         while set_id in self._set_ids:
@@ -343,7 +346,7 @@ class DAQRunner:
     def _handle_port_learn(self, dpid, port, vid, target_mac):
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
-            device = self._devices.new_device(target_mac, port_info=self._ports[port])
+            device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
             self._target_set_trigger(device)
         else:
             LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
