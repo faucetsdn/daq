@@ -814,9 +814,10 @@ class DAQRunner:
             return
         if not target_gateway.detach_target(device):
             LOGGER.info('Retiring %s. Last device: %s', target_gateway, device)
-            self.gateway_sets.add(target_gateway.port_set)
             target_gateway.terminate()
-            self._direct_device_traffic(device, None)
+            self.gateway_sets.add(target_gateway.port_set)
+            if device.vlan:
+                self._direct_device_traffic(device, None)
         device.gateway = None
 
     def monitor_stream(self, *args, **kwargs):
