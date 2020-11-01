@@ -219,8 +219,8 @@ class TestNetwork:
 
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
-        assert device.vlan
-        LOGGER.info('Directing traffic for vlan %s to port set %s', device.vlan, port_set)
+        LOGGER.info('Directing traffic for %s on vlan %s to %s',
+                    device.mac, device.vlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_device_traffic(device, port_set)
         self._generate_behavioral_config()
