@@ -58,7 +58,7 @@ cmd/faucet
 
 timeout 1200s cmd/run -s
 
-fgrep '9a:02:57:1e:8f:01 learned on vid 1002' inst/cmdrun.log | head -1 | redact | tee -a $TEST_RESULTS
+fgrep 'Learned 9a:02:57:1e:8f:01 on vid 1002' inst/cmdrun.log | head -1 | redact | tee -a $TEST_RESULTS
 unqie_ips=$(fgrep '10.20.99' inst/run-9a02571e8f01/scans/ip_triggers.txt | awk '{print $1}' | sort | uniq | wc -l)
 echo Unique IPs: $unqie_ips | tee -a $TEST_RESULTS
 
