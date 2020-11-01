@@ -637,14 +637,9 @@ class DAQRunner:
         device.ip_info.ip_addr = target_ip
         device.ip_info.state = state
         device.ip_info.delta_sec = delta_sec
-        if device and device.host:
-            # Allow a DHCP Offer through to allow the VLAN to be learned.
-            #if target_type == 'Offer':
-            #    if device.vlan:
-            #        self._direct_device_traffic(device, device.gateway.port_set)
-            if target_type in ('ACK', 'STATIC'):
-                device.host.ip_notify(target_ip, state, delta_sec)
-                self._check_and_activate_gateway(device)
+        if device and device.host and target_type in ('ACK', 'STATIC'):
+            device.host.ip_notify(target_ip, state, delta_sec)
+            self._check_and_activate_gateway(device)
 
     def _get_active_ports(self):
         return [p.port_no for p in self._ports.values() if p.active]
@@ -801,8 +796,6 @@ class DAQRunner:
             else:
                 if target_port:
                     self._direct_port_traffic(device.mac, target_port, None)
-                #else:
-                #    self._direct_device_traffic(device, None)
                 target_host.terminate('_target_set_cancel', trigger=False)
                 if target_gateway:
                     self._detach_gateway(device)

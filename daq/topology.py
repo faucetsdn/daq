@@ -42,7 +42,7 @@ class FaucetTopology:
     PRI_TRUNK_NAME = 'trunk_pri'
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
-    _IN_PORT = 0xfffffff8
+    _OFPP_IN_PORT = 0xfffffff8
 
     def __init__(self, config):
         self.config = config
@@ -242,7 +242,7 @@ class FaucetTopology:
     def _make_pri_interfaces(self):
         interfaces = {}
         interfaces[self.PRI_TRUNK_PORT] = self._make_pri_trunk_interface()
-        interfaces[self._IN_PORT] = self._make_in_port_interface()
+        interfaces[self._OFPP_IN_PORT] = self._make_in_port_interface()
         for port_set in range(1, self.sec_port):
             for port in self._get_gw_ports(port_set):
                 interfaces[port] = self._make_gw_interface(port_set)
@@ -370,14 +370,11 @@ class FaucetTopology:
                 self._add_acl_rule(acl_list, dl_type='0x800',
                                    nw_proto=17, udp_src=68, udp_dst=67,
                                    vlan_vid=device.vlan,
-                                   swap_vid=self._egress_vlan, port=self._IN_PORT)
-                # Only after network services are ready, pass traffic back to device.
-                #out_port = self._IN_PORT if device.ip_info.ip_addr else None
-                out_port = self._IN_PORT
+                                   swap_vid=self._egress_vlan, port=self._OFPP_IN_PORT)
                 self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac,
                                    nw_proto=17, udp_src=67, udp_dst=68,
                                    vlan_vid=self._egress_vlan,
-                                   swap_vid=device.vlan, port=out_port, allow=True)
+                                   swap_vid=device.vlan, port=self._OFPP_IN_PORT, allow=True)
 
         # Allow any unrecognized requests for learning, but don't reflect.
         self._add_acl_rule(acl_list, dl_type='0x800', allow=True,
