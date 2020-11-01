@@ -118,12 +118,16 @@ class FaucetTopology:
         """Modify gateway set's vlan to match triggering vlan"""
         device_set = device.gateway.port_set
         assert port_set == device_set or not port_set
-        vlan = device.vlan if port_set else self._DUMP_VLAN
+        if port_set:
+            self._set_devices.setdefault(device_set, set()).add(device)
+        else:
+            self._set_devices[device_set].remove(device)
+        set_active = bool(self._set_devices[device_set])
+        vlan = device.vlan if set_active else self._DUMP_VLAN
         LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
-        self._set_devices[device_set] = device if port_set else None
         self._generate_acls()
 
     def direct_port_traffic(self, target_mac, port_no, target):
@@ -357,29 +361,31 @@ class FaucetTopology:
     def _add_dhcp_reflectors(self, acl_list):
         if not self._ext_faucet or not self._egress_vlan:
             return
-        for device in self._set_devices.values():
-            if device:
-                LOGGER.info('dhcp reflect %s as %s', device.mac, device.ip_info.ip_addr)
+        for devices in self._set_devices.values():
+            for device in devices:
+                LOGGER.info('dhcp reflect %s as %s to %s',
+                            device.mac, device.ip_info.ip_addr, device.vlan)
 
                 # Rule for DHCP request to server. Convert device vlan to egress vlan.
                 self._add_acl_rule(acl_list, dl_type='0x800',
                                    nw_proto=17, udp_src=68, udp_dst=67,
                                    vlan_vid=device.vlan,
                                    swap_vid=self._egress_vlan, port=self._IN_PORT)
-                # After network services are ready, pass traffic back to device.
-                out_port = self._IN_PORT if device.ip_info.ip_addr else None
+                # Only after network services are ready, pass traffic back to device.
+                #out_port = self._IN_PORT if device.ip_info.ip_addr else None
+                out_port = self._IN_PORT
                 self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac,
                                    nw_proto=17, udp_src=67, udp_dst=68,
                                    vlan_vid=self._egress_vlan,
                                    swap_vid=device.vlan, port=out_port, allow=True)
 
+        # Allow any unrecognized requests for learning, but don't reflect.
+        self._add_acl_rule(acl_list, dl_type='0x800', allow=True,
+                           nw_proto=17, udp_src=68, udp_dst=67)
+
         # Deny any unrecognized replies.
         self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
                            nw_proto=17, udp_src=67, udp_dst=68)
-
-        # Deny any requests from the egress vlan.
-        self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
-                           nw_proto=17, udp_src=68, udp_dst=67, vlan_vid=self._egress_vlan)
 
     def _generate_main_acls(self):
         incoming_acl = []
