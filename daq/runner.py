@@ -354,7 +354,7 @@ class DAQRunner:
             LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, vid, target_mac):
-        LOGGER.info('%s learned on vid %s', target_mac, vid)
+        LOGGER.info('Learned %s on vid %s', target_mac, vid)
         if not self._devices.get(target_mac):
             device = self._devices.new_device(target_mac, vlan=vid)
         else:
