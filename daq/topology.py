@@ -125,6 +125,7 @@ class FaucetTopology:
         set_active = bool(self._set_devices[device_set])
         vlan = device.vlan if set_active else self._DUMP_VLAN
         LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
+        assert vlan
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
