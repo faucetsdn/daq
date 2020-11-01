@@ -351,7 +351,7 @@ class DAQRunner:
             device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
             self._target_set_trigger(device)
         else:
-            LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
+            LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, vid, target_mac):
         LOGGER.info('%s learned on vid %s', target_mac, vid)
@@ -522,7 +522,6 @@ class DAQRunner:
                 }
                 self._direct_port_traffic(device.mac, device.port.port_no, target)
             else:
-                assert not device.ip_info.ip_addr
                 self._direct_device_traffic(device, gateway.port_set)
             return True
         except Exception as e:
@@ -639,9 +638,10 @@ class DAQRunner:
         device.ip_info.state = state
         device.ip_info.delta_sec = delta_sec
         if device and device.host:
-            if target_type == 'Offer':
-                if device.vlan:
-                    self._direct_device_traffic(device, device.gateway.port_set)
+            # Allow a DHCP Offer through to allow the VLAN to be learned.
+            #if target_type == 'Offer':
+            #    if device.vlan:
+            #        self._direct_device_traffic(device, device.gateway.port_set)
             if target_type in ('ACK', 'STATIC'):
                 device.host.ip_notify(target_ip, state, delta_sec)
                 self._check_and_activate_gateway(device)
@@ -801,8 +801,8 @@ class DAQRunner:
             else:
                 if target_port:
                     self._direct_port_traffic(device.mac, target_port, None)
-                else:
-                    self._direct_device_traffic(device, None)
+                #else:
+                #    self._direct_device_traffic(device, None)
                 target_host.terminate('_target_set_cancel', trigger=False)
                 if target_gateway:
                     self._detach_gateway(device)
@@ -819,11 +819,12 @@ class DAQRunner:
         target_gateway = device.gateway
         if not target_gateway:
             return
-        device.gateway = None
         if not target_gateway.detach_target(device):
             LOGGER.info('Retiring %s. Last device: %s', target_gateway, device)
             self.gateway_sets.add(target_gateway.port_set)
             target_gateway.terminate()
+            self._direct_device_traffic(device, None)
+        device.gateway = None
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""
