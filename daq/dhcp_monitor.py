@@ -63,24 +63,24 @@ class DhcpMonitor:
             self.dhcp_log.write(dhcp_line)
         match = re.search(self.DHCP_PATTERN, dhcp_line)
         if match:
-            LOGGER.info('dhcp_line: %s', dhcp_line.strip())
+            LOGGER.debug('dhcp_line: %s', dhcp_line.strip())
             if match.group(1):
                 self.target_mac = None
                 self.target_ip = None
-                LOGGER.info('Reset dhcp')
+                LOGGER.debug('Reset dhcp')
             elif match.group(2):
                 assert not self.target_ip
                 self.target_ip = match.group(3)
-                LOGGER.info('Found ip %s', self.target_ip)
+                LOGGER.debug('Found ip %s', self.target_ip)
             elif match.group(4):
                 assert not self.target_mac
                 self.target_mac = match.group(5)
-                LOGGER.info('Found mac %s', self.target_mac)
+                LOGGER.debug('Found mac %s', self.target_mac)
             elif match.group(6):
-                LOGGER.info('Message type %s', match.group(7))
+                LOGGER.debug('Message type %s', match.group(7))
                 self._dhcp_complete(match.group(7))
             else:
-                LOGGER.info('Unknown match')
+                LOGGER.info('Unknown dhcp match: %s', dhcp_line.strip())
 
     def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
