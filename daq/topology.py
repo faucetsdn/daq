@@ -118,15 +118,16 @@ class FaucetTopology:
         """Modify gateway set's vlan to match triggering vlan"""
         device_set = device.gateway.port_set
         assert port_set == device_set or not port_set
-        vlan = device.vlan if port_set else self._DUMP_VLAN
-        LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
-        interfaces = self.topology['dps'][self.pri_name]['interfaces']
-        for port in self._get_gw_ports(device_set):
-            interfaces[port]['native_vlan'] = vlan
         if port_set:
             self._set_devices.setdefault(device_set, set()).add(device)
         else:
             self._set_devices[device_set].remove(device)
+        set_active = bool(self._set_devices[device_set])
+        vlan = device.vlan if set_active else self._DUMP_VLAN
+        LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
+        interfaces = self.topology['dps'][self.pri_name]['interfaces']
+        for port in self._get_gw_ports(device_set):
+            interfaces[port]['native_vlan'] = vlan
         self._generate_acls()
 
     def direct_port_traffic(self, target_mac, port_no, target):
