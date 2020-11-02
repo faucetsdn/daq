@@ -86,6 +86,9 @@ $ovsctl status || sudo $ovsctl start
 
 sudo rm -f $cleanup_file
 
+# Hacky workaround for apparmor protection of tcpdump. Without this, the process can not be killed.
+cp `which tcpdump` binhack/
+
 function autostart {
     tmp=`mktemp`
     echo DAQ autostart $@

@@ -69,15 +69,16 @@ class ConnectedHost:
 
     _STARTUP_MIN_TIME_SEC = 5
     _RPC_TIMEOUT_SEC = 20
-    _INST_DIR = "inst/"
-    _DEVICE_PATH = "device/%s"
-    _NETWORK_DIR = "inst/network"
-    _MODULE_CONFIG = "module_config.json"
-    _CONTROL_PATH = "control/port-%s"
+    _INST_DIR = 'inst/'
+    _DEVICE_PATH = 'device/%s'
+    _NETWORK_DIR = 'inst/network'
+    _MODULE_CONFIG = 'module_config.json'
+    _CONTROL_PATH = 'control/port-%s'
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
-    _AUX_DIR = "aux/"
-    _CONFIG_DIR = "config/"
+    _AUX_DIR = 'aux/'
+    _CONFIG_DIR = 'config/'
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
+    _PATH_PREFIX = os.path.abspath('.') + '/' + _INST_DIR
 
     # pylint: disable=too-many-statements
     def __init__(self, runner, device, config):
@@ -360,6 +361,7 @@ class ConnectedHost:
             self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
+                'type': 'STATIC',
                 'mac': self.target_mac,
                 'ip': static_ip,
                 'delta': -1
@@ -501,13 +503,18 @@ class ConnectedHost:
         self.logger.info('Target device %s startup pcap capture', self)
         self._monitor_scan(self._startup_file)
 
+    def _shorten_filename(self, long_name):
+        if long_name and long_name.startswith(self._PATH_PREFIX):
+            return long_name[len(self._PATH_PREFIX):]
+        return long_name
+
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
-                         output_file)
+                         self._shorten_filename(output_file))
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
                                               timeout=timeout, pcap_out=output_file,

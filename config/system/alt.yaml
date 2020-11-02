@@ -21,7 +21,7 @@ interfaces:
     port: 2
   faux-2:
     opts: -n 
-    port: 3
+    port: 11
 
 default_timeout_sec: 120
 

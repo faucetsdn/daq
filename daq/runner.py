@@ -351,10 +351,10 @@ class DAQRunner:
             device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
             self._target_set_trigger(device)
         else:
-            LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
+            LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, vid, target_mac):
-        LOGGER.info('%s learned on vid %s', target_mac, vid)
+        LOGGER.info('Learned %s on vid %s', target_mac, vid)
         if not self._devices.get(target_mac):
             device = self._devices.new_device(target_mac, vlan=vid)
         else:
@@ -486,7 +486,7 @@ class DAQRunner:
             return False
 
         try:
-            group_name = self.network.device_group_for(device.mac)
+            group_name = self.network.device_group_for(device)
             device.group = group_name
             gateway = self._activate_device_group(device)
             if gateway.activated:
@@ -522,10 +522,13 @@ class DAQRunner:
                 }
                 self._direct_port_traffic(device.mac, device.port.port_no, target)
             else:
-                self.network.direct_vlan_traffic(gateway.port_set, device.vlan)
+                self._direct_device_traffic(device, gateway.port_set)
             return True
         except Exception as e:
             self.target_set_error(device, e)
+
+    def _direct_device_traffic(self, device, port_set):
+        self.network.direct_device_traffic(device, port_set)
 
     def _get_test_list(self, test_file):
         no_test = self.config.get('no_test', False)
@@ -621,19 +624,20 @@ class DAQRunner:
             self._terminate_gateway_set(gateway)
             return
 
+        target_type = target['type']
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('IP notify %s is %s on %s (%s/%d)', target_mac,
+        LOGGER.info('IP notify %s %s is %s on %s (%s/%d)', target_type, target_mac,
                     target_ip, gateway, state, delta_sec)
 
-        if not target_mac:
-            LOGGER.warning('IP target mac missing')
-            return
+        assert target_mac
+        assert target_ip
+        assert delta_sec is not None
 
         device = self._devices.get(target_mac)
         device.ip_info.ip_addr = target_ip
         device.ip_info.state = state
         device.ip_info.delta_sec = delta_sec
-        if device and device.host:
+        if device and device.host and target_type in ('ACK', 'STATIC'):
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
 
@@ -808,11 +812,13 @@ class DAQRunner:
         target_gateway = device.gateway
         if not target_gateway:
             return
-        device.gateway = None
         if not target_gateway.detach_target(device):
             LOGGER.info('Retiring %s. Last device: %s', target_gateway, device)
-            self.gateway_sets.add(target_gateway.port_set)
             target_gateway.terminate()
+            self.gateway_sets.add(target_gateway.port_set)
+            if device.vlan:
+                self._direct_device_traffic(device, None)
+        device.gateway = None
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""
