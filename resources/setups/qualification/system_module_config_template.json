@@ -6,14 +6,18 @@
     "bacnet": {
       "enabled": true
     },
-    "brute": {
-      "enabled": false
-    },
     "discover": {
       "enabled": true
     },
     "ipaddr": {
-      "timeout_sec": 120
+      "enabled": true,
+      "timeout_sec": 0,
+      "port_flap_timeout_sec": 20,
+      "dhcp_ranges": [{"start": "10.10.0.1", "end": "10.10.255.254", "prefix_length": 16}, 
+        {"start": "192.168.100.1", "end": "192.168.100.254", "prefix_length": 24}]
+    },
+    "manual": {
+      "enabled": true
     },
     "mudgee": {
       "enabled": true
@@ -22,21 +26,31 @@
       "enabled": true
     },
     "nmap": {
+      "enabled": true,
+      "timeout_sec": 0
+    },
+    "password": {
+      "enabled": true,
+      "timeout_sec": 0
+    },
+    "ssh": {
       "enabled": true
     },
     "switch": {
       "enabled": true,
+      "timeout_sec": 0,
       "poe": {
         "enabled" : true
       }
     },
     "tls": {
-      "enabled": true
-    },
-    "passwords": {
-      "enabled": true
+      "enabled": true,
+      "timeout_sec": 0
     },
     "udmi": {
+      "enabled": true
+    },
+    "usi": {
       "enabled": false
     }
   },
@@ -46,10 +60,44 @@
   },
   "report": {
     "results": [ "pass", "fail", "skip", "info"  ],
-    "categories": [ "Connection", "Security", "Network Time", "TLS", "Protocol", "PoE", "BOS"],
-    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Recommended Pass", "Information" ]
+    "categories": [ "Base", "Connection", "Security", "NTP", "DNS", "Communication", "Protocol", "PoE", "IoT"],
+    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Required Pass for IoT Devices", "Recommended Pass", "Information" ]
   },
   "tests": {
+    "connection.manual.comms_down": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass",
+      "description": "Remove the network connection and confirm the device is still operational.",
+      "enabled": true,
+      "type": "manual",
+      "result": "required",   
+      "outcome": "",   
+      "summary" : "",
+      "test_log" : ""
+    },
+    "connection.manual.sec_eth_port": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass",
+      "description": "Connect the second port to the network switch. Check that no connection light is available and the port has been disabled.",
+      "enabled": true,
+      "type": "manual",
+      "result": "required",   
+      "outcome": "",   
+      "summary" : "",
+      "test_log" : ""
+    },
+    "base.startup.dhcp": {
+      "category": "Base",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "base.switch.ping": {
+      "category": "Base",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
     "connection.switch.port_link": {
       "category": "Connection",
       "required": "pass",
@@ -65,7 +113,7 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "base.switch.ping": {
+    "connection.ipaddr.private_address": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"
@@ -75,17 +123,22 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.ipaddr.private_address": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Required Pass"
-    },
     "connection.ipaddr.dhcp_disconnect": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "connection.network.dhcp_long": {
+    "connection.ipaddr.disconnect_ip_change": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.ipaddr.ip_change": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "connection.network.mac_address": {
       "category": "Connection",
       "required": "pass",
       "expected": "Required Pass"
@@ -96,22 +149,7 @@
       "expected": "Required Pass"
     },
     "ntp.network.ntp_support": {
-      "category": "Network Time",
-      "required": "pass",
-      "expected": "Required Pass"
-    },
-    "ntp.network.ntp_update": {
-      "category": "Network Time",
-      "required": "pass",
-      "expected": "Required Pass"
-    },
-    "connection.network.communication_type": {
-      "category": "Communication",
-      "required": "info",
-      "expected": "information"
-    },
-    "connection.network.communication_min_send": {
-      "category": "Communication",
+      "category": "NTP",
       "required": "pass",
       "expected": "Required Pass"
     },
@@ -120,15 +158,55 @@
       "required": "pass",
       "expected": "Required Pass"
     },
-    "security.tls.v3": {
-      "category": "TLS",
+    "security.nmap.http": {
+      "category": "Security",
       "required": "pass",
       "expected": "Required Pass"
     },
-    "security.tls.x509": {
-      "category": "Access Control",
+    "ntp.network.ntp_update": {
+      "category": "NTP",
       "required": "pass",
       "expected": "Required Pass"
+    },
+    "communication.network.min_send": {
+      "category": "Communication",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "communication.network.type": {
+      "category": "Communication",
+      "required": "info",
+      "expected": "Information"
+    },
+    "dns.network.hostname_resolution": {
+      "category": "DNS",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.v1_server": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.v1_2_server": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.v1_2_client": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
+    "security.tls.v1_3_server": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Recommended Pass"
+    },
+    "security.tls.v1_3_client": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Recommended Pass"
     },
     "security.password.http": {
       "category": "Security",
@@ -150,6 +228,11 @@
       "required": "pass",
       "expected": "Required Pass"
     },
+    "security.ssh.version": {
+      "category": "Security",
+      "required": "pass",
+      "expected": "Required Pass"
+    },
     "protocol.bacext.pic": {
       "category": "Protocol",
       "required": "pass",
@@ -165,73 +248,15 @@
       "required": "pass",
       "expected": "Required Pass for PoE Devices"
     },
-    "poe.switch.negotiation": {
-      "category": "PoE",
-      "required": "pass",
-      "expected": "Required Pass for PoE Devices"
-    },
-    "poe.switch.support": {
-      "category": "PoE",
-      "required": "info",
-      "expected": "Information"
-    },
     "cloud.udmi.pointset": {
-      "category": "BOS",
+      "category": "IoT",
       "required": "pass",
-      "expected": "Recommended Pass"
+      "expected": "Required Pass for IoT Devices"
     },
     "security.discover.firmware": {
       "category": "Security",
       "required": "info",
       "expected": "Information"
-    },
-    "security.manual.java_interface": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.flash_interface": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.flash_functionality": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.http": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.web_passwords": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "connection.manual.comms_down": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Recommended Pass",
-      "type": "manual"
-    },    
-    "connection.manual.sec_eth_port": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Recommended Pass",
-      "type": "manual"
-    },    
-    "connection.manual.sec_eth_port_no_ip": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Recommended Pass",
-      "type": "manual"
     }
   }
 }
