@@ -5,8 +5,10 @@
   "device_info": {
     "make": "Delta Controls Inc.",
     "model": "O3-DIN-CPU",
-    "type": "BACnet controller"
+    "category": "BACnet controller"
   },
+  "default_username": "DELTA",   
+  "default_password": "LOGIN",
   "device_manuals_url": "https://deltacontrols.com/wp-content/uploads/Delta-Controls-Product-Catalog-2019-DIGITAL.pdf",
   "modules": {
     "bacext": {
@@ -15,10 +17,22 @@
     "bacnet": {
       "enabled": true
     },
+    "discover": {
+      "enabled": true
+    },
+    "ipaddr": {
+      "enabled": true
+    },
     "mudgee": {
+      "enabled": false
+    },
+    "network": {
       "enabled": true
     },
     "nmap": {
+      "enabled": true
+    },
+    "password": {
       "enabled": true
     },
     "switch": {
@@ -30,11 +44,11 @@
     "tls": {
       "enabled": true
     },
-    "discover": {
+    "ssh": {
       "enabled": true
     },
-    "passwords": {
-      "enabled": true
+    "udmi": {
+      "enabled": false
     }
   },
   "servers": {
@@ -136,8 +150,5 @@
         }
       }
     }
-  },
-  "process": {
-     "attempt_number": 1
   }
 }

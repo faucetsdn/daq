@@ -1,21 +1,21 @@
 {
-  "device_datasheets_url": "https://docs.distech-controls.com/bundle/ECY-S1000_SP/resource/ECY-S1000_SP.pdf",
-  "device_description": "The ECY-S1000 is a HVAC controller that supports a range of communication protocols such as BACnetIP, BACnet MS/TP, Modbus RTU, Modbus TCP, and M-Bus. With the RESTful API, data can be accessed from different applications, such as energy dashboards, analytics tools, and mobile applications.",
-  "device_image": "https://shop.controlco.com/SSP%20Applications/NetSuite%20Inc.%20-%20SCA%20Aconcagua/Development/img/Products/CDIYS100000_00.png?resizeid=3&resizeh=205&resizew=308",
+  "device_datasheets_url": "https://www.tridium.com/~/media/tridium/enterprisesecurity/documents/jace%208000%20ds%20new%20tridium.ashx?la=es-mx",
+  "device_description": "The JACE 8000 is a compact, embedded IoT (Internet of Things) controller and server platform for connecting multiple and diverse devices and sub-systems. With internet connectivity and web-serving capability, the JACE 8000 controller provides integrated control, supervision, data logging, alarming, scheduling and network management. It streams data and rich graphical displays to a standard web browser via an Ethernet or wireless LAN, or remotely over the internet. Niagara Enterprise Security is a Niagara AX-based application that runs on the JACE 8000. Niagara Analytics 2.0 is a data analytics extension to the Niagara Framework® available on JACE 8000 controllers.",
+  "device_image": "https://abs-controls.com/wp-content/uploads/2019/07/JACE_8000-316x186.fw_.png",
   "device_info": {
-    "make": "Distech Controls, Inc.",
-    "model": "ECY-S1000",
-    "category": "BACnet controller"
+    "make": "Tridium",
+    "model": "JACE 8000",
+    "category": "IoT controller"
   },
-  "default_username": "admin",   
-  "default_password": "admin",
-  "device_manuals_url": "https://docs.distech-controls.com/bundle/ECY-CSC_IG/resource/ECY-CSC_IG.pdf",
+  "default_username": "tridium",   
+  "default_password": "controls",
+  "device_manuals_url": "https://community.exchange.se.com/krefy84679/attachments/krefy84679/knowledge-base_public/9611/1/docJace8000Startup.pdf",
   "modules": {
     "bacext": {
-      "enabled": true
+      "enabled": false
     },
     "bacnet": {
-      "enabled": true
+      "enabled": false
     },
     "discover": {
       "enabled": true
@@ -109,6 +109,16 @@
           "description": "Administrative Secure Web-Server",
           "reason": ""
         },
+        "1911": {
+          "allowed": false,
+          "description": "Unencrypted FOX",
+          "reason": ""
+        },
+        "4911": {
+          "allowed": true,
+          "description": "Secure FOX",
+          "reason": ""
+        },
         "5800": {
           "allowed": false,
           "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol Over HTTP",
@@ -144,11 +154,14 @@
           "reason": ""
         },
         "47808": {
-          "allowed": true,
+          "allowed": false,
           "description": "BACnet protocol",
           "reason": ""
         }
       }
     }
+  },
+  "process": {
+     "attempt_number": 1
   }
 }
