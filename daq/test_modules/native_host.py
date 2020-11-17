@@ -43,6 +43,7 @@ class NativeHost(Host):
 
         env = dict(self.env_vars)
         # for devcies with ips that are not in the same subnet as test hosts' ips.
+        # TODO: ip added assumes a /16 subnet
         if self.intf() and "TARGET_IP" in env and not env["TARGET_IP"].startswith('10.20'):
             parts = env["TARGET_IP"].split('.')
             parts[-1] = str((int(parts[-1]) + 1) % 256)
