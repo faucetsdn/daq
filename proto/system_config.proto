@@ -145,11 +145,6 @@ enum DhcpMode {
   IP_CHANGE = 4;
 }
 
-message IpSubnet {
-  string base_ip = 1;
-  int32 prefix_length = 2;
-}
-
 /**
  * USI paramters
 **/
