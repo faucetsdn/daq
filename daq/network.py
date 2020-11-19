@@ -119,6 +119,7 @@ class TestNetwork:
             del self.net.links[self.net.links.index(switch_link)]
 
     def get_subnet(self):
+        """Gets the internal mininet subnet"""
         return copy.copy(self._mininet_subnet)
 
     def _create_secondary(self):
