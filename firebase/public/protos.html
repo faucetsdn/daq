@@ -203,6 +203,10 @@
                 </li>
               
                 <li>
+                  <a href="#SubnetSpec"><span class="badge">M</span>SubnetSpec</a>
+                </li>
+              
+                <li>
                   <a href="#SwitchSetup"><span class="badge">M</span>SwitchSetup</a>
                 </li>
               
@@ -529,6 +533,20 @@
                   <td><p>Reporting device result </p></td>
                 </tr>
               
+                <tr>
+                  <td>external_subnets</td>
+                  <td><a href="#SubnetSpec">SubnetSpec</a></td>
+                  <td>repeated</td>
+                  <td><p>For specifying ip subnets assigned by external DHCP server / static ips </p></td>
+                </tr>
+              
+                <tr>
+                  <td>internal_subnet</td>
+                  <td><a href="#SubnetSpec">SubnetSpec</a></td>
+                  <td></td>
+                  <td><p>IP subnet used by test hosts </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -682,6 +700,30 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>egress vlan </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SubnetSpec">SubnetSpec</h3>
+        <p>For specifying internal / external subnets information</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>subnet</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>

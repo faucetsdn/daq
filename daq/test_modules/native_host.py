@@ -42,12 +42,6 @@ class NativeHost(Host):
         assert not self.active_pipe, '%s already activated' % self.name
 
         env = dict(self.env_vars)
-        # for devcies with ips that are not in the same subnet as test hosts' ips.
-        # TODO: ip added assumes a /16 subnet
-        if self.intf() and "TARGET_IP" in env and not env["TARGET_IP"].startswith('10.20'):
-            parts = env["TARGET_IP"].split('.')
-            parts[-1] = str((int(parts[-1]) + 1) % 256)
-            self.cmd('ip addr add %s/16 dev %s' % (".".join(parts), self.intf()))
 
         self.cmd('mkdir %s' % os.path.join(self.basedir, "config"))
 
