@@ -45,3 +45,8 @@ topology_hook: bin/dump_network
 usi_setup: 
   url: localhost:5000
   rpc_timeout_sec: 20
+
+# default mininet subnet
+mininet_subnet:
+  base_ip: 10.20.0.0
+  prefix_length: 16

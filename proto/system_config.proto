@@ -129,6 +129,12 @@ message DaqConfig {
 
   // Reporting device result
   DeviceReporting device_reporting = 53;
+
+  // For specifying ip subnets assigned by external DHCP server
+  repeated IpSubnet external_dhcp_subnets = 54;
+
+  // IP subnet used by test hosts
+  IpSubnet mininet_subnet = 55;
 }
 
 enum DhcpMode {
@@ -137,6 +143,11 @@ enum DhcpMode {
   EXTERNAL = 2;
   LONG_RESPONSE = 3;
   IP_CHANGE = 4;
+}
+
+message IpSubnet {
+  string base_ip = 1;
+  int32 prefix_length = 2;
 }
 
 /**

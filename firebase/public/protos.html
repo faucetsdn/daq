@@ -199,6 +199,10 @@
                 </li>
               
                 <li>
+                  <a href="#IpSubnet"><span class="badge">M</span>IpSubnet</a>
+                </li>
+              
+                <li>
                   <a href="#RunTrigger"><span class="badge">M</span>RunTrigger</a>
                 </li>
               
@@ -529,6 +533,20 @@
                   <td><p>Reporting device result </p></td>
                 </tr>
               
+                <tr>
+                  <td>external_dhcp_subnets</td>
+                  <td><a href="#IpSubnet">IpSubnet</a></td>
+                  <td>repeated</td>
+                  <td><p>For specifying ip subnets assigned by external DHCP server </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mininet_subnet</td>
+                  <td><a href="#IpSubnet">IpSubnet</a></td>
+                  <td></td>
+                  <td><p>IP subnet used by test hosts </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -644,6 +662,37 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>Switch port for attching interface. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="IpSubnet">IpSubnet</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>base_ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>prefix_length</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>
