@@ -25,7 +25,7 @@ class ExternalModule(HostModule):
         self.host = None
         self.pipe = None
         self.basedir = basedir
-        self.external_subnets = self.runner.config.get('external_dhcp_subnets', [])
+        self.external_subnets = self.runner.config.get('external_subnets', [])
 
     @abc.abstractmethod
     def _get_module_class(self):
@@ -48,7 +48,7 @@ class ExternalModule(HostModule):
 
         try:
             pipe = host.activate(log_name=None)
-            # for devcies with ips that are not in the same subnet as test hosts' ips.
+            # For devcies with ips that are not in the same subnet as test hosts' ips.
             host_ip = self._get_host_ip(params)
             if host.intf() and host_ip:
                 host.cmd('ip addr add %s dev %s' % (host_ip, host.intf()))
@@ -83,10 +83,11 @@ class ExternalModule(HostModule):
         target_subnet = ip_network(params['target_ip'])
         if not target_subnet.overlaps(self.runner.network.get_subnet()):
             for subnet in self.external_subnets:
-                subnet = ip_network('%s/%s' % (subnet['base_ip'], subnet['prefix_length']))
+                subnet = ip_network(subnet)
                 if target_subnet.overlaps(subnet):
                     target_ip = ip_address(params['target_ip'])
-                    return target_ip + (-1 if target_ip == subnet.broadcast_address - 1 else 1)
+                    new_ip = target_ip + (-1 if target_ip == subnet.broadcast_address - 1 else 1)
+                    return "%s/%s" % (str(new_ip), subnet.prefixlen)
         return None
 
     def _get_env_vars(self, params):

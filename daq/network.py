@@ -1,5 +1,7 @@
 """Networking module"""
 
+from __future__ import absolute_import
+
 from ipaddress import ip_network
 import copy
 import os
@@ -55,10 +57,8 @@ class TestNetwork:
         self.sec_dpid = None
         self.sec_port = None
         self._settle_sec = int(config['settle_sec'])
-        subnet = config.get('mininet_subnet')
-        subnet_str = "%s/%s" % (subnet['base_ip'], subnet['prefix_length']
-                                ) if subnet else DEFAULT_MININET_SUBNET
-        self._mininet_subnet = ip_network(subnet_str)
+        subnet = config.get('mininet_subnet', self.DEFAULT_MININET_SUBNET)
+        self._mininet_subnet = ip_network(subnet)
         self.topology = FaucetTopology(self.config)
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})

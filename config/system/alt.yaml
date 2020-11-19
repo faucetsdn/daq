@@ -31,11 +31,8 @@ run_trigger:
   vlan_end: 1009
   egress_vlan: 121
 
-mininet_subnet:
-  base_ip: 192.168.1.0
-  prefix_length: 24
+internal_subnet: 192.168.1.0/24
 
 # Define external DHCP subnets to be used by test hosts
-external_dhcp_subnets:
-  - base_ip: 10.20.99.0
-    prefix_length: 24
+external_subnets:
+  - 10.20.99.0/24
