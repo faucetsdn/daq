@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x1d\x64\x61q/proto/system_config.proto\"\xc7\t\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x15\n\rtopology_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x12\x1c\n\tusi_setup\x18\x31 \x01(\x0b\x32\t.UsiSetup\x12 \n\x0brun_trigger\x18\x32 \x01(\x0b\x32\x0b.RunTrigger\x12\x12\n\ndebug_mode\x18\x33 \x01(\x08\x12\x13\n\x0buse_console\x18\x34 \x01(\x08\x12*\n\x10\x64\x65vice_reporting\x18\x35 \x01(\x0b\x32\x10.DeviceReporting\x12\x18\n\x10\x65xternal_subnets\x18\x36 \x03(\t\x12\x17\n\x0finternal_subnet\x18\x37 \x01(\t\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"0\n\x08UsiSetup\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x17\n\x0frpc_timeout_sec\x18\x02 \x01(\x05\"\xf4\x01\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\x05\x12\x10\n\x08\x61lt_port\x18\x10 \x01(\x05\x12\x0f\n\x07lo_addr\x18\x12 \x01(\t\x12\x11\n\tmods_addr\x18\x14 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\"G\n\nRunTrigger\x12\x12\n\nvlan_start\x18\x01 \x01(\x05\x12\x10\n\x08vlan_end\x18\x02 \x01(\x05\x12\x13\n\x0b\x65gress_vlan\x18\x03 \x01(\x05\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"&\n\x0f\x44\x65viceReporting\x12\x13\n\x0bserver_port\x18\x01 \x01(\x05*U\n\x08\x44hcpMode\x12\n\n\x06NORMAL\x10\x00\x12\r\n\tSTATIC_IP\x10\x01\x12\x0c\n\x08\x45XTERNAL\x10\x02\x12\x11\n\rLONG_RESPONSE\x10\x03\x12\r\n\tIP_CHANGE\x10\x04\x62\x06proto3')
+  serialized_pb=_b('\n\x1d\x64\x61q/proto/system_config.proto\"\xe1\t\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x15\n\rtopology_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x12\x1c\n\tusi_setup\x18\x31 \x01(\x0b\x32\t.UsiSetup\x12 \n\x0brun_trigger\x18\x32 \x01(\x0b\x32\x0b.RunTrigger\x12\x12\n\ndebug_mode\x18\x33 \x01(\x08\x12\x13\n\x0buse_console\x18\x34 \x01(\x08\x12*\n\x10\x64\x65vice_reporting\x18\x35 \x01(\x0b\x32\x10.DeviceReporting\x12%\n\x10\x65xternal_subnets\x18\x36 \x03(\x0b\x32\x0b.SubnetSpec\x12$\n\x0finternal_subnet\x18\x37 \x01(\x0b\x32\x0b.SubnetSpec\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1c\n\nSubnetSpec\x12\x0e\n\x06subnet\x18\x01 \x01(\t\"0\n\x08UsiSetup\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x17\n\x0frpc_timeout_sec\x18\x02 \x01(\x05\"\xf4\x01\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\x05\x12\x10\n\x08\x61lt_port\x18\x10 \x01(\x05\x12\x0f\n\x07lo_addr\x18\x12 \x01(\t\x12\x11\n\tmods_addr\x18\x14 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\"G\n\nRunTrigger\x12\x12\n\nvlan_start\x18\x01 \x01(\x05\x12\x10\n\x08vlan_end\x18\x02 \x01(\x05\x12\x13\n\x0b\x65gress_vlan\x18\x03 \x01(\x05\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"&\n\x0f\x44\x65viceReporting\x12\x13\n\x0bserver_port\x18\x01 \x01(\x05*U\n\x08\x44hcpMode\x12\n\n\x06NORMAL\x10\x00\x12\r\n\tSTATIC_IP\x10\x01\x12\x0c\n\x08\x45XTERNAL\x10\x02\x12\x11\n\rLONG_RESPONSE\x10\x03\x12\r\n\tIP_CHANGE\x10\x04\x62\x06proto3')
 )
 
 _DHCPMODE = _descriptor.EnumDescriptor(
@@ -52,8 +52,8 @@ _DHCPMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1710,
-  serialized_end=1795,
+  serialized_start=1766,
+  serialized_end=1851,
 )
 _sym_db.RegisterEnumDescriptor(_DHCPMODE)
 
@@ -99,8 +99,8 @@ _DAQCONFIG_INTERFACESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1145,
-  serialized_end=1206,
+  serialized_start=1171,
+  serialized_end=1232,
 )
 
 _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
@@ -136,8 +136,8 @@ _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1208,
-  serialized_end=1257,
+  serialized_start=1234,
+  serialized_end=1283,
 )
 
 _DAQCONFIG = _descriptor.Descriptor(
@@ -436,15 +436,15 @@ _DAQCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='external_subnets', full_name='DaqConfig.external_subnets', index=41,
-      number=54, type=9, cpp_type=9, label=3,
+      number=54, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='internal_subnet', full_name='DaqConfig.internal_subnet', index=42,
-      number=55, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=55, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -461,7 +461,38 @@ _DAQCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=34,
-  serialized_end=1257,
+  serialized_end=1283,
+)
+
+
+_SUBNETSPEC = _descriptor.Descriptor(
+  name='SubnetSpec',
+  full_name='SubnetSpec',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='subnet', full_name='SubnetSpec.subnet', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1285,
+  serialized_end=1313,
 )
 
 
@@ -498,8 +529,8 @@ _USISETUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1259,
-  serialized_end=1307,
+  serialized_start=1315,
+  serialized_end=1363,
 )
 
 
@@ -613,8 +644,8 @@ _SWITCHSETUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1310,
-  serialized_end=1554,
+  serialized_start=1366,
+  serialized_end=1610,
 )
 
 
@@ -658,8 +689,8 @@ _RUNTRIGGER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1556,
-  serialized_end=1627,
+  serialized_start=1612,
+  serialized_end=1683,
 )
 
 
@@ -696,8 +727,8 @@ _INTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1629,
-  serialized_end=1668,
+  serialized_start=1685,
+  serialized_end=1724,
 )
 
 
@@ -727,8 +758,8 @@ _DEVICEREPORTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1670,
-  serialized_end=1708,
+  serialized_start=1726,
+  serialized_end=1764,
 )
 
 _DAQCONFIG_INTERFACESENTRY.fields_by_name['value'].message_type = _INTERFACE
@@ -740,7 +771,10 @@ _DAQCONFIG.fields_by_name['fail_module'].message_type = _DAQCONFIG_FAILMODULEENT
 _DAQCONFIG.fields_by_name['usi_setup'].message_type = _USISETUP
 _DAQCONFIG.fields_by_name['run_trigger'].message_type = _RUNTRIGGER
 _DAQCONFIG.fields_by_name['device_reporting'].message_type = _DEVICEREPORTING
+_DAQCONFIG.fields_by_name['external_subnets'].message_type = _SUBNETSPEC
+_DAQCONFIG.fields_by_name['internal_subnet'].message_type = _SUBNETSPEC
 DESCRIPTOR.message_types_by_name['DaqConfig'] = _DAQCONFIG
+DESCRIPTOR.message_types_by_name['SubnetSpec'] = _SUBNETSPEC
 DESCRIPTOR.message_types_by_name['UsiSetup'] = _USISETUP
 DESCRIPTOR.message_types_by_name['SwitchSetup'] = _SWITCHSETUP
 DESCRIPTOR.message_types_by_name['RunTrigger'] = _RUNTRIGGER
@@ -771,6 +805,13 @@ DaqConfig = _reflection.GeneratedProtocolMessageType('DaqConfig', (_message.Mess
 _sym_db.RegisterMessage(DaqConfig)
 _sym_db.RegisterMessage(DaqConfig.InterfacesEntry)
 _sym_db.RegisterMessage(DaqConfig.FailModuleEntry)
+
+SubnetSpec = _reflection.GeneratedProtocolMessageType('SubnetSpec', (_message.Message,), dict(
+  DESCRIPTOR = _SUBNETSPEC,
+  __module__ = 'daq.proto.system_config_pb2'
+  # @@protoc_insertion_point(class_scope:SubnetSpec)
+  ))
+_sym_db.RegisterMessage(SubnetSpec)
 
 UsiSetup = _reflection.GeneratedProtocolMessageType('UsiSetup', (_message.Message,), dict(
   DESCRIPTOR = _USISETUP,

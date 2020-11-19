@@ -46,5 +46,6 @@ usi_setup:
   url: localhost:5000
   rpc_timeout_sec: 20
 
-# default test host subnet
-internal_subnet: 10.20.0.0/16
+# internal test host subnet
+internal_subnet:
+  subnet: 10.20.0.0/16

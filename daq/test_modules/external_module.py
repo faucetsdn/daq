@@ -82,8 +82,8 @@ class ExternalModule(HostModule):
     def _get_host_ip(self, params):
         target_subnet = ip_network(params['target_ip'])
         if not target_subnet.overlaps(self.runner.network.get_subnet()):
-            for subnet in self.external_subnets:
-                subnet = ip_network(subnet)
+            for subnet_spec in self.external_subnets:
+                subnet = ip_network(subnet_spec['subnet'])
                 if target_subnet.overlaps(subnet):
                     target_ip = ip_address(params['target_ip'])
                     new_ip = target_ip + (-1 if target_ip == subnet.broadcast_address - 1 else 1)
