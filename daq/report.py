@@ -105,6 +105,7 @@ class ReportGenerator:
         self._expected_headers = list(self._module_config.get('report', {}).get('expected', []))
         self._expecteds = {}
         self._categories = list(self._module_config.get('report', {}).get('categories', []))
+        self._category_headers = []
         self._file_md = None
 
     def _write(self, msg=''):
@@ -253,35 +254,29 @@ class ReportGenerator:
         return '/'.join(str(value) for value in results)
 
     def _write_category_table(self):
-        passes = True #overall
+        passes = True  # Overall device status
         rows = []
         self._category_headers = self._CATEGORY_BASE_COLS + self._expected_headers
 
         for category in self._categories:
             total = 0
-            match = 0 # no. of tests matching "required"
 
             results = [[0, 0, 0] for _ in range(len(self._expected_headers))]
-            result = self._NO_REQUIRED # Overall category result
+            result = self._NO_REQUIRED  # Overall category result
 
             for test_name, result_dict in self._results.items():
                 test_info = self._get_test_info(test_name)
                 category_name = test_info.get('category', self._DEFAULT_CATEGORY)
 
-                # all tests must have required in order to be counted 
+                # all tests must have required in order to be counted
                 if category_name == category and 'required' in test_info:
+                    total += 1
 
                     expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
                     expected_index = self._expected_headers.index(expected_name)
 
-                    required_result = test_info['required']
-                    total += 1
-
-                    # The category table determines the overall result of the device
-                    # TODO device type based classification (e.g. compliant + smart)
-                    if result_dict["result"] == required_result:
-                        match += 1
-                    else:
+                    # The device overall fails if any result is unexpected
+                    if result_dict["result"] != test_info['required']:
                         passes = False
 
                     # Put test results into right location in the result matrix
@@ -293,8 +288,13 @@ class ReportGenerator:
                         results[expected_index][self._INDEX_FAIL] += 1
 
                     # Calculate overall rolling result for the category
-                    if result not in (result_dict["result"], result != self._NO_REQUIRED):
-                        result = "fail"
+                    if result not in (result_dict["result"], self._NO_REQUIRED):
+                        # Consider info and pass alike
+                        # TODO remove when info tests are removed
+                        if result_dict["result"] == 'info':
+                            result_dict["result"] = 'pass'
+                        else:
+                            result = "fail"
                     else:
                         result = result_dict["result"]
 
@@ -309,7 +309,7 @@ class ReportGenerator:
         for row in rows:
             table.add_row(row)
         self._write(table.render())
-        self._writeln('`Syntax: Pass / Fail / Skip`')
+        self._writeln('Syntax: Pass / Fail / Skip')
 
     def _write_expected_table(self):
         table = MdTable([self._EXPECTED_HEADER, *self._result_headers])
