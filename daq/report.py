@@ -273,30 +273,30 @@ class ReportGenerator:
 
                 if result_dict["result"] == 'gone':
                     gone = True
-        
+
         # Write Results
         self._writeln('Overall device result %s' % ('PASS' if passes else 'FAIL'))
         self._writeln()
 
         if gone:
-            gone_message = ('**Some tests report as GONE. ' 
-                           'Please check for possible misconfiguration**')
+            gone_message = ('**Some tests report as GONE. '
+                            'Please check for possible misconfiguration**')
             self._writeln(gone_message)
             self._writeln()
 
-        
+
     def _join_category_results(self, results):
-        """ Used to convert list of results into the pass/fail/skip format 
+        """ Used to convert list of results into the pass/fail/skip format
             for category table
 
         Args:
-        results: List of results 
+        results: List of results
 
         Returns:
         String in pass/fail/skip format
         """
         return '/'.join(str(value) for value in results)
-    
+
 
     def _write_category_table(self):
     # Write the first category and expected table
