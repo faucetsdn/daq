@@ -63,18 +63,12 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|info|gone|
 |---|---|---|---|---|---|
-<<<<<<< HEAD
 |Required Pass|4|1|8|0|4|
 |Required Pass for PoE Devices|0|0|1|0|1|
 |Required Pass for BACnet Devices|0|1|0|0|0|
 |Recommended Pass|1|0|1|0|1|
 |Information|0|0|2|0|2|
-|Other|3|0|9|1|2|
-=======
-|Required|1|0|0|0|0|
-|Recommended|1|0|0|0|1|
-|Other|6|2|21|2|2|
->>>>>>> master
+|Other|3|0|9|2|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -86,25 +80,17 @@ Syntax: Pass / Fail / Skip
 |skip|cloud.udmi.system|Other|Other|No device id|
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
-<<<<<<< HEAD
 |pass|connection.base.target_ping|Connection|Required Pass|target reached|
 |gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
 |gone|connection.ipaddr.private_address|Connection|Required Pass||
 |gone|connection.network.communication_min_send|Communication|Required Pass||
 |gone|connection.network.communication_type|Communication|Information||
 |gone|connection.network.dhcp_long|Connection|Required Pass||
+|info|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
 |fail|connection.network.mac_oui|Connection|Required Pass|Manufacturer prefix not found!|
 |skip|connection.switch.port_duplex|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Connection|Required Pass|No local IP has been set, check system config|
-=======
-|pass|connection.base.target_ping|Connectivity|Required|target reached|
-|info|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
-|fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
-|skip|connection.switch.port_duplex|Other|Other|No local IP has been set, check system config|
-|skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
-|skip|connection.switch.port_speed|Other|Other|No local IP has been set, check system config|
->>>>>>> master
 |skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
 |pass|manual.test.name|Security|Recommended Pass|Manual test - for testing|
 |pass|ntp.network.ntp_support|Network Time|Required Pass|Using NTPv4.|
