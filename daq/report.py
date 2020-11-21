@@ -296,7 +296,7 @@ class ReportGenerator:
         return '/'.join(str(value) for value in results)
 
     def _write_category_table(self):
-        """ Write the first category and expected table 
+        """ Write the first category and expected table
         """
 
         rows = []
