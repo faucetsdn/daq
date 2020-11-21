@@ -46,6 +46,8 @@
 
 Overall device result FAIL
 
+**Some tests report as GONE. Please check for possible misconfiguration**
+
 |Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Recommended Pass|Information|Other|
 |---|---|---|---|---|---|---|---|---|
 |Connection|9|FAIL|1/4/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
