@@ -28,3 +28,15 @@ write_out_result $REPORT \
                  "$TEST_DESCRIPTION" \
                  "$TEST_RESULT" \
                  "$RESULT_AND_SUMMARY"
+
+# Write result for connection.network.mac_address 
+TEST_NAME="connection.network.mac_address"
+TEST_DESCRIPTION="Reports device MAC address"
+TEST_RESULT="Device MAC address is ${TARGET_MAC}"
+RESULT_AND_SUMMARY="RESULT info ${TEST_NAME} ${TEST_RESULT}"
+
+write_out_result $REPORT \
+                 "$TEST_NAME" \
+                 "$TEST_DESCRIPTION" \
+                 "$TEST_RESULT" \
+                 "$RESULT_AND_SUMMARY"
