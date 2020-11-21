@@ -252,7 +252,6 @@ class ReportGenerator:
         self._write_result_table()
         self._writeln()
 
-
     def _analyse_and_write_results(self):
         """ Analyse the test results to determine if the device is a pass or fail
             and identify possible issues (e.g. gone) and writes these to the report
@@ -284,7 +283,6 @@ class ReportGenerator:
             self._writeln(gone_message)
             self._writeln()
 
-
     def _join_category_results(self, results):
         """ Used to convert list of results into the pass/fail/skip format
             for category table
@@ -297,9 +295,9 @@ class ReportGenerator:
         """
         return '/'.join(str(value) for value in results)
 
-
     def _write_category_table(self):
-    # Write the first category and expected table
+        """ Write the first category and expected table 
+        """
 
         rows = []
         self._category_headers = self._CATEGORY_BASE_COLS + self._expected_headers
