@@ -108,7 +108,7 @@
     "connection.network.communication_type": {
       "category": "Communication",
       "required": "info",
-      "expected": "information"
+      "expected": "Information"
     },
     "connection.network.communication_min_send": {
       "category": "Communication",
