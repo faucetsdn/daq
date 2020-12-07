@@ -1,5 +1,9 @@
 """Networking module"""
 
+from __future__ import absolute_import
+
+from ipaddress import ip_network
+import copy
 import os
 from shutil import copyfile
 import time
@@ -40,6 +44,7 @@ class TestNetwork:
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
     DEFAULT_OF_PORT = 6653
+    DEFAULT_MININET_SUBNET = "10.20.0.0/16"
     _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = "inst/faucet_intermediate.yaml"
     OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
@@ -52,6 +57,8 @@ class TestNetwork:
         self.sec_dpid = None
         self.sec_port = None
         self._settle_sec = int(config['settle_sec'])
+        subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
+        self._mininet_subnet = ip_network(subnet)
         self.topology = FaucetTopology(self.config)
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
@@ -111,6 +118,10 @@ class TestNetwork:
             intf.delete()
             del self.net.links[self.net.links.index(switch_link)]
 
+    def get_subnet(self):
+        """Gets the internal mininet subnet"""
+        return copy.copy(self._mininet_subnet)
+
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
@@ -164,7 +175,7 @@ class TestNetwork:
         """Initialize network"""
 
         LOGGER.debug("Creating miniet...")
-        self.net = mininet_net.Mininet(ipBase='10.20.0.0/16')
+        self.net = mininet_net.Mininet(ipBase=str(self._mininet_subnet))
 
         LOGGER.debug("Adding primary...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)

@@ -316,9 +316,9 @@ class DAQRunner:
             LOGGER.info('Port %s dpid %s is now %s', port, dpid, "active" if active else "inactive")
         if active:
             self._activate_port(port)
-        else:
-            device = self._devices.get_by_port_info(self._ports[port])
+        elif port in self._ports:
             port_info = self._ports[port]
+            device = self._devices.get_by_port_info(port_info)
             if device and device.host and not port_info.flapping_start:
                 port_info.flapping_start = time.time()
             if port_info.active:

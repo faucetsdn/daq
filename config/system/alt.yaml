@@ -30,3 +30,10 @@ run_trigger:
   vlan_start: 1001
   vlan_end: 1009
   egress_vlan: 121
+
+internal_subnet: 
+  subnet: 192.168.1.0/24
+
+# Define external DHCP subnets to be used by test hosts
+external_subnets:
+  - subnet: 10.20.0.0/16

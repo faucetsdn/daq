@@ -55,18 +55,21 @@ RESULT info communication.network.type Broadcast packets received. Unicast packe
 RESULT pass ntp.network.ntp_support Using NTPv4.
 RESULT pass ntp.network.ntp_update Device clock synchronized.
 RESULT fail connection.network.mac_oui Manufacturer prefix not found!
+RESULT info connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
 RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
 RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.network.type Broadcast packets received. Unicast packets received.
 RESULT fail ntp.network.ntp_support Not using NTPv4.
 RESULT fail ntp.network.ntp_update Device clock not synchronized with local NTP server.
 RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0b
+RESULT info connection.network.mac_address Device MAC address is 3c:5a:b4:1e:8f:0b
 RESULT fail dns.network.hostname_resolution Device sent DNS requests to servers other than the DHCP provided server
 RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT info communication.network.type Broadcast packets received. Unicast packets received.
 RESULT skip ntp.network.ntp_support No NTP packets received.
 RESULT skip ntp.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
+RESULT info connection.network.mac_address Device MAC address is 3c:5a:b4:1e:8f:0a
 RESULT pass dns.network.hostname_resolution Device sends DNS requests and resolves host names
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
