@@ -46,48 +46,68 @@
 
 Overall device result FAIL
 
-|Category|Result|
-|---|---|
-|Security|1/2|
-|Other|1/2|
-|Connectivity|n/a|
+**Some tests report as GONE. Please check for possible misconfiguration**
+
+|Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Recommended Pass|Information|Other|
+|---|---|---|---|---|---|---|---|---|
+|Connection|9|FAIL|1/4/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Security|8|FAIL|1/0/4|0/0/0|0/0/0|1/1/0|0/0/1|0/0/0|
+|Network Time|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|TLS|0|N/A|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Protocol|2|FAIL|0/0/0|0/0/0|0/1/0|0/0/0|0/0/1|0/0/0|
+|PoE|3|FAIL|0/0/0|0/1/1|0/0/0|0/0/0|0/1/0|0/0/0|
+|BOS|1|SKIP|0/0/0|0/0/0|0/0/0|0/0/1|0/0/0|0/0/0|
+|Other|2|GONE|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/2/0|
+|Communication|2|GONE|0/1/0|0/0/0|0/0/0|0/0/0|0/1/0|0/0/0|
+Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|info|gone|
 |---|---|---|---|---|---|
-|Required|1|0|0|0|0|
-|Recommended|1|0|0|0|1|
-|Other|6|2|21|1|2|
+|Required Pass|4|1|8|0|4|
+|Required Pass for PoE Devices|0|0|1|0|1|
+|Required Pass for BACnet Devices|0|1|0|0|0|
+|Recommended Pass|1|0|1|0|1|
+|Information|0|0|2|0|2|
+|Other|3|0|9|2|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
-|skip|base.switch.ping|Other|Other|No local IP has been set, check system config|
-|skip|cloud.udmi.pointset|Other|Other|No device id|
+|skip|base.switch.ping|Connection|Required Pass|No local IP has been set, check system config|
+|skip|cloud.udmi.pointset|BOS|Recommended Pass|No device id|
 |skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
-|pass|connection.base.target_ping|Connectivity|Required|target reached|
-|fail|connection.network.mac_oui|Other|Other|Manufacturer prefix not found!|
-|skip|connection.switch.port_duplex|Other|Other|No local IP has been set, check system config|
-|skip|connection.switch.port_link|Other|Other|No local IP has been set, check system config|
-|skip|connection.switch.port_speed|Other|Other|No local IP has been set, check system config|
+|pass|connection.base.target_ping|Connection|Required Pass|target reached|
+|gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
+|gone|connection.ipaddr.private_address|Connection|Required Pass||
+|gone|connection.network.communication_min_send|Communication|Required Pass||
+|gone|connection.network.communication_type|Communication|Information||
+|gone|connection.network.dhcp_long|Connection|Required Pass||
+|info|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
+|fail|connection.network.mac_oui|Connection|Required Pass|Manufacturer prefix not found!|
+|skip|connection.switch.port_duplex|Connection|Required Pass|No local IP has been set, check system config|
+|skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
+|skip|connection.switch.port_speed|Connection|Required Pass|No local IP has been set, check system config|
 |skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
-|pass|manual.test.name|Security|Recommended|Manual test - for testing|
-|pass|ntp.network.ntp_support|Other|Other|Using NTPv4.|
-|pass|ntp.network.ntp_update|Other|Other|Device clock synchronized.|
-|skip|poe.switch.power|Other|Other|No local IP has been set, check system config|
-|fail|protocol.bacext.pic|Other|Other|PICS file defined however a BACnet device was not found.|
-|skip|protocol.bacext.version|Other|Other|Bacnet device not found.|
-|skip|security.discover.firmware|Other|Other|Could not retrieve a firmware version with nmap. Check bacnet port.|
+|pass|manual.test.name|Security|Recommended Pass|Manual test - for testing|
+|pass|ntp.network.ntp_support|Network Time|Required Pass|Using NTPv4.|
+|pass|ntp.network.ntp_update|Network Time|Required Pass|Device clock synchronized.|
+|gone|poe.switch.negotiation|PoE|Required Pass for PoE Devices||
+|skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
+|gone|poe.switch.support|PoE|Information||
+|fail|protocol.bacext.pic|Protocol|Required Pass for BACnet Devices|PICS file defined however a BACnet device was not found.|
+|skip|protocol.bacext.version|Protocol|Information|Bacnet device not found.|
+|skip|security.discover.firmware|Security|Information|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |pass|security.nmap.http|Other|Other|No running http servers have been found.|
-|pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
-|skip|security.password.http|Other|Other|Port 80 not open on target device.|
-|skip|security.password.https|Other|Other|Port 443 not open on target device.|
-|skip|security.password.ssh|Other|Other|Port 22 not open on target device.|
-|skip|security.password.telnet|Other|Other|Port 23 not open on target device.|
-|gone|security.ports.nmap|Security|Recommended||
+|pass|security.nmap.ports|Security|Required Pass|Only allowed ports found open.|
+|skip|security.password.http|Security|Required Pass|Port 80 not open on target device.|
+|skip|security.password.https|Security|Required Pass|Port 443 not open on target device.|
+|skip|security.password.ssh|Security|Required Pass|Port 22 not open on target device.|
+|skip|security.password.telnet|Security|Required Pass|Port 23 not open on target device.|
+|gone|security.ports.nmap|Security|Recommended Pass||
 |skip|security.tls.v1_2_client|Other|Other|No client initiated TLS communication detected|
 |skip|security.tls.v1_2_server|Other|Other|IOException unable to connect to server.|
 |skip|security.tls.v1_3_client|Other|Other|No client initiated TLS communication detected|
@@ -598,6 +618,15 @@ Using the host hardware address 9a:02:57:1e:8f:01
 Mac OUI Test
 --------------------
 RESULT fail connection.network.mac_oui Manufacturer prefix not found!
+
+--------------------
+connection.network.mac_address
+--------------------
+Reports device MAC address
+--------------------
+Device MAC address is 9a:02:57:1e:8f:01
+--------------------
+RESULT info connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
 
 --------------------
 dns.network.hostname_resolution

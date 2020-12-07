@@ -42,6 +42,7 @@ class NativeHost(Host):
         assert not self.active_pipe, '%s already activated' % self.name
 
         env = dict(self.env_vars)
+
         self.cmd('mkdir %s' % os.path.join(self.basedir, "config"))
 
         for vol_map in self.vol_maps:

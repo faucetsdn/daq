@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import datetime
 import abc
 import os
+from ipaddress import ip_network, ip_address
 
 import logger
 import wrappers
@@ -24,6 +25,7 @@ class ExternalModule(HostModule):
         self.host = None
         self.pipe = None
         self.basedir = basedir
+        self.external_subnets = self.runner.config.get('external_subnets', [])
 
     @abc.abstractmethod
     def _get_module_class(self):
@@ -46,6 +48,10 @@ class ExternalModule(HostModule):
 
         try:
             pipe = host.activate(log_name=None)
+            # For devcies with ips that are not in the same subnet as test hosts' ips.
+            host_ip = self._get_host_ip(params)
+            if host.intf() and host_ip:
+                host.cmd('ip addr add %s dev %s' % (host_ip, host.intf()))
             self.log = host.open_log()
             if self._should_raise_test_exception('initialize'):
                 LOGGER.error('%s inducing initialization failure', self)
@@ -72,6 +78,17 @@ class ExternalModule(HostModule):
         """Forcibly terminate this module"""
         LOGGER.info("%s terminating", self)
         return self._finalize()
+
+    def _get_host_ip(self, params):
+        target_subnet = ip_network(params['target_ip'])
+        if not target_subnet.overlaps(self.runner.network.get_subnet()):
+            for subnet_spec in self.external_subnets:
+                subnet = ip_network(subnet_spec['subnet'])
+                if target_subnet.overlaps(subnet):
+                    target_ip = ip_address(params['target_ip'])
+                    new_ip = target_ip + (-1 if target_ip == subnet.broadcast_address - 1 else 1)
+                    return "%s/%s" % (str(new_ip), subnet.prefixlen)
+        return None
 
     def _get_env_vars(self, params):
         def opt_param(key):

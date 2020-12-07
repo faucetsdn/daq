@@ -20,9 +20,10 @@ By default would be in local/site/ rather than resources/test_site/.
 
 Overall device result PASS
 
-|Category|Result|
-|---|---|
-|Other|n/a|
+|Category|Total Tests|Result|Other|
+|---|---|---|---|
+|Other|0|N/A|0/0/0|
+Syntax: Pass / Fail / Skip
 
 |Expectation|pass|skip|
 |---|---|---|
