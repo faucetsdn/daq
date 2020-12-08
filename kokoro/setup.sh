@@ -21,6 +21,7 @@ add_rapture_repo() {
   echo "deb https://rapture-prod.corp.google.com $1 $2" >> /etc/apt/sources.list
 }
 add_rapture_repo glinux-base-rodete-stable main
+add_rapture_repo glinux-rodete-stable main
 add_rapture_repo glinux-extra-rodete-stable main
 add_rapture_repo glinux-priority-rodete-stable main
 add_rapture_repo glinux-canaries-rodete-stable main
