@@ -1,40 +1,54 @@
 {
-  "device_datasheets_url": "https://greatnortherncontrols.com/wp-content/uploads/2018/03/O3-DIN-CPU_Catalog_Sheet.pdf",
-  "device_description": "The O3-DIN-CPU is a fully programmable native BACnet Building Controller. As the primary integration engine of the O3 system, the O3-DIN-CPU contains memory storage and external communication ports as well as the control logic for the expansion modules. The O3-DIN-CPU can support up to 4 expansion modules. The O3-DIN-CPU supports multiple communication methods, including BACnet/IP, BACnet over Ethernet, BACnet MS/TP and Delta LINKnet.",
-  "device_image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwW3OChK5E7P64JwcASNGHi2YWzcCu5kBouBugewtnzgQiZ-dh&s",
+  "device_datasheets_url": "https://www.tridium.com/~/media/tridium/enterprisesecurity/documents/jace%208000%20ds%20new%20tridium.ashx?la=es-mx",
+  "device_description": "The JACE 8000 is a compact, embedded IoT (Internet of Things) controller and server platform for connecting multiple and diverse devices and sub-systems. With internet connectivity and web-serving capability, the JACE 8000 controller provides integrated control, supervision, data logging, alarming, scheduling and network management. It streams data and rich graphical displays to a standard web browser via an Ethernet or wireless LAN, or remotely over the internet. Niagara Enterprise Security is a Niagara AX-based application that runs on the JACE 8000. Niagara Analytics 2.0 is a data analytics extension to the Niagara Framework® available on JACE 8000 controllers.",
+  "device_image": "https://abs-controls.com/wp-content/uploads/2019/07/JACE_8000-316x186.fw_.png",
   "device_info": {
-    "make": "Delta Controls Inc.",
-    "model": "O3-DIN-CPU",
-    "type": "BACnet controller"
+    "make": "Tridium",
+    "model": "JACE 8000",
+    "category": "IoT controller"
   },
-  "device_manuals_url": "https://deltacontrols.com/wp-content/uploads/Delta-Controls-Product-Catalog-2019-DIGITAL.pdf",
+  "default_username": "tridium",   
+  "default_password": "controls",
+  "device_manuals_url": "https://community.exchange.se.com/krefy84679/attachments/krefy84679/knowledge-base_public/9611/1/docJace8000Startup.pdf",
   "modules": {
     "bacext": {
-      "enabled": true
+      "enabled": false
     },
     "bacnet": {
+      "enabled": false
+    },
+    "discover": {
+      "enabled": true
+    },
+    "ipaddr": {
       "enabled": true
     },
     "mudgee": {
+      "enabled": false
+    },
+    "network": {
       "enabled": true
     },
     "nmap": {
       "enabled": true
     },
+    "password": {
+      "enabled": true
+    },
     "switch": {
       "enabled": true,
       "poe": {
-        "enabled" : true
+        "enabled" : false
       }
     },
     "tls": {
       "enabled": true
     },
-    "discover": {
+    "ssh": {
       "enabled": true
     },
-    "passwords": {
-      "enabled": true
+    "udmi": {
+      "enabled": false
     }
   },
   "servers": {
@@ -95,6 +109,16 @@
           "description": "Administrative Secure Web-Server",
           "reason": ""
         },
+        "1911": {
+          "allowed": false,
+          "description": "Unencrypted FOX",
+          "reason": ""
+        },
+        "4911": {
+          "allowed": true,
+          "description": "Secure FOX",
+          "reason": ""
+        },
         "5800": {
           "allowed": false,
           "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol Over HTTP",
@@ -130,7 +154,7 @@
           "reason": ""
         },
         "47808": {
-          "allowed": true,
+          "allowed": false,
           "description": "BACnet protocol",
           "reason": ""
         }

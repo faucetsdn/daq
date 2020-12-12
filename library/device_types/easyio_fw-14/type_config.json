@@ -5,9 +5,52 @@
   "device_info": { 
     "make": "EasyIO",
     "model": "FW-14",
-    "type": "BACnet controller"
+    "category": "BACnet controller"
   },
+  "default_username": "admin",   
+  "default_password": "hellocpt",
   "device_manuals_url": "https://techcommft.blob.core.windows.net/fluidtopics/integrations/docs/easyio_fw_installation_v2.0.pdf",
+  "modules": {
+    "bacext": {
+      "enabled": true
+    },
+    "bacnet": {
+      "enabled": true
+    },
+    "discover": {
+      "enabled": true
+    },
+    "ipaddr": {
+      "enabled": true
+    },
+    "mudgee": {
+      "enabled": false
+    },
+    "network": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "password": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true,
+      "poe": {
+        "enabled" : false
+      }
+    },
+    "tls": {
+      "enabled": true
+    },
+    "ssh": {
+      "enabled": true
+    },
+    "udmi": {
+      "enabled": false
+    }
+  },
   "servers": {
     "tcp": {
       "ports": {
@@ -62,5 +105,5 @@
         }
       }
     }
-  },
+  }
 }

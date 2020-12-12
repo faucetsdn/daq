@@ -1,0 +1,39 @@
+{
+  "device_info": {
+    "guid": "*** GUID ***",
+    "hostname": "*** Network Hostname ***",
+    "name": "*** Name ***",
+    "serial": "*** Serial ***",
+    "firmware_version": "*** Firmware Version ***"
+  },
+  "device_type": "*** Device Type ***",
+  "process": {
+     "attempt_number": 1
+  },
+  "tests": {
+    "connection.manual.comms_down": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass",
+      "description": "Remove the network connection and confirm the device is still operational.",
+      "enabled": true,
+      "type": "manual",
+      "result": "required",   
+      "outcome": "INPUT OUTCOME OF TEST HERE (pass/fail/skip)",   
+      "summary" : "INPUT SUMMARY OF TEST HERE",
+      "test_log" : "INPUT LOG OF TEST HERE"
+    },
+    "connection.manual.sec_eth_port": {
+      "category": "Connection",
+      "required": "pass",
+      "expected": "Required Pass",
+      "description": "Connect the second port to the network switch. Check that no connection light is available and the port has been disabled.",
+      "enabled": true,
+      "type": "manual",
+      "result": "required",   
+      "outcome": "INPUT OUTCOME OF TEST HERE (pass/fail/skip)",   
+      "summary" : "INPUT SUMMARY OF TEST HERE",
+      "test_log" : "INPUT LOG OF TEST HERE"
+    }
+  }
+}
