@@ -46,7 +46,7 @@ jobs:
         cat inst/test_${{ matrix.test }}.out
 
   unit_tests:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -64,7 +64,7 @@ jobs:
         testing/run_unit_tests.sh
 
   usi_tests:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.11
