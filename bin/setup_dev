@@ -134,8 +134,9 @@ $PIP -V
 
 echo Installing python dependencies...
 $PIP install wheel
+$PIP install --upgrade --index-url=https://pypi.python.org/simple setuptools
 $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
-    pylint==2.4.2 cryptography requests netifaces codecov coverage setuptools \
+    pylint==2.4.2 cryptography requests netifaces codecov coverage \
     pyyaml cairocffi==1.0.2 WeasyPrint==50 pypandoc==1.4 \
     firebase-admin==2.16.0 \
     google-api-core==1.16.0 \
