@@ -30,4 +30,7 @@ def set_config(*args, **kwargs):
     """Sets config for all loggers"""
     return logging.basicConfig(*args, **kwargs)
 
+def do_nothing():
+    pass
+
 set_stackdriver_client.stackdriver_handler = None
