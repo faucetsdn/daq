@@ -85,6 +85,7 @@ class Devices:
 
     def create_if_absent(self, mac, port_info=None, vlan=None):
         """Create a new device if none found, else return the previous one"""
+        LOGGER.info('Appending test_hold to master test list')
         prev_device = self._devices.get(mac)
         return prev_device if prev_device else self.new_device(mac, port_info=port_info, vlan=vlan)
 
