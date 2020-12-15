@@ -221,6 +221,7 @@ class ConnectedHost:
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
 
     def _write_module_config(self, config, path):
+        self.logger.info('Write config')
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
     def _type_path(self):
