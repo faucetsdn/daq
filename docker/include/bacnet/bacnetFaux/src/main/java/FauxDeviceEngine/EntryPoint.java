@@ -84,14 +84,14 @@ public class EntryPoint {
     }
 
     private static void getID(JSONObject bacnetObject) {
-        List<String> bacnetObjectTypeArr = new ArrayList<>(bacnetObject.keySet());
-        String bacnetObjectType = bacnetObjectTypeArr.get(0);
-        if(bacnetObjectType.contains("DeviceID")) {
-            String IDString = (String) bacnetObject.get(bacnetObjectType);
-            int DeviceID = Integer.parseInt(IDString);
-            System.out.println("Device ID found in JSON file.");
-            deviceId = DeviceID;
-        }
+        bacnetObject.keySet().forEach(bacnetObjectType -> {
+            if("DeviceID".equals(bacnetObjectType)) {
+                String IDString = (String) bacnetObject.get(bacnetObjectType);
+                int DeviceID = Integer.parseInt(IDString);
+                System.out.println("Device ID found in JSON file.");
+                deviceId = DeviceID;
+            }
+        });
     }
 
     private static void addProperty(JSONObject bacnetObject) {
