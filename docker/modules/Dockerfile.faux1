@@ -10,7 +10,7 @@ RUN $AG update && $AG install openjdk-8-jre
 
 RUN $AG update && $AG install openjdk-8-jdk git
 
-ENV BACHASH=94a794a756ee0d37c6a2e53e08747ee021415aa8
+ENV BACHASH=2e670f7aea1721fc69aac3a94e65f62250c7b6e8
 
 RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-branch \
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
