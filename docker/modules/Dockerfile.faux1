@@ -48,7 +48,7 @@ RUN $AG update && cd /tmp && ln -s ~/bin bin && $AG download resolvconf && mv re
 
 COPY docker/include/bin/start_faux docker/include/bin/failing bin/
 
-COPY --from=java_build /root/bacnet4j/*.jar bacnet4j/
+COPY --from=java_build /root/bacnet4j/build/libs/*.jar bacnet4j/
 COPY docker/include/bin/bacnet_discover bin/
 
 COPY --from=java_build /root/pubber/build/libs/*.jar pubber/build/libs/
@@ -59,7 +59,7 @@ COPY docker/include/security/tlsfaux tlsfaux/
 
 COPY docker/include/bacnet/bacnetFaux/ bacnetFaux
 COPY docker/include/bacnet/bacnetFaux/src/main/resources/Faux*.json tmp/
-COPY --from=java_build /root/bacnet4j/bacnet4j-1.0-SNAPSHOT-all.jar bacnetFaux/libs/
+COPY --from=java_build /root/bacnet4j/build/libs/*.jar bacnetFaux/libs/
 RUN cd bacnetFaux && ./gradlew build
 
 # HTTP/HTTPS dependency
