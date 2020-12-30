@@ -5,7 +5,6 @@ from __future__ import absolute_import
 from ipaddress import ip_network
 import copy
 import os
-from shutil import copyfile
 import time
 import yaml
 
