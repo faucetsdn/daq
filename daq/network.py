@@ -215,14 +215,6 @@ class TestNetwork:
             network_topology = self.topology.get_network_topology()
             yaml.safe_dump(network_topology, file)
 
-        # TODO: temporary fix. Remove after Forch behavior is changed
-        dir_name = os.path.dirname(self.OUTPUT_FAUCET_FILE)
-        for included_file_name in network_topology.get('include', []):
-            base_name, ext = os.path.splitext(included_file_name)
-            src_name = os.path.join(dir_name, included_file_name)
-            dst_name = os.path.join(dir_name, base_name + '_augmented' + ext)
-            copyfile(src_name, dst_name)
-
         self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
         if self._settle_sec:
             LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
