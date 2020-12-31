@@ -108,8 +108,6 @@ function test_mud {
 }
 
 test_mud open
-test_mud base
-test_mud todev
 test_mud frdev
 test_mud none
 test_mud star
