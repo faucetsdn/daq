@@ -76,12 +76,6 @@ if [ -z `which tcpdump` ]; then
     export PATH=/usr/sbin:$PATH
 fi
 
-device_ufr1="$device_traffic and ether src 9a:02:57:1e:8f:03"
-cntrlr_traffic="tcpdump -en -r inst/run-9a02571e8f02/scans/monitor.pcap port 47808"
-cntrlr_bcast="$cntrlr_traffic and ether broadcast"
-cntrlr_ucast="$cntrlr_traffic and ether dst 9a:02:57:1e:8f:01"
-cntrlr_xcast="$cntrlr_traffic and ether dst 9a:02:57:1e:8f:03"
-
 function test_device_traffic {
     device_num=$1
     peer_num=$((3-device_num))
@@ -89,16 +83,15 @@ function test_device_traffic {
     peer_mac=9a:02:57:1e:8f:0$peer_num
     
     device_traffic="tcpdump -en -r inst/run-9a02571e8f0$device_num/scans/monitor.pcap port 47808"
-    device_bcast="$device_traffic and ether broadcast"
-    device_bfr_peer="$device_traffic and ether broadcast and ether src $peer_mac"
-    device_bfr3="$device_traffic and ether boradcast and ether src 9a:02:57:1e:8f:03"
+    device_bfr_peer="$device_traffic and ether src $peer_mac and ether broadcast"
+    device_bfr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and ether boradcast"
     device_ufr_peer="$device_traffic and ether src $peer_mac and dst $device_mac"
     device_ufr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and dst $device_mac"
     bfr_peer=$($device_bfr_peer | wc -l)
     bfr3=$($device_bfr3 | wc -l)
     ufr_peer=$($device_ufr_peer | wc -l)
     ufr3=$($device_ufr3 | wc -l)
-    echo device $type $(($bfr_peer > 2)) $(($bfr_3 > 2)) $(($ufr_peer > 0)) $(($ufr3 > 0)) | tee -a $TEST_RESULTS
+    echo device $type $((bfr_peer > 2)) $((bfr_3 > 2)) $((ufr_peer > 0)) $((ufr3 > 0)) | tee -a $TEST_RESULTS
 }
 
 function test_mud {
