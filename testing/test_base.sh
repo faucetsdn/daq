@@ -84,14 +84,14 @@ function test_device_traffic {
 
     device_traffic="tcpdump -en -r inst/run-9a02571e8f0$device_num/scans/monitor.pcap port 47808"
     device_bfr_peer="$device_traffic and ether src $peer_mac and ether broadcast"
-    device_bfr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and ether boradcast"
-    device_ufr_peer="$device_traffic and ether src $peer_mac and dst $device_mac"
-    device_ufr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and dst $device_mac"
+    device_bfr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and ether broadcast"
+    device_ufr_peer="$device_traffic and ether src $peer_mac and ether dst $device_mac"
+    device_ufr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and ether dst $device_mac"
     bfr_peer=$($device_bfr_peer | wc -l)
     bfr3=$($device_bfr3 | wc -l)
     ufr_peer=$($device_ufr_peer | wc -l)
     ufr3=$($device_ufr3 | wc -l)
-    echo device $type $((bfr_peer > 2)) $((bfr_3 > 2)) $((ufr_peer > 0)) $((ufr3 > 0)) | tee -a $TEST_RESULTS
+    echo device-$device_num $type $((bfr_peer > 2)) $((bfr3 > 2)) $((ufr_peer > 0)) $((ufr3 > 0)) | tee -a $TEST_RESULTS
 }
 
 function test_mud {
@@ -108,7 +108,7 @@ function test_mud {
 }
 
 test_mud open
-test_mud frdev
+test_mud todev
 test_mud none
 test_mud star
 
