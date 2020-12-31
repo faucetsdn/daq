@@ -85,14 +85,14 @@ function test_device_traffic {
 
     device_traffic="tcpdump -en -r inst/run-9a02571e8f0$device_num/scans/monitor.pcap port 47808"
     device_bfr_peer="$device_traffic and ether src $peer_mac and ether broadcast"
-    device_bfr_ngbr="$device_traffic and ether src neighbor_mac and ether broadcast"
+    device_bfr_ngbr="$device_traffic and ether src $neighbor_mac and ether broadcast"
     device_ufr_peer="$device_traffic and ether src $peer_mac and ether dst $device_mac"
-    device_ufr_ngbr="$device_traffic and ether src neighbor_mac and ether dst $device_mac"
+    device_ufr_ngbr="$device_traffic and ether src $neighbor_mac and ether dst $device_mac"
     bfr_peer=$($device_bfr_peer | wc -l)
     bfr_ngbr=$($device_bfr_ngbr | wc -l)
     ufr_peer=$($device_ufr_peer | wc -l)
     ufr_ngbr=$($device_ufr_ngbr | wc -l)
-    echo device-$device_num $type $((bfr_peer > 2)) $((bfr_ngbr > 2)) $((ufr_peer > 0)) $((ufr_ngbr > 0)) | tee -a $TEST_RESULTS
+    echo device-$device_num $type $((bfr_peer > 2)) $((bfr_ngbr > 0)) $((ufr_peer > 2)) $((ufr_ngbr > 0)) | tee -a $TEST_RESULTS
 }
 
 function test_mud {
