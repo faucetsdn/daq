@@ -81,7 +81,7 @@ function test_device_traffic {
     peer_num=$((3-device_num))
     device_mac=9a:02:57:1e:8f:0$device_num
     peer_mac=9a:02:57:1e:8f:0$peer_num
-    
+
     device_traffic="tcpdump -en -r inst/run-9a02571e8f0$device_num/scans/monitor.pcap port 47808"
     device_bfr_peer="$device_traffic and ether src $peer_mac and ether broadcast"
     device_bfr3="$device_traffic and ether src 9a:02:57:1e:8f:03 and ether boradcast"
@@ -103,7 +103,7 @@ function test_mud {
 
     test_device_traffic 1
     test_device_traffic 2
-    
+
     more inst/run-*/nodes/*/activate.log | cat
 }
 
