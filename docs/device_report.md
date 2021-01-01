@@ -48,27 +48,26 @@ Overall device result FAIL
 
 **Some tests report as GONE. Please check for possible misconfiguration**
 
-|Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Recommended Pass|Information|Other|
+|Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Recommended Pass|Other|
 |---|---|---|---|---|---|---|---|---|
-|Connection|9|FAIL|1/4/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Security|8|FAIL|1/0/4|0/0/0|0/0/0|1/1/0|0/0/1|0/0/0|
-|Network Time|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|TLS|0|N/A|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Protocol|2|FAIL|0/0/0|0/0/0|0/1/0|0/0/0|0/0/1|0/0/0|
-|PoE|3|FAIL|0/0/0|0/1/1|0/0/0|0/0/0|0/1/0|0/0/0|
-|BOS|1|SKIP|0/0/0|0/0/0|0/0/0|0/0/1|0/0/0|0/0/0|
-|Other|2|GONE|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/2/0|
-|Communication|2|GONE|0/1/0|0/0/0|0/0/0|0/0/0|0/1/0|0/0/0|
+|Connection|9|FAIL|1/4/4|0/0/0|0/0/0|0/0/0|0/0/0|
+|Security|8|FAIL|1/0/4|0/0/0|0/0/1|1/1/00/0/0|
+|Network Time|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|TLS|0|N/A|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Protocol|2|FAIL|0/0/0|0/0/0|0/1/1|0/0/0|0/0/0|
+|PoE|1|SKIP|0/0/0|0/0/1|0/0/0|0/0/0|0/0/0|
+|BOS|1|SKIP|0/0/0|0/0/0|0/0/0|0/0/1|0/0/0|
+|Other|2|GONE|0/0/0|0/0/0|0/0/0|0/0/0|0/2/0|
+|Communication|2|GONE|0/1/0|0/0/0|0/0/0|0/0/0|0/0/0|
 Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required Pass|4|1|8|4|
-|Required Pass for PoE Devices|0|0|1|1|
-|Required Pass for BACnet Devices|0|1|0|0|
+|Required Pass|4|1|8|5|
+|Required Pass for PoE Devices|0|0|1|0|
+|Required Pass for BACnet Devices|0|1|2|0|
 |Recommended Pass|1|0|1|1|
-|Information|0|0|2|2|
-|Other|5|0|9|2|$
+|Other|5|0|9|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -84,7 +83,7 @@ Syntax: Pass / Fail / Skip
 |gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
 |gone|connection.ipaddr.private_address|Connection|Required Pass||
 |gone|connection.network.communication_min_send|Communication|Required Pass||
-|gone|connection.network.communication_type|Communication|Information||
+|gone|connection.network.communication_type|Communication|Required Pass||
 |gone|connection.network.dhcp_long|Connection|Required Pass||
 |pass|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
 |fail|connection.network.mac_oui|Connection|Required Pass|Manufacturer prefix not found!|
@@ -95,12 +94,10 @@ Syntax: Pass / Fail / Skip
 |pass|manual.test.name|Security|Recommended Pass|Manual test - for testing|
 |pass|ntp.network.ntp_support|Network Time|Required Pass|Using NTPv4.|
 |pass|ntp.network.ntp_update|Network Time|Required Pass|Device clock synchronized.|
-|gone|poe.switch.negotiation|PoE|Required Pass for PoE Devices||
 |skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
-|gone|poe.switch.support|PoE|Information||
 |fail|protocol.bacext.pic|Protocol|Required Pass for BACnet Devices|PICS file defined however a BACnet device was not found.|
-|skip|protocol.bacext.version|Protocol|Information|Bacnet device not found.|
-|skip|security.discover.firmware|Security|Information|Could not retrieve a firmware version with nmap. Check bacnet port.|
+|skip|protocol.bacext.version|Protocol|Required Pass for BACnet Devices|Bacnet device not found.|
+|skip|security.discover.firmware|Security|Required Pass for BACnet Devices|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |pass|security.nmap.http|Other|Other|No running http servers have been found.|
 |pass|security.nmap.ports|Security|Required Pass|Only allowed ports found open.|
 |skip|security.password.http|Security|Required Pass|Port 80 not open on target device.|

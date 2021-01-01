@@ -109,7 +109,7 @@
     "connection.network.communication_type": {
       "category": "Communication",
       "required": "info",
-      "expected": "Information"
+      "expected": "Required Pass"
     },
     "connection.network.communication_min_send": {
       "category": "Communication",
