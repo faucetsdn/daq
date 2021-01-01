@@ -29,7 +29,7 @@
   "report": {
     "results": [ "pass", "fail", "skip" ],
     "categories": [ "Connection", "Security", "Network Time", "TLS", "Protocol", "PoE", "BOS"],
-    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Recommended Pass", "Information" ]
+    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Recommended Pass"]
   },
   "tests": {
     "unknown.fake.llama": {
