@@ -175,8 +175,8 @@
     },
     "communication.network.type": {
       "category": "Communication",
-      "required": "info",
-      "expected": "Information"
+      "required": "pass",
+      "expected": "Required Pass"
     },
     "dns.network.hostname_resolution": {
       "category": "DNS",
@@ -240,8 +240,8 @@
     },
     "protocol.bacext.version": {
       "category": "Protocol",
-      "required": "info",
-      "expected": "Information"
+      "required": "pass",
+      "expected": "Required Pass for BACnet Devices"
     },
     "poe.switch.power": {
       "category": "PoE",
@@ -255,8 +255,8 @@
     },
     "security.discover.firmware": {
       "category": "Security",
-      "required": "info",
-      "expected": "Information"
+      "required": "pass",
+      "expected": "Required Pass for BACnet Devices"
     }
   }
 }

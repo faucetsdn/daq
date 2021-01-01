@@ -65,10 +65,10 @@ Syntax: Pass / Fail / Skip
 |---|---|---|---|---|---|
 |Required Pass|4|1|8|0|4|
 |Required Pass for PoE Devices|0|0|1|0|1|
-|Required Pass for BACnet Devices|0|1|0|0|0|
+|Required Pass for BACnet Devices|0|1|1|0|0|
 |Recommended Pass|1|0|1|0|1|
-|Information|0|0|2|0|2|
-|Other|3|0|9|2|2|
+|Information|0|0|0|0|2|
+|Other|4|0|9|2|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -86,7 +86,7 @@ Syntax: Pass / Fail / Skip
 |gone|connection.network.communication_min_send|Communication|Required Pass||
 |gone|connection.network.communication_type|Communication|Information||
 |gone|connection.network.dhcp_long|Connection|Required Pass||
-|info|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
+|pass|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
 |fail|connection.network.mac_oui|Connection|Required Pass|Manufacturer prefix not found!|
 |skip|connection.switch.port_duplex|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
@@ -626,7 +626,7 @@ Reports device MAC address
 --------------------
 Device MAC address is 9a:02:57:1e:8f:01
 --------------------
-RESULT info connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
+RESULT pass connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
 
 --------------------
 dns.network.hostname_resolution

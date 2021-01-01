@@ -149,27 +149,17 @@
     "protocol.bacext.pic": {
       "category": "Protocol",
       "required": "pass",
-      "expected": "Required Pass for BACnet devices"
+      "expected": "Required Pass for BACnet Devices"
     },
     "protocol.bacext.version": {
       "category": "Protocol",
-      "required": "info",
-      "expected": "Information"
+      "required": "pass",
+      "expected": "Required Pass for BACnet Devices"
     },
     "poe.switch.power": {
       "category": "PoE",
       "required": "pass",
       "expected": "Required Pass for PoE Devices"
-    },
-    "poe.switch.negotiation": {
-      "category": "PoE",
-      "required": "pass",
-      "expected": "Required Pass for PoE Devices"
-    },
-    "poe.switch.support": {
-      "category": "PoE",
-      "required": "info",
-      "expected": "Information"
     },
     "cloud.udmi.pointset": {
       "category": "BOS",
