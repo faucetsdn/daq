@@ -61,14 +61,14 @@ Overall device result FAIL
 |Communication|2|GONE|0/1/0|0/0/0|0/0/0|0/0/0|0/1/0|0/0/0|
 Syntax: Pass / Fail / Skip
 
-|Expectation|pass|fail|skip|info|gone|
-|---|---|---|---|---|---|
-|Required Pass|4|1|8|0|4|
-|Required Pass for PoE Devices|0|0|1|0|1|
-|Required Pass for BACnet Devices|0|1|1|0|0|
-|Recommended Pass|1|0|1|0|1|
-|Information|0|0|0|0|2|
-|Other|4|0|9|2|2|
+|Expectation|pass|fail|skip|gone|
+|---|---|---|---|---|
+|Required Pass|4|1|8|4|
+|Required Pass for PoE Devices|0|0|1|1|
+|Required Pass for BACnet Devices|0|1|0|0|
+|Recommended Pass|1|0|1|1|
+|Information|0|0|2|2|
+|Other|5|0|9|2|$
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -79,7 +79,7 @@ Syntax: Pass / Fail / Skip
 |skip|cloud.udmi.state|Other|Other|No device id|
 |skip|cloud.udmi.system|Other|Other|No device id|
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
-|info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
+|pass|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connection|Required Pass|target reached|
 |gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
 |gone|connection.ipaddr.private_address|Connection|Required Pass||
@@ -596,7 +596,7 @@ Device sends unicast or broadcast packets.
 --------------------
 
 
-RESULT info communication.network.type Broadcast packets received. Unicast packets received.
+RESULT pass communication.network.type Broadcast packets received. Unicast packets received.
 --------------------
 ntp.network.ntp_support
 --------------------
