@@ -49,16 +49,16 @@ Overall device result FAIL
 **Some tests report as GONE. Please check for possible misconfiguration**
 
 |Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Recommended Pass|Other|
-|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|
 |Connection|9|FAIL|1/4/4|0/0/0|0/0/0|0/0/0|0/0/0|
-|Security|8|FAIL|1/0/4|0/0/0|0/0/1|1/1/00/0/0|
+|Security|8|FAIL|1/0/4|0/0/0|0/0/1|1/1/0|0/0/0|
 |Network Time|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |TLS|0|N/A|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Protocol|2|FAIL|0/0/0|0/0/0|0/1/1|0/0/0|0/0/0|
 |PoE|1|SKIP|0/0/0|0/0/1|0/0/0|0/0/0|0/0/0|
 |BOS|1|SKIP|0/0/0|0/0/0|0/0/0|0/0/1|0/0/0|
 |Other|2|GONE|0/0/0|0/0/0|0/0/0|0/0/0|0/2/0|
-|Communication|2|GONE|0/1/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Communication|2|GONE|0/2/0|0/0/0|0/0/0|0/0/0|0/0/0|
 Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
