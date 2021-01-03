@@ -59,9 +59,9 @@
     "operator": "*** Operator ***"
   },
   "report": {
-    "results": [ "pass", "fail", "skip", "info"  ],
+    "results": [ "pass", "fail", "skip" ],
     "categories": [ "Base", "Connection", "Security", "NTP", "DNS", "Communication", "Protocol", "PoE", "IoT"],
-    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Required Pass for IoT Devices", "Recommended Pass", "Information" ]
+    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Required Pass for IoT Devices", "Recommended Pass" ]
   },
   "tests": {
     "connection.manual.comms_down": {
