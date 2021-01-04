@@ -136,7 +136,7 @@ public class VersionTest {
     Report report = new Report("tmp/BacnetVersionTestReport.txt");
     Report appendices = new Report("tmp/BacnetVersionTest_APPENDIX.txt");
     if (bacnetSupported && testPassed) {
-        report.writeReport(passReportText + protocolVersionText);
+      report.writeReport(passReportText + protocolVersionText);
     } else {
       report.writeReport(skippedReportText);
     }

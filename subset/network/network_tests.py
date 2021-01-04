@@ -210,7 +210,6 @@ def test_communication_type_broadcast():
         add_summary("Unicast packets received.")
         add_packet_count_to_report("Unicast", unicast_packets)
 
-
     return test_result
 
 
