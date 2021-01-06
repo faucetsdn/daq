@@ -1,5 +1,6 @@
 """Unit tests for device report client"""
 
+import os
 import time
 import unittest
 
@@ -16,6 +17,7 @@ class DeviceReportClientTestBase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        os.environ['FORCH_LOG'] = '/tmp/forch.log'
         self._server = None
         self._client = None
 
