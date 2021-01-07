@@ -8,6 +8,7 @@ from ipaddress import ip_network, ip_address
 
 import logger
 import wrappers
+from proto.system_config_pb2 import DhcpMode
 
 from .base_module import HostModule
 
@@ -93,7 +94,7 @@ class ExternalModule(HostModule):
     def _get_env_vars(self, params):
         def opt_param(key):
             return params.get(key) or ''  # Substitute empty string for None
-
+        dhcp_mode = DhcpMode.Name(self.device.dhcp_mode) if self.device.dhcp_mode else ''
         env_vars = [
             ("TARGET_NAME", self.host_name),
             ("TARGET_IP", params['target_ip']),
@@ -102,6 +103,7 @@ class ExternalModule(HostModule):
             ("GATEWAY_IP", params['gateway_ip']),
             ("GATEWAY_MAC", params['gateway_mac']),
             ("LOCAL_IP", opt_param('local_ip')),
+            ("DHCP_MODE", dhcp_mode)
         ]
         return env_vars
 
