@@ -36,7 +36,7 @@ public class EntryPoint {
 
         int port = IpNetwork.DEFAULT_PORT;
         network = new IpNetwork(broadcastIpAddr, port,
-                IpNetwork.DEFAULT_BIND_IP, 0, localIpAddr);
+            IpNetwork.DEFAULT_BIND_IP, 0, localIpAddr);
         Transport transport = new Transport(network);
         transport.setTimeout(timeout);
 
@@ -50,7 +50,7 @@ public class EntryPoint {
             System.out.println("Creating LoopDevice id " + deviceId);
             localDevice = new LocalDevice(deviceId, transport);
             localDevice.getConfiguration().setProperty(PropertyIdentifier.modelName,
-                    new CharacterString("BACnet4J LoopDevice"));
+                new CharacterString("BACnet4J LoopDevice"));
             System.out.println("Local device is running with device id " + deviceId);
             addBacnetProperties(bacnetObjectArray);
             localDevice.initialize();
@@ -113,7 +113,7 @@ public class EntryPoint {
                 objectTypeValue = ObjectType.binaryValue;
             }
             BACnetObject bacnetType = new BACnetObject(localDevice,
-                    localDevice.getNextInstanceObjectIdentifier(objectTypeValue), false);
+                localDevice.getNextInstanceObjectIdentifier(objectTypeValue), false);
             Map<String, String > map = (Map<String, String>) bacnetObject.get(bacnetObjectType);
             int objectTypeIntValue = objectTypeValue.intValue();
             if(objectTypeIntValue >= 0 && objectTypeIntValue < 3) {
