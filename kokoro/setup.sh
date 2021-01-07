@@ -30,4 +30,4 @@ add_rapture_repo goobuntu-utils-stable main
 add_rapture_repo enterprise-sdn-faucet-core-unstable main
 
 apt-get -q update
-apt-get -q -y install glinux-build git devscripts
+apt-get -q -y install glinux-build git devscripts rapture-archive-keyring
