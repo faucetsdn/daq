@@ -22,7 +22,7 @@ fi
 
 if [ -n "$STATIC_IP" ]; then
     echo RESULT skip base.startup.dhcp Using static ip $STATIC_IP | tee -a $RESULT_LINES
-elif [ -n "$EXTERNAL_DHCP" ]; then
+elif [ "$DHCP_MODE" -eq "EXTERNAL" ]; then
     echo RESULT skip base.startup.dhcp Using external DHCP | tee -a $RESULT_LINES
 else
     req=pass

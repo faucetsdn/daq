@@ -94,7 +94,7 @@ class ExternalModule(HostModule):
     def _get_env_vars(self, params):
         def opt_param(key):
             return params.get(key) or ''  # Substitute empty string for None
-        external_dhcp = self.device.dhcp_mode == DhcpMode.EXTERNAL
+        dhcp_mode = DhcpMode.Name(self.device.dhcp_mode) if self.device.dhcp_mode else ''
         env_vars = [
             ("TARGET_NAME", self.host_name),
             ("TARGET_IP", params['target_ip']),
@@ -103,7 +103,7 @@ class ExternalModule(HostModule):
             ("GATEWAY_IP", params['gateway_ip']),
             ("GATEWAY_MAC", params['gateway_mac']),
             ("LOCAL_IP", opt_param('local_ip')),
-            ("EXTERNAL_DHCP", '1' if external_dhcp else '')
+            ("DHCP_MODE", dhcp_mode)
         ]
         return env_vars
 
