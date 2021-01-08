@@ -69,6 +69,11 @@ class Configurator:
         """Update a dict object and follow nested objects"""
         if not adding:
             return base
+        if 'include' in adding:
+            include = adding['include']
+            del adding['include']
+            self._log('Including config file %s' % include)
+            self._read_config_into(base, include)
         for key in sorted(adding.keys()):
             value = adding[key]
             if isinstance(value, dict) and key in base:
@@ -84,7 +89,7 @@ class Configurator:
         config_file = os.path.join(path, filename) if filename else path
         if not os.path.exists(config_file):
             if optional:
-                LOGGER.info('Skipping missing %s', config_file)
+                self._log('Skipping missing %s' % config_file)
                 return {}
             raise Exception('Config file %s not found.' % config_file)
         return self._read_config_into({}, config_file)
@@ -100,19 +105,14 @@ class Configurator:
         if not os.path.exists(path):
             os.makedirs(path)
         config_file = os.path.join(path, filename)
-        LOGGER.info('Writing config to %s', config_file)
+        self._log('Writing config to %s' % config_file)
         with open(config_file, 'w') as output_stream:
             output_stream.write(json.dumps(config, indent=2, sort_keys=True))
             output_stream.write('\n')
 
     def _read_yaml_config(self, config, filename):
-        self._log('Reading yaml config from %s' % filename)
         with open(filename) as data_file:
             loaded_config = yaml.safe_load(data_file)
-        if 'include' in loaded_config:
-            include = loaded_config['include']
-            del loaded_config['include']
-            self._read_config_into(config, include)
         return self.merge_config(config, loaded_config)
 
     def _parse_flat_item(self, config, parts):
@@ -124,7 +124,6 @@ class Configurator:
             self._parse_flat_item(config.setdefault(key_parts[0], {}), (key_parts[1], value))
 
     def _read_flat_config(self, config, filename):
-        self._log('Reading flat config from %s' % filename)
         with open(filename) as file:
             line = file.readline()
             while line:
