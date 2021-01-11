@@ -1,7 +1,7 @@
 # Example configuration file for using an OVS switch not managed by DAQ.
 
 # Load defaults.
-include: config/system/default.yaml
+include: default.yaml
 
 # Description for dashboard.
 site_description: "Alternate switch (not managed by DAQ) configuration"

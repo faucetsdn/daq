@@ -1,3 +1,3 @@
 {
-  "include": "resources/setups/common/module_config.json"
+  "include": "../common/module_config.json"
 }
