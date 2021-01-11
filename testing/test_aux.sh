@@ -57,7 +57,7 @@ cat resources/setups/baseline/module_config.json | jq '.modules.password += {"di
 
 cat <<EOF > local/system.yaml
 ---
-include: config/system/all.conf
+include: all.conf
 base_conf: local/module_config.json
 finish_hook: bin/dump_network
 test_config: resources/runtime_configs/long_wait
@@ -179,7 +179,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing hold test run
 # Try various exception handling conditions.
 cat <<EOF > local/system.yaml
 ---
-include: config/system/multi.conf
+include: multi.conf
 fail_module:
   ping_9a02571e8f01: finalize
   hold_9a02571e8f02: initialize
@@ -211,7 +211,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Running port toggle test
 # Check port toggling does not cause a shutdown
 cat <<EOF > local/system.yaml
 ---
-include: config/system/base.yaml
+include: base.yaml
 port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF

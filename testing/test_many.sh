@@ -15,7 +15,7 @@ NUM_IPADDR_TEST_TIMEOUT_DEVICES=1
 
 echo Many Tests >> $TEST_RESULTS
 
-echo source config/system/default.yaml > local/system.conf
+echo include=../config/system/default.yaml > local/system.conf
 
 echo monitor_scan_sec=5 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
