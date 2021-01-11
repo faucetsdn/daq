@@ -99,6 +99,7 @@ port-01 module_config modules
     "enabled": true
   },
   "brute": {
+    "dictionary_dir": "resources/faux",
     "enabled": true
   },
   "discover": {
@@ -172,6 +173,7 @@ port-02 module_config modules
     "enabled": true
   },
   "brute": {
+    "dictionary_dir": "resources/faux",
     "enabled": true
   },
   "hold": {
