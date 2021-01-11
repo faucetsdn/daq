@@ -5,7 +5,7 @@ source testing/test_preamble.sh
 echo Base Tests >> $TEST_RESULTS
 
 mkdir -p local
-cp config/system/all.conf local/system.conf
+echo 'include=../config/system/all.conf' > local/system.conf
 
 TEST_LIST=/tmp/module_tests.txt
 

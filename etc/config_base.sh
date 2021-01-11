@@ -11,9 +11,9 @@ if [ -d venv ]; then
 fi
 
 if [ ! -f "$LOCAL_YAML" -a ! -f "$LOCAL_CONF" ]; then
-    echo No $LOCAL_YAML or $LOCAL_CONF found, copying defaults from $DEFAULT_CONF...
+    echo No $LOCAL_YAML or $LOCAL_CONF found, pointing at $DEFAULT_CONF...
     mkdir -p local
-    cp $DEFAULT_CONF $LOCAL_YAML
+    echo "include: ../$DEFAULT_CONF" > $LOCAL_YAML
     conf_file=$LOCAL_YAML
 elif [ -f "$LOCAL_YAML" -a -f "$LOCAL_CONF" ]; then
     echo Both $LOCAL_YAML and $LOCAL_CONF found, not sure which to use: panic quit.

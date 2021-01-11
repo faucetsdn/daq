@@ -43,7 +43,7 @@ fgrep 'security.nmap.ports'  inst/reports/report_9a02571e8f00_*.md | tee -a $TES
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
-cp config/system/ext.yaml local/system.yaml
+echo 'include: ../config/system/ext.yaml' > local/system.yaml
 cmd/run -s
 cat inst/result.log | tee -a $TEST_RESULTS
 fgrep dp_id inst/faucet.yaml | tee -a $TEST_RESULTS
@@ -53,7 +53,7 @@ count=$(fgrep icmp_seq=5 inst/run-9a02571e8f00/nodes/ping*/activate.log | wc -l)
 echo switch ping $count | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Alt switch tests | tee -a $TEST_RESULTS
-cp config/system/alt.yaml local/system.yaml
+echo 'include: ../config/system/alt.yaml' > local/system.yaml
 cmd/faucet
 
 timeout 1200s cmd/run -s
@@ -69,7 +69,7 @@ fgrep 9a02571e8f02 inst/result.log | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
-cp config/system/muddy.conf local/system.conf
+echo 'include=../config/system/muddy.conf' > local/system.conf
 
 if [ -z `which tcpdump` ]; then
     export PATH=/usr/sbin:$PATH
