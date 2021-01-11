@@ -126,16 +126,17 @@ class Configurator:
 
     def _read_flat_config(self, config, path, filename):
         config_file = os.path.join(path, filename)
+        loaded_config = {}
         with open(config_file) as file:
             line = file.readline()
             while line:
                 parts = re.sub(r'#.*', '', line).strip().split('=', 1)
                 if len(parts) == 2:
-                    self._parse_flat_item(config, parts)
+                    self._parse_flat_item(loaded_config, parts)
                 elif parts and parts[0]:
                     raise Exception('Unknown config entry: %s' % line)
                 line = file.readline()
-        return config
+        return self.merge_config(config, os.path.dirname(config_file), loaded_config)
 
     def _read_config_into(self, config, path, filename):
         if filename.endswith('.yaml') or filename.endswith('.json'):
