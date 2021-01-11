@@ -52,6 +52,9 @@ def print_config(config):
     _append_config(config_list, '', config)
     print(*config_list, sep='\n')
 
+def print_json(config):
+    """Dump config info as json to console out."""
+    print(json.dumps(config, indent=2, sort_keys=True))
 
 class Configurator:
     """Manager class for system configuration."""
@@ -165,4 +168,8 @@ class Configurator:
 
 if __name__ == '__main__':
     CONFIG = Configurator()
-    print_config(CONFIG.parse_args(sys.argv))
+    args = sys.argv
+    if sys.argv[1] == '--json':
+        print_json(CONFIG.parse_args(sys.argv[1:]))
+    else:
+        print_config(CONFIG.parse_args(sys.argv))
