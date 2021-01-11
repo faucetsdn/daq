@@ -21,7 +21,11 @@ EOF
 DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 bin/docker_build force inline
 
 mkdir -p inst/modules/tls/config
-cp resources/setups/baseline/module_config.json inst/modules/tls/config/module_config.json
+cat <<EOF > inst/modules/tls/config/module_config.json
+{
+  "include": "../../../../resources/setups/baseline/module_config.json"
+}
+EOF
 
 cat $TEST_LIST | while read module args; do
     if ! docker inspect daqf/test_$module:latest > /dev/null; then
