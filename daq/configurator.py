@@ -133,8 +133,6 @@ class Configurator:
                 entry = parts[0].split() if parts else None
                 if len(parts) == 2:
                     self._parse_flat_item(config, parts)
-                elif len(entry) == 2 and entry[0] == 'source':
-                    self._read_config_into(config, os.path.dirname(config_file), entry[1])
                 elif parts and parts[0]:
                     raise Exception('Unknown config entry: %s' % line)
                 line = file.readline()
