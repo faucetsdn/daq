@@ -1,9 +1,10 @@
 """gRPC client to send device result"""
 
+import threading
 import grpc
 
 from forch.proto.grpc.device_report_pb2_grpc import DeviceReportStub
-from forch.proto.devices_state_pb2 import DevicesState
+from forch.proto.devices_state_pb2 import DevicesState, Device
 
 from utils import dict_proto
 
@@ -28,3 +29,14 @@ class DeviceReportClient:
             }
         }
         self._stub.ReportDevicesState(dict_proto(devices_state, DevicesState))
+
+    def _port_event_handler(self, mac, callback):
+        device = {
+            "mac": mac
+        }
+        for port_event in self._stub.GetPortState(dict_proto(device, Device)):
+            callback(port_event)
+
+    def get_port_events(self, mac, callback):
+        """Gets remote port events"""
+        threading.Thread(target=self._port_event_handler, args=(mac, callback)).start()
