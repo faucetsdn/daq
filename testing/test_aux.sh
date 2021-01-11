@@ -57,7 +57,9 @@ cat <<EOF > local/module_config.json
 {
   "include": "../resources/setups/baseline/module_config.json",
   "modules": {
-    "dictionary_dir": "resources/faux"
+    "password": {
+      "dictionary_dir": "resources/faux"
+    }
   }
 }
 EOF
