@@ -130,7 +130,6 @@ class Configurator:
             line = file.readline()
             while line:
                 parts = re.sub(r'#.*', '', line).strip().split('=', 1)
-                entry = parts[0].split() if parts else None
                 if len(parts) == 2:
                     self._parse_flat_item(config, parts)
                 elif parts and parts[0]:
