@@ -55,7 +55,7 @@ cp -r resources/test_site/mac_addrs local/site/
 # Create config for the password test to select which dictionaries to use.
 cat <<EOF > local/module_config.json
 {
-  "include": "../resources/setups/baseline/module_config.json"
+  "include": "../resources/setups/baseline/module_config.json",
   "modules": {
     "dictionary_dir": "resources/faux"
   }
