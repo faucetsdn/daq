@@ -168,7 +168,6 @@ class Configurator:
 
 if __name__ == '__main__':
     CONFIG = Configurator()
-    args = sys.argv
     if sys.argv[1] == '--json':
         print_json(CONFIG.parse_args(sys.argv[1:]))
     else:
