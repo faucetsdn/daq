@@ -17,7 +17,6 @@ import configurator
 from device_report_client import DeviceReportClient
 import faucet_event_client
 import container_gateway
-
 import external_gateway
 import gcp
 import host as connected_host
@@ -620,6 +619,7 @@ class DAQRunner:
         if device.dhcp_mode == DhcpMode.EXTERNAL:
             # Under vlan trigger, start a external gateway that doesn't utilize a DHCP server.
             gateway = external_gateway.ExternalGateway(self, group_name, set_num)
+            gateway.set_tap_intf(self.network.tap_intf)
         else:
             gateway = container_gateway.ContainerGateway(self, group_name, set_num)
 

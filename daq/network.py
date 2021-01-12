@@ -47,6 +47,8 @@ class TestNetwork:
     _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = "inst/faucet_intermediate.yaml"
     OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
+    _VXLAN_DEFAULT_PORT = 4789
+    _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
 
     def __init__(self, config):
         self.config = config
@@ -55,6 +57,7 @@ class TestNetwork:
         self.sec = None
         self.sec_dpid = None
         self.sec_port = None
+        self.tap_intf = None
         self._settle_sec = int(config['settle_sec'])
         subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
         self._mininet_subnet = ip_network(subnet)
@@ -200,6 +203,25 @@ class TestNetwork:
 
         if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
+
+        self.tap_intf = self._configure_tap_intf()
+
+    def _configure_tap_intf(self):
+        vxlan_config = self.config.get('switch_setup', {}).get('vxlan', {})
+        if 'key' not in vxlan_config:
+            return self.ext_intf
+
+        key = vxlan_config['key']
+        remote_ip = vxlan_config['remote_ip']
+        port = self._VXLAN_DEFAULT_PORT
+        ovs_config = self._VXLAN_CONFIG_FMT % (self.ext_intf, remote_ip, key)
+        LOGGER.info('Configuring interface %s', ovs_config)
+        if self._settle_sec:
+            time.sleep(self._settle_sec)
+        self.pri.vsctl('set interface %s' % ovs_config)
+
+        # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
+        return 'vxlan_sys_%d' % port
 
     def direct_port_traffic(self, target_mac, port, target):
         """Direct traffic for a given mac to target port"""

@@ -82,13 +82,20 @@ class ExternalModule(HostModule):
 
     def _get_host_ip(self, params):
         target_subnet = ip_network(params['target_ip'])
-        if not target_subnet.overlaps(self.runner.network.get_subnet()):
+        runner_subnet = self.runner.network.get_subnet()
+        if target_subnet.overlaps(runner_subnet):
+            LOGGER.info('Target subnet %s overlaps with runner subnet %s.',
+                        target_subnet, runner_subnet)
+        else:
             for subnet_spec in self.external_subnets:
                 subnet = ip_network(subnet_spec['subnet'])
                 if target_subnet.overlaps(subnet):
                     target_ip = ip_address(params['target_ip'])
                     new_ip = target_ip + (-1 if target_ip == subnet.broadcast_address - 1 else 1)
+                    LOGGER.info('Target subnet %s overlaps with external subnet %s.',
+                                target_subnet, subnet)
                     return "%s/%s" % (str(new_ip), subnet.prefixlen)
+            LOGGER.info('No external subnets match target subnet %s.', target_subnet)
         return None
 
     def _get_env_vars(self, params):
