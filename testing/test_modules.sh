@@ -43,9 +43,5 @@ cat $TEST_LIST | while read module args; do
     fi
 done
 
-echo TAPTAP
-more inst/modules/tls/config/* | cat
-more inst/config/* | cat
-
 echo
 echo Testing complete. | tee -a $TEST_RESULTS
