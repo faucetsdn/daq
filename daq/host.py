@@ -216,6 +216,8 @@ class ConnectedHost:
         return os.path.join('run_id', self.run_id, partial)
 
     def _load_config(self, name, config, path):
+        if not path:
+            return config
         if name:
             self.logger.info('Loading %s module config from %s', name, path)
         return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)

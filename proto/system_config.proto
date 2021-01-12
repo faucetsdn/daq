@@ -135,6 +135,9 @@ message DaqConfig {
 
   // IP subnet used by test hosts
   SubnetSpec internal_subnet = 55;
+
+  // Path to include file
+  string include = 56;
 }
 
 enum DhcpMode {

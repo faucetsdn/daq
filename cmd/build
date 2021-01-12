@@ -68,8 +68,8 @@ if [ "$1" == push ]; then
     exit 0
 elif [ "$1" == pull ]; then
     REPO_VER=$(< etc/$DOCKER_IMAGE_VER)
-    REPO_HASH=`git rev-list -n 1 $REPO_VER`
-    TAG_HASH=`git rev-list -n 1 $TAG_VER`
+    REPO_HASH=`git rev-list -n 1 $REPO_VER --`
+    TAG_HASH=`git rev-list -n 1 $TAG_VER --`
     if [ "$TAG_HASH" != "$REPO_HASH" ]; then
 	echo Tagged version $TAG_VER does not match etc/$DOCKER_IMAGE_VER $REPO_VER
 	false
@@ -124,7 +124,7 @@ if [ "$1" == -f ]; then
 fi
 
 target_version=$(cat etc/FAUCET_VERSION)
-target_commit=$(cd faucet; git rev-list -n 1 $target_version) || true
+target_commit=$(cd faucet; git rev-list -n 1 $target_version --) || true
 if [ -z "$target_commit" ]; then
     echo No valid faucet commit found, try running bin/setup_dev.
     false
@@ -138,7 +138,7 @@ fi
 
 local_version=$(cd udmi; git rev-list -n 1 HEAD)
 target_version=$(cat etc/UDMI_VERSION)
-target_commit=$(cd udmi; git rev-list -n 1 $target_version) || true
+target_commit=$(cd udmi; git rev-list -n 1 $target_version --) || true
 if [ -z "$target_commit" ]; then
     echo No valid udmi commit found, try running bin/setup_dev.
     false

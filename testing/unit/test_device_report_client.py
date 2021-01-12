@@ -3,8 +3,11 @@
 import os
 import time
 import unittest
+from unittest.mock import patch
 
-from forch.device_report_server import DeviceReportServer
+from forch.device_report_server import DeviceReportServer, DeviceReportServicer
+from forch.proto.shared_constants_pb2 import PortBehavior
+from forch.proto.devices_state_pb2 import DevicePortEvent
 
 from device_report_client import DeviceReportClient
 from utils import proto_dict
@@ -13,7 +16,6 @@ from utils import proto_dict
 class DeviceReportClientTestBase(unittest.TestCase):
     """Base class for device report client unit test"""
     _SERVER_ADDRESS = '0.0.0.0'
-    _SERVER_PORT = 50071
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,6 +40,8 @@ class DeviceReportClientTestBase(unittest.TestCase):
 
 
 class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
+    _SERVER_PORT = 50071
+
     """Basic test case for device report client"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,3 +69,39 @@ class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
 
         time.sleep(2)
         self.assertEqual(self._received_results, expected_results)
+
+
+class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase):
+    """Port events for device report client"""
+    _SERVER_PORT = 50072
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._received_port_events = []
+        self._mock_port_events = [
+            DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="0"),
+            DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="1"),
+            DevicePortEvent(event=PortBehavior.PortEvent.up, timestamp="2"),
+            DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="3")
+        ]
+
+    def setUp(self):
+        """Setup fixture for each test method"""
+        self._client = DeviceReportClient(server_port=self._SERVER_PORT)
+
+        def mock_function(_, __, ___):
+            for event in self._mock_port_events:
+                yield event
+        with patch.object(DeviceReportServicer, 'GetPortState', side_effect=mock_function,
+                          autospec=True):
+            self._server = DeviceReportServer(
+                self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT)
+            self._server.start()
+
+    def _on_port_event(self, event):
+        self._received_port_events.append(event)
+
+    def test_getting_port_events(self):
+        self._client.get_port_events("mac", self._on_port_event)
+        time.sleep(1)
+        self.assertEqual(self._received_port_events, self._mock_port_events)

@@ -327,6 +327,17 @@ class DAQRunner:
                 self._deactivate_port(port)
         self._send_heartbeat()
 
+    def _handle_remote_port_state(self, device, port_event):
+        if not device.host:
+            return
+        if port_event.event == PortBehavior.PortEvent.down:
+            if not device.port.flapping_start:
+                device.port.flapping_start = time.time()
+            device.port.active = False
+        else:
+            device.port.flapping_start = 0
+            device.port.active = True
+
     def _activate_port(self, port):
         if port not in self._ports:
             self._ports[port] = PortInfo()
@@ -360,6 +371,13 @@ class DAQRunner:
         else:
             device = self._devices.get(target_mac)
         device.dhcp_mode = DhcpMode.EXTERNAL
+
+        # For keeping track of remote port flap events
+        if self._device_result_client:
+            device.port = PortInfo()
+            device.port.active = True
+            self._device_result_client(device.mac,
+                                       lambda event: self._handle_remote_port_state(device, event))
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
@@ -876,14 +894,14 @@ class DAQRunner:
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
         LOGGER.info('Loading base module config from %s', base_conf)
-        base = self.configurator.load_and_merge({}, base_conf)
+        base = self.configurator.load_and_merge({}, os.getcwd(), base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site module config from %s', base_conf)
+        LOGGER.info('Loading site module config from %s/%s', site_path, self._MODULE_CONFIG)
         site_config = self.configurator.load_config(site_path, self._MODULE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
-        return self.configurator.merge_config(base, site_config)
+        return self.configurator.merge_config(base, site_path, site_config)
 
     def get_base_config(self):
         """Get the base configuration for this install"""
