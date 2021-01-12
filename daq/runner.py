@@ -773,8 +773,8 @@ class DAQRunner:
         self._result_sets[device] = result_set
 
         if self._device_result_client:
-            self._device_result_client.send_device_result(
-                device.mac, PortBehavior.passed)
+            device_result = PortBehavior.failed if results else PortBehavior.passed
+            self._device_result_client.send_device_result(device.mac, device_result)
 
     def _target_set_cancel(self, device):
         target_host = device.host
