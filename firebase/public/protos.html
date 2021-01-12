@@ -214,6 +214,10 @@
                   <a href="#UsiSetup"><span class="badge">M</span>UsiSetup</a>
                 </li>
               
+                <li>
+                  <a href="#VxlanSetup"><span class="badge">M</span>VxlanSetup</a>
+                </li>
+              
               
                 <li>
                   <a href="#DhcpMode"><span class="badge">E</span>DhcpMode</a>
@@ -814,6 +818,13 @@
                 </tr>
               
                 <tr>
+                  <td>vxlan</td>
+                  <td><a href="#VxlanSetup">VxlanSetup</a></td>
+                  <td></td>
+                  <td><p>VXLAN configuration information </p></td>
+                </tr>
+              
+                <tr>
                   <td>ext_br</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
@@ -870,6 +881,37 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="VxlanSetup">VxlanSetup</h3>
+        <p>Information for configuring a vxlan interface.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>remote_ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Remote endpoint for vxlan interface. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Tunnel key id. </p></td>
                 </tr>
               
             </tbody>
