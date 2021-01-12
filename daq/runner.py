@@ -327,6 +327,17 @@ class DAQRunner:
                 self._deactivate_port(port)
         self._send_heartbeat()
 
+    def _handle_remote_port_state(self, device, port_event):
+        if not device.host:
+            return
+        if port_event.event == PortBehavior.PortEvent.down:
+            if not device.port.flapping_start:
+                device.port.flapping_start = time.time()
+            device.port.active = False
+        else:
+            device.port.flapping_start = 0
+            device.port.active = True
+
     def _activate_port(self, port):
         if port not in self._ports:
             self._ports[port] = PortInfo()
@@ -360,6 +371,13 @@ class DAQRunner:
         else:
             device = self._devices.get(target_mac)
         device.dhcp_mode = DhcpMode.EXTERNAL
+
+        # For keeping track of remote port flap events
+        if self._device_result_client:
+            device.port = PortInfo()
+            device.port.active = True
+            self._device_result_client(device.mac,
+                                       lambda event: self._handle_remote_port_state(device, event))
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
