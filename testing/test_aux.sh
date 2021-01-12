@@ -52,12 +52,21 @@ mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
 
-# Add extra configs to a copy of the baseline module config for the password test to select which dictionaries to use.
-cat resources/setups/baseline/module_config.json | jq '.modules.password += {"dictionary_dir":"resources/faux"}' > local/module_config.json
+# Create config for the password test to select which dictionaries to use.
+cat <<EOF > local/module_config.json
+{
+  "include": "../resources/setups/baseline/module_config.json",
+  "modules": {
+    "password": {
+      "dictionary_dir": "resources/faux"
+    }
+  }
+}
+EOF
 
 cat <<EOF > local/system.yaml
 ---
-include: config/system/all.conf
+include: ../config/system/all.conf
 base_conf: local/module_config.json
 finish_hook: bin/dump_network
 test_config: resources/runtime_configs/long_wait
@@ -179,7 +188,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing hold test run
 # Try various exception handling conditions.
 cat <<EOF > local/system.yaml
 ---
-include: config/system/multi.conf
+include: ../config/system/multi.conf
 fail_module:
   ping_9a02571e8f01: finalize
   hold_9a02571e8f02: initialize
@@ -211,7 +220,7 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Running port toggle test
 # Check port toggling does not cause a shutdown
 cat <<EOF > local/system.yaml
 ---
-include: config/system/base.yaml
+include: ../config/system/base.yaml
 port_flap_timeout_sec: 10
 port_debounce_sec: 0
 EOF

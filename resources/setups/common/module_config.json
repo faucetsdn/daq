@@ -1,0 +1,44 @@
+{
+  "modules": {
+    "ipaddr": {
+      "enabled": false,
+      "timeout_sec": 0,
+      "port_flap_timeout_sec": 20,
+      "dhcp_ranges": [
+        {"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16},
+        {"start": "172.16.0.1", "end": "172.31.255.254", "prefix_length": 12},
+        {"start": "10.0.0.1", "end": "10.255.255.254", "prefix_length": 8}
+      ]
+    },
+    "pass": {
+      "enabled": true
+    },
+    "nmap": {
+      "timeout_sec": 600,
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true
+    },
+    "brute": {
+      "enabled": true
+    },
+    "password": {
+      "dictionary_dir": "resources/faux",
+      "enabled": true
+    },
+    "bacext": {
+      "enabled": true
+    },
+    "tls": {
+      "enabled": true,
+      "ca_file": "CA_Faux.pem"
+    },
+    "udmi": {
+      "enabled": true
+    },
+    "network": {
+      "enabled": true
+    }
+  }
+}

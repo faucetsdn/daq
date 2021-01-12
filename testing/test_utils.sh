@@ -3,7 +3,7 @@
 # Create system.conf and startup file for arbitrary number of faux virtual devices.
 function generate {
   rm -f local/system.yaml
-  echo source config/system/default.yaml > local/system.conf
+  echo include=../config/system/default.yaml > local/system.conf
 
   type=$1
   faux_num=$2
