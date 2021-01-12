@@ -195,9 +195,6 @@ message SwitchSetup {
   // Interface name for external switch data plane
   string data_intf = 42;
 
-  // VXLAN configuration information
-  VxlanSetup vxlan = 47;
-
   // Name for external OVS bridge in lieu of physical switch
   string ext_br = 43;
 
@@ -209,6 +206,9 @@ message SwitchSetup {
 
   // Switch connect password
   string password = 46;
+
+  // VXLAN configuration information
+  VxlanSetup vxlan = 47;
 }
 
 /*
