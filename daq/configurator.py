@@ -52,9 +52,11 @@ def print_config(config):
     _append_config(config_list, '', config)
     print(*config_list, sep='\n')
 
+
 def print_json(config):
     """Dump config info as json to console out."""
     print(json.dumps(config, indent=2, sort_keys=True))
+
 
 class Configurator:
     """Manager class for system configuration."""
