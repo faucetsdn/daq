@@ -371,6 +371,7 @@ class DAQRunner:
         else:
             device = self._devices.get(target_mac)
         device.dhcp_mode = DhcpMode.EXTERNAL
+
         # For keeping track of remote port flap events
         if self._device_result_client:
             device.port = PortInfo()

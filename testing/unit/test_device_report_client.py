@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from forch.device_report_server import DeviceReportServer, DeviceReportServicer
-from forch.proto.shared_constants_pb2 import Empty, PortBehavior
+from forch.proto.shared_constants_pb2 import PortBehavior
 from forch.proto.devices_state_pb2 import DevicePortEvent
 
 from device_report_client import DeviceReportClient
@@ -84,6 +84,7 @@ class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase
             DevicePortEvent(event=PortBehavior.PortEvent.up, timestamp="2"),
             DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="3")
         ]
+
     def setUp(self):
         """Setup fixture for each test method"""
         self._client = DeviceReportClient(server_port=self._SERVER_PORT)
@@ -91,7 +92,8 @@ class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase
         def mock_function(_, __, ___):
             for event in self._mock_port_events:
                 yield event
-        with patch.object(DeviceReportServicer, 'GetPortState', side_effect=mock_function, autospec=True):
+        with patch.object(DeviceReportServicer, 'GetPortState', side_effect=mock_function,
+                          autospec=True):
             self._server = DeviceReportServer(
                 self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT)
             self._server.start()
