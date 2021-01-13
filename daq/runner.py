@@ -893,10 +893,10 @@ class DAQRunner:
 
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
-        LOGGER.info('Loading base module config from %s', base_conf)
+        LOGGER.info('Loading base config from %s', base_conf)
         base = self.configurator.load_and_merge({}, os.getcwd(), base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site module config from %s%s', site_path, self._SITE_CONFIG)
+        LOGGER.info('Loading site config from %s', os.path.join(site_path, self._SITE_CONFIG))
         site_config = self.configurator.load_config(site_path, self._SITE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
