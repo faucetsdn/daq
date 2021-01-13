@@ -15,7 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [base, many, aux, topo, modules, dhcp]
+        test: [many, dhcp]
+        num: [1, 2, 3, 4, 5]
     steps:
     - uses: actions/checkout@v2
       with:

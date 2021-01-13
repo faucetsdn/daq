@@ -53,8 +53,9 @@ class IpAddrModule(HostModule):
         """Start the ip-addr tests"""
         super().start(port, params, callback, finish_hook)
         assert self.host.device.dhcp_mode != DhcpMode.EXTERNAL, "device DHCP is not enabled."
-        self._logger.debug('Target device %s starting ipaddr test %s', self.device, self.test_name)
-        self._next_test()
+        self._logger.info('Target device %s starting ipaddr test %s', self.device, self.test_name)
+        # Wait for initial ip before beginning test.
+        self._ip_callback = self._next_test
 
     def _get_lease_time(self):
         lease_time = self.host.config.get("dhcp_lease_time")
