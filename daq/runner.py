@@ -375,8 +375,8 @@ class DAQRunner:
         if self._device_result_client:
             device.port = PortInfo()
             device.port.active = True
-            self._device_result_client(device.mac,
-                                       lambda event: self._handle_remote_port_state(device, event))
+            self._device_result_client.get_port_events(
+                device.mac, lambda event: self._handle_remote_port_state(device, event))
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
