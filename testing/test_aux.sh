@@ -53,9 +53,9 @@ cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types
 cp -r resources/test_site/mac_addrs local/site/
 
 # Create config for the password test to select which dictionaries to use.
-cat <<EOF > local/module_config.json
+cat <<EOF > local/base_config.json
 {
-  "include": "../resources/setups/baseline/module_config.json",
+  "include": "../resources/setups/baseline/base_config.json",
   "modules": {
     "password": {
       "dictionary_dir": "resources/faux"
@@ -67,7 +67,7 @@ EOF
 cat <<EOF > local/system.yaml
 ---
 include: ../config/system/all.conf
-base_conf: local/module_config.json
+base_conf: local/base_config.json
 finish_hook: bin/dump_network
 test_config: resources/runtime_configs/long_wait
 site_path: inst/test_site

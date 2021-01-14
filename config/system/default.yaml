@@ -25,7 +25,7 @@ default_timeout_sec: 350
 port_flap_timeout_sec: 5
 
 # Default base module configuration file.
-base_conf: resources/setups/baseline/module_config.json
+base_conf: resources/setups/baseline/base_config.json
 
 # Directory of site-configuration data, including devices.
 site_path: local/site/
