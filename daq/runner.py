@@ -883,8 +883,8 @@ class DAQRunner:
         self._device_result_client.send_device_result(mac, device_result)
 
     def _calculate_device_result(self, test_results):
-        for module_name, module_result in test_results.get('modules', {}).items():
-            for test_name, test_result in module_result.get('tests', {}).items():
+        for module_result in test_results.get('modules', {}).values():
+            for test_result in module_result.get('tests', {}).values():
                 if test_result.get('result') == 'fail':
                     return PortBehavior.failed
         return PortBehavior.passed
