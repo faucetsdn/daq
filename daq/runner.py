@@ -887,7 +887,7 @@ class DAQRunner:
         for module_name, module_result in test_results.get('modules', {}).items():
             for test_name, test_result in module_result.get('tests', {}).items():
                 LOGGER.info(f'** YD test: {test_name}, {test_result}')
-                if test_result.result == 'failed':
+                if test_result.get('result') == 'fail':
                     return PortBehavior.failed
         return PortBehavior.passed
 
