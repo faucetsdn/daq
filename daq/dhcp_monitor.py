@@ -47,8 +47,9 @@ class DhcpMonitor:
         self.scan_start = int(time.time())
         # Because there's buffering somewhere, can't reliably filter out DHCP with "src port 67"
         tcp_filter = ""
+        flags = "-v -l"  # use line buffering
         helper = tcpdump_helper.TcpdumpHelper(self.host, tcp_filter, packets=None,
-                                              timeout=None, blocking=False,
+                                              vflags=flags, timeout=None, blocking=False,
                                               intf_name=self.intf_name)
         self.dhcp_traffic = helper
         self.runner.monitor_stream(self.name, self.dhcp_traffic.stream(),
