@@ -813,7 +813,6 @@ class DAQRunner:
                     self._direct_port_traffic(device.mac, target_port, None)
 
                 test_results = target_host.terminate('_target_set_cancel', trigger=False)
-                LOGGER.info(f'** YD test_results in runner: {device.mac}, {test_results}')
                 self._send_device_result(device.mac, test_results)
 
                 if target_gateway:
@@ -880,13 +879,12 @@ class DAQRunner:
         else:
             device_result = self._calculate_device_result(test_results)
 
-        LOGGER.info(f'** Sending device result: {mac}, {device_result}')
+        LOGGER.info('Sending device result for device %s: %s', mac, device_result)
         self._device_result_client.send_device_result(mac, device_result)
 
     def _calculate_device_result(self, test_results):
         for module_name, module_result in test_results.get('modules', {}).items():
             for test_name, test_result in module_result.get('tests', {}).items():
-                LOGGER.info(f'** YD test: {test_name}, {test_result}')
                 if test_result.get('result') == 'fail':
                     return PortBehavior.failed
         return PortBehavior.passed
