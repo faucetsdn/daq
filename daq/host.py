@@ -418,6 +418,8 @@ class ConnectedHost:
         self.logger.info('Finalized with reports %s', list(report_paths.keys()))
         report_blobs = {name: self._upload_file(path) for name, path in report_paths.items()}
         self.record_result('terminate', state=MODE.TERM, **report_blobs)
+        self.logger.info(f'** YD report_blobs: {self}, {report_blobs}')
+        self.logger.info(f'** YD self._report.results: {self}, {self._report._all_results}')
         self._report = None
 
     def terminate(self, reason, trigger=True):
