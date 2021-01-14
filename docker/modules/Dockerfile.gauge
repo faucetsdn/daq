@@ -2,6 +2,8 @@
 
 FROM faucet/python3:5.0.1
 
+RUN apk add -q build-base
+
 COPY faucet/ /faucet-src/
 
 RUN /faucet-src/docker/install-faucet.sh && rm -rf /faucet-src/.git
