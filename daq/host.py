@@ -412,7 +412,7 @@ class ConnectedHost:
         self._dhcp_listeners.append(callback)
 
     def _finalize_report(self):
-        report_paths = self._report.finalize()
+        report_paths, test_results = self._report.finalize()
         if self._trigger_path:
             report_paths.update({'trigger_path': self._trigger_path})
         self.logger.info('Finalized with reports %s', list(report_paths.keys()))
@@ -420,7 +420,10 @@ class ConnectedHost:
         self.record_result('terminate', state=MODE.TERM, **report_blobs)
         self.logger.info(f'** YD report_blobs: {self}, {report_blobs}')
         self.logger.info(f'** YD self._report.results: {self}, {self._report._all_results}')
+
         self._report = None
+
+        return test_results
 
     def terminate(self, reason, trigger=True):
         """Terminate this host"""
@@ -431,7 +434,9 @@ class ConnectedHost:
         self._monitor_cleanup()
         if self.target_port:
             self.runner.network.delete_mirror_interface(self.target_port)
-        self._finalize_report()
+
+        test_results = self._finalize_report()
+
         if self.test_host:
             try:
                 self.test_host.terminate()
@@ -444,6 +449,7 @@ class ConnectedHost:
             self.runner.target_set_complete(self.device,
                                             'Target device %s termination: %s' % (
                                                 self, self.test_host))
+        return test_results
 
     def idle_handler(self):
         """Trigger events from idle state"""

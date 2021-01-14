@@ -159,7 +159,7 @@ class ReportGenerator:
             if self._alt_path:
                 shutil.copyfile(self._report_prefix + extension, self._alt_prefix + extension)
             report_paths.update({self._PATH_PREFIX + extension: self._report_prefix + extension})
-        return report_paths
+        return report_paths, self._all_results
 
     def _write_json_report(self):
         json_path = self._report_prefix + '.json'
