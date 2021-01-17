@@ -23,8 +23,8 @@ function make_pubber {
     cat <<EOF > $local_dir/pubber.json
   {
     "projectId": "$project_id",
-    "cloudRegion": $cloud_region,
-    "registryId": $registry_id,
+    "cloudRegion": "$cloud_region",
+    "registryId": "$registry_id",
     "extraField": $extra,
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
@@ -32,6 +32,19 @@ function make_pubber {
   }
 EOF
   ls -l $local_dir
+}
+
+function setup_reflector {
+    echo Setting up GCP reflector configuration...
+
+    cat <<EOF > inst/config/gcp_reflect_config.json
+  {
+    "project_id": "$project_id",
+    "registry_id": "$registry_id"
+  }
+EOF
+
+    ls -l inst/config
 }
 
 function capture_test_results {
@@ -90,8 +103,8 @@ if [ -f "$gcp_cred" ]; then
 
     cloud_file=inst/test_site/cloud_iot_config.json
     echo Pulling cloud iot details from $cloud_file...
-    registry_id=`jq .registry_id $cloud_file`
-    cloud_region=`jq .cloud_region $cloud_file`
+    registry_id=`jq -r .registry_id $cloud_file`
+    cloud_region=`jq -r .cloud_region $cloud_file`
 
     make_pubber AHU-1 daq-faux-2 null null
     make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
@@ -102,6 +115,8 @@ if [ -f "$gcp_cred" ]; then
     fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
     find inst/test_site -name errors.json | tee -a $GCP_RESULTS
     more inst/test_site/devices/*/errors.json
+
+    setup_reflector
 else
     echo No gcp service account defined, as required for cloud-based tests.
     echo Please check install/setup documentation to enable.
@@ -138,7 +153,7 @@ sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
 head -20 inst/gw*/nodes/gw*/activate.log
-head -20 inst/run-*/nodes/*/activate.log
+head -80 inst/run-*/nodes/*/activate.log
 head -20 inst/run-*/nodes/*/tmp/report.txt
 ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
 
@@ -154,7 +169,10 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 
 # Add the results for cloud tests into a different file, since cloud tests may not run if
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
-fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | tee -a $GCP_RESULTS
+fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
+
+echo TAPTAP
+more inst/run-*/nodes/udmi*/tmp/files.txt | cat
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num

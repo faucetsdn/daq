@@ -171,7 +171,7 @@
       "required": "info",
       "expected": "Information"
     },
-    "cloud.udmi.pointset": {
+    "cloud.udmi.udmi_pointset": {
       "category": "BOS",
       "required": "pass",
       "expected": "Recommended Pass"

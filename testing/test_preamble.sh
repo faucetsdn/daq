@@ -10,6 +10,7 @@ gcp_name=${test_script%.sh}.gcp
 TEST_RESULTS=${TEST_RESULTS:-out/$def_name}
 GCP_RESULTS=${GCP_RESULTS:-out/$gcp_name}
 GCP_FILE=inst/config/gcp_service_account.json
+GCP_REFLECT_KEY_FILE=inst/config/gcp_reflect_key.pkcs8
 
 echo Writing test results to $TEST_RESULTS and $GCP_RESULTS
 echo Running $0 > $TEST_RESULTS
@@ -39,6 +40,17 @@ fi
 
 if [ -f "$gcp_cred" ]; then
   echo GCP service account is `jq .client_email $gcp_cred`
+fi
+
+if [ -f $GCP_REFLECT_KEY_FILE ]; then
+  echo Found previously existing $GCP_REFLECT_KEY_FILE
+elif [ -n "$GCP_REFLECT_KEY_BASE64" ]; then
+  echo Creating $GCP_REFLECT_KEY_FILE from GCP_REFLECT_KEY_BASE64
+  echo Decoding GCP_REFLECT_KEY_BASE64 to $GCP_REFLECT_KEY_FILE
+  echo base64 wc: `echo "$GCP_REFLECT_KEY_BASE64" | wc`
+  echo "$GCP_REFLECT_KEY_BASE64" | base64 -d > $GCP_REFLECT_KEY_FILE
+else
+  echo No $GCP_REFLECT_KEY_FILE file or GCP_REFLECT_KEY_BASE64 env found/configured
 fi
 
 function kill_children {
