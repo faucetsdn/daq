@@ -43,8 +43,6 @@ function setup_reflector {
     "registry_id": "$registry_id"
   }
 EOF
-
-    ls -l inst/config
 }
 
 function capture_test_results {
@@ -153,7 +151,7 @@ sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
 head -20 inst/gw*/nodes/gw*/activate.log
-head -80 inst/run-*/nodes/*/activate.log
+head -20 inst/run-*/nodes/*/activate.log
 head -20 inst/run-*/nodes/*/tmp/report.txt
 ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
 
@@ -170,9 +168,6 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 # Add the results for cloud tests into a different file, since cloud tests may not run if
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
-
-echo TAPTAP
-more inst/run-*/nodes/udmi*/tmp/files.txt | cat
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num

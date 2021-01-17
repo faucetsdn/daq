@@ -70,8 +70,6 @@ write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
 echo timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/
 timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ || true
 
-find out -type f > /tmp/files.txt
-
 function message_report {
     message_type=$1
     base=out/devices/$device_id/$message_type
