@@ -21,6 +21,7 @@ import external_gateway
 import gcp
 import host as connected_host
 import network
+import report
 import stream_monitor
 from wrappers import DaqException
 import logger
@@ -884,9 +885,13 @@ class DAQRunner:
 
     def _calculate_device_result(self, test_results):
         for module_result in test_results.get('modules', {}).values():
+            if report.ResultType.EXCEPTION in module_result:
+                return PortBehavior.failed
+
             for test_result in module_result.get('tests', {}).values():
                 if test_result.get('result') == 'fail':
                     return PortBehavior.failed
+
         return PortBehavior.passed
 
     def finalize(self):
