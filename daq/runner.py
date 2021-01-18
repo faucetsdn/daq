@@ -888,6 +888,9 @@ class DAQRunner:
             if report.ResultType.EXCEPTION in module_result:
                 return PortBehavior.failed
 
+            if module_result.get(report.ResultType.RETURN_CODE):
+                return PortBehavior.failed
+
             for test_result in module_result.get('tests', {}).values():
                 if test_result.get('result') == 'fail':
                     return PortBehavior.failed
