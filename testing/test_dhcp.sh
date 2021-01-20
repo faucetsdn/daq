@@ -20,7 +20,7 @@ EOF
 intf_mac="9a02571e8f03"
 rm -rf local/site
 mkdir -p local/site/mac_addrs/$intf_mac
-cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
 {
   "modules": {
     "ipaddr": {
@@ -34,7 +34,7 @@ EOF
 # Multi subnet tests
 intf_mac="9a02571e8f04"
 mkdir -p local/site/mac_addrs/$intf_mac
-cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
 {
   "modules": {
     "ipaddr": {
@@ -51,7 +51,7 @@ EOF
 # ip and dhcp change tests
 intf_mac="9a02571e8f05"
 mkdir -p local/site/mac_addrs/$intf_mac
-cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
 {
   "modules": {
     "ipaddr": {
@@ -66,7 +66,7 @@ EOF
 # DHCP times out in extended DHCP tests
 intf_mac="9a02571e8f06"
 mkdir -p local/site/mac_addrs/$intf_mac
-cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
 {
   "modules": {
     "ipaddr": {

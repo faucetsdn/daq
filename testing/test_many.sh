@@ -31,13 +31,13 @@ for iface in $(seq 1 $NUM_DEVICES); do
         xdhcp="xdhcp=$ip opendns ntp_fail"
         if [[ $iface -gt $NUM_TIMEOUT_DEVICES ]]; then
             #Install site specific configs for xdhcp ips
-            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+            cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
         "static_ip": "$ip"
     }
 EOF
         else
-            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+            cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
         "modules": {
             "ipaddr": {
@@ -49,7 +49,7 @@ EOF
         fi
     elif [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_IPADDR_TEST_DEVICES)) ]]; then
         if [[ $iface -le $((NUM_NO_DHCP_DEVICES + NUM_IPADDR_TEST_TIMEOUT_DEVICES)) ]]; then
-            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+            cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
         "modules": {
             "ipaddr": {
@@ -61,7 +61,7 @@ EOF
     }
 EOF
         else
-            cat <<EOF > local/site/mac_addrs/$intf_mac/module_config.json
+            cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
         "modules": {
             "ipaddr": {

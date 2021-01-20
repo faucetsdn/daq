@@ -248,7 +248,7 @@
       "required": "pass",
       "expected": "Required Pass for PoE Devices"
     },
-    "cloud.udmi.pointset": {
+    "cloud.udmi.event_pointset": {
       "category": "IoT",
       "required": "pass",
       "expected": "Required Pass for IoT Devices"
