@@ -822,7 +822,7 @@ class DAQRunner:
                 self.run_tests = False
             if self.single_shot and self.run_tests:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
-                self._handle_faucet_events()  # Process remaining queued faucet events 
+                self._handle_faucet_events()  # Process remaining queued faucet events
                 self.run_tests = False
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
