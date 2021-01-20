@@ -166,7 +166,7 @@
       "required": "info",
       "expected": "Information"
     },
-    "cloud.udmi.pointset": {
+    "cloud.udmi.event_pointset": {
       "category": "BOS",
       "required": "pass",
       "expected": "Recommended Pass"

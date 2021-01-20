@@ -68,16 +68,17 @@ Syntax: Pass / Fail / Skip
 |Required Pass for BACnet Devices|0|1|0|0|0|
 |Recommended Pass|1|0|1|0|1|
 |Information|0|0|2|0|2|
-|Other|3|0|9|2|2|
+|Other|3|0|10|2|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
 |pass|base.startup.dhcp|Other|Other||
 |skip|base.switch.ping|Connection|Required Pass|No local IP has been set, check system config|
-|skip|cloud.udmi.pointset|BOS|Recommended Pass|No device id|
+|skip|cloud.udmi.event_pointset|BOS|Recommended Pass|No device id|
+|skip|cloud.udmi.event_system|Other|Other|No device id|
 |skip|cloud.udmi.provision|Other|Other|No device id|
-|skip|cloud.udmi.state|Other|Other|No device id|
-|skip|cloud.udmi.system|Other|Other|No device id|
+|skip|cloud.udmi.state_pointset|Other|Other|No device id|
+|skip|cloud.udmi.state_system|Other|Other|No device id|
 |pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connection|Required Pass|target reached|
@@ -509,31 +510,40 @@ No device id
 RESULT skip cloud.udmi.provision No device id
 
 --------------------
-cloud.udmi.state
+cloud.udmi.state_system
 --------------------
-Validates device state payload.
+Validates device state_system payload.
 --------------------
 No device id
 --------------------
-RESULT skip cloud.udmi.state No device id
+RESULT skip cloud.udmi.state_system No device id
 
 --------------------
-cloud.udmi.pointset
+cloud.udmi.state_pointset
 --------------------
-Validates device pointset payload.
+Validates device state_pointset payload.
 --------------------
 No device id
 --------------------
-RESULT skip cloud.udmi.pointset No device id
+RESULT skip cloud.udmi.state_pointset No device id
 
 --------------------
-cloud.udmi.system
+cloud.udmi.event_system
 --------------------
-Validates device system payload.
+Validates device event_system payload.
 --------------------
 No device id
 --------------------
-RESULT skip cloud.udmi.system No device id
+RESULT skip cloud.udmi.event_system No device id
+
+--------------------
+cloud.udmi.event_pointset
+--------------------
+Validates device event_pointset payload.
+--------------------
+No device id
+--------------------
+RESULT skip cloud.udmi.event_pointset No device id
 
 ```
 

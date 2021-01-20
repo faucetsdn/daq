@@ -73,7 +73,9 @@ CRED_FILE=inst/config/gcp_service_account.json
 
 echo Running test script $TEST_SCRIPT
 sudo PATH=$PATH TEST_RESULTS=$TEST_RESULTS GCP_RESULTS=$GCP_RESULTS \
-     DAQ_CODECOV=y GCP_BASE64_CRED="$GCP_BASE64_CRED" $TEST_SCRIPT  2>&1
+     DAQ_CODECOV=y GCP_BASE64_CRED="$GCP_BASE64_CRED" \
+     GCP_REFLECT_KEY_BASE64="$GCP_REFLECT_KEY_BASE64" \
+     $TEST_SCRIPT  2>&1
 
 if [ -f .coverage ]; then
     codecov_tag=${DAQ_TEST##*/}

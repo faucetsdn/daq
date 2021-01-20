@@ -56,7 +56,7 @@ service ntp start
 GCP_CRED_FILE=/config/inst/gcp_service_account.json
 SITE_MODEL=$PWD/test_site
 
-if [ -f /config/inst/gcp_service_account.json ]; then
+if [ -f $GCP_CRED_FILE ]; then
     echo Activating pagent with $GCP_CRED_FILE
     (
         gcloud auth activate-service-account --key-file $GCP_CRED_FILE
