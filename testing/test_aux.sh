@@ -234,10 +234,10 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Running port toggle test
 cat <<EOF > local/system.yaml
 ---
 include: ../config/system/base.yaml
-port_flap_timeout_sec: 10
+port_flap_timeout_sec: 20
 port_debounce_sec: 0
 EOF
-monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 5; sudo ifconfig faux up"
+monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 15; sudo ifconfig faux up"
 monitor_log "Target device 9a02571e8f00 test hold running" "sudo ifconfig faux down"
 rm -r inst/run-*
 cmd/run -s -k
