@@ -21,6 +21,7 @@ import external_gateway
 import gcp
 import host as connected_host
 import network
+import report
 import stream_monitor
 from wrappers import DaqException
 import logger
@@ -768,6 +769,7 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
+            self._send_device_result(device.mac, None)
             self._detach_gateway(device)
 
     def target_set_complete(self, device, reason):
@@ -790,10 +792,6 @@ class DAQRunner:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-        if self._device_result_client:
-            device_result = PortBehavior.failed if results else PortBehavior.passed
-            self._device_result_client.send_device_result(device.mac, device_result)
-
     def _target_set_cancel(self, device):
         target_host = device.host
         if target_host:
@@ -814,7 +812,10 @@ class DAQRunner:
             else:
                 if target_port:
                     self._direct_port_traffic(device.mac, target_port, None)
-                target_host.terminate('_target_set_cancel', trigger=False)
+
+                test_results = target_host.terminate('_target_set_cancel', trigger=False)
+                self._send_device_result(device.mac, test_results)
+
                 if target_gateway:
                     self._detach_gateway(device)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
@@ -869,6 +870,32 @@ class DAQRunner:
             if status != 0:
                 results.append('%s:%s:%s' % (set_key, name, status))
         return results
+
+    def _send_device_result(self, mac, test_results):
+        if not self._device_result_client:
+            return
+
+        if test_results is None:
+            device_result = PortBehavior.failed
+        else:
+            device_result = self._calculate_device_result(test_results)
+
+        LOGGER.info('Sending device result for device %s: %s', mac, device_result)
+        self._device_result_client.send_device_result(mac, device_result)
+
+    def _calculate_device_result(self, test_results):
+        for module_result in test_results.get('modules', {}).values():
+            if report.ResultType.EXCEPTION in module_result:
+                return PortBehavior.failed
+
+            if module_result.get(report.ResultType.RETURN_CODE):
+                return PortBehavior.failed
+
+            for test_result in module_result.get('tests', {}).values():
+                if test_result.get('result') == 'fail':
+                    return PortBehavior.failed
+
+        return PortBehavior.passed
 
     def finalize(self):
         """Finalize this instance, returning error result code"""
