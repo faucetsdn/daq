@@ -797,7 +797,6 @@ class DAQRunner:
     def _target_set_cancel(self, device):
         target_host = device.host
         if target_host:
-            device.host = None
             target_gateway = device.gateway
             target_port = device.port.port_no
             LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
@@ -824,6 +823,7 @@ class DAQRunner:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self._handle_faucet_events()  # Process remaining queued faucet events
                 self.run_tests = False
+            device.host = None
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
