@@ -42,7 +42,7 @@ class TestRunner(unittest.TestCase):
         configurator.Configurator.load_and_merge = MagicMock(return_value={})
         network.TestNetwork.__init__ = MagicMock(return_value=None)
         DAQRunner._get_test_metadata = MagicMock(return_value={})
-        with patch("builtins.open", mock_open(read_data="data")):
+        with patch("builtins.open", mock_open(read_data="a: b")):
             self.runner = DAQRunner(self.config)
 
     def test_reap_stale_ports(self):

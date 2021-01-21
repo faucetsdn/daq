@@ -886,8 +886,8 @@ class DAQRunner:
 
     def _base_config_changed(self, new_config):
         LOGGER.info('Base config changed: %s', new_config)
-        self.configurator.write_config(new_config, self.config.get('site_path'),
-                                       self._SITE_CONFIG)
+        config_file = os.path.join(self.config.get('site_path'), self._SITE_CONFIG)
+        self.configurator.write_config(new_config, config_file)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
@@ -895,14 +895,17 @@ class DAQRunner:
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
         LOGGER.info('Loading base config from %s', base_conf)
-        base = self.configurator.load_and_merge({}, os.getcwd(), base_conf)
+        base = self.configurator.load_config(base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site config from %s', os.path.join(site_path, self._SITE_CONFIG))
-        site_config = self.configurator.load_config(site_path, self._SITE_CONFIG, optional=True)
+        site_config_file = os.path.join(site_path, self._SITE_CONFIG)
+        LOGGER.info('Loading site config from %s', site_config_file)
+        site_config = self.configurator.load_config(site_config_file, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
-        return self.configurator.merge_config(base, site_path, site_config)
+        if site_config:
+            return self.configurator.merge_config(base, site_config_file)
+        return base
 
     def get_base_config(self):
         """Get the base configuration for this install"""
