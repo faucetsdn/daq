@@ -488,9 +488,6 @@ class DAQRunner:
     def _target_set_trigger(self, device):
         assert self._devices.contains(device), 'Target device %s is not expected' % device.mac
         port_trigger = device.port.port_no is not None
-        if port_trigger:
-            assert device.port.active, 'Target port %d is not active' % device.port.port_no
-
         if not self._system_active:
             LOGGER.warning('Target device %s ignored, system is not active', device.mac)
             return False
@@ -498,6 +495,9 @@ class DAQRunner:
         if device.host:
             LOGGER.debug('Target device %s already triggered', device.mac)
             return False
+
+        if port_trigger:
+            assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
         if not self.run_tests:
             LOGGER.debug('Target device %s trigger suppressed', device.mac)
@@ -795,7 +795,6 @@ class DAQRunner:
     def _target_set_cancel(self, device):
         target_host = device.host
         if target_host:
-            device.host = None
             target_gateway = device.gateway
             target_port = device.port.port_no
             LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
@@ -823,7 +822,9 @@ class DAQRunner:
                 self.run_tests = False
             if self.single_shot and self.run_tests:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
+                self._handle_faucet_events()  # Process remaining queued faucet events
                 self.run_tests = False
+            device.host = None
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
