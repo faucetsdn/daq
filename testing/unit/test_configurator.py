@@ -1,7 +1,6 @@
 """Unit tests for configurator"""
 
 import unittest
-from unittest import mock
 from unittest.mock import patch
 import os
 import yaml
@@ -30,15 +29,15 @@ TEMP_WITH_CIRCULAR_INCLUDE2 = 'temp_with_circular_include2.yaml'
 class TestConfigurator(unittest.TestCase):
     """Test class for Configurator"""
 
-    config_files = { 
+    config_files = {
         TEMP_CONF_FILE: {
-            'monitor_scan_sec' : '30',
-            'default_timeout_sec' : '350',
-            'base_conf' : 'resources/setups/baseline/base_config.json',
-            'site_path' : 'local/site/',
-            'initial_dhcp_lease_time' : '120s',
-            'dhcp_lease_time' : '500s',
-            'long_dhcp_response_sec' : '105'
+            'monitor_scan_sec': '30',
+            'default_timeout_sec': '350',
+            'base_conf': 'resources/setups/baseline/base_config.json',
+            'site_path': 'local/site/',
+            'initial_dhcp_lease_time': '120s',
+            'dhcp_lease_time': '500s',
+            'long_dhcp_response_sec': '105'
         },
         TEMP_WITH_INCLUDE: {
             'include': TEMP_CONF_FILE,
@@ -106,7 +105,7 @@ class TestConfigurator(unittest.TestCase):
                 'k2': 2
             }
         }, read_config)
-    
+
     def test_config_with_deep_include(self):
         configurator = Configurator()
         args = ['test', TEMP_WITH_DEEP_INCLUDE]
@@ -171,7 +170,7 @@ class TestConfigurator(unittest.TestCase):
     def test_circular_include_in_config(self):
         configurator = Configurator()
         args = ['test', TEMP_WITH_CIRCULAR_INCLUDE]
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(Exception):
             configurator.parse_args(args)
 
     @patch('builtins.print')
@@ -188,7 +187,6 @@ class TestConfigurator(unittest.TestCase):
             'initial_dhcp_lease_time=120s',
             'long_dhcp_response_sec=105',
             'monitor_scan_sec=30',
-            'site_path=local/site/'
-        , sep='\n')
+            'site_path=local/site/', sep='\n')
 if __name__ == '__main__':
     unittest.main()
