@@ -129,27 +129,7 @@ class TestConfigurator(unittest.TestCase):
 
     def test_config_override(self):
         configurator = Configurator()
-        args = ['test', 'initial_dhcp_lease_time=999s', 'dhcp_lease_time=999', TEMP_WITH_INCLUDE]
-        read_config = configurator.parse_args(args)
-        self.assertEqual({
-            'monitor_scan_sec': '30',
-            'default_timeout_sec': '350',
-            'base_conf': 'resources/setups/baseline/base_config.json',
-            'site_path': 'local/site/',
-            'initial_dhcp_lease_time': '999s',
-            'long_dhcp_response_sec': '105',
-            'dhcp_lease_time': '999',
-            'dict': {
-                'k1': {
-                    'k2': 0,
-                },
-                'k2': 2
-            }
-        }, read_config)
-
-    def test_config_override_different_order(self):
-        configurator = Configurator()
-        args = ['test', 'initial_dhcp_lease_time=999s', TEMP_WITH_INCLUDE, 'dhcp_lease_time=999']
+        args = ['test', TEMP_WITH_INCLUDE, 'initial_dhcp_lease_time=999s', 'dhcp_lease_time=999']
         read_config = configurator.parse_args(args)
         self.assertEqual({
             'monitor_scan_sec': '30',

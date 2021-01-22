@@ -160,8 +160,7 @@ class Configurator:
                 elif '=' in arg:
                     self._parse_flat_item(config, arg.split('=', 1))
                 else:
-                    from_config_file = self.load_config(arg)
-                    config = self._deep_merge_dict(from_config_file, config)
+                    config = self.merge_config(config, arg)
         return config
 
 
