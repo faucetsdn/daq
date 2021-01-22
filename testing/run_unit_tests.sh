@@ -19,3 +19,7 @@ coverage run \
 
 coverage combine || true
 coverage report -m
+if [ -f .coverage ]; then
+    echo Generating codecov report \#unit...
+    codecov -F unit 
+fi
