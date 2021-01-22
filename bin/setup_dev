@@ -17,29 +17,12 @@ fi
 
 PVERSION=3.8
 
-FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
-FAUCETX=$(cat etc/FAUCET_VERSION)
-FAUCETV=${DAQ_FAUCET_VER:-$FAUCETX}
-
-FORCHR=${DAQ_FORCH_REPO:-https://github.com/faucetsdn/forch}
-FORCHB=${DAQ_FORCH_BRANCH}
-FORCHX=$(cat etc/FORCH_VERSION)
-FORCHV=${DAQ_FORCH_VER:-$FORCHX}
-
 MININET=https://github.com/mininet/mininet
 MININETV=$(cat etc/MININET_VERSION)
 
 if [ -f .daq.local ]; then
     echo Loading config from .daq.local
     source .daq.local
-fi
-
-if [ "$FAUCETX" != "$FAUCETV" ]; then
-    echo $FAUCETV > etc/FAUCET_VERSION
-fi
-
-if [ "$FORCHX" != "$FORCHV" ]; then
-    echo $FORCHV > etc/FORCH_VERSION
 fi
 
 if [ -z "$AG" ]; then
@@ -137,7 +120,7 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
     google-cloud-pubsub==0.40.0 \
     google-cloud-storage==1.16.1 \
     grpcio-tools==1.30.0
-    
+
 $PIP freeze
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
@@ -147,46 +130,12 @@ if [ -n "$SIMPLE" ]; then
     exit 0
 fi
 
-if [ -z "$FAUCETV" ]; then
-    echo No faucet version found, skipping.
-else
-    if [ ! -d faucet ]; then
-	echo Cloning $FAUCETR...
-	git clone $FAUCETR faucet
-    fi
-
-    echo Setting faucet version $FAUCETV
-    (cd faucet; git fetch; git checkout $FAUCETV)
-fi
-
-if [ -z "$FORCHV" ]; then
-    echo No forch version found, skipping.
-else
-    if [ ! -d forch ]; then
-	echo Cloning $FORCHR...
-	git clone $FORCHR forch
-    fi
-
-    echo Setting forch version $FORCHV
-    (cd forch; git fetch; git checkout $FORCHV)
-fi
-
+bin/setup_remote faucet
+bin/setup_remote forch
 bin/setup_remote udmi
 
 echo -n "DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
-echo
-
-echo -n "Last FAUCET commit "
-(cd faucet; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
-echo
-
-echo -n "Last FORCH commit "
-(cd forch; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
-echo
-
-echo -n "Last UDMI commit "
-(cd udmi; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
 echo
 
 docker --version
@@ -200,3 +149,6 @@ fi
 
 rm -rf protoc-gen-doc
 git clone https://github.com/pseudomuto/protoc-gen-doc.git
+
+echo
+echo Setup completed successfully.
