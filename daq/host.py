@@ -228,10 +228,13 @@ class ConnectedHost:
         if os.path.exists(old_path):
             raise Exception('Old %s config found in %s, should be renamed to %s' %
                             (name, old_path, filename))
-        return self.configurator.load_and_merge(config, path, filename, optional=True)
+        config_file = os.path.join(path, filename)
+        if os.path.exists(config_file):
+            return self.configurator.merge_config(config, os.path.join(path, filename))
+        return config
 
     def _write_module_config(self, config, path):
-        self.configurator.write_config(config, path, self._MODULE_CONFIG)
+        self.configurator.write_config(config, os.path.join(path, self._MODULE_CONFIG))
 
     def _type_path(self):
         dev_config = self._load_config(None, {}, self._device_base, self._DEVICE_CONFIG)
