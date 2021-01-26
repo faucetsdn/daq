@@ -53,6 +53,11 @@ def print_config(config):
     print(*config_list, sep='\n')
 
 
+def print_json(config):
+    """Dump config info as json to console out."""
+    print(json.dumps(config, indent=2, sort_keys=True))
+
+
 class Configurator:
     """Manager class for system configuration."""
 
@@ -65,33 +70,38 @@ class Configurator:
         else:
             LOGGER.info(message)
 
-    def merge_config(self, base, adding):
+    def merge_config(self, base, path, adding):
         """Update a dict object and follow nested objects"""
         if not adding:
             return base
+        if 'include' in adding:
+            include = adding['include']
+            del adding['include']
+            self._log('Including config file %s' % include)
+            adj_path = os.path.dirname(os.path.join(path, include))
+            self._read_config_into(base, adj_path, os.path.basename(include))
         for key in sorted(adding.keys()):
             value = adding[key]
             if isinstance(value, dict) and key in base:
-                self.merge_config(base[key], value)
+                self.merge_config(base[key], path, value)
             else:
                 base[key] = copy.deepcopy(value)
         return base
 
-    def load_config(self, path, filename=None, optional=False):
+    def load_config(self, path, filename, optional=False):
         """Load a config file"""
-        if not path:
-            return None
         config_file = os.path.join(path, filename) if filename else path
         if not os.path.exists(config_file):
             if optional:
-                LOGGER.info('Skipping missing %s', config_file)
+                self._log('Skipping missing config file %s' % filename)
                 return {}
             raise Exception('Config file %s not found.' % config_file)
-        return self._read_config_into({}, config_file)
+        return self._read_config_into({}, path, filename)
 
-    def load_and_merge(self, base, path, filename=None, optional=False):
+    def load_and_merge(self, base, path, filename, optional=False):
         """Load a config file and merge with an existing base"""
-        return self.merge_config(base, self.load_config(path, filename, optional))
+        self._log('load_and_merge %s/%s' % (path, filename))
+        return self.merge_config(base, path, self.load_config(path, filename, optional))
 
     def write_config(self, config, path, filename):
         """Write a config file"""
@@ -100,20 +110,16 @@ class Configurator:
         if not os.path.exists(path):
             os.makedirs(path)
         config_file = os.path.join(path, filename)
-        LOGGER.info('Writing config to %s', config_file)
+        self._log('Writing config to %s' % config_file)
         with open(config_file, 'w') as output_stream:
             output_stream.write(json.dumps(config, indent=2, sort_keys=True))
             output_stream.write('\n')
 
-    def _read_yaml_config(self, config, filename):
-        self._log('Reading yaml config from %s' % filename)
-        with open(filename) as data_file:
+    def _read_yaml_config(self, config, path, filename):
+        config_file = os.path.join(path, filename)
+        with open(config_file) as data_file:
             loaded_config = yaml.safe_load(data_file)
-        if 'include' in loaded_config:
-            include = loaded_config['include']
-            del loaded_config['include']
-            self._read_config_into(config, include)
-        return self.merge_config(config, loaded_config)
+        return self.merge_config(config, os.path.dirname(config_file), loaded_config)
 
     def _parse_flat_item(self, config, parts):
         key_parts = parts[0].strip().split('.', 1)
@@ -123,27 +129,25 @@ class Configurator:
         else:
             self._parse_flat_item(config.setdefault(key_parts[0], {}), (key_parts[1], value))
 
-    def _read_flat_config(self, config, filename):
-        self._log('Reading flat config from %s' % filename)
-        with open(filename) as file:
+    def _read_flat_config(self, config, path, filename):
+        config_file = os.path.join(path, filename)
+        loaded_config = {}
+        with open(config_file) as file:
             line = file.readline()
             while line:
                 parts = re.sub(r'#.*', '', line).strip().split('=', 1)
-                entry = parts[0].split() if parts else None
                 if len(parts) == 2:
-                    self._parse_flat_item(config, parts)
-                elif len(entry) == 2 and entry[0] == 'source':
-                    self._read_config_into(config, entry[1])
+                    self._parse_flat_item(loaded_config, parts)
                 elif parts and parts[0]:
                     raise Exception('Unknown config entry: %s' % line)
                 line = file.readline()
-        return config
+        return self.merge_config(config, os.path.dirname(config_file), loaded_config)
 
-    def _read_config_into(self, config, filename):
+    def _read_config_into(self, config, path, filename):
         if filename.endswith('.yaml') or filename.endswith('.json'):
-            return self._read_yaml_config(config, filename)
+            return self._read_yaml_config(config, path, filename)
         if filename.endswith('.conf'):
-            return self._read_flat_config(config, filename)
+            return self._read_flat_config(config, path, filename)
         raise Exception('Unknown config file type: %s' % filename)
 
     def parse_args(self, args):
@@ -160,10 +164,13 @@ class Configurator:
                 elif '=' in arg:
                     self._parse_flat_item(config, arg.split('=', 1))
                 else:
-                    self._read_config_into(config, arg)
+                    self._read_config_into(config, os.getcwd(), arg)
         return config
 
 
 if __name__ == '__main__':
     CONFIG = Configurator()
-    print_config(CONFIG.parse_args(sys.argv))
+    if sys.argv[1] == '--json':
+        print_json(CONFIG.parse_args(sys.argv[1:]))
+    else:
+        print_config(CONFIG.parse_args(sys.argv))

@@ -1,0 +1,152 @@
+{
+  "device_datasheets_url": "https://www.artisticlicence.com/WebSiteMaster/Datasheets/lightJuice%20CV4%20datasheet.pdf",
+  "device_description": "lightJuice CV4 is the first product in a new range of technology based on the latest Power over Ethernet (PoE++) standard. The network cable carries both power and lighting control data, so AC mains wiring is eliminated. lightJuice offers cost savings and uses human-safe DC voltage suitable for LEDs. lightJuice CV4 is a 4-channel constant voltage dimmer configured for common anode drive. It offers high resolution (up to 12-bit) PWM dimming and can drive loads up to 60W in total at 24V. The product supports both Art-Net and sACN, with data and power connected via an Ethercon RJ45. An auxiliary DC input offers an alternative mode of operation if PoE++ is not available.",
+  "device_image": "https://artisticlicence.com/wp-content/uploads/2017/06/lightJuice-CV4.jpg",
+  "device_info": {
+    "make": "Artistic Licence",
+    "model": "lightJuice CV4",
+    "category": "Artnet LED constant voltage driver"
+  },
+  "device_manuals_url": "https://www.artisticlicence.com/WebSiteMaster/User%20Guides/lightjuice%20cv4%20user%20guide.pdf",
+  "modules": {
+    "bacext": {
+      "enabled": false
+    },
+    "bacnet": {
+      "enabled": false
+    },
+    "discover": {
+      "enabled": true
+    },
+    "ipaddr": {
+      "enabled": true
+    },
+    "mudgee": {
+      "enabled": false
+    },
+    "network": {
+      "enabled": true
+    },
+    "nmap": {
+      "enabled": true
+    },
+    "password": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true,
+      "poe": {
+        "enabled" : true
+      }
+    },
+    "tls": {
+      "enabled": true
+    },
+    "ssh": {
+      "enabled": true
+    },
+    "udmi": {
+      "enabled": false
+    }
+  },
+  "servers": {
+    "tcp": {
+      "ports": {
+        "20": {
+          "allowed": false,
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
+        },
+        "21": {
+          "allowed": false,
+          "description": "File Transfer Protocol (FTP) Server Data Transfer",
+          "reason": ""
+        },
+        "22": {
+          "allowed": true,
+          "description": "Secure Shell (SSH) server",
+          "reason": ""
+        },
+        "23": {
+          "allowed": false,
+          "description": "Telnet Server",
+          "reason": ""
+        },
+        "25": {
+          "allowed": false,
+          "description": "Simple Mail Transfer Protocol (SMTP) Server",
+          "reason": ""
+        },
+        "80": {
+          "allowed": false,
+          "description": "Administrative Insecure Web-Server",
+          "reason": ""
+        },
+        "110": {
+          "allowed": false,
+          "description": "Post Office Protocol v3 (POP3) Server",
+          "reason": ""
+        },
+        "143": {
+          "allowed": false,
+          "description": "Internet Message Access Protocol (IMAP) Server",
+          "reason": ""
+        },
+        "161": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP)",
+          "reason": ""
+        },
+        "162": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP) Trap",
+          "reason": ""
+        },
+        "443": {
+          "allowed": true,
+          "description": "Administrative Secure Web-Server",
+          "reason": ""
+        },
+        "5800": {
+          "allowed": false,
+          "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol Over HTTP",
+          "reason": ""
+        },
+        "5500": {
+          "allowed": false,
+          "description": "Virtual Network Computing (VNC) Remote Frame Buffer Protocol",
+          "reason": ""
+        }
+      }
+    },
+    "udp": {
+      "ports": {
+        "69": {
+          "allowed": false,
+          "description": "Trivial File Transfer Protocol (TFTP) Server",
+          "reason": ""
+        },
+        "123": {
+          "allowed": true,
+          "description": "Network Time Protocol (NTP) Server",
+          "reason": ""
+        },
+        "161": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP)",
+          "reason": ""
+        },
+        "162": {
+          "allowed": false,
+          "description": "Simple Network Management Protocol (SNMP) Trap",
+          "reason": ""
+        },
+        "47808": {
+          "allowed": false,
+          "description": "BACnet protocol",
+          "reason": ""
+        }
+      }
+    }
+  }
+}

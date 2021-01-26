@@ -1,0 +1,45 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+
+export DAQ_VERSION=$(git describe --dirty)
+LSB_RAW=$(lsb_release -a)
+export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
+export DAQ_SYS_UNAME=$(uname -a)
+
+if [ -f .pdbrc ]; then
+    echo Found .pdbrc file, using pdb...
+    runcmd="python3 -m pdb"
+elif [ -n "$DAQ_CODECOV" ]; then
+    echo Running with codecov analysis...
+    runcmd="coverage run --source=daq -a"
+else
+    runcmd="python3"
+fi
+
+if [ -d venv ]; then
+    echo Entering virtual python environment...
+    source venv/bin/activate
+fi
+
+if [ -z `which ifconfig` ]; then
+    export PATH=/sbin:$PATH
+fi
+
+if [ -z `which tcpdump` ]; then
+    export PATH=/usr/sbin:$PATH
+fi
+
+echo Using python3 at `which python3`
+
+export PYTHONDONTWRITEBYTECODE=True
+export PYTHONUNBUFFERED=True
+export TERM=dumb
+
+echo Prepending $ROOT/binhack to PATH
+export OVSVSCTL_ORIG=`which ovs-vsctl`
+export PATH=$ROOT/binhack:$PATH
+
+echo Executing: $runcmd daq/daq.py $@
+$runcmd daq/daq.py $@ 2>&1

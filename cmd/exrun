@@ -9,11 +9,7 @@ LOCALDIR=$ROOT/local
 FAUCET_LOG=$INSTDIR/faucet.log
 FAUCET_SOCK=faucet_event.sock
 export FAUCET_EVENT_SOCK=$INSTDIR/$FAUCET_SOCK
-export DAQ_VERSION=$(git describe --dirty)
 TAGGED_VERSION=`cat etc/docker_images.ver`
-LSB_RAW=$(lsb_release -a)
-export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
-export DAQ_SYS_UNAME=$(uname -a)
 skip_autostart=
 cleanup_file=inst/exrun_cleanup.sh
 uri_url_override=""
@@ -71,7 +67,10 @@ fi
 export PYTHONPATH=$FORCH:$FAUCET:$MININET:$LIBS:$PROTO
 
 mkdir -p $INSTDIR
-rm -rf $INSTDIR/faucet* $cleanup_file
+rm -f $cleanup_file
+if [ "$switch_setup_model" != EXT_STACK ]; then
+    rm -rf $INSTDIR/faucet*
+fi
 
 docker ps > /dev/null 2>&1 || service docker start
 
@@ -86,6 +85,13 @@ ovsctl=/usr/share/openvswitch/scripts/ovs-ctl
 $ovsctl status || sudo $ovsctl start
 
 sudo rm -f $cleanup_file
+
+if [ -z `which tcpdump` ]; then
+    export PATH=/usr/sbin:$PATH
+fi
+
+# Hacky workaround for apparmor protection of tcpdump. Without this, the process can not be killed.
+cp `which tcpdump` binhack/
 
 function autostart {
     tmp=`mktemp`
@@ -108,7 +114,7 @@ if [ -n "$switch_setup_alt_port" ]; then
     autostart bin/alt_faucet
 fi
 
-if [ -n "$switch_setup_model" ]; then
+if [ -n "$switch_setup_model" -a "$switch_setup_model" != EXT_STACK ]; then
     autostart bin/physical_sec
 else
     echo No external switch model specified.
@@ -141,42 +147,8 @@ if [ -z "$skip_autostart" ]; then
     fi
 fi
 
-if [ -f .pdbrc ]; then
-    echo Found .pdbrc file, using pdb...
-    runcmd="python3 -m pdb"
-elif [ -n "$DAQ_CODECOV" ]; then
-    echo Running with codecov analysis...
-    runcmd="coverage run --source=daq -a"
-else
-    runcmd="python3"
-fi
-
-if [ -d venv ]; then
-    echo Entering virtual python environment...
-    source venv/bin/activate
-fi
-
-if [ -z `which ifconfig` ]; then
-    export PATH=/sbin:$PATH
-fi
-
-if [ -z `which tcpdump` ]; then
-    export PATH=/usr/sbin:$PATH
-fi
-
-echo Using python3 at `which python3`
-echo Executing: $runcmd daq/daq.py $conf_file $@
-
-export PYTHONDONTWRITEBYTECODE=True
-export PYTHONUNBUFFERED=True
-export TERM=dumb
-
-echo Prepending $ROOT/binhack to PATH
-export OVSVSCTL_ORIG=`which ovs-vsctl`
-export PATH=$ROOT/binhack:$PATH
-
 exit_code=0
-$runcmd daq/daq.py $conf_file $uri_url_override $@ 2>&1 || exit_code=$?
+cmd/start $conf_file $@ $uri_url_override || exit_code=$?
 
 if [ -f "$cleanup_file" ]; then
     source $cleanup_file

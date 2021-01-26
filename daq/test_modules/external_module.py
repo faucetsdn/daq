@@ -4,9 +4,11 @@ from __future__ import absolute_import
 import datetime
 import abc
 import os
+from ipaddress import ip_network, ip_address
 
 import logger
 import wrappers
+from proto.system_config_pb2 import DhcpMode
 
 from .base_module import HostModule
 
@@ -24,6 +26,7 @@ class ExternalModule(HostModule):
         self.host = None
         self.pipe = None
         self.basedir = basedir
+        self.external_subnets = self.runner.config.get('external_subnets', [])
 
     @abc.abstractmethod
     def _get_module_class(self):
@@ -46,6 +49,10 @@ class ExternalModule(HostModule):
 
         try:
             pipe = host.activate(log_name=None)
+            # For devcies with ips that are not in the same subnet as test hosts' ips.
+            host_ip = self._get_host_ip(params)
+            if host.intf() and host_ip:
+                host.cmd('ip addr add %s dev %s' % (host_ip, host.intf()))
             self.log = host.open_log()
             if self._should_raise_test_exception('initialize'):
                 LOGGER.error('%s inducing initialization failure', self)
@@ -73,10 +80,28 @@ class ExternalModule(HostModule):
         LOGGER.info("%s terminating", self)
         return self._finalize()
 
+    def _get_host_ip(self, params):
+        target_subnet = ip_network(params['target_ip'])
+        runner_subnet = self.runner.network.get_subnet()
+        if target_subnet.overlaps(runner_subnet):
+            LOGGER.info('Target subnet %s overlaps with runner subnet %s.',
+                        target_subnet, runner_subnet)
+        else:
+            for subnet_spec in self.external_subnets:
+                subnet = ip_network(subnet_spec['subnet'])
+                if target_subnet.overlaps(subnet):
+                    target_ip = ip_address(params['target_ip'])
+                    new_ip = target_ip + (-1 if target_ip == subnet.broadcast_address - 1 else 1)
+                    LOGGER.info('Target subnet %s overlaps with external subnet %s.',
+                                target_subnet, subnet)
+                    return "%s/%s" % (str(new_ip), subnet.prefixlen)
+            LOGGER.info('No external subnets match target subnet %s.', target_subnet)
+        return None
+
     def _get_env_vars(self, params):
         def opt_param(key):
             return params.get(key) or ''  # Substitute empty string for None
-
+        dhcp_mode = DhcpMode.Name(self.device.dhcp_mode) if self.device.dhcp_mode else ''
         env_vars = [
             ("TARGET_NAME", self.host_name),
             ("TARGET_IP", params['target_ip']),
@@ -85,6 +110,7 @@ class ExternalModule(HostModule):
             ("GATEWAY_IP", params['gateway_ip']),
             ("GATEWAY_MAC", params['gateway_mac']),
             ("LOCAL_IP", opt_param('local_ip')),
+            ("DHCP_MODE", dhcp_mode)
         ]
         return env_vars
 

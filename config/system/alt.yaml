@@ -1,17 +1,18 @@
 # Example configuration file for using an OVS switch not managed by DAQ.
 
 # Load defaults.
-include: config/system/default.yaml
+include: default.yaml
 
 # Description for dashboard.
-site_description: "Alternate (not managed by DAQ) OVS switch configuration"
+site_description: "Alternate switch (not managed by DAQ) configuration"
 
 # Network switch configuration.
 switch_setup:
   data_intf: alt-intf
   alt_port: 6669
-  uplink_port: 100
+  uplink_port: 10
   ext_br: alt-switch
+  model: EXT_STACK
 
 # Faux device connection for testing.
 interfaces:
@@ -20,11 +21,19 @@ interfaces:
     port: 2
   faux-2:
     opts: -n 
-    port: 3
+    port: 11
 
 default_timeout_sec: 120
 
 # use vlan trigger
 run_trigger:
-  vlan_start: 2000
-  vlan_end: 2050
+  vlan_start: 1001
+  vlan_end: 1009
+  egress_vlan: 121
+
+internal_subnet: 
+  subnet: 192.168.1.0/24
+
+# Define external DHCP subnets to be used by test hosts
+external_subnets:
+  - subnet: 10.20.0.0/16

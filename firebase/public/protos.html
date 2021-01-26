@@ -191,6 +191,10 @@
                 </li>
               
                 <li>
+                  <a href="#DeviceReporting"><span class="badge">M</span>DeviceReporting</a>
+                </li>
+              
+                <li>
                   <a href="#Interface"><span class="badge">M</span>Interface</a>
                 </li>
               
@@ -199,16 +203,24 @@
                 </li>
               
                 <li>
+                  <a href="#SubnetSpec"><span class="badge">M</span>SubnetSpec</a>
+                </li>
+              
+                <li>
                   <a href="#SwitchSetup"><span class="badge">M</span>SwitchSetup</a>
                 </li>
               
                 <li>
-                  <a href="#USISetup"><span class="badge">M</span>USISetup</a>
+                  <a href="#UsiSetup"><span class="badge">M</span>UsiSetup</a>
+                </li>
+              
+                <li>
+                  <a href="#VxlanSetup"><span class="badge">M</span>VxlanSetup</a>
                 </li>
               
               
                 <li>
-                  <a href="#DHCPMode"><span class="badge">E</span>DHCPMode</a>
+                  <a href="#DhcpMode"><span class="badge">E</span>DhcpMode</a>
                 </li>
               
               
@@ -492,7 +504,7 @@
               
                 <tr>
                   <td>usi_setup</td>
-                  <td><a href="#USISetup">USISetup</a></td>
+                  <td><a href="#UsiSetup">UsiSetup</a></td>
                   <td></td>
                   <td><p>USI url </p></td>
                 </tr>
@@ -516,6 +528,34 @@
                   <td><a href="#bool">bool</a></td>
                   <td></td>
                   <td><p>Drop into console mode after test </p></td>
+                </tr>
+              
+                <tr>
+                  <td>device_reporting</td>
+                  <td><a href="#DeviceReporting">DeviceReporting</a></td>
+                  <td></td>
+                  <td><p>Reporting device result </p></td>
+                </tr>
+              
+                <tr>
+                  <td>external_subnets</td>
+                  <td><a href="#SubnetSpec">SubnetSpec</a></td>
+                  <td>repeated</td>
+                  <td><p>For specifying ip subnets assigned by external DHCP server / static ips </p></td>
+                </tr>
+              
+                <tr>
+                  <td>internal_subnet</td>
+                  <td><a href="#SubnetSpec">SubnetSpec</a></td>
+                  <td></td>
+                  <td><p>IP subnet used by test hosts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>include</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Path to include file </p></td>
                 </tr>
               
             </tbody>
@@ -587,6 +627,30 @@
 
         
       
+        <h3 id="DeviceReporting">DeviceReporting</h3>
+        <p>Configuration for device result reporting</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>server_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Server port </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="Interface">Interface</h3>
         <p>Information for faux containers.</p>
 
@@ -640,6 +704,37 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>end of vlan range </p></td>
+                </tr>
+              
+                <tr>
+                  <td>egress_vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>egress vlan </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SubnetSpec">SubnetSpec</h3>
+        <p>For specifying internal / external subnets information</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>subnet</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>
@@ -750,6 +845,13 @@
                   <td><p>Switch connect password </p></td>
                 </tr>
               
+                <tr>
+                  <td>vxlan</td>
+                  <td><a href="#VxlanSetup">VxlanSetup</a></td>
+                  <td></td>
+                  <td><p>VXLAN configuration information </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -757,7 +859,7 @@
 
         
       
-        <h3 id="USISetup">USISetup</h3>
+        <h3 id="UsiSetup">UsiSetup</h3>
         <p>USI paramters</p>
 
         
@@ -788,9 +890,40 @@
 
         
       
+        <h3 id="VxlanSetup">VxlanSetup</h3>
+        <p>Information for configuring a vxlan interface.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>remote_ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Remote endpoint for vxlan interface. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Tunnel key id. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
 
       
-        <h3 id="DHCPMode">DHCPMode</h3>
+        <h3 id="DhcpMode">DhcpMode</h3>
         <p></p>
         <table class="enum-table">
           <thead>

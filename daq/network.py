@@ -1,6 +1,12 @@
 """Networking module"""
 
+from __future__ import absolute_import
+
+from ipaddress import ip_network
+import copy
 import os
+import time
+import yaml
 
 import logger
 from topology import FaucetTopology
@@ -11,6 +17,7 @@ from mininet import link as mininet_link
 from mininet import cli as mininet_cli
 from mininet import util as mininet_util
 from forch import faucetizer
+from forch.proto.forch_configuration_pb2 import OrchestrationConfig
 
 LOGGER = logger.get_logger('network')
 
@@ -36,8 +43,12 @@ class TestNetwork:
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
     DEFAULT_OF_PORT = 6653
+    DEFAULT_MININET_SUBNET = "10.20.0.0/16"
     _CTRL_PRI_IFACE = 'ctrl-pri'
+    INTERMEDIATE_FAUCET_FILE = "inst/faucet_intermediate.yaml"
     OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
+    _VXLAN_DEFAULT_PORT = 4789
+    _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
 
     def __init__(self, config):
         self.config = config
@@ -46,13 +57,19 @@ class TestNetwork:
         self.sec = None
         self.sec_dpid = None
         self.sec_port = None
+        self.tap_intf = None
+        self._settle_sec = int(config['settle_sec'])
+        subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
+        self._mininet_subnet = ip_network(subnet)
         self.topology = FaucetTopology(self.config)
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
         self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
         self.switch_links = {}
-        self.faucitizer = faucetizer.Faucetizer(None, None)
+        orch_config = OrchestrationConfig()
+        self.faucitizer = faucetizer.Faucetizer(
+            orch_config, self.INTERMEDIATE_FAUCET_FILE, self.OUTPUT_FAUCET_FILE)
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
@@ -102,6 +119,10 @@ class TestNetwork:
             self._switch_del_intf(self.pri, intf)
             intf.delete()
             del self.net.links[self.net.links.index(switch_link)]
+
+    def get_subnet(self):
+        """Gets the internal mininet subnet"""
+        return copy.copy(self._mininet_subnet)
 
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
@@ -156,7 +177,7 @@ class TestNetwork:
         """Initialize network"""
 
         LOGGER.debug("Creating miniet...")
-        self.net = mininet_net.Mininet(ipBase='10.20.0.0/16')
+        self.net = mininet_net.Mininet(ipBase=str(self._mininet_subnet))
 
         LOGGER.debug("Adding primary...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
@@ -166,8 +187,7 @@ class TestNetwork:
         self.topology.start()
 
         LOGGER.info("Initializing faucitizer...")
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self._generate_behavioral_config()
 
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
@@ -184,22 +204,50 @@ class TestNetwork:
         if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
 
+        self.tap_intf = self._configure_tap_intf()
+
+    def _configure_tap_intf(self):
+        vxlan_config = self.config.get('switch_setup', {}).get('vxlan', {})
+        if 'key' not in vxlan_config:
+            return self.ext_intf
+
+        key = vxlan_config['key']
+        remote_ip = vxlan_config['remote_ip']
+        port = self._VXLAN_DEFAULT_PORT
+        ovs_config = self._VXLAN_CONFIG_FMT % (self.ext_intf, remote_ip, key)
+        LOGGER.info('Configuring interface %s', ovs_config)
+        if self._settle_sec:
+            time.sleep(self._settle_sec)
+        self.pri.vsctl('set interface %s' % ovs_config)
+
+        # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
+        return 'vxlan_sys_%d' % port
+
     def direct_port_traffic(self, target_mac, port, target):
         """Direct traffic for a given mac to target port"""
         dest = target['port_set'] if target else None
         LOGGER.info('Directing traffic for %s on port %s to %s', target_mac, port, dest)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_port_traffic(target_mac, port, target)
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self._generate_behavioral_config()
 
-    def direct_vlan_traffic(self, port_set, vlan):
+    def _generate_behavioral_config(self):
+        with open(self.INTERMEDIATE_FAUCET_FILE, 'w') as file:
+            network_topology = self.topology.get_network_topology()
+            yaml.safe_dump(network_topology, file)
+
+        self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
+        if self._settle_sec:
+            LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
+            time.sleep(self._settle_sec)
+
+    def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
-        LOGGER.info('Directing traffic for port set %s to vlan %s', port_set, vlan)
+        LOGGER.info('Directing traffic for %s on vlan %s to %s',
+                    device.mac, device.vlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
-        self.topology.direct_vlan_traffic(port_set, vlan)
-        self.faucitizer.process_faucet_config(self.topology.get_network_topology())
-        faucetizer.write_behavioral_config(self.faucitizer, self.OUTPUT_FAUCET_FILE)
+        self.topology.direct_device_traffic(device, port_set)
+        self._generate_behavioral_config()
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()
@@ -229,9 +277,9 @@ class TestNetwork:
                            'set', 'interface', mirror_intf_name, 'ofport_request=%s' % mirror_port)
         return mirror_intf_name
 
-    def device_group_for(self, target_mac):
-        """Find the target device group for the given address."""
-        return self.topology.device_group_for(target_mac)
+    def device_group_for(self, device):
+        """Find the target device group for the given device."""
+        return self.topology.device_group_for(device)
 
     def device_group_size(self, group_name):
         """Return the size of the given group."""

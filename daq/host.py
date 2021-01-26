@@ -12,7 +12,7 @@ from clib import tcpdump_helper
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
-from proto.system_config_pb2 import DHCPMode
+from proto.system_config_pb2 import DhcpMode
 
 import configurator
 from test_modules import DockerModule, IpAddrModule, NativeModule
@@ -69,15 +69,20 @@ class ConnectedHost:
 
     _STARTUP_MIN_TIME_SEC = 5
     _RPC_TIMEOUT_SEC = 20
-    _INST_DIR = "inst/"
-    _DEVICE_PATH = "device/%s"
-    _NETWORK_DIR = "inst/network"
-    _MODULE_CONFIG = "module_config.json"
-    _CONTROL_PATH = "control/port-%s"
+    _INST_DIR = 'inst/'
+    _DEVICE_PATH = 'device/%s'
+    _NETWORK_DIR = 'inst/network'
+    _MODULE_CONFIG = 'module_config.json'
+    _DEVICE_CONFIG = 'device_config.json'
+    _TYPE_CONFIG = 'type_config.json'
+    _PORT_CONFIG = 'port_config.json'
+    _BASE_CONFIG = 'base_config.json'
+    _CONTROL_PATH = 'control/port-%s'
     _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
-    _AUX_DIR = "aux/"
-    _CONFIG_DIR = "config/"
+    _AUX_DIR = 'aux/'
+    _CONFIG_DIR = 'config/'
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
+    _PATH_PREFIX = os.path.abspath('.') + '/' + _INST_DIR
 
     # pylint: disable=too-many-statements
     def __init__(self, runner, device, config):
@@ -207,23 +212,29 @@ class ConnectedHost:
 
     def _get_dhcp_mode(self):
         mode_str = self._loaded_config['modules'].get('ipaddr', {}).get('dhcp_mode', "NORMAL")
-        return DHCPMode.Value(mode_str)
+        return DhcpMode.Value(mode_str)
 
     def _get_unique_upload_path(self, file_name):
         base = os.path.basename(file_name)
         partial = os.path.join('tests', self.test_name, base) if self.test_name else base
         return os.path.join('run_id', self.run_id, partial)
 
-    def _load_config(self, name, config, path):
+    def _load_config(self, name, config, path, filename):
+        if not path:
+            return config
         if name:
-            self.logger.info('Loading %s module config from %s', name, path)
-        return self.configurator.load_and_merge(config, path, self._MODULE_CONFIG, optional=True)
+            self.logger.info('Loading %s module config from %s/%s', name, path, filename)
+        old_path = os.path.join(path, self._MODULE_CONFIG)
+        if os.path.exists(old_path):
+            raise Exception('Old %s config found in %s, should be renamed to %s' %
+                            (name, old_path, filename))
+        return self.configurator.load_and_merge(config, path, filename, optional=True)
 
     def _write_module_config(self, config, path):
         self.configurator.write_config(config, path, self._MODULE_CONFIG)
 
     def _type_path(self):
-        dev_config = self._load_config(None, {}, self._device_base)
+        dev_config = self._load_config(None, {}, self._device_base, self._DEVICE_CONFIG)
         device_type = dev_config.get('device_type')
         if not device_type:
             return None
@@ -357,9 +368,10 @@ class ConnectedHost:
         static_ip = self._get_static_ip()
         if static_ip:
             self.logger.info('Target device %s using static ip', self)
-            self.device.dhcp_mode = DHCPMode.STATIC_IP
+            self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
+                'type': 'STATIC',
                 'mac': self.target_mac,
                 'ip': static_ip,
                 'delta': -1
@@ -370,10 +382,10 @@ class ConnectedHost:
                 self.device.dhcp_mode = dhcp_mode
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
-                if self.device.dhcp_mode == DHCPMode.LONG_RESPONSE else 0
+                if self.device.dhcp_mode == DhcpMode.LONG_RESPONSE else 0
             self.logger.info('Target device %s using %s DHCP mode, wait %s',
-                             self, DHCPMode.Name(self.device.dhcp_mode), wait_time)
-            if self.device.dhcp_mode != DHCPMode.EXTERNAL:
+                             self, DhcpMode.Name(self.device.dhcp_mode), wait_time)
+            if self.device.dhcp_mode != DhcpMode.EXTERNAL:
                 self.gateway.change_dhcp_response_time(self.target_mac, wait_time)
         _ = [listener(self.device) for listener in self._dhcp_listeners]
 
@@ -465,7 +477,7 @@ class ConnectedHost:
         delta_t = datetime.now() - self._startup_time
         if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
             return False
-        if self._get_dhcp_mode() == DHCPMode.IP_CHANGE:
+        if self._get_dhcp_mode() == DhcpMode.IP_CHANGE:
             return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         return True
 
@@ -501,13 +513,18 @@ class ConnectedHost:
         self.logger.info('Target device %s startup pcap capture', self)
         self._monitor_scan(self._startup_file)
 
+    def _shorten_filename(self, long_name):
+        if long_name and long_name.startswith(self._PATH_PREFIX):
+            return long_name[len(self._PATH_PREFIX):]
+        return long_name
+
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
-                         output_file)
+                         self._shorten_filename(output_file))
         helper = tcpdump_helper.TcpdumpHelper(network.pri, tcp_filter, packets=None,
                                               intf_name=self._mirror_intf_name,
                                               timeout=timeout, pcap_out=output_file,
@@ -771,9 +788,9 @@ class ConnectedHost:
         config = self.runner.get_base_config()
         if run_info:
             self._merge_run_info(config)
-        self._load_config('type', config, self._type_path())
-        self._load_config('device', config, self._device_base)
-        self._load_config('port', config, self._port_base)
+        self._load_config('type', config, self._type_path(), self._TYPE_CONFIG)
+        self._load_config('device', config, self._device_base, self._DEVICE_CONFIG)
+        self._load_config('port', config, self._port_base, self._PORT_CONFIG)
         return config
 
     def record_result(self, name, **kwargs):
@@ -842,7 +859,7 @@ class ConnectedHost:
         self.reload_config()
 
     def _initialize_config(self):
-        dev_config = self._load_config('base', {}, self._device_base)
+        dev_config = self._load_config('base', {}, self._device_base, self._BASE_CONFIG)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
         if self.target_port:

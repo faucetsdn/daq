@@ -40,10 +40,6 @@
       "enabled": false
     }
   },
-  "process": {
-    "approver": "*** Approver ***",
-    "operator": "*** Operator ***"
-  },
   "report": {
     "results": [ "pass", "fail", "skip", "info"  ],
     "categories": [ "Connection", "Security", "Network Time", "TLS", "Protocol", "PoE", "BOS"],
@@ -63,7 +59,7 @@
     "connection.switch.port_duplex": {
       "category": "Connection",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Recommended Pass"
     },
     "base.switch.ping": {
       "category": "Connection",
@@ -98,12 +94,12 @@
     "ntp.network.ntp_support": {
       "category": "Network Time",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Recommended Pass"
     },
     "ntp.network.ntp_update": {
       "category": "Network Time",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Recommended Pass"
     },
     "connection.network.communication_type": {
       "category": "Communication",
@@ -113,7 +109,7 @@
     "connection.network.communication_min_send": {
       "category": "Communication",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Recommended Pass"
     },
     "security.nmap.ports": {
       "category": "Security",
@@ -123,7 +119,7 @@
     "security.tls.v3": {
       "category": "TLS",
       "required": "pass",
-      "expected": "Required Pass"
+      "expected": "Recommended Pass"
     },
     "security.tls.x509": {
       "category": "Access Control",
@@ -153,7 +149,7 @@
     "protocol.bacext.pic": {
       "category": "Protocol",
       "required": "pass",
-      "expected": "Required Pass for BACnet Devices"
+      "expected": "Required Pass for BACnet devices"
     },
     "protocol.bacext.version": {
       "category": "Protocol",
@@ -175,7 +171,7 @@
       "required": "info",
       "expected": "Information"
     },
-    "cloud.udmi.pointset": {
+    "cloud.udmi.udmi_pointset": {
       "category": "BOS",
       "required": "pass",
       "expected": "Recommended Pass"
@@ -184,54 +180,6 @@
       "category": "Security",
       "required": "info",
       "expected": "Information"
-    },
-    "security.manual.java_interface": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.flash_interface": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.flash_functionality": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.http": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "security.manual.web_passwords": {
-      "category": "Security",
-      "required": "pass",
-      "expected": "Required Pass",
-      "type": "manual"
-    },
-    "connection.manual.comms_down": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Recommended Pass",
-      "type": "manual"
-    },    
-    "connection.manual.sec_eth_port": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Recommended Pass",
-      "type": "manual"
-    },    
-    "connection.manual.sec_eth_port_no_ip": {
-      "category": "Connection",
-      "required": "pass",
-      "expected": "Recommended Pass",
-      "type": "manual"
     }
   }
 }

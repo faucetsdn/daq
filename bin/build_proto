@@ -6,6 +6,8 @@ cd $ROOT
 WEB_ROOT=firebase/public
 
 proto_files=`ls proto/*.proto`
+PROTOC_VERSION=$(< etc/PROTOC_VERSION)
+echo Using protoc version $PROTOC_VERSION
 
 if [ "$1" == check ]; then
     mkdir -p build
@@ -24,6 +26,7 @@ sha1sum $proto_files > $WEB_ROOT/protos.hash
 (
     export PATH=$PATH:/usr/local/go/bin/
     cd protoc-gen-doc
+    git checkout $PROTOC_VERSION
     script/dist.sh
     tar -xzvf dist/protoc-gen-doc-*.linux-amd64.go*.tar.gz
     mkdir -p bin

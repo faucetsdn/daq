@@ -10,7 +10,7 @@ import copy
 import logger
 from .docker_module import DockerModule
 from .base_module import HostModule
-from proto.system_config_pb2 import DHCPMode
+from proto.system_config_pb2 import DhcpMode
 
 _LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
 LEASE_TIME_UNITS_CONVERTER = {
@@ -52,9 +52,10 @@ class IpAddrModule(HostModule):
     def start(self, port, params, callback, finish_hook):
         """Start the ip-addr tests"""
         super().start(port, params, callback, finish_hook)
-        assert self.host.device.dhcp_mode != DHCPMode.EXTERNAL, "device DHCP is not enabled."
-        self._logger.debug('Target device %s starting ipaddr test %s', self.device, self.test_name)
-        self._next_test()
+        assert self.host.device.dhcp_mode != DhcpMode.EXTERNAL, "device DHCP is not enabled."
+        self._logger.info('Target device %s starting ipaddr test %s', self.device, self.test_name)
+        # Wait for initial ip before beginning test.
+        self._ip_callback = self._next_test
 
     def _get_lease_time(self):
         lease_time = self.host.config.get("dhcp_lease_time")

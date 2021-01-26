@@ -22,6 +22,8 @@ fi
 
 if [ -n "$STATIC_IP" ]; then
     echo RESULT skip base.startup.dhcp Using static ip $STATIC_IP | tee -a $RESULT_LINES
+elif [ "$DHCP_MODE" == "EXTERNAL" ]; then
+    echo RESULT skip base.startup.dhcp Using external DHCP | tee -a $RESULT_LINES
 else
     req=pass
     ack=pass
@@ -68,12 +70,13 @@ fi
 # First ping might fail b/c of warm-up delays.
 summary=""
 local_status=pass
-ping -n -c 10 $TARGET_IP || (local_status=fail && status=fail)
+ping -n -c 10 $TARGET_IP || local_status=fail
 
 if [ $local_status == pass ]; then
     summary="target reached"
 else
     summary="could not reach target"
+    status=fail
 fi
 
 echo RESULT $local_status connection.base.target_ping $summary %% $TARGET_IP | tee -a $RESULT_LINES

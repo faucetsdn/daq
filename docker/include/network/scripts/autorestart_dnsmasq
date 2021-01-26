@@ -5,6 +5,7 @@ config_file='/etc/dnsmasq.conf'
 
 PID_FILE=/var/run/dnsmasq.pid
 
+# Wait for first client so tcpdump has a chance to attach first.
 echo Waiting for first DHCP device...
 while [ $(cat $config_file | grep "dhcp-host=\*,ignore" | wc -l) -ne 0 ]; do 
     sleep 1
@@ -28,7 +29,7 @@ while true; do
     fi
     checksum=$new_checksum
     echo Starting dnsmasq at $(date)
-    dnsmasq --dhcp-broadcast --log-facility=/tmp/dnsmasq.log --log-dhcp &
+    dnsmasq --log-facility=/tmp/dnsmasq.log --log-dhcp &
     while [ ! -f $PID_FILE ]; do
         echo Waiting for $PID_FILE...
         sleep 2

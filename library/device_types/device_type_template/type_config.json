@@ -5,7 +5,7 @@
   "device_info": {
     "make": "*** Make ***",
     "model": "*** Model ***",
-    "type": "*** Type ***"
+    "category": "*** Category ***"
   },
   "device_manuals_url": "*** Device Manuals URL ***",
   "modules": {
@@ -14,9 +14,6 @@
     },
     "bacnet": {
       "enabled": true
-    },
-    "brute": {
-      "enabled": false
     },
     "discover": {
       "enabled": true
@@ -42,11 +39,11 @@
     "tls": {
       "enabled": true
     },
-    "passwords": {
+    "password": {
       "enabled": true
     },
     "udmi": {
-      "enabled": false
+      "enabled": true
     }
   },
   "servers": {

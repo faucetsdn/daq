@@ -11,10 +11,12 @@ import json
 import pathlib
 from datetime import datetime, timedelta, timezone
 
+from forch.proto.shared_constants_pb2 import PortBehavior
+
 import configurator
+from device_report_client import DeviceReportClient
 import faucet_event_client
 import container_gateway
-
 import external_gateway
 import gcp
 import host as connected_host
@@ -22,7 +24,7 @@ import network
 import stream_monitor
 from wrappers import DaqException
 import logger
-from proto.system_config_pb2 import DHCPMode
+from proto.system_config_pb2 import DhcpMode
 
 LOGGER = logger.get_logger('runner')
 
@@ -79,6 +81,11 @@ class Devices:
         device.set_id = set_id
         return device
 
+    def create_if_absent(self, mac, port_info=None, vlan=None):
+        """Create a new device if none found, else return the previous one"""
+        prev_device = self._devices.get(mac)
+        return prev_device if prev_device else self.new_device(mac, port_info=port_info, vlan=vlan)
+
     def _allocate_set_id(self):
         set_id = 1
         while set_id in self._set_ids:
@@ -129,7 +136,7 @@ class DAQRunner:
 
     MAX_GATEWAYS = 9
     _DEFAULT_RETENTION_DAYS = 30
-    _MODULE_CONFIG = 'module_config.json'
+    _SITE_CONFIG = 'site_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
     _DEFAULT_TESTS_FILE = 'config/modules/host.conf'
     _RESULT_LOG_FILE = 'inst/result.log'
@@ -166,6 +173,7 @@ class DAQRunner:
         self._system_active = False
         logging_client = self.gcp.get_logging_client()
         self.daq_run_id = self._init_daq_run_id()
+        self._device_result_client = self._init_device_result_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
@@ -194,6 +202,12 @@ class DAQRunner:
         with open('inst/daq_run_id.txt', 'w') as output_stream:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
+
+    def _init_device_result_client(self):
+        server_port = self.config.get('device_reporting', {}).get('server_port')
+        if server_port:
+            return DeviceReportClient(server_port=server_port)
+        return None
 
     def _send_heartbeat(self):
         message = {
@@ -297,17 +311,13 @@ class DAQRunner:
             LOGGER.debug('Unknown port %s on dpid %s is active %s', port, dpid, active)
             return
 
-        if port not in self._ports:
-            self._ports[port] = PortInfo()
-            self._ports[port].port_no = port
-
-        if active != self._ports[port].active:
+        if active != self._is_port_active(port):
             LOGGER.info('Port %s dpid %s is now %s', port, dpid, "active" if active else "inactive")
         if active:
             self._activate_port(port)
-        else:
-            device = self._devices.get_by_port_info(self._ports[port])
+        elif port in self._ports:
             port_info = self._ports[port]
+            device = self._devices.get_by_port_info(port_info)
             if device and device.host and not port_info.flapping_start:
                 port_info.flapping_start = time.time()
             if port_info.active:
@@ -316,10 +326,27 @@ class DAQRunner:
                 self._deactivate_port(port)
         self._send_heartbeat()
 
+    def _handle_remote_port_state(self, device, port_event):
+        if not device.host:
+            return
+        if port_event.event == PortBehavior.PortEvent.down:
+            if not device.port.flapping_start:
+                device.port.flapping_start = time.time()
+            device.port.active = False
+        else:
+            device.port.flapping_start = 0
+            device.port.active = True
+
     def _activate_port(self, port):
+        if port not in self._ports:
+            self._ports[port] = PortInfo()
+            self._ports[port].port_no = port
         port_info = self._ports[port]
         port_info.flapping_start = 0
         port_info.active = True
+
+    def _is_port_active(self, port):
+        return port in self._ports and self._ports[port].active
 
     def _deactivate_port(self, port):
         port_info = self._ports[port]
@@ -329,24 +356,27 @@ class DAQRunner:
         self.network.direct_port_traffic(mac, port, target)
 
     def _handle_port_learn(self, dpid, port, vid, target_mac):
-        if self.network.is_device_port(dpid, port):
+        if self.network.is_device_port(dpid, port) and self._is_port_active(port):
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
-            if port not in self._ports:
-                self._ports[port] = PortInfo()
-                self._ports[port].port_no = port
-            if not self._devices.get(target_mac):
-                self._devices.new_device(target_mac, port_info=self._ports[port])
-            self._target_set_trigger(self._devices.get(target_mac))
+            device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
+            self._target_set_trigger(device)
         else:
-            LOGGER.debug('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
+            LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, vid, target_mac):
-        LOGGER.info('%s learned on vid %s', target_mac, vid)
+        LOGGER.info('Learned %s on vid %s', target_mac, vid)
         if not self._devices.get(target_mac):
             device = self._devices.new_device(target_mac, vlan=vid)
         else:
             device = self._devices.get(target_mac)
-        device.dhcp_mode = DHCPMode.EXTERNAL
+        device.dhcp_mode = DhcpMode.EXTERNAL
+
+        # For keeping track of remote port flap events
+        if self._device_result_client:
+            device.port = PortInfo()
+            device.port.active = True
+            self._device_result_client.get_port_events(
+                device.mac, lambda event: self._handle_remote_port_state(device, event))
         self._target_set_trigger(device)
 
     def _queue_callback(self, callback):
@@ -473,7 +503,7 @@ class DAQRunner:
             return False
 
         try:
-            group_name = self.network.device_group_for(device.mac)
+            group_name = self.network.device_group_for(device)
             device.group = group_name
             gateway = self._activate_device_group(device)
             if gateway.activated:
@@ -488,7 +518,7 @@ class DAQRunner:
 
         # Stops all DHCP response initially
         # Selectively enables dhcp response at ipaddr stage based on dhcp mode
-        if device.dhcp_mode != DHCPMode.EXTERNAL:
+        if device.dhcp_mode != DhcpMode.EXTERNAL:
             gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
@@ -509,10 +539,13 @@ class DAQRunner:
                 }
                 self._direct_port_traffic(device.mac, device.port.port_no, target)
             else:
-                self.network.direct_vlan_traffic(gateway.port_set, device.vlan)
+                self._direct_device_traffic(device, gateway.port_set)
             return True
         except Exception as e:
             self.target_set_error(device, e)
+
+    def _direct_device_traffic(self, device, port_set):
+        self.network.direct_device_traffic(device, port_set)
 
     def _get_test_list(self, test_file):
         no_test = self.config.get('no_test', False)
@@ -583,9 +616,10 @@ class DAQRunner:
         set_num = self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, initializing base %d...',
                     device.group, set_num)
-        if device.dhcp_mode == DHCPMode.EXTERNAL:
+        if device.dhcp_mode == DhcpMode.EXTERNAL:
             # Under vlan trigger, start a external gateway that doesn't utilize a DHCP server.
             gateway = external_gateway.ExternalGateway(self, group_name, set_num)
+            gateway.set_tap_intf(self.network.tap_intf)
         else:
             gateway = container_gateway.ContainerGateway(self, group_name, set_num)
 
@@ -608,19 +642,20 @@ class DAQRunner:
             self._terminate_gateway_set(gateway)
             return
 
+        target_type = target['type']
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('IP notify %s is %s on %s (%s/%d)', target_mac,
+        LOGGER.info('IP notify %s %s is %s on %s (%s/%d)', target_type, target_mac,
                     target_ip, gateway, state, delta_sec)
 
-        if not target_mac:
-            LOGGER.warning('IP target mac missing')
-            return
+        assert target_mac
+        assert target_ip
+        assert delta_sec is not None
 
         device = self._devices.get(target_mac)
         device.ip_info.ip_addr = target_ip
         device.ip_info.state = state
         device.ip_info.delta_sec = delta_sec
-        if device and device.host:
+        if device and device.host and target_type in ('ACK', 'STATIC'):
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
 
@@ -755,6 +790,10 @@ class DAQRunner:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
+        if self._device_result_client:
+            device_result = PortBehavior.failed if results else PortBehavior.passed
+            self._device_result_client.send_device_result(device.mac, device_result)
+
     def _target_set_cancel(self, device):
         target_host = device.host
         if target_host:
@@ -791,11 +830,13 @@ class DAQRunner:
         target_gateway = device.gateway
         if not target_gateway:
             return
-        device.gateway = None
         if not target_gateway.detach_target(device):
             LOGGER.info('Retiring %s. Last device: %s', target_gateway, device)
-            self.gateway_sets.add(target_gateway.port_set)
             target_gateway.terminate()
+            self.gateway_sets.add(target_gateway.port_set)
+            if device.vlan:
+                self._direct_device_traffic(device, None)
+        device.gateway = None
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""
@@ -845,22 +886,22 @@ class DAQRunner:
     def _base_config_changed(self, new_config):
         LOGGER.info('Base config changed: %s', new_config)
         self.configurator.write_config(new_config, self.config.get('site_path'),
-                                       self._MODULE_CONFIG)
+                                       self._SITE_CONFIG)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
 
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
-        LOGGER.info('Loading base module config from %s', base_conf)
-        base = self.configurator.load_and_merge({}, base_conf)
+        LOGGER.info('Loading base config from %s', base_conf)
+        base = self.configurator.load_and_merge({}, os.getcwd(), base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site module config from %s', base_conf)
-        site_config = self.configurator.load_config(site_path, self._MODULE_CONFIG, optional=True)
+        LOGGER.info('Loading site config from %s', os.path.join(site_path, self._SITE_CONFIG))
+        site_config = self.configurator.load_config(site_path, self._SITE_CONFIG, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
-        return self.configurator.merge_config(base, site_config)
+        return self.configurator.merge_config(base, site_path, site_config)
 
     def get_base_config(self):
         """Get the base configuration for this install"""

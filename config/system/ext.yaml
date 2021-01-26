@@ -1,10 +1,10 @@
 # Base configuration file for using an OVS switch external to DAQ itself.
 
 # Load defaults.
-include: config/system/default.yaml
+include: default.yaml
 
 # Description for dashboard.
-site_description: "External (not integrated with DAQ) OVS switch configuration"
+site_description: "External switch (not integrated with DAQ) configuration"
 
 # Network switch configuration.
 switch_setup:

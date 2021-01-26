@@ -2,7 +2,6 @@
 
 import copy
 import os
-import time
 import yaml
 
 from base_gateway import BaseGateway
@@ -36,11 +35,14 @@ class FaucetTopology:
     _MIRROR_IFACE_FORMAT = "mirror-%d"
     _MIRROR_PORT_BASE = 1000
     _SWITCH_LOCAL_PORT = _MIRROR_PORT_BASE
-    _VLAN_BASE = 1000
+    _LOCAL_VLAN = 1000
+    _DUMP_VLAN = 999
     PRI_DPID = 1
     PRI_TRUNK_PORT = 1
     PRI_TRUNK_NAME = 'trunk_pri'
     _NO_VLAN = "0x0000/0x1000"
+    _EXT_STACK = 'EXT_STACK'
+    _OFPP_IN_PORT = 0xfffffff8
 
     def __init__(self, config):
         self.config = config
@@ -52,9 +54,11 @@ class FaucetTopology:
         self.sec_dpid = int(switch_setup['of_dpid'], 0)
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
-        self._settle_sec = int(config['settle_sec'])
+        self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
+        self._set_devices = {}
+        self._egress_vlan = self.config.setdefault('run_trigger', {}).get('egress_vlan')
         self.topology = None
 
     def initialize(self, pri):
@@ -67,6 +71,9 @@ class FaucetTopology:
 
     def start(self):
         """Start this instance"""
+        if self._ext_faucet:
+            LOGGER.info('Relying on external faucet...')
+            return
         LOGGER.info("Starting faucet...")
         output = self.pri.cmd('cmd/faucet && echo SUCCESS')
         if not output.strip().endswith('SUCCESS'):
@@ -107,11 +114,22 @@ class FaucetTopology:
             device_intfs.append(intf_names[port-1] if named_port else default_name)
         return device_intfs
 
-    def direct_vlan_traffic(self, port_set, vlan):
+    def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
+        device_set = device.gateway.port_set
+        assert port_set == device_set or not port_set
+        if port_set:
+            self._set_devices.setdefault(device_set, set()).add(device)
+        else:
+            self._set_devices[device_set].remove(device)
+        set_active = bool(self._set_devices[device_set])
+        vlan = device.vlan if set_active else self._DUMP_VLAN
+        LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
+        assert vlan
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
-        for port in self._get_gw_ports(port_set):
+        for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
+        self._generate_acls()
 
     def direct_port_traffic(self, target_mac, port_no, target):
         """Direct traffic from a port to specified port set"""
@@ -125,10 +143,8 @@ class FaucetTopology:
             return
         self._generate_acls()
         port_set = target['port_set'] if target else None
-        self._update_port_vlan(port_no, port_set)
-        if self._settle_sec:
-            LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
-            time.sleep(self._settle_sec)
+        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
+        interface['native_vlan'] = self._port_set_vlan(port_set)
 
     def _ensure_entry(self, root, key, value):
         if key not in root:
@@ -161,25 +177,28 @@ class FaucetTopology:
         interface['output_only'] = True
         return interface
 
-    def _make_switch_interface(self):
+    def _make_local_interface(self):
         interface = {}
         interface['name'] = 'local_switch'
-        interface['native_vlan'] = self._VLAN_BASE
+        interface['native_vlan'] = self._LOCAL_VLAN
         interface['acl_in'] = self.LOCAL_ACL_FORMAT % (self.pri_name)
         return interface
 
     def _make_gw_interface(self, port_set):
         interface = {}
         interface['acl_in'] = self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)
-        interface['native_vlan'] = self._port_set_vlan(port_set)
+        vlan_id = self._DUMP_VLAN if self._use_vlan_triggers() else self._port_set_vlan(port_set)
+        interface['native_vlan'] = vlan_id
         return interface
 
-    def _update_port_vlan(self, port_no, port_set):
-        interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
-        interface['native_vlan'] = self._port_set_vlan(port_set)
+    def _port_set_vlan(self, port_set):
+        return self._LOCAL_VLAN + port_set if port_set else self._DUMP_VLAN
 
-    def _port_set_vlan(self, port_set=None):
-        return self._VLAN_BASE + (port_set if port_set else 0)
+    def _make_in_port_interface(self):
+        interface = {}
+        interface['description'] = 'OFPP_IN_PORT'
+        interface['output_only'] = True
+        return interface
 
     def _make_pri_trunk_interface(self):
         interface = {}
@@ -195,14 +214,17 @@ class FaucetTopology:
         interface['name'] = self.get_ext_intf() or self._DEFAULT_SEC_TRUNK_NAME
         return interface
 
+    def _use_vlan_triggers(self):
+        vlan_range_config = self.config.get("run_trigger", {})
+        return bool(vlan_range_config.get("vlan_start"))
+
     def _vlan_tags(self):
         vlan_range_config = self.config.get("run_trigger", {})
-        test_vlan_start = vlan_range_config.get("vlan_start")
-        test_vlan_end = vlan_range_config.get("vlan_end")
-        if test_vlan_start is not None and test_vlan_end is not None:
-            return [*range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port),
-                    *range(test_vlan_start, test_vlan_end + 1)]
-        return list(range(self._VLAN_BASE, self._VLAN_BASE + self.sec_port))
+        vlan_start = vlan_range_config.get("vlan_start")
+        vlan_end = vlan_range_config.get("vlan_end")
+        if self._use_vlan_triggers():
+            return [*range(vlan_start, vlan_end + 1)] + [self._LOCAL_VLAN]
+        return list(range(self._LOCAL_VLAN, self._LOCAL_VLAN + self.sec_port))
 
     def _make_default_acl_rules(self):
         rules = []
@@ -213,18 +235,20 @@ class FaucetTopology:
     def _make_sec_port_interface(self, port_no):
         interface = {}
         interface['acl_in'] = self.PORT_ACL_NAME_FORMAT % (self.sec_name, port_no)
-        interface['native_vlan'] = self._port_set_vlan()
+        vlan_id = self._port_set_vlan(port_no) if self._use_vlan_triggers() else self._DUMP_VLAN
+        interface['native_vlan'] = vlan_id
         return interface
 
     def _make_pri_interfaces(self):
         interfaces = {}
         interfaces[self.PRI_TRUNK_PORT] = self._make_pri_trunk_interface()
+        interfaces[self._OFPP_IN_PORT] = self._make_in_port_interface()
         for port_set in range(1, self.sec_port):
             for port in self._get_gw_ports(port_set):
                 interfaces[port] = self._make_gw_interface(port_set)
             mirror_port = self.mirror_port(port_set)
             interfaces[mirror_port] = self._make_mirror_interface(port_set)
-        interfaces[self._SWITCH_LOCAL_PORT] = self._make_switch_interface()
+        interfaces[self._SWITCH_LOCAL_PORT] = self._make_local_interface()
         return interfaces
 
     def _make_sec_interfaces(self):
@@ -335,6 +359,31 @@ class FaucetTopology:
             self._add_acl_rule(portset_acls[port_set], dl_dst=self.BROADCAST_MAC,
                                ports=bcast_mirror_ports, allow=1)
 
+    def _add_dhcp_reflectors(self, acl_list):
+        if not self._ext_faucet or not self._egress_vlan:
+            return
+        for devices in self._set_devices.values():
+            if devices:
+                LOGGER.info('Reflecting dhcp to %s for %s', list(devices)[0].vlan, devices)
+            for device in devices:
+                # Rule for DHCP request to server. Convert device vlan to egress vlan.
+                self._add_acl_rule(acl_list, dl_type='0x800',
+                                   nw_proto=17, udp_src=68, udp_dst=67,
+                                   vlan_vid=device.vlan,
+                                   swap_vid=self._egress_vlan, port=self._OFPP_IN_PORT)
+                self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac,
+                                   nw_proto=17, udp_src=67, udp_dst=68,
+                                   vlan_vid=self._egress_vlan,
+                                   swap_vid=device.vlan, port=self._OFPP_IN_PORT, allow=True)
+
+        # Allow any unrecognized requests for learning, but don't reflect.
+        self._add_acl_rule(acl_list, dl_type='0x800', allow=True,
+                           nw_proto=17, udp_src=68, udp_dst=67)
+
+        # Deny any unrecognized replies.
+        self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
+                           nw_proto=17, udp_src=67, udp_dst=68)
+
     def _generate_main_acls(self):
         incoming_acl = []
         portset_acls = {}
@@ -351,6 +400,7 @@ class FaucetTopology:
 
         self._generate_mirror_acls(port_set_mirrors, incoming_acl, portset_acls)
 
+        self._add_dhcp_reflectors(incoming_acl)
         self._add_acl_rule(incoming_acl, allow=1)
         acls[self.INCOMING_ACL_FORMAT % self.pri_name] = incoming_acl
 
@@ -380,7 +430,7 @@ class FaucetTopology:
 
     def _maybe_apply(self, target, keyword, origin, source=None):
         source_keyword = source if source else keyword
-        if source_keyword in origin:
+        if source_keyword in origin and origin[source_keyword] is not None:
             assert not keyword in target, 'duplicate acl rule keyword %s' % keyword
             target[keyword] = origin[source_keyword]
 
@@ -394,6 +444,7 @@ class FaucetTopology:
         self._maybe_apply(output, 'port', kwargs)
         self._maybe_apply(output, 'ports', kwargs)
         self._maybe_apply(output, 'vlan_vid', kwargs, 'out_vlan')
+        self._maybe_apply(output, 'swap_vid', kwargs)
         self._maybe_apply(output, 'pop_vlans', in_vlan)
 
         actions = {}
@@ -407,6 +458,9 @@ class FaucetTopology:
         self._maybe_apply(subrule, 'dl_type', kwargs)
         self._maybe_apply(subrule, 'dl_src', kwargs)
         self._maybe_apply(subrule, 'dl_dst', kwargs)
+        self._maybe_apply(subrule, 'nw_proto', kwargs)
+        self._maybe_apply(subrule, 'udp_src', kwargs)
+        self._maybe_apply(subrule, 'udp_dst', kwargs)
         self._maybe_apply(subrule, 'vlan_vid', in_vlan)
         self._maybe_apply(subrule, 'vlan_vid', kwargs)
         self._maybe_apply(subrule, 'ipv4_dst', kwargs)
@@ -475,8 +529,11 @@ class FaucetTopology:
     def _sanitize_mac(self, mac_addr):
         return mac_addr.replace(':', '')
 
-    def device_group_for(self, target_mac):
-        """Find the target device group for the given address"""
+    def device_group_for(self, device):
+        """Return the target device group for the given device"""
+        if self._ext_faucet:
+            return 'vlan-%s' % device.vlan
+        target_mac = device.mac
         if not self._device_specs:
             return self._sanitize_mac(target_mac)
         mac_map = self._device_specs['macAddrs']

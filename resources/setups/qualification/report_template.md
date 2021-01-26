@@ -6,8 +6,8 @@
 
 ## Test Roles
 
-Role     | Name                   | Status
--------- | ---------------------- | ------
+Role     | Name                   |
+-------- | ---------------------- |
 Operator | {{ process.operator }} |
 Approver | {{ process.approver }} |
 
@@ -28,7 +28,8 @@ Name             | {{ device_info.name }}
 GUID             | {{ device_info.guid }}
 MAC address      | {{ run_info.mac_addr }}
 Hostname         | {{ device_info.hostname }}
-Type             | {{ device_info.type }}
+Type             | {{ device_type }}
+Category         | {{ device_info.category }}
 Make             | {{ device_info.make }}
 Model            | {{ device_info.model }}
 Serial Number    | {{ device_info.serial }}

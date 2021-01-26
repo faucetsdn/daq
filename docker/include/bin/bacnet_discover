@@ -5,6 +5,7 @@ CLASS=com.serotonin.bacnet4j.test.DiscoveryTest
 TARGET="Object name = BACnet device"
 TMPOUT=`tempfile`
 BACNET_EXPECTED=
+LOCAL_INTF=faux-eth0
 
 if [ "$1" == "loop" ]; then
     shift
@@ -18,12 +19,16 @@ line=$(ip addr show | fgrep "inet " | fgrep -v 127.0.0.1)
 
 read -r -a parts <<< "$line"
 
+# Extract the lower 3 bytes of the interface mac to use as the BACnet ID
+hexmac=0x`ip addr show $LOCAL_INTF | sed -nr 's/.*ether ..:..:..:(.*) brd.*/\1/p' | sed s/://g`
+device_id=$((hexmac))
+
 local_ip=${parts[1]%/*}
 broadcast_ip=${parts[3]}
 
-echo Scanning bacnet $broadcast_ip from $local_ip
+echo Scanning bacnet $broadcast_ip from $local_ip as device $device_id
 
-java -cp $JAR $CLASS $local_ip $broadcast_ip $subcmd | tee $TMPOUT
+java -cp $JAR $CLASS $device_id $local_ip $broadcast_ip $subcmd | tee $TMPOUT
 
 bacnet_runtime=/config/port/bacnet_runtime.sh
 if [ -f $bacnet_runtime ]; then

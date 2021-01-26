@@ -67,12 +67,16 @@ class ReportGenerator:
     _DEFAULT_EXPECTED = 'Other'
     _PRE_START_MARKER = "```"
     _PRE_END_MARKER = "```"
-    _CATEGORY_HEADERS = ["Category", "Result"]
+    _CATEGORY_BASE_COLS = ["Category", "Total Tests", "Result"]
     _EXPECTED_HEADER = "Expectation"
     _SUMMARY_HEADERS = ["Result", "Test", "Category", "Expectation", "Notes"]
     _MISSING_TEST_RESULT = 'gone'
     _NO_REQUIRED = 'n/a'
     _PASS_REQUIRED = 'PASS'
+
+    _INDEX_PASS = 0
+    _INDEX_FAIL = 1
+    _INDEX_SKIP = 2
 
     def __init__(self, config, tmp_base, target_mac, module_config):
         self._config = config
@@ -101,7 +105,8 @@ class ReportGenerator:
         self._expected_headers = list(self._module_config.get('report', {}).get('expected', []))
         self._expecteds = {}
         self._categories = list(self._module_config.get('report', {}).get('categories', []))
-
+        self._category_headers = []
+        self._append_notices = []
         self._file_md = None
 
     def _write(self, msg=''):
@@ -206,6 +211,7 @@ class ReportGenerator:
 
     def _write_test_summary(self):
         self._writeln(self._TEST_SEPARATOR % self._SUMMARY_LINE)
+        self._analyse_and_write_results()
         self._write_test_tables()
 
     def _accumulate_result(self, test_name, result, extra='', module_name=None):
@@ -246,33 +252,102 @@ class ReportGenerator:
         self._write_result_table()
         self._writeln()
 
-    def _write_category_table(self):
+    def _analyse_and_write_results(self):
+        """ Analyse the test results to determine if the device is a pass or fail
+            and identify possible issues (e.g. gone) and writes these to the report
+        """
         passes = True
+        gone = False
+
+        # Analyse results
+        for test_name, result_dict in self._results.items():
+            test_info = self._get_test_info(test_name)
+
+            if 'required' in test_info:
+                required_result = test_info['required']
+
+                # The device overall fails if any result is unexpected
+                if result_dict["result"] != required_result:
+                    passes = False
+
+                if result_dict["result"] == 'gone':
+                    gone = True
+
+        # Write Results
+        self._writeln('Overall device result %s' % ('PASS' if passes else 'FAIL'))
+        self._writeln()
+
+        if gone:
+            gone_message = ('**Some tests report as GONE. '
+                            'Please check for possible misconfiguration**')
+            self._writeln(gone_message)
+            self._writeln()
+
+    def _join_category_results(self, results):
+        """ Used to convert list of results into the pass/fail/skip format
+            for category table
+
+        Args:
+        results: List of results
+
+        Returns:
+        String in pass/fail/skip format
+        """
+        return '/'.join(str(value) for value in results)
+
+    def _write_category_table(self):
+        """ Write the first category and expected table
+        """
+
         rows = []
+        self._category_headers = self._CATEGORY_BASE_COLS + self._expected_headers
+
         for category in self._categories:
             total = 0
-            match = 0
+
+            results = [[0, 0, 0] for _ in range(len(self._expected_headers))]
+            result = self._NO_REQUIRED  # Overall category result
+
             for test_name, result_dict in self._results.items():
                 test_info = self._get_test_info(test_name)
                 category_name = test_info.get('category', self._DEFAULT_CATEGORY)
+
+                # all tests must have required in order to be counted
                 if category_name == category and 'required' in test_info:
-                    required_result = test_info['required']
                     total += 1
-                    if result_dict["result"] == required_result:
-                        match += 1
+
+                    expected_name = test_info.get('expected', self._DEFAULT_EXPECTED)
+                    expected_index = self._expected_headers.index(expected_name)
+
+                    # Put test results into right location in the result matrix
+                    if result_dict["result"] in ("pass", "info"):
+                        results[expected_index][self._INDEX_PASS] += 1
+                    elif result_dict["result"] == "skip":
+                        results[expected_index][self._INDEX_SKIP] += 1
                     else:
-                        passes = False
+                        results[expected_index][self._INDEX_FAIL] += 1
 
-            output = self._NO_REQUIRED if total == 0 else (self._PASS_REQUIRED \
-                     if match == total else '%s/%s' % (match, total))
-            rows.append([category, output])
+                    # Calculate overall rolling result for the category
+                    if result not in (result_dict["result"], self._NO_REQUIRED):
+                        # Consider info and pass alike
+                        # TODO remove when info tests are removed
+                        if result_dict["result"] == 'info':
+                            result_dict["result"] = 'pass'
+                        else:
+                            result = "fail"
+                    else:
+                        result = result_dict["result"]
 
-        self._writeln('Overall device result %s' % ('PASS' if passes else 'FAIL'))
-        self._writeln()
-        table = MdTable(self._CATEGORY_HEADERS)
+            results = list(map(self._join_category_results, results))
+
+            row = [category, str(total), result.upper()] + results
+            rows.append(row)
+
+        table = MdTable(self._category_headers)
         for row in rows:
             table.add_row(row)
         self._write(table.render())
+        self._writeln('Syntax: Pass / Fail / Skip')
 
     def _write_expected_table(self):
         table = MdTable([self._EXPECTED_HEADER, *self._result_headers])

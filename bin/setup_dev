@@ -9,7 +9,13 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-PVERSION=3.7
+SIMPLE=
+if [ "$1" == simple ]; then
+    SIMPLE=y
+    shift
+fi
+
+PVERSION=3.8
 
 FAUCETR=${DAQ_FAUCET_REPO:-https://github.com/faucetsdn/faucet}
 FAUCETX=$(cat etc/FAUCET_VERSION)
@@ -19,11 +25,6 @@ FORCHR=${DAQ_FORCH_REPO:-https://github.com/faucetsdn/forch}
 FORCHB=${DAQ_FORCH_BRANCH}
 FORCHX=$(cat etc/FORCH_VERSION)
 FORCHV=${DAQ_FORCH_VER:-$FORCHX}
-
-UDMIR=${DAQ_UDMI_REPO:-https://github.com/faucetsdn/udmi}
-UDMIB=${DAQ_UDMI_BRANCH}
-UDMIX=$(cat etc/UDMI_VERSION)
-UDMIV=${DAQ_UDMI_VER:-$UDMIX}
 
 MININET=https://github.com/mininet/mininet
 MININETV=$(cat etc/MININET_VERSION)
@@ -39,10 +40,6 @@ fi
 
 if [ "$FORCHX" != "$FORCHV" ]; then
     echo $FORCHV > etc/FORCH_VERSION
-fi
-
-if [ "$UDMIX" != "$UDMIV" ]; then
-    echo $UDMIV > etc/UDMI_VERSION
 fi
 
 if [ -z "$AG" ]; then
@@ -128,8 +125,9 @@ $PIP -V
 
 echo Installing python dependencies...
 $PIP install wheel
+$PIP install --upgrade --index-url=https://pypi.python.org/simple setuptools
 $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
-    pylint==2.4.2 cryptography requests netifaces codecov coverage setuptools \
+    pylint==2.4.2 cryptography requests netifaces codecov coverage \
     pyyaml cairocffi==1.0.2 WeasyPrint==50 pypandoc==1.4 \
     firebase-admin==2.16.0 \
     google-api-core==1.16.0 \
@@ -143,6 +141,11 @@ $PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
 $PIP freeze
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
+
+if [ -n "$SIMPLE" ]; then
+    echo Finished with simple setup.
+    exit 0
+fi
 
 if [ -z "$FAUCETV" ]; then
     echo No faucet version found, skipping.
@@ -168,17 +171,7 @@ else
     (cd forch; git fetch; git checkout $FORCHV)
 fi
 
-if [ -z "$UDMIV" ]; then
-    echo No udmi version found, skipping.
-else
-    if [ ! -d udmi ]; then
-	echo Cloning $UDMIR...
-	git clone $UDMIR udmi
-    fi
-
-    echo Setting udmi version $UDMIV
-    (cd udmi; git fetch; git checkout $UDMIV)
-fi
+bin/setup_remote udmi
 
 echo -n "DAQ commit "
 git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
