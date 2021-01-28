@@ -11,7 +11,10 @@ TARGET=$1
 shift
 
 if [[ -z $GIT_URL ]]; then
+    echo Using base GIT_URL from default.
     GIT_URL=https://github.com/faucetsdn/daq.git
+else
+    echo Using base GIT_URL from environment.
 fi
 
 GIT_PEER=`echo $GIT_URL | sed s/daq/$TARGET/`
