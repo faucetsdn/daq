@@ -1,12 +1,13 @@
 """Unit tests for configurator"""
 
-import unittest
-import sys
 import logging
-import network
 import os
+import sys
 import time
+import unittest
 from unittest.mock import MagicMock, mock_open, patch
+
+import network
 
 from forch.proto.shared_constants_pb2 import PortBehavior
 from forch.proto.devices_state_pb2 import DevicePortEvent
