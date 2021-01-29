@@ -1,11 +1,7 @@
 """Unit tests for report"""
 
 import unittest
-import sys
-import os
-import time
-from unittest.mock import MagicMock, mock_open, patch
-from daq.report import MdTable 
+from daq.report import MdTable
 
 class TestReport(unittest.TestCase):
     """Test class for Report"""
@@ -21,6 +17,7 @@ class TestReport(unittest.TestCase):
 |c|b|a|
 """
         self.assertEqual(expected, table.render())
-          
+
+
 if __name__ == '__main__':
     unittest.main()
