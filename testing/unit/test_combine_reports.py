@@ -11,6 +11,7 @@ from combine_reports import _render_results, main, os
 from daq.report import MdTable
 
 
+# pylint: disable=protected-access
 class TestCombineReportsFromDateRange(unittest.TestCase):
     """Test class for Report"""
     def __init__(self, *args, **kwargs):

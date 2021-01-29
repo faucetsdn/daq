@@ -16,6 +16,7 @@ from utils import proto_dict
 class DeviceReportClientTestBase(unittest.TestCase):
     """Base class for device report client unit test"""
     _SERVER_ADDRESS = '0.0.0.0'
+    _SERVER_PORT = 50071
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,9 +41,8 @@ class DeviceReportClientTestBase(unittest.TestCase):
 
 
 class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
-    _SERVER_PORT = 50071
-
     """Basic test case for device report client"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._received_results = []
@@ -73,7 +73,6 @@ class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
 
 class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase):
     """Port events for device report client"""
-    _SERVER_PORT = 50072
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,6 +101,7 @@ class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase
         self._received_port_events.append(event)
 
     def test_getting_port_events(self):
+        """Test the ability to get port events"""
         self._client.get_port_events("mac", self._on_port_event)
         time.sleep(1)
         self.assertEqual(self._received_port_events, self._mock_port_events)

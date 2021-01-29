@@ -2,6 +2,8 @@
 
 import unittest
 import sys
+import logging
+import network
 import os
 import time
 from unittest.mock import MagicMock, mock_open, patch
@@ -9,16 +11,16 @@ from unittest.mock import MagicMock, mock_open, patch
 from forch.proto.shared_constants_pb2 import PortBehavior
 from forch.proto.devices_state_pb2 import DevicePortEvent
 
-from daq.runner import DAQRunner, configurator, PortInfo
 from daq.host import ConnectedHost
-import network
+from daq.runner import DAQRunner, configurator
 
-import logging
-logger = logging.getLogger()
-logger.level = logging.INFO
-stream_handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(stream_handler)
+LOGGER = logging.getLogger()
+LOGGER.level = logging.INFO
+STREAM_HANDLER = logging.StreamHandler(sys.stdout)
+LOGGER.addHandler(STREAM_HANDLER)
 
+
+# pylint: disable=protected-access
 class TestRunner(unittest.TestCase):
     """Test class for Configurator"""
 
