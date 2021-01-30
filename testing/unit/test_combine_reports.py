@@ -1,18 +1,17 @@
 """Unit tests for combine_reports"""
 
 import unittest
-import sys
 import re
 import json
 from datetime import datetime
 from unittest.mock import MagicMock, mock_open, patch
 
-import daq
 import combine_reports
 from combine_reports import _render_results, main, os
 from daq.report import MdTable
 
 
+# pylint: disable=protected-access
 class TestCombineReportsFromDateRange(unittest.TestCase):
     """Test class for Report"""
     def __init__(self, *args, **kwargs):
@@ -21,8 +20,8 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
         mock_path = os.path.join(self.script_path, 'mock', 'test_combine_reports')
         self.mocks = {'empty': ''}
         for filename in os.listdir(mock_path):
-            with open(os.path.join(mock_path, filename)) as f:
-                self.mocks[filename] = f.read()
+            with open(os.path.join(mock_path, filename)) as stream:
+                self.mocks[filename] = stream.read()
 
     def _dict_compare(self, dict1, dict2):
         return json.dumps(dict1, sort_keys=True) == json.dumps(dict2, sort_keys=True)
@@ -72,7 +71,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
         self.assertEqual(expected, _render_results(aggregate))
 
     def test_main_with_local(self):
-
+        """Testing report generation locally"""
         device = 'device1'
         files_list = [
             'report_someotherdevice_2020-05-29T002333.json',
@@ -87,7 +86,7 @@ class TestCombineReportsFromDateRange(unittest.TestCase):
                 mock_name = "report_1.json"
             elif report.endswith('report_' + device + '_2020-05-29T092333.json'):
                 mock_name = "report_2.json"
-            elif re.search('combo.*\.md$', report):
+            elif re.search('combo.*\\.md$', report):
                 mock_name = 'empty'
             else:
                 raise Exception(report + ' is not expected')
