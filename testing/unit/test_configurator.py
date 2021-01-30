@@ -2,14 +2,14 @@
 
 import unittest
 from unittest.mock import patch
+import logging
 import os
 import yaml
 
 from daq.configurator import Configurator, print_config
 
-import logging
-logger = logging.getLogger()
-logger.level = logging.INFO
+LOGGER = logging.getLogger()
+LOGGER.level = logging.INFO
 
 
 def dict_to_conf_str(obj):
@@ -76,7 +76,7 @@ class TestConfigurator(unittest.TestCase):
                     yaml.dump(config, tempfile)
 
     def tearDown(self):
-        for file_path in self.config_files.keys():
+        for file_path in self.config_files:
             os.remove(file_path)
 
     def test_config_load(self):
@@ -87,6 +87,7 @@ class TestConfigurator(unittest.TestCase):
         self.assertEqual(self.config_files[TEMP_CONF_FILE], read_config)
 
     def test_config_with_basic_include(self):
+        """Basic include file test"""
         configurator = Configurator()
         args = ['test', TEMP_WITH_INCLUDE]
         read_config = configurator.parse_args(args)
@@ -107,6 +108,7 @@ class TestConfigurator(unittest.TestCase):
         }, read_config)
 
     def test_config_with_deep_include(self):
+        """Deep include test"""
         configurator = Configurator()
         args = ['test', TEMP_WITH_DEEP_INCLUDE]
         read_config = configurator.parse_args(args)
@@ -128,6 +130,7 @@ class TestConfigurator(unittest.TestCase):
         }, read_config)
 
     def test_config_override(self):
+        """Overriding config test"""
         configurator = Configurator()
         args = ['test', TEMP_WITH_INCLUDE, 'initial_dhcp_lease_time=999s', 'dhcp_lease_time=999']
         read_config = configurator.parse_args(args)
@@ -148,6 +151,7 @@ class TestConfigurator(unittest.TestCase):
         }, read_config)
 
     def test_circular_include_in_config(self):
+        """Circular include test"""
         configurator = Configurator()
         args = ['test', TEMP_WITH_CIRCULAR_INCLUDE]
         with self.assertRaises(Exception):
@@ -155,6 +159,7 @@ class TestConfigurator(unittest.TestCase):
 
     @patch('builtins.print')
     def test_print_config(self, mock_print):
+        """Test the print config capability"""
         configurator = Configurator()
         args = ['test', TEMP_WITH_INCLUDE]
         print_config(configurator.parse_args(args))
@@ -168,5 +173,7 @@ class TestConfigurator(unittest.TestCase):
             'long_dhcp_response_sec=105',
             'monitor_scan_sec=30',
             'site_path=local/site/', sep='\n')
+
+
 if __name__ == '__main__':
     unittest.main()
