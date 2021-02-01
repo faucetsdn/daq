@@ -245,8 +245,8 @@ if [ -n "${options[pubber]}" ]; then
         echo Updated pubber private key from pagent for device $deviceId
         ls -l local/rsa_*
     fi
-    echo Running cloud pubber tool...
     (while date; do
+         echo Running cloud pubber tool `date`
          pubber/bin/run local/pubber.json
          # Do https query in case pubber is not configured, for testing port 443
          curl -o /dev/null https://google.com
