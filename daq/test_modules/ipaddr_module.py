@@ -8,9 +8,9 @@ from datetime import datetime, timedelta
 import os
 import copy
 import logger
+from proto.system_config_pb2 import DhcpMode
 from .docker_module import DockerModule
 from .base_module import HostModule
-from proto.system_config_pb2 import DhcpMode
 
 _LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
 LEASE_TIME_UNITS_CONVERTER = {

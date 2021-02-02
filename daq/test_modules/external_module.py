@@ -56,7 +56,7 @@ class ExternalModule(HostModule):
             self.log = host.open_log()
             if self._should_raise_test_exception('initialize'):
                 LOGGER.error('%s inducing initialization failure', self)
-                raise Exception('induced initialization failure')
+                raise Exception('Induced initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.log,
                                        hangup=self._complete,
                                        error=self._error)
@@ -152,7 +152,7 @@ class ExternalModule(HostModule):
         self.log = None
         if self._should_raise_test_exception('finalize'):
             LOGGER.error('%s inducing finalize failure', self)
-            raise Exception('induced finalize failure')
+            raise Exception('Induced finalize failure')
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):

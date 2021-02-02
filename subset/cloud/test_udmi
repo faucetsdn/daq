@@ -67,8 +67,9 @@ RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
                  "$skip" "$RESULT_AND_SUMMARY"
 
-echo timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/
-timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ || true
+echo Starting base message validation run `date`
+echo timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ --
+timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ -- || true
 
 function message_report {
     message_type=$1
@@ -78,6 +79,8 @@ function message_report {
     if [ -f "$base.out" ]; then
         result=fail
         detail=`head -n 1 $base.out`
+        echo schema failures from $base.out
+        cat $base.out
     elif [ -f "$base.json" ]; then
         result=pass
         detail="Payload successfully validated"
@@ -96,6 +99,16 @@ function message_report {
 for message_type in $message_types; do
     message_report $message_type
 done
+
+result=pass
+sequence=config_basic
+echo validator/bin/validate $project_id $schema_path reflect AHU-1 local/ sequences/$sequence
+timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local sequences/$sequence || result=fail
+TEST_NAME="cloud.udmi.$sequence"
+TEST_DESCRIPTION="Validates device $sequence message sequence."
+RESULT_AND_SUMMARY="RESULT $result $TEST_NAME Sequence successfully completed"
+write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                 "$skip" "$RESULT_AND_SUMMARY"
 
 fgrep RESULT $REPORT
 
