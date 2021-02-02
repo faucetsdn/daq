@@ -881,7 +881,9 @@ class DAQRunner:
         else:
             device_result = self._calculate_device_result(test_results)
 
-        LOGGER.info('Sending device result for device %s: %s', mac, device_result)
+        LOGGER.info(
+            'Sending device result for device %s: %s',
+            mac, PortBehavior.Behavior.Name(device_result))
         self._device_result_client.send_device_result(mac, device_result)
 
     def _calculate_device_result(self, test_results):
