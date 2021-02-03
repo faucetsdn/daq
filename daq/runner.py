@@ -21,6 +21,7 @@ import external_gateway
 import gcp
 import host as connected_host
 import network
+import report
 import stream_monitor
 from wrappers import DaqException
 import logger
@@ -768,6 +769,7 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
+            self._send_device_result(device.mac, None)
             self._detach_gateway(device)
 
     def target_set_complete(self, device, reason):
@@ -790,14 +792,9 @@ class DAQRunner:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-        if self._device_result_client:
-            device_result = PortBehavior.failed if results else PortBehavior.passed
-            self._device_result_client.send_device_result(device.mac, device_result)
-
     def _target_set_cancel(self, device):
         target_host = device.host
         if target_host:
-            device.host = None
             target_gateway = device.gateway
             target_port = device.port.port_no
             LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
@@ -814,7 +811,10 @@ class DAQRunner:
             else:
                 if target_port:
                     self._direct_port_traffic(device.mac, target_port, None)
-                target_host.terminate('_target_set_cancel', trigger=False)
+
+                test_results = target_host.terminate('_target_set_cancel', trigger=False)
+                self._send_device_result(device.mac, test_results)
+
                 if target_gateway:
                     self._detach_gateway(device)
             if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
@@ -824,6 +824,7 @@ class DAQRunner:
                 LOGGER.warning('Suppressing future tests because test done in single shot.')
                 self._handle_faucet_events()  # Process remaining queued faucet events
                 self.run_tests = False
+            device.host = None
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
@@ -871,6 +872,34 @@ class DAQRunner:
                 results.append('%s:%s:%s' % (set_key, name, status))
         return results
 
+    def _send_device_result(self, mac, test_results):
+        if not self._device_result_client:
+            return
+
+        if test_results is None:
+            device_result = PortBehavior.failed
+        else:
+            device_result = self._calculate_device_result(test_results)
+
+        LOGGER.info(
+            'Sending device result for device %s: %s',
+            mac, PortBehavior.Behavior.Name(device_result))
+        self._device_result_client.send_device_result(mac, device_result)
+
+    def _calculate_device_result(self, test_results):
+        for module_result in test_results.get('modules', {}).values():
+            if report.ResultType.EXCEPTION in module_result:
+                return PortBehavior.failed
+
+            if module_result.get(report.ResultType.RETURN_CODE):
+                return PortBehavior.failed
+
+            for test_result in module_result.get('tests', {}).values():
+                if test_result.get('result') == 'fail':
+                    return PortBehavior.failed
+
+        return PortBehavior.passed
+
     def finalize(self):
         """Finalize this instance, returning error result code"""
         self.gcp.release_config(self._RUNNER_CONFIG_PATH)
@@ -886,8 +915,8 @@ class DAQRunner:
 
     def _base_config_changed(self, new_config):
         LOGGER.info('Base config changed: %s', new_config)
-        self.configurator.write_config(new_config, self.config.get('site_path'),
-                                       self._SITE_CONFIG)
+        config_file = os.path.join(self.config.get('site_path'), self._SITE_CONFIG)
+        self.configurator.write_config(new_config, config_file)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
@@ -895,14 +924,17 @@ class DAQRunner:
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
         LOGGER.info('Loading base config from %s', base_conf)
-        base = self.configurator.load_and_merge({}, os.getcwd(), base_conf)
+        base = self.configurator.load_config(base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site config from %s', os.path.join(site_path, self._SITE_CONFIG))
-        site_config = self.configurator.load_config(site_path, self._SITE_CONFIG, optional=True)
+        site_config_file = os.path.join(site_path, self._SITE_CONFIG)
+        LOGGER.info('Loading site config from %s', site_config_file)
+        site_config = self.configurator.load_config(site_config_file, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
-        return self.configurator.merge_config(base, site_path, site_config)
+        if site_config:
+            return self.configurator.merge_config(base, site_config_file)
+        return base
 
     def get_base_config(self):
         """Get the base configuration for this install"""

@@ -30,6 +30,8 @@ jobs:
       with:
         java-version: 1.11
     - name: Installing dependencies
+      env:
+        GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_daq
     - name: Running ${{ matrix.test }} test
@@ -56,6 +58,8 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
+      env:
+        GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_dev
     - name: Check style
