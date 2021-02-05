@@ -79,10 +79,10 @@ class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase
         super().__init__(*args, **kwargs)
         self._received_port_events = []
         self._mock_port_events = [
-            DevicePortEvent(state=PortBehavior.PortState.down, timestamp="0"),
-            DevicePortEvent(state=PortBehavior.PortState.down, timestamp="1"),
-            DevicePortEvent(state=PortBehavior.PortState.up, timestamp="2"),
-            DevicePortEvent(state=PortBehavior.PortState.down, timestamp="3")
+            DevicePortEvent(state=PortBehavior.PortState.down),
+            DevicePortEvent(state=PortBehavior.PortState.down),
+            DevicePortEvent(state=PortBehavior.PortState.up),
+            DevicePortEvent(state=PortBehavior.PortState.down)
         ]
 
     def setUp(self):
