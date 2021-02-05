@@ -330,7 +330,7 @@ class DAQRunner:
     def _handle_remote_port_state(self, device, port_event):
         if not device.host:
             return
-        if port_event.event == PortBehavior.PortEvent.down:
+        if port_event.state == PortBehavior.PortState.down:
             if not device.port.flapping_start:
                 device.port.flapping_start = time.time()
             device.port.active = False
