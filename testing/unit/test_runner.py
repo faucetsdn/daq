@@ -73,7 +73,7 @@ class TestRunner(unittest.TestCase):
         """Test device learn on vlan trigger"""
         self.runner.target_set_error = MagicMock()
         device = self.runner._devices.new_device("0000000000", None)
-        mock_port_event = DevicePortEvent(timestamp="1", event=PortBehavior.PortEvent.down)
+        mock_port_event = DevicePortEvent(timestamp="1", state=PortBehavior.PortState.down)
         self.runner._handle_remote_port_state(device, mock_port_event)
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
@@ -83,23 +83,23 @@ class TestRunner(unittest.TestCase):
         host.test_name = "test_test"
         device.host = host
         host.get_port_flap_timeout = MagicMock(return_value=10000)
-        mock_port_event = DevicePortEvent(timestamp="1", event=PortBehavior.PortEvent.up)
+        mock_port_event = DevicePortEvent(timestamp="1", state=PortBehavior.PortState.up)
         self.runner._handle_remote_port_state(device, mock_port_event)
 
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
 
         host.get_port_flap_timeout = MagicMock(return_value=None)
-        mock_port_event = DevicePortEvent(timestamp="1", event=PortBehavior.PortEvent.down)
+        mock_port_event = DevicePortEvent(timestamp="1", state=PortBehavior.PortState.down)
         self.runner._handle_remote_port_state(device, mock_port_event)
 
-        mock_port_event = DevicePortEvent(timestamp="1", event=PortBehavior.PortEvent.up)
+        mock_port_event = DevicePortEvent(timestamp="1", state=PortBehavior.PortState.up)
         self.runner._handle_remote_port_state(device, mock_port_event)
 
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
 
-        mock_port_event = DevicePortEvent(timestamp="1", event=PortBehavior.PortEvent.down)
+        mock_port_event = DevicePortEvent(timestamp="1", state=PortBehavior.PortState.down)
         self.runner._handle_remote_port_state(device, mock_port_event)
 
         self.runner._reap_stale_ports()
