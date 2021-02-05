@@ -9,6 +9,7 @@ cmdrun_log=inst/cmdrun.log
 
 cd $ROOT
 source etc/config_base.sh
+source etc/FILES_MAPPING
 
 echo Starting `date`
 echo Clearing previous state...

@@ -14,6 +14,7 @@ import jinja2
 import pypandoc
 import weasyprint
 
+from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import gcp
 import logger
 LOGGER = logger.get_logger('report')
@@ -53,8 +54,9 @@ class ReportGenerator:
 
     _NAME_FORMAT = "report_%s_%s"
     _SIMPLE_REPORT = "report"
-    _REPORT_CSS_PATH = 'resources/setups/baseline/device_report.css'
-    _REPORT_TMP_HTML_PATH = 'inst/last_report_out.html'
+    _REPORT_CSS_PATH = os.path.join(DAQ_LIB_DIR, 'resources', 
+        'setups', 'baseline', 'device_report.css')
+    _REPORT_TMP_HTML_PATH = os.path.join(DAQ_RUN_DIR, 'last_report_out.html')
     _TEST_SEPARATOR = "\n## %s\n"
     _TEST_SUBHEADER = "\n#### %s\n"
     _RESULT_REGEX = r'^RESULT (.*?)\s+(.*?)\s+([^%]*)\s*(%%.*)?$'

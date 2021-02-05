@@ -8,6 +8,7 @@ from ipaddress import ip_network, ip_address
 
 import logger
 import wrappers
+from env import DAQ_RUN_DIR
 from proto.system_config_pb2 import DhcpMode
 
 from .base_module import HostModule
@@ -116,7 +117,7 @@ class ExternalModule(HostModule):
 
     def _get_vol_maps(self, params):
         vol_maps = [(params['scan_base'], os.path.join(self.basedir, "scans"))]
-        kinds = ('inst', 'port', 'device', 'type', 'gw')
+        kinds = (DAQ_RUN_DIR, 'port', 'device', 'type', 'gw')
         maps = list(map(lambda kind: self._map_if_exists(params, kind), kinds))
         vol_maps.extend(filter(lambda vol_map: vol_map, maps))
         return vol_maps

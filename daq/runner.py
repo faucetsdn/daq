@@ -15,6 +15,7 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
 from device_report_client import DeviceReportClient
+from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
 import container_gateway
 import external_gateway
@@ -139,8 +140,8 @@ class DAQRunner:
     _DEFAULT_RETENTION_DAYS = 30
     _SITE_CONFIG = 'site_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
-    _DEFAULT_TESTS_FILE = 'config/modules/host.conf'
-    _RESULT_LOG_FILE = 'inst/result.log'
+    _DEFAULT_TESTS_FILE = os.path.join(DAQ_LIB_DIR, 'config/modules/host.conf')
+    _RESULT_LOG_FILE = os.path.join(DAQ_RUN_DIR, 'result.log')
 
     def __init__(self, config):
         self.configurator = configurator.Configurator()
@@ -200,7 +201,8 @@ class DAQRunner:
 
     def _init_daq_run_id(self):
         daq_run_id = str(uuid.uuid4())
-        with open('inst/daq_run_id.txt', 'w') as output_stream:
+        daq_run_id_file = os.path.join(DAQ_RUN_DIR, 'daq_run_id.txt') 
+        with open(daq_run_id_file, 'w') as output_stream:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
 
@@ -580,7 +582,10 @@ class DAQRunner:
                             if argument in section:
                                 section.remove(argument)
                     elif cmd_name == 'include':
-                        get_test_list(argument)
+                        env_regex = re.compile(r'\$\{(.*)\}')
+                        match = env_regex.match(argument)
+                        env_var = match.group()[2:-1]
+                        get_test_list(os.getenv(env_var) + argument[match.end():])
                     elif cmd_name == 'build' or not cmd_name:
                         pass
                     else:
@@ -589,11 +594,9 @@ class DAQRunner:
         get_test_list(test_file)
         return [*head, *body, *tail]
 
-    def _get_test_metadata(self, extension=".daqmodule", root="."):
+    def _get_test_metadata(self, extension=".daqmodule", root="subset"):
         metadata = {}
         for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
-            if str(meta_file).startswith('inst') or str(meta_file).startswith('local'):
-                continue
             with open(meta_file) as fd:
                 metadatum = json.loads(fd.read())
                 assert "name" in metadatum and "startup_cmd" in metadatum
