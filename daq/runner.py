@@ -57,6 +57,7 @@ class Device:
         self.vlan = None
         self.set_id = None
         self.assigned = None
+        self.wait_remote = False
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -277,6 +278,10 @@ class DAQRunner:
         """Get the internal interface for the host"""
         return self.network.get_host_interface(host)
 
+    def _handle_faucet_events_locked(self):
+        with self._event_lock:
+            self._handle_faucet_events()
+
     def _handle_faucet_events(self):
         while self.faucet_events:
             event = self.faucet_events.next_event()
@@ -285,24 +290,23 @@ class DAQRunner:
             self._process_faucet_event(event)
 
     def _process_faucet_event(self, event):
-        with self._event_lock:
-            (dpid, port, active) = self.faucet_events.as_port_state(event)
-            if dpid and port:
-                LOGGER.debug('port_state: %s %s', dpid, port)
-                self._handle_port_state(dpid, port, active)
-                return
-            (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
-            if dpid and port and vid:
-                is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
-                if is_vlan:
-                    if self.network.is_system_port(dpid, port):
-                        self._handle_device_learn(target_mac, vid)
-                else:
-                    self._handle_port_learn(dpid, port, target_mac)
-                return
-            (dpid, restart_type) = self.faucet_events.as_config_change(event)
-            if dpid is not None:
-                LOGGER.debug('dp_id %d restart %s', dpid, restart_type)
+        (dpid, port, active) = self.faucet_events.as_port_state(event)
+        if dpid and port:
+            LOGGER.debug('port_state: %s %s', dpid, port)
+            self._handle_port_state(dpid, port, active)
+            return
+        (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
+        if dpid and port and vid:
+            is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
+            if is_vlan:
+                if self.network.is_system_port(dpid, port):
+                    self._handle_device_learn(target_mac, vid)
+            else:
+                self._handle_port_learn(dpid, port, target_mac)
+            return
+        (dpid, restart_type) = self.faucet_events.as_config_change(event)
+        if dpid is not None:
+            LOGGER.debug('dp_id %d restart %s', dpid, restart_type)
 
     def _handle_port_state(self, dpid, port, active):
         if self.network.is_system_port(dpid, port):
@@ -368,8 +372,10 @@ class DAQRunner:
 
         # For keeping track of remote port events
         if self._device_result_client:
+            LOGGER.info('TAP Connecting device result client for %s', target_mac)
             device.port = PortInfo()
             device.port.active = True
+            device.wait_remote = True
             self._device_result_client.get_port_events(
                 device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
@@ -391,12 +397,12 @@ class DAQRunner:
 
             LOGGER.info('TAP remote_port_state %s %s/%s', device,
                         device.vlan, device.assigned)
-            self._target_set_trigger(device)
-            self._direct_device_traffic(device, device.gateway.port_set)
+            self._target_set_trigger(device, remote_trigger=True)
+            if device.gateway:
+                self._direct_device_traffic(device, device.gateway.port_set)
 
     def _queue_callback(self, callback):
         with self._event_lock:
-            LOGGER.debug('Register callback')
             self._callback_queue.append(callback)
 
     def _handle_queued_events(self):
@@ -405,8 +411,8 @@ class DAQRunner:
             self._callback_queue = []
             if callbacks:
                 LOGGER.debug('Processing %d callbacks', len(callbacks))
-            for callback in callbacks:
-                callback()
+                for callback in callbacks:
+                    callback()
 
     def _handle_system_idle(self):
         with self._event_lock:
@@ -481,7 +487,7 @@ class DAQRunner:
                                                    loop_hook=self._loop_hook,
                                                    timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events,
+            self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events_locked,
                                 priority=10)
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
@@ -503,7 +509,7 @@ class DAQRunner:
 
         self._terminate()
 
-    def _target_set_trigger(self, device):
+    def _target_set_trigger(self, device, remote_trigger=False):
         assert self._devices.contains(device), 'Target device %s is not expected' % device.mac
         port_trigger = device.port.port_no is not None
         if not self._system_active:
@@ -520,6 +526,11 @@ class DAQRunner:
         if not self.run_tests:
             LOGGER.debug('Target device %s trigger suppressed', device.mac)
             return False
+
+        if device.wait_remote and not remote_trigger:
+            LOGGER.debug('Ingoring local trigger for remote target %s', device)
+            return False
+        device.wait_remote = False
 
         try:
             group_name = self.network.device_group_for(device)
