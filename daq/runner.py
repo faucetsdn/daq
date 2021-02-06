@@ -509,7 +509,7 @@ class DAQRunner:
 
         self._terminate()
 
-    def _target_set_trigger(self, device, remote_trigger=False):
+    def _target_set_check_state(self, device, remote_trigger):
         assert self._devices.contains(device), 'Target device %s is not expected' % device.mac
         port_trigger = device.port.port_no is not None
         if not self._system_active:
@@ -530,6 +530,13 @@ class DAQRunner:
         if device.wait_remote and not remote_trigger:
             LOGGER.debug('Ingoring local trigger for remote target %s', device)
             return False
+
+        return True
+
+    def _target_set_trigger(self, device, remote_trigger=False):
+        if not self._target_set_check_state(device, remote_trigger):
+            return False
+
         device.wait_remote = False
 
         try:
