@@ -511,7 +511,6 @@ class DAQRunner:
 
     def _target_set_check_state(self, device, remote_trigger):
         assert self._devices.contains(device), 'Target device %s is not expected' % device.mac
-        port_trigger = device.port.port_no is not None
         if not self._system_active:
             LOGGER.warning('Target device %s ignored, system is not active', device.mac)
             return False
@@ -519,9 +518,6 @@ class DAQRunner:
         if device.host:
             LOGGER.debug('Target device %s already triggered', device.mac)
             return False
-
-        if port_trigger:
-            assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
         if not self.run_tests:
             LOGGER.debug('Target device %s trigger suppressed', device.mac)
@@ -536,6 +532,10 @@ class DAQRunner:
     def _target_set_trigger(self, device, remote_trigger=False):
         if not self._target_set_check_state(device, remote_trigger):
             return False
+
+        port_trigger = device.port.port_no is not None
+        if port_trigger:
+            assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
         device.wait_remote = False
 
