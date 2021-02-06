@@ -356,7 +356,7 @@ class DAQRunner:
 
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
-            LOGGER.info('Port %s dpid %s learned %s %s', port, dpid, target_mac)
+            LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
             self._target_set_trigger(device)
         else:
