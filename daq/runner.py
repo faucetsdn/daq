@@ -372,7 +372,7 @@ class DAQRunner:
 
         # For keeping track of remote port events
         if self._device_result_client:
-            LOGGER.info('TAP Connecting device result client for %s', target_mac)
+            LOGGER.info('Connecting device result client for %s', target_mac)
             device.port = PortInfo()
             device.port.active = True
             device.wait_remote = True
@@ -395,7 +395,7 @@ class DAQRunner:
             device.vlan = port_event.device_vlan
             device.assigned = port_event.assigned_vlan
 
-            LOGGER.info('TAP remote_port_state %s %s/%s', device,
+            LOGGER.info('Processing remote state %s %s/%s', device,
                         device.vlan, device.assigned)
             self._target_set_trigger(device, remote_trigger=True)
             if device.gateway:
@@ -640,7 +640,7 @@ class DAQRunner:
         existing_gateways = {device.gateway for device in group_devices if device.gateway}
         if existing_gateways:
             existing = existing_gateways.pop()
-            LOGGER.debug('Gateway for existing device group %s is %s', group_name, existing)
+            LOGGER.info('Gateway for existing device group %s is %s', group_name, existing)
             return existing
 
         set_num = self._find_gateway_set(device)
