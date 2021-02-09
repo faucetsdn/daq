@@ -118,7 +118,6 @@ class Configurator:
         # Fills in env var
         env_regex = re.compile(r'\$\{(.*)\}')
 
-
         def env_constructor(loader, node):
             match = env_regex.match(node.value)
             env_var = match.group()[2:-1]

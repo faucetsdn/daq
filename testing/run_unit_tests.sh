@@ -7,7 +7,7 @@ BASEDIR=`readlink -f $TESTDIR/..`
 cd $BASEDIR
 
 source venv/bin/activate
-
+source etc/FILES_MAPPING
 coverage erase
 
 export PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch:$BASEDIR/bin/python:$BASEDIR/libs:$BASEDIR/libs/proto

@@ -53,6 +53,7 @@ def build_source_files(tmp):
     shutil.copytree('faucet/clib', os.path.join(tmp, 'clib'), symlinks=True)
     return tmp
 
+
 dirs = os.listdir('.')
 assert all([repo in dirs for repo in ('faucet',)]), \
     'Missing dependent repos. Please run bin/setup_dev'
