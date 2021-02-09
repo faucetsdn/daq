@@ -14,6 +14,7 @@ try:
     from google.cloud import storage
     from google.cloud import logging
     from google.auth import _default as google_auth
+    # pylint: disable=no-member
     DESCENDING = firestore.Query.DESCENDING
     SUCCESSFUL_IMPORTS = True
 except ImportError:
@@ -27,7 +28,6 @@ import configurator
 LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 DEFAULT_LIMIT = 100
-# pylint: disable=no-member
 
 
 def get_timestamp():

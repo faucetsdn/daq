@@ -555,9 +555,11 @@ class DAQRunner:
         if no_test:
             LOGGER.warning('Suppressing configured tests because no_test')
             return ['hold']
-        head = []
-        body = []
-        tail = []
+        test_ordering = {
+            "first": [],
+            "last": [],
+            "body": []
+        }
 
         def get_test_list(test_file):
             LOGGER.info('Reading test definition file %s', test_file)
@@ -570,15 +572,10 @@ class DAQRunner:
                     ordering = cmd[2] if len(cmd) > 2 else None
                     if cmd_name == 'add':
                         LOGGER.debug('Adding test %s from %s', argument, test_file)
-                        if ordering == "first":
-                            head.append(argument)
-                        elif ordering == "last":
-                            tail.append(argument)
-                        else:
-                            body.append(argument)
+                        test_ordering.get(ordering, test_ordering["body"]).append(argument)
                     elif cmd_name == 'remove':
                         LOGGER.debug('Removing test %s from %s', argument, test_file)
-                        for section in (head, body, tail):
+                        for section in test_ordering.values():
                             if argument in section:
                                 section.remove(argument)
                     elif cmd_name == 'include':
@@ -595,7 +592,7 @@ class DAQRunner:
                         LOGGER.warning('Unknown test list command %s', cmd_name)
                     line = file.readline()
         get_test_list(test_file)
-        return [*head, *body, *tail]
+        return [*test_ordering["first"], *test_ordering["body"], *test_ordering["last"]]
 
     def _get_test_metadata(self, extension=".daqmodule", root="subset"):
         metadata = {}

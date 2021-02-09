@@ -491,7 +491,7 @@ class FaucetTopology:
             self._add_acl_port_rules(rules, target_mac, port)
 
         LOGGER.debug('match port %s to mac %s', port, target_mac)
-        
+
         file_name = self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
         file_path = os.path.join(self.INST_FILE_PREFIX, file_name)
         if target_mac:
