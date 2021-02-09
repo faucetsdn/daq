@@ -246,11 +246,16 @@ if [ -n "${options[pubber]}" ]; then
         echo Updated pubber private key from pagent for device $deviceId
         ls -l local/rsa_*
     fi
+
+    echo TAPTAPA
+    ping -c 4 mqtt.googleapis.com
+    echo TAPTAPB
+
     (while date; do
          echo Running cloud pubber tool `date`
          pubber/bin/run local/pubber.json
          # Do https query in case pubber is not configured, for testing port 443
-         curl -o /dev/null https://google.com
+         curl -o /dev/null https://google.com 2> /dev/null
          sleep 30
      done) &
 fi
@@ -263,7 +268,9 @@ fi
 
 if [ -n "${options[curl]}" ]; then
     echo Starting curl loop.
-    (while true; do curl -o - http://google.com; sleep 1; done) &
+    (
+        while true; do echo -n curl google.com && curl -o - http://google.com 2> /dev/null | wc -l; sleep 5; done
+    ) &
 fi
 
 conf_file=/config/start/start_faux.sh
