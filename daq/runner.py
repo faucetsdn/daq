@@ -201,7 +201,7 @@ class DAQRunner:
 
     def _init_daq_run_id(self):
         daq_run_id = str(uuid.uuid4())
-        daq_run_id_file = os.path.join(DAQ_RUN_DIR, 'daq_run_id.txt') 
+        daq_run_id_file = os.path.join(DAQ_RUN_DIR, 'daq_run_id.txt')
         with open(daq_run_id_file, 'w') as output_stream:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
@@ -584,8 +584,11 @@ class DAQRunner:
                     elif cmd_name == 'include':
                         env_regex = re.compile(r'\$\{(.*)\}')
                         match = env_regex.match(argument)
-                        env_var = match.group()[2:-1]
-                        get_test_list(os.getenv(env_var) + argument[match.end():])
+                        if match:
+                            env_var = match.group()[2:-1]
+                            get_test_list(os.getenv(env_var) + argument[match.end():])
+                        else:
+                            get_test_list(argument)
                     elif cmd_name == 'build' or not cmd_name:
                         pass
                     else:

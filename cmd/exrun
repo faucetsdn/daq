@@ -30,6 +30,7 @@ if ! git show $TAGGED_VERSION > /dev/null; then
 fi
 
 cd $ROOT
+source etc/FILES_MAPPING
 source etc/config_base.sh
 
 while [ -f $INSTLOCK ]; do

@@ -18,17 +18,15 @@ class FaucetTopology:
     MAC_PREFIX = "@mac:"
     DNS_PREFIX = "@dns:"
     CTL_PREFIX = "@ctrl:"
-    INST_FILE_PREFIX = DAQ_RUN_DIR 
+    INST_FILE_PREFIX = DAQ_RUN_DIR
     BROADCAST_MAC = "ff:ff:ff:ff:ff:ff"
     IPV4_DL_TYPE = "0x0800"
     ARP_DL_TYPE = "0x0806"
     LLDP_DL_TYPE = "0x88cc"
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
     DP_ACL_FILE_FORMAT = "dp_port_acls.yaml"
-    PORT_ACL_FILE_FORMAT = os.path.join("port_acls",
-        "dp_%s_port_%d_acl.yaml")
-    TEMPLATE_FILE_FORMAT = os.path.join(INST_FILE_PREFIX, 
-        "acl_templates", "template_%s_acl.yaml")
+    PORT_ACL_FILE_FORMAT = os.path.join("port_acls", "dp_%s_port_%d_acl.yaml")
+    TEMPLATE_FILE_FORMAT = os.path.join(INST_FILE_PREFIX, "acl_templates", "template_%s_acl.yaml")
     FROM_ACL_KEY_FORMAT = "@from:template_%s_acl"
     TO_ACL_KEY_FORMAT = "@to:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
@@ -493,15 +491,15 @@ class FaucetTopology:
             self._add_acl_port_rules(rules, target_mac, port)
 
         LOGGER.debug('match port %s to mac %s', port, target_mac)
-
-        filename = os.path.join(self.INST_FILE_PREFIX, 
-            self.PORT_ACL_FILE_FORMAT % (self.sec_name, port))
+        
+        file_name = self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
+        file_path = os.path.join(self.INST_FILE_PREFIX, file_name)
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
-            self._write_port_acl(port, rules, filename)
+            self._write_port_acl(port, rules, file_path)
         else:
-            self._write_port_acl(port, self._make_default_acl_rules(), filename)
+            self._write_port_acl(port, self._make_default_acl_rules(), file_path)
 
         return target_mac
 

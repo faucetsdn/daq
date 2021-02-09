@@ -54,8 +54,8 @@ class ReportGenerator:
 
     _NAME_FORMAT = "report_%s_%s"
     _SIMPLE_REPORT = "report"
-    _REPORT_CSS_PATH = os.path.join(DAQ_LIB_DIR, 'resources', 
-        'setups', 'baseline', 'device_report.css')
+    _REPORT_CSS_PATH = os.path.join(DAQ_LIB_DIR, 'resources', 'setups', 'baseline',
+                                    'device_report.css')
     _REPORT_TMP_HTML_PATH = os.path.join(DAQ_RUN_DIR, 'last_report_out.html')
     _TEST_SEPARATOR = "\n## %s\n"
     _TEST_SUBHEADER = "\n#### %s\n"

@@ -5,7 +5,6 @@ import json
 import os
 import sys
 
-SUCCESSFUL_IMPORTS = True
 try:
     import firebase_admin
     from firebase_admin import credentials
@@ -16,6 +15,7 @@ try:
     from google.cloud import logging
     from google.auth import _default as google_auth
     DESCENDING = firestore.Query.DESCENDING
+    SUCCESSFUL_IMPORTS = True
 except ImportError:
     SUCCESSFUL_IMPORTS = False
 

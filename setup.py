@@ -6,12 +6,15 @@ import shutil
 import os
 import tempfile
 
+
 def get_files_mapping_env():
     with open('etc/PACKAGE_FILES_MAPPING') as f:
-       return f.read().split('\n') 
+        return f.read().split('\n')
+
 
 def get_version():
-    return os.popen('git describe').read().strip() 
+    return os.popen('git describe').read().strip()
+
 
 def build_entry_script(tmp):
     with open(os.path.join(tmp, 'daq'), 'w') as f:
@@ -20,7 +23,7 @@ if [ "$EUID" -ne 0 ]; then
     echo Please run DAQ as root
     exit
 fi
-%s 
+%s
 export DAQ_VERSION="%s"
 LSB_RAW=$(lsb_release -a)
 export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
@@ -33,13 +36,15 @@ python3 $DAQ_DIR/daq.py $conf_file $@
         f.write(script)
     return os.path.join(tmp, 'daq')
 
+
 def build_data_files(prefix, package_prefix):
     paths = []
     for root, dirs, files in os.walk(prefix):
         if files:
-            paths.append((os.path.join(package_prefix, root[len(prefix) + 1:]), 
-                [os.path.join(root, name) for name in files]))
+            paths.append((os.path.join(package_prefix, root[len(prefix) + 1:]),
+                         [os.path.join(root, name) for name in files]))
     return paths
+
 
 def build_source_files(tmp):
     shutil.rmtree(tmp, ignore_errors=True)
@@ -52,15 +57,15 @@ dirs = os.listdir('.')
 assert all([repo in dirs for repo in ('faucet',)]), \
     'Missing dependent repos. Please run bin/setup_dev'
 
-with tempfile.TemporaryDirectory(dir='.') as tmp: 
+with tempfile.TemporaryDirectory(dir='.') as tmp:
     setuptools.setup(
-        package_dir = {
-            'daq': build_source_files(tmp) 
+        package_dir={
+            'daq': build_source_files(tmp)
         },
         package_data={'daq': ['proto/*', 'clib/*', 'forch/proto/*']},
         setup_requires=['pbr>=1.9', 'setuptools>=17.1'],
         pbr=True,
-        scripts = [
+        scripts=[
             build_entry_script(tmp),
         ],
         data_files=[

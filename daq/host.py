@@ -70,7 +70,7 @@ class ConnectedHost:
 
     _STARTUP_MIN_TIME_SEC = 5
     _RPC_TIMEOUT_SEC = 20
-    _INST_DIR = DAQ_RUN_DIR 
+    _INST_DIR = DAQ_RUN_DIR
     _DEVICE_PATH = 'device/%s'
     _NETWORK_DIR = os.path.join(DAQ_RUN_DIR, 'network')
     _MODULE_CONFIG = 'module_config.json'
@@ -524,7 +524,7 @@ class ConnectedHost:
 
     def _shorten_filename(self, long_name):
         if long_name and long_name.startswith(self._PATH_PREFIX):
-            return long_name[len(self._PATH_PREFIX):]
+            return long_name[len(self._PATH_PREFIX) + 1:]
         return long_name
 
     def _monitor_scan(self, output_file, timeout=None):

@@ -81,9 +81,8 @@ class Configurator:
         traversed.add(config_file)
         if 'include' in config:
             include = config.pop('include')
-            including_config_file = os.path.join(os.path.dirname(config_file), include)
-            if include.startswith('/'):
-                including_config_file = include
+            including_config_file = include if include.startswith('/') else os.path.join(
+                os.path.dirname(config_file), include)
             self._log('Including config file %s' % including_config_file)
             self.merge_config(base, including_config_file, traversed=traversed)
         return self._deep_merge_dict(base, config)
@@ -118,6 +117,8 @@ class Configurator:
     def _read_yaml_config(self, config_file):
         # Fills in env var
         env_regex = re.compile(r'\$\{(.*)\}')
+
+
         def env_constructor(loader, node):
             match = env_regex.match(node.value)
             env_var = match.group()[2:-1]
