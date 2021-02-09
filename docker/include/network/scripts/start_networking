@@ -73,5 +73,11 @@ echo Starting expired tls server on port 443 https.
 mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
 service nginx start
 
+echo TAPTAPC
+ip route || true
+ip addr || true
+ping -c 4 mqtt.googleapis.com
+echo TAPTAPD
+
 echo Blocking for all eternity.
 ./autorestart_dnsmasq
