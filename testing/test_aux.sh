@@ -125,6 +125,9 @@ more inst/faux/daq-faux-*/local/pubber.json | cat
 echo Build all container images...
 cmd/build
 
+image_count=$(docker images -q | wc -l)
+echo Built $image_count docker images.
+
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
