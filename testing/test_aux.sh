@@ -172,11 +172,16 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
 
+echo TAPTAP1
+more inst/run-*/nodes/udmi*/activate.log | cat
+echo TAPTAP2
+
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num 2>&1 | head -n 100
+    docker logs daq-faux-$num 2>&1 | head -n 300
 done
-echo done with docker logs
+echo docker logs done
+echo TAPTAP3
 
 echo Raw generated report:
 cat inst/reports/report_9a02571e8f01_*.md
