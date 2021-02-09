@@ -6,17 +6,22 @@ Build-Depends: debhelper (>=11~),
                dh-python,
                python3-all,
                python3-setuptools,
-	       python3-pbr (>= 1.9),
+	           python3-pbr (>= 1.9),
 Standards-Version: 4.1.4
 Homepage: https://github.com/faucetsdn/forch
 X-Python3-Version: >= 3.6
 
 Package: python3-daq
 Architecture: all
-# TODO Need to audit the imported modules to complete dependancies
-Depends: python3-grpcio,
-         python3-protobuf,
-         python3-yaml
+Depends: python3-mininet,
+         python3-jinja2,
+         python3-cryptography,
+         python3-yaml,
+         python3-cairocffi,
+         weasyprint,
+         python3-pypandoc,
+         python3-netifaces,
+         python3-grpcio
 Description: DAQ is a framework designed to test and operate IoT devices in an enterprise IoT environment.
 
 Package: daq

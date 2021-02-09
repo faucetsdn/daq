@@ -2,7 +2,10 @@
 
 import logging
 
-from google.cloud.logging.handlers import CloudLoggingHandler
+try:
+    from google.cloud.logging.handlers import CloudLoggingHandler
+except ImportError:
+    pass
 
 LOGGERS = {}
 

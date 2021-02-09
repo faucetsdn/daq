@@ -25,10 +25,10 @@ default_timeout_sec: 350
 port_flap_timeout_sec: 5
 
 # Default base module configuration file.
-base_conf: resources/setups/baseline/base_config.json
+base_conf: ${DAQ_LIB}/resources/setups/baseline/base_config.json
 
 # Directory of site-configuration data, including devices.
-site_path: local/site/
+site_path: ${DAQ_CONF}/site/
 
 # DHCP lease time parameters
 initial_dhcp_lease_time: 120s
@@ -36,10 +36,10 @@ dhcp_lease_time: 500s
 long_dhcp_response_sec: 105
 
 # finish hook: executed at the end of every test
-finish_hook: bin/dump_network
+finish_hook: ${DAQ_LIB}/bin/dump_network
 
 # topology hook: executed when device topology changes
-topology_hook: bin/dump_network
+topology_hook: ${DAQ_LIB}/bin/dump_network
 
 # usi url for DAQ to connect to
 usi_setup: 
