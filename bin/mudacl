@@ -13,7 +13,7 @@ port_acls=$DAQ_RUN/port_acls
 cd $ROOT
 $DAQ_LIB/mudacl/bin/test.sh
 
-source $DAQ_LIB/etc/config_base.sh || source $DAQ_LIB/bin/config_Base.sh
+source $DAQ_LIB/etc/config_base.sh || source $DAQ_LIB/bin/config_base.sh
 
 if [ $# -gt 0 ]; then
     echo Unexpected command line argument: $*

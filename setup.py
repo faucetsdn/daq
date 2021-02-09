@@ -8,7 +8,7 @@ import tempfile
 
 
 def get_files_mapping_env():
-    with open('etc/PACKAGE_FILES_MAPPING') as f:
+    with open('debian/FILES_MAPPING') as f:
         return f.read().split('\n')
 
 
