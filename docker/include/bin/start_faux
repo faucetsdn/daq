@@ -233,9 +233,9 @@ elif [ -n "${options[expiredtls]}" ]; then
 fi
 
 if [ -n "${options[pubber]}" ]; then
+    deviceId=`jq -r .deviceId local/pubber.json`
     extraField=`jq .extraField local/pubber.json`
     if [ "$extraField" == null ]; then
-        deviceId=`jq -r .deviceId local/pubber.json`
         gateway=`ip route | sed -rn 's/default via (.*) dev.*/\1/p'`
         echo Contacting pagent $gateway for new device key for $deviceId
         curl http://$gateway:8192?device=$deviceId > pagent.json || echo pagent error
@@ -247,7 +247,7 @@ if [ -n "${options[pubber]}" ]; then
         ls -l local/rsa_*
     fi
 
-    echo TAPTAPA $deviceId
+    echo Running pubber for device $deviceId
 
     (while date; do
          echo Running cloud pubber tool `date`
