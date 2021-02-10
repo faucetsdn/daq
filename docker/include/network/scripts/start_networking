@@ -30,8 +30,8 @@ iptables -A FORWARD -i $LOCAL_IF -o $EXT_IF -j ACCEPT
 echo TAPTAPC
 ip route || true
 ip addr || true
-ping -c 4 mqtt.googleapis.com || true
-ping -4 -c 4 mqtt.googleapis.com || true
+ping -c 1 mqtt.googleapis.com || true
+ping -4 -c 1 mqtt.googleapis.com || true
 echo TAPTAPD
 
 # Pick a random DHCP range to force clients to pick a new address.
