@@ -36,7 +36,7 @@ jobs:
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
       run: |
-        timeout 30m bin/test_daq ${{ matrix.test }}
+        bin/test_daq ${{ matrix.test }}
     - name: GW Debugging
       if: ${{ always() }}
       run: cat inst/gw*/nodes/gw*/activate.log
