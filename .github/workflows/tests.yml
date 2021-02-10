@@ -22,7 +22,11 @@ jobs:
       run: |
         bin/setup_daq
     - name: Build docker images
-      run: cmd/build; docker image ls
+      run: cmd/build tar /tmp/docker_images/; docker image ls
+    - uses: actions/upload-artifact@v2
+      with:
+          name: docker_image_dir
+          path: /tmp/docker_images
 
   integration_tests:
     runs-on: ubuntu-18.04
@@ -31,6 +35,10 @@ jobs:
       matrix:
         test: [base, many, aux, topo, modules, dhcp]
     steps:
+    - uses: actions/download-artifact@v2
+      with:
+          name: docker_image_dir
+          path: /tmp/docker_images
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -46,7 +54,7 @@ jobs:
       env:
         GIT_URL: ${{ secrets.GIT_URL }}
       run: |
-        bin/setup_daq
+        ls /tmp/docker_images; bin/setup_daq
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
