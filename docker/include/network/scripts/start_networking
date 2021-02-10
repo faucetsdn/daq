@@ -25,6 +25,13 @@ iptables -t nat -A POSTROUTING -o $EXT_IF -j MASQUERADE
 iptables -A FORWARD -i $EXT_IF -o $LOCAL_IF -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i $LOCAL_IF -o $EXT_IF -j ACCEPT
 
+echo TAPTAPC
+ip route || true
+ip addr || true
+ping -c 4 mqtt.googleapis.com || true
+ping -4 -c 4 mqtt.googleapis.com || true
+echo TAPTAPD
+
 # Pick a random DHCP range to force clients to pick a new address.
 random_subnet=$((RANDOM % 99 + 1))
 subnet=${IP_SUBNET:-$random_subnet}
@@ -72,13 +79,6 @@ fi
 echo Starting expired tls server on port 443 https.
 mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
 service nginx start
-
-echo TAPTAPC
-ip route || true
-ip addr || true
-ping -c 4 mqtt.googleapis.com || true
-ping -4 -c 4 mqtt.googleapis.com || true
-echo TAPTAPD
 
 echo Blocking for all eternity.
 ./autorestart_dnsmasq
