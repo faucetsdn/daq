@@ -17,8 +17,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Build docker images
-      run: cmd/build
-      run: docker image ls
+      run: cmd/build; docker image ls
 
   integration_tests:
     runs-on: ubuntu-18.04
