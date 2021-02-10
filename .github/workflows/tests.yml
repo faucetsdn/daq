@@ -12,7 +12,7 @@ on:
 jobs:
   integration_tests:
     runs-on: ubuntu-18.04
-    timeout-minutes: 60
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
@@ -30,17 +30,19 @@ jobs:
       with:
         java-version: 1.11
     - name: Installing dependencies
+      env:
+        GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_daq
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
+        GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
+        GCP_REFLECT_KEY_BASE64: ${{ secrets.GCP_REFLECT_KEY_BASE64 }}
       run: |
         bin/test_daq ${{ matrix.test }}
-    - name: GW Debugging
-      if: ${{ always() }}
-      run: cat inst/gw*/nodes/gw*/activate.log
     - name: Generated test report
+      if: ${{ always() }}
       run: |
         echo '************* Use sed to filter out timestamp prefix *************'
         echo 'Download log archive, find the right job, and use:'
@@ -56,6 +58,8 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
+      env:
+        GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_dev
     - name: Check style
