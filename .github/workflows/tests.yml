@@ -55,7 +55,11 @@ jobs:
       env:
         GIT_URL: ${{ secrets.GIT_URL }}
       run: |
-        ls /tmp/docker_images; bin/setup_daq
+        bin/setup_daq
+    - name: Loading docker images
+      run: |
+        cd /tmp/docker_images
+        for file in *; do docker load < "$file"; done
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
