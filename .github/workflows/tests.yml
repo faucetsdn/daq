@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [base, many, aux, topo, modules, dhcp]
+        test: [aux]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -30,15 +30,11 @@ jobs:
       with:
         java-version: 1.11
     - name: Installing dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_daq
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
-        GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
-        GCP_REFLECT_KEY_BASE64: ${{ secrets.GCP_REFLECT_KEY_BASE64 }}
       run: |
         bin/test_daq ${{ matrix.test }}
     - name: Generated test report
@@ -58,8 +54,6 @@ jobs:
       with:
         python-version: 3.8
     - name: Install dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_dev
     - name: Check style
