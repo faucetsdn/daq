@@ -29,6 +29,7 @@ jobs:
           path: /tmp/docker_images
 
   integration_tests:
+    needs: build_docker
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
