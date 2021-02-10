@@ -10,6 +10,16 @@ on:
     - cron: '0 */2 * * *'
 
 jobs:
+  build_docker:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Build docker images
+      run: cmd/build
+      run: docker image ls
+
   integration_tests:
     runs-on: ubuntu-18.04
     strategy:
