@@ -5,14 +5,21 @@ import json
 import os
 import sys
 
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+try:
+    import firebase_admin
+    from firebase_admin import credentials
+    from firebase_admin import firestore
 
-from google.cloud import pubsub_v1
-from google.cloud import storage
-from google.cloud import logging
-from google.auth import _default as google_auth
+    from google.cloud import pubsub_v1
+    from google.cloud import storage
+    from google.cloud import logging
+    from google.auth import _default as google_auth
+    # pylint: disable=no-member
+    DESCENDING = firestore.Query.DESCENDING
+    SUCCESSFUL_IMPORTS = True
+except ImportError:
+    SUCCESSFUL_IMPORTS = False
+
 from grpc import StatusCode
 
 import logger
@@ -21,8 +28,6 @@ import configurator
 LOGGER = logger.get_logger('gcp')
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 DEFAULT_LIMIT = 100
-# pylint: disable=no-member
-DESCENDING = firestore.Query.DESCENDING
 
 
 def get_timestamp():
@@ -56,6 +61,7 @@ class GcpManager:
             self._firestore = None
             self._client_name = None
             return
+        assert SUCCESSFUL_IMPORTS, "Missing google cloud python dependencies."
         LOGGER.info('Loading gcp credentials from %s', cred_file)
         # Normal execution assumes default credentials.
         (self._credentials, self._project) = google_auth.load_credentials_from_file(cred_file)

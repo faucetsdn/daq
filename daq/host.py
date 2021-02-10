@@ -16,6 +16,7 @@ from proto.system_config_pb2 import DhcpMode
 
 import configurator
 from test_modules import DockerModule, IpAddrModule, NativeModule
+from env import DAQ_RUN_DIR
 import gcp
 import logger
 
@@ -69,9 +70,9 @@ class ConnectedHost:
 
     _STARTUP_MIN_TIME_SEC = 5
     _RPC_TIMEOUT_SEC = 20
-    _INST_DIR = 'inst/'
+    _INST_DIR = DAQ_RUN_DIR
     _DEVICE_PATH = 'device/%s'
-    _NETWORK_DIR = 'inst/network'
+    _NETWORK_DIR = os.path.join(DAQ_RUN_DIR, 'network')
     _MODULE_CONFIG = 'module_config.json'
     _DEVICE_CONFIG = 'device_config.json'
     _TYPE_CONFIG = 'type_config.json'
@@ -523,7 +524,7 @@ class ConnectedHost:
 
     def _shorten_filename(self, long_name):
         if long_name and long_name.startswith(self._PATH_PREFIX):
-            return long_name[len(self._PATH_PREFIX):]
+            return long_name[len(self._PATH_PREFIX) + 1:]
         return long_name
 
     def _monitor_scan(self, output_file, timeout=None):

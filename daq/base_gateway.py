@@ -6,6 +6,7 @@ import shutil
 from abc import ABC, abstractmethod
 
 import logger
+from env import DAQ_RUN_DIR
 
 LOGGER = logger.get_logger('gateway')
 
@@ -56,7 +57,7 @@ class BaseGateway(ABC):
                     self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
         cls = self._get_host_class()
-        vol_maps = [os.path.abspath('inst/config') + ':/config/inst']
+        vol_maps = [os.path.abspath(os.path.join(DAQ_RUN_DIR, 'config')) + ':/config/inst']
         host = self.runner.add_host(
             host_name, port=host_port, cls=cls, tmpdir=self.tmpdir, vol_maps=vol_maps)
         host.activate()
@@ -138,7 +139,7 @@ class BaseGateway(ABC):
             self.runner.ip_notify(state, target, self, exception=exception)
 
     def _setup_tmpdir(self, base_name):
-        tmpdir = os.path.join('inst', base_name)
+        tmpdir = os.path.join(DAQ_RUN_DIR, base_name)
         if os.path.exists(tmpdir):
             shutil.rmtree(tmpdir)
         os.makedirs(tmpdir)
