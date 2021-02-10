@@ -247,10 +247,7 @@ if [ -n "${options[pubber]}" ]; then
         ls -l local/rsa_*
     fi
 
-    echo TAPTAPA
-    ping -c 4 mqtt.googleapis.com
-    ping -4 -c 4 mqtt.googleapis.com
-    echo TAPTAPB
+    echo TAPTAPA $deviceId
 
     (while date; do
          echo Running cloud pubber tool `date`
