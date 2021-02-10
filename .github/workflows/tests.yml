@@ -36,9 +36,11 @@ jobs:
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
       run: |
-        bin/test_daq ${{ matrix.test }}
-    - name: Generated test report
+        timeout 30m bin/test_daq ${{ matrix.test }}
+    - name: GW Debugging
       if: ${{ always() }}
+      run: cat inst/gw*/nodes/gw*/activate.log
+    - name: Generated test report
       run: |
         echo '************* Use sed to filter out timestamp prefix *************'
         echo 'Download log archive, find the right job, and use:'
