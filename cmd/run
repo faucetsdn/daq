@@ -8,7 +8,6 @@ run_args="$@"
 cmdrun_log=inst/cmdrun.log
 
 cd $ROOT
-source etc/FILES_MAPPING
 source etc/config_base.sh
 
 echo Starting `date`
