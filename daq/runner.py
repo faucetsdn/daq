@@ -932,7 +932,7 @@ class DAQRunner:
                 LOGGER.warning('Failing report due to module exception')
                 failed = True
 
-            return_code = module_result.get(report.ResultType.RETURN_CODE):
+            return_code = module_result.get(report.ResultType.RETURN_CODE)
             if return_code:
                 LOGGER.warning('Failing report due to module return code %s', return_code)
                 failed = True
@@ -940,7 +940,7 @@ class DAQRunner:
             module_tests = module_result.get('tests', {})
             for test_name in module_tests:
                 test_result = module_tests.get(test_name)
-                if test_result.get('result') == 'fail':
+                if test_result.get('result') != 'pass':
                     LOGGER.info('Failing report due to failing %s', test_name)
                     failed = True
 
