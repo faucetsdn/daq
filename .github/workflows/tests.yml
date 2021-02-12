@@ -12,11 +12,10 @@ on:
 jobs:
   integration_tests:
     runs-on: ubuntu-18.04
-    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
-        test: [aux]
+        test: [base, many, aux, topo, modules, dhcp]
     steps:
     - uses: actions/checkout@v2
       with:
