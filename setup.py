@@ -72,6 +72,7 @@ with tempfile.TemporaryDirectory(dir='.') as tmp:
         data_files=[
             *build_data_files('bin', 'lib/daq/bin'),
             *build_data_files('cmd', 'lib/daq/cmd'),
+            *build_data_files('etc', 'lib/daq/etc'),
             *build_data_files('resources/setups', 'lib/daq/resources/setups'),
             *build_data_files('subset', 'lib/daq/subset'),
             *build_data_files('usi', 'lib/daq/usi'),
