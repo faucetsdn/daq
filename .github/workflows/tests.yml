@@ -10,7 +10,7 @@ on:
     - cron: '0 */2 * * *'
 
 jobs:
-  build_docker_host:
+  build_docker:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
