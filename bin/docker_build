@@ -39,7 +39,9 @@ if [ -n "$DAQ_TARGETS" ]; then
 fi
 
 docker_files=$(host_tests=$host_tests bin/docker_build_files)
-for file in $docker_files; do
+
+build_target() {
+    file=$1
     if [ ${file%\~} != ${file} ]; then
         continue
     fi
@@ -76,7 +78,12 @@ for file in $docker_files; do
         docker tag $tag:latest $tag:$hash
         echo Build complete. >> $logfile
     fi
+}
+
+for file in $docker_files; do
+    build_target $file &
 done
+wait
 
 if [ -n "$DAQ_TARGETS" ]; then
     for module in "${!test_set[@]}"; do
