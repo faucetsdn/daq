@@ -46,8 +46,6 @@ class FaucetTopology:
     _OFPP_IN_PORT = 0xfffffff8
 
     def __init__(self, config):
-        LOGGER.info('DAQ_RUN_DIR is %s', DAQ_RUN_DIR)
-        LOGGER.info('INST_FILE_PREFIX is %s', self.INST_FILE_PREFIX)
         self.config = config
         self.pri = None
         self.pri_name = None
