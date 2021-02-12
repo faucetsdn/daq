@@ -3,14 +3,14 @@
 # Simple helper script to run the prototype MUD ACL generator.
 #
 
-SYSCONF=$DAQ_CONF/system.conf
-ROOT=$(dirname $0)/..
+ROOT=$(realpath $(dirname $0)/..)
+cd $ROOT
+source etc/config_base.sh
 
 mud_files=$DAQ_LIB/mud_files/
 acl_templates=$DAQ_RUN/acl_templates
 port_acls=$DAQ_RUN/port_acls
 
-cd $ROOT
 $DAQ_LIB/mudacl/bin/test.sh
 
 source $DAQ_LIB/etc/config_base.sh || source $DAQ_LIB/bin/config_base.sh
@@ -30,4 +30,5 @@ mkdir $port_acls
 
 $DAQ_LIB/mudacl/bin/run.sh $mud_files $acl_templates
 
+echo MUD acl templates:
 ls -l $acl_templates $port_acls
