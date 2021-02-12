@@ -22,11 +22,16 @@ jobs:
       run: |
         bin/setup_daq
     - name: Build docker images
-      run: cmd/build tar /tmp/docker_images/; docker image ls
+      run: |
+        cmd/build tar /tmp/build_artifacts/docker_images/
+        docker image ls
+        mkdir -p /tmp/build_artifacts
+        cp .build_built /tmp/build_artifacts/
+        cp .build_hash /tmp/build_artifacts/
     - uses: actions/upload-artifact@v2
       with:
-          name: docker_image_dir
-          path: /tmp/docker_images
+          name: build_artifacts
+          path: /tmp/build_artifacts/
 
   integration_tests:
     needs: build_docker
@@ -38,8 +43,8 @@ jobs:
     steps:
     - uses: actions/download-artifact@v2
       with:
-          name: docker_image_dir
-          path: /tmp/docker_images
+          name: build_artifacts
+          path: /tmp/build_artifacts
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -58,7 +63,9 @@ jobs:
         bin/setup_daq
     - name: Loading docker images
       run: |
-        cd /tmp/docker_images
+        cp /tmp/build_artifacts/.build* .
+        ls -a
+        cd /tmp/build_artifacts/docker_images
         for file in *; do docker load < "$file"; done
     - name: Running ${{ matrix.test }} test
       env:
