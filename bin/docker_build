@@ -73,6 +73,8 @@ build_target() {
             echo Saving Docker image $tag to $path
             mkdir -p $path
             docker save "$tag" > $path/$module.tar
+            echo Delete image $tag
+            docker image rm $tag
         fi
         hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
         docker tag $tag:latest $tag:$hash

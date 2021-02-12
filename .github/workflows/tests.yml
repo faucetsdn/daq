@@ -23,6 +23,7 @@ jobs:
         bin/setup_daq
     - name: Build docker images
       run: |
+        export host_tests=config/modules/all.conf
         cmd/build tar /tmp/build_artifacts/docker_images/
         docker image ls
         mkdir -p /tmp/build_artifacts
