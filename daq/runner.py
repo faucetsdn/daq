@@ -942,7 +942,7 @@ class DAQRunner:
                 test_result = module_tests.get(test_name)
                 result = test_result.get('result')
                 LOGGER.info('Test report for %s is %s', test_name, result)
-                if result != 'pass' and result != 'skip':
+                if result not in ('pass', 'skip'):
                     failed = True
 
         return PortBehavior.failed if failed else PortBehavior.passed
