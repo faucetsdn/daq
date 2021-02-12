@@ -938,8 +938,7 @@ class DAQRunner:
                 failed = True
 
             module_tests = module_result.get('tests', {})
-            for test_name in module_tests:
-                test_result = module_tests.get(test_name)
+            for test_name, test_result in module_tests.items():
                 result = test_result.get('result')
                 LOGGER.info('Test report for %s is %s', test_name, result)
                 if result not in ('pass', 'skip'):
