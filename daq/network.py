@@ -22,7 +22,6 @@ from forch.proto.forch_configuration_pb2 import OrchestrationConfig
 
 LOGGER = logger.get_logger('network')
 
-
 # pylint: disable=too-few-public-methods
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
