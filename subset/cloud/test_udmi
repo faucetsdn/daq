@@ -64,8 +64,7 @@ fi
 TEST_NAME="cloud.udmi.provision"
 TEST_DESCRIPTION="Validates dynamic provisioning request"
 RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
-write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
-                 "$skip" "$RESULT_AND_SUMMARY"
+write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
 echo timeout 90 validator/bin/validate $project_id $schema_path reflect $device_id local/ --
@@ -100,18 +99,27 @@ for message_type in $message_types; do
     message_report $message_type
 done
 
-result=pass
-sequence=config_basic
-validator=validator/bin/validate
-cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
-echo $cmd
-timeout 90 $cmd || true
+sequences=$(cd udmi/sequences; ls | sort)
+for sequence in $sequences; do
+    result=pass
+    sequence=config_basic
+    validator=validator/bin/validate
+    cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
+    echo $cmd
+    timeout 60 $cmd || result=fail
 
-TEST_NAME="cloud.udmi.$sequence"
-TEST_DESCRIPTION="Validates device $sequence message sequence."
-RESULT_AND_SUMMARY="RESULT $result $TEST_NAME Sequence successfully completed"
-write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
-                 "$skip" "$RESULT_AND_SUMMARY"
+    if [[ $result == pass ]]; then
+        summary="Validation successfully completed"
+    else
+        summary="Sequence validation falied"
+    fi
+
+    TEST_NAME="cloud.udmi.$sequence"
+    TEST_DESCRIPTION="Validates device $sequence message sequence."
+    RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $summary"
+    write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                     "n/a" "$RESULT_AND_SUMMARY"
+done
 
 fgrep RESULT $REPORT
 
