@@ -5,15 +5,13 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-source etc/config_base.sh
+source bin/config_base.sh
 
 mud_files=$DAQ_LIB/mud_files/
 acl_templates=$DAQ_RUN/acl_templates
 port_acls=$DAQ_RUN/port_acls
 
 $DAQ_LIB/mudacl/bin/test.sh
-
-source $DAQ_LIB/etc/config_base.sh || source $DAQ_LIB/bin/config_base.sh
 
 if [ $# -gt 0 ]; then
     echo Unexpected command line argument: $*

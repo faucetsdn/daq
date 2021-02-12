@@ -30,7 +30,7 @@ if ! git show $TAGGED_VERSION > /dev/null; then
 fi
 
 cd $ROOT
-source etc/config_base.sh
+source bin/config_base.sh
 
 while [ -f $INSTLOCK ]; do
     echo Waiting for $INSTLOCK to disappear!
