@@ -68,8 +68,8 @@ write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
                  "$skip" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local/ --
-timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local/ -- || true
+echo timeout 90 validator/bin/validate $project_id $schema_path reflect $device_id local/ --
+timeout 90 validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
 
 function message_report {
     message_type=$1
@@ -102,8 +102,11 @@ done
 
 result=pass
 sequence=config_basic
-echo validator/bin/validate $project_id $schema_path reflect AHU-1 local/ sequences/$sequence
-timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local sequences/$sequence || result=fail
+validator=validator/bin/validate
+cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
+echo $cmd
+timeout 90 $cmd || true
+
 TEST_NAME="cloud.udmi.$sequence"
 TEST_DESCRIPTION="Validates device $sequence message sequence."
 RESULT_AND_SUMMARY="RESULT $result $TEST_NAME Sequence successfully completed"
