@@ -68,8 +68,8 @@ write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
                  "$skip" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ --
-timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ -- || true
+echo timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local/ --
+timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local/ -- || true
 
 function message_report {
     message_type=$1
