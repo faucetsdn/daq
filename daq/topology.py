@@ -364,17 +364,15 @@ class FaucetTopology:
         if not self._ext_faucet or not self._egress_vlan:
             return
         for devices in self._set_devices.values():
-            if devices:
-                LOGGER.info('Reflecting dhcp to %s for %s', list(devices)[0].vlan, devices)
             for device in devices:
                 # Rule for DHCP request to server. Convert device vlan to egress vlan.
-                self._add_acl_rule(acl_list, dl_type='0x800',
-                                   nw_proto=17, udp_src=68, udp_dst=67,
-                                   vlan_vid=device.vlan,
-                                   swap_vid=self._egress_vlan, port=self._OFPP_IN_PORT)
-                self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac,
-                                   nw_proto=17, udp_src=67, udp_dst=68,
-                                   vlan_vid=self._egress_vlan,
+                egress_vlan = device.assigned if device.assigned else self._egress_vlan
+                LOGGER.info('Reflecting %s dhcp with %s/%s', device.mac, device.vlan, egress_vlan)
+                self._add_acl_rule(acl_list, dl_type='0x800', nw_proto=17, udp_src=68, udp_dst=67,
+                                   vlan_vid=device.vlan, swap_vid=egress_vlan,
+                                   port=self._OFPP_IN_PORT)
+                self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac, nw_proto=17,
+                                   udp_src=67, udp_dst=68, vlan_vid=egress_vlan,
                                    swap_vid=device.vlan, port=self._OFPP_IN_PORT, allow=True)
 
         # Allow any unrecognized requests for learning, but don't reflect.

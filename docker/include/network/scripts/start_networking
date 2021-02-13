@@ -68,5 +68,10 @@ if [ -f $GCP_CRED_FILE ]; then
     ) &
 fi
 
+# Setup a bad SSL Server for TLS client tests
+echo Starting expired tls server on port 443 https.
+mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
+service nginx start
+
 echo Blocking for all eternity.
 ./autorestart_dnsmasq
