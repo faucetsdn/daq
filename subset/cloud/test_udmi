@@ -100,9 +100,9 @@ for message_type in $message_types; do
 done
 
 sequences=$(cd udmi/sequences; ls | sort)
+echo Validating sequences for $device_id: $sequences
 for sequence in $sequences; do
     result=pass
-    sequence=config_basic
     validator=validator/bin/validate
     cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
     echo $cmd
