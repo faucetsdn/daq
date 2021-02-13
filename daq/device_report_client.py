@@ -1,6 +1,5 @@
 """gRPC client to send device result"""
 
-import signal
 import threading
 import grpc
 

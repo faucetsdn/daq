@@ -307,7 +307,7 @@ class ConnectedHost:
         if expected is not None:
             message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
-        assert self.state != _STATE.TERM or (self.state == _STATE.TERM and target != _STATE.TERM), 'host already terminated'
+        assert self.state != _STATE.TERM or target != _STATE.TERM, 'host already terminated'
         self.logger.debug('Target device %s state: %s -> %s', self, self.state, target)
         self.state = target
 
