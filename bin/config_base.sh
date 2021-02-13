@@ -1,5 +1,9 @@
 # Script file included by all setup scripts to load local config.
 
+if [[ -z $DAQ_LIB ]]; then
+    source etc/FILES_MAPPING
+fi
+
 LOCAL_YAML=$DAQ_CONF/system.yaml
 LOCAL_CONF=$DAQ_CONF/system.conf
 DEFAULT_CONF=$DAQ_LIB/config/system/base.yaml

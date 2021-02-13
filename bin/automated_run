@@ -17,7 +17,7 @@ PIDFILE=inst/daq.pid
 SYSCONF=local/system.conf
 
 cd $ROOT
-source etc/config_base.sh
+source bin/config_base.sh
 
 if [ "$1" == debug ]; then
     auto_args+=" daq_loglevel=debug"

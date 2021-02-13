@@ -30,7 +30,7 @@ export DAQ_LSB_RELEASE=$(echo $LSB_RAW)
 export DAQ_SYS_UNAME=$(uname -a)
 
 export DAQ_DIR=`python3 -c 'import daq; import os; print(os.path.dirname(daq.__file__))'`
-source $DAQ_LIB/config_base.sh
+source $DAQ_LIB/bin/config_base.sh
 python3 $DAQ_DIR/daq.py $conf_file $@
         """ % (";".join(get_files_mapping_env()), get_version())
         f.write(script)
@@ -77,6 +77,5 @@ with tempfile.TemporaryDirectory(dir='.') as tmp:
             *build_data_files('usi', 'lib/daq/usi'),
             *build_data_files('config/modules', 'lib/daq/config/modules'),
             *build_data_files('config/system', 'lib/daq/config/system'),
-            ('lib/daq', ['etc/config_base.sh']),
         ]
     )

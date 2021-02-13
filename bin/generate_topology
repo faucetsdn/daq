@@ -2,7 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-source etc/config_base.sh
+source bin/config_base.sh
 
 FAUCET=$(realpath $ROOT/faucet)
 MININET=$(realpath $ROOT/mininet)
