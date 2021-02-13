@@ -17,7 +17,7 @@ echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml local/system.conf
 MARKER=inst/run-9a02571e8f00/nodes/hold*/activate.log
 monitor_marker $MARKER "sudo ip link set pri-eth1 down"
-cmd/run -k -s site_path=inst/tmp_site
+cmd/run -b -k -s site_path=inst/tmp_site
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 
