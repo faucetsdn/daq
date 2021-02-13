@@ -777,8 +777,12 @@ class DAQRunner:
 
     def target_set_complete(self, device, reason):
         """Handle completion of a target_set"""
+        try:
+            self._target_set_cancel(device)
+        except Exception as e:
+            LOGGER.error(e)
+            device.host.record_result(device.host.test_name, exception=e)
         self._target_set_finalize(device, device.host.results, reason)
-        self._target_set_cancel(device)
 
     def _target_set_finalize(self, device, result_set, reason):
         results = self._combine_result_set(device, result_set)
@@ -795,41 +799,41 @@ class DAQRunner:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-    def _target_set_cancel(self, device):
-        target_host = device.host
-        if target_host:
-            target_gateway = device.gateway
-            target_port = device.port.port_no
-            LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
-                        self.run_limit)
-
-            results = self._combine_result_set(device, self._result_sets.get(device))
-            this_result_linger = results and self.result_linger
-            target_gateway_linger = target_gateway and target_gateway.result_linger
-            if target_gateway_linger or this_result_linger:
-                LOGGER.warning('Target device %s result_linger: %s', device.mac, results)
-                if target_port:
-                    self._activate_port(target_port)
-                target_gateway.result_linger = True
-            else:
-                if target_port:
-                    self._direct_port_traffic(device.mac, target_port, None)
-
-                test_results = target_host.terminate('_target_set_cancel', trigger=False)
-                self._send_device_result(device.mac, test_results)
-
-                if target_gateway:
-                    self._detach_gateway(device)
-            if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
-                LOGGER.warning('Suppressing future tests because run limit reached.')
-                self.run_tests = False
-            if self.single_shot and self.run_tests:
-                LOGGER.warning('Suppressing future tests because test done in single shot.')
-                self._handle_faucet_events()  # Process remaining queued faucet events
-                self.run_tests = False
-            device.host = None
+        if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
+            LOGGER.warning('Suppressing future tests because run limit reached.')
+            self.run_tests = False
+        if self.single_shot and self.run_tests:
+            LOGGER.warning('Suppressing future tests because test done in single shot.')
+            self._handle_faucet_events()  # Process remaining queued faucet events
+            self.run_tests = False
+        device.host = None
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
+
+    def _target_set_cancel(self, device):
+        target_host = device.host
+        if not target_host:
+            return
+        target_gateway = device.gateway
+        target_port = device.port.port_no
+        LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
+                    self.run_limit)
+
+        results = self._combine_result_set(device, self._result_sets.get(device))
+        this_result_linger = results and self.result_linger
+        target_gateway_linger = target_gateway and target_gateway.result_linger
+        if target_gateway_linger or this_result_linger:
+            LOGGER.warning('Target device %s result_linger: %s', device.mac, results)
+            if target_port:
+                self._activate_port(target_port)
+            target_gateway.result_linger = True
+        else:
+            if target_port:
+                self._direct_port_traffic(device.mac, target_port, None)
+            if target_gateway:
+                self._detach_gateway(device)
+            test_results = target_host.terminate('_target_set_cancel', trigger=False)
+            self._send_device_result(device.mac, test_results)
 
     def _detach_gateway(self, device):
         target_gateway = device.gateway
@@ -887,7 +891,10 @@ class DAQRunner:
         LOGGER.info(
             'Sending device result for device %s: %s',
             mac, PortBehavior.Behavior.Name(device_result))
-        self._device_result_client.send_device_result(mac, device_result)
+        try:
+            self._device_result_client.send_device_result(mac, device_result)
+        except Exception as e:
+            LOGGER.error("Failed to send device results for device %s: %s ", mac, e)
 
     def _calculate_device_result(self, test_results):
         for module_result in test_results.get('modules', {}).values():

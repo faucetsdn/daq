@@ -116,7 +116,7 @@ function monitor_marker {
             if [ -n "$test_done" ]; then
                 break
             fi
-            echo test_aux.sh waiting for $MARKER
+            echo waiting for $MARKER
             sleep 60
         done
         echo Found $MARKER, executing $RUNCMD

@@ -1,5 +1,6 @@
 """gRPC client to send device result"""
 
+import signal
 import threading
 import grpc
 
@@ -10,12 +11,15 @@ from utils import dict_proto
 
 _SERVER_ADDRESS_DEFAULT = '127.0.0.1'
 _SERVER_PORT_DEFAULT = 50051
-
+_RPC_TIMEOUT_SEC = 10
 
 class DeviceReportClient:
     """gRPC client to send device result"""
-    def __init__(self, server_address=_SERVER_ADDRESS_DEFAULT, server_port=_SERVER_PORT_DEFAULT):
+    def __init__(self, server_address=_SERVER_ADDRESS_DEFAULT, server_port=_SERVER_PORT_DEFAULT,
+                 rpc_timeout_sec=_RPC_TIMEOUT_SEC):
         self._initialize_stub(server_address, server_port)
+        self._pending_requests = []
+        self._rpc_timeout_sec = rpc_timeout_sec
 
     def _initialize_stub(self, sever_address, server_port):
         channel = grpc.insecure_channel(f'{sever_address}:{server_port}')
@@ -28,15 +32,28 @@ class DeviceReportClient:
                 mac: {'port_behavior': device_result}
             }
         }
-        self._stub.ReportDevicesState(dict_proto(devices_state, DevicesState))
+        self._stub.ReportDevicesState(dict_proto(devices_state, DevicesState),
+                                      timeout=self._rpc_timeout_sec)
 
     def _port_event_handler(self, mac, callback):
         device = {
             "mac": mac
         }
-        for port_event in self._stub.GetPortState(dict_proto(device, Device)):
+        result_generator = self._stub.GetPortState(dict_proto(device, Device))
+        def cancel_request():
+            result_generator.cancel()
+
+        self._pending_requests.append(cancel_request)
+        for port_event in result_generator:
             callback(port_event)
+        if cancel_request in self._pending_requests:
+            self._pending_requests.remove(cancel_request)
 
     def get_port_events(self, mac, callback):
         """Gets remote port events"""
         threading.Thread(target=self._port_event_handler, args=(mac, callback)).start()
+
+    def terminate(self):
+        """Terminates all onging grpc calls"""
+        for handler in self._pending_requests:
+            handler()

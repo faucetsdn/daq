@@ -28,9 +28,9 @@ sha1sum $proto_files > $WEB_ROOT/protos.hash
     cd protoc-gen-doc
     git checkout $PROTOC_VERSION
     script/dist.sh
-    tar -xzvf dist/protoc-gen-doc-*.linux-amd64.go*.tar.gz
+    tar -xzvf dist/protoc-gen-doc-*.linux-amd64.*.tar.gz
     mkdir -p bin
-    cp protoc-gen-doc-*.linux-amd64.go*/protoc-gen-doc bin/
+    cp protoc-gen-doc-*.linux-amd64.*/protoc-gen-doc bin/
 )
 
 gen_path=$ROOT/protoc-gen-doc/bin/protoc-gen-doc
