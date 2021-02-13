@@ -8,7 +8,7 @@ fi
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-source etc/config_base.sh
+source bin/config_base.sh
 
 PROJECT=$1
 shift

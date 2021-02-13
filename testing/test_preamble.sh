@@ -25,7 +25,6 @@ lsb_release -a
 
 mkdir -p inst/config
 gcp_cred=
-source etc/FILES_MAPPING
 
 if [ -f $GCP_FILE ]; then
   gcp_cred=$GCP_FILE

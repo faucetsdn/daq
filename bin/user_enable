@@ -3,6 +3,6 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-source etc/config_base.sh
+source bin/config_base.sh
 
 python daq/gcp.py register_offenders=true $conf_file 
