@@ -11,6 +11,7 @@ function make_pubber {
     faux=$2
     extra=$3
     gateway=$4
+    serial_no=test_aux-$RANDOM
     local_dir=inst/faux/$faux/local/
     echo Creating $device with $extra/$gateway in $local_dir
     mkdir -p $local_dir
@@ -26,6 +27,7 @@ function make_pubber {
     "cloudRegion": "$cloud_region",
     "registryId": "$registry_id",
     "extraField": $extra,
+    "serialNo": "$serial_no",
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
