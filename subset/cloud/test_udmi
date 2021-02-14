@@ -99,19 +99,23 @@ for message_type in $message_types; do
     message_report $message_type
 done
 
+device_dir=out/devices/$device_id
 sequences=$(cd sequences; ls | sort)
 echo Validating sequences for $device_id: $sequences
 for sequence in $sequences; do
     result=pass
     validator=validator/bin/validate
+    rm -rf $device_dir
     cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
     echo $cmd
     timeout 60 $cmd || result=fail
+    echo Validation result for $device_id against $sequence was $result
 
     if [[ $result == pass ]]; then
         summary="Validation successfully completed"
     else
         summary="Sequence validation falied"
+        more $device_dir/* | cat
     fi
 
     TEST_NAME="cloud.udmi.$sequence"
