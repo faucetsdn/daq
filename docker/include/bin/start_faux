@@ -161,15 +161,15 @@ fi
 if [ -n "${options[ntpv4]}" ]; then
     dhcp_ntp=$(fgrep NTPSERVERS= /run/ntpdate.dhcp)
     ntp_server=`echo $dhcp_ntp | cut -d "'" -f 2`
+    echo Transmitting NTP query to $ntp_server using NTPv4
     (while true; do
-        echo Transmitting NTP query to $ntp_server using NTPv4
         java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $ntp_server 123 4 > ntp.log
         sleep 8
     done) &
 elif [ -n "${options[ntpv3]}" ]; then
     STATIC_NTP_SERVER=216.239.35.8
+    echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
     (while true; do
-        echo Transmitting NTP query to $STATIC_NTP_SERVER using NTPv3
         timeout 5 java -jar NTPClient/build/libs/NTPClient-1.0-SNAPSHOT.jar $STATIC_NTP_SERVER 123 3 > ntp.log
         sleep 8
     done) &
@@ -266,9 +266,7 @@ fi
 
 if [ -n "${options[curl]}" ]; then
     echo Starting curl loop.
-    (
-        while true; do echo -n curl google.com && curl -o - http://google.com 2> /dev/null | wc -l; sleep 5; done
-    ) &
+    (while true; do curl -o - http://google.com 2> /dev/null 1>&2; sleep 5; done) &
 fi
 
 conf_file=/config/start/start_faux.sh

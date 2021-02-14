@@ -177,7 +177,7 @@ more inst/run-*/nodes/udmi*/activate.log | cat
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num 2>&1 | head -n 300
+    docker logs daq-faux-$num 2>&1 | head -n 500
 done
 echo docker logs done
 
