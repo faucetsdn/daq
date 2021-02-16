@@ -45,8 +45,8 @@ Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet,
 ```
 * A testing gcp service account `gcp_cred` needs to be setup as described in
 [service account setup instructions](service.md).
-* The system's default `module_config` needs to enable the `udmi` test, e.g. as per
-`resources/setups/baseline/module_config.json`. This can be validated by (runtime) checking
+* The system's default config needs to enable the `udmi` test, e.g. as per
+`resources/setups/baseline/base_config.json`. This can be validated by (runtime) checking
 `inst/run-port-01/nodes/udmi01/tmp/module_config.json` to see if it has something like the following:
 ```
     "udmi": {
@@ -55,9 +55,9 @@ Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet,
 ```
 * `site_path` config needs to point to a site definition directory, or defaults to `local/site`.
 This contains all the site-specific information about devices needed for testing.
-* `{site_path}/mac_addrs/{mac_addr}/module_config.json` needs to have a `device_id` defined, e.g.
-as in `resources/test_site/mac_addrs/3c5ab41e8f0b/module_config.json`.
-* The GCP IoT Core setup needs to have a proper registry and device configred. This can either
+* `{site_path}/mac_addrs/{mac_addr}/device_config.json` needs to have a `device_id` defined, e.g.
+as in `resources/test_site/mac_addrs/3c5ab41e8f0b/device_config.json`.
+* The GCP IoT Core setup needs to have a proper registry and device configured. This can either
 be done manually or using the [registrar
 tool](https://github.com/faucetsdn/udmi/blob/master/docs/registrar.md) tool.
 
