@@ -30,8 +30,8 @@ A setup for the `pass` test, as an example, woud be configured as follows
 * `mkdir -p local/docker` -- Make local directories.
 * `cp config/modules/local.conf local/` -- Copy the example test configuraiton file.
 * `cp docker/modules/Dockerfile.test_pass local/docker/` -- Copy the example Docker file to build directory.
-* `cp config/system/base.conf local/system.conf` -- Create local version of system.conf file.
-* `echo host_tests=local/local_tests.conf >> local/system.conf` -- Set tests configuration.
+* `cp config/system/base.yaml local/system.yaml` -- Create local version of system.yaml file.
+* `echo host_tests: local/local_tests.conf >> local/system.yaml` -- Set tests configuration.
 
 This, of course, only works for local development when using the `local_tests.conf` config. To
 formalize a test and include it in the overall system build it should be included in
@@ -83,8 +83,8 @@ INFO:host:Finalizing report inst/report_9a02571e8f00_2018-11-06T21:20:51.txt
 ## Dynamic Configuration
 
 The dynamic configuration of a test (if it is actually executed or is skipped completely),
-is controlled through the `module_config.json` file associated with the specific site install.
-See `resources/setups/baseline/module_config.json` for an example of what this looks like. Without this entry,
+is controlled through the `site_config.json` file associated with the specific site install.
+See `resources/setups/baseline/base_config.json` for an example of what this looks like. Without this entry,
 the test will be included into the runtime set of modules but not actually executed. The
 execution behavior can be altered at runtime (through the web user interface).
 
@@ -100,7 +100,7 @@ different places that are dynamically mapped into the system at runtime:
 * `/config/device`: Device-specific customizations from `{site_path}/mac_addrs/{device_mac}/aux/`.
 * `/config/port`: Switch-port customizations from `inst/runtime_conf/port-##/`.
 * `/config/type`: Device-type customizations from `{site_path}/device_types/{device_type}/aux/`.
-  * See `resources/test_site/mac_addrs/9a02571e8f01/module_config.json` as an example of specifying device type.
+  * See `resources/test_site/mac_addrs/9a02571e8f01/device_config.json` as an example of specifying device type.
   * See `resources/test_site/device_types/rocket/` for an example device type.
   * See `qualification/*` for more detailed examples of test configuration files.
 
