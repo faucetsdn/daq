@@ -211,7 +211,10 @@ class DAQRunner:
     def _init_device_result_client(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         if server_port:
-            return DeviceReportClient(server_port=server_port)
+            timeout = self.config['device_reporting'].get('rpc_timeout_sec')
+            if timeout:
+                return DeviceReportClient(server_port=server_port, rpc_timeout_sec=timeout)
+            return DeviceReportClient(server_port=server_port) 
         return None
 
     def _send_heartbeat(self):
