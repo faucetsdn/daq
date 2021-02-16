@@ -10,6 +10,7 @@ GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
 route add default gw $GATEWAY_IP
 
 schema_path=schema
+timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
@@ -67,8 +68,8 @@ RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo timeout 90 validator/bin/validate $project_id $schema_path reflect $device_id local/ --
-timeout 90 validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
+echo validator/bin/validate $project_id $schema_path reflect $device_id local/ --
+timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
 
 function message_report {
     message_type=$1
@@ -108,7 +109,7 @@ for sequence in $sequences; do
     rm -rf $device_dir
     cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
     echo $cmd
-    timeout 60 $cmd || result=fail
+    timeout $timeout $cmd || result=fail
     echo Validation result for $device_id against $sequence was $result
 
     if [[ $result == pass ]]; then

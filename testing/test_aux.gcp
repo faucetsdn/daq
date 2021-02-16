@@ -22,7 +22,7 @@ RESULT fail cloud.udmi.event_pointset "Unrecognized field \"extraField\" (class 
 RESULT fail cloud.udmi.config_basic Sequence validation falied
 RESULT fail cloud.udmi.writeback Sequence validation falied
 RESULT pass cloud.udmi.provision Found provisioning request
-RESULT pass cloud.udmi.state_system Payload successfully validate
+RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
 RESULT pass cloud.udmi.event_system Payload successfully validated
 RESULT pass cloud.udmi.event_pointset Payload successfully validated
