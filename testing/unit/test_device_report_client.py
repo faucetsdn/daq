@@ -147,6 +147,7 @@ class DeviceDeviceReportPortEventsStreamCleanup(DeviceReportClientTestBase):
         self._server.process_port_change("name", "port", False)
         time.sleep(1)
         self._client.terminate()
+        time.sleep(1)
         self._server.process_port_change("name", "port", False)
         self.assertEqual(len(self._received_port_events), 2)
 
@@ -175,5 +176,6 @@ class DeviceDeviceReportPortEventsMultipleStreams(DeviceReportClientTestBase):
         self._server.process_port_change("name", "port", False)
         self._server.process_port_change("name", "port", True)
         self._client.send_device_result("mac", "passed")
+        time.sleep(1)
         self.assertEqual(len(self._received_port_events), 4) # FIX ME after b/180156547
         self.assertEqual(len(self._received_port_events2), 3)
