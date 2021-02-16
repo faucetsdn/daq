@@ -23,20 +23,15 @@ jobs:
         bin/setup_daq
     - name: Build docker images
       run: |
-        export host_tests=config/modules/all.conf
         cmd/build tar /tmp/build_artifacts/docker_images/
         docker image ls
         mkdir -p /tmp/build_artifacts
         cp .build_built /tmp/build_artifacts/
         cp .build_hash /tmp/build_artifacts/
-    - name: Tar and zip
-      run: |
-        cd /tmp/
-        tar -czvf build_artifacts.tar.gz build_artifacts/ --remove-files
     - uses: actions/upload-artifact@v2
       with:
           name: build_artifacts
-          path: /tmp/build_artifacts.tar.gz
+          path: /tmp/build_artifacts/
 
   integration_tests:
     needs: build_docker
@@ -49,7 +44,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
           name: build_artifacts
-          path: /tmp/
+          path: /tmp/build_artifacts
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -68,8 +63,6 @@ jobs:
         bin/setup_daq
     - name: Loading docker images
       run: |
-        cd /tmp/
-        tar -zxvf build_artifacts.tar.gz
         cp /tmp/build_artifacts/.build* .
         ls -a
         cd /tmp/build_artifacts/docker_images
