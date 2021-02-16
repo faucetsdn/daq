@@ -10,6 +10,7 @@ GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
 route add default gw $GATEWAY_IP
 
 schema_path=schema
+timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
@@ -64,12 +65,11 @@ fi
 TEST_NAME="cloud.udmi.provision"
 TEST_DESCRIPTION="Validates dynamic provisioning request"
 RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
-write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
-                 "$skip" "$RESULT_AND_SUMMARY"
+write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ --
-timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ -- || true
+echo validator/bin/validate $project_id $schema_path reflect $device_id local/ --
+timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
 
 function message_report {
     message_type=$1
@@ -100,15 +100,31 @@ for message_type in $message_types; do
     message_report $message_type
 done
 
-result=pass
-sequence=config_basic
-echo validator/bin/validate $project_id $schema_path reflect AHU-1 local/ sequences/$sequence
-timeout 90 validator/bin/validate $project_id $schema_path reflect AHU-1 local sequences/$sequence || result=fail
-TEST_NAME="cloud.udmi.$sequence"
-TEST_DESCRIPTION="Validates device $sequence message sequence."
-RESULT_AND_SUMMARY="RESULT $result $TEST_NAME Sequence successfully completed"
-write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
-                 "$skip" "$RESULT_AND_SUMMARY"
+device_dir=out/devices/$device_id
+sequences=$(cd sequences; ls | sort)
+echo Validating sequences for $device_id: $sequences
+for sequence in $sequences; do
+    result=pass
+    validator=validator/bin/validate
+    rm -rf $device_dir
+    cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
+    echo $cmd
+    timeout $timeout $cmd || result=fail
+    echo Validation result for $device_id against $sequence was $result
+
+    if [[ $result == pass ]]; then
+        summary="Validation successfully completed"
+    else
+        summary="Sequence validation falied"
+        more $device_dir/* | cat
+    fi
+
+    TEST_NAME="cloud.udmi.$sequence"
+    TEST_DESCRIPTION="Validates device $sequence message sequence."
+    RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $summary"
+    write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                     "n/a" "$RESULT_AND_SUMMARY"
+done
 
 fgrep RESULT $REPORT
 

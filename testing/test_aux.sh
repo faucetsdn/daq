@@ -11,6 +11,7 @@ function make_pubber {
     faux=$2
     extra=$3
     gateway=$4
+    serial_no=test_aux-$RANDOM
     local_dir=inst/faux/$faux/local/
     echo Creating $device with $extra/$gateway in $local_dir
     mkdir -p $local_dir
@@ -26,6 +27,7 @@ function make_pubber {
     "cloudRegion": "$cloud_region",
     "registryId": "$registry_id",
     "extraField": $extra,
+    "serialNo": "$serial_no",
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
@@ -172,11 +174,14 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
 
+echo Full UDMI testing logs
+more inst/run-*/nodes/udmi*/activate.log | cat
+
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num 2>&1 | head -n 100
+    docker logs daq-faux-$num 2>&1 | head -n 500
 done
-echo done with docker logs
+echo docker logs done
 
 echo Raw generated report:
 cat inst/reports/report_9a02571e8f01_*.md
