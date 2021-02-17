@@ -65,4 +65,4 @@ touch libs/proto/__init__.py
 cp build/daq/proto/*.py libs/proto/
 cp build/protos.html $WEB_ROOT/
 
-python3 -m grpc_tools.protoc -I usi/src/main/proto/ --python_out=libs/proto/ --grpc_python_out=libs/proto/ usi/src/main/proto/usi.proto
+python3 -m grpc_tools.protoc -I usi/src/main/ --python_out=libs/ --grpc_python_out=libs/ usi/src/main/proto/usi.proto
