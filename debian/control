@@ -21,7 +21,8 @@ Depends: python3-mininet,
          weasyprint,
          python3-pypandoc,
          python3-netifaces,
-         python3-grpcio
+         python3-grpcio,
+         openvswitch-switch
 Description: DAQ is a framework designed to test and operate IoT devices in an enterprise IoT environment.
 
 Package: daq
