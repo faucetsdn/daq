@@ -20,11 +20,7 @@ fi
 if [ ! -f "$LOCAL_YAML" -a ! -f "$LOCAL_CONF" ]; then
     echo No $LOCAL_YAML or $LOCAL_CONF found, pointing at $DEFAULT_CONF...
     mkdir -p $DAQ_CONF 
-    if [ $DAQ_DIR == daq ]; then
-        echo "include: ../$DEFAULT_CONF" > $LOCAL_YAML
-    else
-        echo "include: $DEFAULT_CONF" > $LOCAL_YAML
-    fi
+    echo "include: $DEFAULT_CONF" > $LOCAL_YAML
     conf_file=$LOCAL_YAML
 elif [ -f "$LOCAL_YAML" -a -f "$LOCAL_CONF" ]; then
     echo Both $LOCAL_YAML and $LOCAL_CONF found, not sure which to use: panic quit.
