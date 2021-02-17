@@ -20,7 +20,7 @@ dependencies {
     implementation 'com.google.guava:guava:23.0'
     compile 'com.google.code.gson:gson:2.8.6'
     compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.45'
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
 
 }
 

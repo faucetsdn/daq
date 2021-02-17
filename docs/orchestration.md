@@ -9,7 +9,7 @@ network-based port restrctions at runtime.
 NB: The various file formats are in various stages of specification and are subject
 to change.
 
-## Data Rouces
+## Data Sources
 
 The overall orchestration capability relies on several simple data sources:
 1. [Overall network topology](topologies.md), which indicates how the network hardware is configured.

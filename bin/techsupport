@@ -37,7 +37,7 @@ done
 CONF_PROBE=inst/config/system.conf
 touch $CONF_PROBE || sudo chown $USER -R inst
 
-source etc/config_base.sh
+source bin/config_base.sh
 ext_ctrl=$switch_setup_ctrl_intf
 ext_addr=$switch_setup_ip_addr
 ext_intf=$switch_setup_data_intf

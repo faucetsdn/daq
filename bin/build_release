@@ -36,7 +36,7 @@ if [ -n "$tagged" ]; then
     false
 fi
 
-source etc/config_base.sh
+source bin/config_base.sh
 
 if [ "$host_tests" != config/modules/all.conf ]; then
     echo Configure your system with host_tests=config/modules/all.conf

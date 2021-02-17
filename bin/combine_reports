@@ -3,6 +3,6 @@
 ROOT=$(dirname $0)/..
 cd $ROOT
 
-source etc/config_base.sh
+source bin/config_base.sh
 
 PYTHONPATH=daq python3 bin/python/combine_reports.py $conf_file $@

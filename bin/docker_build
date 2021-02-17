@@ -5,7 +5,7 @@ set -o pipefail
 
 ROOT=$(dirname $0)/..
 cd $ROOT
-source etc/config_base.sh
+source bin/config_base.sh
 
 build_root=build
 sudo rm -rf $build_root .build_hash .build_files

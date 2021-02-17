@@ -926,18 +926,25 @@ class DAQRunner:
         self._device_result_client.send_device_result(mac, device_result)
 
     def _calculate_device_result(self, test_results):
+        failed = False
         for module_result in test_results.get('modules', {}).values():
             if report.ResultType.EXCEPTION in module_result:
-                return PortBehavior.failed
+                LOGGER.warning('Failing report due to module exception')
+                failed = True
 
-            if module_result.get(report.ResultType.RETURN_CODE):
-                return PortBehavior.failed
+            return_code = module_result.get(report.ResultType.RETURN_CODE)
+            if return_code:
+                LOGGER.warning('Failing report due to module return code %s', return_code)
+                failed = True
 
-            for test_result in module_result.get('tests', {}).values():
-                if test_result.get('result') == 'fail':
-                    return PortBehavior.failed
+            module_tests = module_result.get('tests', {})
+            for test_name, test_result in module_tests.items():
+                result = test_result.get('result')
+                LOGGER.info('Test report for %s is %s', test_name, result)
+                if result not in ('pass', 'skip'):
+                    failed = True
 
-        return PortBehavior.passed
+        return PortBehavior.failed if failed else PortBehavior.passed
 
     def finalize(self):
         """Finalize this instance, returning error result code"""
