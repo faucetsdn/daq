@@ -331,7 +331,7 @@ class ConnectedHost:
 
     def is_running(self):
         """Return True if this host is running active test."""
-        return self.state != _STATE.ERROR and self.state != _STATE.DONE
+        return self.state not in (_STATE.ERROR, _STATE.DONE)
 
     def is_ready(self):
         """Return True if this host paused and waiting to run."""
@@ -444,8 +444,6 @@ class ConnectedHost:
         if self.target_port:
             self.runner.network.delete_mirror_interface(self.target_port)
 
-        test_results = self._finalize_report()
-
         if self.test_host:
             try:
                 self.test_host.terminate()
@@ -458,6 +456,7 @@ class ConnectedHost:
             self.runner.target_set_complete(self.device,
                                             'Target device %s termination: %s' % (
                                                 self, self.test_host))
+        test_results = self._finalize_report()
         return test_results
 
     def idle_handler(self):

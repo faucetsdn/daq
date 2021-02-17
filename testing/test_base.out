@@ -137,6 +137,8 @@ terminated
 
 ## Report complete
 
+%%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling
+9a02571e8f00: ['9a02571e8f00:finish:FileNotFoundError']
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
 DAQ result code 1
 9a02571e8f00: ['9a02571e8f00:hold:DaqException']
