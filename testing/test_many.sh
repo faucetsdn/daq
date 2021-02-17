@@ -79,7 +79,15 @@ done
 echo DAQ stress test | tee -a $TEST_RESULTS
 
 start_time=`date -u -Isec`
-cmd/run -b run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
+build_mode=
+release_tag=`git describe --dirty || echo unknown`
+# If the current commit is a release tag, then pull images.
+echo Processing release tag $release_tag
+if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
+    build_mode=pull
+fi
+cmd/build $build_mode build
+cmd/run run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
 end_time=`date -u -Isec --date="+5min"` # Adding additional time to account for slower cloud function calls for updating timestamp.
 
 cat inst/result.log

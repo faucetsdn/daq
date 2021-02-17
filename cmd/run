@@ -26,7 +26,7 @@ if [ -n "$build_tests" ]; then
     if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
 	build_mode=pull
     fi
-    cmd/build $build_mode build
+    cmd/build $build_mode
 fi
 
 bin/build_hash check
