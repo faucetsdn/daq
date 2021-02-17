@@ -17,15 +17,7 @@ rm -f local/system.yaml local/system.conf
 # Check that bringing down the trunk interface terminates DAQ.
 MARKER=inst/run-9a02571e8f00/nodes/hold*/activate.log
 monitor_marker $MARKER "sudo ip link set pri-eth1 down"
-build_mode=
-release_tag=`git describe --dirty || echo unknown`
-# If the current commit is a release tag, then pull images.
-echo Processing release tag $release_tag
-if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
-    build_mode=pull
-fi
-cmd/build $build_mode build
-cmd/run -k -s site_path=inst/tmp_site
+cmd/run -b -k -s site_path=inst/tmp_site
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 
