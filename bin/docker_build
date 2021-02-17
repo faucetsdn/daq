@@ -50,10 +50,10 @@ build_target() {
     failed=
     tag=daqf/$module
     found=$(docker images $tag 2>/dev/null | grep $module) || true
-    if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
+    if [ -z "${test_set[$module]}" ]; then
         #echo Skipping non-enabled $tag
         true
-    elif [ -z "$DAQ_TARGETS" -a -z "$force" -a -n "$found" ]; then
+    elif [ -z "$force" -a -n "$found" ]; then
         unset test_set[$module]
         echo Skipping building existing $tag 
     else
@@ -73,8 +73,6 @@ build_target() {
             echo Saving Docker image $tag to $path
             mkdir -p $path
             docker save "$tag" > $path/$module.tar
-            echo Delete image $tag
-            docker image rm $tag
         fi
         hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
         docker tag $tag:latest $tag:$hash

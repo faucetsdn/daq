@@ -32,7 +32,7 @@ echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 fgrep 'security.nmap.ports' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
-DAQ_TARGETS=test_hold cmd/build
+DAQ_TARGETS=test_hold cmd/build build
 
 # Except with a default MUD file that blocks the port.
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
