@@ -32,7 +32,7 @@ DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 bin/docker_build force inline
 
 cat $TEST_LIST | while read module args; do
     if ! docker inspect daqf/test_$module:latest > /dev/null; then
-	DAQ_TARGETS=test_$module bin/docker_build
+	DAQ_TARGETS=test_$module cmd/build build
     fi
     echo
     echo Testing $module $args | tee -a $TEST_RESULTS

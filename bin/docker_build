@@ -50,7 +50,7 @@ build_target() {
     failed=
     tag=daqf/$module
     found=$(docker images $tag 2>/dev/null | grep $module) || true
-    if [ -z "${test_set[$module]}" ]; then
+    if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         #echo Skipping non-enabled $tag
         true
     elif [ -z "$force" -a -n "$found" ]; then
