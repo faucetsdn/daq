@@ -6,11 +6,10 @@ uname -a
 echo "${TMPDIR}"
 cd git/benz-build-source
 sudo kokoro/setup.sh
+ls -alrt /
 mkdir -p "${TMPDIR}/binary/"
 mkdir -p "${TMPDIR}/glinux-build"
 
-ls -alrt
-GIT_URL=rpc://perry-internal/daq bin/setup_remote faucet
 VERSION=$(git describe)
 debchange --newversion $VERSION -b "New upstream release"
 
