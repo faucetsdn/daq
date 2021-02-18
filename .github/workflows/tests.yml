@@ -67,6 +67,7 @@ jobs:
         ls -a
         cd /tmp/build_artifacts/docker_images
         for file in *; do docker load < "$file"; done
+        rm -rf /tmp/build_artifacts
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
