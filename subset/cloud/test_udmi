@@ -15,7 +15,8 @@ message_types="state_system state_pointset event_system event_pointset"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
 
-echo Config contains `ls /config/inst`
+# Do a check for testing.
+echo Config contains `ls /config/inst/system.conf`
 
 # Enable dns for GCP lookup
 echo "nameserver 8.8.8.8" >> /etc/resolv.conf
