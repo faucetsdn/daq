@@ -174,6 +174,9 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
 
+# Check that configuration is properly mapped into the container.
+fgrep 'Config contains' inst/run-*/nodes/udmi*/activate.log | tee -a $TEST_RESULTS
+
 echo Full UDMI testing logs
 more inst/run-*/nodes/udmi*/activate.log | cat
 
