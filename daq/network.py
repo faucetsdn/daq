@@ -10,6 +10,7 @@ import yaml
 
 import logger
 from topology import FaucetTopology
+from env import DAQ_RUN_DIR
 
 from mininet import node as mininet_node
 from mininet import net as mininet_net
@@ -45,8 +46,8 @@ class TestNetwork:
     DEFAULT_OF_PORT = 6653
     DEFAULT_MININET_SUBNET = "10.20.0.0/16"
     _CTRL_PRI_IFACE = 'ctrl-pri'
-    INTERMEDIATE_FAUCET_FILE = "inst/faucet_intermediate.yaml"
-    OUTPUT_FAUCET_FILE = "inst/faucet.yaml"
+    INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
+    OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
     _VXLAN_DEFAULT_PORT = 4789
     _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
 
@@ -243,8 +244,8 @@ class TestNetwork:
 
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
-        LOGGER.info('Directing traffic for %s on vlan %s to %s',
-                    device.mac, device.vlan, port_set)
+        LOGGER.info('Directing traffic for %s on %s/%s to %s',
+                    device.mac, device.vlan, device.assigned, port_set)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_device_traffic(device, port_set)
         self._generate_behavioral_config()

@@ -7,6 +7,7 @@ import yaml
 from base_gateway import BaseGateway
 
 import logger
+from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 
 LOGGER = logger.get_logger('topology')
 
@@ -17,15 +18,15 @@ class FaucetTopology:
     MAC_PREFIX = "@mac:"
     DNS_PREFIX = "@dns:"
     CTL_PREFIX = "@ctrl:"
-    INST_FILE_PREFIX = "inst/"
+    INST_FILE_PREFIX = DAQ_RUN_DIR
     BROADCAST_MAC = "ff:ff:ff:ff:ff:ff"
     IPV4_DL_TYPE = "0x0800"
     ARP_DL_TYPE = "0x0806"
     LLDP_DL_TYPE = "0x88cc"
     PORT_ACL_NAME_FORMAT = "dp_%s_port_%d_acl"
     DP_ACL_FILE_FORMAT = "dp_port_acls.yaml"
-    PORT_ACL_FILE_FORMAT = "port_acls/dp_%s_port_%d_acl.yaml"
-    TEMPLATE_FILE_FORMAT = INST_FILE_PREFIX + "acl_templates/template_%s_acl.yaml"
+    PORT_ACL_FILE_FORMAT = os.path.join("port_acls", "dp_%s_port_%d_acl.yaml")
+    TEMPLATE_FILE_FORMAT = os.path.join(INST_FILE_PREFIX, "acl_templates", "template_%s_acl.yaml")
     FROM_ACL_KEY_FORMAT = "@from:template_%s_acl"
     TO_ACL_KEY_FORMAT = "@to:template_%s_acl"
     INCOMING_ACL_FORMAT = "dp_%s_incoming_acl"
@@ -75,7 +76,7 @@ class FaucetTopology:
             LOGGER.info('Relying on external faucet...')
             return
         LOGGER.info("Starting faucet...")
-        output = self.pri.cmd('cmd/faucet && echo SUCCESS')
+        output = self.pri.cmd('%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR)
         if not output.strip().endswith('SUCCESS'):
             LOGGER.info('Faucet output: %s', output)
             assert False, 'Faucet startup failed'
@@ -363,17 +364,15 @@ class FaucetTopology:
         if not self._ext_faucet or not self._egress_vlan:
             return
         for devices in self._set_devices.values():
-            if devices:
-                LOGGER.info('Reflecting dhcp to %s for %s', list(devices)[0].vlan, devices)
             for device in devices:
                 # Rule for DHCP request to server. Convert device vlan to egress vlan.
-                self._add_acl_rule(acl_list, dl_type='0x800',
-                                   nw_proto=17, udp_src=68, udp_dst=67,
-                                   vlan_vid=device.vlan,
-                                   swap_vid=self._egress_vlan, port=self._OFPP_IN_PORT)
-                self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac,
-                                   nw_proto=17, udp_src=67, udp_dst=68,
-                                   vlan_vid=self._egress_vlan,
+                egress_vlan = device.assigned if device.assigned else self._egress_vlan
+                LOGGER.info('Reflecting %s dhcp with %s/%s', device.mac, device.vlan, egress_vlan)
+                self._add_acl_rule(acl_list, dl_type='0x800', nw_proto=17, udp_src=68, udp_dst=67,
+                                   vlan_vid=device.vlan, swap_vid=egress_vlan,
+                                   port=self._OFPP_IN_PORT)
+                self._add_acl_rule(acl_list, dl_type='0x800', dl_dst=device.mac, nw_proto=17,
+                                   udp_src=67, udp_dst=68, vlan_vid=egress_vlan,
                                    swap_vid=device.vlan, port=self._OFPP_IN_PORT, allow=True)
 
         # Allow any unrecognized requests for learning, but don't reflect.
@@ -418,7 +417,7 @@ class FaucetTopology:
         self._write_main_acls(pri_acls)
 
     def _write_main_acls(self, pri_acls):
-        filename = self.INST_FILE_PREFIX + self.DP_ACL_FILE_FORMAT
+        filename = os.path.join(self.INST_FILE_PREFIX, self.DP_ACL_FILE_FORMAT)
         LOGGER.debug('Writing updated pri acls to %s', filename)
         self._write_acl_file(filename, pri_acls)
 
@@ -491,13 +490,14 @@ class FaucetTopology:
 
         LOGGER.debug('match port %s to mac %s', port, target_mac)
 
-        filename = self.INST_FILE_PREFIX + self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
+        file_name = self.PORT_ACL_FILE_FORMAT % (self.sec_name, port)
+        file_path = os.path.join(self.INST_FILE_PREFIX, file_name)
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
-            self._write_port_acl(port, rules, filename)
+            self._write_port_acl(port, rules, file_path)
         else:
-            self._write_port_acl(port, self._make_default_acl_rules(), filename)
+            self._write_port_acl(port, self._make_default_acl_rules(), file_path)
 
         return target_mac
 

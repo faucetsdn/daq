@@ -8,6 +8,7 @@ from ipaddress import ip_network, ip_address
 
 import logger
 import wrappers
+from env import DAQ_RUN_DIR
 from proto.system_config_pb2 import DhcpMode
 
 from .base_module import HostModule
@@ -56,7 +57,7 @@ class ExternalModule(HostModule):
             self.log = host.open_log()
             if self._should_raise_test_exception('initialize'):
                 LOGGER.error('%s inducing initialization failure', self)
-                raise Exception('induced initialization failure')
+                raise Exception('Induced initialization failure')
             self.runner.monitor_stream(self.host_name, pipe.stdout, copy_to=self.log,
                                        hangup=self._complete,
                                        error=self._error)
@@ -116,17 +117,18 @@ class ExternalModule(HostModule):
 
     def _get_vol_maps(self, params):
         vol_maps = [(params['scan_base'], os.path.join(self.basedir, "scans"))]
-        kinds = ('inst', 'port', 'device', 'type', 'gw')
+        kinds = (DAQ_RUN_DIR, 'port', 'device', 'type', 'gw')
         maps = list(map(lambda kind: self._map_if_exists(params, kind), kinds))
         vol_maps.extend(filter(lambda vol_map: vol_map, maps))
         return vol_maps
 
     def _map_if_exists(self, params, kind):
         base = params.get('%s_base' % kind)
+        LOGGER.info('TAP checking %s %s', kind, base)
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             dst = os.path.join(self.basedir, 'config', kind)
-            LOGGER.debug('%s mapping %s to %s', self, abs_base, dst)
+            LOGGER.info('%s mapping %s to %s', self, abs_base, dst)
             return (abs_base, dst)
         return None
 
@@ -152,7 +154,7 @@ class ExternalModule(HostModule):
         self.log = None
         if self._should_raise_test_exception('finalize'):
             LOGGER.error('%s inducing finalize failure', self)
-            raise Exception('induced finalize failure')
+            raise Exception('Induced finalize failure')
         return return_code
 
     def _should_raise_test_exception(self, trigger_value):

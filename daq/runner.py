@@ -15,12 +15,14 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
 from device_report_client import DeviceReportClient
+from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
 import container_gateway
 import external_gateway
 import gcp
 import host as connected_host
 import network
+import report
 import stream_monitor
 from wrappers import DaqException
 import logger
@@ -55,6 +57,8 @@ class Device:
         self.ip_info = IpInfo()
         self.vlan = None
         self.set_id = None
+        self.assigned = None
+        self.wait_remote = False
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -138,8 +142,8 @@ class DAQRunner:
     _DEFAULT_RETENTION_DAYS = 30
     _SITE_CONFIG = 'site_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
-    _DEFAULT_TESTS_FILE = 'config/modules/host.conf'
-    _RESULT_LOG_FILE = 'inst/result.log'
+    _DEFAULT_TESTS_FILE = os.path.join(DAQ_LIB_DIR, 'config/modules/host.conf')
+    _RESULT_LOG_FILE = os.path.join(DAQ_RUN_DIR, 'result.log')
 
     def __init__(self, config):
         self.configurator = configurator.Configurator()
@@ -149,7 +153,7 @@ class DAQRunner:
         self._devices = Devices()
         self._ports = {}
         self._callback_queue = []
-        self._callback_lock = threading.Lock()
+        self._event_lock = threading.Lock()
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
@@ -199,13 +203,17 @@ class DAQRunner:
 
     def _init_daq_run_id(self):
         daq_run_id = str(uuid.uuid4())
-        with open('inst/daq_run_id.txt', 'w') as output_stream:
+        daq_run_id_file = os.path.join(DAQ_RUN_DIR, 'daq_run_id.txt')
+        with open(daq_run_id_file, 'w') as output_stream:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
 
     def _init_device_result_client(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         if server_port:
+            timeout = self.config['device_reporting'].get('rpc_timeout_sec')
+            if timeout:
+                return DeviceReportClient(server_port=server_port, rpc_timeout_sec=timeout)
             return DeviceReportClient(server_port=server_port)
         return None
 
@@ -275,28 +283,35 @@ class DAQRunner:
         """Get the internal interface for the host"""
         return self.network.get_host_interface(host)
 
+    def _handle_faucet_events_locked(self):
+        with self._event_lock:
+            self._handle_faucet_events()
+
     def _handle_faucet_events(self):
         while self.faucet_events:
             event = self.faucet_events.next_event()
             if not event:
                 break
-            (dpid, port, active) = self.faucet_events.as_port_state(event)
-            if dpid and port:
-                LOGGER.debug('port_state: %s %s', dpid, port)
-                self._handle_port_state(dpid, port, active)
-                return
-            (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
-            if dpid and port and vid:
-                is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
-                if is_vlan:
-                    if self.network.is_system_port(dpid, port):
-                        self._handle_device_learn(vid, target_mac)
-                else:
-                    self._handle_port_learn(dpid, port, vid, target_mac)
-                return
-            (dpid, restart_type) = self.faucet_events.as_config_change(event)
-            if dpid is not None:
-                LOGGER.debug('dp_id %d restart %s', dpid, restart_type)
+            self._process_faucet_event(event)
+
+    def _process_faucet_event(self, event):
+        (dpid, port, active) = self.faucet_events.as_port_state(event)
+        if dpid and port:
+            LOGGER.debug('port_state: %s %s', dpid, port)
+            self._handle_port_state(dpid, port, active)
+            return
+        (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
+        if dpid and port and vid:
+            is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
+            if is_vlan:
+                if self.network.is_system_port(dpid, port):
+                    self._handle_device_learn(target_mac, vid)
+            else:
+                self._handle_port_learn(dpid, port, target_mac)
+            return
+        (dpid, restart_type) = self.faucet_events.as_config_change(event)
+        if dpid is not None:
+            LOGGER.debug('dp_id %d restart %s', dpid, restart_type)
 
     def _handle_port_state(self, dpid, port, active):
         if self.network.is_system_port(dpid, port):
@@ -326,17 +341,6 @@ class DAQRunner:
                 self._deactivate_port(port)
         self._send_heartbeat()
 
-    def _handle_remote_port_state(self, device, port_event):
-        if not device.host:
-            return
-        if port_event.event == PortBehavior.PortEvent.down:
-            if not device.port.flapping_start:
-                device.port.flapping_start = time.time()
-            device.port.active = False
-        else:
-            device.port.flapping_start = 0
-            device.port.active = True
-
     def _activate_port(self, port):
         if port not in self._ports:
             self._ports[port] = PortInfo()
@@ -355,7 +359,7 @@ class DAQRunner:
     def _direct_port_traffic(self, mac, port, target):
         self.network.direct_port_traffic(mac, port, target)
 
-    def _handle_port_learn(self, dpid, port, vid, target_mac):
+    def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
@@ -363,7 +367,7 @@ class DAQRunner:
         else:
             LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
-    def _handle_device_learn(self, vid, target_mac):
+    def _handle_device_learn(self, target_mac, vid):
         LOGGER.info('Learned %s on vid %s', target_mac, vid)
         if not self._devices.get(target_mac):
             device = self._devices.new_device(target_mac, vlan=vid)
@@ -371,29 +375,55 @@ class DAQRunner:
             device = self._devices.get(target_mac)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
-        # For keeping track of remote port flap events
+        # For keeping track of remote port events
         if self._device_result_client:
+            LOGGER.info('Connecting device result client for %s', target_mac)
             device.port = PortInfo()
             device.port.active = True
+            device.wait_remote = True
             self._device_result_client.get_port_events(
                 device.mac, lambda event: self._handle_remote_port_state(device, event))
-        self._target_set_trigger(device)
+        else:
+            self._target_set_trigger(device)
+
+    def _handle_remote_port_state(self, device, port_event):
+        with self._event_lock:
+            if port_event.state == PortBehavior.PortState.down:
+                if not device.port.flapping_start:
+                    device.port.flapping_start = time.time()
+                device.port.active = False
+                return
+
+            device.port.flapping_start = 0
+            device.port.active = True
+
+            device.vlan = port_event.device_vlan
+            device.assigned = port_event.assigned_vlan
+
+            LOGGER.info('Processing remote state %s %s/%s', device,
+                        device.vlan, device.assigned)
+            self._target_set_trigger(device, remote_trigger=True)
+            if device.gateway:
+                self._direct_device_traffic(device, device.gateway.port_set)
 
     def _queue_callback(self, callback):
-        with self._callback_lock:
-            LOGGER.debug('Register callback')
+        with self._event_lock:
             self._callback_queue.append(callback)
 
     def _handle_queued_events(self):
-        with self._callback_lock:
+        with self._event_lock:
             callbacks = self._callback_queue
             self._callback_queue = []
             if callbacks:
                 LOGGER.debug('Processing %d callbacks', len(callbacks))
-            for callback in callbacks:
-                callback()
+                for callback in callbacks:
+                    callback()
 
     def _handle_system_idle(self):
+        with self._event_lock:
+            self._handle_system_idle_raw()
+
+    def _handle_system_idle_raw(self):
         # Some synthetic faucet events don't come in on the socket, so process them here.
         self._handle_faucet_events()
         all_idle = True
@@ -462,8 +492,8 @@ class DAQRunner:
                                                    loop_hook=self._loop_hook,
                                                    timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock, self._handle_faucet_events,
-                                priority=10)
+            self.monitor_stream('faucet', self.faucet_events.sock,
+                                self._handle_faucet_events_locked, priority=10)
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
             while self.stream_monitor.event_loop():
@@ -484,12 +514,8 @@ class DAQRunner:
 
         self._terminate()
 
-    def _target_set_trigger(self, device):
+    def _target_set_check_state(self, device, remote_trigger):
         assert self._devices.contains(device), 'Target device %s is not expected' % device.mac
-        port_trigger = device.port.port_no is not None
-        if port_trigger:
-            assert device.port.active, 'Target port %d is not active' % device.port.port_no
-
         if not self._system_active:
             LOGGER.warning('Target device %s ignored, system is not active', device.mac)
             return False
@@ -501,6 +527,22 @@ class DAQRunner:
         if not self.run_tests:
             LOGGER.debug('Target device %s trigger suppressed', device.mac)
             return False
+
+        if device.wait_remote and not remote_trigger:
+            LOGGER.debug('Ingoring local trigger for remote target %s', device)
+            return False
+
+        return True
+
+    def _target_set_trigger(self, device, remote_trigger=False):
+        if not self._target_set_check_state(device, remote_trigger):
+            return False
+
+        port_trigger = device.port.port_no is not None
+        if port_trigger:
+            assert device.port.active, 'Target port %d is not active' % device.port.port_no
+
+        device.wait_remote = False
 
         try:
             group_name = self.network.device_group_for(device)
@@ -552,9 +594,11 @@ class DAQRunner:
         if no_test:
             LOGGER.warning('Suppressing configured tests because no_test')
             return ['hold']
-        head = []
-        body = []
-        tail = []
+        test_ordering = {
+            "first": [],
+            "last": [],
+            "body": []
+        }
 
         def get_test_list(test_file):
             LOGGER.info('Reading test definition file %s', test_file)
@@ -567,32 +611,31 @@ class DAQRunner:
                     ordering = cmd[2] if len(cmd) > 2 else None
                     if cmd_name == 'add':
                         LOGGER.debug('Adding test %s from %s', argument, test_file)
-                        if ordering == "first":
-                            head.append(argument)
-                        elif ordering == "last":
-                            tail.append(argument)
-                        else:
-                            body.append(argument)
+                        test_ordering.get(ordering, test_ordering["body"]).append(argument)
                     elif cmd_name == 'remove':
                         LOGGER.debug('Removing test %s from %s', argument, test_file)
-                        for section in (head, body, tail):
+                        for section in test_ordering.values():
                             if argument in section:
                                 section.remove(argument)
                     elif cmd_name == 'include':
-                        get_test_list(argument)
+                        env_regex = re.compile(r'\$\{(.*)\}')
+                        match = env_regex.match(argument)
+                        if match:
+                            env_var = match.group()[2:-1]
+                            get_test_list(os.getenv(env_var) + argument[match.end():])
+                        else:
+                            get_test_list(argument)
                     elif cmd_name == 'build' or not cmd_name:
                         pass
                     else:
                         LOGGER.warning('Unknown test list command %s', cmd_name)
                     line = file.readline()
         get_test_list(test_file)
-        return [*head, *body, *tail]
+        return [*test_ordering["first"], *test_ordering["body"], *test_ordering["last"]]
 
-    def _get_test_metadata(self, extension=".daqmodule", root="."):
+    def _get_test_metadata(self, extension=".daqmodule", root="subset"):
         metadata = {}
         for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
-            if str(meta_file).startswith('inst') or str(meta_file).startswith('local'):
-                continue
             with open(meta_file) as fd:
                 metadatum = json.loads(fd.read())
                 assert "name" in metadatum and "startup_cmd" in metadatum
@@ -768,12 +811,17 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
+            self._send_device_result(device.mac, None)
             self._detach_gateway(device)
 
     def target_set_complete(self, device, reason):
         """Handle completion of a target_set"""
+        try:
+            self._target_set_cancel(device)
+        except Exception as e:
+            LOGGER.error(e)
+            device.host.record_result(device.host.test_name, exception=e)
         self._target_set_finalize(device, device.host.results, reason)
-        self._target_set_cancel(device)
 
     def _target_set_finalize(self, device, result_set, reason):
         results = self._combine_result_set(device, result_set)
@@ -790,41 +838,41 @@ class DAQRunner:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-        if self._device_result_client:
-            device_result = PortBehavior.failed if results else PortBehavior.passed
-            self._device_result_client.send_device_result(device.mac, device_result)
+        if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
+            LOGGER.warning('Suppressing future tests because run limit reached.')
+            self.run_tests = False
+        if self.single_shot and self.run_tests:
+            LOGGER.warning('Suppressing future tests because test done in single shot.')
+            self._handle_faucet_events()  # Process remaining queued faucet events
+            self.run_tests = False
+        device.host = None
+        self._devices.remove(device)
+        LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
     def _target_set_cancel(self, device):
         target_host = device.host
-        if target_host:
-            device.host = None
-            target_gateway = device.gateway
-            target_port = device.port.port_no
-            LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
-                        self.run_limit)
+        if not target_host:
+            return
+        target_gateway = device.gateway
+        target_port = device.port.port_no
+        LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
+                    self.run_limit)
 
-            results = self._combine_result_set(device, self._result_sets.get(device))
-            this_result_linger = results and self.result_linger
-            target_gateway_linger = target_gateway and target_gateway.result_linger
-            if target_gateway_linger or this_result_linger:
-                LOGGER.warning('Target device %s result_linger: %s', device.mac, results)
-                if target_port:
-                    self._activate_port(target_port)
-                target_gateway.result_linger = True
-            else:
-                if target_port:
-                    self._direct_port_traffic(device.mac, target_port, None)
-                target_host.terminate('_target_set_cancel', trigger=False)
-                if target_gateway:
-                    self._detach_gateway(device)
-            if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
-                LOGGER.warning('Suppressing future tests because run limit reached.')
-                self.run_tests = False
-            if self.single_shot and self.run_tests:
-                LOGGER.warning('Suppressing future tests because test done in single shot.')
-                self.run_tests = False
-        self._devices.remove(device)
-        LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
+        results = self._combine_result_set(device, self._result_sets.get(device))
+        this_result_linger = results and self.result_linger
+        target_gateway_linger = target_gateway and target_gateway.result_linger
+        if target_gateway_linger or this_result_linger:
+            LOGGER.warning('Target device %s result_linger: %s', device.mac, results)
+            if target_port:
+                self._activate_port(target_port)
+            target_gateway.result_linger = True
+        else:
+            if target_port:
+                self._direct_port_traffic(device.mac, target_port, None)
+            if target_gateway:
+                self._detach_gateway(device)
+            test_results = target_host.terminate('_target_set_cancel', trigger=False)
+            self._send_device_result(device.mac, test_results)
 
     def _detach_gateway(self, device):
         target_gateway = device.gateway
@@ -870,6 +918,44 @@ class DAQRunner:
                 results.append('%s:%s:%s' % (set_key, name, status))
         return results
 
+    def _send_device_result(self, mac, test_results):
+        if not self._device_result_client:
+            return
+
+        if test_results is None:
+            device_result = PortBehavior.failed
+        else:
+            device_result = self._calculate_device_result(test_results)
+
+        LOGGER.info(
+            'Sending device result for device %s: %s',
+            mac, PortBehavior.Behavior.Name(device_result))
+        try:
+            self._device_result_client.send_device_result(mac, device_result)
+        except Exception as e:
+            LOGGER.error("Failed to send device results for device %s: %s ", mac, e)
+
+    def _calculate_device_result(self, test_results):
+        failed = False
+        for module_result in test_results.get('modules', {}).values():
+            if report.ResultType.EXCEPTION in module_result:
+                LOGGER.warning('Failing report due to module exception')
+                failed = True
+
+            return_code = module_result.get(report.ResultType.RETURN_CODE)
+            if return_code:
+                LOGGER.warning('Failing report due to module return code %s', return_code)
+                failed = True
+
+            module_tests = module_result.get('tests', {})
+            for test_name, test_result in module_tests.items():
+                result = test_result.get('result')
+                LOGGER.info('Test report for %s is %s', test_name, result)
+                if result not in ('pass', 'skip'):
+                    failed = True
+
+        return PortBehavior.failed if failed else PortBehavior.passed
+
     def finalize(self):
         """Finalize this instance, returning error result code"""
         self.gcp.release_config(self._RUNNER_CONFIG_PATH)
@@ -885,8 +971,8 @@ class DAQRunner:
 
     def _base_config_changed(self, new_config):
         LOGGER.info('Base config changed: %s', new_config)
-        self.configurator.write_config(new_config, self.config.get('site_path'),
-                                       self._SITE_CONFIG)
+        config_file = os.path.join(self.config.get('site_path'), self._SITE_CONFIG)
+        self.configurator.write_config(new_config, config_file)
         self._base_config = self._load_base_config(register=False)
         self._publish_runner_config(self._base_config)
         _ = [device.host.reload_config() for device in self._devices.get_triggered_devices()]
@@ -894,14 +980,17 @@ class DAQRunner:
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
         LOGGER.info('Loading base config from %s', base_conf)
-        base = self.configurator.load_and_merge({}, os.getcwd(), base_conf)
+        base = self.configurator.load_config(base_conf)
         site_path = self.config.get('site_path')
-        LOGGER.info('Loading site config from %s', os.path.join(site_path, self._SITE_CONFIG))
-        site_config = self.configurator.load_config(site_path, self._SITE_CONFIG, optional=True)
+        site_config_file = os.path.join(site_path, self._SITE_CONFIG)
+        LOGGER.info('Loading site config from %s', site_config_file)
+        site_config = self.configurator.load_config(site_config_file, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,
                                      self._base_config_changed)
-        return self.configurator.merge_config(base, site_path, site_config)
+        if site_config:
+            return self.configurator.merge_config(base, site_config_file)
+        return base
 
     def get_base_config(self):
         """Get the base configuration for this install"""

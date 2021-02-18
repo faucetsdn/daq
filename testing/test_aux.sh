@@ -11,6 +11,7 @@ function make_pubber {
     faux=$2
     extra=$3
     gateway=$4
+    serial_no=test_aux-$RANDOM
     local_dir=inst/faux/$faux/local/
     echo Creating $device with $extra/$gateway in $local_dir
     mkdir -p $local_dir
@@ -26,6 +27,7 @@ function make_pubber {
     "cloudRegion": "$cloud_region",
     "registryId": "$registry_id",
     "extraField": $extra,
+    "serialNo": "$serial_no",
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
@@ -125,6 +127,9 @@ more inst/faux/daq-faux-*/local/pubber.json | cat
 echo Build all container images...
 cmd/build
 
+image_count=$(docker images -q | wc -l)
+echo Built $image_count docker images.
+
 echo %%%%%%%%%%%%%%%%%%%%%%%%% Starting aux test run
 cmd/run -s
 
@@ -169,11 +174,17 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
 fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
 
+# Check that configuration is properly mapped into the container.
+fgrep 'Config contains' inst/run-*/nodes/udmi*/activate.log | tee -a $TEST_RESULTS
+
+echo Full UDMI testing logs
+more inst/run-*/nodes/udmi*/activate.log | cat
+
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
-    docker logs daq-faux-$num 2>&1 | head -n 100
+    docker logs daq-faux-$num 2>&1 | head -n 500
 done
-echo done with docker logs
+echo docker logs done
 
 echo Raw generated report:
 cat inst/reports/report_9a02571e8f01_*.md
@@ -234,10 +245,10 @@ echo %%%%%%%%%%%%%%%%%%%%%%%%% Running port toggle test
 cat <<EOF > local/system.yaml
 ---
 include: ../config/system/base.yaml
-port_flap_timeout_sec: 10
+port_flap_timeout_sec: 20
 port_debounce_sec: 0
 EOF
-monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 5; sudo ifconfig faux up"
+monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 15; sudo ifconfig faux up"
 monitor_log "Target device 9a02571e8f00 test hold running" "sudo ifconfig faux down"
 rm -r inst/run-*
 cmd/run -s -k

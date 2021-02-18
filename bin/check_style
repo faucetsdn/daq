@@ -21,10 +21,18 @@ rm -f $RESULTS
 failure=
 results=
 count=0
-for file in daq/*.py bin/python/*.py; do
-    echo Checking file $file... | tee -a $RESULTS
-    pylint --rcfile=$PYLINTRC $file >> $RESULTS && count=$((count+1)) || true
+files=`find daq/ bin/python/ testing/ -name \*.py`
+for file in $files; do
+    echo Checking file $file... | tee -a $RESULTS.$count
+    pylint --rcfile=$PYLINTRC $file > $RESULTS.$count &
+    count=$((count+1))
 done
+
+echo Waiting for pylint checks to complete...
+wait
+
+cat $RESULTS.* > $RESULTS
+rm $RESULTS.*
 
 results=$(egrep "Your code has been rated" $RESULTS || true)
 numresults=$(echo "$results" | wc -l)

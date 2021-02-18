@@ -2,7 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-source etc/config_base.sh
+source bin/config_base.sh
 
 ext_intf=$switch_setup_data_intf
 ext_dpid=$switch_setup_of_dpid

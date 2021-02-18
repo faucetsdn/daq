@@ -70,56 +70,64 @@ class Configurator:
         else:
             LOGGER.info(message)
 
-    def merge_config(self, base, path, adding):
+    def merge_config(self, base, config_file, traversed=None):
         """Update a dict object and follow nested objects"""
-        if not adding:
-            return base
-        if 'include' in adding:
-            include = adding['include']
-            del adding['include']
-            self._log('Including config file %s' % include)
-            adj_path = os.path.dirname(os.path.join(path, include))
-            self._read_config_into(base, adj_path, os.path.basename(include))
-        for key in sorted(adding.keys()):
-            value = adding[key]
-            if isinstance(value, dict) and key in base:
-                self.merge_config(base[key], path, value)
-            else:
-                base[key] = copy.deepcopy(value)
-        return base
+        config_file = os.path.abspath(config_file)
+        config = self._read_config(config_file)
+        if not traversed:
+            traversed = set()
+        if config_file in traversed:
+            raise Exception('Circular include in config file %s' % config_file)
+        traversed.add(config_file)
+        if 'include' in config:
+            include = config.pop('include')
+            including_config_file = include if include.startswith('/') else os.path.join(
+                os.path.dirname(config_file), include)
+            self._log('Including config file %s' % including_config_file)
+            self.merge_config(base, including_config_file, traversed=traversed)
+        return self._deep_merge_dict(base, config)
 
-    def load_config(self, path, filename, optional=False):
+    def load_config(self, config_file, optional=False):
         """Load a config file"""
-        config_file = os.path.join(path, filename) if filename else path
         if not os.path.exists(config_file):
             if optional:
-                self._log('Skipping missing config file %s' % filename)
+                self._log('Skipping missing config file %s' % config_file)
                 return {}
             raise Exception('Config file %s not found.' % config_file)
-        return self._read_config_into({}, path, filename)
+        return self.merge_config({}, config_file)
 
-    def load_and_merge(self, base, path, filename, optional=False):
-        """Load a config file and merge with an existing base"""
-        self._log('load_and_merge %s/%s' % (path, filename))
-        return self.merge_config(base, path, self.load_config(path, filename, optional))
-
-    def write_config(self, config, path, filename):
+    def write_config(self, config, config_file):
         """Write a config file"""
-        if not path:
-            return
+        path = os.path.dirname(config_file)
         if not os.path.exists(path):
             os.makedirs(path)
-        config_file = os.path.join(path, filename)
         self._log('Writing config to %s' % config_file)
         with open(config_file, 'w') as output_stream:
             output_stream.write(json.dumps(config, indent=2, sort_keys=True))
             output_stream.write('\n')
 
-    def _read_yaml_config(self, config, path, filename):
-        config_file = os.path.join(path, filename)
+    def _deep_merge_dict(self, base, adding):
+        for key, value in adding.items():
+            if isinstance(value, dict) and isinstance(base.get(key), dict):
+                self._deep_merge_dict(base[key], value)
+            else:
+                base[key] = copy.deepcopy(value)
+        return base
+
+    def _read_yaml_config(self, config_file):
+        # Fills in env var
+        env_regex = re.compile(r'\$\{(.*)\}')
+
+        def env_constructor(loader, node):
+            match = env_regex.match(node.value)
+            env_var = match.group()[2:-1]
+            return os.getenv(env_var) + node.value[match.end():]
+
+        yaml.add_implicit_resolver('!env', env_regex, None, yaml.SafeLoader)
+        yaml.add_constructor('!env', env_constructor, yaml.SafeLoader)
         with open(config_file) as data_file:
             loaded_config = yaml.safe_load(data_file)
-        return self.merge_config(config, os.path.dirname(config_file), loaded_config)
+        return loaded_config
 
     def _parse_flat_item(self, config, parts):
         key_parts = parts[0].strip().split('.', 1)
@@ -129,8 +137,7 @@ class Configurator:
         else:
             self._parse_flat_item(config.setdefault(key_parts[0], {}), (key_parts[1], value))
 
-    def _read_flat_config(self, config, path, filename):
-        config_file = os.path.join(path, filename)
+    def _read_flat_config(self, config_file):
         loaded_config = {}
         with open(config_file) as file:
             line = file.readline()
@@ -141,14 +148,14 @@ class Configurator:
                 elif parts and parts[0]:
                     raise Exception('Unknown config entry: %s' % line)
                 line = file.readline()
-        return self.merge_config(config, os.path.dirname(config_file), loaded_config)
+        return loaded_config
 
-    def _read_config_into(self, config, path, filename):
-        if filename.endswith('.yaml') or filename.endswith('.json'):
-            return self._read_yaml_config(config, path, filename)
-        if filename.endswith('.conf'):
-            return self._read_flat_config(config, path, filename)
-        raise Exception('Unknown config file type: %s' % filename)
+    def _read_config(self, config_file):
+        if config_file.endswith('.yaml') or config_file.endswith('.json'):
+            return self._read_yaml_config(config_file)
+        if config_file.endswith('.conf'):
+            return self._read_flat_config(config_file)
+        raise Exception('Unknown config file type: %s' % config_file)
 
     def parse_args(self, args):
         """Parse command line arguments"""
@@ -164,7 +171,7 @@ class Configurator:
                 elif '=' in arg:
                     self._parse_flat_item(config, arg.split('=', 1))
                 else:
-                    self._read_config_into(config, os.getcwd(), arg)
+                    config = self.merge_config(config, arg)
         return config
 
 

@@ -3,31 +3,30 @@
 # Simple helper script to run the prototype MUD ACL generator.
 #
 
-SYSCONF=local/system.conf
-ROOT=$(dirname $0)/..
-
-mud_files=mud_files/
-acl_templates=inst/acl_templates
-port_acls=inst/port_acls
-
+ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
-mudacl/bin/test.sh
+source bin/config_base.sh
 
-source etc/config_base.sh
+mud_files=$DAQ_LIB/mud_files/
+acl_templates=$DAQ_RUN/acl_templates
+port_acls=$DAQ_RUN/port_acls
+
+$DAQ_LIB/mudacl/bin/test.sh
 
 if [ $# -gt 0 ]; then
     echo Unexpected command line argument: $*
     false
 fi
 
-test -d inst/ || mkdir inst
-touch inst/ || sudo chown $USER inst
+test -d $DAQ_RUN/ || mkdir $DAQ_RUN
+touch $DAQ_RUN/ || sudo chown $USER $DAQ_RUN
 
 rm -rf $acl_templates || sudo rm -rf $acl_templates
 mkdir $acl_templates
 rm -rf $port_acls || sudo rm -rf $port_acls
 mkdir $port_acls
 
-mudacl/bin/run.sh $mud_files $acl_templates
+$DAQ_LIB/mudacl/bin/run.sh $mud_files $acl_templates
 
+echo MUD acl templates:
 ls -l $acl_templates $port_acls

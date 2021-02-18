@@ -2,6 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
+source bin/config_base.sh
 
 export DAQ_VERSION=$(git describe --dirty)
 LSB_RAW=$(lsb_release -a)

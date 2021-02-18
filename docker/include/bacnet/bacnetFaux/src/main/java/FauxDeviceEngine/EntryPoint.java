@@ -87,9 +87,8 @@ public class EntryPoint {
         bacnetObject.keySet().forEach(bacnetObjectType -> {
             if("DeviceID".equals(bacnetObjectType)) {
                 String IDString = (String) bacnetObject.get(bacnetObjectType);
-                int DeviceID = Integer.parseInt(IDString);
-                System.out.println("Device ID found in JSON file.");
-                deviceId = DeviceID;
+                deviceId = Integer.parseInt(IDString);
+                System.out.println("Device ID found in JSON file: " + deviceId);
             }
         });
     }

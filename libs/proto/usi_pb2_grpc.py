@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import usi_pb2 as usi__pb2
+from proto import usi_pb2 as proto_dot_usi__pb2
 
 
 class USIServiceStub(object):
@@ -16,23 +16,23 @@ class USIServiceStub(object):
         """
         self.GetPower = channel.unary_unary(
                 '/usi.USIService/GetPower',
-                request_serializer=usi__pb2.SwitchInfo.SerializeToString,
-                response_deserializer=usi__pb2.PowerResponse.FromString,
+                request_serializer=proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+                response_deserializer=proto_dot_usi__pb2.PowerResponse.FromString,
                 )
         self.GetInterface = channel.unary_unary(
                 '/usi.USIService/GetInterface',
-                request_serializer=usi__pb2.SwitchInfo.SerializeToString,
-                response_deserializer=usi__pb2.InterfaceResponse.FromString,
+                request_serializer=proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+                response_deserializer=proto_dot_usi__pb2.InterfaceResponse.FromString,
                 )
         self.disconnect = channel.unary_unary(
                 '/usi.USIService/disconnect',
-                request_serializer=usi__pb2.SwitchInfo.SerializeToString,
-                response_deserializer=usi__pb2.SwitchActionResponse.FromString,
+                request_serializer=proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+                response_deserializer=proto_dot_usi__pb2.SwitchActionResponse.FromString,
                 )
         self.connect = channel.unary_unary(
                 '/usi.USIService/connect',
-                request_serializer=usi__pb2.SwitchInfo.SerializeToString,
-                response_deserializer=usi__pb2.SwitchActionResponse.FromString,
+                request_serializer=proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+                response_deserializer=proto_dot_usi__pb2.SwitchActionResponse.FromString,
                 )
 
 
@@ -68,23 +68,23 @@ def add_USIServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetPower': grpc.unary_unary_rpc_method_handler(
                     servicer.GetPower,
-                    request_deserializer=usi__pb2.SwitchInfo.FromString,
-                    response_serializer=usi__pb2.PowerResponse.SerializeToString,
+                    request_deserializer=proto_dot_usi__pb2.SwitchInfo.FromString,
+                    response_serializer=proto_dot_usi__pb2.PowerResponse.SerializeToString,
             ),
             'GetInterface': grpc.unary_unary_rpc_method_handler(
                     servicer.GetInterface,
-                    request_deserializer=usi__pb2.SwitchInfo.FromString,
-                    response_serializer=usi__pb2.InterfaceResponse.SerializeToString,
+                    request_deserializer=proto_dot_usi__pb2.SwitchInfo.FromString,
+                    response_serializer=proto_dot_usi__pb2.InterfaceResponse.SerializeToString,
             ),
             'disconnect': grpc.unary_unary_rpc_method_handler(
                     servicer.disconnect,
-                    request_deserializer=usi__pb2.SwitchInfo.FromString,
-                    response_serializer=usi__pb2.SwitchActionResponse.SerializeToString,
+                    request_deserializer=proto_dot_usi__pb2.SwitchInfo.FromString,
+                    response_serializer=proto_dot_usi__pb2.SwitchActionResponse.SerializeToString,
             ),
             'connect': grpc.unary_unary_rpc_method_handler(
                     servicer.connect,
-                    request_deserializer=usi__pb2.SwitchInfo.FromString,
-                    response_serializer=usi__pb2.SwitchActionResponse.SerializeToString,
+                    request_deserializer=proto_dot_usi__pb2.SwitchInfo.FromString,
+                    response_serializer=proto_dot_usi__pb2.SwitchActionResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -107,8 +107,8 @@ class USIService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/usi.USIService/GetPower',
-            usi__pb2.SwitchInfo.SerializeToString,
-            usi__pb2.PowerResponse.FromString,
+            proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+            proto_dot_usi__pb2.PowerResponse.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -123,8 +123,8 @@ class USIService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/usi.USIService/GetInterface',
-            usi__pb2.SwitchInfo.SerializeToString,
-            usi__pb2.InterfaceResponse.FromString,
+            proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+            proto_dot_usi__pb2.InterfaceResponse.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -139,8 +139,8 @@ class USIService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/usi.USIService/disconnect',
-            usi__pb2.SwitchInfo.SerializeToString,
-            usi__pb2.SwitchActionResponse.FromString,
+            proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+            proto_dot_usi__pb2.SwitchActionResponse.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -155,7 +155,7 @@ class USIService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/usi.USIService/connect',
-            usi__pb2.SwitchInfo.SerializeToString,
-            usi__pb2.SwitchActionResponse.FromString,
+            proto_dot_usi__pb2.SwitchInfo.SerializeToString,
+            proto_dot_usi__pb2.SwitchActionResponse.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)

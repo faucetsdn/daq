@@ -16,6 +16,7 @@ from utils import proto_dict
 class DeviceReportClientTestBase(unittest.TestCase):
     """Base class for device report client unit test"""
     _SERVER_ADDRESS = '0.0.0.0'
+    _SERVER_PORT = 50071
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,9 +41,8 @@ class DeviceReportClientTestBase(unittest.TestCase):
 
 
 class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
-    _SERVER_PORT = 50071
-
     """Basic test case for device report client"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._received_results = []
@@ -73,21 +73,21 @@ class DeviceDeviceReportServerlientBasicTestCase(DeviceReportClientTestBase):
 
 class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase):
     """Port events for device report client"""
-    _SERVER_PORT = 50072
+    _SERVER_PORT2 = 50072
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._received_port_events = []
         self._mock_port_events = [
-            DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="0"),
-            DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="1"),
-            DevicePortEvent(event=PortBehavior.PortEvent.up, timestamp="2"),
-            DevicePortEvent(event=PortBehavior.PortEvent.down, timestamp="3")
+            DevicePortEvent(state=PortBehavior.PortState.down),
+            DevicePortEvent(state=PortBehavior.PortState.down),
+            DevicePortEvent(state=PortBehavior.PortState.up),
+            DevicePortEvent(state=PortBehavior.PortState.down)
         ]
 
     def setUp(self):
         """Setup fixture for each test method"""
-        self._client = DeviceReportClient(server_port=self._SERVER_PORT)
+        self._client = DeviceReportClient(server_port=self._SERVER_PORT2)
 
         def mock_function(_, __, ___):
             for event in self._mock_port_events:
@@ -95,13 +95,90 @@ class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase
         with patch.object(DeviceReportServicer, 'GetPortState', side_effect=mock_function,
                           autospec=True):
             self._server = DeviceReportServer(
-                self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT)
+                self._process_result, self._SERVER_ADDRESS, self._SERVER_PORT2)
             self._server.start()
 
     def _on_port_event(self, event):
         self._received_port_events.append(event)
 
     def test_getting_port_events(self):
+        """Test the ability to get port events"""
         self._client.get_port_events("mac", self._on_port_event)
         time.sleep(1)
         self.assertEqual(self._received_port_events, self._mock_port_events)
+
+
+class DeviceDeviceReportPortEventsWithTestResultsTestCase(DeviceReportClientTestBase):
+    """Port events for device report client"""
+    _SERVER_PORT = 50073
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._received_port_events = []
+
+    def _on_port_event(self, event):
+        self._received_port_events.append(event)
+
+    def test_sending_test_results_terminate_port_events(self):
+        """Test the ability to get port events"""
+        self._server.process_port_learn("name", "port", "mac", 1)
+        self._client.get_port_events("mac", self._on_port_event)
+        time.sleep(1)  # Takes time to start grpc stream in a thread
+        self._server.process_port_change("name", "port", False)
+        self._server.process_port_change("name", "port", True)
+        self._client.send_device_result("mac", "passed")
+        self.assertEqual(len(self._received_port_events), 3)
+
+
+class DeviceDeviceReportPortEventsStreamCleanup(DeviceReportClientTestBase):
+    """Port events for device report client"""
+    _SERVER_PORT = 50074
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._received_port_events = []
+
+    def _on_port_event(self, event):
+        self._received_port_events.append(event)
+
+    def test_client_terminating_port_events(self):
+        """Test the ability to get port events"""
+        self._server.process_port_learn("name", "port", "mac", 1)
+        self._client.get_port_events("mac", self._on_port_event)
+        time.sleep(1)
+        self._server.process_port_change("name", "port", False)
+        time.sleep(1)
+        self._client.terminate()
+        time.sleep(1)
+        self._server.process_port_change("name", "port", False)
+        self.assertEqual(len(self._received_port_events), 2)
+
+
+class DeviceDeviceReportPortEventsMultipleStreams(DeviceReportClientTestBase):
+    """Port events for device report client"""
+    _SERVER_PORT = 50075
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._received_port_events = []
+        self._received_port_events2 = []
+
+    def _on_port_event(self, event):
+        self._received_port_events.append(event)
+
+    def _on_port_event2(self, event):
+        self._received_port_events2.append(event)
+
+    def test_sending_test_results_terminate_multiple_port_events(self):
+        """Test the ability to get port events"""
+        self._server.process_port_learn("name", "port", "mac", 1)
+        self._client.get_port_events("mac", self._on_port_event)
+        time.sleep(1)  # self._lock introduces uncertainty
+        self._client.get_port_events("mac", self._on_port_event2)
+        time.sleep(1)
+        self._server.process_port_change("name", "port", False)
+        self._server.process_port_change("name", "port", True)
+        self._client.send_device_result("mac", "passed")
+        time.sleep(1)
+        self.assertEqual(len(self._received_port_events), 4)  # FIX ME after b/180156547
+        self.assertEqual(len(self._received_port_events2), 3)

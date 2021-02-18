@@ -5,7 +5,10 @@
 
 FROM daqf/aardvark:latest
 
-RUN $AG update && $AG install apt-transport-https ca-certificates curl gnupg2
+RUN $AG update && $AG install apt-transport-https ca-certificates curl gnupg2 
+
+RUN $AG update && $AG install -y nginx
+
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
     | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
@@ -24,5 +27,10 @@ COPY udmi/ udmi/
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+
+#HTTPS Bad Server depdnency
+COPY docker/include/security/nginxfail.conf /root/nginx/
+COPY docker/include/security/nginx-site /var/www/nginx-site
+COPY docker/include/security/tlsfaux tlsfaux/
 
 ENTRYPOINT ["./start_networking"]

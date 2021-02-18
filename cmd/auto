@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 run_args="$@"
-source etc/config_base.sh
+source bin/config_base.sh
 
 cleanup_file=inst/exrun_cleanup.sh
 CFILE=inst/config/system.conf

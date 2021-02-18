@@ -10,29 +10,29 @@ fi
 TARGET=$1
 shift
 
-GIT_BRANCH=`git rev-parse --abbrev-ref HEAD`
-
-GIT_REMOTE=`git config branch.$GIT_BRANCH.remote` || true
-if [ -z "$GIT_REMOTE" ]; then
-    GIT_URL=`git config remote.origin.url`
-    GIT_REMOTE=tag
+if [[ -z $GIT_URL ]]; then
+    echo Using base GIT_URL from default.
+    GIT_URL=https://github.com/faucetsdn/daq.git
 else
-    GIT_URL=`git remote get-url $GIT_REMOTE`
+    echo Using base GIT_URL from environment.
 fi
 
-echo Build branch $GIT_BRANCH from $GIT_REMOTE at $GIT_URL
 GIT_PEER=`echo $GIT_URL | sed s/daq/$TARGET/`
-echo Auto-generated $TARGET git repo $GIT_PEER
+echo Using $TARGET target git repo $GIT_PEER
 
 TARGET_REPO=$GIT_PEER
 TARGET_VERSION=$(cat etc/${TARGET^^}_VERSION)
 
 if [ -d $TARGET ]; then
-    echo Dir $TARGET/ already exists. Not cloning.
+    echo Dir $TARGET/ already exists. Fetching updates...
+    (cd $TARGET; git fetch)
 else
     echo Cloning $TARGET locally...
+    echo git clone $TARGET_REPO $TARGET
     git clone $TARGET_REPO $TARGET
 fi
 
-echo Switching to target version $TARGET_VERSION
+echo Switching $TARGET to version $TARGET_VERSION
 (cd $TARGET; git checkout $TARGET_VERSION)
+echo -n "Last $TARGET commit: "
+(cd $TARGET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)

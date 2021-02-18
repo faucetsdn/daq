@@ -7,7 +7,7 @@ BASEDIR=`readlink -f $TESTDIR/..`
 cd $BASEDIR
 
 source venv/bin/activate
-
+source bin/config_base.sh
 coverage erase
 
 export PYTHONPATH=$BASEDIR/daq:$BASEDIR/mininet:$BASEDIR/faucet:$BASEDIR/forch:$BASEDIR/bin/python:$BASEDIR/libs:$BASEDIR/libs/proto
@@ -19,3 +19,7 @@ coverage run \
 
 coverage combine || true
 coverage report -m
+if [ -f .coverage ]; then
+    echo Generating codecov report \#unit...
+    codecov -F unit 
+fi

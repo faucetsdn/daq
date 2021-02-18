@@ -10,9 +10,13 @@ GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
 route add default gw $GATEWAY_IP
 
 schema_path=schema
+timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
+
+# Do a check for testing.
+echo Config contains `ls /config/inst/system.conf`
 
 # Enable dns for GCP lookup
 echo "nameserver 8.8.8.8" >> /etc/resolv.conf
@@ -64,11 +68,11 @@ fi
 TEST_NAME="cloud.udmi.provision"
 TEST_DESCRIPTION="Validates dynamic provisioning request"
 RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
-write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
-                 "$skip" "$RESULT_AND_SUMMARY"
+write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
-echo timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/
-timeout 90 validator/bin/validate $project_id $schema_path reflect $registry_id local/ || true
+echo Starting base message validation run `date`
+echo validator/bin/validate $project_id $schema_path reflect $device_id local/ --
+timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
 
 function message_report {
     message_type=$1
@@ -78,6 +82,8 @@ function message_report {
     if [ -f "$base.out" ]; then
         result=fail
         detail=`head -n 1 $base.out`
+        echo schema failures from $base.out
+        cat $base.out
     elif [ -f "$base.json" ]; then
         result=pass
         detail="Payload successfully validated"
@@ -95,6 +101,32 @@ function message_report {
 
 for message_type in $message_types; do
     message_report $message_type
+done
+
+device_dir=out/devices/$device_id
+sequences=$(cd sequences; ls | sort)
+echo Validating sequences for $device_id: $sequences
+for sequence in $sequences; do
+    result=pass
+    validator=validator/bin/validate
+    rm -rf $device_dir
+    cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
+    echo $cmd
+    timeout $timeout $cmd || result=fail
+    echo Validation result for $device_id against $sequence was $result
+
+    if [[ $result == pass ]]; then
+        summary="Validation successfully completed"
+    else
+        summary="Sequence validation falied"
+        more $device_dir/* | cat
+    fi
+
+    TEST_NAME="cloud.udmi.$sequence"
+    TEST_DESCRIPTION="Validates device $sequence message sequence."
+    RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $summary"
+    write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                     "n/a" "$RESULT_AND_SUMMARY"
 done
 
 fgrep RESULT $REPORT

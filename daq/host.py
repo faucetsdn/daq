@@ -16,6 +16,7 @@ from proto.system_config_pb2 import DhcpMode
 
 import configurator
 from test_modules import DockerModule, IpAddrModule, NativeModule
+from env import DAQ_RUN_DIR
 import gcp
 import logger
 
@@ -69,9 +70,9 @@ class ConnectedHost:
 
     _STARTUP_MIN_TIME_SEC = 5
     _RPC_TIMEOUT_SEC = 20
-    _INST_DIR = 'inst/'
+    _INST_DIR = DAQ_RUN_DIR
     _DEVICE_PATH = 'device/%s'
-    _NETWORK_DIR = 'inst/network'
+    _NETWORK_DIR = os.path.join(DAQ_RUN_DIR, 'network')
     _MODULE_CONFIG = 'module_config.json'
     _DEVICE_CONFIG = 'device_config.json'
     _TYPE_CONFIG = 'type_config.json'
@@ -228,10 +229,13 @@ class ConnectedHost:
         if os.path.exists(old_path):
             raise Exception('Old %s config found in %s, should be renamed to %s' %
                             (name, old_path, filename))
-        return self.configurator.load_and_merge(config, path, filename, optional=True)
+        config_file = os.path.join(path, filename)
+        if os.path.exists(config_file):
+            return self.configurator.merge_config(config, os.path.join(path, filename))
+        return config
 
     def _write_module_config(self, config, path):
-        self.configurator.write_config(config, path, self._MODULE_CONFIG)
+        self.configurator.write_config(config, os.path.join(path, self._MODULE_CONFIG))
 
     def _type_path(self):
         dev_config = self._load_config(None, {}, self._device_base, self._DEVICE_CONFIG)
@@ -327,7 +331,7 @@ class ConnectedHost:
 
     def is_running(self):
         """Return True if this host is running active test."""
-        return self.state != _STATE.ERROR and self.state != _STATE.DONE
+        return self.state not in (_STATE.ERROR, _STATE.DONE)
 
     def is_ready(self):
         """Return True if this host paused and waiting to run."""
@@ -420,13 +424,15 @@ class ConnectedHost:
         self._dhcp_listeners.append(callback)
 
     def _finalize_report(self):
-        report_paths = self._report.finalize()
+        report_paths, test_results = self._report.finalize()
         if self._trigger_path:
             report_paths.update({'trigger_path': self._trigger_path})
         self.logger.info('Finalized with reports %s', list(report_paths.keys()))
         report_blobs = {name: self._upload_file(path) for name, path in report_paths.items()}
         self.record_result('terminate', state=MODE.TERM, **report_blobs)
         self._report = None
+
+        return test_results
 
     def terminate(self, reason, trigger=True):
         """Terminate this host"""
@@ -437,7 +443,7 @@ class ConnectedHost:
         self._monitor_cleanup()
         if self.target_port:
             self.runner.network.delete_mirror_interface(self.target_port)
-        self._finalize_report()
+
         if self.test_host:
             try:
                 self.test_host.terminate()
@@ -450,6 +456,8 @@ class ConnectedHost:
             self.runner.target_set_complete(self.device,
                                             'Target device %s termination: %s' % (
                                                 self, self.test_host))
+        test_results = self._finalize_report()
+        return test_results
 
     def idle_handler(self):
         """Trigger events from idle state"""
@@ -515,7 +523,7 @@ class ConnectedHost:
 
     def _shorten_filename(self, long_name):
         if long_name and long_name.startswith(self._PATH_PREFIX):
-            return long_name[len(self._PATH_PREFIX):]
+            return long_name[len(self._PATH_PREFIX) + 1:]
         return long_name
 
     def _monitor_scan(self, output_file, timeout=None):

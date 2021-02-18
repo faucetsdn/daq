@@ -27,7 +27,7 @@
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
-         <version>4.13.1</version>
+         <version>4.13.2</version>
          <scope>test</scope>
       </dependency>
       <dependency>
@@ -59,7 +59,7 @@
       <dependency>
          <groupId>org.junit.jupiter</groupId>
          <artifactId>junit-jupiter</artifactId>
-         <version>5.7.0</version>
+         <version>5.7.1</version>
          <scope>compile</scope>
       </dependency>
    </dependencies>
@@ -68,7 +68,7 @@
          <extension>
             <groupId>kr.motd.maven</groupId>
             <artifactId>os-maven-plugin</artifactId>
-            <version>1.6.2</version>
+            <version>1.7.0</version>
          </extension>
       </extensions>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->

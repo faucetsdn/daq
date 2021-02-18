@@ -6,6 +6,7 @@ import sys
 import yaml
 
 from daq import DAQ
+from env import DAQ_RUN_DIR
 import logger
 
 LOGGER = logger.get_logger('generator')
@@ -38,7 +39,7 @@ class TopologyGenerator():
     def _normalize_raw_topo(self):
         source_dir = self.config.get('raw_topo')
         assert source_dir, 'raw_topo not defined'
-        topo_dir = self.config.get('topo_dir', 'inst')
+        topo_dir = self.config.get('topo_dir', DAQ_RUN_DIR)
         if not os.path.exists(topo_dir):
             os.makedirs(topo_dir)
         configs = {}
@@ -84,7 +85,7 @@ class TopologyGenerator():
             faucet_conf[part] = target_conf[part]
 
     def _delete_config_file(self, target):
-        topo_dir = self.config.get('topo_dir', 'inst')
+        topo_dir = self.config.get('topo_dir', DAQ_RUN_DIR)
         target_path = os.path.join(topo_dir, target)
         if os.path.exists(target_path):
             LOGGER.info('Removing %s', target_path)
