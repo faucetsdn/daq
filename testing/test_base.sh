@@ -42,7 +42,7 @@ cat inst/result.log | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
 # Check that an open port causes the appropriate failure.
-docker rmi daqf/test_hold:latest # Check case of missing image
+docker rmi -f daqf/test_hold:latest # Check case of missing image
 cmd/run -s -k interfaces.faux.opts=telnet
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
