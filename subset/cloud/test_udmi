@@ -5,6 +5,8 @@ source reporting.sh
 REPORT=/tmp/report.txt
 GCP_REFLECT_CONFIG_FILE=/config/inst/gcp_reflect_config.json
 GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
+SITE_DIR=/config/inst
+CLOUD_IOT_CONFIG_FILE=$SITE_DIR/cloud_iot_config.json
 
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
@@ -51,7 +53,9 @@ export GOOGLE_CLOUD_PROJECT=$project_id
 echo Target device is $device_id
 echo Extracted project $project_id
 echo Extracted registry $registry_id
-echo
+
+echo $CLOUD_IOT_CONFIG_FILE:
+cat $CLOUD_IOT_CONFIG_FILE
 
 echo Copying key from $GCP_REFLECT_KEY_FILE
 cp $GCP_REFLECT_KEY_FILE .
@@ -71,8 +75,8 @@ RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo validator/bin/validate $project_id $schema_path reflect $device_id local/ --
-timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
+echo validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR --
+timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR -- || true
 
 function message_report {
     message_type=$1
@@ -110,7 +114,7 @@ for sequence in $sequences; do
     result=pass
     validator=validator/bin/validate
     rm -rf $device_dir
-    cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
+    cmd="$validator $project_id $schema_path reflect $device_id $SITE_DIR sequences/$sequence"
     echo $cmd
     timeout $timeout $cmd || result=fail
     echo Validation result for $device_id against $sequence was $result

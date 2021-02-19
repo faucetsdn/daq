@@ -18,6 +18,4 @@ COPY udmi/sequences/ sequences/
 
 COPY subset/cloud/test_udmi .
 
-COPY resources/test_site/ local/
-
 CMD ./test_udmi
