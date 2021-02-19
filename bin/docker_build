@@ -11,6 +11,7 @@ build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
 force=
+build=
 
 if [ "$1" == "force" ]; then
     force=y
@@ -19,6 +20,11 @@ fi
 
 if [ "$1" == "inline" ]; then
     inline=y
+    shift
+fi
+
+if [ "$1" == build ]; then
+    build=y
     shift
 fi
 
@@ -38,7 +44,7 @@ if [ -n "$DAQ_TARGETS" ]; then
     done
 fi
 
-echo Anurag daqt: $DAQ_TARGETS test_set:
+echo Anurag daqt: $DAQ_TARGETS build $build test_set:
 for KEY in "${!test_set[@]}"; do
     echo "Key: $KEY"
     echo "Value: ${test_set[$KEY]}"
@@ -60,7 +66,7 @@ build_target() {
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         #echo Skipping non-enabled $tag
         true
-    elif [ -z "$DAQ_TARGETS" -a -z "$force" -a -n "$found" ]; then
+    elif [ -z "$DAQ_TARGETS" -o -n "$build" ] && [ -z "$force" -a -n "$found" ]; then
         unset test_set[$module]
         echo Skipping building existing $tag 
     else

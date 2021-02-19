@@ -89,6 +89,7 @@ elif [ "$1" == check ]; then
     exit 0
 elif [ "$1" == build ]; then
     force=
+    build=build
     shift
 elif [ "$1" == force ]; then
     if [ -n "$2" ]; then
@@ -157,7 +158,7 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-bin/docker_build $force $inline $tar $path
+bin/docker_build $force $inline $build $tar $path
 
 echo Updating inst/$DOCKER_IMAGE_LIST...
 docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do

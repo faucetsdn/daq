@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 source testing/test_preamble.sh
 
