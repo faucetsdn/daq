@@ -38,6 +38,12 @@ if [ -n "$DAQ_TARGETS" ]; then
     done
 fi
 
+echo Anurag daqt: $DAQ_TARGETS test_set:
+for KEY in "${!test_set[@]}"; do
+    echo "Key: $KEY"
+    echo "Value: ${test_set[$KEY]}"
+done
+
 docker_files=$(host_tests=$host_tests bin/docker_build_files)
 
 build_target() {
@@ -58,6 +64,11 @@ build_target() {
         unset test_set[$module]
         echo Skipping building existing $tag 
     else
+        echo Anurag 2 daqt: $DAQ_TARGETS test_set: ${my_array[@]}
+        for KEY in "${!test_set[@]}"; do
+            echo "Key: $KEY"
+            echo "Value: ${test_set[$KEY]}"
+        done
         unset test_set[$module]
         echo Build $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
@@ -78,14 +89,24 @@ build_target() {
         hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
         docker tag $tag:latest $tag:$hash
         echo Build complete. >> $logfile
+        echo Anurag 3 daqt: $DAQ_TARGETS test_set: ${my_array[@]}
+        for KEY in "${!test_set[@]}"; do
+            echo "Key: $KEY"
+            echo "Value: ${test_set[$KEY]}"
+        done
     fi
 }
 
 for file in $docker_files; do
-    build_target $file &
+    build_target $file
 done
 wait
 
+echo Anurag 4 daqt: $DAQ_TARGETS test_set: ${my_array[@]}
+for KEY in "${!test_set[@]}"; do
+    echo "Key: $KEY"
+    echo "Value: ${test_set[$KEY]}"
+done
 if [ -n "$DAQ_TARGETS" ]; then
     for module in "${!test_set[@]}"; do
         echo Could not find specified test module to build: $module
