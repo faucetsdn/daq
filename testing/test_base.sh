@@ -17,7 +17,16 @@ echo %%%%%%%%%%%%%%%%%%%%%% Base tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml local/system.conf
 MARKER=inst/run-9a02571e8f00/nodes/hold*/activate.log
 monitor_marker $MARKER "sudo ip link set pri-eth1 down"
-cmd/run -b -k -s site_path=inst/tmp_site
+
+release_tag=`git describe --dirty || echo unknown`
+build_mode=
+# If the current commit is a release tag, then pull images.
+echo Processing release tag $release_tag
+if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
+    build_mode=pull
+fi
+cmd/build $build_mode build
+cmd/run -s -k site_path=inst/tmp_site
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 
