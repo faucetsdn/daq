@@ -162,7 +162,7 @@ jobs:
         cd /tmp/build_artifacts_setup/docker_images
         for file in *; do docker load < "$file"; done
         rm -rf /tmp/build_artifacts_setup
-        cd-
+        cd -
         cat /tmp/build_artifacts_test/.build_built >> .build_built
         ls -a
         cd /tmp/build_artifacts_test/docker_images
