@@ -52,7 +52,6 @@ build_target() {
     else
         bin/retry_cmd docker build -t $tag -f $file . >> $logfile 2>&1 || failed=y
     fi
-    echo docker build went through $failed
     if [ -n "$failed" ]; then
         tail $logfile
         echo Build failed, see $logfile for complete log.
@@ -75,7 +74,6 @@ for file in $docker_files; do
     logfile=$build_root/docker_build.$module
     failed=
     tag=daqf/$module
-    echo DAQ_TARGETS $DAQ_TARGETS force $force
     found=$(docker images $tag 2>/dev/null | grep $module) || true
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         #echo Skipping non-enabled $tag
