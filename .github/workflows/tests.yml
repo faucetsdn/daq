@@ -150,21 +150,25 @@ jobs:
         cd /tmp/build_artifacts_faucet/docker_images
         for file in *; do docker load < "$file"; done
         rm -rf /tmp/build_artifacts_faucet
+        cd -
         cat /tmp/build_artifacts_faux/.build_built >> .build_built
         ls -a
         cd /tmp/build_artifacts_faux/docker_images
         for file in *; do docker load < "$file"; done
         rm -rf /tmp/build_artifacts_faux
+        cd -
         cat /tmp/build_artifacts_setup/.build_built >> .build_built
         ls -a
         cd /tmp/build_artifacts_setup/docker_images
         for file in *; do docker load < "$file"; done
         rm -rf /tmp/build_artifacts_setup
+        cd-
         cat /tmp/build_artifacts_test/.build_built >> .build_built
         ls -a
         cd /tmp/build_artifacts_test/docker_images
         for file in *; do docker load < "$file"; done
         rm -rf /tmp/build_artifacts_test
+        cd -
         bin/build_hash write
     - name: Running ${{ matrix.test }} test
       env:
