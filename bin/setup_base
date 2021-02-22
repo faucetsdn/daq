@@ -25,7 +25,7 @@ fi
 echo AG is $AG
 
 $AG update
-$AG install expect lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent net-tools
+$AG install expect lsb-release git curl sudo apt-transport-https software-properties-common gnupg-agent net-tools parallel
 
 retry=bin/retry_cmd
 distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
