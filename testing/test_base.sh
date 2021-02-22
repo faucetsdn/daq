@@ -12,6 +12,12 @@ cat <<EOF > inst/tmp_site/site_config.json
         "modules": {
             "discover": {
                 "enabled": false
+            },
+             "bacnet": {
+                "enabled": false
+            },
+             "mudgee": {
+                "enabled": false
             }
         }
     }
