@@ -6,6 +6,16 @@ echo Base Tests >> $TEST_RESULTS
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp resources/setups/baseline/report_template.md inst/tmp_site/
+cp resources/test_site/site_config.json inst/tmp_site/site_config.json
+cat <<EOF > inst/tmp_site/site_config.json
+    {
+        "modules": {
+            "discover": {
+                "enabled": false
+            }
+        }
+    }
+EOF
 
 echo Creating MUD templates...
 bin/mudacl

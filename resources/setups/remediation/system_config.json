@@ -41,9 +41,9 @@
     }
   },
   "report": {
-    "results": [ "pass", "fail", "skip", "info"  ],
+    "results": [ "pass", "fail", "skip"],
     "categories": [ "Connection", "Security", "Network Time", "TLS", "Protocol", "PoE", "BOS"],
-    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Recommended Pass", "Information" ]
+    "expected": [ "Required Pass", "Required Pass for PoE Devices", "Required Pass for BACnet Devices", "Recommended Pass" ]
   },
   "tests": {
     "connection.switch.port_link": {
@@ -103,8 +103,8 @@
     },
     "connection.network.communication_type": {
       "category": "Communication",
-      "required": "info",
-      "expected": "information"
+      "required": "pass",
+      "expected": "Required Pass"
     },
     "connection.network.communication_min_send": {
       "category": "Communication",
@@ -149,19 +149,14 @@
     "protocol.bacext.pic": {
       "category": "Protocol",
       "required": "pass",
-      "expected": "Required Pass for BACnet devices"
+      "expected": "Required Pass for BACnet Devices"
     },
     "protocol.bacext.version": {
       "category": "Protocol",
-      "required": "info",
-      "expected": "Information"
+      "required": "pass",
+      "expected": "Required Pass for BACnet Devices"
     },
     "poe.switch.power": {
-      "category": "PoE",
-      "required": "pass",
-      "expected": "Required Pass for PoE Devices"
-    },
-    "poe.switch.negotiation": {
       "category": "PoE",
       "required": "pass",
       "expected": "Required Pass for PoE Devices"
@@ -178,8 +173,8 @@
     },
     "security.discover.firmware": {
       "category": "Security",
-      "required": "info",
-      "expected": "Information"
+      "required": "pass",
+      "expected": "Required Pass for BACnet Devices"
     }
   }
 }
