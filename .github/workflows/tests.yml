@@ -80,7 +80,7 @@ jobs:
           path: /tmp/build_artifacts/
 
   integration_tests:
-    needs: build_docker_faucet,build_docker_setup,build_docker_test
+    needs: [build_docker_faucet, build_docker_setup, build_docker_test]
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
