@@ -94,4 +94,7 @@ function test_mud {
 
 test_mud open
 test_mud todev
+test_mud none
+test_mud star
+
 echo %%%%%%%%%%%%%%%%%%%%%% Done with tests | tee -a $TEST_RESULTS
