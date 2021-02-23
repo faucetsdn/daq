@@ -10,77 +10,11 @@ on:
     - cron: '0 */2 * * *'
 
 jobs:
-  build_docker_faucet:
+  build_docker:
     runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Installing dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
-      run: |
-        bin/setup_daq
-    - name: Build faucet based docker images
-      run: |
-        DAQ_TARGETS=faucet,gauge cmd/build tar /tmp/build_artifacts/docker_images/
-        docker image ls
-        mkdir -p /tmp/build_artifacts
-        cp .build_built /tmp/build_artifacts/
-        cp .build_hash /tmp/build_artifacts/
-    - uses: actions/upload-artifact@v2
-      with:
-          name: build_artifacts_faucet
-          path: /tmp/build_artifacts/
-
-  build_docker_faux:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Installing dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
-      run: |
-        bin/setup_daq
-    - name: Build faux docker images
-      run: |
-        DAQ_TARGETS=faux1,faux2 cmd/build tar /tmp/build_artifacts/docker_images/
-        docker image ls
-        mkdir -p /tmp/build_artifacts
-        cp .build_built /tmp/build_artifacts/
-        cp .build_hash /tmp/build_artifacts/
-    - uses: actions/upload-artifact@v2
-      with:
-          name: build_artifacts_faux
-          path: /tmp/build_artifacts/
-
-  build_docker_setup:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Installing dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
-      run: |
-        bin/setup_daq
-    - name: Build setup based docker images
-      run: |
-        DAQ_TARGETS=aardvark,aardvark2,default,networking,switch cmd/build tar /tmp/build_artifacts/docker_images/
-        docker image ls
-        mkdir -p /tmp/build_artifacts
-        cp .build_built /tmp/build_artifacts/
-        cp .build_hash /tmp/build_artifacts/
-    - uses: actions/upload-artifact@v2
-      with:
-          name: build_artifacts_setup
-          path: /tmp/build_artifacts/
-
-  build_docker_test:
-    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        build: [faucet, faux, setup, test]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -92,18 +26,14 @@ jobs:
         bin/setup_daq
     - name: Build docker images for tests
       run: |
-        DAQ_TARGETS=test_bacnet,test_hold,test_mudgee,test_brute,test_discover,usi,test_ipaddr cmd/build tar /tmp/build_artifacts/docker_images/
-        docker image ls
-        mkdir -p /tmp/build_artifacts
-        cp .build_built /tmp/build_artifacts/
-        cp .build_hash /tmp/build_artifacts/
+          bin/test_build ${{ matrix.build }}
     - uses: actions/upload-artifact@v2
       with:
           name: build_artifacts_test
           path: /tmp/build_artifacts/
 
   integration_tests:
-    needs: [build_docker_faucet, build_docker_faux, build_docker_setup, build_docker_test]
+    needs: build_docker
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
@@ -144,32 +74,7 @@ jobs:
         bin/setup_daq
     - name: Loading docker images
       run: |
-        touch .build_built
-        cat /tmp/build_artifacts_faucet/.build_built >> .build_built
-        ls -a
-        cd /tmp/build_artifacts_faucet/docker_images
-        for file in *; do docker load < "$file"; done
-        rm -rf /tmp/build_artifacts_faucet
-        cd -
-        cat /tmp/build_artifacts_faux/.build_built >> .build_built
-        ls -a
-        cd /tmp/build_artifacts_faux/docker_images
-        for file in *; do docker load < "$file"; done
-        rm -rf /tmp/build_artifacts_faux
-        cd -
-        cat /tmp/build_artifacts_setup/.build_built >> .build_built
-        ls -a
-        cd /tmp/build_artifacts_setup/docker_images
-        for file in *; do docker load < "$file"; done
-        rm -rf /tmp/build_artifacts_setup
-        cd -
-        cat /tmp/build_artifacts_test/.build_built >> .build_built
-        ls -a
-        cd /tmp/build_artifacts_test/docker_images
-        for file in *; do docker load < "$file"; done
-        rm -rf /tmp/build_artifacts_test
-        cd -
-        bin/build_hash write
+        bin/load_images faucet faux setup test
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000

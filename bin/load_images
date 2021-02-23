@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+touch .build_built
+for var in "$@"
+do
+    cat /tmp/build_artifacts_$var/.build_built >> .build_built
+    ls -a
+    cd /tmp/build_artifacts_$var/docker_images
+    for file in *; do docker load < "$file"; done
+    rm -rf /tmp/build_artifacts_$var
+    cd -
+done
+bin/build_hash write
