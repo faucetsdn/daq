@@ -50,13 +50,12 @@ def build_source_files(tmp):
     shutil.rmtree(tmp, ignore_errors=True)
     shutil.copytree('daq', tmp, symlinks=True)
     shutil.copytree('libs/proto', os.path.join(tmp, 'proto'), symlinks=True)
-#    shutil.copytree('faucet/clib', os.path.join(tmp, 'clib'), symlinks=True)
+    shutil.copytree('faucet/clib', os.path.join(tmp, 'clib'), symlinks=True)
     return tmp
 
-# TODO(b/180641686): Need to resolve proper way to do faucet dependency.
-#dirs = os.listdir('.')
-#assert all([repo in dirs for repo in ('faucet',)]), \
-#    'Missing dependent repos. Please run bin/setup_dev'
+dirs = os.listdir('.')
+assert all([repo in dirs for repo in ('faucet',)]), \
+    'Missing dependent repos. Please run bin/setup_dev'
 
 with tempfile.TemporaryDirectory(dir='.') as tmp:
     setuptools.setup(
