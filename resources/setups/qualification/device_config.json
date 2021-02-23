@@ -12,7 +12,11 @@
   },
   "tests": {
     "connection.manual.comms_down": {
-      "result": "required",   
+      "outcome": "INPUT OUTCOME OF TEST HERE (pass/fail/skip)",   
+      "summary" : "INPUT SUMMARY OF TEST HERE",
+      "test_log" : "INPUT LOG OF TEST HERE"
+    },
+    "connection.manual.sec_eth_port": {
       "outcome": "INPUT OUTCOME OF TEST HERE (pass/fail/skip)",   
       "summary" : "INPUT SUMMARY OF TEST HERE",
       "test_log" : "INPUT LOG OF TEST HERE"
