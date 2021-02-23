@@ -7,6 +7,9 @@ echo Switch Tests >> $TEST_RESULTS
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp resources/setups/baseline/report_template.md inst/tmp_site/
 
+echo Creating MUD templates...
+bin/mudacl
+
 release_tag=`git describe --dirty || echo unknown`
 build_mode=
 # If the current commit is a release tag, then pull images.
