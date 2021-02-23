@@ -29,7 +29,7 @@ jobs:
           bin/test_build ${{ matrix.build }}
     - uses: actions/upload-artifact@v2
       with:
-          name: build_artifacts_test
+          name: build_artifacts_${{ matrix.build  }}
           path: /tmp/build_artifacts/
 
   integration_tests:
