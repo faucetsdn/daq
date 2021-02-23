@@ -19,6 +19,14 @@ if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
 fi
 cmd/build $build_mode build
 
+echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
+# Except with a default MUD file that blocks the port.
+cmd/run -s interfaces.faux.opts=telnet device_specs=resources/device_specs/simple.json
+echo DAQ result code $? | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
+fgrep 'security.nmap.ports'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
+cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
+
 echo %%%%%%%%%%%%%%%%%%%%%% External switch tests | tee -a $TEST_RESULTS
 echo 'include: ../config/system/ext.yaml' > local/system.yaml
 cmd/run -s
@@ -43,14 +51,6 @@ fgrep RESULT inst/run-9a02571e8f01/nodes/ping01/activate.log | tee -a $TEST_RESU
 
 # acquire test will fail since the DHCP server never even tries
 fgrep 9a02571e8f02 inst/result.log | tee -a $TEST_RESULTS
-
-echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
-# Except with a default MUD file that blocks the port.
-cmd/run -s interfaces.faux.opts=telnet device_specs=resources/device_specs/simple.json
-echo DAQ result code $? | tee -a $TEST_RESULTS
-cat inst/result.log | tee -a $TEST_RESULTS
-fgrep 'security.nmap.ports'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
-cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
