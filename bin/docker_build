@@ -28,14 +28,6 @@ if [ "$1" == missing ]; then
     shift
 fi
 
-tar_file_path=
-if [ "$1" == "tar" ]; then
-    shift
-    tar_file_path=$1
-    shift
-fi
-
-
 if [ -n "$DAQ_TARGETS" ]; then
     declare -A test_set
     for target in $(echo $DAQ_TARGETS | sed 's/,/ /g'); do
@@ -56,10 +48,6 @@ build_target() {
         tail $logfile
         echo Build failed, see $logfile for complete log.
         false
-    elif [ -n "$tar_file_path" ]; then
-        echo Saving Docker image $tag to $tar_file_path
-        mkdir -p $tar_file_path
-        docker save "$tag" > $tar_file_path/$module.tar
     fi
     hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
     docker tag $tag:latest $tag:$hash
