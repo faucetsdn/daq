@@ -10,14 +10,7 @@ cp resources/setups/baseline/report_template.md inst/tmp_site/
 echo Creating MUD templates...
 bin/mudacl
 
-release_tag=`git describe --dirty || echo unknown`
-build_mode=
-# If the current commit is a release tag, then pull images.
-echo Processing release tag $release_tag
-if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
-    build_mode=pull
-fi
-cmd/build $build_mode missing
+build_if_not_release
 
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
 # Except with a default MUD file that blocks the port.
