@@ -86,7 +86,7 @@ echo Processing release tag $release_tag
 if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
     build_mode=pull
 fi
-cmd/build $build_mode build
+cmd/build $build_mode missing
 cmd/run run_limit=$RUN_LIMIT settle_sec=0 dhcp_lease_time=120s
 end_time=`date -u -Isec --date="+5min"` # Adding additional time to account for slower cloud function calls for updating timestamp.
 

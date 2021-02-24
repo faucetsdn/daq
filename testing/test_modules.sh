@@ -28,11 +28,11 @@ ssh ssh
 ssh sshv1
 EOF
 
-DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 cmd/build build inline
+DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 cmd/build missing inline
 
 cat $TEST_LIST | while read module args; do
     if ! docker inspect daqf/test_$module:latest > /dev/null; then
-	DAQ_TARGETS=test_$module cmd/build build
+	DAQ_TARGETS=test_$module cmd/build missing
     fi
     echo
     echo Testing $module $args | tee -a $TEST_RESULTS

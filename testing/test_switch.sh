@@ -17,7 +17,7 @@ echo Processing release tag $release_tag
 if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
     build_mode=pull
 fi
-cmd/build $build_mode build
+cmd/build $build_mode missing
 
 echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
 # Except with a default MUD file that blocks the port.

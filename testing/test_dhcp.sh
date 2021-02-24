@@ -95,7 +95,7 @@ echo Processing release tag $release_tag
 if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
     build_mode=pull
 fi
-cmd/build $build_mode build
+cmd/build $build_mode missing
 cmd/run -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
