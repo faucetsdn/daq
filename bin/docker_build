@@ -11,7 +11,7 @@ build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
 force=
-build=
+missing=
 
 if [ "$1" == "force" ]; then
     force=y
@@ -23,15 +23,15 @@ if [ "$1" == "inline" ]; then
     shift
 fi
 
-if [ "$1" == build ]; then
-    build=y
+if [ "$1" == missing ]; then
+    missing=y
     shift
 fi
 
-path=
+tar_file_path=
 if [ "$1" == "tar" ]; then
     shift
-    path=$1
+    tar_file_path=$1
     shift
 fi
 
@@ -56,10 +56,10 @@ build_target() {
         tail $logfile
         echo Build failed, see $logfile for complete log.
         false
-    elif [ -n "$path" ]; then
-        echo Saving Docker image $tag to $path
-        mkdir -p $path
-        docker save "$tag" > $path/$module.tar
+    elif [ -n "$tar_file_path" ]; then
+        echo Saving Docker image $tag to $tar_file_path
+        mkdir -p $tar_file_path
+        docker save "$tag" > $tar_file_path/$module.tar
     fi
     hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
     docker tag $tag:latest $tag:$hash
@@ -78,7 +78,7 @@ for file in $docker_files; do
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         #echo Skipping non-enabled $tag
         true
-    elif [ -z "$DAQ_TARGETS" -o -n "$build" ] && [ -z "$force" -a -n "$found" ]; then
+    elif [ -z "$DAQ_TARGETS" -o -n "$missing" ] && [ -z "$force" -a -n "$found" ]; then
         unset test_set[$module]
         echo Skipping building existing $tag 
     else
