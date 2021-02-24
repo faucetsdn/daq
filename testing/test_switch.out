@@ -8,8 +8,8 @@ security.nmap.ports
 RESULT pass security.nmap.ports Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% External switch tests
 9a02571e8f00: []
-dp_id: 1
-dp_id: 4886718345
+    dp_id: 1
+    dp_id: 4886718345
 Switch test with target 192.0.2.138:2
 RESULT pass base.switch.ping target %% 192.0.2.138:2
 Switch test with target 192.0.2.138:2
