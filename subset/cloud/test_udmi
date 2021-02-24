@@ -2,6 +2,8 @@
 
 source reporting.sh
 
+echo Starting UDMI test run `date`
+
 REPORT=/tmp/report.txt
 GCP_REFLECT_CONFIG_FILE=/config/inst/gcp_reflect_config.json
 GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
@@ -10,18 +12,13 @@ CLOUD_IOT_CONFIG_FILE=$SITE_DIR/cloud_iot_config.json
 
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 schema_path=schema
 timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
 device_id=`jq -r .device_id /config/device/module_config.json`
-
-# Do a check for testing.
-echo Config contains `ls /config/inst/system.conf`
-
-# Enable dns for GCP lookup
-echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 if [ "$device_id" == null ]; then
     skip="No device id"
@@ -30,8 +27,6 @@ elif [ ! -f $GCP_REFLECT_CONFIG_FILE ]; then
 else
     skip=
 fi
-
-ls -l /config/inst/ || true
 
 if [ -n "$skip" ]; then
     echo Skipping udmi test because $skip
