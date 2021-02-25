@@ -88,14 +88,7 @@ function kill_dhcp_client {
 
 # Check that killing the dhcp client on a device times out the ipaddr test.
 monitor_log "Target port 6 connect successful" "kill_dhcp_client daq-faux-6"
-build_mode=
-release_tag=`git describe --dirty || echo unknown`
-# If the current commit is a release tag, then pull images.
-echo Processing release tag $release_tag
-if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
-    build_mode=pull
-fi
-cmd/build $build_mode missing
+build_if_not_release
 cmd/run -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
