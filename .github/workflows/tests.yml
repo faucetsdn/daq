@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        build: [faucet, faux, setup, test, subset]
+        build: [faucet, faux, setup, modules, subset]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -79,7 +79,7 @@ jobs:
         bin/setup_daq
     - name: Loading docker images
       run: |
-        bin/load_images faucet faux setup test
+        bin/load_images faucet faux setup modules
     - name: Loading subset docker images
       run: |
         bin/load_images subset

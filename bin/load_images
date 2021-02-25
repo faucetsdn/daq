@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 touch .build_built
+run_dir=$PWD
 for var in "$@"; do
-    working_dir=$PWD
     cat /tmp/build_artifacts_$var/.build_built >> .build_built
     cd /tmp/build_artifacts_$var/docker_images
     ls -a
@@ -10,6 +10,6 @@ for var in "$@"; do
         docker load < "$file"
     done
     rm -rf /tmp/build_artifacts_$var
-    cd $working_dir
+    cd $run_dir
 done
 bin/build_hash write
