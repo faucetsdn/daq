@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        build: [faucet, faux, setup, test]
+        build: [faucet, faux, setup, test, subset]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -56,6 +56,11 @@ jobs:
       with:
           name: build_artifacts_test
           path: /tmp/build_artifacts_test
+    - uses: actions/download-artifact@v2
+      with:
+          name: build_artifacts_test
+          path: /tmp/build_artifacts_subset
+      if: matrix.test == aux
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -75,6 +80,10 @@ jobs:
     - name: Loading docker images
       run: |
         bin/load_images faucet faux setup test
+    - name: Loading subset docker images
+      run: |
+        bin/load_images subset
+      if: matrix.test == aux
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
