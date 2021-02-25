@@ -54,7 +54,7 @@ jobs:
           path: /tmp/build_artifacts_setup
     - uses: actions/download-artifact@v2
       with:
-          name: build_artifacts_test
+          name: build_artifacts_modules
           path: /tmp/build_artifacts_modules
     - uses: actions/download-artifact@v2
       with:
