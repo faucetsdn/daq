@@ -19,7 +19,7 @@ if [ -z "$compressed_file_path" ]; then
     compressed_file_path=/tmp/build_artifacts/docker_images/
 fi
 
-DAQ_TARGETS=$targets cmd/build missing
+DAQ_TARGETS=$targets cmd/build
 for target in $(echo $targets | sed 's/,/ /g'); do
     tag=daqf/$target
     echo $target $tag
