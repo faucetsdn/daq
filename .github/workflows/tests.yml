@@ -58,7 +58,7 @@ jobs:
           path: /tmp/build_artifacts_test
     - uses: actions/download-artifact@v2
       with:
-          name: build_artifacts_test
+          name: build_artifacts_subset
           path: /tmp/build_artifacts_subset
       if: matrix.test == 'aux'
     - uses: actions/checkout@v2
