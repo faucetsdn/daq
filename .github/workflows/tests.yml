@@ -60,7 +60,7 @@ jobs:
       with:
           name: build_artifacts_test
           path: /tmp/build_artifacts_subset
-      if: matrix.test == aux
+      if: matrix.test == 'aux'
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -83,7 +83,7 @@ jobs:
     - name: Loading subset docker images
       run: |
         bin/load_images subset
-      if: matrix.test == aux
+      if: matrix.test == 'aux'
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
