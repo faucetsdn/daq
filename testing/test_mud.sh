@@ -2,7 +2,7 @@
 
 source testing/test_preamble.sh
 
-echo Switch Tests >> $TEST_RESULTS
+echo MUD Tests >> $TEST_RESULTS
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp resources/setups/baseline/report_template.md inst/tmp_site/

@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
           #test: [base, many, aux, topo, modules, dhcp, switch]
-        test: [mud]
+        test: [mud, switch]
     steps:
     - uses: actions/download-artifact@v2
       with:
