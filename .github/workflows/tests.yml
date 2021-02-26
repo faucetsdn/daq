@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        build: [faucet, faux, setup, modules, subset]
+        build: [faucet, faux, setup, base, subset]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -54,8 +54,8 @@ jobs:
           path: /tmp/build_artifacts_setup
     - uses: actions/download-artifact@v2
       with:
-          name: build_artifacts_modules
-          path: /tmp/build_artifacts_modules
+          name: build_artifacts_base
+          path: /tmp/build_artifacts_base
     - uses: actions/download-artifact@v2
       with:
           name: build_artifacts_subset
@@ -79,7 +79,7 @@ jobs:
         bin/setup_daq
     - name: Loading docker images
       run: |
-        bin/load_images faucet faux setup modules
+        bin/load_images faucet faux setup base
     - name: Loading subset docker images
       run: |
         bin/load_images subset
