@@ -35,7 +35,7 @@ rm -rf $module_dir
 faux_build=
 
 if [ -n "$build" ]; then
-    DAQ_TARGETS=$target bin/docker_build force
+    DAQ_TARGETS=$target cmd/build missing
     faux_build=-b
 fi
 

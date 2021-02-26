@@ -19,7 +19,7 @@ echo Creating MUD templates...
 bin/mudacl
 
 generate open 3
-cmd/build
+cmd/build missing
 check_socket 01 02 1 1
 check_socket 02 01 1 1
 check_bacnet 01 02 1 1 1 1

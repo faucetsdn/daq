@@ -40,7 +40,7 @@ cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     "ipaddr": {
       "enabled": true,
       "port_flap_timeout_sec": 20,
-      "dhcp_ranges": [{"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16}, 
+      "dhcp_ranges": [{"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16},
         {"start": "10.255.255.1", "end": "10.255.255.255", "prefix_length": 24},
         {"start": "172.16.0.1", "end": "172.16.0.200", "prefix_length": 24}]
     }
@@ -88,7 +88,8 @@ function kill_dhcp_client {
 
 # Check that killing the dhcp client on a device times out the ipaddr test.
 monitor_log "Target port 6 connect successful" "kill_dhcp_client daq-faux-6"
-cmd/run -b -s settle_sec=0 dhcp_lease_time=120s
+build_if_not_release
+cmd/run -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 

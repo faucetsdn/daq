@@ -8,7 +8,7 @@ if [ "$1" == help ]; then
  echo $0 check : Check if the built images are updated.
  echo $0 push : Pushes images to docker hub
  echo $0 pull : Pulls images from docker hub
- echo $0 build : Builds only missing docker images
+ echo $0 missing : Builds only missing docker images
  echo $0 force [version] : Builds all docker images
  exit 0
 fi
@@ -85,8 +85,9 @@ elif [ "$1" == check ]; then
     shift
     bin/build_hash check
     exit 0
-elif [ "$1" == build ]; then
+elif [ "$1" == missing ]; then
     force=
+    missing=missing
     shift
 elif [ "$1" == force ]; then
     if [ -n "$2" ]; then
@@ -150,7 +151,7 @@ if [ "$target_commit" != "$local_version" ]; then
     false
 fi
 
-bin/docker_build $force $inline
+bin/docker_build $force $inline $missing
 
 echo Updating inst/$DOCKER_IMAGE_LIST...
 docker images | sort | fgrep daqf/ | fgrep latest | while read image tag hash other; do

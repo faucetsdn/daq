@@ -10,13 +10,57 @@ on:
     - cron: '0 */2 * * *'
 
 jobs:
+  build_docker:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        build: [faucet, faux, setup, base, subset]
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Installing dependencies
+      env:
+        GIT_URL: ${{ secrets.GIT_URL }}
+      run: |
+        bin/setup_daq
+    - name: Build docker images for tests
+      run: |
+          bin/test_build ${{ matrix.build }} compress /tmp/build_artifacts/docker_images/
+    - uses: actions/upload-artifact@v2
+      with:
+          name: build_artifacts_${{ matrix.build  }}
+          path: /tmp/build_artifacts/
+
   integration_tests:
+    needs: build_docker
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
       matrix:
-        test: [base, many, aux, topo, modules, dhcp]
+        test: [base, many, aux, topo, modules, dhcp, switch, mud]
     steps:
+    - uses: actions/download-artifact@v2
+      with:
+          name: build_artifacts_faucet
+          path: /tmp/build_artifacts_faucet
+    - uses: actions/download-artifact@v2
+      with:
+          name: build_artifacts_faux
+          path: /tmp/build_artifacts_faux
+    - uses: actions/download-artifact@v2
+      with:
+          name: build_artifacts_setup
+          path: /tmp/build_artifacts_setup
+    - uses: actions/download-artifact@v2
+      with:
+          name: build_artifacts_base
+          path: /tmp/build_artifacts_base
+    - uses: actions/download-artifact@v2
+      with:
+          name: build_artifacts_subset
+          path: /tmp/build_artifacts_subset
+      if: matrix.test == 'aux'
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -33,6 +77,13 @@ jobs:
         GIT_URL: ${{ secrets.GIT_URL }}
       run: |
         bin/setup_daq
+    - name: Loading docker images
+      run: |
+        bin/load_images faucet faux setup base
+    - name: Loading subset docker images
+      run: |
+        bin/load_images subset
+      if: matrix.test == 'aux'
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
