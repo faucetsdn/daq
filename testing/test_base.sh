@@ -24,6 +24,17 @@ cat inst/result.log | tee -a $TEST_RESULTS
 echo Redacted report for 9a02571e8f00:
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
 
+echo %%%%%%%%%%%%%%%%%%%%%% Test DAQ can recover from sock connection failures | tee -a $TEST_RESULTS
+# Check exception handling during report finalizing.
+restart_faucet() {
+    container=$(docker ps | grep daqf/faucet | awk '{print $1}')
+    docker stop $container; sleep 5; docker start $container
+}
+monitor_log "Port 1 dpid 2 learned 9a:02:57:1e:8f:00" "restart_faucet"
+cmd/run -s default_timeout_sec=100
+reconnections=$(fgrep "Attempting to reconnect to faucet socket" inst/cmdrun.log | wc -l)
+echo Found reconnections? $((reconnections > 0)) | tee -a $TEST_RESULTS
+
 echo %%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling | tee -a $TEST_RESULTS
 # Check exception handling during report finalizing.
 mv resources/setups/baseline/device_report.css resources/setups/baseline/device_report

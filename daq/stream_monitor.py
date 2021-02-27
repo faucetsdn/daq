@@ -8,6 +8,7 @@ import logger
 
 LOGGER = logger.get_logger('stream')
 
+
 class StreamMonitor:
     """Monitor set of stream objects"""
 
@@ -141,11 +142,11 @@ class StreamMonitor:
         try:
             if not fds and self.idle_handler:
                 self.idle_handler()
-                # Check corner case when idle_handler removes all callbacks.
-                if not self.callbacks:
-                    return False
             if self.loop_hook:
                 self.loop_hook()
+                # Check the corner case when loop_hook removes all callbacks.
+                if not self.callbacks:
+                    return False
         except Exception as e:
             LOGGER.error('Monitoring exception in callback: %s', e)
             LOGGER.exception(e)
@@ -154,6 +155,6 @@ class StreamMonitor:
         LOGGER.debug('Monitoring found fds %s', fds)
         if fds:
             for fd, event in sorted(fds, key=lambda f: -self.fd_priority[f[0]]):
-                if fd in self.callbacks: # Monitoring set could be modified
+                if fd in self.callbacks:  # Monitoring set could be modified
                     self.process_poll_result(event, fd)
         return len(self.callbacks) > 0

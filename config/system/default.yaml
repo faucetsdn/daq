@@ -24,6 +24,9 @@ default_timeout_sec: 350
 # default time between port disconnect and host tests shutdown
 port_flap_timeout_sec: 5
 
+# default max time between messages from faucet
+faucet_event_timeout_sec: 10
+
 # Default base module configuration file.
 base_conf: ${DAQ_LIB}/resources/setups/baseline/base_config.json
 

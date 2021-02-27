@@ -6,7 +6,7 @@ import logger
 
 from .native_host import make_native_host
 from .external_module import ExternalModule
-
+from env import DAQ_LIB_DIR
 
 LOGGER = logger.get_logger('docker')
 
@@ -33,8 +33,9 @@ class NativeModule(ExternalModule):
         vol_maps = super()._get_vol_maps(params)
 
         # Common testing tools
-        vol_maps.append((os.path.abspath('bin/retry_cmd'), '/bin/retry_cmd'))
-        vol_maps.append((os.path.abspath('docker/include/utils/reporting.sh'),
+        vol_maps.append((os.path.abspath(os.path.join(DAQ_LIB_DIR, 'bin', 'retry_cmd')),
+                        '/bin/retry_cmd'))
+        vol_maps.append((os.path.abspath(os.path.join(DAQ_LIB_DIR, 'bin', 'reporting.sh')),
                          os.path.join(self.basedir, 'reporting.sh')))
         return vol_maps
 

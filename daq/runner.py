@@ -30,6 +30,7 @@ from proto.system_config_pb2 import DhcpMode
 
 LOGGER = logger.get_logger('runner')
 
+
 class PortInfo:
     """Simple container for device port info"""
     active = False
@@ -133,6 +134,7 @@ class Devices:
         """Returns true if the device is expected"""
         return self._devices.get(device.mac) == device
 
+
 class DAQRunner:
     """Main runner class controlling DAQ. Primarily mediates between
     faucet events, connected hosts (to test), and gcp for logging. This
@@ -164,6 +166,7 @@ class DAQRunner:
         self.result_linger = config.get('result_linger', False)
         self._linger_exit = 0
         self.faucet_events = None
+        self.faucet_events_fd = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
         self.run_trigger = config.get('run_trigger', {})
@@ -253,6 +256,8 @@ class DAQRunner:
         LOGGER.debug('Attaching event channel...')
         self.faucet_events = faucet_event_client.FaucetEventClient(self.config)
         self.faucet_events.connect()
+        # sock fileno will change if the socket is ever reconnected.
+        self.faucet_events_fd = self.faucet_events.sock.fileno()
 
         LOGGER.info('Waiting for system to settle...')
         time.sleep(3)
@@ -305,6 +310,7 @@ class DAQRunner:
             is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
             if is_vlan:
                 if self.network.is_system_port(dpid, port):
+                    self._system_active = True
                     self._handle_device_learn(target_mac, vid)
             else:
                 self._handle_port_learn(dpid, port, target_mac)
@@ -377,12 +383,13 @@ class DAQRunner:
 
         # For keeping track of remote port events
         if self._device_result_client:
-            LOGGER.info('Connecting device result client for %s', target_mac)
-            device.port = PortInfo()
-            device.port.active = True
-            device.wait_remote = True
-            self._device_result_client.get_port_events(
-                device.mac, lambda event: self._handle_remote_port_state(device, event))
+            if not device.port.wait_remote:
+                LOGGER.info('Connecting device result client for %s', target_mac)
+                device.port = PortInfo()
+                device.port.active = True
+                device.wait_remote = True
+                self._device_result_client.get_port_events(
+                    device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
             self._target_set_trigger(device)
 
@@ -439,13 +446,6 @@ class DAQRunner:
         for device in self._devices.get_all_devices():
             self._target_set_trigger(device)
             all_idle = False
-        if not self._devices.get_triggered_devices() and not self.run_tests:
-            if self.faucet_events and not self._linger_exit:
-                self.shutdown()
-            if self._linger_exit == 1:
-                self._linger_exit = 2
-                LOGGER.warning('Result linger on exit.')
-            all_idle = False
         if all_idle:
             LOGGER.debug('No active device, waiting for trigger event...')
 
@@ -464,7 +464,7 @@ class DAQRunner:
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
         self._terminate()
-        self.monitor_forget(self.faucet_events.sock)
+        self.monitor_forget(self.faucet_events_fd)
         self.faucet_events.disconnect()
         self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
@@ -475,10 +475,18 @@ class DAQRunner:
         self._handle_queued_events()
         states = {device.mac: device.host.state for device in self._devices.get_triggered_devices()}
         LOGGER.debug('Active target sets/state: %s', states)
+        if not self._devices.get_triggered_devices() and not self.run_tests:
+            if self.faucet_events and not self._linger_exit:
+                self.shutdown()
+            if self._linger_exit == 1:
+                self._linger_exit = 2
+                LOGGER.warning('Result linger on exit.')
 
     def _terminate(self):
         for device in self._devices.get_triggered_devices():
             self.target_set_error(device, DaqException('terminated'))
+        if self._device_result_client:
+            self._device_result_client.terminate()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -633,7 +641,7 @@ class DAQRunner:
         get_test_list(test_file)
         return [*test_ordering["first"], *test_ordering["body"], *test_ordering["last"]]
 
-    def _get_test_metadata(self, extension=".daqmodule", root="subset"):
+    def _get_test_metadata(self, extension=".daqmodule", root=os.path.join(DAQ_LIB_DIR, "subset")):
         metadata = {}
         for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
             with open(meta_file) as fd:

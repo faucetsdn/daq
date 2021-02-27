@@ -2,6 +2,7 @@
 
 import json
 import os
+from queue import Queue, Empty
 import select
 import socket
 import threading
@@ -11,19 +12,25 @@ import logger
 
 LOGGER = logger.get_logger('fevent')
 
+
 class FaucetEventClient():
     """A general client interface to the FAUCET event API"""
 
     FAUCET_RETRIES = 10
     _PORT_DEBOUNCE_SEC = 5
+    _EVENT_TIMEOUT_SEC = 10
 
     def __init__(self, config):
         self.config = config
         self.sock = None
-        self.buffer = None
+        self.buffer = ''
+        self.debounced_q = Queue()
+        self._last_message = time.time()
         self._buffer_lock = threading.Lock()
-        self.previous_state = None
+        self.previous_state = {}
         self._port_debounce_sec = int(config.get('port_debounce_sec', self._PORT_DEBOUNCE_SEC))
+        event_timeout_sec = config.get('faucet_event_timeout_sec', self._EVENT_TIMEOUT_SEC)
+        self._event_timeout_sec = int(event_timeout_sec)
         self._port_timers = {}
 
     def connect(self):
@@ -32,9 +39,6 @@ class FaucetEventClient():
         sock_path = os.getenv('FAUCET_EVENT_SOCK')
 
         assert sock_path, 'Environment FAUCET_EVENT_SOCK not defined'
-
-        self.previous_state = {}
-        self.buffer = ''
 
         retries = self.FAUCET_RETRIES
         while not os.path.exists(sock_path):
@@ -65,11 +69,24 @@ class FaucetEventClient():
             if '\n' in self.buffer:
                 return True
             if blocking or self.has_data():
-                data = self.sock.recv(1024).decode('utf-8')
-                with self._buffer_lock:
-                    self.buffer += data
-            else:
+                data = self.sock.recv(2048).decode('utf-8')
+                if data.strip():
+                    self._last_message = time.time()
+                    with self._buffer_lock:
+                        self.buffer += data
+            if not blocking and self._check_socket_connection():
                 return False
+
+    def _check_socket_connection(self):
+        time_elapsed = time.time() - self._last_message
+        if self._event_timeout_sec and time_elapsed >= self._event_timeout_sec:
+            LOGGER.info('Attempting to reconnect to faucet socket %s ' %
+                        os.getenv('FAUCET_EVENT_SOCK'))
+            time.sleep(self._event_timeout_sec)  # Ensure faucet socket's been disconnected.
+            self.connect()
+            time.sleep(self._event_timeout_sec)  # Ensure a new heart beat has happened.
+            return False
+        return True
 
     def _filter_faucet_event(self, event):
         (dpid, port, active) = self.as_port_state(event)
@@ -115,7 +132,7 @@ class FaucetEventClient():
 
     def _handle_debounce(self, dpid, port, active):
         LOGGER.debug('Port handle %s-%s as %s', dpid, port, active)
-        self._append_event(self._make_port_state(dpid, port, active, debounced=True))
+        self.debounced_q.put_nowait(self._make_port_state(dpid, port, active, debounced=True))
 
     def _prepend_event(self, event):
         with self._buffer_lock:
@@ -135,7 +152,12 @@ class FaucetEventClient():
 
     def next_event(self, blocking=False):
         """Return the next event from the queue"""
-        while self.has_event(blocking=blocking):
+        while self.debounced_q.qsize() or self.has_event(blocking=blocking):
+            if not self.debounced_q.empty():
+                try:
+                    return self.debounced_q.get_nowait()
+                except Empty:
+                    return None
             with self._buffer_lock:
                 line, remainder = self.buffer.split('\n', 1)
                 self.buffer = remainder

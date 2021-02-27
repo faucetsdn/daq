@@ -20,6 +20,7 @@ from env import DAQ_RUN_DIR
 import gcp
 import logger
 
+
 class _STATE:
     """Host state enum for testing cycle"""
     ERROR = 'Error condition'
@@ -32,7 +33,6 @@ class _STATE:
     TESTING = 'Active test'
     DONE = 'Done with sequence'
     TERM = 'Host terminated'
-
 
 
 class MODE:
@@ -54,6 +54,7 @@ class MODE:
 def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'acquire', 'base', 'monitor']
+
 
 def post_states():
     """Return post-test states for recording finalization"""

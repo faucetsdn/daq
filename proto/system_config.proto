@@ -138,6 +138,9 @@ message DaqConfig {
 
   // Path to include file
   string include = 56;
+
+  // The maximum time in seconds between messages from faucet
+  int32 faucet_event_timeout_sec = 57;
 }
 
 enum DhcpMode {

@@ -17,7 +17,7 @@ FROM ubuntu:focal
 WORKDIR /root
 
 COPY bin/retry_cmd bin/
-COPY docker/include/utils/reporting.sh .
+COPY bin/reporting.sh .
 
 ENV AG="bin/retry_cmd apt-get -qqy --no-install-recommends -o=Dpkg::Use-Pty=0"
 

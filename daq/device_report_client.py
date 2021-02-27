@@ -12,6 +12,7 @@ _SERVER_ADDRESS_DEFAULT = '127.0.0.1'
 _SERVER_PORT_DEFAULT = 50051
 _DEFAULT_RPC_TIMEOUT_SEC = 10
 
+
 class DeviceReportClient:
     """gRPC client to send device result"""
     def __init__(self, server_address=_SERVER_ADDRESS_DEFAULT, server_port=_SERVER_PORT_DEFAULT,
