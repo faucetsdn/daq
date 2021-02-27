@@ -166,7 +166,6 @@ class DAQRunner:
         self.result_linger = config.get('result_linger', False)
         self._linger_exit = 0
         self.faucet_events = None
-        self.faucet_events_fd = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
         self.run_trigger = config.get('run_trigger', {})
@@ -257,7 +256,6 @@ class DAQRunner:
         self.faucet_events = faucet_event_client.FaucetEventClient(self.config)
         self.faucet_events.connect()
         # sock fileno will change if the socket is ever reconnected.
-        self.faucet_events_fd = self.faucet_events.sock.fileno()
 
         LOGGER.info('Waiting for system to settle...')
         time.sleep(3)
@@ -464,7 +462,6 @@ class DAQRunner:
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
         self._terminate()
-        self.monitor_forget(self.faucet_events_fd)
         self.faucet_events.disconnect()
         self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
@@ -500,11 +497,9 @@ class DAQRunner:
                                                    loop_hook=self._loop_hook,
                                                    timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock,
-                                self._handle_faucet_events_locked, priority=10)
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
-            while self.stream_monitor.event_loop():
+            while self.stream_monitor.event_loop() or self.faucet_events:
                 self._reap_stale_ports()
                 self._module_heartbeat()
         except Exception as e:

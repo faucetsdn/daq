@@ -18,7 +18,7 @@ class FaucetEventClient():
 
     FAUCET_RETRIES = 10
     _PORT_DEBOUNCE_SEC = 5
-    _EVENT_TIMEOUT_SEC = 10
+    _DEFAULT_EVENT_TIMEOUT_SEC = 10
 
     def __init__(self, config):
         self.config = config
@@ -29,27 +29,25 @@ class FaucetEventClient():
         self._buffer_lock = threading.Lock()
         self.previous_state = {}
         self._port_debounce_sec = int(config.get('port_debounce_sec', self._PORT_DEBOUNCE_SEC))
-        event_timeout_sec = config.get('faucet_event_timeout_sec', self._EVENT_TIMEOUT_SEC)
+        event_timeout_sec = config.get('faucet_event_timeout_sec', self._DEFAULT_EVENT_TIMEOUT_SEC)
         self._event_timeout_sec = int(event_timeout_sec)
         self._port_timers = {}
+        self._sock_path = os.getenv('FAUCET_EVENT_SOCK')
+        assert self._sock_path, 'Environment FAUCET_EVENT_SOCK not defined'
 
     def connect(self):
         """Make connection to sock to receive events"""
 
-        sock_path = os.getenv('FAUCET_EVENT_SOCK')
-
-        assert sock_path, 'Environment FAUCET_EVENT_SOCK not defined'
-
         retries = self.FAUCET_RETRIES
-        while not os.path.exists(sock_path):
-            LOGGER.info('Waiting for socket path %s', sock_path)
-            assert retries > 0, "Could not find socket path %s" % sock_path
+        while not os.path.exists(self._sock_path):
+            LOGGER.info('Waiting for socket path %s', self._sock_path)
+            assert retries > 0, "Could not find socket path %s" % self._sock_path
             retries -= 1
             time.sleep(1)
 
         try:
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            self.sock.connect(sock_path)
+            self.sock.connect(self._sock_path)
         except socket.error as err:
             assert False, "Failed to connect because: %s" % err
 
@@ -69,7 +67,7 @@ class FaucetEventClient():
             if '\n' in self.buffer:
                 return True
             if blocking or self.has_data():
-                data = self.sock.recv(2048).decode('utf-8')
+                data = self.sock.recv(1024).decode('utf-8')
                 if data.strip():
                     self._last_message = time.time()
                     with self._buffer_lock:
@@ -80,8 +78,7 @@ class FaucetEventClient():
     def _check_socket_connection(self):
         time_elapsed = time.time() - self._last_message
         if self._event_timeout_sec and time_elapsed >= self._event_timeout_sec:
-            LOGGER.info('Attempting to reconnect to faucet socket %s ' %
-                        os.getenv('FAUCET_EVENT_SOCK'))
+            LOGGER.info('Attempting to reconnect to faucet socket %s ' % self._sock_path)
             time.sleep(self._event_timeout_sec)  # Ensure faucet socket's been disconnected.
             self.connect()
             time.sleep(self._event_timeout_sec)  # Ensure a new heart beat has happened.
