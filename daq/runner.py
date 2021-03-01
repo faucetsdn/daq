@@ -30,6 +30,7 @@ from proto.system_config_pb2 import DhcpMode
 
 LOGGER = logger.get_logger('runner')
 
+
 class PortInfo:
     """Simple container for device port info"""
     active = False
@@ -132,6 +133,7 @@ class Devices:
     def contains(self, device):
         """Returns true if the device is expected"""
         return self._devices.get(device.mac) == device
+
 
 class DAQRunner:
     """Main runner class controlling DAQ. Primarily mediates between
@@ -377,12 +379,13 @@ class DAQRunner:
 
         # For keeping track of remote port events
         if self._device_result_client:
-            LOGGER.info('Connecting device result client for %s', target_mac)
-            device.port = PortInfo()
-            device.port.active = True
-            device.wait_remote = True
-            self._device_result_client.get_port_events(
-                device.mac, lambda event: self._handle_remote_port_state(device, event))
+            if not device.port.wait_remote:
+                LOGGER.info('Connecting device result client for %s', target_mac)
+                device.port = PortInfo()
+                device.port.active = True
+                device.wait_remote = True
+                self._device_result_client.get_port_events(
+                    device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
             self._target_set_trigger(device)
 
@@ -479,6 +482,8 @@ class DAQRunner:
     def _terminate(self):
         for device in self._devices.get_triggered_devices():
             self.target_set_error(device, DaqException('terminated'))
+        if self._device_result_client:
+            self._device_result_client.terminate()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -633,7 +638,7 @@ class DAQRunner:
         get_test_list(test_file)
         return [*test_ordering["first"], *test_ordering["body"], *test_ordering["last"]]
 
-    def _get_test_metadata(self, extension=".daqmodule", root="subset"):
+    def _get_test_metadata(self, extension=".daqmodule", root=os.path.join(DAQ_LIB_DIR, "subset")):
         metadata = {}
         for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
             with open(meta_file) as fd:
