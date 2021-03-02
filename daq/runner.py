@@ -379,7 +379,7 @@ class DAQRunner:
 
         # For keeping track of remote port events
         if self._device_result_client:
-            if not device.port.wait_remote:
+            if not device.wait_remote:
                 LOGGER.info('Connecting device result client for %s', target_mac)
                 device.port = PortInfo()
                 device.port.active = True
