@@ -202,3 +202,4 @@ class FaucetEventClient():
         self.sock = None
         with self._buffer_lock:
             self.buffer = None
+
