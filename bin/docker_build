@@ -11,6 +11,7 @@ build_root=build
 sudo rm -rf $build_root .build_hash .build_files
 mkdir -p $build_root
 force=
+missing=
 
 if [ "$1" == "force" ]; then
     force=y
@@ -19,6 +20,11 @@ fi
 
 if [ "$1" == "inline" ]; then
     inline=y
+    shift
+fi
+
+if [ "$1" == missing ]; then
+    missing=y
     shift
 fi
 
@@ -31,6 +37,23 @@ if [ -n "$DAQ_TARGETS" ]; then
 fi
 
 docker_files=$(host_tests=$host_tests bin/docker_build_files)
+
+build_target() {
+    if [ -n "$inline" ]; then
+        bin/retry_cmd docker build -t $tag -f $file . 2>&1 | tee -a $logfile || failed=y
+    else
+        bin/retry_cmd docker build -t $tag -f $file . >> $logfile 2>&1 || failed=y
+    fi
+    if [ -n "$failed" ]; then
+        tail $logfile
+        echo Build failed, see $logfile for complete log.
+        false
+    fi
+    hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
+    docker tag $tag:latest $tag:$hash
+    echo Build complete. >> $logfile
+}
+
 for file in $docker_files; do
     if [ ${file%\~} != ${file} ]; then
         continue
@@ -43,28 +66,18 @@ for file in $docker_files; do
     if [ -n "$DAQ_TARGETS" -a -z "${test_set[$module]}" ]; then
         #echo Skipping non-enabled $tag
         true
-    elif [ -z "$DAQ_TARGETS" -a -z "$force" -a -n "$found" ]; then
+    elif [ -z "$DAQ_TARGETS" -o -n "$missing" ] && [ -z "$force" -a -n "$found" ]; then
         unset test_set[$module]
         echo Skipping building existing $tag 
     else
         unset test_set[$module]
         echo Build $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
-        if [ -n "$inline" ]; then
-            bin/retry_cmd docker build -t $tag -f $file . 2>&1 | tee -a $logfile || failed=y
-        else
-            bin/retry_cmd docker build -t $tag -f $file . >> $logfile 2>&1 || failed=y
-        fi
-        if [ -n "$failed" ]; then
-            tail $logfile
-            echo Build failed, see $logfile for complete log.
-            false
-        fi
-        hash=$(docker images $tag:latest | awk '{print $3}' | head -2 | tail -1)
-        docker tag $tag:latest $tag:$hash
-        echo Build complete. >> $logfile
+        echo build_target $file
+        build_target &
     fi
 done
+wait
 
 if [ -n "$DAQ_TARGETS" ]; then
     for module in "${!test_set[@]}"; do
