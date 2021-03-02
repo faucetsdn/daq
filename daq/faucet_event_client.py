@@ -2,6 +2,7 @@
 
 import json
 import os
+from queue import Queue, Empty
 import select
 import socket
 import threading
@@ -11,41 +12,39 @@ import logger
 
 LOGGER = logger.get_logger('fevent')
 
+
 class FaucetEventClient():
     """A general client interface to the FAUCET event API"""
 
     FAUCET_RETRIES = 10
     _PORT_DEBOUNCE_SEC = 5
+    _DEFAULT_EVENT_TIMEOUT_SEC = 10
 
     def __init__(self, config):
         self.config = config
         self.sock = None
-        self.buffer = None
+        self.buffer = ''
+        self.debounced_q = Queue()
         self._buffer_lock = threading.Lock()
-        self.previous_state = None
+        self.previous_state = {}
         self._port_debounce_sec = int(config.get('port_debounce_sec', self._PORT_DEBOUNCE_SEC))
         self._port_timers = {}
+        self._sock_path = os.getenv('FAUCET_EVENT_SOCK')
+        assert self._sock_path, 'Environment FAUCET_EVENT_SOCK not defined'
 
     def connect(self):
         """Make connection to sock to receive events"""
 
-        sock_path = os.getenv('FAUCET_EVENT_SOCK')
-
-        assert sock_path, 'Environment FAUCET_EVENT_SOCK not defined'
-
-        self.previous_state = {}
-        self.buffer = ''
-
         retries = self.FAUCET_RETRIES
-        while not os.path.exists(sock_path):
-            LOGGER.info('Waiting for socket path %s', sock_path)
-            assert retries > 0, "Could not find socket path %s" % sock_path
+        while not os.path.exists(self._sock_path):
+            LOGGER.info('Waiting for socket path %s', self._sock_path)
+            assert retries > 0, "Could not find socket path %s" % self._sock_path
             retries -= 1
             time.sleep(1)
 
         try:
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            self.sock.connect(sock_path)
+            self.sock.connect(self._sock_path)
         except socket.error as err:
             assert False, "Failed to connect because: %s" % err
 
@@ -66,8 +65,9 @@ class FaucetEventClient():
                 return True
             if blocking or self.has_data():
                 data = self.sock.recv(1024).decode('utf-8')
-                with self._buffer_lock:
-                    self.buffer += data
+                if data.strip():
+                    with self._buffer_lock:
+                        self.buffer += data
             else:
                 return False
 
@@ -115,7 +115,7 @@ class FaucetEventClient():
 
     def _handle_debounce(self, dpid, port, active):
         LOGGER.debug('Port handle %s-%s as %s', dpid, port, active)
-        self._append_event(self._make_port_state(dpid, port, active, debounced=True))
+        self.debounced_q.put_nowait(self._make_port_state(dpid, port, active, debounced=True))
 
     def _prepend_event(self, event):
         with self._buffer_lock:
@@ -135,7 +135,12 @@ class FaucetEventClient():
 
     def next_event(self, blocking=False):
         """Return the next event from the queue"""
-        while self.has_event(blocking=blocking):
+        while self.debounced_q.qsize() or self.has_event(blocking=blocking):
+            if not self.debounced_q.empty():
+                try:
+                    return self.debounced_q.get_nowait()
+                except Empty:
+                    continue
             with self._buffer_lock:
                 line, remainder = self.buffer.split('\n', 1)
                 self.buffer = remainder
