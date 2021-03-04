@@ -294,13 +294,14 @@ class DAQRunner:
         while self.faucet_events:
             try:
                 event = self.faucet_events.next_event()
-            except DisconnectedException as e:
+            except DisconnectedException:
                 self.monitor_forget(self.faucet_events.sock)
                 self.faucet_events.connect()
                 self.monitor_stream('faucet', self.faucet_events.sock,
                                     self._handle_faucet_events_locked, priority=10)
                 continue
             except Exception as e:
+                LOGGER.error(e)
                 self.faucet_events.disconnect()
                 self.faucet_events = None
                 self.shutdown()
