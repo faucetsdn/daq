@@ -137,7 +137,7 @@ terminated
 
 ## Report complete
 
-%%%%%%%%%%%%%%%%%%%%%% Test DAQ can recover from sock connection failures
+%%%%%%%%%%%%%%%%%%%%%% Test DAQ can recover from faucet restarts
 Found reconnections? 1
 9a02571e8f00: []
 %%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling

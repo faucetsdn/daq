@@ -297,8 +297,7 @@ class DAQRunner:
             except DisconnectedException:
                 self.monitor_forget(self.faucet_events.sock)
                 self.faucet_events.connect()
-                self.monitor_stream('faucet', self.faucet_events.sock,
-                                    self._handle_faucet_events_locked, priority=10)
+                self._monitor_faucet_events()
                 continue
             except Exception as e:
                 LOGGER.error(e)
@@ -511,8 +510,7 @@ class DAQRunner:
                                                    loop_hook=self._loop_hook,
                                                    timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock,
-                                self._handle_faucet_events_locked, priority=10)
+            self._monitor_faucet_events()
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
             while self.stream_monitor.event_loop():
@@ -904,6 +902,10 @@ class DAQRunner:
             if device.vlan:
                 self._direct_device_traffic(device, None)
         device.gateway = None
+
+    def _monitor_faucet_events(self):
+        self.monitor_stream('faucet', self.faucet_events.sock,
+                            self._handle_faucet_events_locked, priority=10)
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""

@@ -33,8 +33,8 @@ restart_faucet() {
 }
 monitor_log "Port 1 dpid 2 learned 9a:02:57:1e:8f:00" "restart_faucet"
 cmd/run -s default_timeout_sec=100
-reconnections=$(fgrep "Attempting to reconnect to faucet socket" inst/cmdrun.log | wc -l)
-echo Found reconnections? $((reconnections > 0)) | tee -a $TEST_RESULTS
+reconnections=$(fgrep "Connecting to socket path" inst/cmdrun.log | wc -l)
+echo Found reconnections? $((reconnections > 1)) | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling | tee -a $TEST_RESULTS
