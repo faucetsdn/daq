@@ -9,6 +9,7 @@ import threading
 import time
 
 import logger
+from wrappers import DisconnectedException
 
 LOGGER = logger.get_logger('fevent')
 
@@ -16,7 +17,7 @@ LOGGER = logger.get_logger('fevent')
 class FaucetEventClient():
     """A general client interface to the FAUCET event API"""
 
-    FAUCET_RETRIES = 10
+    FAUCET_RETRIES = 20
     _PORT_DEBOUNCE_SEC = 5
     _DEFAULT_EVENT_TIMEOUT_SEC = 10
 
@@ -42,11 +43,19 @@ class FaucetEventClient():
             retries -= 1
             time.sleep(1)
 
-        try:
-            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            self.sock.connect(self._sock_path)
-        except socket.error as err:
-            assert False, "Failed to connect because: %s" % err
+        connected = False
+        for _ in range(retries):
+            try:
+                time.sleep(5)
+                LOGGER.info('Connecting to socket path %s', self._sock_path)
+                self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                self.sock.connect(self._sock_path)
+                connected = True
+                break
+            except socket.error as err:
+                LOGGER.info("Failed to connect because: %s" % err)
+        assert connected, "Failed to connect to %s after %d retries" % \
+            (self._sock_path, self.FAUCET_RETRIES)
 
     def disconnect(self):
         """Disconnect this event socket"""
@@ -65,9 +74,11 @@ class FaucetEventClient():
                 return True
             if blocking or self.has_data():
                 data = self.sock.recv(1024).decode('utf-8')
-                if data.strip():
-                    with self._buffer_lock:
-                        self.buffer += data
+                # when there is data but recv len is 0 means the socket has been disconnected
+                if len(data) == 0:
+                    raise DisconnectedException("Faucet event client is disconnected.")
+                with self._buffer_lock:
+                    self.buffer += data
             else:
                 return False
 

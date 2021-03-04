@@ -137,6 +137,9 @@ terminated
 
 ## Report complete
 
+%%%%%%%%%%%%%%%%%%%%%% Test DAQ can recover from sock connection failures
+Found reconnections? 1
+9a02571e8f00: []
 %%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling
 9a02571e8f00: ['9a02571e8f00:finish:FileNotFoundError']
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail

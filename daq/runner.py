@@ -24,7 +24,7 @@ import host as connected_host
 import network
 import report
 import stream_monitor
-from wrappers import DaqException
+from wrappers import DaqException, DisconnectedException
 import logger
 from proto.system_config_pb2 import DhcpMode
 
@@ -290,8 +290,20 @@ class DAQRunner:
             self._handle_faucet_events()
 
     def _handle_faucet_events(self):
+        event = None
         while self.faucet_events:
-            event = self.faucet_events.next_event()
+            try:
+                event = self.faucet_events.next_event()
+            except DisconnectedException as e:
+                self.monitor_forget(self.faucet_events.sock)
+                self.faucet_events.connect()
+                self.monitor_stream('faucet', self.faucet_events.sock,
+                                    self._handle_faucet_events_locked, priority=10)
+                continue
+            except Exception as e:
+                self.faucet_events.disconnect()
+                self.faucet_events = None
+                self.shutdown()
             if not event:
                 break
             self._process_faucet_event(event)
@@ -467,9 +479,10 @@ class DAQRunner:
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
         self._terminate()
-        self.monitor_forget(self.faucet_events.sock)
-        self.faucet_events.disconnect()
-        self.faucet_events = None
+        if self.faucet_events:
+            self.monitor_forget(self.faucet_events.sock)
+            self.faucet_events.disconnect()
+            self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
         self._send_heartbeat()
