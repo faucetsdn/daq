@@ -16,7 +16,7 @@ TLS_CONFIG_DIR=inst/modules/tls/config
 echo Resolve module config to $TLS_CONFIG_DIR
 mkdir -p $TLS_CONFIG_DIR
 python3 daq/configurator.py --json \
-    resources/setups/baseline/base_config.json > $TLS_CONFIG_DIR/module_config.json
+    resources/test_site/site_config.json > $TLS_CONFIG_DIR/module_config.json
 
 TEST_LIST=/tmp/module_tests.txt
 cat > $TEST_LIST <<EOF

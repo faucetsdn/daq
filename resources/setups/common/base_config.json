@@ -17,27 +17,49 @@
       "timeout_sec": 600,
       "enabled": true
     },
-    "switch": {
-      "enabled": true
-    },
     "brute": {
-      "enabled": true
-    },
-    "password": {
-      "dictionary_dir": "resources/faux",
       "enabled": true
     },
     "bacext": {
       "enabled": true
     },
-    "tls": {
-      "enabled": true,
-      "ca_file": "CA_Faux.pem"
-    },
     "udmi": {
       "enabled": true
     },
+    "bacnet": {
+      "enabled": true
+    },
+    "discover": {
+      "enabled": true
+    },
+    "manual": {
+      "enabled": true
+    },
+    "mudgee": {
+      "enabled": true
+    },
     "network": {
+      "enabled": true
+    },
+    "password": {
+      "enabled": true,
+      "timeout_sec": 0
+    },
+    "ssh": {
+      "enabled": true
+    },
+    "switch": {
+      "enabled": true,
+      "timeout_sec": 0,
+      "poe": {
+        "enabled" : true
+      }
+    },
+    "tls": {
+      "enabled": true,
+      "timeout_sec": 0
+    },
+    "usi": {
       "enabled": true
     }
   }

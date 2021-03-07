@@ -33,7 +33,9 @@ write_out_result $REPORT \
 TEST_NAME="connection.network.mac_address"
 TEST_DESCRIPTION="Reports device MAC address"
 TEST_RESULT="Device MAC address is ${TARGET_MAC}"
-RESULT_AND_SUMMARY="RESULT info ${TEST_NAME} ${TEST_RESULT}"
+
+# Test result is a pass because there will always be a MAC address
+RESULT_AND_SUMMARY="RESULT pass ${TEST_NAME} ${TEST_RESULT}"
 
 write_out_result $REPORT \
                  "$TEST_NAME" \

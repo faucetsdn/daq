@@ -1,4 +1,14 @@
 {
+  "device_datasheets_url": "*** Device Datasheets URL ***",
+  "device_description": "*** Device Description ***",
+  "device_image": "*** Device Image URL ***",
+  "device_manuals_url": "*** Device Manuals URL ***",
+  "device_info": {
+    "make": "*** Make ***",
+    "model": "*** Model ***",
+    "type": "*** Type ***"
+  },
+
   "modules": {
     "typeconf": {
       "enabled": false
