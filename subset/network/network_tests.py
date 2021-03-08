@@ -187,26 +187,30 @@ def test_communication_type_broadcast():
     """ Runs the communication.network.type DAQ test.
     Counts the number of unicast, broadcast and multicast packets sent.
     """
+    test_result = 'fail'
 
     broadcast_result = shell_command_with_result(tcpdump_display_broadcast_packets, 0, False)
     broadcast_packets = packets_received_count(broadcast_result)
     if broadcast_packets > 0:
+        test_result = 'pass'
         add_summary("Broadcast packets received.")
         add_packet_count_to_report("Broadcast", broadcast_packets)
 
     multicast_result = shell_command_with_result(tcpdump_display_multicast_packets, 0, False)
     multicast_packets = packets_received_count(multicast_result)
     if multicast_packets > 0:
+        test_result = 'pass'
         add_summary("Multicast packets received.")
         add_packet_count_to_report("Multicast", multicast_packets)
 
     unicast_result = shell_command_with_result(tcpdump_display_all_packets, 0, False)
     unicast_packets = packets_received_count(unicast_result) - broadcast_packets - multicast_packets
     if unicast_packets > 0:
+        test_result = 'pass'
         add_summary("Unicast packets received.")
         add_packet_count_to_report("Unicast", unicast_packets)
 
-    return 'info'
+    return test_result
 
 
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))

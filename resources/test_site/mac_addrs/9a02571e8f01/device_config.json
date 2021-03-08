@@ -1,18 +1,19 @@
 {
-  "device_datasheets_url": "*** Device Datasheets URL ***",
-  "device_description": "*** Device Description ***",
-  "device_image": "*** Device Image URL ***",
+  "device_type": "rocket",
   "device_info": {
     "guid": "*** GUID ***",
     "hostname": "*** Network Hostname ***",
-    "make": "*** Make ***",
-    "model": "*** Model ***",
     "name": "*** Name ***",
     "serial": "*** Serial ***",
-    "type": "*** Type ***",
+    "version": "*** Version ***",
     "firmware_version": "*** Firmware Version ***"
   },
-  "device_manuals_url": "*** Device Manuals URL ***",
+  "tests": {
+    "connection.manual.comms_down": {
+      "outcome": "pass",   
+      "summary" : "Device passed this manual test"
+    }
+  },
   "modules": {
     "pass": {
       "enabled": true
@@ -49,6 +50,5 @@
   },
   "process": {
      "attempt_number": 1
-  },
-  "device_type": "rocket"
+  }
 }

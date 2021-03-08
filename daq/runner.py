@@ -24,11 +24,12 @@ import host as connected_host
 import network
 import report
 import stream_monitor
-from wrappers import DaqException
+from wrappers import DaqException, DisconnectedException
 import logger
 from proto.system_config_pb2 import DhcpMode
 
 LOGGER = logger.get_logger('runner')
+
 
 class PortInfo:
     """Simple container for device port info"""
@@ -132,6 +133,7 @@ class Devices:
     def contains(self, device):
         """Returns true if the device is expected"""
         return self._devices.get(device.mac) == device
+
 
 class DAQRunner:
     """Main runner class controlling DAQ. Primarily mediates between
@@ -288,8 +290,20 @@ class DAQRunner:
             self._handle_faucet_events()
 
     def _handle_faucet_events(self):
+        event = None
         while self.faucet_events:
-            event = self.faucet_events.next_event()
+            try:
+                event = self.faucet_events.next_event()
+            except DisconnectedException:
+                self.monitor_forget(self.faucet_events.sock)
+                self.faucet_events.connect()
+                self._monitor_faucet_events()
+                continue
+            except Exception as e:
+                LOGGER.error(e)
+                self.faucet_events.disconnect()
+                self.faucet_events = None
+                self.shutdown()
             if not event:
                 break
             self._process_faucet_event(event)
@@ -377,12 +391,13 @@ class DAQRunner:
 
         # For keeping track of remote port events
         if self._device_result_client:
-            LOGGER.info('Connecting device result client for %s', target_mac)
-            device.port = PortInfo()
-            device.port.active = True
-            device.wait_remote = True
-            self._device_result_client.get_port_events(
-                device.mac, lambda event: self._handle_remote_port_state(device, event))
+            if not device.wait_remote:
+                LOGGER.info('Connecting device result client for %s', target_mac)
+                device.port = PortInfo()
+                device.port.active = True
+                device.wait_remote = True
+                self._device_result_client.get_port_events(
+                    device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
             self._target_set_trigger(device)
 
@@ -464,9 +479,10 @@ class DAQRunner:
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
         self._terminate()
-        self.monitor_forget(self.faucet_events.sock)
-        self.faucet_events.disconnect()
-        self.faucet_events = None
+        if self.faucet_events:
+            self.monitor_forget(self.faucet_events.sock)
+            self.faucet_events.disconnect()
+            self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
         self._send_heartbeat()
@@ -479,6 +495,8 @@ class DAQRunner:
     def _terminate(self):
         for device in self._devices.get_triggered_devices():
             self.target_set_error(device, DaqException('terminated'))
+        if self._device_result_client:
+            self._device_result_client.terminate()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -492,8 +510,7 @@ class DAQRunner:
                                                    loop_hook=self._loop_hook,
                                                    timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock,
-                                self._handle_faucet_events_locked, priority=10)
+            self._monitor_faucet_events()
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
             while self.stream_monitor.event_loop():
@@ -633,7 +650,7 @@ class DAQRunner:
         get_test_list(test_file)
         return [*test_ordering["first"], *test_ordering["body"], *test_ordering["last"]]
 
-    def _get_test_metadata(self, extension=".daqmodule", root="subset"):
+    def _get_test_metadata(self, extension=".daqmodule", root=os.path.join(DAQ_LIB_DIR, "subset")):
         metadata = {}
         for meta_file in pathlib.Path(root).glob('**/*%s' % extension):
             with open(meta_file) as fd:
@@ -885,6 +902,10 @@ class DAQRunner:
             if device.vlan:
                 self._direct_device_traffic(device, None)
         device.gateway = None
+
+    def _monitor_faucet_events(self):
+        self.monitor_stream('faucet', self.faucet_events.sock,
+                            self._handle_faucet_events_locked, priority=10)
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""

@@ -122,3 +122,14 @@ function monitor_marker {
         $RUNCMD
     ) &
 }
+
+function build_if_not_release {
+    release_tag=`git describe --dirty || echo unknown`
+    build_mode=
+    # If the current commit is a release tag, then pull images.
+    echo Processing release tag $release_tag
+    if [[ "$release_tag" != unknown && ! "$release_tag" =~ -.*- ]]; then
+        build_mode=pull
+    fi
+    cmd/build $build_mode missing
+}
