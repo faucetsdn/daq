@@ -73,7 +73,6 @@ for file in $docker_files; do
         unset test_set[$module]
         echo Build $file into $tag, log to $logfile...
         echo docker build -t $tag -f $file . > $logfile
-        echo build_target $file
         build_target &
     fi
 done
