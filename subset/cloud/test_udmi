@@ -70,8 +70,8 @@ RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR --
-timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR -- || true
+echo validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR
+timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR || true
 
 function message_report {
     message_type=$1
