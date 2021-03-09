@@ -107,10 +107,10 @@ cat <<EOF > validator_config.json
 }
 EOF
 
-bin/test_sequences -n
+bin/test_sequences -n || true
 
 results=out/devices/$device_id/RESULT.log
-cat out/devices/$device_id/RESULT.log | while read header result test_name detail; do
+cat $results | while read header result test_name detail; do
     if [[ $header == RESULT ]]; then
         TEST_NAME="cloud.udmi.$test_name"
         TEST_DESCRIPTION="Validates $test_name sequence"
