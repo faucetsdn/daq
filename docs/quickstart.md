@@ -48,7 +48,7 @@ $ cmd/run -s
 &hellip;
 Done with run, exit 0
 </pre>
-Reports generated fall under **inst/reports**. An example report can be viewed [here.](report.md)
+Reports generated fall under **inst/reports**. An example report can be viewed [here.](device_report.md)
 
 ***The system can be further configured by using a [variety of run options](options.md)***
 
