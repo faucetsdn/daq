@@ -18,12 +18,14 @@ schema_path=schema
 timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
+echo UDMI module config
+cat /config/device/module_config.json
+
 site_model=$SITE_DIR
 project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
 registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
 device_id=`jq -r .device_id /config/device/module_config.json`
 serial_no=unknown
-
 
 if [ "$device_id" == null ]; then
     skip="No device id"
