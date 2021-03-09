@@ -8,9 +8,10 @@ echo Aux Tests >> $TEST_RESULTS
 
 function make_pubber {
     device=$1
-    faux=$2
-    extra=$3
-    gateway=$4
+    mac=$2
+    faux=$3
+    extra=$4
+    gateway=$5
     serial_no=test_aux-$RANDOM
     local_dir=inst/faux/$faux/local/
     echo Creating $device with $extra/$gateway in $local_dir
@@ -21,6 +22,12 @@ function make_pubber {
         gateway_dir=$(sh -c "echo $gateway")
         cp resources/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
     fi
+
+    device_file=inst/test_site/mac_addrs/$mac/device_config.json
+    echo Updating $device_file with $serial_no
+    jq ".device_info.serial = $serial_no" $device_file > $device_file.tmp
+    mv $device_file.tmp $device_file
+
     cat <<EOF > $local_dir/pubber.json
   {
     "projectId": "$project_id",
@@ -106,8 +113,8 @@ if [ -f "$gcp_cred" ]; then
     registry_id=`jq -r .registry_id $cloud_file`
     cloud_region=`jq -r .cloud_region $cloud_file`
 
-    make_pubber AHU-1 daq-faux-2 null null
-    make_pubber SNS-4 daq-faux-3 1234 \"GAT-123\"
+    make_pubber AHU-1 9a02571e8f01 daq-faux-2 null null
+    make_pubber SNS-4 3c5ab41e8f0b daq-faux-3 1234 \"GAT-123\"
 
     GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar inst/test_site $project_id
     cat inst/test_site/registration_summary.json | redact | tee -a $GCP_RESULTS
