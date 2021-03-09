@@ -8,7 +8,7 @@ echo Aux Tests >> $TEST_RESULTS
 
 function make_pubber {
     device=$1
-    mac=$2
+    mac_addr=$2
     faux=$3
     extra=$4
     gateway=$5
@@ -23,7 +23,7 @@ function make_pubber {
         cp resources/test_site/devices/$gateway_dir/rsa_private.pkcs8 $local_dir
     fi
 
-    device_file=inst/test_site/mac_addrs/$mac/device_config.json
+    device_file=inst/test_site/mac_addrs/$mac_addr/device_config.json
     echo Updating $device_file with $serial_no
     jq ".device_info.serial = \"$serial_no\"" $device_file > $device_file.tmp
     mv $device_file.tmp $device_file
@@ -35,6 +35,7 @@ function make_pubber {
     "registryId": "$registry_id",
     "extraField": $extra,
     "serialNo": "$serial_no",
+    "macAddr": "$mac_addr",
     "keyFile": "local/rsa_private.pkcs8",
     "gatewayId": $gateway,
     "deviceId": "$device"
