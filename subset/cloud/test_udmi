@@ -25,7 +25,7 @@ site_model=$SITE_DIR
 project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
 registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
 device_id=`jq -r .device_id /config/device/module_config.json`
-serial_no=unknown
+serial_no=`jq -r .device_info.serial /config/device/module_config.json`
 
 if [ "$device_id" == null ]; then
     skip="No device id"
