@@ -9,6 +9,7 @@ GCP_REFLECT_CONFIG_FILE=/config/inst/gcp_reflect_config.json
 GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
 SITE_DIR=/config/inst
 CLOUD_IOT_CONFIG_FILE=$SITE_DIR/cloud_iot_config.json
+MODULE_CONFIG_FILE=/config/device/module_config.json
 
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
@@ -18,14 +19,11 @@ schema_path=schema
 timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
-echo UDMI module config
-cat /config/device/module_config.json
-
 site_model=$SITE_DIR
 project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
 registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
-device_id=`jq -r .device_id /config/device/module_config.json`
-serial_no=`jq -r .device_info.serial /config/device/module_config.json`
+device_id=`jq -r .device_id $MODULE_CONFIG_FILE`
+serial_no=`jq -r .device_info.serial $MODULE_CONFIG_FILE`
 
 if [ "$device_id" == null ]; then
     skip="No device id"
@@ -53,11 +51,7 @@ echo Target device is $device_id
 echo Extracted project $project_id
 echo Extracted registry $registry_id
 
-echo $CLOUD_IOT_CONFIG_FILE:
-cat $CLOUD_IOT_CONFIG_FILE
-
 ACTIVATE_LOG=/config/gw/nodes/gw*/activate.log
-more $ACTIVATE_LOG | cat
 if fgrep "Processing provisioning request for device $device_id" $ACTIVATE_LOG; then
     result=pass
     detail="Found provisioning request %% $device_id"
@@ -113,10 +107,10 @@ cat <<EOF > validator_config.json
 }
 EOF
 
-bin/test_sequences -n || true
+bin/test_sequences -n
 
 device_dir=out/devices/$device_id
-more $device_dir/* || true
+fgrep RESULT $device_dir/RESULT.log | tee -a $REPORT
 
 fgrep RESULT $REPORT
 
