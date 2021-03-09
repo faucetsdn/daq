@@ -18,7 +18,12 @@ schema_path=schema
 timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
+site_model=$SITE_DIR
+project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
+registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
 device_id=`jq -r .device_id /config/device/module_config.json`
+serial_no=unknown
+
 
 if [ "$device_id" == null ]; then
     skip="No device id"
@@ -40,9 +45,6 @@ if [ -n "$skip" ]; then
     exit 0
 fi
 
-project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
-registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
-
 export GOOGLE_CLOUD_PROJECT=$project_id
 
 echo Target device is $device_id
@@ -51,9 +53,6 @@ echo Extracted registry $registry_id
 
 echo $CLOUD_IOT_CONFIG_FILE:
 cat $CLOUD_IOT_CONFIG_FILE
-
-echo Copying key from $GCP_REFLECT_KEY_FILE
-cp $GCP_REFLECT_KEY_FILE .
 
 ACTIVATE_LOG=/config/gw/nodes/gw*/activate.log
 more $ACTIVATE_LOG | cat
@@ -101,6 +100,16 @@ function message_report {
 for message_type in $message_types; do
     message_report $message_type
 done
+
+cat <<EOF > validator_config.json
+{
+  "project_id": "$project_id",
+  "site_model": "$site_model",
+  "device_id": "$device_id",
+  "serial_no": "$serial_no",
+  "key_file": "$GCP_REFLECT_KEY_FILE"
+}
+EOF
 
 bin/test_sequences -n || true
 
