@@ -25,7 +25,7 @@ function make_pubber {
 
     device_file=inst/test_site/mac_addrs/$mac/device_config.json
     echo Updating $device_file with $serial_no
-    jq ".device_info.serial = $serial_no" $device_file > $device_file.tmp
+    jq ".device_info.serial = \"$serial_no\"" $device_file > $device_file.tmp
     mv $device_file.tmp $device_file
 
     cat <<EOF > $local_dir/pubber.json
