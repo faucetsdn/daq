@@ -114,8 +114,8 @@ if [ -f "$gcp_cred" ]; then
     registry_id=`jq -r .registry_id $cloud_file`
     cloud_region=`jq -r .cloud_region $cloud_file`
 
-    make_pubber AHU-1 9a02571e8f01 daq-faux-2 null null
-    make_pubber SNS-4 3c5ab41e8f0b daq-faux-3 1234 \"GAT-123\"
+    make_pubber AHU-1 3c5ab41e8f0b daq-faux-2 null null
+    make_pubber SNS-4 3c5ab41e8f0a daq-faux-3 1234 \"GAT-123\"
 
     GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar inst/test_site $project_id
     cat inst/test_site/registration_summary.json | redact | tee -a $GCP_RESULTS
