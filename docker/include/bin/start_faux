@@ -249,15 +249,13 @@ if [ -n "${options[pubber]}" ]; then
 
     echo Running pubber for device $deviceId
 
-    (while date; do
+    (while true; do
          # Do https to force testing port 443 even if pubber is not configured, and also to make sure network is live.
          if [ curl -o /dev/null https://google.com 2> /dev/null ]; then
              if [ -f local/pubber.json ]; then
-                 echo Running cloud pubber tool `date`
+                 echo Running udmi pubber tool `date`
                  pubber/bin/run local/pubber.json
              fi
-         else
-             echo Network check failed for pubber...
          fi
          sleep 30
      done) &
