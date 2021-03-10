@@ -235,7 +235,9 @@ fi
 if [ -n "${options[pubber]}" ]; then
     deviceId=`jq -r .deviceId local/pubber.json`
     extraField=`jq .extraField local/pubber.json`
+    serialNo=`jq -r .serialNo local/pubber.json`
     if [ "$extraField" == null ]; then
+        // This is the network gateway, not MQTT gateway.
         gateway=`ip route | sed -rn 's/default via (.*) dev.*/\1/p'`
         echo Contacting pagent $gateway for new device key for $deviceId
         curl http://$gateway:8192?device=$deviceId > pagent.json || echo pagent error
@@ -247,11 +249,15 @@ if [ -n "${options[pubber]}" ]; then
         ls -l local/rsa_*
     fi
 
+    if [[ $serialNo == null ]]; then
+        echo Pubber not defined/enabled through local/pubber.json.
+    fi
+
     (while true; do
          # Do https to force testing port 443 even if pubber is not configured, and also to make sure network is live.
          while curl -o /dev/null https://google.com 2> /dev/null; do
-             if [ -f local/pubber.json ]; then
-                 echo Running udmi pubber tool `date`
+             if [[ $serialNo != null ]]; then
+                 echo Running udmi pubber tool $serialNo `date`
                  pubber/bin/run local/pubber.json
              fi
              sleep 30
