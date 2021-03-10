@@ -247,17 +247,20 @@ if [ -n "${options[pubber]}" ]; then
         ls -l local/rsa_*
     fi
 
-    echo Running pubber for device $deviceId
-
     (while true; do
          # Do https to force testing port 443 even if pubber is not configured, and also to make sure network is live.
-         if [ curl -o /dev/null https://google.com 2> /dev/null ]; then
+         while curl -o /dev/null https://google.com 2> /dev/null; do
              if [ -f local/pubber.json ]; then
                  echo Running udmi pubber tool `date`
                  pubber/bin/run local/pubber.json
              fi
-         fi
-         sleep 30
+             sleep 30
+         done
+         echo Waiting for valid pubber network connection.
+         while ! curl -o /dev/null https://google.com 2> /dev/null; do
+             sleep 30
+         done
+         echo Found valid pubber network connection.
      done) &
 fi
 
