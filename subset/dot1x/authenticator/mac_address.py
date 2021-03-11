@@ -1,5 +1,6 @@
 """MAC address helper"""
 
+from __future__ import absolute_import
 import re
 
 # pylint: disable=too-few-public-methods

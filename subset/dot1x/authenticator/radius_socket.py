@@ -1,5 +1,5 @@
-"""Handle the RADIUS socket
-"""
+"""Handle the RADIUS socket"""
+from __future__ import absolute_import
 import socket
 from utils import get_logger
 

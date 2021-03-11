@@ -1,3 +1,5 @@
+"""Authenticator module"""
+from __future__ import absolute_import
 from eap_module import EapModule
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage

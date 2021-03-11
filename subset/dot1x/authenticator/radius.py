@@ -53,7 +53,7 @@ class Radius:
         """
         try:
             code, packet_id, length, authenticator = struct.unpack(
-                "!BBH16s",packed_message[:RADIUS_HEADER_LENGTH])
+                "!BBH16s", packed_message[:RADIUS_HEADER_LENGTH])
         except struct.error as exception:
             raise MessageParseError('Unable to unpack first 20 bytes of RADIUS header') \
                 from exception

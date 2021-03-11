@@ -1,3 +1,5 @@
+"""RADIUS module to send/receive RADIUS packets"""
+from __future__ import absolute_import
 from eap import Eap
 from message_parser import MessagePacker, IdentityMessage
 from mac_address import MacAddress

@@ -1,4 +1,5 @@
 """Radius Attributes"""
+from __future__ import absolute_import, division
 # TODO if attributes have requirements e.g. length must be above minimum, can enforce that here.
 # TODO could we auto generate this from the radius-types-2.csv available from iana.org?
 

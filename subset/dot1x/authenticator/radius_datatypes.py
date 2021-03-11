@@ -68,7 +68,7 @@ class Integer(DataType):
         if raw_data:
             try:
                 bytes_data = raw_data.to_bytes(self.MAX_DATA_LENGTH, "big")
-            except OverflowError as exception:
+            except OverflowError:
                 raise ValueError("Integer must be >= 0  and <= 2^32-1, was %d" %
                                  raw_data)
         self.bytes_data = bytes_data
@@ -196,7 +196,8 @@ class Concat(DataType):
         # Parsing is (generally) for packets coming from the radius server.
         # Packing is (generally) for packets going to the radius server.
         #
-        # Therefore we error out if length is too long (you are not allowed to have AVP that are too long)
+        # Therefore we error out if length is too long
+        # (you are not allowed to have AVP that are too long)
         try:
             return cls(struct.unpack("!%ds" % len(packed_value), packed_value)[0])
         except struct.error as exception:

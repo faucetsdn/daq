@@ -1,3 +1,5 @@
+"""EAP module to send/receive EAP packets"""
+from __future__ import absolute_import
 from message_parser import MessageParser, MessagePacker, IdentityMessage, EapolStartMessage
 from mac_address import MacAddress
 from eap_socket import EapSocket

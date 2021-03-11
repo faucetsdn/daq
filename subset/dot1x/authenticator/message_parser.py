@@ -1,5 +1,5 @@
 """"""
-
+from __future__ import absolute_import
 from auth_8021x import Auth8021x
 from eap import Eap, EapIdentity, EapMd5Challenge, EapSuccess, EapFailure, EapLegacyNak, \
     EapTTLS, EapTLS, EapPEAP, PARSERS_TYPES
@@ -199,7 +199,7 @@ class MessageParser:
                                     ethernet_packet)
 
         return MessageParser.one_x_parse(ethernet_packet.data, ethernet_packet.src_mac), \
-               ethernet_packet.dst_mac
+            ethernet_packet.dst_mac
 
     @staticmethod
     def radius_parse(packed_message, secret, radius_lifecycle):
