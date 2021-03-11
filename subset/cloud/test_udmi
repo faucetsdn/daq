@@ -121,7 +121,8 @@ cat $results | while read header result test_name detail; do
 done
 
 echo Message results:
-more out/devices/$device_id/*.json | cat
+find out -name \*.json
+more out/devices/$device_id/tests/*/*.json | cat
 
 echo UDMI result summary:
 fgrep RESULT $REPORT
