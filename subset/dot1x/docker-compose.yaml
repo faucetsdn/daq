@@ -1,0 +1,67 @@
+version: '2'
+
+services:
+    wpasupplicant:
+        build:
+            context: .
+            dockerfile: Dockerfile.wpasupplicant
+        image: 'authenticator/wpasupplicant:latest'
+        depends_on: [authenticator]
+        command: bash -c "tail -f"
+        networks:
+            00wpasupplicant-net:
+                ipv4_address: 172.23.0.111
+        cap_add:
+            - ALL
+        volumes:
+            - ./etc/wpasupplicant/:/tmp/wpasupplicant/
+            - ./etc/wpasupplicant/cert/:/tmp/cert/
+
+    authenticator:
+        build:
+            context: .
+            dockerfile: Dockerfile.authenticator
+        image: 'authenticator/authenticator:latest'
+        command: bash -c 'tail -f'
+        networks:
+            00wpasupplicant-net:
+                ipv4_address: 172.23.0.112
+                priority: 200
+            01radius-net:
+                ipv4_address: 172.24.0.112
+                priority: 100
+        cap_add:
+            - ALL
+        volumes:
+            - ./:/authenticator-src/
+
+    freeradius:
+        build:
+            context: .
+            dockerfile: Dockerfile.freeradius
+        image: 'authenticator/freeradius:latest'
+        networks:
+            01radius-net:
+                ipv4_address: 172.24.0.113
+        volumes:
+            - "./etc/freeradius/users:/etc/freeradius/3.0/users:ro"
+            - "./etc/freeradius/certs:/etc/freeradius/3.0/certs"
+            - "./etc/freeradius/default/eap:/etc/freeradius/3.0/mods-enabled/eap:ro"
+            - "./etc/freeradius/clients.conf:/etc/freeradius/3.0/clients.conf:ro"
+
+    tcpdump:
+        image: kaazing/tcpdump
+        network_mode: "host"
+        volumes:
+            - ./tcpdump:/tcpdump
+
+networks:
+    00wpasupplicant-net:
+        driver: macvlan
+        ipam:
+            config:
+                - subnet: 172.23.0.0/16
+    01radius-net:
+        ipam:
+            config:
+                - subnet: 172.24.0.0/16

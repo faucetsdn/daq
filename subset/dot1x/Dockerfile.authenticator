@@ -1,0 +1,5 @@
+FROM faucet/python3:5.0.1
+
+COPY ./ /authenticator-src/
+
+RUN apk add -U git gcc python3-dev musl-dev g++ tcpdump iproute2 vim
