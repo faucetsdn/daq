@@ -19,11 +19,13 @@ RadiusPacketInfo = collections.namedtuple(
     'RadiusPacketInfo', 'payload, src_mac, identity, state, port_id')
 RadiusPacketAttributes = collections.namedtuple('RadiusPacketAttributes', 'eap_message, state')
 
+
 def port_id_to_int(port_id):
     """"Convert a port_id str '00:00:00:aa:00:01 to integer'"""
     dp, port_half_1, port_half_2 = str(port_id).split(':')[3:]
     port = port_half_1 + port_half_2
-    return int.from_bytes(struct.pack('!HH', int(dp, 16), # pytype: disable=attribute-error
+    return int.from_bytes(
+        struct.pack('!HH', int(dp, 16),  # pytype: disable=attribute-error
                                       int(port, 16)), 'big')
 
 
@@ -61,7 +63,6 @@ class RadiusModule:
 
     def receive_radius_messages(self):
         """receive radius messages from supplicant forever."""
-        count = 0
         while True:
             time.sleep(0)
             self.logger.debug("Waiting for radius packets")
@@ -88,28 +89,35 @@ class RadiusModule:
                     state = attribute.data()
             radius_attributes = RadiusPacketAttributes(eap_message, state)
             src_mac, port_id = self.packet_id_to_mac[radius.packet_id].values()
-            self.logger.debug("src_mac %s port_id %s attributes %s" % (src_mac, port_id, str(radius_attributes)))
+            self.logger.debug(
+                "src_mac %s port_id %s attributes %s"
+                % (src_mac, port_id, str(radius_attributes)))
             if self.auth_callback:
                 self.auth_callback(src_mac, radius_attributes, packet_type)
 
     def _decode_radius_response(self, packed_message):
-        return Radius.parse(packed_message, self.radius_secret, self.packet_id_to_request_authenticator)
+        return Radius.parse(
+            packed_message, self.radius_secret, self.packet_id_to_request_authenticator)
 
     def _encode_radius_response(self, packet_info):
-        self.logger.debug("Sending Radius Packet. Mac %s, identity: %s " % (packet_info.src_mac,
-                         packet_info.identity))
+        self.logger.debug(
+            "Sending Radius Packet. Mac %s, identity: %s "
+            % (packet_info.src_mac, packet_info.identity))
 
-        self.logger.debug("Sending to RADIUS payload %s with state %s" %
-                         (packet_info.payload.__dict__, packet_info.state))
+        self.logger.debug(
+            "Sending to RADIUS payload %s with state %s"
+            % (packet_info.payload.__dict__, packet_info.state))
 
         radius_packet_id = self.get_next_radius_packet_id()
-        self.packet_id_to_mac[radius_packet_id] = {'src_mac': packet_info.src_mac, 'port_id': packet_info.port_id}
+        self.packet_id_to_mac[radius_packet_id] = {
+            'src_mac': packet_info.src_mac, 'port_id': packet_info.port_id}
 
         request_authenticator = self.generate_request_authenticator()
         self.packet_id_to_request_authenticator[radius_packet_id] = request_authenticator
         self.extra_radius_request_attributes = self._prepare_extra_radius_attributes()
 
-        return MessagePacker.radius_pack(packet_info.payload, packet_info.src_mac, packet_info.identity,
+        return MessagePacker.radius_pack(packet_info.payload, packet_info.src_mac,
+                                         packet_info.identity,
                                          radius_packet_id, request_authenticator, packet_info.state,
                                          self.radius_secret,
                                          packet_info.port_id,
@@ -119,7 +127,8 @@ class RadiusModule:
         mac = '02:42:ac:17:00:6f'
         _id = 208
         identity = 'user'
-        payload = IdentityMessage(MacAddress.from_string("01:80:C2:00:00:03"), _id, Eap.RESPONSE, identity)
+        payload = IdentityMessage(
+            MacAddress.from_string("01:80:C2:00:00:03"), _id, Eap.RESPONSE, identity)
         state = None
         port_id = port_id_to_int('01:80:c2:00:00:03')
         self.outbound_message_queue.put(RadiusPacketInfo(payload, mac, identity, state, port_id))
@@ -162,6 +171,6 @@ def main():
     t1.join()
     t2.join()
 
+
 if __name__ == '__main__':
     main()
-
