@@ -82,6 +82,7 @@ def register_parser(cls):
     PARSERS_TYPES[cls.PACKET_TYPE] = cls
     return cls
 
+
 # pylint: disable=missing-docstring
 @register_parser
 class EapIdentity(Eap):

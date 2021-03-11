@@ -1,5 +1,5 @@
 from eap import Eap
-from message_parser import MessageParser, MessagePacker, IdentityMessage
+from message_parser import MessagePacker, IdentityMessage
 from mac_address import MacAddress
 from radius import Radius
 from radius_socket import RadiusSocket
@@ -13,8 +13,10 @@ import threading
 import time
 from queue import Queue
 
-RadiusSocketInfo = collections.namedtuple('RadiusSocketInfo', 'source_ip, source_port, server_ip, server_port')
-RadiusPacketInfo = collections.namedtuple('RadiusPacketInfo', 'payload, src_mac, identity, state, port_id')
+RadiusSocketInfo = collections.namedtuple(
+    'RadiusSocketInfo', 'source_ip, source_port, server_ip, server_port')
+RadiusPacketInfo = collections.namedtuple(
+    'RadiusPacketInfo', 'payload, src_mac, identity, state, port_id')
 RadiusPacketAttributes = collections.namedtuple('RadiusPacketAttributes', 'eap_message, state')
 
 def port_id_to_int(port_id):

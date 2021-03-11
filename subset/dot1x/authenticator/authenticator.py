@@ -5,6 +5,7 @@ from utils import get_logger
 
 import threading
 
+
 class AuthStateMachine:
     """Authenticator state machine"""
     START = "start"
@@ -43,7 +44,8 @@ class AuthStateMachine:
             self.identity = eap_message.identity
         self._state_transition(self.RADIUS, self.SUPPLICANT)
         port_id = port_id_to_int(self.authentication_mac)
-        radius_packet_info = RadiusPacketInfo(eap_message, self.src_mac, self.identity, self.radius_state, port_id)
+        radius_packet_info = RadiusPacketInfo(
+            eap_message, self.src_mac, self.identity, self.radius_state, port_id)
         self.radius_send_callback(radius_packet_info)
 
     def received_radius_response(self, payload, radius_state, packet_type):
@@ -76,15 +78,20 @@ class Authenticator:
 
     def _setup(self):
         radius_socket_info = RadiusSocketInfo('172.24.0.112', 0, '172.24.0.113', 1812)
-        self.radius_module = RadiusModule(radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
+        self.radius_module = RadiusModule(
+            radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
         self.eap_module = EapModule('eth0', self.received_eap_request)
 
     def start_threads(self):
         self.logger.info('Starting EAP and RADIUS threads.')
-        radius_receive_thread = threading.Thread(target=self.radius_module.receive_radius_messages, daemon=True)
-        radius_send_thread = threading.Thread(target=self.radius_module.send_radius_messages, daemon=True)
-        eap_receive_thread = threading.Thread(target=self.eap_module.receive_eap_messages, daemon=True)
-        eap_send_thread = threading.Thread(target=self.eap_module.send_eap_messages, daemon=True)
+        radius_receive_thread = threading.Thread(
+            target=self.radius_module.receive_radius_messages, daemon=True)
+        radius_send_thread = threading.Thread(
+            target=self.radius_module.send_radius_messages, daemon=True)
+        eap_receive_thread = threading.Thread(
+            target=self.eap_module.receive_eap_messages, daemon=True)
+        eap_send_thread = threading.Thread(
+            target=self.eap_module.send_eap_messages, daemon=True)
 
         radius_receive_thread.start()
         radius_send_thread.start()
@@ -96,21 +103,25 @@ class Authenticator:
         eap_receive_thread.join()
         eap_send_thread.join()
 
-
     def received_eap_request(self, src_mac, eap_message, is_eapol):
         if is_eapol:
-            if src_mac not in self.state_machines:
-                self.logger.info('Starting authentication for %s' % (src_mac))
-                auth_mac = self.eap_module.get_auth_mac()
-                self.state_machines[src_mac] = AuthStateMachine(src_mac, auth_mac, self.send_eap_response, self.send_radius_request, self.process_test_result)
-            self.state_machines[src_mac].received_eapol_start()
+            self.logger.info('Starting authentication for %s' % (src_mac))
+            auth_mac = self.eap_module.get_auth_mac()
+            state_machine = AuthStateMachine(
+                src_mac, auth_mac,
+                self.send_eap_response, self.send_radius_request,
+                self.process_test_result)
+            self.state_machines[src_mac] = state_machine
+            state_machine.received_eapol_start()
         else:
-            self.state_machines[src_mac].received_eap_request(eap_message)
+            state_machine = self.state_machines[src_mac]
+            state_machine.received_eap_request(eap_message)
 
     def received_radius_response(self, src_mac, radius_attributes, packet_type):
         eap_message = radius_attributes.eap_message
         radius_state = radius_attributes.state
-        self.state_machines[src_mac].received_radius_response(eap_message, radius_state, packet_type)
+        state_machine = self.state_machines[src_mac]
+        state_machine.received_radius_response(eap_message, radius_state, packet_type)
 
     def send_eap_response(self, src_mac, message=None):
         if not message:
@@ -131,6 +142,7 @@ class Authenticator:
 def main():
     authenticator = Authenticator()
     authenticator.start_threads()
+
 
 if __name__ == '__main__':
     main()

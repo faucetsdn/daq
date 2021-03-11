@@ -12,7 +12,7 @@ import time
 class EapModule:
     """Module to send, receive and process EAP packets"""
 
-    def __init__(self, interface, auth_callback = None):
+    def __init__(self, interface, auth_callback=None):
         self.eap_socket = None
         self.logger = get_logger('EapModule')
         self.interface = interface
@@ -24,7 +24,6 @@ class EapModule:
 
     def setup_eap_socket(self):
         """Setup EAP socket"""
-        log_prefix = "EapModule.EapSocket"
         self.eap_socket = EapSocket(self.interface, 'eap_socket')
         self.eap_socket.setup()
 
@@ -52,7 +51,6 @@ class EapModule:
             if isinstance(eap, EapolStartMessage):
                 is_eapol = True
                 self.authenticator_mac = dst_mac
-                #self.send_eapol_response(str(eap.src_mac))
             if self.auth_callback:
                 self.auth_callback(str(eap.src_mac), eap, is_eapol)
 
@@ -91,6 +89,6 @@ def main():
     t1.start()
     t1.join()
 
+
 if __name__ == '__main__':
     main()
-

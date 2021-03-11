@@ -11,6 +11,7 @@ ATTRIBUTE_TYPES = {}
 
 # TODO Fix Class Docstrings
 
+
 class Attribute():
     """Parent class for the Attributes."""
 
@@ -312,13 +313,15 @@ class EAPMessage(Attribute):
         """
         from message_parser import MessagePacker, EapMessage
         if isinstance(data, EapMessage):
-            return cls(cls.DATA_TYPE(bytes_data=MessagePacker.eap_pack(data)[2]))  # pylint: disable=not-callable
+            return cls(cls.DATA_TYPE(
+                bytes_data=MessagePacker.eap_pack(data)[2]))  # pylint: disable=not-callable
         else:
             return super(EAPMessage, cls).create(data)
 
     def data(self):
         from message_parser import MessageParser
         return MessageParser.eap_parse(self._data_type.data(), None)
+
 
 @register_attribute_type
 class MessageAuthenticator(Attribute):
