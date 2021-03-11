@@ -26,7 +26,7 @@ def port_id_to_int(port_id):
     port = port_half_1 + port_half_2
     return int.from_bytes(
         struct.pack('!HH', int(dp, 16),  # pytype: disable=attribute-error
-                                      int(port, 16)), 'big')
+                    int(port, 16)), 'big')
 
 
 class RadiusModule:
