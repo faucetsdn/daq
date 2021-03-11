@@ -257,7 +257,7 @@ if [ -n "${options[pubber]}" ]; then
          # Do https to force testing port 443 even if pubber is not configured, and also to make sure network is live.
          while curl -o /dev/null https://google.com 2> /dev/null; do
              if [[ $serialNo != null ]]; then
-                 echo Running udmi pubber tool $serialNo `date`
+                 echo Running udmi pubber tool $deviceId $serialNo `date`
                  pubber/bin/run local/pubber.json
              fi
              sleep 30
