@@ -3,51 +3,38 @@ version: '2'
 services:
     wpasupplicant:
         build:
-            context: .
+            context: ../../docker/modules/
             dockerfile: Dockerfile.wpasupplicant
         image: 'authenticator/wpasupplicant:latest'
         depends_on: [authenticator]
-        command: bash -c "tail -f"
+        command: bash -c "wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired"
         networks:
             00wpasupplicant-net:
                 ipv4_address: 172.23.0.111
         cap_add:
             - ALL
         volumes:
-            - ./etc/wpasupplicant/:/tmp/wpasupplicant/
-            - ./etc/wpasupplicant/cert/:/tmp/cert/
+            - ../../etc/wpasupplicant/:/tmp/wpasupplicant/
+            - ../../etc/wpasupplicant/cert/:/tmp/cert/
 
     authenticator:
         build:
             context: .
             dockerfile: Dockerfile.authenticator
         image: 'authenticator/authenticator:latest'
-        command: bash -c 'tail -f'
+        #command: ./start_radius_and_auth
         networks:
             00wpasupplicant-net:
                 ipv4_address: 172.23.0.112
                 priority: 200
-            01radius-net:
-                ipv4_address: 172.24.0.112
-                priority: 100
         cap_add:
             - ALL
         volumes:
             - ./:/authenticator-src/
-
-    freeradius:
-        build:
-            context: .
-            dockerfile: Dockerfile.freeradius
-        image: 'authenticator/freeradius:latest'
-        networks:
-            01radius-net:
-                ipv4_address: 172.24.0.113
-        volumes:
-            - "./etc/freeradius/users:/etc/freeradius/3.0/users:ro"
-            - "./etc/freeradius/certs:/etc/freeradius/3.0/certs"
-            - "./etc/freeradius/default/eap:/etc/freeradius/3.0/mods-enabled/eap:ro"
-            - "./etc/freeradius/clients.conf:/etc/freeradius/3.0/clients.conf:ro"
+            - "./freeradius/users:/etc/freeradius/3.0/users:ro"
+            - "./freeradius/certs:/etc/freeradius/3.0/certs"
+            - "./freeradius/default/eap:/etc/freeradius/3.0/mods-enabled/eap:ro"
+            - "./freeradius/clients.conf:/etc/freeradius/3.0/clients.conf:ro"
 
     tcpdump:
         image: kaazing/tcpdump
@@ -61,7 +48,3 @@ networks:
         ipam:
             config:
                 - subnet: 172.23.0.0/16
-    01radius-net:
-        ipam:
-            config:
-                - subnet: 172.24.0.0/16

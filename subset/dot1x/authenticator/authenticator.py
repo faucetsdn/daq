@@ -79,7 +79,7 @@ class Authenticator:
         self._setup()
 
     def _setup(self):
-        radius_socket_info = RadiusSocketInfo('172.24.0.112', 0, '172.24.0.113', 1812)
+        radius_socket_info = RadiusSocketInfo('172.23.0.112', 0, '127.0.0.1', 1812)
         self.radius_module = RadiusModule(
             radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
         self.eap_module = EapModule('eth0', self.received_eap_request)

@@ -1,5 +1,13 @@
-FROM faucet/python3:5.0.1
+FROM ubuntu:18.04
+
+RUN apt-get update && \
+    apt-get install -y freeradius iproute2 vim git gcc python3-dev musl-dev g++ tcpdump
 
 COPY ./ /authenticator-src/
 
-RUN apk add -U git gcc python3-dev musl-dev g++ tcpdump iproute2 vim
+EXPOSE \
+    1812/udp \
+    1813/udp \
+    18120
+
+CMD ["/authenticator-src/start_radius_and_auth"]
