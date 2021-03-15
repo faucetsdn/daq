@@ -8,7 +8,7 @@ FROM daqf/aardvark:latest as java_build
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
 
-RUN $AG update && $AG install openjdk-8-jdk git vim iproute2
+RUN $AG update && $AG install openjdk-8-jdk git
 
 ENV BACHASH=3d4df538935eb461331c156e9e14d2df276e8cea
 
@@ -29,12 +29,6 @@ COPY docker/include/security/sshfaux/*.sh ./
 RUN sh ssh_build.sh
     
 FROM daqf/aardvark:latest
-
-# wpa_suplicant for dot1x
-
-RUN $AG update && $AG install wpasupplicant
-
-COPY docker/include/etc/wpasupplicant/ /etc/wpasupplicant/
 
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-8-jre
@@ -84,5 +78,11 @@ RUN /usr/local/bin/ssh-keygen -A
 
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+
+# wpa_suplicant for dot1x
+
+RUN $AG update && $AG install wpasupplicant vim iproute2
+
+COPY docker/include/etc/wpasupplicant/ /etc/wpasupplicant/
 
 ENTRYPOINT ["bin/start_faux"]
