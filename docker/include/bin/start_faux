@@ -277,5 +277,8 @@ else
     echo Runtime config $conf_file not found.
 fi
 
+# Trigger wpasupplicant
+wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired &
+
 echo Blocking for all eternity.
 tail -f /dev/null

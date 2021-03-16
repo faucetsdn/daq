@@ -3,19 +3,19 @@ version: '2'
 services:
     wpasupplicant:
         build:
-            context: ../../docker/modules/
-            dockerfile: Dockerfile.wpasupplicant
+            context: ../..
+            dockerfile: ./docker/modules/Dockerfile.faux1
         image: 'authenticator/wpasupplicant:latest'
         depends_on: [authenticator]
-        command: bash -c "wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired"
+        #command: bash -c "wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired"
         networks:
             00wpasupplicant-net:
                 ipv4_address: 172.23.0.111
         cap_add:
             - ALL
         volumes:
-            - ../../etc/wpasupplicant/:/tmp/wpasupplicant/
-            - ../../etc/wpasupplicant/cert/:/tmp/cert/
+            - ../../docker/include/etc/wpasupplicant/:/tmp/wpasupplicant/
+            - ../../docker/include/etc/wpasupplicant/cert/:/tmp/cert/
 
     authenticator:
         build:

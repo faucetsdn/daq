@@ -79,4 +79,11 @@ RUN /usr/local/bin/ssh-keygen -A
 # Weird workaround for problem running tcdump in a privlidged container.
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 
+# wpa_suplicant for dot1x
+
+RUN $AG update && $AG install wpasupplicant vim iproute2
+
+COPY docker/include/etc/wpasupplicant/ /tmp/wpasupplicant/
+COPY docker/include/etc/wpasupplicant/cert/ /tmp/cert/
+
 ENTRYPOINT ["bin/start_faux"]

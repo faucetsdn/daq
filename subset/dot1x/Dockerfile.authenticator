@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM daqf/aardvark:latest
 
 RUN apt-get update && \
     apt-get install -y freeradius iproute2 vim git gcc python3-dev musl-dev g++ tcpdump
