@@ -68,8 +68,8 @@ fi
 
 docker_envs="\
         --env FAUCET_CONFIG_STAT_RELOAD=1 \
-        --env FAUCET_EVENT_SOCK=$event_sock" \
-        --env GAUGE_CONFIG_STAT_RELOAD=1
+        --env FAUCET_EVENT_SOCK=$event_sock \
+        --env GAUGE_CONFIG_STAT_RELOAD=1"
 
 docker_volumes+="\
         -v $INSTDIR:/etc/faucet \
