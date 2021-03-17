@@ -323,10 +323,14 @@ class FaucetTopology:
     def get_gauge_config(self):
         """Return Gauge config"""
         config = {
-            'dbs': {'prometheus_port': 9303, 'type:': 'prometheus'},
+            'dbs': {
+                'prometheus': {'prometheus_port': 9303, 'type': 'prometheus'}
+            },
             'faucet_configs': ['/etc/faucet/faucet.yaml'],
             'watchers': {
-                'flow_table_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'flow_table'}
+                'flow_table_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'flow_table'},
+                'port_stats_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'port_stats'},
+                'port_status_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'port_state'}
             }
         }
         return config
