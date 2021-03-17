@@ -183,6 +183,9 @@ message SwitchSetup {
   // Local port for an alternate OpenFlow controller
   int32 alt_port = 16;
 
+  // Gauge OpenFlow Port
+  int32 gauge_port = 15;
+
   // IP address and subnet for local control plane interface
   string lo_addr = 18;
 

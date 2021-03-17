@@ -43,7 +43,8 @@ class TestNetwork:
 
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
-    DEFAULT_OF_PORT = 6653
+    DEFAULT_FAUCET_OF_PORT = 6653
+    DEFAULT_GAUGE_OF_PORT = 6654
     DEFAULT_MININET_SUBNET = "10.20.0.0/16"
     _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
@@ -65,8 +66,9 @@ class TestNetwork:
         self.topology = FaucetTopology(self.config)
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
-        self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
+        self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
+        self.ext_gauge_ofpt = int(switch_setup.get('gauge_port', self.DEFAULT_GAUGE_OF_PORT))
         self.switch_links = {}
         orch_config = OrchestrationConfig()
         self.faucitizer = faucetizer.Faucetizer(
@@ -193,8 +195,10 @@ class TestNetwork:
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
         controller = mininet_node.RemoteController
-        self.net.addController('controller', controller=controller,
-                               ip=target_ip, port=self.ext_ofpt)
+        self.net.addController('faucet', controller=controller,
+                               ip=target_ip, port=self.ext_faucet_ofpt)
+        self.net.addController('gauge', controller=controller,
+                               ip=target_ip, port=self.ext_gauge_ofpt)
 
         LOGGER.debug("Adding secondary...")
         self._create_secondary()

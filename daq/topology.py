@@ -11,6 +11,9 @@ from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 
 LOGGER = logger.get_logger('topology')
 
+FAUCET = 'faucet'
+GAUGE = 'gauge'
+
 
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
@@ -44,6 +47,8 @@ class FaucetTopology:
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
     _OFPP_IN_PORT = 0xfffffff8
+    _DEFAULT_GAUGE_OF_PORT = 6654
+    _DEFAULT_GAUGE_PROM_PORT = 9303
 
     def __init__(self, config):
         self.config = config
@@ -56,6 +61,7 @@ class FaucetTopology:
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
+        self._ext_gauge_ofpt = int(switch_setup.get('gauge_port', self._DEFAULT_GAUGE_OF_PORT))
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self._set_devices = {}
@@ -75,16 +81,29 @@ class FaucetTopology:
         if self._ext_faucet:
             LOGGER.info('Relying on external faucet...')
             return
-        LOGGER.info("Starting faucet...")
-        output = self.pri.cmd('%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR)
-        if not output.strip().endswith('SUCCESS'):
-            LOGGER.info('Faucet output: %s', output)
-            assert False, 'Faucet startup failed'
+        self._run_faucet()
+        self._run_faucet(GAUGE)
 
     def stop(self):
         """Stop this instance"""
         LOGGER.debug("Stopping faucet...")
         self.pri.cmd('docker kill daq-faucet')
+        self.pri.cmd('docker kill daq-gauge-1')
+
+    def _run_faucet(self, process=FAUCET):
+        LOGGER.info('Starting %s...', process)
+
+        if process == FAUCET:
+            cmd = '%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR
+        else:
+            cmd = ('%s/cmd/faucet 1 %s %s && echo SUCCESS' %
+                   (DAQ_LIB_DIR, self._ext_gauge_ofpt, self._DEFAULT_GAUGE_PROM_PORT))
+
+        output = self.pri.cmd(cmd)
+        if not output.strip().endswith('SUCCESS'):
+            LOGGER.info('%s output: %s', process, output)
+            assert False, '%s startup failed' % process
+
 
     def _load_file(self, filename):
         if not os.path.isfile(filename):
