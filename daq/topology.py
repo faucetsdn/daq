@@ -13,21 +13,6 @@ LOGGER = logger.get_logger('topology')
 
 FAUCET = 'faucet'
 GAUGE = 'gauge'
-DEFAULT_GAUGE_TOPO = {'dbs:'}
-DEFAULT_GAUGE_TOPO = """
-dbs:
-  prometheus:
-    prometheus_addr: 0.0.0.0
-    prometheus_port: 9303
-    type: prometheus
-faucet_configs:
-- /etc/faucet/faucet.yaml
-watchers:
-  flow_table_poller:
-    all_dps: true
-    db: prometheus
-    interval: 60
-    type: flow_table"""
 
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
@@ -61,8 +46,6 @@ class FaucetTopology:
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
     _OFPP_IN_PORT = 0xfffffff8
-    _DEFAULT_GAUGE_OF_PORT = 6654
-    _DEFAULT_GAUGE_PROM_PORT = 9303
 
     def __init__(self, config):
         self.config = config
@@ -75,7 +58,6 @@ class FaucetTopology:
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
-        self._ext_gauge_ofpt = int(switch_setup.get('gauge_port', self._DEFAULT_GAUGE_OF_PORT))
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self._set_devices = {}
@@ -110,8 +92,7 @@ class FaucetTopology:
         if process == FAUCET:
             cmd = '%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR
         elif process == GAUGE:
-            cmd = ('%s/cmd/faucet gauge 1 %s %s && echo SUCCESS' %
-                   (DAQ_LIB_DIR, self._ext_gauge_ofpt, self._DEFAULT_GAUGE_PROM_PORT))
+            cmd = ('%s/cmd/faucet gauge && echo SUCCESS' % DAQ_LIB_DIR)
         else:
             raise Exception('Unknown process %s' % process)
 

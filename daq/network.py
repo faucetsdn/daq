@@ -48,7 +48,7 @@ class TestNetwork:
     DEFAULT_MININET_SUBNET = "10.20.0.0/16"
     _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
-    INTERMEDIATE_GAUGE_FILE = os.path.join(DAQ_RUN_DIR, "gauge_intermediate.yaml")
+    INTERMEDIATE_GAUGE_FILE = os.path.join(DAQ_RUN_DIR, "gauge.yaml")
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
     _VXLAN_DEFAULT_PORT = 4789
     _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
