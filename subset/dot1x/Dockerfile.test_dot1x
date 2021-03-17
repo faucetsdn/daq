@@ -1,0 +1,13 @@
+FROM daqf/aardvark:latest
+
+RUN apt-get update && \
+    apt-get install -y freeradius iproute2 vim git gcc python3-dev musl-dev g++ tcpdump
+
+COPY subset/dot1x/ .
+
+EXPOSE \
+    1812/udp \
+    1813/udp \
+    18120
+
+CMD ["./test_dot1x"]
