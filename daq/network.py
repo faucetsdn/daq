@@ -49,6 +49,7 @@ class TestNetwork:
     _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
+    OUTPUT_GAUGE_FILE = os.path.join(DAQ_RUN_DIR, "gauge.yaml")
     _VXLAN_DEFAULT_PORT = 4789
     _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
 
@@ -242,6 +243,11 @@ class TestNetwork:
             yaml.safe_dump(network_topology, file)
 
         self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
+
+        with open(self.INTERMEDIATE_GAUGE_FILE, 'w') as file:
+            yaml.safe_dump(self.topology.get_gauge_config(), file)
+        self.faucitizer.reload_and_flush_gauge_config(self.INTERMEDIATE_GAUGE_FILE)
+
         if self._settle_sec:
             LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
             time.sleep(self._settle_sec)

@@ -13,7 +13,21 @@ LOGGER = logger.get_logger('topology')
 
 FAUCET = 'faucet'
 GAUGE = 'gauge'
-
+DEFAULT_GAUGE_TOPO = {'dbs:'}
+DEFAULT_GAUGE_TOPO = """
+dbs:
+  prometheus:
+    prometheus_addr: 0.0.0.0
+    prometheus_port: 9303
+    type: prometheus
+faucet_configs:
+- /etc/faucet/faucet.yaml
+watchers:
+  flow_table_poller:
+    all_dps: true
+    db: prometheus
+    interval: 60
+    type: flow_table"""
 
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
@@ -324,6 +338,17 @@ class FaucetTopology:
     def get_network_topology(self):
         """Return the current faucet network topology"""
         return copy.deepcopy(self.topology)
+
+    def get_gauge_config(self):
+        """Return Gauge config"""
+        config = {
+            'dbs': {'prometheus_port': self._DEFAULT_GAUGE_PROM_PORT, 'type:': 'prometheus'},
+            'faucet_configs': ['/etc/faucet/faucet.yaml'],
+            'watchers': {
+                'flow_table_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'flow_table'}
+            }
+        }
+        return config
 
     def _generate_acls(self):
         self._generate_main_acls()
