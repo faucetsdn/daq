@@ -95,9 +95,11 @@ class FaucetTopology:
 
         if process == FAUCET:
             cmd = '%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR
-        else:
-            cmd = ('%s/cmd/faucet 1 %s %s && echo SUCCESS' %
+        elif process == GAUGE:
+            cmd = ('%s/cmd/faucet gauge 1 %s %s && echo SUCCESS' %
                    (DAQ_LIB_DIR, self._ext_gauge_ofpt, self._DEFAULT_GAUGE_PROM_PORT))
+        else:
+            raise Exception('Unknown process %s' % process)
 
         output = self.pri.cmd(cmd)
         if not output.strip().endswith('SUCCESS'):
