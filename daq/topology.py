@@ -84,7 +84,7 @@ class FaucetTopology:
         """Stop this instance"""
         LOGGER.debug("Stopping faucet...")
         self.pri.cmd('docker kill daq-faucet')
-        self.pri.cmd('docker kill daq-gauge-1')
+        self.pri.cmd('docker kill daq-gauge')
 
     def _run_faucet(self, process=FAUCET):
         LOGGER.info('Starting %s...', process)
@@ -323,7 +323,7 @@ class FaucetTopology:
     def get_gauge_config(self):
         """Return Gauge config"""
         config = {
-            'dbs': {'prometheus_port': self._DEFAULT_GAUGE_PROM_PORT, 'type:': 'prometheus'},
+            'dbs': {'prometheus_port': 9303, 'type:': 'prometheus'},
             'faucet_configs': ['/etc/faucet/faucet.yaml'],
             'watchers': {
                 'flow_table_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'flow_table'}

@@ -32,9 +32,7 @@ if [ "$1" == "gauge" ]; then
     IMAGE=daqf/gauge
     PROM_TARGET=9303
     FAUCET_SOCK=
-    if [ -n "$switch_setup_gauge_port" ]; then
-        ext_ofpt=$switch_setup_gauge_port
-    fi
+    ext_ofpt=${switch_setup_gauge_port:-6654}
     prom_pt=9303
     shift
 fi
