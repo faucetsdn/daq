@@ -197,9 +197,9 @@ class TestNetwork:
         LOGGER.debug("Adding controller at %s", target_ip)
         controller = mininet_node.RemoteController
         self.net.addController('faucet', controller=controller,
-                               ip=target_ip, port=self.ext_faucet_ofpt)
+                               ip=target_ip, port=self.ext_faucet_ofpt, verbose=True)
         self.net.addController('gauge', controller=controller,
-                               ip=target_ip, port=self.ext_gauge_ofpt)
+                               ip=target_ip, port=self.ext_gauge_ofpt, verbose=True)
 
         LOGGER.debug("Adding secondary...")
         self._create_secondary()
