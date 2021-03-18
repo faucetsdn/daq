@@ -19,8 +19,8 @@ services:
 
     authenticator:
         build:
-            context: .
-            dockerfile: Dockerfile.authenticator
+            context: ../..
+            dockerfile: ./subset/dot1x/Dockerfile.test_dot1x
         image: 'authenticator/authenticator:latest'
         #command: ./start_radius_and_auth
         networks:
@@ -29,12 +29,6 @@ services:
                 priority: 200
         cap_add:
             - ALL
-        volumes:
-            - ./:/authenticator-src/
-            - "./freeradius/users:/etc/freeradius/3.0/users:ro"
-            - "./freeradius/certs:/etc/freeradius/3.0/certs"
-            - "./freeradius/default/eap:/etc/freeradius/3.0/mods-enabled/eap:ro"
-            - "./freeradius/clients.conf:/etc/freeradius/3.0/clients.conf:ro"
 
     tcpdump:
         image: kaazing/tcpdump
