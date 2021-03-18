@@ -277,7 +277,7 @@ else
     echo Runtime config $conf_file not found.
 fi
 
-if [ -n "${options[wpa_supplicant]}" ]; then
+if [ -n "${options[wpa]}" ]; then
     wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired &
 fi
 
