@@ -107,6 +107,9 @@ port-01 module_config modules
   "discover": {
     "enabled": true
   },
+  "dot1x": {
+    "enabled": true
+  },
   "hold": {
     "enabled": false
   },
@@ -191,6 +194,9 @@ port-02 module_config modules
   },
   "discover": {
     "enabled": false
+  },
+  "dot1x": {
+    "enabled": true
   },
   "hold": {
     "enabled": true
