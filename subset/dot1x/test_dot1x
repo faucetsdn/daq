@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+# Start RADIUS server locally
 freeradius -fxx -l stdout &
 
 source reporting.sh
