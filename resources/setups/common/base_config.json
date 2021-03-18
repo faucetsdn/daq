@@ -48,6 +48,9 @@
     "ssh": {
       "enabled": true
     },
+    "dot1x": {
+      "enabled": true
+    },
     "switch": {
       "enabled": true,
       "timeout_sec": 0,
