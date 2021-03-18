@@ -1,0 +1,20 @@
+FROM daqf/aardvark:latest
+
+RUN apt-get update && \
+    apt-get install -y freeradius git gcc python3-dev musl-dev g++
+
+COPY subset/dot1x/freeradius/users /etc/freeradius/3.0/users:ro
+COPY subset/dot1x/freeradius/certs /etc/freeradius/3.0/certs
+COPY subset/dot1x/freeradius/default/eap /etc/freeradius/3.0/mods-enabled/eap
+COPY subset/dot1x/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
+
+
+COPY subset/dot1x/authenticator/ authenticator/
+COPY subset/dot1x/test_dot1x test_dot1x
+
+EXPOSE \
+    1812/udp \
+    1813/udp \
+    18120
+
+CMD ["./test_dot1x"]
