@@ -1,0 +1,63 @@
+listen {
+	ipaddr = *
+	port = 2083
+	type = auth+acct
+	proto = tcp
+	virtual_server = default
+	clients = radsec
+	limit {
+	      max_connections = 16
+	      lifetime = 0
+	      idle_timeout = 30
+	}
+	tls {
+		private_key_password = whatever
+		private_key_file = ${certdir}/server.pem
+		certificate_file = ${certdir}/server.pem
+		ca_file = ${cadir}/ca.pem
+		dh_file = ${certdir}/dh
+		fragment_size = 8192
+		ca_path = ${cadir}
+		cipher_list = "DEFAULT"
+		cipher_server_preference = no
+		cache {
+		      enable = no
+		}
+		require_client_cert = yes
+		verify {
+		}
+	}
+}
+clients radsec {
+	client 127.0.0.1 {
+		ipaddr = 127.0.0.1
+		proto = tls
+		secret = radsec
+	}
+}
+home_server tls {
+	ipaddr = 127.0.0.1
+	port = 2083
+	type = auth
+	secret = radsec
+	proto = tcp
+	status_check = none
+	tls {
+		private_key_password = whatever
+		private_key_file = ${certdir}/client.pem
+		certificate_file = ${certdir}/client.pem
+		ca_file = ${cadir}/ca.pem
+		dh_file = ${certdir}/dh
+		random_file = /dev/urandom
+		fragment_size = 8192
+		ca_path = ${cadir}
+		cipher_list = "DEFAULT"
+	}
+}
+home_server_pool tls {
+		 type = fail-over
+		 home_server = tls
+}
+realm tls {
+      auth_pool = tls
+}
