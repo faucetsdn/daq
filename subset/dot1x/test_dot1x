@@ -8,10 +8,6 @@ TEST_DESCRIPTION="Dot1x authentication tests"
 
 python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt
 
-while [ ! -f /tmp/dot1x_result.txt  ]; do
-    sleep 3 
-done
-
 RESULT_AND_SUMMARY=$(cat /tmp/dot1x_result.txt)
 
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
