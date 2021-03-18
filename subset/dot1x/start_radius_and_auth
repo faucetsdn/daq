@@ -1,4 +1,0 @@
-#!/bin/bash -e
-
-freeradius -fxx -l stdout &
-python3 /authenticator-src/authenticator/authenticator.py
