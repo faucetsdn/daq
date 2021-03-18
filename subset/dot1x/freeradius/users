@@ -1,0 +1,23 @@
+# Test Usage
+# echo "User-Name=user,User-Password=microphone" | radclient -x localhost:1812 auth SECRET
+user   Cleartext-Password := "microphone"
+
+# NOTE: The Filter-Id is the ACL name
+filter_id   Cleartext-Password := "microphone"
+	 Filter-Id = "ACL_1"
+
+# Tunnel-Type = VLAN
+# Tunnel-Medium = 802
+vlan_id   Cleartext-Password := "microphone"
+	Tunnel-Type = 13,
+    Tunnel-Medium-Type = 6,
+    Tunnel-Private-Group-ID = "VLAN_100"
+
+# Using the HPE ACE standard
+# http://h22208.www2.hpe.com/eginfolib/networking/docs/switches/K-KA-KB/15-18/5998-8150_access_security_guide/content/c_IPv4_Access_Control_Lists_ACLs.html
+filter_rule   Cleartext-Password := "microphone"
+	NAS-Filter-Rule = "deny in tcp from any to any"
+
+# MAB Examples for integration tests
+8e0000000102 Cleartext-Password := '8e0000000102'
+    NAS-Filter-Rule = "deny in tcp from any to any"
