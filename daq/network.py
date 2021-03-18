@@ -68,8 +68,8 @@ class TestNetwork:
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
         self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
+        self.ext_gauge_ofpt = int(switch_setup.get('lo_port_2', self.DEFAULT_GAUGE_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
-        self.ext_gauge_ofpt = int(switch_setup.get('gauge_port', self.DEFAULT_GAUGE_OF_PORT))
         self.switch_links = {}
         orch_config = OrchestrationConfig()
         self.faucitizer = faucetizer.Faucetizer(
