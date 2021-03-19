@@ -12,12 +12,12 @@ RUN $AG update && $AG install openjdk-11-jdk git
 RUN $AG update && $AG install curl
 
 COPY udmi/schema/ schema/
+
 COPY udmi/validator/ validator/
 RUN validator/bin/build
-COPY udmi/sequences/ sequences/
+
+COPY udmi/bin/test_sequences bin/test_sequences
 
 COPY subset/cloud/test_udmi .
-
-COPY resources/test_site/ local/
 
 CMD ./test_udmi
