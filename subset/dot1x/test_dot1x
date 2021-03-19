@@ -8,11 +8,11 @@ REPORT=/tmp/report.txt
 TEST_NAME="dot1x"
 TEST_DESCRIPTION="Dot1x authentication tests"
 
+echo 'Dot1x Authentication tests'
+
 python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt
 
 RESULT_AND_SUMMARY=$(cat /tmp/dot1x_result.txt)
 
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
                      "n/a" "$RESULT_AND_SUMMARY"
-
-tail -f

@@ -156,22 +156,17 @@ class Authenticator:
         # Needs to be changed if we support multiple devices.
         self._end_authentication()
 
-    def get_results(self):
-        """Return results"""
-        return self.results
-
-
-def run_authentication_test():
-    authenticator = Authenticator()
-    authenticator.start_threads()
-    result_str = ""
-    for src_mac, is_success in authenticator.get_results().items():
-        result = 'succeeded' if is_success else 'failed'
-        result_str += "Authentication for %s %s." % (src_mac, result)
-    return result_str
+    def run_authentication_test(self):
+        self.start_threads()
+        result_str = ""
+        for src_mac, is_success in self.results.items():
+            result = 'succeeded' if is_success else 'failed'
+            result_str += "Authentication for %s %s." % (src_mac, result)
+        return result_str
 
 def main():
-    print(run_authentication_test())
+    authenticator = Authenticator()
+    print(authenticator.run_authentication_test())
 
 
 if __name__ == '__main__':
