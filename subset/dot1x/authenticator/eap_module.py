@@ -21,6 +21,7 @@ class EapModule:
         self.auth_callback = auth_callback
         self.authenticator_mac = None
         self.outbound_message_queue = Queue()
+        self.shut_down = False
 
         self.setup_eap_socket()
 
@@ -30,11 +31,13 @@ class EapModule:
         self.eap_socket.setup()
 
     def receive_eap_messages(self):
-        """receive eap messages from supplicant forever."""
-        while True:
+        """receive eap messages from supplicant."""
+        while not self.shut_down:
             time.sleep(0)
             self.logger.debug("Waiting for eap messages")
             packed_message = self.eap_socket.receive()
+            if not packed_message:
+                continue
             self.logger.debug("Received packed_message: %s", str(packed_message))
             try:
                 eap, dst_mac = MessageParser.ethernet_parse(packed_message)
@@ -55,6 +58,8 @@ class EapModule:
                 self.authenticator_mac = dst_mac
             if self.auth_callback:
                 self.auth_callback(str(eap.src_mac), eap, is_eapol)
+
+        self.logger.info('Done receiving EAP messages')
 
     def get_auth_mac(self):
         return str(self.authenticator_mac)
@@ -77,11 +82,20 @@ class EapModule:
         self.outbound_message_queue.put(eap_message)
 
     def send_eap_messages(self):
-        """send RADIUS messages to RADIUS Server forever."""
-        while True:
+        """send EAP messages forever."""
+        while not self.shut_down:
             time.sleep(0)
             outbound_packet = self.outbound_message_queue.get()
-            self.eap_socket.send(outbound_packet)
+            if outbound_packet:
+                self.eap_socket.send(outbound_packet)
+
+        self.logger.info('Done sending EAP messages')
+
+    def shut_down_module(self):
+        """Stop listening for and sending packets"""
+        self.shut_down = True
+        self.outbound_message_queue.put(None)
+        self.eap_socket.shutdown()
 
 
 def main():

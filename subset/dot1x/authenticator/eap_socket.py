@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import struct
 from abc import ABC, abstractmethod
 from fcntl import ioctl
+import errno
 import socket
 
 from mac_address import MacAddress
@@ -65,6 +66,10 @@ class PromiscuousSocket(ABC):
                               len(self.EAP_ADDRESS.address), self.EAP_ADDRESS.address)
         self.socket.setsockopt(self.SOL_PACKET, self.PACKET_ADD_MEMBERSHIP, request)
 
+    def shutdown(self):
+        """Shutdown socket"""
+        self.socket.close()
+
 
 class EapSocket(PromiscuousSocket):
     """Handle the EAP socket"""
@@ -72,6 +77,7 @@ class EapSocket(PromiscuousSocket):
     def setup(self):
         """Set up the socket"""
         self._setup(socket.htons(0x888e))
+        self.socket.settimeout(2.0)
 
     def send(self, data):
         """send on eap socket.
@@ -80,4 +86,16 @@ class EapSocket(PromiscuousSocket):
 
     def receive(self):
         """receive from eap socket"""
-        return self.socket.recv(4096)
+        # While socket hasn't been closed
+        while self.socket.fileno() != -1:
+            try:
+                return self.socket.recv(4096)
+            except socket.timeout:
+                # Socket timed out. Expected. Move on.
+                continue
+            except OSError as exception:
+                # socket closed
+                if exception.errno == errno.EBADFD:
+                    break
+            except:
+                raise

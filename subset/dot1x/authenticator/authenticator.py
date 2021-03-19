@@ -18,6 +18,7 @@ class AuthStateMachine:
 
     def __init__(self, src_mac, auth_mac, eap_send_callback, radius_send_callback, auth_callback):
         self.state = self.START
+        self._state_lock = threading.Lock()
         self.logger = get_logger('AuthStateMachine')
         self.src_mac = src_mac
         self.eap_send_callback = eap_send_callback
@@ -29,11 +30,12 @@ class AuthStateMachine:
         self.logger = get_logger('AuthSM')
 
     def _state_transition(self, target, expected=None):
-        if expected is not None:
-            message = 'state was %s expected %s' % (self.state, expected)
-            assert self.state == expected, message
-        self.logger.debug('Transition for %s: %s -> %s', self.src_mac, self.state, target)
-        self.state = target
+        with self._state_lock:
+            if expected is not None:
+                message = 'state was %s expected %s' % (self.state, expected)
+                assert self.state == expected, message
+            self.logger.debug('Transition for %s: %s -> %s', self.src_mac, self.state, target)
+            self.state = target
 
     def received_eapol_start(self):
         """Received EAPOL start on EAP socket"""
@@ -72,9 +74,11 @@ class Authenticator:
 
     def __init__(self):
         self.state_machines = {}
+        self.results = {}
         self.eap_module = None
         self.radius_module = None
         self.logger = get_logger('Authenticator')
+        self._threads = []
 
         self._setup()
 
@@ -85,36 +89,43 @@ class Authenticator:
         self.eap_module = EapModule('eth0', self.received_eap_request)
 
     def start_threads(self):
-        self.logger.info('Starting EAP and RADIUS threads.')
-        radius_receive_thread = threading.Thread(
-            target=self.radius_module.receive_radius_messages, daemon=True)
-        radius_send_thread = threading.Thread(
-            target=self.radius_module.send_radius_messages, daemon=True)
-        eap_receive_thread = threading.Thread(
-            target=self.eap_module.receive_eap_messages, daemon=True)
-        eap_send_thread = threading.Thread(
-            target=self.eap_module.send_eap_messages, daemon=True)
+        self.logger.info('Listening for EAP and RADIUS.')
 
-        radius_receive_thread.start()
-        radius_send_thread.start()
-        eap_receive_thread.start()
-        eap_send_thread.start()
+        def build_thread(method):
+            self._threads.append(threading.Thread(target=method))
 
-        radius_receive_thread.join()
-        radius_send_thread.join()
-        eap_receive_thread.join()
-        eap_send_thread.join()
+        build_thread(self.radius_module.receive_radius_messages)
+        build_thread(self.radius_module.send_radius_messages)
+        build_thread(self.eap_module.receive_eap_messages)
+        build_thread(self.eap_module.send_eap_messages)
+
+        for thread in self._threads:
+            thread.start()
+
+        for thread in self._threads:
+            thread.join()
+
+        self.logger.info('Done listening for EAP and RADIUS packets.')
+
+    def _end_authentication(self):
+        self.logger.info('Shutting down modules.')
+        self.radius_module.shut_down_module()
+        self.eap_module.shut_down_module()
 
     def received_eap_request(self, src_mac, eap_message, is_eapol):
         if is_eapol:
-            self.logger.info('Starting authentication for %s' % (src_mac))
-            auth_mac = self.eap_module.get_auth_mac()
-            state_machine = AuthStateMachine(
-                src_mac, auth_mac,
-                self.send_eap_response, self.send_radius_request,
-                self.process_test_result)
-            self.state_machines[src_mac] = state_machine
-            state_machine.received_eapol_start()
+            if not (src_mac in self.state_machines or src_mac in self.results):
+                self.logger.info('Starting authentication for %s' % (src_mac))
+                auth_mac = self.eap_module.get_auth_mac()
+                state_machine = AuthStateMachine(
+                    src_mac, auth_mac,
+                    self.send_eap_response, self.send_radius_request,
+                    self.process_test_result)
+                self.state_machines[src_mac] = state_machine
+                state_machine.received_eapol_start()
+            else:
+                self.logger.warning(
+                    'Authentication for %s is in progress or has been completed' % (src_mac))
         else:
             state_machine = self.state_machines[src_mac]
             state_machine.received_eap_request(eap_message)
@@ -139,11 +150,28 @@ class Authenticator:
             self.logger.info('Authentication successful for %s' % (src_mac))
         else:
             self.logger.info('Authentication failed for %s' % (src_mac))
+        self.results[src_mac] = is_success
+        self.state_machines.pop(src_mac)
+        # TODO: We currently finalize results as soon as we get a result for a src_mac.
+        # Needs to be changed if we support multiple devices.
+        self._end_authentication()
+
+    def get_results(self):
+        """Return results"""
+        return self.results
 
 
-def main():
+def run_authentication_test():
     authenticator = Authenticator()
     authenticator.start_threads()
+    result_str = ""
+    for src_mac, is_success in authenticator.get_results().items():
+        result = 'succeeded' if is_success else 'failed'
+        result_str += "Authentication for %s %s." % (src_mac, result)
+    return result_str
+
+def main():
+    print(run_authentication_test())
 
 
 if __name__ == '__main__':

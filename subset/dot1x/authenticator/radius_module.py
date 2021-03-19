@@ -47,6 +47,7 @@ class RadiusModule:
         self.packet_id_to_mac = {}
         self.module_id = module_id
         self.auth_callback = auth_callback
+        self.shut_down = False
 
     def setup_radius_socket(self):
         """Setup RADIUS socket"""
@@ -56,16 +57,19 @@ class RadiusModule:
 
     def send_radius_messages(self):
         """send RADIUS messages to RADIUS Server forever."""
-        while True:
+        while not self.shut_down:
             time.sleep(0)
             outbound_packet = self.outbound_message_queue.get()
-            packed_message = self._encode_radius_response(outbound_packet)
-            self.radius_socket.send(packed_message)
-            self.logger.debug("sent radius message %s" % (packed_message))
+            if outbound_packet:
+                packed_message = self._encode_radius_response(outbound_packet)
+                self.radius_socket.send(packed_message)
+                self.logger.debug("sent radius message %s" % (packed_message))
+
+        self.logger.info('Done sending RADIUS packets')
 
     def receive_radius_messages(self):
-        """receive radius messages from supplicant forever."""
-        while True:
+        """receive radius messages from supplicant."""
+        while not self.shut_down:
             time.sleep(0)
             self.logger.debug("Waiting for radius packets")
             packed_message = self.radius_socket.receive()
@@ -96,6 +100,8 @@ class RadiusModule:
                 % (src_mac, port_id, str(radius_attributes)))
             if self.auth_callback:
                 self.auth_callback(src_mac, radius_attributes, packet_type)
+
+        self.logger.info('Done receiving RADIUS packets')
 
     def _decode_radius_response(self, packed_message):
         return Radius.parse(
@@ -158,6 +164,12 @@ class RadiusModule:
                      NASPortType.create(15),
                      NASIdentifier.create(self.module_id)]
         return attr_list
+
+    def shut_down_module(self):
+        """Stop listening for and sending packets"""
+        self.shut_down = True
+        self.outbound_message_queue.put(None)
+        self.radius_socket.shutdown()
 
 
 def main():

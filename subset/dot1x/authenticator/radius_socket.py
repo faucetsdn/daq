@@ -1,5 +1,6 @@
 """Handle the RADIUS socket"""
 from __future__ import absolute_import
+import errno
 import socket
 from utils import get_logger
 
@@ -35,3 +36,15 @@ class RadiusSocket:
     def receive(self):
         """Receives from the radius socket"""
         return self.socket.recv(4096)
+
+    def shutdown(self):
+        """Shut down socket"""
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+        except OSError as exception:
+            if exception.errno == errno.ENOTCONN:
+                # Socket isn't connected. Can't send FIN
+                pass
+            else:
+                raise
+        self.socket.close()
