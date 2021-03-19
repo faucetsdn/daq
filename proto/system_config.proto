@@ -180,6 +180,9 @@ message SwitchSetup {
   // Local port of DAQ OpenFlow controller
   int32 lo_port = 14;
 
+  // Local port of second DAQ OpenFlow controller
+  int32 lo_port_2 = 15;
+
   // Local port for an alternate OpenFlow controller
   int32 alt_port = 16;
 

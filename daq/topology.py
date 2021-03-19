@@ -11,6 +11,8 @@ from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 
 LOGGER = logger.get_logger('topology')
 
+FAUCET = 'faucet'
+GAUGE = 'gauge'
 
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
@@ -75,16 +77,30 @@ class FaucetTopology:
         if self._ext_faucet:
             LOGGER.info('Relying on external faucet...')
             return
-        LOGGER.info("Starting faucet...")
-        output = self.pri.cmd('%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR)
-        if not output.strip().endswith('SUCCESS'):
-            LOGGER.info('Faucet output: %s', output)
-            assert False, 'Faucet startup failed'
+        self._run_faucet()
+        self._run_faucet(GAUGE)
 
     def stop(self):
         """Stop this instance"""
         LOGGER.debug("Stopping faucet...")
         self.pri.cmd('docker kill daq-faucet')
+        self.pri.cmd('docker kill daq-gauge')
+
+    def _run_faucet(self, process=FAUCET):
+        LOGGER.info('Starting %s...', process)
+
+        if process == FAUCET:
+            cmd = '%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR
+        elif process == GAUGE:
+            cmd = ('%s/cmd/faucet gauge && echo SUCCESS' % DAQ_LIB_DIR)
+        else:
+            raise Exception('Unknown process %s' % process)
+
+        output = self.pri.cmd(cmd)
+        if not output.strip().endswith('SUCCESS'):
+            LOGGER.info('%s output: %s', process, output)
+            assert False, '%s startup failed' % process
+
 
     def _load_file(self, filename):
         if not os.path.isfile(filename):
@@ -303,6 +319,21 @@ class FaucetTopology:
     def get_network_topology(self):
         """Return the current faucet network topology"""
         return copy.deepcopy(self.topology)
+
+    def get_gauge_config(self):
+        """Return Gauge config"""
+        config = {
+            'dbs': {
+                'prometheus': {'prometheus_port': 9303, 'type': 'prometheus'}
+            },
+            'faucet_configs': ['/etc/faucet/faucet.yaml'],
+            'watchers': {
+                'flow_table_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'flow_table'},
+                'port_stats_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'port_stats'},
+                'port_status_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'port_state'}
+            }
+        }
+        return config
 
     def _generate_acls(self):
         self._generate_main_acls()
