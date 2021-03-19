@@ -20,17 +20,20 @@ timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
 site_model=$SITE_DIR
-project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
-registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
-device_id=`jq -r .device_id $MODULE_CONFIG_FILE`
-serial_no=`jq -r .device_info.serial $MODULE_CONFIG_FILE`
 
-if [ "$device_id" == null ]; then
-    skip="No device id"
-elif [ ! -f $GCP_REFLECT_CONFIG_FILE ]; then
+if [ ! -f $GCP_REFLECT_CONFIG_FILE ]; then
     skip="No credentials"
 else
-    skip=
+    project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
+    registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
+    device_id=`jq -r .device_id $MODULE_CONFIG_FILE`
+    serial_no=`jq -r .device_info.serial $MODULE_CONFIG_FILE`
+
+    if [ "$device_id" == null ]; then
+        skip="No device id"
+    else
+        skip=
+    fi
 fi
 
 if [ -n "$skip" ]; then
