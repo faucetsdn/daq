@@ -97,5 +97,5 @@ class EapSocket(PromiscuousSocket):
                 # socket closed
                 if exception.errno == errno.EBADFD:
                     break
-            except:
+            except Exception:
                 raise

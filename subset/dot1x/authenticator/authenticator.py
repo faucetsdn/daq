@@ -164,6 +164,7 @@ class Authenticator:
             result_str += "Authentication for %s %s." % (src_mac, result)
         return result_str
 
+
 def main():
     authenticator = Authenticator()
     print(authenticator.run_authentication_test())
