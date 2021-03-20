@@ -27,6 +27,7 @@ class EapModule:
 
     def setup_eap_socket(self):
         """Setup EAP socket"""
+        print(self.interface)
         self.eap_socket = EapSocket(self.interface, 'eap_socket')
         self.eap_socket.setup()
 
@@ -99,7 +100,7 @@ class EapModule:
 
 
 def main():
-    eap_module = EapModule('eth0')
+    eap_module = EapModule('dot1x01-eth0')
     t1 = threading.Thread(target=eap_module.receive_eap_messages, daemon=True)
 
     t1.start()
