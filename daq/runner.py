@@ -351,7 +351,7 @@ class DAQRunner:
                 port_info.flapping_start = time.time()
             if port_info.active:
                 if device and not port_info.flapping_start:
-                    self._direct_port_traffic(device.mac, port, None)
+                    self._direct_port_traffic(device, port, None)
                 self._deactivate_port(port)
         self._send_heartbeat()
 
@@ -370,8 +370,8 @@ class DAQRunner:
         port_info = self._ports[port]
         port_info.active = False
 
-    def _direct_port_traffic(self, mac, port, target):
-        self.network.direct_port_traffic(mac, port, target)
+    def _direct_port_traffic(self, device, port, target, portset=None):
+        self.network.direct_port_traffic(device, port, target, portset)
 
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
@@ -596,7 +596,7 @@ class DAQRunner:
                     'port_set': gateway.port_set,
                     'mac': device.mac
                 }
-                self._direct_port_traffic(device.mac, device.port.port_no, target)
+                self._direct_port_traffic(device, device.port.port_no, target, gateway.port_set)
             else:
                 self._direct_device_traffic(device, gateway.port_set)
             return True
@@ -885,7 +885,7 @@ class DAQRunner:
             target_gateway.result_linger = True
         else:
             if target_port:
-                self._direct_port_traffic(device.mac, target_port, None)
+                self._direct_port_traffic(device, target_port, None)
             if target_gateway:
                 self._detach_gateway(device)
             test_results = target_host.terminate('_target_set_cancel', trigger=False)

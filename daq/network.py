@@ -229,12 +229,12 @@ class TestNetwork:
         # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
         return 'vxlan_sys_%d' % port
 
-    def direct_port_traffic(self, target_mac, port, target):
+    def direct_port_traffic(self, device, port, target, portset):
         """Direct traffic for a given mac to target port"""
         dest = target['port_set'] if target else None
-        LOGGER.info('Directing traffic for %s on port %s to %s', target_mac, port, dest)
+        LOGGER.info('Directing traffic for %s on port %s to %s', device, port, dest)
         # TODO: Convert this to use faucitizer to change vlan
-        self.topology.direct_port_traffic(target_mac, port, target)
+        self.topology.direct_port_traffic(device, port, target, portset)
         self._generate_behavioral_config()
 
     def _generate_behavioral_config(self):
