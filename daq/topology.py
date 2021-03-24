@@ -421,6 +421,14 @@ class FaucetTopology:
         local_acl = []
         acls = {}
 
+        dot1x_pri_ports = [12]
+        dot1x_pri_rule = self._ethertype_to_port_acl(0x888e, dot1x_pri_ports)
+        incoming_acl.append(dot1x_pri_rule)
+
+        dot1x_sec_ports = list(range(1,self.sec_port))
+        dot1x_sec_rule = self._ethertype_to_port_acl(0x888e, dot1x_sec_ports)
+        secondary_acl.append(dot1x_sec_rule)
+
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
 
@@ -438,6 +446,8 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
+            dot1x_portset_rule = self._ethertype_to_port_acl(0x888e, [self.PRI_TRUNK_PORT])
+            portset_acls[port_set].append(dot1x_portset_rule)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -514,6 +524,10 @@ class FaucetTopology:
         target_mac = None
         rules = []
 
+        if port != self.sec_port:
+            dot1x_rule = self._ethertype_to_port_acl(0x888e, [self.sec_port])
+            rules.append(dot1x_rule)
+
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
             target_mac = target['mac']
@@ -526,9 +540,10 @@ class FaucetTopology:
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
-            self._write_port_acl(port, rules, file_path)
         else:
-            self._write_port_acl(port, self._make_default_acl_rules(), file_path)
+            rules = self._make_default_acl_rules()
+
+        self._write_port_acl(port, rules, file_path)
 
         return target_mac
 
@@ -624,6 +639,13 @@ class FaucetTopology:
             subrule['description'] = "device_spec default_allow"
             acl = {'rule': subrule}
             self._append_augmented_rule(rules, acl)
+
+    def _ethertype_to_port_acl(self, ether_type, ports):
+        ports = {'ports': ports}
+        output_action = {'output': ports}
+        subrule = {'eth_type': ether_type, 'actions': output_action}
+        acl = {'rule': subrule}
+        return acl
 
     def _get_acl_template(self, device_type):
         filename = self.TEMPLATE_FILE_FORMAT % device_type
