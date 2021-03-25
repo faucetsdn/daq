@@ -433,12 +433,10 @@ class FaucetTopology:
             for device in devices:
                 dot1x_ports.extend(device.gateway.get_possible_test_ports())
 
-        dot1x_pri_rule = self._ethertype_to_port_acl(self._DOT1X_ETH_TYPE, dot1x_ports)
-        incoming_acl.append(dot1x_pri_rule)
+        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_ports)
 
         dot1x_ports = list(range(1, self.sec_port))
-        dot1x_sec_rule = self._ethertype_to_port_acl(self._DOT1X_ETH_TYPE, dot1x_ports)
-        secondary_acl.append(dot1x_sec_rule)
+        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_ports)
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
@@ -457,9 +455,8 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
-            dot1x_portset_rule = self._ethertype_to_port_acl(
-                self._DOT1X_ETH_TYPE, [self.PRI_TRUNK_PORT])
-            portset_acls[port_set].append(dot1x_portset_rule)
+            self._add_acl_rule(portset_acls[port_set],
+                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT])
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -516,6 +513,7 @@ class FaucetTopology:
         self._maybe_apply(subrule, 'vlan_vid', in_vlan)
         self._maybe_apply(subrule, 'vlan_vid', kwargs)
         self._maybe_apply(subrule, 'ipv4_dst', kwargs)
+        self._maybe_apply(subrule, 'eth_type', kwargs)
 
         rule = {}
         rule['rule'] = subrule
@@ -536,9 +534,7 @@ class FaucetTopology:
         target_mac = None
         rules = []
 
-        if port != self.sec_port:
-            dot1x_rule = self._ethertype_to_port_acl(self._DOT1X_ETH_TYPE, [self.sec_port])
-            rules.append(dot1x_rule)
+        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port])
 
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
@@ -553,7 +549,7 @@ class FaucetTopology:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
         else:
-            rules = self._make_default_acl_rules()
+            rules.extend(self._make_default_acl_rules())
 
         self._write_port_acl(port, rules, file_path)
 
@@ -651,13 +647,6 @@ class FaucetTopology:
             subrule['description'] = "device_spec default_allow"
             acl = {'rule': subrule}
             self._append_augmented_rule(rules, acl)
-
-    def _ethertype_to_port_acl(self, ether_type, ports):
-        ports = {'ports': ports}
-        output_action = {'output': ports}
-        subrule = {'eth_type': ether_type, 'actions': output_action}
-        acl = {'rule': subrule}
-        return acl
 
     def _get_acl_template(self, device_type):
         filename = self.TEMPLATE_FILE_FORMAT % device_type
