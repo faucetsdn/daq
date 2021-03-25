@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-freeradius -l /tmp/radius_log
+freeradius -xx -l /tmp/radius_log
 
 source reporting.sh
 
