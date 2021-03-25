@@ -46,6 +46,7 @@ class FaucetTopology:
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
     _OFPP_IN_PORT = 0xfffffff8
+    _DOT1X_ETH_TYPE = 0x888e
 
     def __init__(self, config):
         self.config = config
@@ -432,11 +433,11 @@ class FaucetTopology:
             for device in devices:
                 dot1x_ports.extend(device.gateway.get_possible_test_ports())
 
-        dot1x_pri_rule = self._ethertype_to_port_acl(0x888e, dot1x_ports)
+        dot1x_pri_rule = self._ethertype_to_port_acl(self._DOT1X_ETH_TYPE, dot1x_ports)
         incoming_acl.append(dot1x_pri_rule)
 
         dot1x_ports = list(range(1, self.sec_port))
-        dot1x_sec_rule = self._ethertype_to_port_acl(0x888e, dot1x_ports)
+        dot1x_sec_rule = self._ethertype_to_port_acl(self._DOT1X_ETH_TYPE, dot1x_ports)
         secondary_acl.append(dot1x_sec_rule)
 
         for port_set in range(1, self.sec_port):
@@ -456,7 +457,8 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
-            dot1x_portset_rule = self._ethertype_to_port_acl(0x888e, [self.PRI_TRUNK_PORT])
+            dot1x_portset_rule = self._ethertype_to_port_acl(
+                self._DOT1X_ETH_TYPE, [self.PRI_TRUNK_PORT])
             portset_acls[port_set].append(dot1x_portset_rule)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
@@ -535,7 +537,7 @@ class FaucetTopology:
         rules = []
 
         if port != self.sec_port:
-            dot1x_rule = self._ethertype_to_port_acl(0x888e, [self.sec_port])
+            dot1x_rule = self._ethertype_to_port_acl(self._DOT1X_ETH_TYPE, [self.sec_port])
             rules.append(dot1x_rule)
 
         if self._device_specs and port in self._port_targets:
