@@ -27,20 +27,22 @@ $ cmd/build
 4. run <pre>$ sudo bin/setup_switch enx00e04c68036b </pre> replace enx00e04c68036b with your interface name. After about 2 mins, the switch is ready to be used by DAQ.
 5. Confirm you can ping switch at 192.168.1.1
 6. Connect another ethernet cable into second to last port of the switch and find the interface name. 
-7. Create **local/system.conf** to specify switch configurations and fill in the following information: 
+7. Create **local/system.yaml** to specify switch configurations and fill in the following information: 
   <pre>
   #Load the defaults
-  source config/system/default.yaml
-  ext_dpid=0x12345
-  ext_ctrl=enx00e04c68036b <-- replace with first interface name
-  ext_intf=enx00e03c689934 <-- replace with second interface name
-  ext_ofpt=6653
-  ext_ofip=192.168.1.10/16
-  ext_addr=192.168.1.1</pre>
+  include: ../config/system/default.yaml
+  switch_setup:
+    of_dpid=0x12345
+    ctrl_intf=enx00e04c68036b <-- replace with first interface name
+    data_intf=enx00e03c689934 <-- replace with second interface name
+    lo_port=6653
+    lo_addr=192.168.1.10/16
+    ip_addr=192.168.1.1
+  </pre>
  8. Verify switch config with 
  <pre>$ bin/physical_sec </pre>
  9. Plug in a test device in any port not in use.
-See [test_lab](test_lab.md) for details and additional troubleshooting.
+See [test_lab](test_lab.md) for more settings and additional troubleshooting.
 
 ## Test Run
 <pre>

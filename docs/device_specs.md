@@ -7,13 +7,13 @@ There are three levels of device configuration:
 
 ## Device Descriptions
 
-Device descriptions are simple text files indexed by MAC address included in generated
-reports. Located by default in directory
+Device descriptions are simple text files indexed by MAC address included in generated reports. Located by default in directory
 <code>local/site/mac_addrs/<em>macaddressXX</em>/aux</code>,
 they are copied unmodified into the report. See
 [`resources/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt`](../resources/test_site/mac_addrs/3c5ab41e8f0a/aux/snake.txt)
-for an example. The base site directory (`local/site`) is configurable by the
-`site_path` config parameter.
+for an example. The base site directory (`local/site`) is configurable by the `site_path` config parameter.
+
+More on site_path configurations: [Site wide configurations](site_path.md)
 
 ## Device Groupings
 

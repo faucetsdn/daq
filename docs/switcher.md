@@ -3,55 +3,43 @@
 This setup defines how to access the the control plane from a container test.
 
 ## Required Config
+* Configurations of the the access switch can be specified under swith_setup of the system config. An example of switch_setup is available under <b>config/system/ext.yaml</b>. Descriptions of these config options are available under <b>proto/system_config.proto</b>.
 
-In addition to the `ext_ofip` and `ext_addr` config values, setting
-`ext_loip` will enable switch control-plane access. It should be set
+* In addition to the `lo_addr` and `ip_addr` config values, setting
+`mods_addr` will enable switch control-plane access. It should be set
 to a pattern for the test container IP, e.g. `192.0.3.%d/24`, where
 the `%d` will be automaticaly replaced with test port set number.
-Doing this causes the `LOCAL_IP` and `SWITCH_IP` env variables to be set in
-test containers. See `docker/include/bin/test_ping` for an example of how to use them.
+Doing this causes the `LOCAL_IP` and `SWITCH_IP` env variables to be set in test containers. See `subset/ping/test_ping` for an example of how to use them.
 
-If `ext_ctrl` is defined, then this will enable utilization of the actual physical
-switch. If `ext_ctrl` is _not_ defined, then the system will spin up a special
-`daq-switch` Docker container, defined by `Dockerfile.switch`, to masquerade as
-the switch for unit testing.
+* If `ctrl_intf` is defined, then this will enable utilization of the actual physical
+switch. If `ctrl_intf` is _not_ defined, then the system will spin up a special `daq-switch` Docker container, defined by `Dockerfile.switch`, to masquerade as the switch for unit testing.
 
 ## Test Run
 This is a sample test run while using a simulated docker switch container
 along with an 'external' OVS switch as per the automated integration tests.
 <pre>
-~/daq$ <b>cp config/system/ext.yaml local/system.yaml</b>
+~/daq$ <b>echo "include: ../config/system/ext.yaml" > local/system.yaml</b>
 ~/daq$ <b>cmd/run -s</b>
-Loading config from local/system.yaml
-Starting Sun Dec 23 08:36:09 PST 2018
-Clearing previous reports...
-Running as root...
-Loading config from local/system.yaml
-Release version 0.9.0
-cleanup='echo cleanup'
-ext_addr=192.0.2.138
-ext_dpid=0x123456789
-ext_intf=ext-ovs-pri
-<b>ext_loip=192.0.3.%d/24</b>
-ext_ofip=192.0.2.10/24
-ext_ofpt=6666
-sec_port=7
-&hellip;
-Loading config from local/system.yaml
+Flattening config from local/system.yaml into inst/config/system.conf
+Running switch setup...
 Using default cplane_mac f8:39:71:c9:7a:09
 Cleaning old setup...
 Creating ovs-link interfaces...
 Creating local-link interfaces...
-Creating local bridge...
-Creating daq-switch, because only ext_addr defined.
+Creating local bridge ctrl-br...
+Configuring ctrl-swy with 192.0.2.10/24
+Creating daq-switch as per FAUX_SWITCH switch model.
 daq-switch
-<b>Creating docker with veth -swb at 192.0.2.138/16</b>
+Creating daq-switch at 192.0.2.138/24 linked via ctrl-swa
+DAQ autoclean docker rm -f daq-switch
+DAQ autoclean ip link del ctrl-swa
+Ignoring interface ext-ovs-ctl in favor of ctrl-swa
+Skipping bring-up of ovs switch interface ext-ovs-pri
 Bridging ctrl-swa to ctrl-br
-<b>Configuring ctrl-swy with 192.0.2.10/16</b>
-Checking external connection to 192.0.2.138
+Warmup ping for 192.0.2.138
 PING 192.0.2.138 (192.0.2.138) 56(84) bytes of data.
-64 bytes from 192.0.2.138: icmp_seq=1 ttl=64 time=0.315 ms
-64 bytes from 192.0.2.138: icmp_seq=2 ttl=64 time=0.061 ms
+64 bytes from 192.0.2.138: icmp_seq=1 ttl=64 time=16.9 ms
+64 bytes from 192.0.2.138: icmp_seq=2 ttl=64 time=0.052 ms
 
 --- 192.0.2.138 ping statistics ---
 2 packets transmitted, 2 received, 0% packet loss, time 1027ms
@@ -64,33 +52,42 @@ INFO:mininet:...
 <b>INFO:network:Attaching switch interface ctrl-pri on port 1000</b>
 INFO:runner:Waiting for system to settle...
 INFO:runner:Entering main event loop.
-INFO:runner:If this blocks for too long, check inst/faucet.log for errors
+INFO:runner: See docs/troubleshooting.md if this blocks for more than a few minutes.
 INFO:runner:Port 2 dpid 4886718345 is now active True
-INFO:runner:System port 7 on dpid 4886718345 is active True
 &hellip;
 INFO:runner:Done with runner.
 INFO:daq:DAQ runner returned 0
 Cleanup ovs-vsctl del-br ext-ovs
 Cleanup ip link del ext-ovs-pri
+Cleanup docker rm -f daq-switch
+daq-switch
+Cleanup ip link del ctrl-swa
+Cannot find device "ctrl-swa"
+Cleanup ip link del ctrl-pri
+Cleanup ip link del ctrl-swx
+Cleanup ovs-vsctl --if-exists del-br ctrl-br
+Cleanup docker cp daq-usi:/root/logs.txt inst/cmdusi.log
+Cleanup docker kill daq-usi
+daq-usi
 Cleanup docker kill daq-faux
 daq-faux
 Done with run, exit 0
-~/daq$ <b>cat inst/run-port-02/nodes/ping02/activate.log</b>
+~/daq$ <b>cat inst/run-9a02571e8f02/nodes/ping02/activate.log</b>
 
--rw-r--r-- 1 root root 8674 Dec 23 16:37 /scans/startup.pcap
-reading from file /scans/startup.pcap, link-type EN10MB (Ethernet)
-66 packets captured.
+Baseline ping test report
 &hellip;
-<b>Configuring network with local address 192.0.3.22/16</b>
+reading from file /home/username/daq/inst/run-9a02571e8f02/test_root/scans/startup.pcap, link-type EN10MB (Ethernet)
+%% 40 packets captured.
+&hellip;
+<b>Configuring network with local address 192.0.2.122/24</b>
+Using IP index 122
 PING 192.0.2.138 (192.0.2.138) 56(84) bytes of data.
-64 bytes from 192.0.2.138: icmp_seq=1 ttl=64 time=2056 ms
-64 bytes from 192.0.2.138: icmp_seq=2 ttl=64 time=1025 ms
-64 bytes from 192.0.2.138: icmp_seq=3 ttl=64 time=1.52 ms
-64 bytes from 192.0.2.138: icmp_seq=4 ttl=64 time=0.136 ms
-64 bytes from 192.0.2.138: icmp_seq=5 ttl=64 time=0.127 ms
+64 bytes from 192.0.2.138: icmp_seq=1 ttl=64 time=0.026 ms
+64 bytes from 192.0.2.138: icmp_seq=2 ttl=64 time=0.024 ms
 
 --- 192.0.2.138 ping statistics ---
-5 packets transmitted, 5 received, 0% packet loss, time 4070ms
+2 packets transmitted, 2 received, 0% packet loss, time 27ms
+rtt min/avg/max/mdev = 0.024/0.025/0.026/0.001 ms
 &hellip;
-Passed basic connectivity tests.
+Critical module status is pass
 </pre>
