@@ -427,16 +427,16 @@ class FaucetTopology:
         local_acl = []
         acls = {}
 
-        dot1x_ports = []
+        dot1x_pri_ports = []
 
         for devices in self._set_devices.values():
             for device in devices:
-                dot1x_ports.extend(device.gateway.get_possible_test_ports())
+                dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
 
-        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_ports)
+        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_pri_ports)
 
-        dot1x_ports = list(range(1, self.sec_port))
-        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_ports)
+        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE,
+                           ports=list(range(1, self.sec_port)))
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
