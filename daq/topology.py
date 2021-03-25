@@ -425,7 +425,7 @@ class FaucetTopology:
         dot1x_pri_rule = self._ethertype_to_port_acl(0x888e, dot1x_pri_ports)
         incoming_acl.append(dot1x_pri_rule)
 
-        dot1x_sec_ports = list(range(1,self.sec_port))
+        dot1x_sec_ports = list(range(1, self.sec_port))
         dot1x_sec_rule = self._ethertype_to_port_acl(0x888e, dot1x_sec_ports)
         secondary_acl.append(dot1x_sec_rule)
 
