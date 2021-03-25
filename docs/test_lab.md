@@ -56,7 +56,7 @@ host. The port used for this is defined as part of the vendor-specific switch se
 2. _Data_ plane connection, which provides for all data access for the devices. Internet access for
 the devices will be filtered/proxied through the controller host. The port used for this is defined
 by the `sec_port` config (see below).
-3. _etra_ devices, also known as _faux_ devices (not required), can be used to run a simulated
+3. _eXtra_ devices, also known as _faux_ devices (not required), can be used to run a simulated
 device on the controller host.
 
 ### Extra Network Connections
