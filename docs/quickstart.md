@@ -42,7 +42,7 @@ $ cmd/build
  8. Verify switch config with 
  <pre>$ bin/physical_sec </pre>
  9. Plug in a test device in any port not in use.
-See [test_lab](test_lab.md) for more  and additional troubleshooting.
+See [test_lab](test_lab.md) for more settings and additional troubleshooting.
 
 ## Test Run
 <pre>
