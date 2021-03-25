@@ -16,12 +16,24 @@ on the command line, or with the more verbose long-form (`single_shot=true`).
 * `-n`, `no_test`: Do not test devices, just put them on the network.
 * `-s`, `single_shot`: Don't repeat tests, only do one run.
 
-## `local/system.conf` File.
+## Local Configuration File `local/system.yaml`
 
 Additional long-form options are documented in the `config/system/default.yaml` file,
-and can also be included on the command-line.
+and can also be included on the command-line to overwrite options in the config file.
 
-### Debugging
+e.g.: `cmd/run build_tests=true keep_hold=true`
+
+Config files may also inherit from other config files but inheritance must be explicity stated by using "include" with path <b>relative</b> to the config file. Other configurations specified in the same config file will overwrite inherited options. 
+
+e.g. Assuming the following config file is located at daq/local/system.yaml
+<pre>
+include: ../config/system/default.yaml
+</pre>
+The referenced file should exist at daq/config/system/default.yaml. 
+
+
+### Common Configuration Options
+#### Debugging
 
 * `daq_loglevel`: Set log-level for daq-based logging commands.
 * `mininet_loglevel`: Set log-level for underlying mininet commands.
@@ -29,11 +41,11 @@ and can also be included on the command-line.
 
 e.g.: `cmd/run daq_loglevel=debug run_limit=10`
 
-### Timeout setting
+#### Timeout setting
 
 * `default_timeout_sec`: Set default global module timeout. Applies to all modules. 
 
-### DHCP settings
+#### DHCP settings
 
 * `initial_dhcp_lease_time`: Set the initial DHCP lease time. Lease time must be greater than 120s. 
 * `dhcp_lease_time`: Set the ongoing DHCP lease time for when all devices are running test modules.
@@ -66,4 +78,12 @@ out from something run with a complete test suite.
 
 ## More on configurations
 1. [Site wide configurations](site_path.md)
-2. [Device Specific configurations](device_specs.md)
+1. [Device specific configurations](device_specs.md)
+1. [External switch configurations](switcher.md)
+1. [Configure test modules to run](add_test.md)
+1. [Faux devices configurations](faux.md)
+1. Both YAML and Conf are supported as local configurations files, but only one of them may exist under `local` directory. Additionally, yaml files may include conf files; conf files may include yaml files. 
+
+## More usecase setups
+1. [Device Qualification](qualification.md)
+1. [Test lab](test_lab.md)

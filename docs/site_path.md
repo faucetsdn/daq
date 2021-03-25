@@ -1,13 +1,13 @@
 # Site path configuration
 
 The `site_path` configuration variable determines where site-specific information is stored.
-This is different than `local/` which is always local to the physical machine. The site path
-would ideally be stored in a git repo (separate from DAQ), that can then be used to share
-configuration across installs. The site path defaults to `local/site`, which means you can
-also store your entire configuration of local/ in the same source control repo, if desired.
+This is different than `local/` which is always local to the physical machine. The site path would ideally be stored in a git repo (separate from DAQ), that can then be used to share configuration across installs. 
 
-For initial testing and setup, setting `site_path=resources/test_site` will use the default devices
-used for integration testing and is a good way to get started.
+The site path defaults to `local/site`, which means you can
+also store your entire configuration of local/ in the same source control repo. Site path is also by default referenced from the root of DAQ installation but it may be an aboluste path, if desired.
+
+For initial testing and setup, setting `site_path=resources/test_site` will use the default devices used for integration testing and is a good way to get started.
+
 
 # Module configs
 

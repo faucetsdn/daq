@@ -1,12 +1,7 @@
 # Device Qualification
 
-One primary function of DAQ is the ability to automatically (and continuously) test devices against
-a set of recognized standards. The goal is to increase the overall security level of devices to
-help prevent system compromise. In the base case, once the system is setup, a device can be plugged in
-and automatically tested against the built-in suite of tests to measure complicance. Core tests
-focus on base network operation (e.g. proper handling of DHCP) and security measures (e.g. proper
-use of TLS). Techincally, the core framework is a python program that coordinates the operation of
-dockerized test containers to run against tests against network-attached target devices; afterwards,
+One primary function of DAQ is the ability to automatically (and continuously) test devices against a set of recognized standards. The goal is to increase the overall security level of devices to help prevent system compromise. In the base case, once the system is setup, a device can be plugged in and automatically tested against the built-in suite of tests to measure complicance. Core tests focus on base network operation (e.g. proper handling of DHCP) and security measures (e.g. proper
+use of TLS). Techincally, the core framework is a python program that coordinates the operation of dockerized test containers to run against tests against network-attached target devices; afterwards,
 a report is generated and optionally uploaded to a web dashboard.
 
 ## Quickstart
@@ -16,31 +11,27 @@ For the system overall, this installs a minimum set of basic packages, docker, a
 Additionally, it sets up a local install of required packages and components. After setup,
 also run `cmd/build` to build the necessary Docker images.
 
-To configure the system to run the comprehensive suite of tests, copy `config/system/all.conf` to
-`local/system.conf` (creating `local` if necessary). The basic qualification suite can be run with
-`cmd/run -s`. The `-s` means <em>single shot</em> and will run tests just once and then exit (see the
-[options documentation](options.md) for more details). The output should approximately look like this
-[example log output](run_log.md).
+To configure the system to run the comprehensive suite of tests, do
+<pre>
+echo "include: ../config/system/all.conf > local/system.yaml
+</pre>
+(creating `local` if necessary). The basic qualification suite can be run with `cmd/run -s`. The `-s` means <em>single shot</em> and will run tests just once and then exit (see the
+[options documentation](options.md) for more details). The output should approximately look like this [example log output](run_log.md).
 
 ## Configuration
 
-After an initial test-install run, edit `local/system.conf` to specify the network adapter
-name(s) of the device adapter(s) or external physical switch.
-If the file does not exist, it will be populated with a default version on system start with
-defaults that use the internal _faux_ test client: This is recommended the first time around
-as it will test the install to make sure everything works properly. The various options are
-documented in the configuration file itself. Note that the file follows "assignment" semantics,
-so the last declaration of a variable will be the only one that sticks. (The `local/`
-subdirectory contains all information local to the DAQ install, such as configuration information
-or cloud credentials.)
+After an initial test-install run, edit `local/system.yaml` to specify the network adapter name(s) of the device adapter(s) or external physical switch.
+
+If the file does not exist, it will be populated with a default version on system start with defaults that use the internal _faux_ test client: This is recommended the first time around as it will test the install to make sure everything works properly.
+
+The various options are documented in the configuration file itself. Note that the file follows "assignment" semantics, so the last declaration of a variable will be the only one that sticks. (The `local/` subdirectory contains all information local to the DAQ install, such as configuration information or cloud credentials.)
 
 ## Report Generation
 
 After a test run, the system creates a <em>test report document</em> in a file that is named
 something like <code>inst/report_<em>macaddressXX</em>_<em>timestamp</em>.txt</code>. This file
 contains a complete summary of all the test results most germane to qualifying a device
-([complete example report](report.md)). If properly configured, this report will be uploaded to
-the configured cloud instance and available for download from the Web UI.
+([complete example report](report.md)). If qualification dashboard is configured, this report will be uploaded to the configured cloud instance and available for download from the Web UI. Please see more in the next section.
 
 ## Qualification Dashboard
 
@@ -48,8 +39,7 @@ The (optional) cloud dashboard requires a service-account certification to grant
 Contact the project owner to obtain a new certificate for a dashboard page on an already
 existing cloud project. Alternatively set up a new project by following the
 [Firebase install instructions](firebase.md). The `bin/stress_test` script is useful for
-setting up a continuous qualification environment: it runs in the background and pipes the output
-into a rotating set of logfiles.
+setting up a continuous qualification environment: it runs in the background and pipes the output into a rotating set of logfiles. See [here](service.md) for configuring DAQ to use the service account.
 
 ## Containerized Tests
 

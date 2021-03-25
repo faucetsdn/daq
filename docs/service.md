@@ -18,7 +18,7 @@ and unpredictable results.
 
 2. Install the downloaded key into the DAQ install.
    * Copy the download JSON key file to the `local/` directory.
-   * Edit `local/system.conf` to specify the `gcp_cred` setting to point to the downloaded file
+   * Edit `local/system.yaml` to specify the `gcp_cred` setting to point to the downloaded file
      (with a path relative to the `daq` install directory), e.g.
      `gcp_cred=local/daq-testlab-de56aa4b1e47.json`.
 
