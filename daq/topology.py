@@ -131,7 +131,7 @@ class FaucetTopology:
             device_intfs.append(intf_names[port-1] if named_port else default_name)
         return device_intfs
 
-    def _populate_set_devices(device, port_set):
+    def _populate_set_devices(self, device, port_set):
         device_set = device.gateway.port_set
         assert port_set == device_set or not port_set
         if port_set:
@@ -152,9 +152,9 @@ class FaucetTopology:
             interfaces[port]['native_vlan'] = vlan
         self._generate_acls()
 
-    def direct_port_traffic(self, device, port_no, target, port_set=None):
+    def direct_port_traffic(self, device, port_no, target):
         """Direct traffic from a port to specified port set"""
-        self._populate_set_devices(device, port_set)
+        self._populate_set_devices(device, device.gateway.port_set)
         if target is None and port_no in self._port_targets:
             del self._port_targets[port_no]
         elif target is not None and port_no not in self._port_targets:

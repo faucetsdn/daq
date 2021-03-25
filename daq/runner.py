@@ -370,8 +370,8 @@ class DAQRunner:
         port_info = self._ports[port]
         port_info.active = False
 
-    def _direct_port_traffic(self, device, port, target, portset=None):
-        self.network.direct_port_traffic(device, port, target, portset)
+    def _direct_port_traffic(self, device, port, target):
+        self.network.direct_port_traffic(device, port, target)
 
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
@@ -596,7 +596,7 @@ class DAQRunner:
                     'port_set': gateway.port_set,
                     'mac': device.mac
                 }
-                self._direct_port_traffic(device, device.port.port_no, target, gateway.port_set)
+                self._direct_port_traffic(device, device.port.port_no, target)
             else:
                 self._direct_device_traffic(device, gateway.port_set)
             return True
