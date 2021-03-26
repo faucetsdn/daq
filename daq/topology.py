@@ -431,7 +431,8 @@ class FaucetTopology:
 
         for devices in self._set_devices.values():
             for device in devices:
-                dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
+                if device and device.gateway:
+                    dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
 
         self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_pri_ports)
 
