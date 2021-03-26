@@ -191,7 +191,8 @@ class DAQRunner:
         config['test_list'] = test_list
         config['test_metadata'] = self._get_test_metadata()
         LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
-        LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
+        tests_string = ', '.join(config['test_list']) or '**none**'
+        LOGGER.info('Configured with tests %s' % tests_string)
         LOGGER.info('DAQ version %s' % self._daq_version)
         LOGGER.info('LSB release %s' % self._lsb_release)
         LOGGER.info('system uname %s' % self._sys_uname)
@@ -607,10 +608,9 @@ class DAQRunner:
         self.network.direct_device_traffic(device, port_set)
 
     def _get_test_list(self, test_file):
-        no_test = self.config.get('no_test', False)
-        if no_test:
+        if self.config.get('no_test', False):
             LOGGER.warning('Suppressing configured tests because no_test')
-            return ['hold']
+            return []
         test_ordering = {
             "first": [],
             "last": [],
@@ -1000,11 +1000,11 @@ class DAQRunner:
 
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
-        LOGGER.info('Loading base config from %s', base_conf)
+        LOGGER.info('Loading base config from %s', os.path.abspath(base_conf))
         base = self.configurator.load_config(base_conf)
         site_path = self.config.get('site_path')
         site_config_file = os.path.join(site_path, self._SITE_CONFIG)
-        LOGGER.info('Loading site config from %s', site_config_file)
+        LOGGER.info('Loading site config from %s', os.path.abspath(site_config_file))
         site_config = self.configurator.load_config(site_config_file, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,

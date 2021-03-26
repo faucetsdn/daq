@@ -628,7 +628,7 @@
         
       
         <h3 id="DeviceReporting">DeviceReporting</h3>
-        <p>Configuration for device result reporting</p>
+        <p>Configuration for device result reporting.</p>
 
         
           <table class="field-table">
@@ -648,7 +648,7 @@
                   <td>rpc_timeout_sec</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>GRPC timeout in seconds </p></td>
+                  <td><p>RPC timeout in seconds </p></td>
                 </tr>
               
             </tbody>
@@ -797,10 +797,38 @@
                 </tr>
               
                 <tr>
-                  <td>alt_port</td>
+                  <td>varz_port</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>Local port for an alternate OpenFlow controller </p></td>
+                  <td><p>Port for varz server </p></td>
+                </tr>
+              
+                <tr>
+                  <td>varz_port_2</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Port for second varz server </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_of_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Port for an alternate stack setup (not controlled by daq). </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_varz_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Port for alternate setup varz server. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>native</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Run network controller native, not in container. </p></td>
                 </tr>
               
                 <tr>

@@ -13,10 +13,10 @@ vxlan_key=$switch_setup_vxlan_key
 ext_pri=${ext_intf}
 ext_sec=${ext_intf%-pri}-sec
 
-if [ -z "$switch_setup_alt_port" ]; then
-    ext_ofpt=$switch_setup_lo_port
+if [ -n "$switch_setup_alt_of_port" ]; then
+    ext_ofpt=$switch_setup_alt_of_port
 else
-    ext_ofpt=$switch_setup_alt_port
+    ext_ofpt=$switch_setup_lo_port
 fi
 
 echo ext_dpid is $ext_dpid on port $ext_ofpt

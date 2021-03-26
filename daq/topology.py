@@ -11,8 +11,6 @@ from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 
 LOGGER = logger.get_logger('topology')
 
-FAUCET = 'faucet'
-GAUGE = 'gauge'
 
 class FaucetTopology:
     """Topology manager specific to FAUCET configs"""
@@ -57,6 +55,7 @@ class FaucetTopology:
         self.sec_dpid = int(switch_setup['of_dpid'], 0)
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
+        self._native_faucet = switch_setup.get('native')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
@@ -74,32 +73,30 @@ class FaucetTopology:
 
     def start(self):
         """Start this instance"""
-        if self._ext_faucet:
-            LOGGER.info('Relying on external faucet...')
-            return
         self._run_faucet()
-        self._run_faucet(GAUGE)
+        self._run_faucet(as_gauge=True)
 
     def stop(self):
         """Stop this instance"""
-        LOGGER.debug("Stopping faucet...")
-        self.pri.cmd('docker kill daq-faucet')
-        self.pri.cmd('docker kill daq-gauge')
+        if self._ext_faucet and not self._native_faucet:
+            return
+        self._run_faucet(kill=True)
+        self._run_faucet(kill=True, as_gauge=True)
 
-    def _run_faucet(self, process=FAUCET):
-        LOGGER.info('Starting %s...', process)
+    def _run_faucet(self, kill=False, as_gauge=False):
+        process_name = 'gauge' if as_gauge else 'faucet'
+        native_arg = ' native' if self._native_faucet else ''
+        gauge_arg = ' gauge' if as_gauge else ''
+        kill_arg = ' kill' if kill else ''
 
-        if process == FAUCET:
-            cmd = '%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR
-        elif process == GAUGE:
-            cmd = ('%s/cmd/faucet gauge && echo SUCCESS' % DAQ_LIB_DIR)
-        else:
-            raise Exception('Unknown process %s' % process)
+        LOGGER.info('Starting%s%s %s...', native_arg, kill_arg, process_name)
+        cmd = '%s/cmd/faucet%s%s%s && echo SUCCESS' % (
+            DAQ_LIB_DIR, native_arg, kill_arg, gauge_arg)
 
         output = self.pri.cmd(cmd)
         if not output.strip().endswith('SUCCESS'):
-            LOGGER.info('%s output: %s', process, output)
-            assert False, '%s startup failed' % process
+            LOGGER.error('%s output:\n%s', process_name, output)
+            assert False, '%s failed' % process_name
 
 
     def _load_file(self, filename):
