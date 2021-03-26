@@ -46,7 +46,6 @@ class FaucetTopology:
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
     _OFPP_IN_PORT = 0xfffffff8
-    _DOT1X_ETH_TYPE = 0x888e
 
     def __init__(self, config):
         self.config = config
@@ -427,17 +426,6 @@ class FaucetTopology:
         local_acl = []
         acls = {}
 
-        dot1x_pri_ports = []
-
-        for devices in self._set_devices.values():
-            for device in devices:
-                dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
-
-        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_pri_ports)
-
-        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE,
-                           ports=list(range(1, self.sec_port)))
-
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
 
@@ -455,8 +443,6 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
-            self._add_acl_rule(portset_acls[port_set],
-                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT])
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -513,7 +499,6 @@ class FaucetTopology:
         self._maybe_apply(subrule, 'vlan_vid', in_vlan)
         self._maybe_apply(subrule, 'vlan_vid', kwargs)
         self._maybe_apply(subrule, 'ipv4_dst', kwargs)
-        self._maybe_apply(subrule, 'eth_type', kwargs)
 
         rule = {}
         rule['rule'] = subrule
@@ -534,8 +519,6 @@ class FaucetTopology:
         target_mac = None
         rules = []
 
-        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port])
-
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
             target_mac = target['mac']
@@ -548,10 +531,9 @@ class FaucetTopology:
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
+            self._write_port_acl(port, rules, file_path)
         else:
-            rules.extend(self._make_default_acl_rules())
-
-        self._write_port_acl(port, rules, file_path)
+            self._write_port_acl(port, self._make_default_acl_rules(), file_path)
 
         return target_mac
 

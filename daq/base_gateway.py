@@ -173,12 +173,6 @@ class BaseGateway(ABC):
         """Return the host targets associated with this gateway"""
         return self.targets.values()
 
-    def get_possible_test_ports(self):
-        """Return test ports associated with gateway"""
-        test_port = self._switch_port(self.TEST_OFFSET_START)
-        limit_port = self._switch_port(self.NUM_SET_PORTS)
-        return list(range(test_port, limit_port))
-
     def terminate(self):
         """Terminate this instance"""
         assert not self.targets, 'gw %s has targets %s' % (
