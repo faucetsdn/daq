@@ -109,7 +109,7 @@ if [ -n "$switch_setup_ext_br" ]; then
     autostart bin/external_ovs
 fi
 
-if [ -n "$switch_setup_alt_port" ]; then
+if [ -n "$switch_setup_alt_of_port" ]; then
     autostart bin/alt_faucet
 fi
 

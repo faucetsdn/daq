@@ -111,14 +111,14 @@ message DaqConfig {
 
   // Failure testing triggers
   map<string, string> fail_module = 47;
-  
+
   // Set time between port disconnect and host tests shutdown
   int32 port_flap_timeout_sec = 48;
 
   // USI url
   UsiSetup usi_setup = 49;
 
-  // Configures events that trigger a DAQ run 
+  // Configures events that trigger a DAQ run
   RunTrigger run_trigger = 50;
 
   // verbose output
@@ -173,7 +173,7 @@ message SwitchSetup {
 
   // IP address of external switch.
   string ip_addr = 11;
-  
+
   // Dataplane uplink port
   int32 uplink_port = 13;
 
@@ -183,11 +183,23 @@ message SwitchSetup {
   // Local port of second DAQ OpenFlow controller
   int32 lo_port_2 = 15;
 
-  // Local port for an alternate OpenFlow controller
-  int32 alt_port = 16;
+  // Port for varz server
+  int32 varz_port = 30;
+
+  // Port for second varz server
+  int32 varz_port_2 = 31;
+
+  // Port for an alternate stack setup (not controlled by daq).
+  int32 alt_of_port = 16;
+
+  // Port for alternate setup varz server.
+  int32 alt_varz_port = 17;
+
+  // Run network controller native, not in container.
+  bool native = 18;
 
   // IP address and subnet for local control plane interface
-  string lo_addr = 18;
+  string lo_addr = 19;
 
   // IP address template and subnet for module ip addresses
   string mods_addr = 20;
@@ -231,7 +243,7 @@ message VxlanSetup {
 message RunTrigger {
   // start of vlan range
   int32 vlan_start = 1;
-  
+
   // end of vlan range
   int32 vlan_end = 2;
 
@@ -251,11 +263,12 @@ message Interface {
 }
 
 /*
- * Configuration for device result reporting
+ * Configuration for device result reporting.
  */
 message DeviceReporting {
   // Server port
   int32 server_port = 1;
-  // GRPC timeout in seconds
+
+  // RPC timeout in seconds
   int32 rpc_timeout_sec = 2;
 }

@@ -1,45 +1,51 @@
 #!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
-CONTAINER=daq-faucet
-INSTDIR=$ROOT/inst
-IMAGE=daqf/faucet
-PROM_TARGET=9302
-FAUCET_SOCK=faucet_event.sock
-FAUCET_LOG=faucet.log
-SYSTEM_CONF=system.conf
-LOCAL_CONFIG=local/$SYSTEM_CONF
-
-ext_ofpt=6653
-prom_pt=
-docker_volumes=
-port_opts=
-
 cd $ROOT
 source bin/config_base.sh
 
-if [ -n "$switch_setup_lo_port" ]; then
-    ext_ofpt=$switch_setup_lo_port
+RUNTIME=$(realpath $DAQ_RUN)
+SYSTEM_CONF=system.conf
+RYU_CONF=$(realpath $DAQ_RUN/ryu.conf)
+
+ext_ofpt=
+prom_pt=
+port_opts=
+native=
+
+if [ "$1" == "native" ]; then
+    native=y
+    shift
+fi
+
+if [ "$1" == "kill" ]; then
+    kill=y
+    shift
 fi
 
 if [ "$1" == "local" ]; then
-    docker_volumes="-v $ROOT/faucet/faucet:/usr/lib/python3.6/site-packages/faucet"
+    local=y
     shift
 fi
 
 if [ "$1" == "gauge" ]; then
-    CONTAINER=daq-gauge
-    IMAGE=daqf/gauge
+    BASECMD=gauge
     PROM_TARGET=9303
     FAUCET_SOCK=
     ext_ofpt=${switch_setup_lo_port_2:-6654}
-    prom_pt=9303
+    prom_pt=${switch_setup_varz_port_2:-9303}
     shift
+else
+    BASECMD=faucet
+    PROM_TARGET=9302
+    FAUCET_SOCK=faucet_event.sock
+    ext_ofpt=${switch_setup_lo_port:-6653}
+    prom_pt=${switch_setup_varz_port}
 fi
 
 if [ -n "$1" ]; then
     CONTAINER=$CONTAINER-$1
-    INSTDIR=$INSTDIR/faucet/daq-faucet-$1
+    RUNTIME=$(realpath $DAQ_RUN/faucet/daq-faucet-$1)
     shift
 fi
 
@@ -53,38 +59,107 @@ if [ -n "$1" ]; then
     shift
 fi
 
-echo Creating $IMAGE instance $CONTAINER on port $ext_ofpt in $INSTDIR
+CONTAINER=daq-$BASECMD
+IMAGE=daqf/$BASECMD
+NATIVE_CMD=$BASECMD
+PID_FILE=$RUNTIME/$BASECMD.pid
+PREFIX=`echo $BASECMD | tr a-z A-Z`
+LOG_VAR=${PREFIX}_LOG
 
-mkdir -p $INSTDIR
-rm -f $INSTDIR/$FAUCET_LOG
+LOG_FILE=$RUNTIME/$BASECMD.log
+export $LOG_VAR=$LOG_FILE
+mkdir -p $RUNTIME
+rm -f $LOG_FILE
 
-if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
-    echo -n "Clensing old container "
-    docker rm -f $CONTAINER
+if [[ -n $native ]]; then
+    if [[ -f $PID_FILE ]]; then
+        pid=$(< $PID_FILE)
+        rm -f $PID_FILE
+        echo killing $BASECMD pid $pid
+        kill $pid || true
+    elif [[ -n $kill ]]; then
+        echo kill specified but no pid file $PID_FILE
+        exit 1
+    fi
+    $BASECMD -V
+else
+    if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
+        echo -n "Clensing old container "
+        docker rm -f $CONTAINER
+    elif [[ -n $kill ]]; then
+        echo kill specified but no running container $CONTAINER
+        exit 1
+    fi
+fi
+
+if [[ -n $kill ]]; then
+    exit 0
 fi
 
 if [ -n "$FAUCET_SOCK" ]; then
-    rm -f $INSTDIR/$FAUCET_SOCK
-    event_sock=/var/log/faucet/$FAUCET_SOCK
+    rm -f $RUNTIME/$FAUCET_SOCK
 fi
 
-docker_envs="\
-        --env FAUCET_CONFIG_STAT_RELOAD=1 \
-        --env FAUCET_EVENT_SOCK=$event_sock \
-        --env GAUGE_CONFIG_STAT_RELOAD=1"
+if [[ -n $native ]]; then
+    [ -f $RYU_CONF ] || (echo $RYU_CONF not found.; exit 1)
+    export ${PREFIX}_EXCEPTION_LOG=$RUNTIME/${BASECMD}_exception.log
+    export ${PREFIX}_PROMETHEUS_PORT=${prom_pt:-$PROM_TARGET}
+    export ${PREFIX}_CONFIG=$RUNTIME/$BASECMD.yaml
+    export ${PREFIX}_EVENT_SOCK=$RUNTIME/$FAUCET_SOCK
+    export ${PREFIX}_CONFIG_STAT_RELOAD=1
+    export RYU_LISTEN_PORT=$ext_ofpt
+    export WSAPI_LISTEN_PORT=4567
+    echo Launching $BASECMD $RYU_LISTEN_PORT $FAUCET_PROMETHEUS_PORT $WSAPI_LISTEN_PORT
+    env | fgrep ${PREFIX}_
+    $BASECMD --ryu-config-file=$RYU_CONF --ryu-ofp-tcp-listen-port=$RYU_LISTEN_PORT &
+    echo $! > $PID_FILE
+    echo Started $BASECMD pid $(< $PID_FILE)
+else
+    echo Creating $IMAGE instance $CONTAINER on port $ext_ofpt in $RUNTIME
 
-docker_volumes+="\
-        -v $INSTDIR:/etc/faucet \
-        -v $INSTDIR:/var/log/faucet"
+    # Make sure container exists to prevent pulling from repo.
+    docker inspect $IMAGE > /dev/null
 
-if [ -n "$prom_pt" ]; then
-    port_opts="-p $prom_pt:$PROM_TARGET"
+    docker_volumes=
+
+    docker_envs="\
+            --env FAUCET_CONFIG_STAT_RELOAD=1 \
+            --env FAUCET_EVENT_SOCK=/var/log/faucet/$FAUCET_SOCK \
+            --env GAUGE_CONFIG_STAT_RELOAD=1"
+
+    if [[ -n $local ]]; then
+        docker_volumes+="-v $ROOT/faucet/faucet:/usr/lib/python3.6/site-packages/faucet"
+    fi
+
+    docker_volumes+="\
+            -v $RUNTIME:/etc/faucet \
+            -v $RUNTIME:/var/log/faucet"
+
+    if [ -n "$prom_pt" ]; then
+        port_opts="-p $prom_pt:$PROM_TARGET"
+    fi
+
+    cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $port_opts $IMAGE)
+    echo Container $CONTAINER started as $cid
 fi
 
-cid=$(docker run -d --privileged --name $CONTAINER $docker_volumes $docker_envs -p $ext_ofpt:6653 $port_opts $IMAGE)
-echo Container $CONTAINER started as $cid
+if [ -n "$FAUCET_SOCK" ]; then
+    status=fail
+    for retry in $(seq 1 10); do
+        if [[ -e $RUNTIME/$FAUCET_SOCK ]]; then
+            status=pass
+            break;
+        fi
+        echo Waiting for $RUNTIME/$FAUCET_SOCK to exist...
+        sleep 10
+    done
 
-while [ -n "$FAUCET_SOCK" -a ! -e $INSTDIR/$FAUCET_SOCK ]; do
-    echo Waiting for $INSTDIR/$FAUCET_SOCK to exist...
+    if [[ $status == fail ]]; then
+        cat $FAUCET_LOG
+        exit 1
+    fi
+else
     sleep 10
-done
+fi
+
+echo $CONTAINER started successfully.

@@ -31,6 +31,7 @@ class _STATE:
     NEXT = 'Ready for next'
     TESTING = 'Active test'
     DONE = 'Done with sequence'
+    HOLD = 'Holding with no test'
     TERM = 'Host terminated'
 
 
@@ -44,7 +45,6 @@ class MODE:
     EXEC = 'exec'
     FINE = 'fine'
     NOPE = 'nope'
-    HOLD = 'hold'
     DONE = 'done'
     TERM = 'term'
     LONG = 'long'
@@ -93,6 +93,7 @@ class ConnectedHost:
         self.gateway = device.gateway
         self.config = config
         self.switch_setup = self.config.get('switch_setup', {})
+        self._no_test = self.config.get('no_test', False)
         self.device = device
         self.target_mac = device.mac
         self.target_port = device.port.port_no
@@ -406,7 +407,7 @@ class ConnectedHost:
         timeout_sec = self._get_test_timeout(self.test_name)
         if self.test_host:
             self.test_host.heartbeat()
-        if not timeout_sec or not self.test_start:
+        if not timeout_sec or not self.test_start or self._no_test:
             return
         timeout = gcp.parse_timestamp(self.test_start) + timedelta(seconds=timeout_sec)
         nowtime = gcp.parse_timestamp(gcp.get_timestamp())
@@ -629,6 +630,9 @@ class ConnectedHost:
                 self.logger.debug('Target device %s executing tests %s',
                                   self, self.remaining_tests)
                 self._run_test(self.remaining_tests.pop(0))
+            elif self._no_test:
+                self.logger.info('Target device %s entering no test hold', self)
+                self._state_transition(_STATE.HOLD, _STATE.NEXT)
             else:
                 self.logger.info('Target device %s no more tests remaining', self)
                 self.timeout_handler = self._aux_module_timeout_handler

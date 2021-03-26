@@ -9,8 +9,8 @@ if [ -z "$switch_setup_ext_br" ]; then
    false
 fi
 
-if [ -z "$switch_setup_alt_port" ]; then
-   echo switch_setup.alt_port not defined for alternate faucet setup.
+if [ -z "$switch_setup_alt_of_port" ]; then
+   echo switch_setup.alt_of_port not defined for alternate faucet setup.
    false
 fi
 
@@ -19,6 +19,6 @@ inst_name=$switch_setup_ext_br
 inst_dir=inst/faucet/daq-faucet-$inst_name
 mkdir -p $inst_dir
 cp config/faucet/faucet_$inst_name.yaml $inst_dir/faucet.yaml
-echo Launching alternate faucet install $inst_name on $switch_setup_alt_port
+echo Launching alternate faucet $inst_name on $switch_setup_alt_of_port $switch_setup_alt_varz_port
 echo DAQ autoclean docker kill daq-faucet-$inst_name
-cmd/faucet $inst_name $switch_setup_alt_port
+cmd/faucet $inst_name $switch_setup_alt_of_port $switch_setup_alt_varz_port
