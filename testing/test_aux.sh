@@ -95,7 +95,7 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4
+    opts: brute broadcast_client ntpv4 wpa
   faux-2:
     opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
   faux-3:
