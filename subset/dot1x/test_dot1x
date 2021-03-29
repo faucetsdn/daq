@@ -8,7 +8,10 @@ REPORT=/tmp/report.txt
 TEST_NAME="dot1x"
 TEST_DESCRIPTION="Dot1x authentication tests"
 
-echo 'Dot1x Authentication tests'
+echo 'dot1x Authentication tests'
+echo $(ip a)
+
+sleep 100
 
 python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt
 
