@@ -44,6 +44,7 @@ class FaucetTopology:
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
     _OFPP_IN_PORT = 0xfffffff8
+    _DOT1X_ETH_TYPE = 0x888e
 
     def __init__(self, config):
         self.config = config
@@ -55,6 +56,7 @@ class FaucetTopology:
         self.sec_dpid = int(switch_setup['of_dpid'], 0)
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
+        self._native_faucet = switch_setup.get('native')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
@@ -72,19 +74,31 @@ class FaucetTopology:
 
     def start(self):
         """Start this instance"""
-        if self._ext_faucet:
-            LOGGER.info('Relying on external faucet...')
-            return
-        LOGGER.info("Starting faucet...")
-        output = self.pri.cmd('%s/cmd/faucet && echo SUCCESS' % DAQ_LIB_DIR)
-        if not output.strip().endswith('SUCCESS'):
-            LOGGER.info('Faucet output: %s', output)
-            assert False, 'Faucet startup failed'
+        self._run_faucet()
+        self._run_faucet(as_gauge=True)
 
     def stop(self):
         """Stop this instance"""
-        LOGGER.debug("Stopping faucet...")
-        self.pri.cmd('docker kill daq-faucet')
+        if self._ext_faucet and not self._native_faucet:
+            return
+        self._run_faucet(kill=True)
+        self._run_faucet(kill=True, as_gauge=True)
+
+    def _run_faucet(self, kill=False, as_gauge=False):
+        process_name = 'gauge' if as_gauge else 'faucet'
+        native_arg = ' native' if self._native_faucet else ''
+        gauge_arg = ' gauge' if as_gauge else ''
+        kill_arg = ' kill' if kill else ''
+
+        LOGGER.info('Starting%s%s %s...', native_arg, kill_arg, process_name)
+        cmd = '%s/cmd/faucet%s%s%s && echo SUCCESS' % (
+            DAQ_LIB_DIR, native_arg, kill_arg, gauge_arg)
+
+        output = self.pri.cmd(cmd)
+        if not output.strip().endswith('SUCCESS'):
+            LOGGER.error('%s output:\n%s', process_name, output)
+            assert False, '%s failed' % process_name
+
 
     def _load_file(self, filename):
         if not os.path.isfile(filename):
@@ -115,8 +129,7 @@ class FaucetTopology:
             device_intfs.append(intf_names[port-1] if named_port else default_name)
         return device_intfs
 
-    def direct_device_traffic(self, device, port_set):
-        """Modify gateway set's vlan to match triggering vlan"""
+    def _populate_set_devices(self, device, port_set):
         device_set = device.gateway.port_set
         assert port_set == device_set or not port_set
         if port_set:
@@ -126,14 +139,20 @@ class FaucetTopology:
         set_active = bool(self._set_devices[device_set])
         vlan = device.vlan if set_active else self._DUMP_VLAN
         LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
+        return device_set, vlan
+
+    def direct_device_traffic(self, device, port_set):
+        """Modify gateway set's vlan to match triggering vlan"""
+        device_set, vlan = self._populate_set_devices(device, port_set)
         assert vlan
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
         self._generate_acls()
 
-    def direct_port_traffic(self, target_mac, port_no, target):
+    def direct_port_traffic(self, device, port_no, target):
         """Direct traffic from a port to specified port set"""
+        self._populate_set_devices(device, device.gateway.port_set)
         if target is None and port_no in self._port_targets:
             del self._port_targets[port_no]
         elif target is not None and port_no not in self._port_targets:
@@ -304,6 +323,21 @@ class FaucetTopology:
         """Return the current faucet network topology"""
         return copy.deepcopy(self.topology)
 
+    def get_gauge_config(self):
+        """Return Gauge config"""
+        config = {
+            'dbs': {
+                'prometheus': {'prometheus_port': 9303, 'type': 'prometheus'}
+            },
+            'faucet_configs': ['/etc/faucet/faucet.yaml'],
+            'watchers': {
+                'flow_table_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'flow_table'},
+                'port_stats_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'port_stats'},
+                'port_status_poller': {'all_dps': True, 'db': 'prometheus', 'type': 'port_state'}
+            }
+        }
+        return config
+
     def _generate_acls(self):
         self._generate_main_acls()
         self._generate_port_acls()
@@ -390,6 +424,18 @@ class FaucetTopology:
         local_acl = []
         acls = {}
 
+        dot1x_pri_ports = []
+
+        for devices in self._set_devices.values():
+            for device in devices:
+                if device and device.gateway:
+                    dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
+
+        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_pri_ports)
+
+        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE,
+                           ports=list(range(1, self.sec_port)))
+
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
 
@@ -407,6 +453,8 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
+            self._add_acl_rule(portset_acls[port_set],
+                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT])
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -463,6 +511,7 @@ class FaucetTopology:
         self._maybe_apply(subrule, 'vlan_vid', in_vlan)
         self._maybe_apply(subrule, 'vlan_vid', kwargs)
         self._maybe_apply(subrule, 'ipv4_dst', kwargs)
+        self._maybe_apply(subrule, 'eth_type', kwargs)
 
         rule = {}
         rule['rule'] = subrule
@@ -483,6 +532,8 @@ class FaucetTopology:
         target_mac = None
         rules = []
 
+        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port])
+
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
             target_mac = target['mac']
@@ -495,9 +546,10 @@ class FaucetTopology:
         if target_mac:
             assert self._append_acl_template(rules, 'baseline'), 'Missing ACL template baseline'
             self._append_device_default_allow(rules, target_mac)
-            self._write_port_acl(port, rules, file_path)
         else:
-            self._write_port_acl(port, self._make_default_acl_rules(), file_path)
+            rules.extend(self._make_default_acl_rules())
+
+        self._write_port_acl(port, rules, file_path)
 
         return target_mac
 

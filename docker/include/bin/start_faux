@@ -193,6 +193,10 @@ if [ -n "${options[ntp_pass]}" -o -n "${options[ntp_fail]}" ]; then
      done) &
 fi
 
+if [ -n "${options[wpa]}" ]; then
+    wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ifaux-eth0 -Dwired &
+fi
+
 if [ -n "${options[broadcast_client]}" ]; then
     echo Starting broadcast client.
     port=41794
@@ -235,7 +239,9 @@ fi
 if [ -n "${options[pubber]}" ]; then
     deviceId=`jq -r .deviceId local/pubber.json`
     extraField=`jq .extraField local/pubber.json`
+    serialNo=`jq -r .serialNo local/pubber.json`
     if [ "$extraField" == null ]; then
+        // This is the network gateway, not MQTT gateway.
         gateway=`ip route | sed -rn 's/default via (.*) dev.*/\1/p'`
         echo Contacting pagent $gateway for new device key for $deviceId
         curl http://$gateway:8192?device=$deviceId > pagent.json || echo pagent error
@@ -247,14 +253,24 @@ if [ -n "${options[pubber]}" ]; then
         ls -l local/rsa_*
     fi
 
-    echo Running pubber for device $deviceId
+    if [[ $serialNo == null ]]; then
+        echo Pubber not defined/enabled through local/pubber.json.
+    fi
 
-    (while date; do
-         echo Running cloud pubber tool `date`
-         pubber/bin/run local/pubber.json
-         # Do https query in case pubber is not configured, for testing port 443
-         curl -o /dev/null https://google.com 2> /dev/null
-         sleep 30
+    (while true; do
+         # Do https to force testing port 443 even if pubber is not configured, and also to make sure network is live.
+         while curl -o /dev/null https://google.com 2> /dev/null; do
+             if [[ $serialNo != null ]]; then
+                 echo Running udmi pubber tool $deviceId $serialNo `date`
+                 pubber/bin/run local/pubber.json
+             fi
+             sleep 30
+         done
+         echo Waiting for valid pubber network connection.
+         while ! curl -o /dev/null https://google.com 2> /dev/null; do
+             sleep 30
+         done
+         echo Found valid pubber network connection.
      done) &
 fi
 

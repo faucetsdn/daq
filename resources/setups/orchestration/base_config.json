@@ -1,0 +1,8 @@
+{
+  "modules": {
+    "nmap": {
+      "timeout_sec": 600,
+      "enabled": true
+    }
+  }
+}

@@ -6,6 +6,22 @@ echo Base Tests >> $TEST_RESULTS
 
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp resources/setups/baseline/report_template.md inst/tmp_site/
+cp resources/test_site/site_config.json inst/tmp_site/site_config.json
+cat <<EOF > inst/tmp_site/site_config.json
+    {
+        "modules": {
+            "discover": {
+                "enabled": false
+            },
+             "bacnet": {
+                "enabled": false
+            },
+             "mudgee": {
+                "enabled": false
+            }
+        }
+    }
+EOF
 
 echo Creating MUD templates...
 bin/mudacl
@@ -25,6 +41,17 @@ cat inst/result.log | tee -a $TEST_RESULTS
 
 echo Redacted report for 9a02571e8f00:
 cat inst/reports/report_9a02571e8f00_*.md | redact | tee -a $TEST_RESULTS
+
+echo %%%%%%%%%%%%%%%%%%%%%% Test DAQ can recover from faucet restarts | tee -a $TEST_RESULTS
+restart_faucet() {
+    container=$(docker ps | grep daqf/faucet | awk '{print $1}')
+    docker stop $container; sleep 5; docker start $container
+}
+monitor_log "Port 1 dpid 2 learned 9a:02:57:1e:8f:00" "restart_faucet"
+cmd/run -s default_timeout_sec=100
+reconnections=$(fgrep "Connecting to socket path" inst/cmdrun.log | wc -l)
+echo Found reconnections? $((reconnections > 1)) | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling | tee -a $TEST_RESULTS
 # Check exception handling during report finalizing.

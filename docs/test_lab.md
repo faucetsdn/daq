@@ -1,9 +1,7 @@
 # Test Lab Setup
 
-The basic _Test Lab Setup_ is designed to test ~10 devices at a time using a physical network
-switch. Additionally, it is the minimum setup to test switch-specific functionality such as PoE.
-Although hooked together through one switch, dynamic network configuration is used to control
-dataflow in the system, following the outline in the [device specs](device_specs.md) docs: by
+The basic _Test Lab Setup_ is designed to test ~10 devices at a time using a physical network switch. Additionally, it is the minimum setup to test switch-specific functionality such as PoE or port flapping.
+Although hooked together through one switch, dynamic network configuration is used to control dataflow in the system, following the outline in the [device specs](device_specs.md) docs: by
 default, all devices are completely sequestered and tested as if they were the only one on the
 switch.
 
@@ -67,6 +65,7 @@ device on the controller host.
 * At least 1 eXtra is useful for diagnosing switch configuration problems.
 * 3 or more eXtra are recommended for a full test lab setup because it allows running
 [core FAUCET switch tests](https://faucet.readthedocs.io/en/latest/testing.html#hardware-switch-testing-with-docker).
+* [More faux device configurations](faux.md)
 
 ## Configuration
 
@@ -74,15 +73,21 @@ Configuring the test lab switch requires a few separate pieces of setup:
 1. The [FAUCET Vendor-Specific Documentation](https://docs.faucet.nz/en/latest/vendors/index.html)
 for the specific switch used in any setup, including the necessary OpenFlow controller
 configuration (such as the port used for the control plane uplink).
-2. System configuration of the controller host. See `config/system/ext.yaml` for an example
-configuration for an external physical switch. Key entries are:
-    * `ext_dpid`: Data plane ID for the connected physical switch.
-    * `ext_ctrl`: Interface name of the control-plane network.
-    * `ext_intf`: Interface name of the data-plane network.
-    * `ext_ofpt`: Controller OpenFlow port (defaults to 6653).
-    * `ext_ofip`: Controller control plane IP address (and subnet).
-    * `ext_addr`: External switch IP address (used to verify the connection).
-    * `sec_port`: Port of secondary (external) switch for the data-plane uplink (defaults to 7).
+2. System configuration of the controller host. See `config/system/ext.yaml` for an example configuration for an external physical switch. All the following should be under the `switch_setup` dictionary:
+    * `of_dpid`: Data plane ID for the connected physical switch.
+    * `ctrl_intf`: Interface name of the control-plane network.
+    * `data_intf`: Interface name of the data-plane network.
+    * `lo_port`: Controller OpenFlow port (defaults to 6653).
+    * `lo_addr`: Controller control plane IP address (and subnet).
+    * `ip_addr`: External switch IP address (used to verify the connection).
+    * `uplink_port`: Port of secondary (external) switch for the data-plane uplink (defaults to 7).
+    * `model`: Currently supporting the following switch model
+      * FAUX_SWITCH
+      * ALLIED_TELESIS_X230
+      * CISCO_9300
+    * `username`: switch login username
+    * `password`: switch login password
+
 
 ## Troubleshooting
 

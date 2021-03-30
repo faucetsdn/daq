@@ -2,34 +2,36 @@
 
 source reporting.sh
 
+echo Starting UDMI test run `date`
+
 REPORT=/tmp/report.txt
 GCP_REFLECT_CONFIG_FILE=/config/inst/gcp_reflect_config.json
 GCP_REFLECT_KEY_FILE=/config/inst/gcp_reflect_key.pkcs8
+SITE_DIR=/config/inst
+CLOUD_IOT_CONFIG_FILE=$SITE_DIR/cloud_iot_config.json
+MODULE_CONFIG_FILE=/config/device/module_config.json
 
 # Necessary to reach gcp. Should be done by framework but this works for now.
 route add default gw $GATEWAY_IP
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
 schema_path=schema
 timeout=60
 message_types="state_system state_pointset event_system event_pointset"
 
-device_id=`jq -r .device_id /config/device/module_config.json`
-
-# Do a check for testing.
-echo Config contains `ls /config/inst/system.conf`
-
-# Enable dns for GCP lookup
-echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+site_model=$SITE_DIR
+device_id=`jq -r .device_id $MODULE_CONFIG_FILE`
+serial_no=`jq -r .device_info.serial $MODULE_CONFIG_FILE`
 
 if [ "$device_id" == null ]; then
     skip="No device id"
 elif [ ! -f $GCP_REFLECT_CONFIG_FILE ]; then
     skip="No credentials"
 else
+    project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
+    registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
     skip=
 fi
-
-ls -l /config/inst/ || true
 
 if [ -n "$skip" ]; then
     echo Skipping udmi test because $skip
@@ -43,21 +45,13 @@ if [ -n "$skip" ]; then
     exit 0
 fi
 
-project_id=`jq -r .project_id $GCP_REFLECT_CONFIG_FILE`
-registry_id=`jq -r .registry_id $GCP_REFLECT_CONFIG_FILE`
-
 export GOOGLE_CLOUD_PROJECT=$project_id
 
 echo Target device is $device_id
 echo Extracted project $project_id
 echo Extracted registry $registry_id
-echo
-
-echo Copying key from $GCP_REFLECT_KEY_FILE
-cp $GCP_REFLECT_KEY_FILE .
 
 ACTIVATE_LOG=/config/gw/nodes/gw*/activate.log
-more $ACTIVATE_LOG | cat
 if fgrep "Processing provisioning request for device $device_id" $ACTIVATE_LOG; then
     result=pass
     detail="Found provisioning request %% $device_id"
@@ -71,8 +65,8 @@ RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" "n/a" "$RESULT_AND_SUMMARY"
 
 echo Starting base message validation run `date`
-echo validator/bin/validate $project_id $schema_path reflect $device_id local/ --
-timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id local/ -- || true
+echo validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR
+timeout $((timeout * 2)) validator/bin/validate $project_id $schema_path reflect $device_id $SITE_DIR || true
 
 function message_report {
     message_type=$1
@@ -103,32 +97,35 @@ for message_type in $message_types; do
     message_report $message_type
 done
 
-device_dir=out/devices/$device_id
-sequences=$(cd sequences; ls | sort)
-echo Validating sequences for $device_id: $sequences
-for sequence in $sequences; do
-    result=pass
-    validator=validator/bin/validate
-    rm -rf $device_dir
-    cmd="$validator $project_id $schema_path reflect $device_id local/ sequences/$sequence"
-    echo $cmd
-    timeout $timeout $cmd || result=fail
-    echo Validation result for $device_id against $sequence was $result
+cat <<EOF > validator_config.json
+{
+  "project_id": "$project_id",
+  "site_model": "$site_model",
+  "device_id": "$device_id",
+  "serial_no": "$serial_no",
+  "key_file": "$GCP_REFLECT_KEY_FILE"
+}
+EOF
 
-    if [[ $result == pass ]]; then
-        summary="Validation successfully completed"
-    else
-        summary="Sequence validation falied"
-        more $device_dir/* | cat
+bin/test_sequences -n || true
+
+results=out/devices/$device_id/RESULT.log
+cat $results | while read header result test_name detail; do
+    if [[ $header == RESULT ]]; then
+        TEST_NAME="cloud.udmi.$test_name"
+        TEST_DESCRIPTION="Validates $test_name sequence"
+        RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $detail"
+        write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
+                         "$skip" "$RESULT_AND_SUMMARY"
     fi
-
-    TEST_NAME="cloud.udmi.$sequence"
-    TEST_DESCRIPTION="Validates device $sequence message sequence."
-    RESULT_AND_SUMMARY="RESULT $result $TEST_NAME $summary"
-    write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
-                     "n/a" "$RESULT_AND_SUMMARY"
 done
 
+echo Message results:
+ls -l `find out -name \*.json`
+more out/devices/$device_id/*.json | cat
+more out/devices/$device_id/tests/*/*.json | cat
+
+echo UDMI result summary:
 fgrep RESULT $REPORT
 
 echo Done with test_udmi

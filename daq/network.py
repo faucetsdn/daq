@@ -43,10 +43,12 @@ class TestNetwork:
 
     OVS_CLS = mininet_node.OVSSwitch
     MAX_INTERNAL_DPID = 100
-    DEFAULT_OF_PORT = 6653
+    DEFAULT_FAUCET_OF_PORT = 6653
+    DEFAULT_GAUGE_OF_PORT = 6654
     DEFAULT_MININET_SUBNET = "10.20.0.0/16"
     _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
+    INTERMEDIATE_GAUGE_FILE = os.path.join(DAQ_RUN_DIR, "gauge.yaml")
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
     _VXLAN_DEFAULT_PORT = 4789
     _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
@@ -65,7 +67,8 @@ class TestNetwork:
         self.topology = FaucetTopology(self.config)
         self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
-        self.ext_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_OF_PORT))
+        self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
+        self.ext_gauge_ofpt = int(switch_setup.get('lo_port_2', self.DEFAULT_GAUGE_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
         self.switch_links = {}
         orch_config = OrchestrationConfig()
@@ -193,8 +196,10 @@ class TestNetwork:
         target_ip = "127.0.0.1"
         LOGGER.debug("Adding controller at %s", target_ip)
         controller = mininet_node.RemoteController
-        self.net.addController('controller', controller=controller,
-                               ip=target_ip, port=self.ext_ofpt)
+        self.net.addController('faucet', controller=controller,
+                               ip=target_ip, port=self.ext_faucet_ofpt)
+        self.net.addController('gauge', controller=controller,
+                               ip=target_ip, port=self.ext_gauge_ofpt)
 
         LOGGER.debug("Adding secondary...")
         self._create_secondary()
@@ -224,12 +229,12 @@ class TestNetwork:
         # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
         return 'vxlan_sys_%d' % port
 
-    def direct_port_traffic(self, target_mac, port, target):
+    def direct_port_traffic(self, device, port, target):
         """Direct traffic for a given mac to target port"""
         dest = target['port_set'] if target else None
-        LOGGER.info('Directing traffic for %s on port %s to %s', target_mac, port, dest)
+        LOGGER.info('Directing traffic for %s on port %s to %s', device, port, dest)
         # TODO: Convert this to use faucitizer to change vlan
-        self.topology.direct_port_traffic(target_mac, port, target)
+        self.topology.direct_port_traffic(device, port, target)
         self._generate_behavioral_config()
 
     def _generate_behavioral_config(self):
@@ -238,6 +243,11 @@ class TestNetwork:
             yaml.safe_dump(network_topology, file)
 
         self.faucitizer.reload_structural_config(self.INTERMEDIATE_FAUCET_FILE)
+
+        with open(self.INTERMEDIATE_GAUGE_FILE, 'w') as file:
+            yaml.safe_dump(self.topology.get_gauge_config(), file)
+        self.faucitizer.reload_and_flush_gauge_config(self.INTERMEDIATE_GAUGE_FILE)
+
         if self._settle_sec:
             LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
             time.sleep(self._settle_sec)

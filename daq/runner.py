@@ -24,7 +24,7 @@ import host as connected_host
 import network
 import report
 import stream_monitor
-from wrappers import DaqException
+from wrappers import DaqException, DisconnectedException
 import logger
 from proto.system_config_pb2 import DhcpMode
 
@@ -191,7 +191,8 @@ class DAQRunner:
         config['test_list'] = test_list
         config['test_metadata'] = self._get_test_metadata()
         LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
-        LOGGER.info('Configured with tests %s' % ', '.join(config['test_list']))
+        tests_string = ', '.join(config['test_list']) or '**none**'
+        LOGGER.info('Configured with tests %s' % tests_string)
         LOGGER.info('DAQ version %s' % self._daq_version)
         LOGGER.info('LSB release %s' % self._lsb_release)
         LOGGER.info('system uname %s' % self._sys_uname)
@@ -290,8 +291,20 @@ class DAQRunner:
             self._handle_faucet_events()
 
     def _handle_faucet_events(self):
+        event = None
         while self.faucet_events:
-            event = self.faucet_events.next_event()
+            try:
+                event = self.faucet_events.next_event()
+            except DisconnectedException:
+                self.monitor_forget(self.faucet_events.sock)
+                self.faucet_events.connect()
+                self._monitor_faucet_events()
+                continue
+            except Exception as e:
+                LOGGER.error(e)
+                self.faucet_events.disconnect()
+                self.faucet_events = None
+                self.shutdown()
             if not event:
                 break
             self._process_faucet_event(event)
@@ -339,7 +352,7 @@ class DAQRunner:
                 port_info.flapping_start = time.time()
             if port_info.active:
                 if device and not port_info.flapping_start:
-                    self._direct_port_traffic(device.mac, port, None)
+                    self._direct_port_traffic(device, port, None)
                 self._deactivate_port(port)
         self._send_heartbeat()
 
@@ -358,8 +371,8 @@ class DAQRunner:
         port_info = self._ports[port]
         port_info.active = False
 
-    def _direct_port_traffic(self, mac, port, target):
-        self.network.direct_port_traffic(mac, port, target)
+    def _direct_port_traffic(self, device, port, target):
+        self.network.direct_port_traffic(device, port, target)
 
     def _handle_port_learn(self, dpid, port, target_mac):
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
@@ -467,9 +480,10 @@ class DAQRunner:
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
         self._terminate()
-        self.monitor_forget(self.faucet_events.sock)
-        self.faucet_events.disconnect()
-        self.faucet_events = None
+        if self.faucet_events:
+            self.monitor_forget(self.faucet_events.sock)
+            self.faucet_events.disconnect()
+            self.faucet_events = None
         count = self.stream_monitor.log_monitors(as_info=True)
         LOGGER.warning('No active ports remaining (%d monitors), ending test run.', count)
         self._send_heartbeat()
@@ -497,8 +511,7 @@ class DAQRunner:
                                                    loop_hook=self._loop_hook,
                                                    timeout_sec=20)  # Polling rate
             self.stream_monitor = monitor
-            self.monitor_stream('faucet', self.faucet_events.sock,
-                                self._handle_faucet_events_locked, priority=10)
+            self._monitor_faucet_events()
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
             while self.stream_monitor.event_loop():
@@ -584,7 +597,7 @@ class DAQRunner:
                     'port_set': gateway.port_set,
                     'mac': device.mac
                 }
-                self._direct_port_traffic(device.mac, device.port.port_no, target)
+                self._direct_port_traffic(device, device.port.port_no, target)
             else:
                 self._direct_device_traffic(device, gateway.port_set)
             return True
@@ -595,10 +608,9 @@ class DAQRunner:
         self.network.direct_device_traffic(device, port_set)
 
     def _get_test_list(self, test_file):
-        no_test = self.config.get('no_test', False)
-        if no_test:
+        if self.config.get('no_test', False):
             LOGGER.warning('Suppressing configured tests because no_test')
-            return ['hold']
+            return []
         test_ordering = {
             "first": [],
             "last": [],
@@ -873,7 +885,7 @@ class DAQRunner:
             target_gateway.result_linger = True
         else:
             if target_port:
-                self._direct_port_traffic(device.mac, target_port, None)
+                self._direct_port_traffic(device, target_port, None)
             if target_gateway:
                 self._detach_gateway(device)
             test_results = target_host.terminate('_target_set_cancel', trigger=False)
@@ -890,6 +902,10 @@ class DAQRunner:
             if device.vlan:
                 self._direct_device_traffic(device, None)
         device.gateway = None
+
+    def _monitor_faucet_events(self):
+        self.monitor_stream('faucet', self.faucet_events.sock,
+                            self._handle_faucet_events_locked, priority=10)
 
     def monitor_stream(self, *args, **kwargs):
         """Monitor a stream"""
@@ -984,11 +1000,11 @@ class DAQRunner:
 
     def _load_base_config(self, register=True):
         base_conf = self.config.get('base_conf')
-        LOGGER.info('Loading base config from %s', base_conf)
+        LOGGER.info('Loading base config from %s', os.path.abspath(base_conf))
         base = self.configurator.load_config(base_conf)
         site_path = self.config.get('site_path')
         site_config_file = os.path.join(site_path, self._SITE_CONFIG)
-        LOGGER.info('Loading site config from %s', site_config_file)
+        LOGGER.info('Loading site config from %s', os.path.abspath(site_config_file))
         site_config = self.configurator.load_config(site_config_file, optional=True)
         if register:
             self.gcp.register_config(self._RUNNER_CONFIG_PATH, site_config,

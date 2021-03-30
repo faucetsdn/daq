@@ -48,72 +48,71 @@ Overall device result FAIL
 
 **Some tests report as GONE. Please check for possible misconfiguration**
 
-|Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Recommended Pass|Information|Other|
+|Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Required Pass for IoT Devices|Recommended Pass|Other|
 |---|---|---|---|---|---|---|---|---|
-|Connection|9|FAIL|1/4/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Security|8|FAIL|1/0/4|0/0/0|0/0/0|1/1/0|0/0/1|0/0/0|
-|Network Time|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|TLS|0|N/A|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Protocol|2|FAIL|0/0/0|0/0/0|0/1/0|0/0/0|0/0/1|0/0/0|
-|PoE|3|FAIL|0/0/0|0/1/1|0/0/0|0/0/0|0/1/0|0/0/0|
-|BOS|1|SKIP|0/0/0|0/0/0|0/0/0|0/0/1|0/0/0|0/0/0|
+|Base|2|FAIL|1/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Connection|12|FAIL|3/5/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Security|13|FAIL|2/1/7|0/0/0|0/0/1|0/0/0|0/0/2|0/0/0|
+|NTP|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|DNS|1|SKIP|0/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Communication|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Protocol|2|FAIL|0/0/0|0/0/0|0/1/1|0/0/0|0/0/0|0/0/0|
+|PoE|1|SKIP|0/0/0|0/0/1|0/0/0|0/0/0|0/0/0|0/0/0|
+|IoT|1|SKIP|0/0/0|0/0/0|0/0/0|0/0/1|0/0/0|0/0/0|
 |Other|2|GONE|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/2/0|
-|Communication|2|GONE|0/1/0|0/0/0|0/0/0|0/0/0|0/1/0|0/0/0|
 Syntax: Pass / Fail / Skip
 
-|Expectation|pass|fail|skip|info|gone|
-|---|---|---|---|---|---|
-|Required Pass|4|1|8|0|4|
-|Required Pass for PoE Devices|0|0|1|0|1|
-|Required Pass for BACnet Devices|0|1|0|0|0|
-|Recommended Pass|1|0|1|0|1|
-|Information|0|0|2|0|2|
-|Other|3|0|10|2|2|
+|Expectation|pass|fail|skip|gone|
+|---|---|---|---|---|
+|Required Pass|10|1|13|5|
+|Required Pass for PoE Devices|0|0|1|0|
+|Required Pass for BACnet Devices|0|1|2|0|
+|Required Pass for IoT Devices|0|0|1|0|
+|Recommended Pass|0|0|2|0|
+|Other|0|0|4|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
-|pass|base.startup.dhcp|Other|Other||
-|skip|base.switch.ping|Connection|Required Pass|No local IP has been set, check system config|
-|skip|cloud.udmi.event_pointset|BOS|Recommended Pass|No device id|
+|pass|base.startup.dhcp|Base|Required Pass||
+|skip|base.switch.ping|Base|Required Pass|No local IP has been set, check system config|
+|skip|cloud.udmi.event_pointset|IoT|Required Pass for IoT Devices|No device id|
 |skip|cloud.udmi.event_system|Other|Other|No device id|
 |skip|cloud.udmi.provision|Other|Other|No device id|
 |skip|cloud.udmi.state_pointset|Other|Other|No device id|
 |skip|cloud.udmi.state_system|Other|Other|No device id|
-|pass|communication.network.min_send|Other|Other|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
-|info|communication.network.type|Other|Other|Broadcast packets received. Unicast packets received.|
+|pass|communication.network.min_send|Communication|Required Pass|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
+|pass|communication.network.type|Communication|Required Pass|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connection|Required Pass|target reached|
 |gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
+|gone|connection.ipaddr.disconnect_ip_change|Connection|Required Pass||
+|gone|connection.ipaddr.ip_change|Connection|Required Pass||
 |gone|connection.ipaddr.private_address|Connection|Required Pass||
-|gone|connection.network.communication_min_send|Communication|Required Pass||
-|gone|connection.network.communication_type|Communication|Information||
-|gone|connection.network.dhcp_long|Connection|Required Pass||
-|info|connection.network.mac_address|Other|Other|Device MAC address is 9a:02:57:1e:8f:01|
+|pass|connection.manual.comms_down|Connection|Required Pass|Manual test - Device passed this manual test|
+|skip|connection.manual.sec_eth_port|Connection|Required Pass|Manual test - Test results not inputted into module_config|
+|pass|connection.network.mac_address|Connection|Required Pass|Device MAC address is 9a:02:57:1e:8f:01|
 |fail|connection.network.mac_oui|Connection|Required Pass|Manufacturer prefix not found!|
 |skip|connection.switch.port_duplex|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Connection|Required Pass|No local IP has been set, check system config|
-|skip|dns.network.hostname_resolution|Other|Other|Device did not send any DNS requests|
-|pass|manual.test.name|Security|Recommended Pass|Manual test - for testing|
-|pass|ntp.network.ntp_support|Network Time|Required Pass|Using NTPv4.|
-|pass|ntp.network.ntp_update|Network Time|Required Pass|Device clock synchronized.|
-|gone|poe.switch.negotiation|PoE|Required Pass for PoE Devices||
+|skip|dns.network.hostname_resolution|DNS|Required Pass|Device did not send any DNS requests|
+|pass|ntp.network.ntp_support|NTP|Required Pass|Using NTPv4.|
+|pass|ntp.network.ntp_update|NTP|Required Pass|Device clock synchronized.|
 |skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
-|gone|poe.switch.support|PoE|Information||
 |fail|protocol.bacext.pic|Protocol|Required Pass for BACnet Devices|PICS file defined however a BACnet device was not found.|
-|skip|protocol.bacext.version|Protocol|Information|Bacnet device not found.|
-|skip|security.discover.firmware|Security|Information|Could not retrieve a firmware version with nmap. Check bacnet port.|
-|pass|security.nmap.http|Other|Other|No running http servers have been found.|
+|skip|protocol.bacext.version|Protocol|Required Pass for BACnet Devices|Bacnet device not found.|
+|skip|security.discover.firmware|Security|Required Pass for BACnet Devices|Could not retrieve a firmware version with nmap. Check bacnet port.|
+|pass|security.nmap.http|Security|Required Pass|No running http servers have been found.|
 |pass|security.nmap.ports|Security|Required Pass|Only allowed ports found open.|
 |skip|security.password.http|Security|Required Pass|Port 80 not open on target device.|
 |skip|security.password.https|Security|Required Pass|Port 443 not open on target device.|
 |skip|security.password.ssh|Security|Required Pass|Port 22 not open on target device.|
 |skip|security.password.telnet|Security|Required Pass|Port 23 not open on target device.|
-|gone|security.ports.nmap|Security|Recommended Pass||
-|skip|security.tls.v1_2_client|Other|Other|No client initiated TLS communication detected|
-|skip|security.tls.v1_2_server|Other|Other|IOException unable to connect to server.|
-|skip|security.tls.v1_3_client|Other|Other|No client initiated TLS communication detected|
-|skip|security.tls.v1_3_server|Other|Other|IOException unable to connect to server.|
-|skip|security.tls.v1_server|Other|Other|IOException unable to connect to server.|
+|gone|security.ssh.version|Security|Required Pass||
+|skip|security.tls.v1_2_client|Security|Required Pass|No client initiated TLS communication detected|
+|skip|security.tls.v1_2_server|Security|Required Pass|IOException unable to connect to server.|
+|skip|security.tls.v1_3_client|Security|Recommended Pass|No client initiated TLS communication detected|
+|skip|security.tls.v1_3_server|Security|Recommended Pass|IOException unable to connect to server.|
+|skip|security.tls.v1_server|Security|Required Pass|IOException unable to connect to server.|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -286,6 +285,7 @@ RESULT skip poe.switch.power No local IP has been set, check system config
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|timeout_sec|0|
 |poe|{'enabled': True}|
 
 ## Module bacext
@@ -401,6 +401,7 @@ RESULT skip security.tls.v1_server IOException unable to connect to server.
 |Attribute|Value|
 |---|---|
 |enabled|True|
+|timeout_sec|0|
 |ca_file|CA_Faux.pem|
 
 ## Module password
@@ -491,8 +492,9 @@ RESULT skip security.password.telnet Port 23 not open on target device.
 
 |Attribute|Value|
 |---|---|
-|dictionary_dir|resources/faux|
 |enabled|True|
+|timeout_sec|0|
+|dictionary_dir|resources/faux|
 
 ## Module udmi
 
@@ -560,13 +562,22 @@ RESULT skip cloud.udmi.event_pointset No device id
 
 ```
 --------------------
-manual.test.name
+connection.manual.comms_down
 --------------------
 
 --------------------
 No additional information provided
 --------------------
-RESULT pass manual.test.name Manual test - for testing
+RESULT pass connection.manual.comms_down Manual test - Device passed this manual test
+
+--------------------
+connection.manual.sec_eth_port
+--------------------
+
+--------------------
+No additional information provided
+--------------------
+RESULT skip connection.manual.sec_eth_port Manual test - Test results not inputted into module_config
 
 ```
 
@@ -606,7 +617,7 @@ Device sends unicast or broadcast packets.
 --------------------
 
 
-RESULT info communication.network.type Broadcast packets received. Unicast packets received.
+RESULT pass communication.network.type Broadcast packets received. Unicast packets received.
 --------------------
 ntp.network.ntp_support
 --------------------
@@ -636,7 +647,7 @@ Reports device MAC address
 --------------------
 Device MAC address is 9a:02:57:1e:8f:01
 --------------------
-RESULT info connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
+RESULT pass connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
 
 --------------------
 dns.network.hostname_resolution

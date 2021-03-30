@@ -124,8 +124,8 @@ class DeviceDeviceReportPortEventsWithTestResultsTestCase(DeviceReportClientTest
         self._server.process_port_learn("name", "port", "mac", 1)
         self._client.get_port_events("mac", self._on_port_event)
         time.sleep(1)  # Takes time to start grpc stream in a thread
-        self._server.process_port_change("name", "port", False)
-        self._server.process_port_change("name", "port", True)
+        self._server.process_port_state("name", "port", False)
+        self._server.process_port_state("name", "port", True)
         self._client.send_device_result("mac", "passed")
         self.assertEqual(len(self._received_port_events), 3)
 
@@ -146,11 +146,11 @@ class DeviceDeviceReportPortEventsStreamCleanup(DeviceReportClientTestBase):
         self._server.process_port_learn("name", "port", "mac", 1)
         self._client.get_port_events("mac", self._on_port_event)
         time.sleep(1)
-        self._server.process_port_change("name", "port", False)
+        self._server.process_port_state("name", "port", False)
         time.sleep(1)
         self._client.terminate()
         time.sleep(1)
-        self._server.process_port_change("name", "port", False)
+        self._server.process_port_state("name", "port", False)
         self.assertEqual(len(self._received_port_events), 2)
 
 
@@ -173,12 +173,11 @@ class DeviceDeviceReportPortEventsMultipleStreams(DeviceReportClientTestBase):
         """Test the ability to get port events"""
         self._server.process_port_learn("name", "port", "mac", 1)
         self._client.get_port_events("mac", self._on_port_event)
-        time.sleep(1)  # self._lock introduces uncertainty
         self._client.get_port_events("mac", self._on_port_event2)
         time.sleep(1)
-        self._server.process_port_change("name", "port", False)
-        self._server.process_port_change("name", "port", True)
+        self._server.process_port_state("name", "port", False)
+        self._server.process_port_state("name", "port", True)
         self._client.send_device_result("mac", "passed")
         time.sleep(1)
-        self.assertEqual(len(self._received_port_events), 4)  # FIX ME after b/180156547
+        self.assertEqual(len(self._received_port_events), 3)
         self.assertEqual(len(self._received_port_events2), 3)
