@@ -1,5 +1,7 @@
 """Unit tests for AclStateCollector"""
 
+from __future__ import absolute_import
+
 import shutil
 import tempfile
 import unittest
