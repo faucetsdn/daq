@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from eap_module import EapModule
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
-from utils import get_logger
+from utils import get_logger, get_interface_name, get_interface_ip
 
 import threading
 
@@ -33,37 +33,40 @@ class AuthStateMachine:
         with self._state_lock:
             if expected is not None:
                 message = 'state was %s expected %s' % (self.state, expected)
-                assert self.state == expected, message
+                if self.state != expected:
+                    self.logger.warning('Unexpected state: %s', message)
+                    return False
             self.logger.debug('Transition for %s: %s -> %s', self.src_mac, self.state, target)
             self.state = target
+            return True
 
     def received_eapol_start(self):
         """Received EAPOL start on EAP socket"""
-        self._state_transition(self.SUPPLICANT, self.START)
-        self.eap_send_callback(self.src_mac)
+        if self._state_transition(self.SUPPLICANT, self.START):
+            self.eap_send_callback(self.src_mac)
 
     def received_eap_request(self, eap_message):
         """Received EAP request"""
-        if isinstance(eap_message, IdentityMessage) and not self.identity:
-            self.identity = eap_message.identity
-        self._state_transition(self.RADIUS, self.SUPPLICANT)
-        port_id = port_id_to_int(self.authentication_mac)
-        radius_packet_info = RadiusPacketInfo(
-            eap_message, self.src_mac, self.identity, self.radius_state, port_id)
-        self.radius_send_callback(radius_packet_info)
+        if self._state_transition(self.RADIUS, self.SUPPLICANT):
+            if isinstance(eap_message, IdentityMessage) and not self.identity:
+                self.identity = eap_message.identity
+            port_id = port_id_to_int(self.authentication_mac)
+            radius_packet_info = RadiusPacketInfo(
+                eap_message, self.src_mac, self.identity, self.radius_state, port_id)
+            self.radius_send_callback(radius_packet_info)
 
     def received_radius_response(self, payload, radius_state, packet_type):
         """Received RADIUS access channel"""
         self.radius_state = radius_state
         if packet_type == 'RadiusAccessReject':
-            self._state_transition(self.FAIL, self.RADIUS)
-            eap_message = FailureMessage(self.src_mac, 255)
-            self.auth_callback(self.src_mac, False)
+            if self._state_transition(self.FAIL, self.RADIUS):
+                eap_message = FailureMessage(self.src_mac, 255)
+                self.auth_callback(self.src_mac, False)
         else:
             eap_message = payload
             if packet_type == 'RadiusAccessAccept':
-                self._state_transition(self.SUCCESS, self.RADIUS)
-                self.auth_callback(self.src_mac, True)
+                if self._state_transition(self.SUCCESS, self.RADIUS):
+                    self.auth_callback(self.src_mac, True)
             else:
                 self._state_transition(self.SUPPLICANT, self.RADIUS)
         self.eap_send_callback(self.src_mac, eap_message)
@@ -83,10 +86,12 @@ class Authenticator:
         self._setup()
 
     def _setup(self):
-        radius_socket_info = RadiusSocketInfo('10.20.0.3', 0, '127.0.0.1', 1812)
+        ifname = get_interface_name()
+        listen_ip = get_interface_ip(ifname)
+        radius_socket_info = RadiusSocketInfo(listen_ip, 0, '127.0.0.1', 1812)
         self.radius_module = RadiusModule(
             radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
-        self.eap_module = EapModule('dot1x01-eth0', self.received_eap_request)
+        self.eap_module = EapModule(ifname, self.received_eap_request)
 
     def start_threads(self):
         self.logger.info('Listening for EAP and RADIUS.')

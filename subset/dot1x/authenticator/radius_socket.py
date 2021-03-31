@@ -2,6 +2,8 @@
 from __future__ import absolute_import
 import errno
 import socket
+import fcntl
+import struct
 from utils import get_logger
 
 

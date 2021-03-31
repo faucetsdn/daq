@@ -7,7 +7,7 @@ import sys
 def get_logger(logname):
     """Create and return a logger object."""
     logger = logging.getLogger(logname)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
@@ -22,6 +22,17 @@ def get_logger(logname):
     logger.addHandler(logfile_handler)
 
     return logger
+
+def get_interface_name():
+    """Get main interface name from test container"""
+    return '%s-eth0' % socket.gethostname()
+
+def get_interface_ip(ifname):
+    """Get interface IP"""
+    return socket.inet_ntoa(fcntl.ioctl(
+        self.socket.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+    )[20:24])
+
 
 
 class MessageParseError(Exception):
