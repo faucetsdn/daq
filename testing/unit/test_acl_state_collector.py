@@ -36,7 +36,7 @@ class AclStateCollectorTestBase(unittest.TestCase):
 
         with open(temp_faucet_config_file, 'w') as file:
             file.write(self.FAUCET_CONFIG)
-        _, _, dps_config, _ = config_parser.parse_dps(self._faucet_config_file)
+        _, _, dps_config, _ = config_parser.dp_parser(temp_faucet_config_file)
         switches_config = {str(dp): dp for dp in dps_config}
 
         self._acl_collector = AclStateCollector()
