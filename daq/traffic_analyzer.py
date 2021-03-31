@@ -1,14 +1,12 @@
 """Traffic statistics analyzer"""
 
-import logger
-
 from acl_state_collector import AclStateCollector
+import logger
 from utils import dict_proto
 
 from proto.acl_counts_pb2 import AclCounts
 
 from faucet import config_parser
-from forch.proto.devices_state_pb2 import DevicePlacement
 
 LOGGER = logger.get_logger('ta')
 
