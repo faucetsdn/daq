@@ -1,5 +1,7 @@
 """Process ACL states"""
 
+from __future__ import absolute_import
+
 import logger
 
 LOGGER = logger.get_logger('acl')

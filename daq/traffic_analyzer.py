@@ -1,5 +1,7 @@
 """Traffic statistics analyzer"""
 
+from __future__ import absolute_import
+
 from acl_state_collector import AclStateCollector
 import logger
 from utils import dict_proto
