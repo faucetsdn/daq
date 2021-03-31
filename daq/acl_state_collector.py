@@ -31,7 +31,7 @@ class AclStateCollector:
             LOGGER.warning('No ACLs applied to port: %s:%s', switch, port)
             return {}
 
-        return self._get_port_rules_count(switch, port, acls_config, port_acl_samples)
+        return self._get_port_rules_count(switch, port, acls_config[0], port_acl_samples)
 
     def _get_port_rules_count(self, switch, port, acl_config, acl_samples):
         rules_map = {}
@@ -41,23 +41,23 @@ class AclStateCollector:
             if not cookie_num:
                 LOGGER.error(f'Cookie is not generated for acl {acl_config._id}')
 
-                has_sample = False
-                for sample in acl_samples:
-                    if str(sample.labels.get('cookie')) != str(cookie_num):
-                        continue
-                    if sample.labels.get('dp_name') != switch:
-                        continue
-                    if int(sample.labels.get('in_port')) != port:
-                        continue
-                    rule_map = rules_map.setdefault(rule_config['description'])
-                    rule_map['packet_count'] = int(sample.value)
-                    has_sample = True
-                    break
+            has_sample = False
+            for sample in acl_samples:
+                if str(sample.labels.get('cookie')) != str(cookie_num):
+                    continue
+                if sample.labels.get('dp_name') != switch:
+                    continue
+                if int(sample.labels.get('in_port')) != port:
+                    continue
+                rule_map = rules_map.setdefault(rule_config['description'], {})
+                rule_map['packet_count'] = int(sample.value)
+                has_sample = True
+                break
 
-                if not has_sample:
-                    LOGGER.debug(
-                        'No ACL metric sample available for switch, port, ACL, rule:'
-                        '%s, %s, %s, %s', switch, port, acl_config._id, cookie_num)
+            if not has_sample:
+                LOGGER.warning(
+                    'No ACL metric sample available for switch, port, ACL, rule:'
+                    '%s, %s, %s, %s', switch, port, acl_config._id, cookie_num)
 
         return {'rules': rules_map}
 

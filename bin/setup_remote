@@ -36,3 +36,12 @@ echo Switching $TARGET to version $TARGET_VERSION
 (cd $TARGET; git checkout $TARGET_VERSION)
 echo -n "Last $TARGET commit: "
 (cd $TARGET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
+
+if [ -z "$VIRTUAL_ENV" ]; then
+    python3 -m venv venv
+    source venv/bin/activate
+fi
+
+SITE_PACKAGES_PATH=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+rm -f $SITE_PACKAGES_PATH/$TARGET
+ln -s $ROOT/$TARGET/$TARGET $SITE_PACKAGES_PATH/$TARGET

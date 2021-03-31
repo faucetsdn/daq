@@ -36,7 +36,7 @@ class AclStateCollectorTestBase(unittest.TestCase):
 
         with open(temp_faucet_config_file, 'w') as file:
             file.write(self.FAUCET_CONFIG)
-        _, _, dps_config, _ = config_parser.dp_parser(temp_faucet_config_file)
+        _, _, dps_config, _ = config_parser.dp_parser(temp_faucet_config_file, 'fconfig')
         switches_config = {str(dp): dp for dp in dps_config}
 
         self._acl_collector = AclStateCollector()
@@ -58,8 +58,9 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
         interfaces:
           1:
             acl_in: port_1_acl
+            native_vlan: 1000
     acls:
-      port_acl:
+      port_1_acl:
       - rule:
         description: allow all
         cookie: 5
@@ -82,3 +83,7 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
             }
         }
         self.assertEqual(acl_count, expected_acl_count)
+
+
+if __name__ == '__main__':
+    unittest.main()
