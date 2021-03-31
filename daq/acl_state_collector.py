@@ -33,6 +33,7 @@ class AclStateCollector:
 
         return self._get_port_rules_count(switch, port, acls_config[0], port_acl_samples)
 
+    # pylint: disable=protected-access
     def _get_port_rules_count(self, switch, port, acl_config, acl_samples):
         rules_map = {}
 

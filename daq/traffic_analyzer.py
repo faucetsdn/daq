@@ -32,13 +32,16 @@ class TrafficAnalyzer:
             return acl_counts
 
         for mac, device_placement in self._device_placements.items():
-            acl_counts[mac] = AclStateCollector.get_port_acl_count(
+            acl_counts[mac] = self._acl_state_collector.get_port_acl_count(
                 device_placement.switch, device_placement.port, port_acl_metrics.samples)
 
         return acl_counts
 
     def reload_faucet_config(self):
         """Reload Faucet DPs config"""
-        _, _, dps_config, _ = config_parser.dp_parser(self._faucet_config_file)
+        _, _, dps_config, _ = config_parser.dp_parser(self._faucet_config_file, 'fconfig')
         switches_config = {str(dp): dp for dp in dps_config}
         self._acl_state_collector.update_switch_configs(switches_config)
+
+    def _get_metrics(self):
+        pass
