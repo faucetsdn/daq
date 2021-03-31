@@ -14,6 +14,7 @@ LOGGER = logger.get_logger('ta')
 
 
 class TrafficAnalyzer:
+    """Analyzing traffic statistics"""
     def __init__(self, faucet_config_file):
         self._faucet_config_file = faucet_config_file
         self._acl_state_collector = AclStateCollector()
