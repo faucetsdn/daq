@@ -39,6 +39,6 @@ class TrafficAnalyzer:
 
     def reload_faucet_config(self):
         """Reload Faucet DPs config"""
-        _, _, dps_config, _ = config_parser.parse_dps(self._faucet_config_file)
+        _, _, dps_config, _ = config_parser.dp_parser(self._faucet_config_file)
         switches_config = {str(dp): dp for dp in dps_config}
         self._acl_state_collector.update_switch_configs(switches_config)
