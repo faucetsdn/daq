@@ -188,6 +188,9 @@ fgrep 'Config contains' inst/run-*/nodes/udmi*/activate.log | tee -a $TEST_RESUL
 echo Full UDMI testing logs
 more inst/run-*/nodes/udmi*/activate.log | cat
 
+echo Full dot1x testing logs
+more inst/run-*/nodes/dot1x*/activate.log | cat
+
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
     docker logs daq-faux-$num 2>&1 | head -n 500
