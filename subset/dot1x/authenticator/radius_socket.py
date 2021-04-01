@@ -23,7 +23,7 @@ class RadiusSocket:
         try:
             self.socket = socket.socket(socket.AF_INET,
                                         socket.SOCK_DGRAM)
-            listen_ip = get_interface_ip(self.ifname)
+            listen_ip = get_interface_ip(self.ifname, self.socker)
             self.socket.bind((listen_ip, self.listen_port))
         except socket.error as err:
             self.logger.error("Unable to setup socket: %s", str(err))
