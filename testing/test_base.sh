@@ -62,12 +62,20 @@ cat inst/result.log | tee -a $TEST_RESULTS
 
 echo %%%%%%%%%%%%%%%%%%%%%% Telnet fail | tee -a $TEST_RESULTS
 # Check that an open port causes the appropriate failure.
-docker rmi daqf/test_hold:latest # Check case of missing image
-cmd/run -s -k interfaces.faux.opts=telnet
-echo DAQ result code $? | tee -a $TEST_RESULTS
+cmd/run -s interfaces.faux.opts=telnet
 cat inst/result.log | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 fgrep 'security.nmap.ports' inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
-DAQ_TARGETS=test_hold cmd/build
+
+echo %%%%%%%%%%%%%%%%%%%%%% Missing Docker Image | tee -a $TEST_RESULTS
+# Check that an open port causes the appropriate failure.
+docker rmi daqf/test_bacnet:latest # Check case of missing image
+cmd/run -s 
+echo DAQ result code $? | tee -a $TEST_RESULTS
+cat inst/result.log | tee -a $TEST_RESULTS
+
+if [ -z "$CI" ]; then
+    DAQ_TARGETS=test_bacnet cmd/build
+fi
 
 echo %%%%%%%%%%%%%%%%%%%%%% Done with tests | tee -a $TEST_RESULTS

@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+if [ -n "$LOCAL_IP" ]; then
+    ip addr add $LOCAL_IP dev `ifconfig | grep eth0 | cut -d ":" -f 1`
+fi
+
+echo Holding for all eternity.
+
+tail -f /dev/null

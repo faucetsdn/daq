@@ -126,6 +126,15 @@ Syntax: Pass / Fail / Skip
 |---|---|
 |enabled|True|
 
+## Module fail
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module ping
 
 
@@ -167,6 +176,12 @@ See log above
 RESULT pass connection.base.target_ping target reached
 
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Module nmap
 

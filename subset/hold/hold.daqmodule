@@ -1,0 +1,4 @@
+{
+    "name": "hold",
+    "startup_cmd": "test_hold"
+}
