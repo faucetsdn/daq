@@ -87,6 +87,7 @@ else
 	sed -i '5 i print(sys.version)' setup.py
 	sed -i '58 i \\t-which $(PYTHON)' Makefile
 	ls -l $(which python)
+	sudo which python
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
