@@ -85,6 +85,7 @@ else
 	sed -i '172 i python -c "import setuptools; print(setuptools)"' util/install.sh
 	sed -i '4 i import sys' setup.py
 	sed -i '5 i print(sys.version)' setup.py
+	ls -l $(which python)
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
