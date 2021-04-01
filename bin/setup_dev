@@ -60,8 +60,6 @@ $AG install \
 
 PYTHON_BIN=$(readlink -f $(which python))
 echo Python binary is at $PYTHON_BIN
-sudo ln -fs $PYTHON_BIN /usr/bin/python
-ls -l /usr/bin/python
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -85,6 +83,8 @@ else
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
+        export PYTHON_BIN
+        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON_BIN} make install/' util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
