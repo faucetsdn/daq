@@ -60,7 +60,7 @@ $AG install \
 
 PYTHON_BIN=$(readlink -f $(which python))
 echo Python binary is at $PYTHON_BIN
-sudo ls -fs $PYTHON_BIN /usr/bin/python
+sudo ln -fs $PYTHON_BIN /usr/bin/python
 ls -l /usr/bin/python
 
 if [ -d mininet ]; then
