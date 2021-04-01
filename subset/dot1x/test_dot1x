@@ -11,8 +11,6 @@ TEST_DESCRIPTION="Dot1x authentication tests"
 echo 'Dot1x authentication tests'
 echo $(ip a)
 
-sleep 100
-
 python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt
 
 RESULT_AND_SUMMARY=$(cat /tmp/dot1x_result.txt)

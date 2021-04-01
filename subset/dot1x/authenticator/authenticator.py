@@ -36,7 +36,7 @@ class AuthStateMachine:
                 if self.state != expected:
                     self.logger.warning('Unexpected state: %s', message)
                     return False
-            self.logger.debug('Transition for %s: %s -> %s', self.src_mac, self.state, target)
+            self.logger.debug('transition for %s: %s -> %s', self.src_mac, self.state, target)
             self.state = target
             return True
 
@@ -59,15 +59,18 @@ class AuthStateMachine:
         """Received RADIUS access channel"""
         self.radius_state = radius_state
         if packet_type == 'RadiusAccessReject':
+            self.logger.debug('Got RADIUS Reject')
             if self._state_transition(self.FAIL, self.RADIUS):
                 eap_message = FailureMessage(self.src_mac, 255)
                 self.auth_callback(self.src_mac, False)
         else:
             eap_message = payload
             if packet_type == 'RadiusAccessAccept':
+                self.logger.debug('Got RADIUS Accept')
                 if self._state_transition(self.SUCCESS, self.RADIUS):
                     self.auth_callback(self.src_mac, True)
             else:
+                self.logger.debug('Got RADIUS response')
                 self._state_transition(self.SUPPLICANT, self.RADIUS)
         self.eap_send_callback(self.src_mac, eap_message)
 
@@ -119,7 +122,7 @@ class Authenticator:
     def received_eap_request(self, src_mac, eap_message, is_eapol):
         if is_eapol:
             if not (src_mac in self.state_machines or src_mac in self.results):
-                self.logger.info('Starting authentication for %s' % (src_mac))
+                self.logger.debug('Starting authentication for %s' % (src_mac))
                 auth_mac = self.eap_module.get_auth_mac()
                 state_machine = AuthStateMachine(
                     src_mac, auth_mac,
@@ -141,6 +144,7 @@ class Authenticator:
         state_machine.received_radius_response(eap_message, radius_state, packet_type)
 
     def send_eap_response(self, src_mac, message=None):
+        self.logger.debug('Sending EAP response %s', message)
         if not message:
             self.eap_module.send_eapol_response(src_mac)
         else:

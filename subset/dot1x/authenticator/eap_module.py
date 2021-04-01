@@ -77,6 +77,7 @@ class EapModule:
         src_mac_address = MacAddress.from_string(src_mac)
         port_id = self.authenticator_mac
         packed_message = MessagePacker.ethernet_pack(data, port_id, src_mac_address)
+        self.logger.debug("Sending eap packed_message: %s", str(packed_message))
         self.send_packed_eap_message(packed_message)
 
     def send_packed_eap_message(self, eap_message):
