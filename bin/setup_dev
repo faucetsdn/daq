@@ -58,6 +58,11 @@ $AG install \
     python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python emacs-nox python$PVERSION-venv nmap
 
+readlink -f $(which python)
+PYTHON_BIN=$(readlink -f $(which python))
+echo Python binary is at $PYTHON_BIN
+sudo ls -fs $PYTHON_BIN /usr/bin/python
+
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
     targetrev=$(cd mininet; git rev-parse $MININETV)
