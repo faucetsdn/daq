@@ -80,6 +80,7 @@ else
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
+        sed -i s/python-setuptools/python2-setuptools/ util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
