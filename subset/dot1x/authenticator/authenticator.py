@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from eap_module import EapModule
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
-from utils import get_logger, get_interface_name, get_interface_ip
+from utils import get_logger, get_interface_name
 
 import threading
 
@@ -87,8 +87,7 @@ class Authenticator:
 
     def _setup(self):
         ifname = get_interface_name()
-        listen_ip = get_interface_ip(ifname)
-        radius_socket_info = RadiusSocketInfo(listen_ip, 0, '127.0.0.1', 1812)
+        radius_socket_info = RadiusSocketInfo(if_name, 0, '127.0.0.1', 1812)
         self.radius_module = RadiusModule(
             radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
         self.eap_module = EapModule(ifname, self.received_eap_request)

@@ -1,6 +1,9 @@
 """Utility Functions"""
 from __future__ import absolute_import
 import logging
+import fcntl
+import socket
+import struct
 import sys
 
 
@@ -23,16 +26,17 @@ def get_logger(logname):
 
     return logger
 
+
 def get_interface_name():
     """Get main interface name from test container"""
     return '%s-eth0' % socket.gethostname()
 
-def get_interface_ip(ifname):
+
+def get_interface_ip(ifname, _socket):
     """Get interface IP"""
     return socket.inet_ntoa(fcntl.ioctl(
-        self.socket.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+        _socket.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8'))
     )[20:24])
-
 
 
 class MessageParseError(Exception):

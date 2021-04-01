@@ -2,18 +2,16 @@
 from __future__ import absolute_import
 import errno
 import socket
-import fcntl
-import struct
-from utils import get_logger
+from utils import get_logger, get_interface_ip
 
 
 class RadiusSocket:
     """Handle the RADIUS socket"""
 
-    def __init__(self, listen_ip, listen_port, server_ip,  # pylint: disable=too-many-arguments
+    def __init__(self, ifname, listen_port, server_ip,  # pylint: disable=too-many-arguments
                  server_port):
         self.socket = None
-        self.listen_ip = listen_ip
+        self.ifname = ifname
         self.listen_port = listen_port
         self.server_ip = server_ip
         self.server_port = server_port
@@ -25,7 +23,8 @@ class RadiusSocket:
         try:
             self.socket = socket.socket(socket.AF_INET,
                                         socket.SOCK_DGRAM)
-            self.socket.bind((self.listen_ip, self.listen_port))
+            listen_ip = get_interface_ip(self.ifname)
+            self.socket.bind((listen_ip, self.listen_port))
         except socket.error as err:
             self.logger.error("Unable to setup socket: %s", str(err))
             raise err
