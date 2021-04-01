@@ -40,7 +40,10 @@ class AclStateCollector:
         for rule_config in acl_config.rules:
             cookie_num = rule_config.get('cookie')
             if not cookie_num:
-                LOGGER.error(f'Cookie is not generated for acl {acl_config._id}')
+                LOGGER.error(
+                    'Cookie is not generated for ACL rule: %s, %s',
+                    acl_config._id, rule_config.get('description'))
+                continue
 
             has_sample = False
             for sample in acl_samples:
