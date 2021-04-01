@@ -80,8 +80,9 @@ else
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
-	sed -i '106 i echo Python: "$(python --version)"' util/install.sh
-	sed -i '171 i python -c "import setuptools; print(setuptools)"' util/install.sh
+	sed -i '106 i echo Python: "$(python --version)", "$(which python)"' util/install.sh
+	sed -i '107 i echo PATH: "$PATH"' util/install.sh
+	sed -i '172 i python -c "import setuptools; print(setuptools)"' util/install.sh
 	sed -i '4 i import sys' setup.py
 	sed -i '5 i print(sys.version)' setup.py
         util/install.sh -n
