@@ -81,6 +81,7 @@ else
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
 	sed -i '106 i echo Python: "$(python --version)"' util/install.sh
+	sed -i '171 i python -c "import setuptools; print(setuptools)"' util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
