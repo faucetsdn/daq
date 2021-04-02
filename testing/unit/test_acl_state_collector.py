@@ -7,6 +7,9 @@ import tempfile
 import unittest
 
 from acl_state_collector import AclStateCollector
+from utils import dict_proto
+
+from proto.acl_counts_pb2 import AclCount
 
 from faucet import config_parser
 
@@ -46,6 +49,9 @@ class AclStateCollectorTestBase(unittest.TestCase):
         """Cleanup after each test method finishes"""
         shutil.rmtree(self._temp_dir)
         self._acl_collector = None
+
+    def _verify_acl_count(self, acl_count, expected_acl_count):
+        self.assertEqual(acl_count, dict_proto(expected_acl_count, AclCount))
 
 
 class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
@@ -98,7 +104,7 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
                 'allow all': {'packet_count': 25}
             }
         }
-        self.assertEqual(acl_count, expected_acl_count)
+        self._verify_acl_count(acl_count, expected_acl_count)
 
     def test_rule_errors(self):
         """Test getting the ACL count that contains rule errors"""

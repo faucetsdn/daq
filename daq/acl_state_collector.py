@@ -24,7 +24,7 @@ class AclStateCollector:
         if not acl_config:
             return dict_proto(error_map, AclCount)
 
-        acl_count = self._get_port_rules_count(switch, port, acl_config, acl_samples)
+        acl_count = self._get_port_acl_count(switch, port, acl_config, acl_samples)
         return dict_proto(acl_count, AclCount)
 
     # pylint: disable=protected-access
@@ -63,7 +63,7 @@ class AclStateCollector:
         return acl_map
 
     def _verify_port_acl_config(self, switch, port):
-        error_map = {'errors', []}
+        error_map = {'errors': []}
         error_list = error_map['errors']
 
         switch_config = self._switch_configs.get(switch)
@@ -75,14 +75,14 @@ class AclStateCollector:
 
         port_config = switch_config.ports.get(port)
         if not port_config:
-            error = 'Port not defined in Faucet dps config: {switch}, {port}'
+            error = f'Port not defined in Faucet dps config: {switch}, {port}'
             LOGGER.error(error)
             error_list.append(error)
             return None, error_map
 
         acls_config = port_config.acls_in
         if not acls_config:
-            error = 'No ACLs applied to port: {switch}, {port}'
+            error = f'No ACLs applied to port: {switch}, {port}'
             LOGGER.error(error)
             error_list.append(error)
             return None, error_map
