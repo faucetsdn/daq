@@ -22,7 +22,6 @@ services:
             context: ../..
             dockerfile: ./subset/dot1x/Dockerfile.test_dot1x
         image: 'authenticator/authenticator:latest'
-        #command: tail -f
         networks:
             00wpasupplicant-net:
                 ipv4_address: 10.20.0.3
