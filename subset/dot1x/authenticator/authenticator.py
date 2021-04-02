@@ -5,8 +5,8 @@ from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port
 from message_parser import IdentityMessage, FailureMessage
 from utils import get_logger
 
+import json
 import threading
-import yaml
 
 
 class AuthStateMachine:
@@ -85,15 +85,19 @@ class Authenticator:
         self._radius_secret = None
         self._radius_id = None
         self._interface = None
+        self._enabled = None
 
         self._setup()
 
-    def _load_yaml_config(self):
+    def _load_config(self):
+        self.logger.info(self._config_file)
         with open(self._config_file, 'r') as file_stream:
-            config = yaml.safe_load(file_stream)
+            full_config = json.load(file_stream)
+        config = full_config.get('modules').get('dot1x')
 
         self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
+        self._enabled = config['enabled']
         self._interface = config['interface']
 
         radius_config = config['radius']
@@ -105,7 +109,7 @@ class Authenticator:
         self._radius_id = radius_config['id']
 
     def _setup(self):
-        self._load_yaml_config()
+        self._load_config()
         self.radius_module = RadiusModule(
             self._radius_socket_info, self._radius_secret,
             self._radius_id, self.received_radius_response)
@@ -180,6 +184,8 @@ class Authenticator:
         self._end_authentication()
 
     def run_authentication_test(self):
+        if not self._enabled:
+            return "Authentication tests disabled"
         self.start_threads()
         result_str = ""
         for src_mac, is_success in self.results.items():

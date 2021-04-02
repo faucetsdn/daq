@@ -28,6 +28,8 @@ services:
                 priority: 200
         cap_add:
             - ALL
+        volumes:
+            - ../../resources/setups/common/base_config.json:/config/device/module_config.json
 
     tcpdump:
         image: kaazing/tcpdump

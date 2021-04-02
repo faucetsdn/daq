@@ -10,7 +10,7 @@ def main():
     # TODO: Link with authentucation module once ready.
     # Currently simply writes an empty result into the file.
     LOGGER.info('Initialising authenticator')
-    authenticator = Authenticator('/root/dot1x_config.yaml')
+    authenticator = Authenticator('/config/device/module_config.json')
     LOGGER.info('Running auth test')
     result = authenticator.run_authentication_test()
     with open(write_file,  'w') as w_file:

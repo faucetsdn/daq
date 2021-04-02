@@ -1,9 +1,0 @@
-radius:
-    radius_socket_info:
-        listen_ip: '10.20.0.3'
-        listen_port: 0
-        remote_ip: '127.0.0.1'
-        remote_port: 1812
-    secret: 'SECRET'
-    id: '02:42:ac:18:00:70'
-interface: 'eth0'
