@@ -6,6 +6,7 @@ from message_parser import IdentityMessage, FailureMessage
 from utils import get_logger
 
 import threading
+import yaml
 
 
 class AuthStateMachine:
@@ -72,21 +73,43 @@ class AuthStateMachine:
 class Authenticator:
     """Authenticator to manage Authentication flow"""
 
-    def __init__(self):
+    def __init__(self, config_file):
         self.state_machines = {}
         self.results = {}
         self.eap_module = None
         self.radius_module = None
         self.logger = get_logger('Authenticator')
+        self.config_file = config_file
         self._threads = []
+        self.radius_socket_info = None
+        self.radius_secret = None
+        self.radius_id = None
+        self.interface = None
 
         self._setup()
 
+    def _load_yaml_config(self):
+        with open(self.config_file, 'r') as file_stream:
+            config = yaml.safe_load(file_stream)
+
+        self.logger.info('Loaded config from %s:\n %s', self.config_file, config)
+
+        self.interface = config['interface']
+
+        radius_config = config['radius']
+        radius_socket_info = radius_config['radius_socket_info']
+        self.radius_socket_info = RadiusSocketInfo(
+            radius_socket_info['listen_ip'], radius_socket_info['listen_port'],
+            radius_socket_info['remote_ip'], radius_socket_info['remote_port'])
+        self.radius_secret = radius_config['secret']
+        self.radius_id = radius_config['id']
+
     def _setup(self):
-        radius_socket_info = RadiusSocketInfo('10.20.0.3', 0, '127.0.0.1', 1812)
+        self._load_yaml_config()
         self.radius_module = RadiusModule(
-            radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
-        self.eap_module = EapModule('dot1x01-eth0', self.received_eap_request)
+            self.radius_socket_info, self.radius_secret,
+            self.radius_id, self.received_radius_response)
+        self.eap_module = EapModule(self.interface, self.received_eap_request)
 
     def start_threads(self):
         self.logger.info('Listening for EAP and RADIUS.')
