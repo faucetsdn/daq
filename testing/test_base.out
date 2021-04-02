@@ -47,6 +47,15 @@ Syntax: Pass / Fail / Skip
 |---|---|
 |enabled|True|
 
+## Module fail
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 ## Module ping
 
 
@@ -88,6 +97,12 @@ See log above
 RESULT pass connection.base.target_ping target reached
 
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Module nmap
 
@@ -131,6 +146,12 @@ RESULT pass security.nmap.http No running http servers have been found.
 ## Module hold
 
 
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
 #### Exceptions
 
 terminated
@@ -143,9 +164,11 @@ Found reconnections? 1
 %%%%%%%%%%%%%%%%%%%%%% Report Finalizing Exception handling
 9a02571e8f00: ['9a02571e8f00:finish:FileNotFoundError']
 %%%%%%%%%%%%%%%%%%%%%% Telnet fail
-DAQ result code 1
-9a02571e8f00: ['9a02571e8f00:hold:DaqException']
+9a02571e8f00: []
 |fail|security.nmap.ports|Other|Other|Some disallowed ports are open: 23.|
 security.nmap.ports
 RESULT fail security.nmap.ports Some disallowed ports are open: 23.
+%%%%%%%%%%%%%%%%%%%%%% Missing Docker Image
+DAQ result code 1
+9a02571e8f00: ['9a02571e8f00:bacnet:DaqException']
 %%%%%%%%%%%%%%%%%%%%%% Done with tests

@@ -110,6 +110,9 @@ port-01 module_config modules
   "dot1x": {
     "enabled": true
   },
+  "fail": {
+    "enabled": true
+  },
   "hold": {
     "enabled": false
   },
@@ -155,6 +158,9 @@ port-01 module_config modules
     "dictionary_dir": "resources/faux",
     "enabled": true,
     "timeout_sec": 0
+  },
+  "ping": {
+    "enabled": true
   },
   "ssh": {
     "enabled": false
@@ -176,9 +182,6 @@ port-01 module_config modules
   },
   "udmi": {
     "enabled": true
-  },
-  "usi": {
-    "enabled": true
   }
 }
 port-02 module_config modules
@@ -196,6 +199,9 @@ port-02 module_config modules
     "enabled": false
   },
   "dot1x": {
+    "enabled": true
+  },
+  "fail": {
     "enabled": true
   },
   "hold": {
@@ -244,6 +250,9 @@ port-02 module_config modules
     "enabled": true,
     "timeout_sec": 0
   },
+  "ping": {
+    "enabled": true
+  },
   "ssh": {
     "enabled": false
   },
@@ -260,9 +269,6 @@ port-02 module_config modules
     "timeout_sec": 0
   },
   "udmi": {
-    "enabled": true
-  },
-  "usi": {
     "enabled": true
   }
 }

@@ -1,9 +1,0 @@
-FROM daqf/aardvark:latest
-
-RUN $AG update && $AG install nmap netcat jq
-
-RUN $AG update && $AG install ethtool netcat curl
-
-COPY docker/include/bin/test_hold .
-
-CMD ./test_hold
