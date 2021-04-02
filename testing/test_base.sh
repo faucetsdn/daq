@@ -73,9 +73,7 @@ docker rmi daqf/test_bacnet:latest # Check case of missing image
 cmd/run -s 
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
-
-if [ -z "$CI" ]; then
-    DAQ_TARGETS=test_bacnet cmd/build
-fi
+tag=$(docker images daqf/test_bacnet | head -2 | tail -1 | awk '{print $3}')
+docker tag daqf/test_bacnet:$tag daqf/test_bacnet:latest
 
 echo %%%%%%%%%%%%%%%%%%%%%% Done with tests | tee -a $TEST_RESULTS
