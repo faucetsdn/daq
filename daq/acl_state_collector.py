@@ -56,7 +56,8 @@ class AclStateCollector:
 
             if not has_sample:
                 error = (f'No ACL metric sample available for switch, port, ACL, rule: '
-                         f'{switch}, {port}, {acl_config._id}, {cookie_num}')
+                         f'{switch}, {port}, {acl_config._id}, {rule_config["description"]} '
+                         f'(cookie={cookie_num})')
                 errors.append(error)
                 LOGGER.error(error)
 

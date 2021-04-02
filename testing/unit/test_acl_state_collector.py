@@ -64,7 +64,10 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
         interfaces:
           1:
             acl_in: port_1_acl
-            native_vlan: 1000
+            native_vlan: 1001
+          2:
+            acl_in: port_2_acl
+            native_vlan: 1002
     acls:
       port_1_acl:
       - rule:
@@ -81,6 +84,11 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
       - rule:
         description: allow icmp
         cookie: 6
+        actions:
+          allow: True
+      - rule:
+        description: allow ntp
+        cookie: 7
         actions:
           allow: True
       - rule:
@@ -111,16 +119,22 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
         acl_count = self._acl_collector.get_port_acl_count('sec', 2, self.ACL_SAMPLES)
         expected_acl_count = {
             'rules': {
-                'allow dns': {'packet_count': 24},
-                'allow all': {'packet_count': 25}
-            }
+                'allow icmp': {'packet_count': 26}
+            },
+            'errors': [
+                'No ACL metric sample available for switch, port, ACL, rule: sec, 2, port_2_acl, '
+                'allow ntp (cookie=7)'
+            ]
         }
-        print(f'Rule errors:\n{acl_count}')
+        self._verify_acl_count(acl_count, expected_acl_count)
 
     def test_nonexistent_port_config(self):
         """Testing getting ACL count for a nonexistent port"""
         acl_count = self._acl_collector.get_port_acl_count('sec', 3, self.ACL_SAMPLES)
-        print(f'Nonexistent:\n{acl_count}')
+        expected_acl_count = {
+            'errors': ['Port not defined in Faucet dps config: sec, 3']
+        }
+        self._verify_acl_count(acl_count, expected_acl_count)
 
 
 if __name__ == '__main__':
