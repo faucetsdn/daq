@@ -79,37 +79,37 @@ class Authenticator:
         self.eap_module = None
         self.radius_module = None
         self.logger = get_logger('Authenticator')
-        self.config_file = config_file
+        self._config_file = config_file
         self._threads = []
-        self.radius_socket_info = None
-        self.radius_secret = None
-        self.radius_id = None
-        self.interface = None
+        self._radius_socket_info = None
+        self._radius_secret = None
+        self._radius_id = None
+        self._interface = None
 
         self._setup()
 
     def _load_yaml_config(self):
-        with open(self.config_file, 'r') as file_stream:
+        with open(self._config_file, 'r') as file_stream:
             config = yaml.safe_load(file_stream)
 
-        self.logger.info('Loaded config from %s:\n %s', self.config_file, config)
+        self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
-        self.interface = config['interface']
+        self._interface = config['interface']
 
         radius_config = config['radius']
         radius_socket_info = radius_config['radius_socket_info']
-        self.radius_socket_info = RadiusSocketInfo(
+        self._radius_socket_info = RadiusSocketInfo(
             radius_socket_info['listen_ip'], radius_socket_info['listen_port'],
             radius_socket_info['remote_ip'], radius_socket_info['remote_port'])
-        self.radius_secret = radius_config['secret']
-        self.radius_id = radius_config['id']
+        self._radius_secret = radius_config['secret']
+        self._radius_id = radius_config['id']
 
     def _setup(self):
         self._load_yaml_config()
         self.radius_module = RadiusModule(
-            self.radius_socket_info, self.radius_secret,
-            self.radius_id, self.received_radius_response)
-        self.eap_module = EapModule(self.interface, self.received_eap_request)
+            self._radius_socket_info, self._radius_secret,
+            self._radius_id, self.received_radius_response)
+        self.eap_module = EapModule(self._interface, self.received_eap_request)
 
     def start_threads(self):
         self.logger.info('Listening for EAP and RADIUS.')
