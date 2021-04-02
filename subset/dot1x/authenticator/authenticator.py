@@ -1,6 +1,7 @@
 """Authenticator module"""
 from __future__ import absolute_import
 from eap_module import EapModule
+from heartbeat_scheduler import HeartbeatScheduler
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
 from utils import get_logger
@@ -72,6 +73,8 @@ class AuthStateMachine:
 class Authenticator:
     """Authenticator to manage Authentication flow"""
 
+    HEARTBEAT_INTERVAL = 3
+
     def __init__(self):
         self.state_machines = {}
         self.results = {}
@@ -86,9 +89,19 @@ class Authenticator:
         radius_socket_info = RadiusSocketInfo('10.20.0.3', 0, '127.0.0.1', 1812)
         self.radius_module = RadiusModule(
             radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
-        self.eap_module = EapModule('dot1x01-eth0', self.received_eap_request)
+        self.eap_module = EapModule('eth0', self.received_eap_request)
+
+        #TODO: Take value from config and then revert to default
+        interval = self.HEARTBEAT_INTERVAL
+
+        self.sm_timer = HeartbeatScheduler(interval)
+        self.sm_timer.add_callback(self.handle_sm_timeout)
+
 
     def start_threads(self):
+        self.logger.info('Starting SM timer')
+        self.sm_timer.start()
+
         self.logger.info('Listening for EAP and RADIUS.')
 
         def build_thread(method):
@@ -108,6 +121,9 @@ class Authenticator:
         self.logger.info('Done listening for EAP and RADIUS packets.')
 
     def _end_authentication(self):
+        self.logger.info('Stopping timer')
+        if self.sm_timer:
+            self.sm_timer.stop()
         self.logger.info('Shutting down modules.')
         self.radius_module.shut_down_module()
         self.eap_module.shut_down_module()
@@ -163,6 +179,9 @@ class Authenticator:
             result = 'succeeded' if is_success else 'failed'
             result_str += "Authentication for %s %s." % (src_mac, result)
         return result_str
+
+    def handle_sm_timeout(self):
+        self.logger.info('Timer called')
 
 
 def main():
