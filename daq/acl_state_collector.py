@@ -3,8 +3,11 @@
 from __future__ import absolute_import
 
 import logger
+from utils import dict_proto
 
-LOGGER = logger.get_logger('acl')
+from proto.acl_counts_pb2 import AclCount
+
+LOGGER = logger.get_logger('aclstate')
 
 
 class AclStateCollector:
@@ -13,29 +16,22 @@ class AclStateCollector:
     def __init__(self):
         self._switch_configs = {}
 
-    def get_port_acl_count(self, switch, port, port_acl_samples):
+    def get_port_acl_count(self, switch, port, acl_samples):
         """Return the ACL count for a port"""
 
-        switch_config = self._switch_configs.get(switch)
-        if not switch_config:
-            LOGGER.warning('Switch not defined in Faucet dps config: %s', switch)
-            return {}
+        acl_config, error_map = self._verify_port_acl_config(switch, port)
 
-        port_config = switch_config.ports.get(port)
-        if not port_config:
-            LOGGER.warning('Port not defined in Faucet dps config: %s:%s', switch, port)
-            return {}
+        if not acl_config:
+            return dict_proto(error_map, AclCount)
 
-        acls_config = port_config.acls_in
-        if not acls_config:
-            LOGGER.warning('No ACLs applied to port: %s:%s', switch, port)
-            return {}
-
-        return self._get_port_rules_count(switch, port, acls_config[0], port_acl_samples)
+        acl_count = self._get_port_rules_count(switch, port, acl_config, acl_samples)
+        return dict_proto(acl_count, AclCount)
 
     # pylint: disable=protected-access
-    def _get_port_rules_count(self, switch, port, acl_config, acl_samples):
-        rules_map = {}
+    def _get_port_acl_count(self, switch, port, acl_config, acl_samples):
+        acl_map = {'rules': {}, 'errors': []}
+        rules_map = acl_map['rules']
+        errors = acl_map['errors']
 
         for rule_config in acl_config.rules:
             cookie_num = rule_config.get('cookie')
@@ -59,11 +55,39 @@ class AclStateCollector:
                 break
 
             if not has_sample:
-                LOGGER.warning(
-                    'No ACL metric sample available for switch, port, ACL, rule:'
-                    '%s, %s, %s, %s', switch, port, acl_config._id, cookie_num)
+                error = (f'No ACL metric sample available for switch, port, ACL, rule: '
+                         f'{switch}, {port}, {acl_config._id}, {cookie_num}')
+                errors.append(error)
+                LOGGER.error(error)
 
-        return {'rules': rules_map}
+        return acl_map
+
+    def _verify_port_acl_config(self, switch, port):
+        error_map = {'errors', []}
+        error_list = error_map['errors']
+
+        switch_config = self._switch_configs.get(switch)
+        if not switch_config:
+            error = f'Switch not defined in Faucet dps config: {switch}'
+            LOGGER.error(error)
+            error_list.append(error)
+            return None, error_map
+
+        port_config = switch_config.ports.get(port)
+        if not port_config:
+            error = 'Port not defined in Faucet dps config: {switch}, {port}'
+            LOGGER.error(error)
+            error_list.append(error)
+            return None, error_map
+
+        acls_config = port_config.acls_in
+        if not acls_config:
+            error = 'No ACLs applied to port: {switch}, {port}'
+            LOGGER.error(error)
+            error_list.append(error)
+            return None, error_map
+
+        return acls_config[0], None
 
     def update_switch_configs(self, switch_configs):
         """Update cache of switch configs"""

@@ -62,14 +62,31 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
     acls:
       port_1_acl:
       - rule:
+        description: allow dns
+        cookie: 4
+        actions:
+          allow: True
+      - rule:
         description: allow all
         cookie: 5
+        actions:
+          allow: True
+      port_2_acl:
+      - rule:
+        description: allow icmp
+        cookie: 6
+        actions:
+          allow: True
+      - rule:
+        description: allow all
         actions:
           allow: True
     """
 
     ACL_SAMPLES = [
-        MockSample({'dp_name': 'sec', 'in_port': '1', 'cookie': 5}, 20)
+        MockSample({'dp_name': 'sec', 'in_port': '1', 'cookie': 4}, 24),
+        MockSample({'dp_name': 'sec', 'in_port': '1', 'cookie': 5}, 25),
+        MockSample({'dp_name': 'sec', 'in_port': '2', 'cookie': 6}, 26)
     ]
 
     def test_get_port_acl_count(self):
@@ -77,12 +94,27 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
         acl_count = self._acl_collector.get_port_acl_count('sec', 1, self.ACL_SAMPLES)
         expected_acl_count = {
             'rules': {
-                'allow all': {
-                    'packet_count': 20
-                }
+                'allow dns': {'packet_count': 24},
+                'allow all': {'packet_count': 25}
             }
         }
         self.assertEqual(acl_count, expected_acl_count)
+
+   def test_rule_errors(self):
+       """Test getting the ACL count that contains rule errors"""
+       acl_count = self._acl_collector.get_port_acl_count('sec', 2, self.ACL_SAMPLES)
+       expected_acl_count = {
+           'rules': {
+               'allow dns': {'packet_count': 24},
+               'allow all': {'packet_count': 25}
+           }
+       }
+       print(f'Rule errors:\n{acl_count}')
+
+    def test_nonexistent_port_config(self):
+        """Testing getting ACL count for a nonexistent port"""
+        acl_count = self._acl_collector.get_port_acl_count('sec', 3, self.ACL_SAMPLES)
+        print(f'Nonexistent:\n{acl_count}')
 
 
 if __name__ == '__main__':
