@@ -100,16 +100,16 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
         }
         self.assertEqual(acl_count, expected_acl_count)
 
-   def test_rule_errors(self):
-       """Test getting the ACL count that contains rule errors"""
-       acl_count = self._acl_collector.get_port_acl_count('sec', 2, self.ACL_SAMPLES)
-       expected_acl_count = {
-           'rules': {
-               'allow dns': {'packet_count': 24},
-               'allow all': {'packet_count': 25}
-           }
-       }
-       print(f'Rule errors:\n{acl_count}')
+    def test_rule_errors(self):
+        """Test getting the ACL count that contains rule errors"""
+        acl_count = self._acl_collector.get_port_acl_count('sec', 2, self.ACL_SAMPLES)
+        expected_acl_count = {
+            'rules': {
+                'allow dns': {'packet_count': 24},
+                'allow all': {'packet_count': 25}
+            }
+        }
+        print(f'Rule errors:\n{acl_count}')
 
     def test_nonexistent_port_config(self):
         """Testing getting ACL count for a nonexistent port"""
