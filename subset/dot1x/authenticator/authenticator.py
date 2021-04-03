@@ -81,7 +81,7 @@ class AuthStateMachine:
     def _set_timeout(self, clear=False):
         with self._timer_lock:
             if clear:
-                self._current_timeout =  None
+                self._current_timeout = None
             else:
                 self._current_timeout = time.time() + self._idle_time
 
@@ -125,10 +125,10 @@ class Authenticator:
             radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
         self.eap_module = EapModule('eth0', self.received_eap_request)
 
-        #TODO: Take value from config and then revert to default
+        # TODO: Take value from config and then revert to default
         interval = self.HEARTBEAT_INTERVAL
 
-        #TODO: Take value from config and then revert to default
+        # TODO: Take value from config and then revert to default
         self._idle_time = self.IDLE_TIME
         self._max_retry_count = self.RETRY_COUNT
 

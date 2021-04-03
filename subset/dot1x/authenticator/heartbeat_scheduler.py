@@ -1,5 +1,5 @@
 """Schedule heart beat with functions that have to be called in order"""
-
+from __future__ import absolute_import
 import threading
 
 from utils import get_logger
