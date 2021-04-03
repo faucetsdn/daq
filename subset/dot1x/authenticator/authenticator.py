@@ -35,6 +35,9 @@ class AuthStateMachine:
         self._idle_time = idle_time
         self._max_retry_count = retry_count
         self._current_timeout = None
+        self._retry_func = None
+        self._retry_args = None
+        self._current_retries = None
 
     def _state_transition(self, target, expected=None):
         with self._state_lock:
@@ -48,6 +51,7 @@ class AuthStateMachine:
         """Received EAPOL start on EAP socket"""
         self._state_transition(self.SUPPLICANT, self.START)
         self._set_timeout()
+        self._set_retry_actions(retry_func=self.eap_send_callback, retry_args=[self.src_mac])
         self.eap_send_callback(self.src_mac)
 
     def received_eap_request(self, eap_message):
@@ -55,10 +59,12 @@ class AuthStateMachine:
         if isinstance(eap_message, IdentityMessage) and not self.identity:
             self.identity = eap_message.identity
         self._state_transition(self.RADIUS, self.SUPPLICANT)
-        self._set_timeout()
         port_id = port_id_to_int(self.authentication_mac)
         radius_packet_info = RadiusPacketInfo(
             eap_message, self.src_mac, self.identity, self.radius_state, port_id)
+        self._set_timeout()
+        self._set_retry_actions(
+            retry_func=self.radius_send_callback, retry_args=[radius_packet_info])
         self.radius_send_callback(radius_packet_info)
 
     def received_radius_response(self, payload, radius_state, packet_type):
@@ -76,6 +82,8 @@ class AuthStateMachine:
             else:
                 self._state_transition(self.SUPPLICANT, self.RADIUS)
                 self._set_timeout()
+                self._set_retry_actions(
+                    retry_func=self.eap_send_callback, retry_args=[self.src_mac, eap_message])
         self.eap_send_callback(self.src_mac, eap_message)
 
     def _set_timeout(self, clear=False):
@@ -85,12 +93,27 @@ class AuthStateMachine:
             else:
                 self._current_timeout = time.time() + self._idle_time
 
+    def _set_retry_actions(self, retry_func=None, retry_args=None):
+        self._retry_func = retry_func
+        self._retry_args = list(retry_args)
+        self._current_retries = 0
+
+    def _clear_retry_actions(self):
+        self._retry_func = None
+        self._retry_args = None
+        self._current_retries = 0
+
     def handle_timer(self):
         """Handle timer and check if timeout is exceeded"""
         with self._timer_lock:
             if self._current_timeout:
                 if time.time() > self._current_timeout:
-                    self._handle_timeout()
+                    if self._current_retries < self._max_retry_count:
+                        self._current_retries += 1
+                        self._set_timeout()
+                        self._retry_func(*self._retry_args)
+                    else:
+                        self._handle_timeout()
 
     def _handle_timeout(self):
         self._state_transition(self.FAIL)
@@ -104,7 +127,7 @@ class Authenticator:
     """Authenticator to manage Authentication flow"""
 
     HEARTBEAT_INTERVAL = 3
-    IDLE_TIME = 18
+    IDLE_TIME = 9
     RETRY_COUNT = 3
 
     def __init__(self):
