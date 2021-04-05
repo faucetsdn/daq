@@ -56,7 +56,6 @@
     },
     "dot1x": {
       "enabled": true,
-      "interface": "eth0"
     },
     "switch": {
       "enabled": true,
