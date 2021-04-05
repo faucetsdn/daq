@@ -7,6 +7,6 @@ FROM daqf/aardvark:latest
 
 RUN $AG update && $AG install netcat python
 
-COPY docker/include/bin/test_hold .
+COPY docker/include/bin/block_forever .
 
-CMD ./test_hold
+CMD ./block_forever
