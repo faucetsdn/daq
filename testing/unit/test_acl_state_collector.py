@@ -9,7 +9,7 @@ import unittest
 from acl_state_collector import AclStateCollector
 from utils import dict_proto
 
-from proto.acl_counts_pb2 import AclCount
+from proto.acl_counting_pb2 import RuleCounts
 
 from faucet import config_parser
 
@@ -25,7 +25,7 @@ class AclStateCollectorTestBase(unittest.TestCase):
     """Base setup for AclStateCollector tests"""
 
     FAUCET_CONFIG = ''
-    ACL_SAMPLES = []
+    RULE_SAMPLES = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,8 +50,8 @@ class AclStateCollectorTestBase(unittest.TestCase):
         shutil.rmtree(self._temp_dir)
         self._acl_collector = None
 
-    def _verify_acl_count(self, acl_count, expected_acl_count):
-        self.assertEqual(acl_count, dict_proto(expected_acl_count, AclCount))
+    def _verify_rule_counts(self, rule_counts, expected_rule_counts):
+        self.assertEqual(rule_counts, dict_proto(expected_rule_counts, RuleCounts))
 
 
 class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
@@ -97,27 +97,27 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
           allow: True
     """
 
-    ACL_SAMPLES = [
+    RULE_SAMPLES = [
         MockSample({'dp_name': 'sec', 'in_port': '1', 'cookie': 4}, 24),
         MockSample({'dp_name': 'sec', 'in_port': '1', 'cookie': 5}, 25),
         MockSample({'dp_name': 'sec', 'in_port': '2', 'cookie': 6}, 26)
     ]
 
-    def test_get_port_acl_count(self):
-        """Test getting the port ACL count"""
-        acl_count = self._acl_collector.get_port_acl_count('sec', 1, self.ACL_SAMPLES)
-        expected_acl_count = {
+    def test_get_port_rule_counts(self):
+        """Test getting the port ACL rule count"""
+        rule_counts = self._acl_collector.get_port_rule_counts('sec', 1, self.RULE_SAMPLES)
+        expected_rule_counts = {
             'rules': {
                 'allow dns': {'packet_count': 24},
                 'allow all': {'packet_count': 25}
             }
         }
-        self._verify_acl_count(acl_count, expected_acl_count)
+        self._verify_rule_counts(rule_counts, expected_rule_counts)
 
     def test_rule_errors(self):
-        """Test getting the ACL count that contains rule errors"""
-        acl_count = self._acl_collector.get_port_acl_count('sec', 2, self.ACL_SAMPLES)
-        expected_acl_count = {
+        """Test getting the rule_counts that contains rule errors"""
+        rule_counts = self._acl_collector.get_port_rule_counts('sec', 2, self.RULE_SAMPLES)
+        expected_rule_counts = {
             'rules': {
                 'allow icmp': {'packet_count': 26}
             },
@@ -126,15 +126,15 @@ class SimpleAclStateCollectorTestCase(AclStateCollectorTestBase):
                 'allow ntp (cookie=7)'
             ]
         }
-        self._verify_acl_count(acl_count, expected_acl_count)
+        self._verify_rule_counts(rule_counts, expected_rule_counts)
 
     def test_nonexistent_port_config(self):
-        """Testing getting ACL count for a nonexistent port"""
-        acl_count = self._acl_collector.get_port_acl_count('sec', 3, self.ACL_SAMPLES)
-        expected_acl_count = {
+        """Testing getting rule counts for a nonexistent port"""
+        rule_counts = self._acl_collector.get_port_rule_counts('sec', 3, self.RULE_SAMPLES)
+        expected_rule_counts = {
             'errors': ['Port not defined in Faucet dps config: sec, 3']
         }
-        self._verify_acl_count(acl_count, expected_acl_count)
+        self._verify_rule_counts(rule_counts, expected_rule_counts)
 
 
 if __name__ == '__main__':

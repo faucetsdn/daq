@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import logger
 from utils import dict_proto
 
-from proto.acl_counts_pb2 import AclCount
+from proto.acl_counting_pb2 import RuleCounts
 
 LOGGER = logger.get_logger('aclstate')
 
@@ -16,22 +16,22 @@ class AclStateCollector:
     def __init__(self):
         self._switch_configs = {}
 
-    def get_port_acl_count(self, switch, port, acl_samples):
+    def get_port_rule_counts(self, switch, port, rule_samples):
         """Return the ACL count for a port"""
 
         acl_config, error_map = self._verify_port_acl_config(switch, port)
 
         if not acl_config:
-            return dict_proto(error_map, AclCount)
+            return dict_proto(error_map, RuleCounts)
 
-        acl_count = self._get_port_acl_count(switch, port, acl_config, acl_samples)
-        return dict_proto(acl_count, AclCount)
+        rule_counts = self._get_port_rule_counts(switch, port, acl_config, rule_samples)
+        return dict_proto(rule_counts, RuleCounts)
 
     # pylint: disable=protected-access
-    def _get_port_acl_count(self, switch, port, acl_config, acl_samples):
-        acl_map = {'rules': {}, 'errors': []}
-        rules_map = acl_map['rules']
-        errors = acl_map['errors']
+    def _get_port_rule_counts(self, switch, port, acl_config, rule_samples):
+        rule_counts_map = {'rules': {}, 'errors': []}
+        rules_map = rule_counts_map['rules']
+        errors = rule_counts_map['errors']
 
         for rule_config in acl_config.rules:
             cookie_num = rule_config.get('cookie')
@@ -42,7 +42,7 @@ class AclStateCollector:
                 continue
 
             has_sample = False
-            for sample in acl_samples:
+            for sample in rule_samples:
                 if str(sample.labels.get('cookie')) != str(cookie_num):
                     continue
                 if sample.labels.get('dp_name') != switch:
@@ -61,7 +61,7 @@ class AclStateCollector:
                 errors.append(error)
                 LOGGER.error(error)
 
-        return acl_map
+        return rule_counts_map
 
     def _verify_port_acl_config(self, switch, port):
         error_map = {'errors': []}
@@ -84,6 +84,12 @@ class AclStateCollector:
         acls_config = port_config.acls_in
         if not acls_config:
             error = f'No ACLs applied to port: {switch}, {port}'
+            LOGGER.error(error)
+            error_list.append(error)
+            return None, error_map
+
+        if len(acls_config) != 1:
+            error = f'More than one ACLs were applied to port: {switch}, {port}'
             LOGGER.error(error)
             error_list.append(error)
             return None, error_map
