@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from eap_module import EapModule
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
-from utils import get_logger
+from utils import get_logger, get_interface_name, get_interface_ip, get_interface_mac
 
 import json
 import threading
@@ -90,7 +90,6 @@ class Authenticator:
         self._setup()
 
     def _load_config(self):
-        self.logger.info(self._config_file)
         with open(self._config_file, 'r') as file_stream:
             full_config = json.load(file_stream)
         config = full_config.get('modules').get('dot1x')
@@ -98,15 +97,19 @@ class Authenticator:
         self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
         self._enabled = config['enabled']
-        self._interface = config['interface']
+        self._interface = config.get('interface') or get_interface_name()
 
-        radius_config = config['radius']
-        radius_socket_info = radius_config['radius_socket_info']
-        self._radius_socket_info = RadiusSocketInfo(
-            radius_socket_info['listen_ip'], radius_socket_info['listen_port'],
-            radius_socket_info['remote_ip'], radius_socket_info['remote_port'])
-        self._radius_secret = radius_config['secret']
-        self._radius_id = radius_config['id']
+        radius_config = config.get('radius_server', {})
+        radius_socket_info = radius_config.get('radius_socket_info', {})
+
+        listen_ip = radius_socket_info.get('listen_ip') or get_interface_ip(self._interface)
+        listen_port = radius_socket_info.get('listen_port') or 0
+        remote_ip = radius_socket_info.get('remote_ip') or '127.0.0.1'
+        remote_port = radius_socket_info.get('remote_port') or 1812
+
+        self._radius_socket_info = RadiusSocketInfo(listen_ip, listen_port, remote_ip, remote_port)
+        self._radius_secret = radius_config.get('secret') or 'SECRET'
+        self._radius_id = radius_config.get('id') or get_interface_mac(self._interface)
 
     def _setup(self):
         self._load_config()

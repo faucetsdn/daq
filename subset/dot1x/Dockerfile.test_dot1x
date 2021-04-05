@@ -11,7 +11,6 @@ COPY subset/dot1x/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
 
 COPY subset/dot1x/authenticator/ authenticator/
 COPY subset/dot1x/test_dot1x test_dot1x
-COPY subset/dot1x/dot1x_config.yaml dot1x_config.yaml
 
 EXPOSE \
     1812/udp \

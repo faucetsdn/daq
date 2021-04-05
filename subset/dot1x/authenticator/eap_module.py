@@ -27,7 +27,6 @@ class EapModule:
 
     def setup_eap_socket(self):
         """Setup EAP socket"""
-        print(self.interface)
         self.eap_socket = EapSocket(self.interface, 'eap_socket')
         self.eap_socket.setup()
 
