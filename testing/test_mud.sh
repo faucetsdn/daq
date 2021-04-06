@@ -53,7 +53,7 @@ function test_acl_count {
     device_mac=9a:02:57:1e:8f:0$device_num
     peer_mac=9a:02:57:1e:8f:0$peer_num
     metric_output_file=inst/run-9a02571e8f0$device_num/metric_output.json
-    label_matches=eth_src=$device_mac,eth_dst=$peer_mac
+    label_matches=eth_src=$peer_mac,eth_dst=$device_mac
 
     python3 daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $label_matches
     jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file

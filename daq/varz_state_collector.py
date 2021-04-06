@@ -4,11 +4,12 @@ from __future__ import absolute_import
 
 import argparse
 import json
-import prometheus_client.parser
-import requests
 import sys
 import time
 
+import requests
+
+import prometheus_client.parser
 import logger
 
 LOGGER = logger.get_logger('varzstate')
@@ -30,13 +31,14 @@ class VarzStateCollector:
             f'http://{endpoint_address}:{gauge_varz_port or DEFAULT_GAUGE_VARZ_PORT}')
 
     def retry_get_faucet_metrics(self, target_metrics, retries=3):
+        """Get a list of target Faucet metrics with configured number of retries"""
         return self._retry_get_metrics(self._faucet_varz_endpoint, target_metrics, retries)
 
     def retry_get_gauge_metrics(self, target_metrics, retries=3):
+        """Get a list of target Gauge metrics with configured number of retries"""
         return self._retry_get_metrics(self._gauge_varz_endpoint, target_metrics, retries)
 
     def _retry_get_metrics(self, endpoint, target_metrics, retries):
-        """Get a list of target metrics with configured number of retries"""
         for retry in range(retries):
             try:
                 return self._get_metrics(endpoint, target_metrics)
@@ -47,7 +49,6 @@ class VarzStateCollector:
         raise Exception(f'Could not retrieve metrics {target_metrics} after {retries} retries')
 
     def _get_metrics(self, endpoint, target_metrics):
-        """Get a list of target metrics"""
         metric_map = {}
 
         response = requests.get(endpoint)
@@ -83,6 +84,7 @@ def parse_args(raw_args):
 
 
 def report_metrics(metrics, label_matches=None):
+    """Return metric samples with labels and values in Json format"""
     metrics_map = {}
 
     for metric in metrics.values():
@@ -96,6 +98,7 @@ def report_metrics(metrics, label_matches=None):
     return metrics_map
 
 def main():
+    """Main program"""
     args = parse_args(sys.argv[1:])
     varz_collector = VarzStateCollector(
         args.address, args.faucet_varz_port, args.gauge_varz_port)
