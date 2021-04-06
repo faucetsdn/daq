@@ -97,6 +97,7 @@ def report_metrics(metrics, label_matches=None):
 
     return metrics_map
 
+
 def main():
     """Main program"""
     args = parse_args(sys.argv[1:])
@@ -125,6 +126,7 @@ def main():
             json.dump(varz_metrics_map, file)
     else:
         print(json.dumps(varz_metrics_map))
+
 
 if __name__ == '__main__':
     main()
