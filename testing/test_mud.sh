@@ -47,6 +47,18 @@ function test_device_traffic {
     echo device-$device_num $type $((bfr_peer > 2)) $((bfr_ngbr > 0)) $((ufr_peer > 2)) $((ufr_ngbr > 0)) | tee -a $TEST_RESULTS
 }
 
+function test_acl_count {
+    device_num=$1
+    peer_num=$((3-device_num))
+    device_mac=9a:02:57:1e:8f:0$device_num
+    peer_mac=9a:02:57:1e:8f:0$peer_num
+    metric_output_file=inst/run-9a02571e8f0$device_num/metric_output.json
+    label_matches=eth_src=$device_mac,eth_dst=$peer_mac
+
+    python3 daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $label_matches
+    jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file
+}
+
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
@@ -54,8 +66,13 @@ function test_mud {
 
     echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
 
+    echo Device traffic:
     test_device_traffic 1
     test_device_traffic 2
+
+    echo ACL count:
+    test_acl_count 1
+    test_acl_count 2
 
     more inst/run-*/nodes/*/activate.log | cat
 }

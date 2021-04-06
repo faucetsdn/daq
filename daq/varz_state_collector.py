@@ -88,10 +88,9 @@ def report_metrics(metrics, label_matches=None):
     for metric in metrics.values():
         samples = []
         for sample in metric.samples:
-            if label_matches and label_matches.items() <= sample.labels.items():
+            if not label_matches or label_matches.items() <= sample.labels.items():
                 sample_map = {'labels': sample.labels, 'value': sample.value}
                 samples.append(sample_map)
-        samples.sort(key=lambda map: str(map['labels']))
         metrics_map[metric.name] = {'samples': samples}
 
     return metrics_map
