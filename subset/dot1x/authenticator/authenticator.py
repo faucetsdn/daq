@@ -143,7 +143,7 @@ class Authenticator:
     IDLE_TIME = 9
     RETRY_COUNT = 3
     RADIUS_PORT = 1812
-    EAPOL_IDLE_TIME = 100
+    EAPOL_IDLE_TIME = 180
 
     def __init__(self, config_file):
         self.state_machines = {}
