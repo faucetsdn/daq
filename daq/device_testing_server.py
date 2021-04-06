@@ -10,13 +10,13 @@ import grpc
 
 #LOGGER = logger.get_logger('devtesting')
 
-import daq.proto.device_testing_pb2_grpc as device_testing_pb2_grpc
+import proto.device_testing_pb2 as device_testing_pb2
 
 DEFAULT_MAX_WORKERS = 10
 DEFAULT_SERVER_PORT = 47808
 DEFALUT_BIND_ADDRESS = '0.0.0.0'
 
-class SessionProgressServicer(device_report_pb2_grpc.SessionProgressServicer):
+class SessionProgressServicer(device_report_pb2.SessionProgressServicer):
     """gRPC servicer to receive devices state"""
 
     def __init__(self, on_receiving_result):
@@ -122,7 +122,7 @@ class SessionServer:
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
 
         self._servicer = SessionProgressServicer(on_receiving_result)
-        device_report_pb2_grpc.add_SessionProgressServicer_to_server(self._servicer, self._server)
+        device_report_pb2.add_SessionProgressServicer_to_server(self._servicer, self._server)
 
         server_address_port = f'{address or DEFAULT_BIND_ADDRESS}:{port or DEFAULT_SERVER_PORT}'
         self._server.add_insecure_port(server_address_port)
