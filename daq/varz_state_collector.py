@@ -82,13 +82,13 @@ def parse_args(raw_args):
     return parser.parse_args(raw_args)
 
 
-def report_metrics(metrics, label_matches):
+def report_metrics(metrics, label_matches=None):
     metrics_map = {}
 
     for metric in metrics.values():
         samples = []
         for sample in metric.samples:
-            if label_matches.items() <= sample.labels.items():
+            if label_matches and label_matches.items() <= sample.labels.items():
                 sample_map = {'labels': sample.labels, 'value': sample.value}
                 samples.append(sample_map)
         samples.sort(key=lambda map: str(map['labels']))
@@ -102,15 +102,21 @@ def main():
         args.address, args.faucet_varz_port, args.gauge_varz_port)
     varz_metrics_map = {}
 
+    label_matches = {}
+    if args.label_matches:
+        for match in args.label_matches.split(','):
+            label, value = match.split(':')
+            label_matches[label] = value
+
     if args.faucet_target_metrics:
         faucet_target_metrics = args.faucet_target_metrics.split(',')
         faucet_varz_metrics = varz_collector.retry_get_faucet_metrics(faucet_target_metrics)
-        varz_metrics_map['faucet_metrics'] = report_metrics(faucet_varz_metrics)
+        varz_metrics_map['faucet_metrics'] = report_metrics(faucet_varz_metrics, label_matches)
 
     if args.gauge_target_metrics:
         gauge_target_metrics = args.gauge_target_metrics.split(',')
         gauge_varz_metrics = varz_collector.retry_get_gauge_metrics(gauge_target_metrics)
-        varz_metrics_map['gauge_metrics'] = report_metrics(gauge_varz_metrics)
+        varz_metrics_map['gauge_metrics'] = report_metrics(gauge_varz_metrics, label_matches)
 
     if args.output_file:
         with open(args.output_file, 'w') as file:
