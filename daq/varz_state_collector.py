@@ -39,7 +39,7 @@ class VarzStateCollector:
         """Get a list of target metrics with configured number of retries"""
         for retry in range(retries):
             try:
-                return self.get_metrics(endpoint, target_metrics)
+                return self._get_metrics(endpoint, target_metrics)
             except Exception as e:
                 LOGGER.error(
                     'Could not retrieve metrics after %d retries: %s', retry, e)
@@ -64,24 +64,26 @@ class VarzStateCollector:
 
 def parse_args(raw_args):
     """Parse sys args"""
-    parser = argparse.ArgumentParser(prog='varz_collector', stdout=True)
+    parser = argparse.ArgumentParser(description='Varz collector')
     parser.add_argument('-a', '--address', type=str, default=DEFAULT_VARZ_ADDRESS,
-                        help='varz endpoint address')
+                        help='Varz endpoint address')
     parser.add_argument('-f', '--faucet-varz-port', type=str, default=DEFAULT_FAUCET_VARZ_PORT,
-                        help='faucet varz port')
+                        help='Faucet varz port')
     parser.add_argument('-g', '--gauge-varz-port', type=str, default=DEFAULT_GAUGE_VARZ_PORT,
-                        help='gauge varz port')
+                        help='Gauge varz port')
     parser.add_argument('-x', '--faucet-target-metrics', type=str,
                         help='Faucet target metrics separated by comma')
     parser.add_argument('-y', '--gauge-target-metrics', type=str,
                         help='Gauge target metrics separated by comma')
+    parser.add_argument('-o', '--output-file', type=str,
+                        help='Output file')
     return parser.parse_args(raw_args)
 
 
-def report_metrics(metrics, title):
+def report_metrics(metrics):
     metrics_map = {}
 
-    for metric in metrics:
+    for metric in metrics.values():
         samples = []
         for sample in metric.samples:
             sample_map = {'labels': sample.labels, 'value': sample.value}
@@ -90,7 +92,7 @@ def report_metrics(metrics, title):
 
     return metrics_map
 
-if __name__ == 'main':
+if __name__ == '__main__':
     ARGS = parse_args(sys.argv[1:])
     VARZ_COLLECTOR = VarzStateCollector(
         ARGS.address, ARGS.faucet_varz_port, ARGS.gauge_varz_port)
@@ -102,8 +104,12 @@ if __name__ == 'main':
         VARZ_METRICS_MAP['faucet_metrics'] = report_metrics(FAUCET_VARZ_METRICS)
 
     if ARGS.gauge_target_metrics:
-        GAUGE_TARGET_METRICS = ARGS.faucet_target_metrics.split(',')
+        GAUGE_TARGET_METRICS = ARGS.gauge_target_metrics.split(',')
         GAUGE_VARZ_METRICS = VARZ_COLLECTOR.retry_get_gauge_metrics(GAUGE_TARGET_METRICS)
         VARZ_METRICS_MAP['gauge_metrics'] = report_metrics(GAUGE_VARZ_METRICS)
 
-    json.dumps(VARZ_METRICS_MAP)
+    if ARGS.output_file:
+        with open(ARGS.output_file, 'w') as file:
+            json.dump(VARZ_METRICS_MAP, file)
+    else:
+        print(json.dumps(VARZ_METRICS_MAP))
