@@ -22,8 +22,9 @@ class AuthStateMachine:
     def __init__(self, src_mac, auth_mac, idle_time, retry_count,
                  eap_send_callback, radius_send_callback, auth_callback):
         self.state = None
-        self._state_lock = None
-        self._timer_lock = None
+        self._state_lock = threading.Lock()
+        self._timer_lock = threading.RLock()
+        self.logger = get_logger('AuthSM')
         self.src_mac = src_mac
         self.eap_send_callback = eap_send_callback
         self.radius_send_callback = radius_send_callback
@@ -31,7 +32,6 @@ class AuthStateMachine:
         self.identity = None
         self.authentication_mac = auth_mac
         self.radius_state = None
-        self.logger = None
         self._idle_time = idle_time
         self._max_retry_count = retry_count
         self._current_timeout = None
@@ -41,12 +41,7 @@ class AuthStateMachine:
 
     def initialize(self):
         """Initialize state machine"""
-        self.logger.debug('Calling initialize')
-        self.state = self.START
-        self._state_lock = threading.Lock()
-        self._timer_lock = threading.RLock()
-        self.logger = get_logger('AuthStateMachine')
-
+        self._state_transition(self.START)
         self._set_timeout(self._idle_time)
         self._set_retry_actions(retry_func=self.eap_send_callback, retry_args=[self.src_mac])
 
@@ -97,14 +92,12 @@ class AuthStateMachine:
                     retry_func=self.eap_send_callback, retry_args=[self.src_mac, eap_message])
         self.eap_send_callback(self.src_mac, eap_message)
 
-    def _set_timeout(self, time=None, clear=False):
-        self.logger.debug('setting timeout time: %s', time)
+    def _set_timeout(self, timeout_time=None, clear=False):
         with self._timer_lock:
             if clear:
                 self._current_timeout = None
             else:
-                self.logger.debug('timeout time: %s', time)
-                self._current_timeout = time.time() + time
+                self._current_timeout = time.time() + timeout_time
 
     def _set_retry_actions(self, retry_func=None, retry_args=None):
         self._retry_func = retry_func
@@ -243,8 +236,8 @@ class Authenticator:
                     self._idle_time, self._max_retry_count,
                     self.send_eap_response, self.send_radius_request,
                     self.process_test_result)
-                self.state_machines[src_mac] = state_machine
                 state_machine.initialize()
+                self.state_machines[src_mac] = state_machine
                 state_machine.received_eapol_start()
             else:
                 self.logger.warning(

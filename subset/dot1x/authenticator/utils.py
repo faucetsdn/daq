@@ -24,6 +24,7 @@ def get_logger(logname):
         logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     logger.addHandler(logfile_handler)
 
+    print('Returning logger ', logger)
     return logger
 
 
