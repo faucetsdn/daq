@@ -175,16 +175,8 @@
         
           
           <li>
-            <a href="#daq%2fproto%2facl_counts.proto">daq/proto/acl_counts.proto</a>
+            <a href="#daq%2fproto%2facl_counting.proto">daq/proto/acl_counting.proto</a>
             <ul>
-              
-                <li>
-                  <a href="#AclCount"><span class="badge">M</span>AclCount</a>
-                </li>
-              
-                <li>
-                  <a href="#AclCount.RulesEntry"><span class="badge">M</span>AclCount.RulesEntry</a>
-                </li>
               
                 <li>
                   <a href="#AclCounts"><span class="badge">M</span>AclCounts</a>
@@ -196,6 +188,14 @@
               
                 <li>
                   <a href="#RuleCount"><span class="badge">M</span>RuleCount</a>
+                </li>
+              
+                <li>
+                  <a href="#RuleCounts"><span class="badge">M</span>RuleCounts</a>
+                </li>
+              
+                <li>
+                  <a href="#RuleCounts.RulesEntry"><span class="badge">M</span>RuleCounts.RulesEntry</a>
                 </li>
               
               
@@ -266,72 +266,10 @@
     
       
       <div class="file-heading">
-        <h2 id="daq/proto/acl_counts.proto">daq/proto/acl_counts.proto</h2><a href="#title">Top</a>
+        <h2 id="daq/proto/acl_counting.proto">daq/proto/acl_counting.proto</h2><a href="#title">Top</a>
       </div>
       <p>ACL counts for devices</p>
 
-      
-        <h3 id="AclCount">AclCount</h3>
-        <p>ACL counts for a device</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>rules</td>
-                  <td><a href="#AclCount.RulesEntry">AclCount.RulesEntry</a></td>
-                  <td>repeated</td>
-                  <td><p>List of rule counts indexed by the descriptions of the rules </p></td>
-                </tr>
-              
-                <tr>
-                  <td>errors</td>
-                  <td><a href="#string">string</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="AclCount.RulesEntry">AclCount.RulesEntry</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>key</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>value</td>
-                  <td><a href="#RuleCount">RuleCount</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
       
         <h3 id="AclCounts">AclCounts</h3>
         <p>ACL counts for devices</p>
@@ -376,7 +314,7 @@
               
                 <tr>
                   <td>value</td>
-                  <td><a href="#AclCount">AclCount</a></td>
+                  <td><a href="#RuleCounts">RuleCounts</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -403,6 +341,68 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>packet count </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="RuleCounts">RuleCounts</h3>
+        <p>ACL counts for a device</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>rules</td>
+                  <td><a href="#RuleCounts.RulesEntry">RuleCounts.RulesEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>List of rule counts indexed by the descriptions of the rules </p></td>
+                </tr>
+              
+                <tr>
+                  <td>errors</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="RuleCounts.RulesEntry">RuleCounts.RulesEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#RuleCount">RuleCount</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>
