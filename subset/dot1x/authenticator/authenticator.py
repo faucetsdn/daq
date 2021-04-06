@@ -127,13 +127,12 @@ class AuthStateMachine:
 class Authenticator:
     """Authenticator to manage Authentication flow"""
 
-    def __init__(self, config_file):
     HEARTBEAT_INTERVAL = 3
     IDLE_TIME = 9
     RETRY_COUNT = 3
     RADIUS_PORT = 1812
 
-    def __init__(self):
+    def __init__(self, config_file):
         self.state_machines = {}
         self.results = {}
         self.eap_module = None
