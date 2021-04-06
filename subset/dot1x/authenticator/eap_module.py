@@ -79,6 +79,7 @@ class EapModule:
         self.send_packed_eap_message(packed_message)
 
     def send_packed_eap_message(self, eap_message):
+        self.logger.debug('Sending packed eap message %s', eap_message)
         self.outbound_message_queue.put(eap_message)
 
     def send_eap_messages(self):
