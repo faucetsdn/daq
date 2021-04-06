@@ -186,11 +186,11 @@ class TestNetwork:
         LOGGER.debug("Adding primary...")
         self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
 
-        LOGGER.info("Initializing faucitizer...")
+        LOGGER.info("Initializing topology and faucitizer...")
+        self.topology.initialize(self.pri)
         self._generate_behavioral_config()
 
         LOGGER.info("Activating faucet topology...")
-        self.topology.initialize(self.pri)
         self.topology.start()
 
         target_ip = "127.0.0.1"
