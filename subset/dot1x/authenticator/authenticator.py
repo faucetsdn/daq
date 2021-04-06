@@ -155,7 +155,6 @@ class Authenticator:
         self._radius_secret = None
         self._radius_id = None
         self._interface = None
-        self._enabled = None
         self._idle_time = None
         self._max_retry_count = None
         self._eapol_idle_time = None
@@ -169,7 +168,6 @@ class Authenticator:
 
         self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
-        self._enabled = config['enabled']
         self._interface = config.get('interface', get_interface_name())
 
         radius_config = config.get('radius_server', {})
@@ -278,8 +276,6 @@ class Authenticator:
         self._end_authentication()
 
     def run_authentication_test(self):
-        if not self._enabled:
-            return "Authentication tests disabled"
         self.start_threads()
         result_str = ""
         for src_mac, is_success in self.results.items():

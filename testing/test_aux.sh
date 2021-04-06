@@ -164,7 +164,7 @@ sort inst/result.log | tee -a $TEST_RESULTS
 
 # Show partial logs from each test
 head -20 inst/gw*/nodes/gw*/activate.log
-head -20 inst/run-*/nodes/*/activate.log
+head -60 inst/run-*/nodes/*/activate.log
 head -20 inst/run-*/nodes/*/tmp/report.txt
 ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
 
@@ -187,6 +187,9 @@ fgrep 'Config contains' inst/run-*/nodes/udmi*/activate.log | tee -a $TEST_RESUL
 
 echo Full UDMI testing logs
 more inst/run-*/nodes/udmi*/activate.log | cat
+
+echo Full dot1x testing logs
+more inst/run-*/nodes/dot1x*/activate.log | cat
 
 for num in 1 2 3; do
     echo docker logs daq-faux-$num
