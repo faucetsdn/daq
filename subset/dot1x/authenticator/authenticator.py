@@ -131,6 +131,7 @@ class Authenticator:
     HEARTBEAT_INTERVAL = 3
     IDLE_TIME = 9
     RETRY_COUNT = 3
+    RADIUS_PORT = 1812
 
     def __init__(self):
         self.state_machines = {}
@@ -164,9 +165,9 @@ class Authenticator:
         radius_socket_info = radius_config.get('radius_socket_info', {})
 
         listen_ip = radius_socket_info.get('listen_ip') or get_interface_ip(self._interface)
-        listen_port = radius_socket_info.get('listen_port') or 0
-        remote_ip = radius_socket_info.get('remote_ip') or '127.0.0.1'
-        remote_port = radius_socket_info.get('remote_port') or 1812
+        listen_port = radius_socket_info.get('listen_port', 0)
+        remote_ip = radius_socket_info.get('remote_ip', '127.0.0.1')
+        remote_port = radius_socket_info.get('remote_port', self.RADIUS_PORT)
 
         self._radius_socket_info = RadiusSocketInfo(listen_ip, listen_port, remote_ip, remote_port)
         self._radius_secret = radius_config.get('secret') or 'SECRET'

@@ -55,7 +55,7 @@
       "enabled": true
     },
     "dot1x": {
-      "enabled": true,
+      "enabled": true
     },
     "switch": {
       "enabled": true,
