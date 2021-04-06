@@ -120,7 +120,6 @@ class AuthStateMachine:
         """Handle timer and check if timeout is exceeded"""
         with self._timer_lock:
             if self._current_timeout:
-                self.logger.debug('Timeout: %s time: %s', self._current_timeout, time.time())
                 if time.time() > self._current_timeout:
                     if self._current_retries < self._max_retry_count:
                         self._current_retries += 1
@@ -144,6 +143,7 @@ class Authenticator:
     IDLE_TIME = 9
     RETRY_COUNT = 3
     RADIUS_PORT = 1812
+    EAPOL_IDLE_TIME = 100
 
     def __init__(self, config_file):
         self.state_machines = {}
@@ -159,6 +159,7 @@ class Authenticator:
         self._interface = None
         self._idle_time = None
         self._max_retry_count = None
+        self._current_timeout = None
 
         self._setup()
 
@@ -199,6 +200,8 @@ class Authenticator:
 
         self.sm_timer = HeartbeatScheduler(interval)
         self.sm_timer.add_callback(self.handle_sm_timeout)
+
+        self._current_timeout = time.time() + self.EAPOL_IDLE_TIME
 
     def start_threads(self):
         self.logger.info('Starting SM timer')
@@ -269,9 +272,13 @@ class Authenticator:
         if is_success:
             self.logger.info('Authentication successful for %s' % (src_mac))
         else:
-            self.logger.info('Authentication failed for %s' % (src_mac))
-        self.results[src_mac] = is_success
-        self.state_machines.pop(src_mac)
+            if src_mac:
+                self.logger.info('Authentication failed for %s' % (src_mac))
+            else:
+                self.logger.info('Authentication failed. Received no EAPOL packets.')
+        if src_mac:
+            self.results[src_mac] = is_success
+            self.state_machines.pop(src_mac)
         # TODO: We currently finalize results as soon as we get a result for a src_mac.
         # Needs to be changed if we support multiple devices.
         self._end_authentication()
@@ -279,14 +286,21 @@ class Authenticator:
     def run_authentication_test(self):
         self.start_threads()
         result_str = ""
-        for src_mac, is_success in self.results.items():
-            result = 'succeeded' if is_success else 'failed'
-            result_str += "Authentication for %s %s." % (src_mac, result)
+        if not self.results:
+            result_str = "Authentication failed. No EAPOL messages received."
+        else:
+            for src_mac, is_success in self.results.items():
+                result = 'succeeded' if is_success else 'failed'
+                result_str += "Authentication for %s %s." % (src_mac, result)
         return result_str
 
     def handle_sm_timeout(self):
-        for state_machine in self.state_machines.values():
-            state_machine.handle_timer()
+        if not self.state_machines and self._current_timeout:
+            if time.time() > self._current_timeout:
+                self.process_test_result(None, False)
+        else:
+            for state_machine in self.state_machines.values():
+                state_machine.handle_timer()
 
 
 def main():
