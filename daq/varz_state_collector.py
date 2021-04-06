@@ -71,6 +71,8 @@ def parse_args(raw_args):
                         help='Faucet varz port')
     parser.add_argument('-g', '--gauge-varz-port', type=str, default=DEFAULT_GAUGE_VARZ_PORT,
                         help='Gauge varz port')
+    parser.add_argument('-l', '--label-matches', type=str,
+                        help='Only output samples whose labels match specified key value pairs')
     parser.add_argument('-x', '--faucet-target-metrics', type=str,
                         help='Faucet target metrics separated by comma')
     parser.add_argument('-y', '--gauge-target-metrics', type=str,
@@ -80,36 +82,41 @@ def parse_args(raw_args):
     return parser.parse_args(raw_args)
 
 
-def report_metrics(metrics):
+def report_metrics(metrics, label_matches):
     metrics_map = {}
 
     for metric in metrics.values():
         samples = []
         for sample in metric.samples:
-            sample_map = {'labels': sample.labels, 'value': sample.value}
-            samples.append(sample_map)
+            if label_matches.items() <= sample.labels.items():
+                sample_map = {'labels': sample.labels, 'value': sample.value}
+                samples.append(sample_map)
+        samples.sort(key=lambda map: str(map['labels']))
         metrics_map[metric.name] = {'samples': samples}
 
     return metrics_map
 
-if __name__ == '__main__':
-    ARGS = parse_args(sys.argv[1:])
-    VARZ_COLLECTOR = VarzStateCollector(
-        ARGS.address, ARGS.faucet_varz_port, ARGS.gauge_varz_port)
-    VARZ_METRICS_MAP = {}
+def main():
+    args = parse_args(sys.argv[1:])
+    varz_collector = VarzStateCollector(
+        args.address, args.faucet_varz_port, args.gauge_varz_port)
+    varz_metrics_map = {}
 
-    if ARGS.faucet_target_metrics:
-        FAUCET_TARGET_METRICS = ARGS.faucet_target_metrics.split(',')
-        FAUCET_VARZ_METRICS = VARZ_COLLECTOR.retry_get_faucet_metrics(FAUCET_TARGET_METRICS)
-        VARZ_METRICS_MAP['faucet_metrics'] = report_metrics(FAUCET_VARZ_METRICS)
+    if args.faucet_target_metrics:
+        faucet_target_metrics = args.faucet_target_metrics.split(',')
+        faucet_varz_metrics = varz_collector.retry_get_faucet_metrics(faucet_target_metrics)
+        varz_metrics_map['faucet_metrics'] = report_metrics(faucet_varz_metrics)
 
-    if ARGS.gauge_target_metrics:
-        GAUGE_TARGET_METRICS = ARGS.gauge_target_metrics.split(',')
-        GAUGE_VARZ_METRICS = VARZ_COLLECTOR.retry_get_gauge_metrics(GAUGE_TARGET_METRICS)
-        VARZ_METRICS_MAP['gauge_metrics'] = report_metrics(GAUGE_VARZ_METRICS)
+    if args.gauge_target_metrics:
+        gauge_target_metrics = args.gauge_target_metrics.split(',')
+        gauge_varz_metrics = varz_collector.retry_get_gauge_metrics(gauge_target_metrics)
+        varz_metrics_map['gauge_metrics'] = report_metrics(gauge_varz_metrics)
 
-    if ARGS.output_file:
-        with open(ARGS.output_file, 'w') as file:
-            json.dump(VARZ_METRICS_MAP, file)
+    if args.output_file:
+        with open(args.output_file, 'w') as file:
+            json.dump(varz_metrics_map, file)
     else:
-        print(json.dumps(VARZ_METRICS_MAP))
+        print(json.dumps(varz_metrics_map))
+
+if __name__ == '__main__':
+    main()
