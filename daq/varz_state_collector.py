@@ -108,7 +108,7 @@ def main():
     label_matches = {}
     if args.label_matches:
         for match in args.label_matches.split(','):
-            label, value = match.split(':')
+            label, value = match.split('=')
             label_matches[label] = value
 
     if args.faucet_target_metrics:
