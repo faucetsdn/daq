@@ -19,7 +19,7 @@ class AuthStateMachine:
     FAIL = "Test Failed"
     SUCCESS = "Test Succeeded"
 
-    def __init__(self, src_mac, auth_mac, idle_time, eapol_idle_time, retry_count,
+    def __init__(self, src_mac, auth_mac, idle_time, retry_count,
                  eap_send_callback, radius_send_callback, auth_callback):
         self.state = None
         self._state_lock = None
@@ -33,7 +33,6 @@ class AuthStateMachine:
         self.radius_state = None
         self.logger = None
         self._idle_time = idle_time
-        self._eapol_idle_time = eapol_idle_time
         self._max_retry_count = retry_count
         self._current_timeout = None
         self._retry_func = None
@@ -42,12 +41,13 @@ class AuthStateMachine:
 
     def initialize(self):
         """Initialize state machine"""
+        self.logger.debug('Calling initialize')
         self.state = self.START
         self._state_lock = threading.Lock()
         self._timer_lock = threading.RLock()
         self.logger = get_logger('AuthStateMachine')
 
-        self._set_timeout(self._eapol_idle_time)
+        self._set_timeout(self._idle_time)
         self._set_retry_actions(retry_func=self.eap_send_callback, retry_args=[self.src_mac])
 
     def _state_transition(self, target, expected=None):
@@ -98,10 +98,12 @@ class AuthStateMachine:
         self.eap_send_callback(self.src_mac, eap_message)
 
     def _set_timeout(self, time=None, clear=False):
+        self.logger.debug('setting timeout time: %s', time)
         with self._timer_lock:
             if clear:
                 self._current_timeout = None
             else:
+                self.logger.debug('timeout time: %s', time)
                 self._current_timeout = time.time() + time
 
     def _set_retry_actions(self, retry_func=None, retry_args=None):
@@ -118,6 +120,7 @@ class AuthStateMachine:
         """Handle timer and check if timeout is exceeded"""
         with self._timer_lock:
             if self._current_timeout:
+                self.logger.debug('Timeout: %s time: %s', self._current_timeout, time.time())
                 if time.time() > self._current_timeout:
                     if self._current_retries < self._max_retry_count:
                         self._current_retries += 1
@@ -141,7 +144,6 @@ class Authenticator:
     IDLE_TIME = 9
     RETRY_COUNT = 3
     RADIUS_PORT = 1812
-    EAPOL_IDLE_TIME = 65
 
     def __init__(self, config_file):
         self.state_machines = {}
@@ -157,7 +159,6 @@ class Authenticator:
         self._interface = None
         self._idle_time = None
         self._max_retry_count = None
-        self._eapol_idle_time = None
 
         self._setup()
 
@@ -195,7 +196,6 @@ class Authenticator:
         # TODO: Take value from config and then revert to default
         self._idle_time = self.IDLE_TIME
         self._max_retry_count = self.RETRY_COUNT
-        self._eapol_idle_time = self.EAPOL_IDLE_TIME
 
         self.sm_timer = HeartbeatScheduler(interval)
         self.sm_timer.add_callback(self.handle_sm_timeout)
@@ -237,10 +237,11 @@ class Authenticator:
                 auth_mac = self.eap_module.get_auth_mac()
                 state_machine = AuthStateMachine(
                     src_mac, auth_mac,
-                    self._idle_time, self._eapol_idle_time, self._max_retry_count,
+                    self._idle_time, self._max_retry_count,
                     self.send_eap_response, self.send_radius_request,
                     self.process_test_result)
                 self.state_machines[src_mac] = state_machine
+                state_machine.initialize()
                 state_machine.received_eapol_start()
             else:
                 self.logger.warning(
@@ -284,7 +285,6 @@ class Authenticator:
         return result_str
 
     def handle_sm_timeout(self):
-        self.logger.debug('Timer called')
         for state_machine in self.state_machines.values():
             state_machine.handle_timer()
 
