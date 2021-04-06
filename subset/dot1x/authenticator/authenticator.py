@@ -158,19 +158,19 @@ class Authenticator:
         self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
         self._enabled = config['enabled']
-        self._interface = config.get('interface') or get_interface_name()
+        self._interface = config.get('interface', get_interface_name())
 
         radius_config = config.get('radius_server', {})
         radius_socket_info = radius_config.get('radius_socket_info', {})
 
-        listen_ip = radius_socket_info.get('listen_ip') or get_interface_ip(self._interface)
+        listen_ip = radius_socket_info.get('listen_ip', get_interface_ip(self._interface))
         listen_port = radius_socket_info.get('listen_port', 0)
         remote_ip = radius_socket_info.get('remote_ip', '127.0.0.1')
         remote_port = radius_socket_info.get('remote_port', self.RADIUS_PORT)
 
         self._radius_socket_info = RadiusSocketInfo(listen_ip, listen_port, remote_ip, remote_port)
-        self._radius_secret = radius_config.get('secret') or 'SECRET'
-        self._radius_id = radius_config.get('id') or get_interface_mac(self._interface)
+        self._radius_secret = radius_config.get('secret', 'SECRET')
+        self._radius_id = radius_config.get('id', get_interface_mac(self._interface))
 
     def _setup(self):
         self._load_config()
