@@ -6,23 +6,22 @@ from queue import Queue
 import threading
 import grpc
 
-#import logger
+import daq.logger as logger
 
-#LOGGER = logger.get_logger('devtesting')
+LOGGER = logger.get_logger('devserv')
 
-import proto.device_testing_pb2 as device_testing_pb2
+import daq.proto.device_testing_pb2_grpc as server_grpc
 
 DEFAULT_MAX_WORKERS = 10
 DEFAULT_SERVER_PORT = 47808
 DEFALUT_BIND_ADDRESS = '0.0.0.0'
 
-class SessionProgressServicer(device_report_pb2.SessionProgressServicer):
+class DeviceTestingServicer(server_grpc.DeviceTestingServicer):
     """gRPC servicer to receive devices state"""
 
     def __init__(self, on_receiving_result):
         super().__init__()
         self._on_receiving_result = on_receiving_result
-        self._logger = get_logger('drserver')
         self._port_device_mapping = {}
         self._port_events_listeners = {}
         self._mac_assignments = {}
@@ -43,10 +42,10 @@ class SessionProgressServicer(device_report_pb2.SessionProgressServicer):
         if not device or device.mac not in self._port_events_listeners:
             return
         port_event = self._get_port_event(device)
-        self._logger.info('Sending %d DevicePortEvent %s %s %s %s',
-                          len(self._port_events_listeners[device.mac]), device.mac,
-                          # pylint: disable=no-member
-                          port_event.state, device.vlan, device.assigned)
+        LOGGER.info('Sending %d DevicePortEvent %s %s %s %s',
+                    len(self._port_events_listeners[device.mac]), device.mac,
+                    # pylint: disable=no-member
+                    port_event.state, device.vlan, device.assigned)
         for queue in self._port_events_listeners[device.mac]:
             queue.put(port_event)
 
@@ -121,8 +120,8 @@ class SessionServer:
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
 
-        self._servicer = SessionProgressServicer(on_receiving_result)
-        device_report_pb2.add_SessionProgressServicer_to_server(self._servicer, self._server)
+        self._servicer = DeviceTestingServicer(on_receiving_result)
+        server_grpc.add_DeviceTestingServicer_to_server(self._servicer, self._server)
 
         server_address_port = f'{address or DEFAULT_BIND_ADDRESS}:{port or DEFAULT_SERVER_PORT}'
         self._server.add_insecure_port(server_address_port)
