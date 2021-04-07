@@ -63,12 +63,15 @@ function test_acl_count {
 function terminate_daq {
     daq_pid=$(<inst/daq.pid)
     sudo kill -SIGINT $daq_pid
+    while [ -f inst/daq.pid ]; do
+        sleep 5
+    done
 }
 
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json
+    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json & sleep 120
 
     echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
 
