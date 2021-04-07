@@ -11,9 +11,13 @@ google-cloud-pubsub==0.40.0
 google-cloud-storage==1.16.1
 grpcio-tools==1.30.0
 Jinja2
+netaddr
 netifaces
+networkx
 pylint==2.4.2
 pypandoc==1.4
+pytrica
 pyyaml
 requests
+ryu
 WeasyPrint==50

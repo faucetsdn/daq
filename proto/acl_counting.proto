@@ -1,0 +1,29 @@
+/*
+ * ACL counts for devices
+ */
+syntax = "proto3";
+
+/*
+ * ACL counts for devices
+ */
+message AclCounts {
+  // List of ACL counts indexed by device MAC addresses
+  map<string, RuleCounts> devices = 1;
+}
+
+/*
+ *  ACL counts for a device
+ */
+message RuleCounts {
+  // List of rule counts indexed by the descriptions of the rules
+  map<string, RuleCount> rules = 1;
+  repeated string errors = 2;
+}
+
+/*
+ * Rule count
+ */
+message RuleCount {
+  // packet count
+  int32 packet_count = 1;
+}

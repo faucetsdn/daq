@@ -127,7 +127,7 @@ $PIP -V
 echo Installing python dependencies...
 $PIP install wheel
 $PIP install --upgrade --index-url=https://pypi.python.org/simple setuptools
-$PIP install -r etc/requirements.txt --index-url=https://pypi.python.org/simple
+$PIP install --upgrade -r etc/requirements.txt --index-url=https://pypi.python.org/simple
 $PIP freeze
 
 echo Resetting .cache directory permissions...
