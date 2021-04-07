@@ -19,8 +19,8 @@ message SessionProgress {
 }
 
 /*
- * Device testing service endpoint.
+ * Device testing session server endpoint.
  */
-service DeviceTesting {
+service SessionServer {
   rpc StartSession(SessionParams) returns (stream SessionProgress) {}
 }

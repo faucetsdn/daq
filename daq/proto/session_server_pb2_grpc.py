@@ -2,12 +2,12 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from daq.proto import device_testing_pb2 as daq_dot_proto_dot_device__testing__pb2
+from daq.proto import session_server_pb2 as daq_dot_proto_dot_session__server__pb2
 
 
-class DeviceTestingStub(object):
+class SessionServerStub(object):
     """
-    Device testing service endpoint.
+    Device testing session server endpoint.
     """
 
     def __init__(self, channel):
@@ -17,15 +17,15 @@ class DeviceTestingStub(object):
             channel: A grpc.Channel.
         """
         self.StartSession = channel.unary_stream(
-                '/DeviceTesting/StartSession',
-                request_serializer=daq_dot_proto_dot_device__testing__pb2.SessionParams.SerializeToString,
-                response_deserializer=daq_dot_proto_dot_device__testing__pb2.SessionProgress.FromString,
+                '/SessionServer/StartSession',
+                request_serializer=daq_dot_proto_dot_session__server__pb2.SessionParams.SerializeToString,
+                response_deserializer=daq_dot_proto_dot_session__server__pb2.SessionProgress.FromString,
                 )
 
 
-class DeviceTestingServicer(object):
+class SessionServerServicer(object):
     """
-    Device testing service endpoint.
+    Device testing session server endpoint.
     """
 
     def StartSession(self, request, context):
@@ -35,23 +35,23 @@ class DeviceTestingServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_DeviceTestingServicer_to_server(servicer, server):
+def add_SessionServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'StartSession': grpc.unary_stream_rpc_method_handler(
                     servicer.StartSession,
-                    request_deserializer=daq_dot_proto_dot_device__testing__pb2.SessionParams.FromString,
-                    response_serializer=daq_dot_proto_dot_device__testing__pb2.SessionProgress.SerializeToString,
+                    request_deserializer=daq_dot_proto_dot_session__server__pb2.SessionParams.FromString,
+                    response_serializer=daq_dot_proto_dot_session__server__pb2.SessionProgress.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'DeviceTesting', rpc_method_handlers)
+            'SessionServer', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class DeviceTesting(object):
+class SessionServer(object):
     """
-    Device testing service endpoint.
+    Device testing session server endpoint.
     """
 
     @staticmethod
@@ -64,8 +64,8 @@ class DeviceTesting(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/DeviceTesting/StartSession',
-            daq_dot_proto_dot_device__testing__pb2.SessionParams.SerializeToString,
-            daq_dot_proto_dot_device__testing__pb2.SessionProgress.FromString,
+        return grpc.experimental.unary_stream(request, target, '/SessionServer/StartSession',
+            daq_dot_proto_dot_session__server__pb2.SessionParams.SerializeToString,
+            daq_dot_proto_dot_session__server__pb2.SessionProgress.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
