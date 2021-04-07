@@ -166,6 +166,10 @@ class FaucetTopology:
         interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
         interface['native_vlan'] = self._port_set_vlan(port_set)
 
+    def _get_port_vlan(self, port_no):
+        port_set = self._port_targets.get(port_no, {}).get('port_set')
+        return self._port_set_vlan(port_set)
+
     def _ensure_entry(self, root, key, value):
         if key not in root:
             root[key] = value
@@ -424,17 +428,12 @@ class FaucetTopology:
         local_acl = []
         acls = {}
 
-        dot1x_pri_ports = []
 
         for devices in self._set_devices.values():
             for device in devices:
                 if device and device.gateway:
-                    dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
-
-        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_pri_ports)
-
-        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE,
-                           ports=list(range(1, self.sec_port)))
+                    self._add_acl_rule(incoming_acl, vlan_vid=self._get_port_vlan(device.port.port_no), eth_type=self._DOT1X_ETH_TYPE, ports=device.gateway.get_possible_test_ports())
+                    self._add_acl_rule(secondary_acl, vlan_vid=self._get_port_vlan(device.port.port_no), eth_type=self._DOT1X_ETH_TYPE, port=device.port.port_no)
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
@@ -453,8 +452,9 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
+            vlan = self._port_set_vlan(port_set)
             self._add_acl_rule(portset_acls[port_set],
-                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT])
+                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT], out_vlan=vlan)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -532,7 +532,8 @@ class FaucetTopology:
         target_mac = None
         rules = []
 
-        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port])
+        vlan = self._get_port_vlan(port)
+        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port], out_vlan=vlan)
 
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
