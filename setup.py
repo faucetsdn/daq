@@ -49,7 +49,6 @@ def build_data_files(prefix, package_prefix):
 def build_source_files(tmp):
     shutil.rmtree(tmp, ignore_errors=True)
     shutil.copytree('daq', tmp, symlinks=True)
-    shutil.copytree('libs/proto', os.path.join(tmp, 'proto'), symlinks=True)
     shutil.copytree('faucet/clib', os.path.join(tmp, 'clib'), symlinks=True)
     return tmp
 
