@@ -56,13 +56,19 @@ function test_acl_count {
     rule_filter=eth_src=$peer_mac,eth_dst=$device_mac
 
     python3 daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $rule_filter
-    jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file
+    packet_count=$(jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file)
+    echo device-$device_num $type $((packet_count > 2))
+}
+
+function terminate_daq {
+    daq_pid=$(<inst/daq.pid)
+    sudo kill -SIGINT $daq_pid
 }
 
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -s device_specs=resources/device_specs/bacnet_$type.json
+    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json
 
     echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
 
@@ -75,6 +81,8 @@ function test_mud {
     test_acl_count 2
 
     more inst/run-*/nodes/*/activate.log | cat
+
+    terminate_daq
 }
 
 test_mud open
