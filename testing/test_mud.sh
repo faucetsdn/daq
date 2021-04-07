@@ -57,7 +57,7 @@ function test_acl_count {
 
     python3 daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $rule_filter
     packet_count=$(jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file)
-    echo device-$device_num $type $((packet_count > 2))
+    echo device-$device_num $type $((packet_count > 2)) | tee -a $TEST_RESULTS
 }
 
 function terminate_daq {
@@ -72,11 +72,9 @@ function test_mud {
 
     echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
 
-    echo Device traffic:
     test_device_traffic 1
     test_device_traffic 2
 
-    echo ACL count:
     test_acl_count 1
     test_acl_count 2
 
