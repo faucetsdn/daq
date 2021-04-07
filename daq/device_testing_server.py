@@ -2,7 +2,9 @@
 
 from concurrent import futures
 from queue import Queue
+import logging
 import threading
+import time
 import grpc
 
 import daq.logger as logger
@@ -45,11 +47,12 @@ class SessionServer:
         self._servicer = DeviceTestingServicer(on_result)
         server_grpc.add_DeviceTestingServicer_to_server(self._servicer, self._server)
 
-        server_address_port = f'{address or DEFAULT_BIND_ADDRESS}:{port or DEFAULT_SERVER_PORT}'
-        self._server.add_insecure_port(server_address_port)
+        self._server_address_port = f'{address or DEFAULT_BIND_ADDRESS}:{port or DEFAULT_SERVER_PORT}'
+        self._server.add_insecure_port(self._server_address_port)
 
     def start(self):
         """Start the server"""
+        LOGGER.info('Starting sesson server on ' + self._server_address_port)
         self._server.start()
 
     def stop(self):
@@ -62,5 +65,8 @@ def _receive_result(result):
 
 
 if __name__ == '__main__':
+    logger.set_config(level=logging.INFO)
     SERVER = SessionServer(_receive_result)
     SERVER.start()
+    LOGGER.info('Blocking for test')
+    time.sleep(1000)
