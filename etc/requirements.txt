@@ -16,7 +16,7 @@ netifaces
 networkx
 pylint==2.4.2
 pypandoc==1.4
-pytrica
+pytricia
 pyyaml
 requests
 ryu
