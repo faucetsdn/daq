@@ -63,31 +63,31 @@ class SessionServer:
         self._server.stop(grace=None)
 
 
+class TestingSessionServerClient:
+    """Test-only client as a session server."""
+
+    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT,
+                 rpc_timeout_sec=DEFAULT_RPC_TIMEOUT_SEC):
+        self._initialize_stub(server_address, server_port)
+        self._rpc_timeout_sec = rpc_timeout_sec
+
+    def _initialize_stub(self, sever_address, server_port):
+        address = f'{sever_address}:{server_port}'
+        LOGGER.info('Connecting to server ' + address)
+        channel = grpc.insecure_channel(address)
+        self._stub = server_grpc.SessionServerStub(channel)
+
+    def start_session(self, mac):
+        """Send device result of a device to server"""
+        devices_state = {
+            'device_mac': mac
+        }
+        LOGGER.info('Connecting to stream for mac ' + mac)
+        return self._stub.StartSession(dict_proto(devices_state, SessionParams),
+                                       timeout=self._rpc_timeout_sec)
+
 if __name__ == '__main__':
     """Snippet for testing basic client/server operation from the command line."""
-
-    class SessionServerClient:
-        """Test-only client as a session server."""
-
-        def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT,
-                     rpc_timeout_sec=DEFAULT_RPC_TIMEOUT_SEC):
-            self._initialize_stub(server_address, server_port)
-            self._rpc_timeout_sec = rpc_timeout_sec
-
-        def _initialize_stub(self, sever_address, server_port):
-            address = f'{sever_address}:{server_port}'
-            LOGGER.info('Connecting to server ' + address)
-            channel = grpc.insecure_channel(address)
-            self._stub = server_grpc.SessionServerStub(channel)
-
-        def start_session(self, mac):
-            """Send device result of a device to server"""
-            devices_state = {
-                'device_mac': mac
-            }
-            LOGGER.info('Connecting to stream for mac ' + mac)
-            return self._stub.StartSession(dict_proto(devices_state, SessionParams),
-                                               timeout=self._rpc_timeout_sec)
 
     def _receive_session(result):
         LOGGER.info('Received session %s', result.device_mac)
@@ -99,6 +99,6 @@ if __name__ == '__main__':
         LOGGER.info('Blocking for test')
         time.sleep(1000)
     elif sys.argv[1] == 'client':
-        CLIENT = SessionServerClient()
+        CLIENT = TestingSessionServerClient()
         RESULTS = CLIENT.start_session('123')
         LOGGER.info('Session result: ' + str(list(RESULTS)))

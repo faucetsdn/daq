@@ -2,7 +2,7 @@
 
 import unittest
 
-from session_server import SessionServer, SessionServerClient
+from session_server import SessionServer, TestingSessionServerClient
 
 
 TEST_MAC_ADDRESS = 'aa:bb:cc:dd:ee:ff'
@@ -25,7 +25,7 @@ class SessionServerTest(unittest.TestCase):
 
     def test_server_connect(self):
         """Simple server connetion test"""
-        client = SessionServerClient()
+        client = TestingSessionServerClient()
         session = client.start_session(TEST_MAC_ADDRESS)
         print('session running')
         results = list(session)
