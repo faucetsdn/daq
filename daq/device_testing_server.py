@@ -3,6 +3,7 @@
 from concurrent import futures
 from queue import Queue
 import logging
+import sys
 import threading
 import time
 import grpc
@@ -60,13 +61,37 @@ class SessionServer:
         self._server.stop(grace=None)
 
 
+class SessionClient:
+    """gRPC client to send device result"""
+    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT,
+                 rpc_timeout_sec=DEFAULT_RPC_TIMEOUT_SEC):
+        self._initialize_stub(server_address, server_port)
+        self._rpc_timeout_sec = rpc_timeout_sec
+
+    def _initialize_stub(self, sever_address, server_port):
+        channel = grpc.insecure_channel(f'{sever_address}:{server_port}')
+        self._stub = DeviceReportStub(channel)
+
+    def send_device_result(self, mac, device_result):
+        """Send device result of a device to server"""
+        devices_state = {
+            'device_mac_behaviors': {
+                mac: {'port_behavior': device_result}
+            }
+        }
+        self._stub.StartSessionStub(dict_proto(devices_state, SessionParams),
+                                    timeout=self._rpc_timeout_sec)
+
 def _receive_result(result):
     LOGGER.info('Received result', result)
 
 
 if __name__ == '__main__':
     logger.set_config(level=logging.INFO)
-    SERVER = SessionServer(_receive_result)
-    SERVER.start()
-    LOGGER.info('Blocking for test')
-    time.sleep(1000)
+    if sys.argv[1] == 'server':
+        SERVER = SessionServer(_receive_result)
+        SERVER.start()
+        LOGGER.info('Blocking for test')
+        time.sleep(1000)
+    elif sys.argv[1] == 'client':
+        CLIENT = SessionClient()
