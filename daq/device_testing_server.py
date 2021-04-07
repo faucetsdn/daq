@@ -33,13 +33,11 @@ class DeviceTestingServicer(server_grpc.DeviceTestingServicer):
 
     # pylint: disable=invalid-name
     def StartSession(self, request, context):
-        listener_q = Queue()
-        LOGGER.info('Attaching response channel for ' + request.mac)
-        while True:
-            item = listener_q.get()
-            if item is False:
-                break
-            yield item
+        LOGGER.info('Attaching response channel for ' + request.device_mac)
+        results = [ 'a', 'b', 'c' ]
+        for result in results:
+            LOGGER.info('Sending progress ' + result)
+            yield SessionProgress(endpoint_ip=result)
 
 
 class SessionServer:
@@ -88,7 +86,8 @@ class DeviceTestingClient:
                                                    timeout=self._rpc_timeout_sec)
 
         for result in result_generator:
-            LOGGER.info('Result: %s' % result)
+            LOGGER.info('SessionProgress: %s' % result.endpoint_ip)
+        LOGGER.info('Done with session for mac ' + mac)
 
 
 def _receive_result(result):
