@@ -87,7 +87,7 @@ class TestingSessionServerClient:
                                        timeout=self._rpc_timeout_sec)
 
 if __name__ == '__main__':
-    """Snippet for testing basic client/server operation from the command line."""
+    # Snippet for testing basic client/server operation from the command line.
 
     def _receive_session(result):
         LOGGER.info('Received session %s', result.device_mac)
