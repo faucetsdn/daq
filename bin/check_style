@@ -21,7 +21,7 @@ rm -f $RESULTS
 failure=
 results=
 count=0
-files=`find daq/ bin/python/ testing/ -name \*.py`
+files=`find daq/ bin/python/ testing/ -name \*.py -not -path daq/proto\*`
 for file in $files; do
     echo Checking file $file... | tee -a $RESULTS.$count
     pylint --rcfile=$PYLINTRC $file > $RESULTS.$count &
