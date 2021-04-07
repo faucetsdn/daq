@@ -18,10 +18,11 @@ fi
 INSTALLED_PYTHON=`python3 -V | sed -nr 's~Python (3?\..+)\..+$~\1~p'`
 echo Installed python version is $INSTALLED_PYTHON
 
-PVERSION=3.9
+PVERSION=${PVERSION:-3.8}
 
 if [[ $PVERSION != $INSTALLED_PYTHON ]]; then
     echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON
+    echo Set the PVERSION environment variable to specify a different expected value
     false
 fi
 
