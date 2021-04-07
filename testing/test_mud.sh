@@ -73,7 +73,7 @@ function test_mud {
     echo %%%%%%%%%%%%%%%%% test mud profile $type
     cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json & sleep 120
 
-    echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
+    echo result $type | tee -a $TEST_RESULTS
 
     test_device_traffic 1
     test_device_traffic 2
