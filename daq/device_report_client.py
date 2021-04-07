@@ -8,14 +8,14 @@ from forch.proto.devices_state_pb2 import DevicesState, Device
 
 from utils import dict_proto
 
-_SERVER_ADDRESS_DEFAULT = '127.0.0.1'
-_SERVER_PORT_DEFAULT = 50051
-_DEFAULT_RPC_TIMEOUT_SEC = 10
+DEFAULT_SERVER_ADDRESS = '127.0.0.1'
+DEFAULT_SERVER_PORT = 50051
+DEFAULT_RPC_TIMEOUT_SEC = 10
 
 class DeviceReportClient:
     """gRPC client to send device result"""
-    def __init__(self, server_address=_SERVER_ADDRESS_DEFAULT, server_port=_SERVER_PORT_DEFAULT,
-                 rpc_timeout_sec=_DEFAULT_RPC_TIMEOUT_SEC):
+    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT,
+                 rpc_timeout_sec=DEFAULT_RPC_TIMEOUT_SEC):
         self._initialize_stub(server_address, server_port)
         self._active_requests = []
         self._rpc_timeout_sec = rpc_timeout_sec

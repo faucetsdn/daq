@@ -206,6 +206,29 @@
         
           
           <li>
+            <a href="#daq%2fproto%2fsession_server.proto">daq/proto/session_server.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#SessionParams"><span class="badge">M</span>SessionParams</a>
+                </li>
+              
+                <li>
+                  <a href="#SessionProgress"><span class="badge">M</span>SessionProgress</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#SessionServer"><span class="badge">S</span>SessionServer</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
             <a href="#daq%2fproto%2fsystem_config.proto">daq/proto/system_config.proto</a>
             <ul>
               
@@ -418,6 +441,87 @@
       
 
       
+    
+      
+      <div class="file-heading">
+        <h2 id="daq/proto/session_server.proto">daq/proto/session_server.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="SessionParams">SessionParams</h3>
+        <p>Params for session initialization.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>device_mac</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SessionProgress">SessionProgress</h3>
+        <p>Session progress updates.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>endpoint_ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="SessionServer">SessionServer</h3>
+        <p>Device testing session server endpoint.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>StartSession</td>
+                <td><a href="#SessionParams">.SessionParams</a></td>
+                <td><a href="#SessionProgress">.SessionProgress</a> stream</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
     
       
       <div class="file-heading">

@@ -15,10 +15,10 @@ if [ "$1" == simple ]; then
     shift
 fi
 
+PVERSION=${PVERSION:-3.8}
+
 INSTALLED_PYTHON=`python3 -V | sed -nr 's~Python (3?\..+)\..+$~\1~p'`
 echo Installed python version is $INSTALLED_PYTHON
-
-PVERSION=${PVERSION:-3.8}
 
 if [[ $PVERSION != $INSTALLED_PYTHON ]]; then
     echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON
