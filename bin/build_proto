@@ -61,7 +61,7 @@ done
     python3 -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. $proto_files2
 )
 
-python3 -m grpc_tools.protoc -I usi/src/main/ --python_out=build/ --grpc_python_out=build/ usi/src/main/proto/usi.proto
+python3 -m grpc_tools.protoc -I usi/src/main/ --python_out=build/daq --grpc_python_out=build/daq usi/src/main/proto/usi.proto
 
 mkdir -p daq/proto
 touch daq/proto/__init__.py
