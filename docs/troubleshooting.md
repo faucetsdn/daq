@@ -11,14 +11,13 @@ mailing list, and use it as the primary source of troubleshooting.
   * This file should be attached to communications about resolving DAQ issues.
   * It's not necessary to include any associated `local/system.yaml` file, since the
   contents of that are already included.
-* Make sure everything is running properly using the internal simulation setup
-before tackling anything to do with external switches or physical devices.
+* Make sure everything is running properly using the internal simulation setup before tackling anything to do with external switches or physical devices.
   * `config/system/base.conf` is likely the best place to start, as the simplest
   base configuration. This should generate *a* report for a faux device.
   * `config/system/all.conf` is the next step, as it includes all the validated
   built-in tests with DAQ. This should include more tests & faux devices.
-  * See [test lab setup](test_lab.md) setup for additional tips & tricks in
-  dealing with external/physical switches.
+  * See [data path](data_path.md) for a data flow walkthrough.
+  * See [test lab setup](test_lab.md) setup for additional tips & tricks in dealing with external/physical switches.
 * The final output of DAQ is the generated "`report.md`" file, that includes
 a summary of all test results.
   * Generally found in <code>inst/reports/report_<em>XXXXX</em>.md</code> where
