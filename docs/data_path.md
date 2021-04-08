@@ -38,14 +38,35 @@ to pri-eth19. You can tap in there to see where data is doing into/out-of module
 * `pri-eth11`: dummy test host
 * `pri-eth12`: running test (e.g. ping, hold, bacnet, nmap, etc..)
 
-# Docker containers
+# Test containers
 
-See `docker ps` for the containers. They should be fairly direct what they are. You can get into
-the containers and then run tcpdump there to see what traffic is flowing. If you use the `-k`
-runtime option, then the system will create and <b>k</b>eep (forever) a test container, e.g.:
+See `docker ps` for the containers. They should be fairly direct what they are. You can get into the containers and then run tcpdump there to see what traffic is flowing.
+
+Some test modules, including the hold test started using `-k`, are native, which means they run natively on the system instead of in a docker container. To run commands on the shells of these tests, use the tool `mininet/util/m`.
+e.g.:
 
 * _Window 1_: `cmd/run -k`
-* _Window 2_: `docker exec -ti daq-hold01 bash`
+* _Window 2_:
+<pre>
+~/daq$ <b>mininet/util/m hold01 ifconfig</b>
+hold01-eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.20.0.10  netmask 255.255.0.0  broadcast 10.20.255.255
+        inet6 fe80::d8b4:48ff:fedd:5915  prefixlen 64  scopeid 0x20<link>
+        ether da:b4:48:dd:59:15  txqueuelen 1000  (Ethernet)
+        RX packets 86  bytes 5248 (5.1 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 9  bytes 726 (726.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+</pre>
 
 # Sample path
 

@@ -1,0 +1,26 @@
+/*
+ * Collection of messages for testing service endpoing.
+ */
+
+syntax = "proto3";
+
+/*
+ * Params for session initialization.
+ */
+message SessionParams {
+  string device_mac = 1;
+}
+
+/*
+ * Session progress updates.
+ */
+message SessionProgress {
+  string endpoint_ip = 1;
+}
+
+/*
+ * Device testing session server endpoint.
+ */
+service SessionServer {
+  rpc StartSession(SessionParams) returns (stream SessionProgress) {}
+}
