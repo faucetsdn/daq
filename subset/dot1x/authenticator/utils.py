@@ -10,10 +10,10 @@ import sys
 def get_logger(logname):
     """Create and return a logger object."""
     logger = logging.getLogger(logname)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.DEBUG)
+    stdout_handler.setLevel(logging.INFO)
     stdout_handler.setFormatter(
         logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     logger.addHandler(stdout_handler)
@@ -24,7 +24,6 @@ def get_logger(logname):
         logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     logger.addHandler(logfile_handler)
 
-    print('Returning logger ', logger)
     return logger
 
 
