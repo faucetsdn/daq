@@ -72,7 +72,6 @@ cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
-wq
 # Create config for the password test to select which dictionaries to use.
 cat <<EOF > local/base_config.json
 {
