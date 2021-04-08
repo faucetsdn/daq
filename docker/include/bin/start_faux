@@ -195,6 +195,8 @@ fi
 
 if [ -n "${options[wpa]}" ]; then
     wpa_supplicant -dd -c/etc/wpasupplicant/wired-peap.conf -ifaux-eth0 -Dwired &
+elif [ -n "${options[wpawrong]}" ]; then
+    wpa_supplicant -dd -c/etc/wpasupplicant/wired-peap-wrong.conf -ifaux-eth0 -Dwired &
 fi
 
 if [ -n "${options[broadcast_client]}" ]; then

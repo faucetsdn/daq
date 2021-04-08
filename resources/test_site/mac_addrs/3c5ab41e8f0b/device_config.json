@@ -4,6 +4,15 @@
     "serial": "28491384"
   },
   "modules": {
+    "dot1x": {
+      "enabled": true,
+      "radius_server": {
+          "radius_socket_info": {
+              "remote_ip": "10.20.0.3",
+              "remote_port": 1812
+          }
+      }
+    },
     "hold": {
       "enabled": true
     }
