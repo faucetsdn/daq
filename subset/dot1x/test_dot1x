@@ -5,7 +5,7 @@ freeradius -xx -l /tmp/radius_log
 source reporting.sh
 
 REPORT=/tmp/report.txt
-TEST_NAME="dot1x"
+TEST_NAME="dot1x.dot1x"
 TEST_DESCRIPTION="Dot1x authentication tests"
 
 echo 'Dot1x Authentication tests'

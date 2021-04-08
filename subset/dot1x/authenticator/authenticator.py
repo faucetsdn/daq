@@ -279,13 +279,20 @@ class Authenticator:
     def run_authentication_test(self):
         self.start_threads()
         result_str = ""
+        test_result = ""
         if not self.results:
             result_str = "Authentication failed. No EAPOL messages received."
+            test_result = "skip"
         else:
+            test_result = "pass"
             for src_mac, is_success in self.results.items():
-                result = 'succeeded' if is_success else 'failed'
+                if is_success:
+                    result = 'succeeded'
+                else:
+                    result = 'failed'
+                    test_result = "fail"
                 result_str += "Authentication for %s %s." % (src_mac, result)
-        return result_str
+        return result_str, test_result
 
     def handle_sm_timeout(self):
         if not self.state_machines and self._current_timeout:
