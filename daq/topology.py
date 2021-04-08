@@ -432,8 +432,14 @@ class FaucetTopology:
         for devices in self._set_devices.values():
             for device in devices:
                 if device and device.gateway:
-                    self._add_acl_rule(incoming_acl, vlan_vid=self._get_port_vlan(device.port.port_no), eth_type=self._DOT1X_ETH_TYPE, ports=device.gateway.get_possible_test_ports())
-                    self._add_acl_rule(secondary_acl, vlan_vid=self._get_port_vlan(device.port.port_no), eth_type=self._DOT1X_ETH_TYPE, port=device.port.port_no)
+                    self._add_acl_rule(incoming_acl,
+                                       vlan_vid=self._get_port_vlan(device.port.port_no),
+                                       eth_type=self._DOT1X_ETH_TYPE,
+                                       ports=device.gateway.get_possible_test_ports())
+                    self._add_acl_rule(secondary_acl,
+                                       vlan_vid=self._get_port_vlan(device.port.port_no),
+                                       eth_type=self._DOT1X_ETH_TYPE,
+                                       port=device.port.port_no)
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
@@ -454,7 +460,8 @@ class FaucetTopology:
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)
             self._add_acl_rule(portset_acls[port_set],
-                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT], out_vlan=vlan)
+                               eth_type=self._DOT1X_ETH_TYPE,
+                               ports=[self.PRI_TRUNK_PORT], out_vlan=vlan)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -533,7 +540,9 @@ class FaucetTopology:
         rules = []
 
         vlan = self._get_port_vlan(port)
-        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port], out_vlan=vlan)
+        self._add_acl_rule(rules,
+                           eth_type=self._DOT1X_ETH_TYPE,
+                           ports=[self.sec_port], out_vlan=vlan)
 
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
