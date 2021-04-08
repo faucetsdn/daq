@@ -64,6 +64,7 @@ function terminate_daq {
     daq_pid=$(<inst/daq.pid)
     sudo kill -SIGINT $daq_pid
     while [ -f inst/daq.pid ]; do
+        echo Waiting for DAQ to exit...
         sleep 5
     done
 }
@@ -71,7 +72,8 @@ function terminate_daq {
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json & sleep 120
+    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json
+    & sleep 120
 
     echo result $type | tee -a $TEST_RESULTS
 
