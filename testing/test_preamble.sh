@@ -139,6 +139,7 @@ function activate_venv {
         echo Activating venv
         source venv/bin/activate
         python --version # TODO
+        echo virtualenv: "$VIRTUAL_ENV" # TODO
     fi
 
     PYTHON_CMD="python3"

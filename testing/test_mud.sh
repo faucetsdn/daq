@@ -86,12 +86,15 @@ function test_mud {
     
     test_acl_count 1
     test_acl_count 2
-    $PYTHON_CMD report #TODO
     deactivate_venv
 
     more inst/run-*/nodes/*/activate.log | cat
 
     terminate_daq
+
+    activate_venv # TODO
+    $PYTHON_CMD report # TODO
+    deactivate_venv # TODO
 }
 
 test_mud open
