@@ -10,8 +10,8 @@ RESULT pass security.nmap.ports Only allowed ports found open.
 result open
 device-1 open 1 1 1 1
 device-2 open 1 1 1 1
-device-1 open 1
-device-2 open 1
+device-1 open 0
+device-2 open 0
 result todev
 device-1 todev 0 0 0 0
 device-2 todev 0 0 0 0
