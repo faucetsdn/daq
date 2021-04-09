@@ -436,7 +436,7 @@ class FaucetTopology:
     def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vlan=None):
         """Add dot1x reflection rule to acl"""
         if vlan_vid:
-            self._add_acl_rule(acl, vlan_vid=vlan_vid, eth_type=self._DOT1X_ETH_TYPE, ports=ports)
+            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, vlan_vid=vlan_vid)
         elif out_vlan:
             self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vlan=out_vlan)
 
