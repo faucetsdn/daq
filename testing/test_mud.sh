@@ -72,8 +72,8 @@ function terminate_daq {
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json
-    & sleep 120
+    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json &
+    sleep 120
 
     echo result $type | tee -a $TEST_RESULTS
 
