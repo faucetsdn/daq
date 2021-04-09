@@ -428,17 +428,17 @@ class FaucetTopology:
                     vlan = self._get_port_vlan(device.port.port_no)
                     test_ports = device.gateway.get_possible_test_ports()
                     if test_ports:
-                        self._add_dot1x_reflector(incoming_acl, vlan, test_ports, True)
+                        self._add_dot1x_allow_rule(incoming_acl, test_ports, vlan_vid=vlan)
                     device_port = device.port.port_no
                     if device_port:
-                        self._add_dot1x_reflector(secondary_acl, vlan, [device_port], True)
+                        self._add_dot1x_allow_rule(secondary_acl, [device_port], vlan_vid=vlan)
 
-    def _add_dot1x_reflector(self, acl, vlan, ports, is_trunk):
+    def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vlan=None):
         """Add dot1x reflection rule to acl"""
-        if is_trunk:
-            self._add_acl_rule(acl, vlan_vid=vlan, eth_type=self._DOT1X_ETH_TYPE, ports=ports)
-        else:
-            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vlan=vlan)
+        if vlan_vid:
+            self._add_acl_rule(acl, vlan_vid=vlan_vid, eth_type=self._DOT1X_ETH_TYPE, ports=ports)
+        elif out_vlan:
+            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vlan=out_vlan)
 
     def _generate_main_acls(self):
         incoming_acl = []
@@ -467,7 +467,7 @@ class FaucetTopology:
 
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)
-            self._add_dot1x_reflector(portset_acls[port_set], vlan, [self.PRI_TRUNK_PORT], False)
+            self._add_dot1x_allow_rule(portset_acls[port_set], [self.PRI_TRUNK_PORT], out_vlan=vlan)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -546,7 +546,7 @@ class FaucetTopology:
         rules = []
 
         vlan = self._get_port_vlan(port)
-        self._add_dot1x_reflector(rules, vlan, [self.sec_port], False)
+        self._add_dot1x_allow_rule(rules, [self.sec_port], out_vlan=vlan)
 
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
