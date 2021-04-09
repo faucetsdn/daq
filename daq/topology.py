@@ -425,14 +425,18 @@ class FaucetTopology:
         for devices in self._set_devices.values():
             for device in devices:
                 if device and device.gateway:
-                    self._add_acl_rule(incoming_acl,
-                                       vlan_vid=self._get_port_vlan(device.port.port_no),
-                                       eth_type=self._DOT1X_ETH_TYPE,
-                                       ports=device.gateway.get_possible_test_ports())
-                    self._add_acl_rule(secondary_acl,
-                                       vlan_vid=self._get_port_vlan(device.port.port_no),
-                                       eth_type=self._DOT1X_ETH_TYPE,
-                                       port=device.port.port_no)
+                    test_ports = device.gateway.get_possible_test_ports()
+                    if test_ports:
+                        self._add_acl_rule(incoming_acl,
+                                           vlan_vid=self._get_port_vlan(device.port.port_no),
+                                           eth_type=self._DOT1X_ETH_TYPE,
+                                           ports=test_ports)
+                    device_port = device.port.port_no
+                    if device_port:
+                        self._add_acl_rule(secondary_acl,
+                                           vlan_vid=self._get_port_vlan(device.port.port_no),
+                                           eth_type=self._DOT1X_ETH_TYPE,
+                                           port=device.port.port_no)
 
     def _generate_main_acls(self):
         incoming_acl = []
