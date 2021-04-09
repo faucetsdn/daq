@@ -6,7 +6,7 @@ source bin/config_base.sh
 
 RUNTIME=$(realpath $DAQ_RUN)
 SYSTEM_CONF=system.conf
-RYU_CONF=$(realpath $DAQ_RUN/ryu.conf)
+RYU_CONF=$(realpath $DAQ_LIB/config/faucet/ryu.conf)
 
 ext_ofpt=
 prom_pt=
