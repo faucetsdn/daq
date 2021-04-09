@@ -166,6 +166,10 @@ class FaucetTopology:
         interface = self.topology['dps'][self.sec_name]['interfaces'][port_no]
         interface['native_vlan'] = self._port_set_vlan(port_set)
 
+    def _get_port_vlan(self, port_no):
+        port_set = self._port_targets.get(port_no, {}).get('port_set')
+        return self._port_set_vlan(port_set)
+
     def _ensure_entry(self, root, key, value):
         if key not in root:
             root[key] = value
@@ -417,6 +421,25 @@ class FaucetTopology:
         self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
                            nw_proto=17, udp_src=67, udp_dst=68)
 
+    def _add_dot1x_incoming_rule(self, incoming_acl, secondary_acl):
+        for devices in self._set_devices.values():
+            for device in devices:
+                if device and device.gateway:
+                    vlan = self._get_port_vlan(device.port.port_no)
+                    test_ports = device.gateway.get_possible_test_ports()
+                    if test_ports:
+                        self._add_dot1x_allow_rule(incoming_acl, test_ports, vlan_vid=vlan)
+                    device_port = device.port.port_no
+                    if device_port:
+                        self._add_dot1x_allow_rule(secondary_acl, [device_port], vlan_vid=vlan)
+
+    def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vlan=None):
+        """Add dot1x reflection rule to acl"""
+        if vlan_vid:
+            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, vlan_vid=vlan_vid)
+        elif out_vlan:
+            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vlan=out_vlan)
+
     def _generate_main_acls(self):
         incoming_acl = []
         portset_acls = {}
@@ -424,17 +447,7 @@ class FaucetTopology:
         local_acl = []
         acls = {}
 
-        dot1x_pri_ports = []
-
-        for devices in self._set_devices.values():
-            for device in devices:
-                if device and device.gateway:
-                    dot1x_pri_ports.extend(device.gateway.get_possible_test_ports())
-
-        self._add_acl_rule(incoming_acl, eth_type=self._DOT1X_ETH_TYPE, ports=dot1x_pri_ports)
-
-        self._add_acl_rule(secondary_acl, eth_type=self._DOT1X_ETH_TYPE,
-                           ports=list(range(1, self.sec_port)))
+        self._add_dot1x_incoming_rule(incoming_acl, secondary_acl)
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
@@ -453,8 +466,8 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         for port_set in range(1, self.sec_port):
-            self._add_acl_rule(portset_acls[port_set],
-                               eth_type=self._DOT1X_ETH_TYPE, ports=[self.PRI_TRUNK_PORT])
+            vlan = self._port_set_vlan(port_set)
+            self._add_dot1x_allow_rule(portset_acls[port_set], [self.PRI_TRUNK_PORT], out_vlan=vlan)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -532,7 +545,8 @@ class FaucetTopology:
         target_mac = None
         rules = []
 
-        self._add_acl_rule(rules, eth_type=self._DOT1X_ETH_TYPE, ports=[self.sec_port])
+        vlan = self._get_port_vlan(port)
+        self._add_dot1x_allow_rule(rules, [self.sec_port], out_vlan=vlan)
 
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]

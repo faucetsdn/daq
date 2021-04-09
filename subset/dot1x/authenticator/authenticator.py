@@ -4,8 +4,9 @@ from eap_module import EapModule
 from heartbeat_scheduler import HeartbeatScheduler
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
-from utils import get_logger
+from utils import get_logger, get_interface_name, get_interface_ip, get_interface_mac
 
+import json
 import threading
 import time
 
@@ -20,10 +21,10 @@ class AuthStateMachine:
 
     def __init__(self, src_mac, auth_mac, idle_time, retry_count,
                  eap_send_callback, radius_send_callback, auth_callback):
-        self.state = self.START
+        self.state = None
         self._state_lock = threading.Lock()
         self._timer_lock = threading.RLock()
-        self.logger = get_logger('AuthStateMachine')
+        self.logger = get_logger('AuthSM')
         self.src_mac = src_mac
         self.eap_send_callback = eap_send_callback
         self.radius_send_callback = radius_send_callback
@@ -31,13 +32,18 @@ class AuthStateMachine:
         self.identity = None
         self.authentication_mac = auth_mac
         self.radius_state = None
-        self.logger = get_logger('AuthSM')
         self._idle_time = idle_time
         self._max_retry_count = retry_count
         self._current_timeout = None
         self._retry_func = None
         self._retry_args = None
         self._current_retries = None
+
+    def initialize(self):
+        """Initialize state machine"""
+        self._state_transition(self.START)
+        self._set_timeout(self._idle_time)
+        self._set_retry_actions(retry_func=self.eap_send_callback, retry_args=[self.src_mac])
 
     def _state_transition(self, target, expected=None):
         with self._state_lock:
@@ -50,7 +56,7 @@ class AuthStateMachine:
     def received_eapol_start(self):
         """Received EAPOL start on EAP socket"""
         self._state_transition(self.SUPPLICANT, self.START)
-        self._set_timeout()
+        self._set_timeout(self._idle_time)
         self._set_retry_actions(retry_func=self.eap_send_callback, retry_args=[self.src_mac])
         self.eap_send_callback(self.src_mac)
 
@@ -62,7 +68,7 @@ class AuthStateMachine:
         port_id = port_id_to_int(self.authentication_mac)
         radius_packet_info = RadiusPacketInfo(
             eap_message, self.src_mac, self.identity, self.radius_state, port_id)
-        self._set_timeout()
+        self._set_timeout(self._idle_time)
         self._set_retry_actions(
             retry_func=self.radius_send_callback, retry_args=[radius_packet_info])
         self.radius_send_callback(radius_packet_info)
@@ -81,17 +87,17 @@ class AuthStateMachine:
                 self.auth_callback(self.src_mac, True)
             else:
                 self._state_transition(self.SUPPLICANT, self.RADIUS)
-                self._set_timeout()
+                self._set_timeout(self._idle_time)
                 self._set_retry_actions(
                     retry_func=self.eap_send_callback, retry_args=[self.src_mac, eap_message])
         self.eap_send_callback(self.src_mac, eap_message)
 
-    def _set_timeout(self, clear=False):
+    def _set_timeout(self, timeout_time=None, clear=False):
         with self._timer_lock:
             if clear:
                 self._current_timeout = None
             else:
-                self._current_timeout = time.time() + self._idle_time
+                self._current_timeout = time.time() + timeout_time
 
     def _set_retry_actions(self, retry_func=None, retry_args=None):
         self._retry_func = retry_func
@@ -110,7 +116,7 @@ class AuthStateMachine:
                 if time.time() > self._current_timeout:
                     if self._current_retries < self._max_retry_count:
                         self._current_retries += 1
-                        self._set_timeout()
+                        self._set_timeout(self._idle_time)
                         self._retry_func(*self._retry_args)
                     else:
                         self._handle_timeout()
@@ -129,24 +135,54 @@ class Authenticator:
     HEARTBEAT_INTERVAL = 3
     IDLE_TIME = 9
     RETRY_COUNT = 3
+    RADIUS_PORT = 1812
+    EAPOL_IDLE_TIME = 180
 
-    def __init__(self):
+    def __init__(self, config_file):
         self.state_machines = {}
         self.results = {}
         self.eap_module = None
         self.radius_module = None
         self.logger = get_logger('Authenticator')
+        self._config_file = config_file
         self._threads = []
+        self._radius_socket_info = None
+        self._radius_secret = None
+        self._radius_id = None
+        self._interface = None
         self._idle_time = None
         self._max_retry_count = None
+        self._current_timeout = None
 
         self._setup()
 
+    def _load_config(self):
+        with open(self._config_file, 'r') as file_stream:
+            full_config = json.load(file_stream)
+        config = full_config.get('modules').get('dot1x')
+
+        self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
+
+        self._interface = config.get('interface', get_interface_name())
+
+        radius_config = config.get('radius_server', {})
+        radius_socket_info = radius_config.get('radius_socket_info', {})
+
+        listen_ip = radius_socket_info.get('listen_ip', get_interface_ip(self._interface))
+        listen_port = radius_socket_info.get('listen_port', 0)
+        remote_ip = radius_socket_info.get('remote_ip', '127.0.0.1')
+        remote_port = radius_socket_info.get('remote_port', self.RADIUS_PORT)
+
+        self._radius_socket_info = RadiusSocketInfo(listen_ip, listen_port, remote_ip, remote_port)
+        self._radius_secret = radius_config.get('secret', 'SECRET')
+        self._radius_id = radius_config.get('id', get_interface_mac(self._interface))
+
     def _setup(self):
-        radius_socket_info = RadiusSocketInfo('10.20.0.3', 0, '127.0.0.1', 1812)
+        self._load_config()
         self.radius_module = RadiusModule(
-            radius_socket_info, 'SECRET', '02:42:ac:18:00:70', self.received_radius_response)
-        self.eap_module = EapModule('eth0', self.received_eap_request)
+            self._radius_socket_info, self._radius_secret,
+            self._radius_id, self.received_radius_response)
+        self.eap_module = EapModule(self._interface, self.received_eap_request)
 
         # TODO: Take value from config and then revert to default
         interval = self.HEARTBEAT_INTERVAL
@@ -158,6 +194,7 @@ class Authenticator:
         self.sm_timer = HeartbeatScheduler(interval)
         self.sm_timer.add_callback(self.handle_sm_timeout)
 
+        self._current_timeout = time.time() + self.EAPOL_IDLE_TIME
 
     def start_threads(self):
         self.logger.info('Starting SM timer')
@@ -199,6 +236,7 @@ class Authenticator:
                     self._idle_time, self._max_retry_count,
                     self.send_eap_response, self.send_radius_request,
                     self.process_test_result)
+                state_machine.initialize()
                 self.state_machines[src_mac] = state_machine
                 state_machine.received_eapol_start()
             else:
@@ -227,9 +265,13 @@ class Authenticator:
         if is_success:
             self.logger.info('Authentication successful for %s' % (src_mac))
         else:
-            self.logger.info('Authentication failed for %s' % (src_mac))
-        self.results[src_mac] = is_success
-        self.state_machines.pop(src_mac)
+            if src_mac:
+                self.logger.info('Authentication failed for %s' % (src_mac))
+            else:
+                self.logger.info('Authentication failed. Received no EAPOL packets.')
+        if src_mac:
+            self.results[src_mac] = is_success
+            self.state_machines.pop(src_mac)
         # TODO: We currently finalize results as soon as we get a result for a src_mac.
         # Needs to be changed if we support multiple devices.
         self._end_authentication()
@@ -237,15 +279,28 @@ class Authenticator:
     def run_authentication_test(self):
         self.start_threads()
         result_str = ""
-        for src_mac, is_success in self.results.items():
-            result = 'succeeded' if is_success else 'failed'
-            result_str += "Authentication for %s %s." % (src_mac, result)
-        return result_str
+        test_result = ""
+        if not self.results:
+            result_str = "Authentication failed. No EAPOL messages received."
+            test_result = "skip"
+        else:
+            test_result = "pass"
+            for src_mac, is_success in self.results.items():
+                if is_success:
+                    result = 'succeeded'
+                else:
+                    result = 'failed'
+                    test_result = "fail"
+                result_str += "Authentication for %s %s." % (src_mac, result)
+        return result_str, test_result
 
     def handle_sm_timeout(self):
-        self.logger.debug('Timer called')
-        for state_machine in self.state_machines.values():
-            state_machine.handle_timer()
+        if not self.state_machines and self._current_timeout:
+            if time.time() > self._current_timeout:
+                self.process_test_result(None, False)
+        else:
+            for state_machine in self.state_machines.values():
+                state_machine.handle_timer()
 
 
 def main():

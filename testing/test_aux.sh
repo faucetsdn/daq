@@ -72,7 +72,6 @@ cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
-
 # Create config for the password test to select which dictionaries to use.
 cat <<EOF > local/base_config.json
 {
@@ -95,9 +94,9 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4
+    opts: brute broadcast_client ntpv4 wpa
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl wpawrong
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl
 long_dhcp_response_sec: 0
@@ -153,6 +152,7 @@ capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
+capture_test_results dot1x
 
 # Capture peripheral logs
 more inst/run-*/scans/ip_triggers.txt | cat
