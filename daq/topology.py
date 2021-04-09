@@ -421,14 +421,7 @@ class FaucetTopology:
         self._add_acl_rule(acl_list, dl_type='0x800', allow=False,
                            nw_proto=17, udp_src=67, udp_dst=68)
 
-    def _generate_main_acls(self):
-        incoming_acl = []
-        portset_acls = {}
-        secondary_acl = []
-        local_acl = []
-        acls = {}
-
-
+    def _add_dot1x_incoming_rule(self, incoming_acl, secondary_acl):
         for devices in self._set_devices.values():
             for device in devices:
                 if device and device.gateway:
@@ -440,6 +433,15 @@ class FaucetTopology:
                                        vlan_vid=self._get_port_vlan(device.port.port_no),
                                        eth_type=self._DOT1X_ETH_TYPE,
                                        port=device.port.port_no)
+
+    def _generate_main_acls(self):
+        incoming_acl = []
+        portset_acls = {}
+        secondary_acl = []
+        local_acl = []
+        acls = {}
+
+        self._add_dot1x_incoming_rule(incoming_acl, secondary_acl)
 
         for port_set in range(1, self.sec_port):
             portset_acls[port_set] = []
