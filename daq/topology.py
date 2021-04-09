@@ -395,7 +395,7 @@ class FaucetTopology:
                                ports=bcast_mirror_ports, allow=1)
 
     def _add_dhcp_reflectors(self, acl_list):
-        if not self._ext_faucet or not self._egress_vlan:
+        if not self._ext_faucet:
             return
         for devices in self._set_devices.values():
             for device in devices:
