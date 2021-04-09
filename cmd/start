@@ -43,6 +43,4 @@ export OVSVSCTL_ORIG=`which ovs-vsctl`
 export PATH=$ROOT/binhack:$PATH
 
 echo Executing: $runcmd daq/daq.py $@
-echo venv: $VIRTUAL_ENV #TODO
-echo "$runcmd" #TODO
 $runcmd daq/daq.py $@ 2>&1
