@@ -177,9 +177,9 @@ class DAQRunner:
         self._default_port_flap_timeout = int(config.get('port_flap_timeout_sec', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
-        logging_client = self.gcp.get_logging_client()
-        self.daq_run_id = self._init_daq_run_id()
         self._device_result_client = self._init_device_result_client()
+        self.daq_run_id = self._init_daq_run_id()
+        logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
@@ -214,6 +214,8 @@ class DAQRunner:
     def _init_device_result_client(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         if server_port:
+            egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
+            assert not egress_vlan, 'both egress_vlan and server_port defined'
             timeout = self.config['device_reporting'].get('rpc_timeout_sec')
             if timeout:
                 return DeviceReportClient(server_port=server_port, rpc_timeout_sec=timeout)
