@@ -82,8 +82,6 @@ function test_mud {
     test_device_traffic 2
 
     activate_venv
-    echo venv: $VIRTUAL_ENV #TODO
-    
     test_acl_count 1
     test_acl_count 2
     deactivate_venv
@@ -91,10 +89,6 @@ function test_mud {
     more inst/run-*/nodes/*/activate.log | cat
 
     terminate_daq
-
-    activate_venv # TODO
-    $PYTHON_CMD report # TODO
-    deactivate_venv # TODO
 }
 
 test_mud open

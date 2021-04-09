@@ -138,22 +138,21 @@ function activate_venv {
     if [ -d venv ]; then
         echo Activating venv
         source venv/bin/activate
-        python --version # TODO
-        echo virtualenv: "$VIRTUAL_ENV" # TODO
     fi
-
-    PYTHON_CMD="python3"
 
     if [ -n "$DAQ_CODECOV" ]; then
         echo Running Python with codecov analysis...
         PYTHON_CMD="coverage run -a"
+    else
+        PYTHON_CMD="python3"
     fi
 
     export PYTHON_CMD
 }
 
-function deactive_venv {
+function deactivate_venv {
     if [ -n "$VIRTUAL_ENV" ]; then
+        echo Deactivating venv
         deactivate
     fi
     unset PYTHON_CMD
