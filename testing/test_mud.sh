@@ -55,9 +55,7 @@ function test_acl_count {
     metric_output_file=inst/run-9a02571e8f0$device_num/metric_output.json
     rule_filter=eth_src=$peer_mac,eth_dst=$device_mac
 
-    activate_venv
-    python3 daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $rule_filter
-    deactivate
+    $PYTHON_CMD daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $rule_filter
 
     packet_count=$(jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file)
     echo device-$device_num $type $((packet_count > 2)) | tee -a $TEST_RESULTS
@@ -83,8 +81,13 @@ function test_mud {
     test_device_traffic 1
     test_device_traffic 2
 
+    activate_venv
+    echo venv: $VIRTUAL_ENV #TODO
+    
     test_acl_count 1
     test_acl_count 2
+    $PYTHON_CMD report #TODO
+    deactivate_venv
 
     more inst/run-*/nodes/*/activate.log | cat
 

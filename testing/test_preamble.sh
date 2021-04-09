@@ -138,6 +138,7 @@ function activate_venv {
     if [ -d venv ]; then
         echo Activating venv
         source venv/bin/activate
+        python --version # TODO
     fi
 
     PYTHON_CMD="python3"
