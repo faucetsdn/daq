@@ -81,15 +81,15 @@ function test_mud {
     test_device_traffic 1
     test_device_traffic 2
 
-    activate_venv
     test_acl_count 1
     test_acl_count 2
-    deactivate_venv
 
     more inst/run-*/nodes/*/activate.log | cat
 
     terminate_daq
 }
+
+activate_venv
 
 test_mud open
 test_mud todev

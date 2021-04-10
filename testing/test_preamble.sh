@@ -149,11 +149,3 @@ function activate_venv {
 
     export PYTHON_CMD
 }
-
-function deactivate_venv {
-    if [ -n "$VIRTUAL_ENV" ]; then
-        echo Deactivating venv
-        deactivate
-    fi
-    unset PYTHON_CMD
-}
