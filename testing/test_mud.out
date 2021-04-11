@@ -7,16 +7,24 @@ DAQ result code 0
 security.nmap.ports
 RESULT pass security.nmap.ports Only allowed ports found open.
 %%%%%%%%%%%%%%%%%%%%%% Mud profile tests
-result open 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
+result open
 device-1 open 1 1 1 1
 device-2 open 1 1 1 1
-result todev 9a02571e8f01: ['9a02571e8f01:ping:1'] 9a02571e8f02: ['9a02571e8f02:ping:1'] 9a02571e8f03: []
+device-1 open 0
+device-2 open 0
+result todev
 device-1 todev 0 0 0 0
 device-2 todev 0 0 0 0
-result none 9a02571e8f01: ['9a02571e8f01:ping:1'] 9a02571e8f02: ['9a02571e8f02:ping:1'] 9a02571e8f03: []
+device-1 todev 0
+device-2 todev 0
+result none
 device-1 none 0 0 0 0
 device-2 none 0 0 0 0
-result star 9a02571e8f01: [] 9a02571e8f02: [] 9a02571e8f03: []
+device-1 none 0
+device-2 none 0
+result star
 device-1 star 1 1 1 1
 device-2 star 1 1 1 0
+device-1 star 1
+device-2 star 1
 %%%%%%%%%%%%%%%%%%%%%% Done with tests

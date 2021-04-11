@@ -47,18 +47,49 @@ function test_device_traffic {
     echo device-$device_num $type $((bfr_peer > 2)) $((bfr_ngbr > 0)) $((ufr_peer > 2)) $((ufr_ngbr > 0)) | tee -a $TEST_RESULTS
 }
 
+function test_acl_count {
+    device_num=$1
+    peer_num=$((3-device_num))
+    device_mac=9a:02:57:1e:8f:0$device_num
+    peer_mac=9a:02:57:1e:8f:0$peer_num
+    metric_output_file=inst/run-9a02571e8f0$device_num/metric_output.json
+    rule_filter=eth_src=$peer_mac,eth_dst=$device_mac,dp_name=sec
+
+    $PYTHON_CMD daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $rule_filter
+
+    packet_count=$(jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file || true)
+    echo device-$device_num $type $((packet_count > 2)) | tee -a $TEST_RESULTS
+}
+
+function terminate_daq {
+    daq_pid=$(<inst/daq.pid)
+    sudo kill -SIGINT $daq_pid
+    while [ -f inst/daq.pid ]; do
+        echo Waiting for DAQ to exit...
+        sleep 5
+    done
+}
+
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -s device_specs=resources/device_specs/bacnet_$type.json
+    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json &
+    sleep 180
 
-    echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
+    echo result $type | tee -a $TEST_RESULTS
 
     test_device_traffic 1
     test_device_traffic 2
 
+    test_acl_count 1
+    test_acl_count 2
+
     more inst/run-*/nodes/*/activate.log | cat
+
+    terminate_daq
 }
+
+activate_venv
 
 test_mud open
 test_mud todev
