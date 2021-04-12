@@ -42,5 +42,5 @@ echo Prepending $ROOT/binhack to PATH
 export OVSVSCTL_ORIG=`which ovs-vsctl`
 export PATH=$ROOT/binhack:$PATH
 
-echo Executing: $runcmd daq/daq.py $@
-$runcmd daq/daq.py $@ 2>&1
+echo Executing: $runcmd daq/entry.py $@
+$runcmd daq/entry.py $@ 2>&1
