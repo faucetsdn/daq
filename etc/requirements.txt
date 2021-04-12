@@ -1,4 +1,4 @@
-cairocffi==1.0.2
+cairocffi==1.2.0
 codecov
 coverage
 cryptography
