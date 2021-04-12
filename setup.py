@@ -31,7 +31,7 @@ export DAQ_SYS_UNAME=$(uname -a)
 
 export DAQ_DIR=`python3 -c 'import daq; import os; print(os.path.dirname(daq.__file__))'`
 source $DAQ_LIB/bin/config_base.sh
-python3 $DAQ_DIR/daq.py $conf_file $@
+python3 $DAQ_DIR/entry.py $conf_file $@
         """ % (";".join(get_files_mapping_env()), get_version())
         f.write(script)
     return os.path.join(tmp, 'daq')
