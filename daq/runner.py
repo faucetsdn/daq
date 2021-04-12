@@ -231,7 +231,8 @@ class DAQRunner:
 
     # async method to yield session results
     def _on_session(self, request):
-        LOGGER.info('New session started for %s', request.device_mac)
+        LOGGER.info('New session started for %s %s/%s',
+                    request.device_mac, request.device_vlan, request.native_vlan)
         yield SessionProgress(endpoint_ip=('ip-' + request.device_mac))
         LOGGER.info('Session ended for %s', request.device_mac)
 
