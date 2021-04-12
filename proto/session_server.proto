@@ -9,6 +9,8 @@ syntax = "proto3";
  */
 message SessionParams {
   string device_mac = 1;
+  int32 device_vlan = 2;
+  int32 native_vlan = 3;
 }
 
 /*
@@ -16,6 +18,16 @@ message SessionParams {
  */
 message SessionProgress {
   string endpoint_ip = 1;
+  SessionResult.ResultCode session_result = 2;
+}
+
+message SessionResult {
+  enum ResultCode {
+    PENDING = 0;
+    ERROR = 1;
+    CLEAR = 2;
+    FAILED = 3;
+  }
 }
 
 /*

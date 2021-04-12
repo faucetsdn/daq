@@ -15,7 +15,7 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
 from device_report_client import DeviceReportClient
-from session_server import SessionServer
+from session_server import SessionServer, SessionProgress
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
 import container_gateway
@@ -224,10 +224,16 @@ class DAQRunner:
                                              server_port=server_port, rpc_timeout_sec=timeout)
             else:
                 # TODO: Make this all configured form run_trigger not device_reporting
-                handler = SessionServer(server_port=server_port)
+                handler = SessionServer(on_session=self._on_session, server_port=server_port)
             handler.start()
             return handler
         return None
+
+    # async method to yield session results
+    def _on_session(self, request):
+        LOGGER.info('New session started for %s', request.device_mac)
+        yield SessionProgress(endpoint_ip=('ip-' + request.device_mac))
+        LOGGER.info('Session ended for %s', request.device_mac)
 
     def _send_heartbeat(self):
         message = {

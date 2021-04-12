@@ -3,7 +3,6 @@
 from concurrent import futures
 import logging
 import sys
-import threading
 import time
 import grpc
 
@@ -22,28 +21,26 @@ DEFAULT_BIND_ADDRESS = '0.0.0.0'
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 DEFAULT_RPC_TIMEOUT_SEC = 10
 
+
 class SessionServerServicer(server_grpc.SessionServerServicer):
     """gRPC servicer to receive devices state"""
 
     def __init__(self, on_session):
         super().__init__()
         self._on_session = on_session
-        self._lock = threading.Lock()
 
     # pylint: disable=invalid-name
     def StartSession(self, request, context):
         """Start a session servicer"""
-        self._on_session(request)
-        results = ['a', 'b', 'c']
-        for result in results:
-            LOGGER.info('Sending progress ' + result)
-            yield SessionProgress(endpoint_ip=result)
+        LOGGER.info('StartSession')
+        return self._on_session(request)
 
 
 class SessionServer:
     """Devices state server"""
 
     def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
+        LOGGER.info('Initializing')
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
 
@@ -56,14 +53,16 @@ class SessionServer:
 
     def start(self):
         """Start the server"""
-        LOGGER.info('Starting sesson server on ' + self._address)
         self._server.start()
+        LOGGER.info('starting server')
 
     def connect(self, mac, callback):
         """Connect to remote endpoint"""
+        LOGGER.info('Connecting to remote endpoint %s' % mac)
 
     def stop(self):
         """Stop the server"""
+        LOGGER.info('Stopping')
         self._server.stop(grace=None)
 
 
