@@ -103,7 +103,7 @@ class DeviceDeviceReportServerlientPortEventsTestCase(DeviceReportClientTestBase
 
     def test_getting_port_events(self):
         """Test the ability to get port events"""
-        self._client.get_port_events("mac", self._on_port_event)
+        self._client.connect("mac", self._on_port_event)
         time.sleep(1)
         self.assertEqual(self._received_port_events, self._mock_port_events)
 
@@ -122,7 +122,7 @@ class DeviceDeviceReportPortEventsWithTestResultsTestCase(DeviceReportClientTest
     def test_sending_test_results_terminate_port_events(self):
         """Test the ability to get port events"""
         self._server.process_port_learn("name", "port", "mac", 1)
-        self._client.get_port_events("mac", self._on_port_event)
+        self._client.connect("mac", self._on_port_event)
         time.sleep(1)  # Takes time to start grpc stream in a thread
         self._server.process_port_state("name", "port", False)
         self._server.process_port_state("name", "port", True)
@@ -144,7 +144,7 @@ class DeviceDeviceReportPortEventsStreamCleanup(DeviceReportClientTestBase):
     def test_client_terminating_port_events(self):
         """Test the ability to get port events"""
         self._server.process_port_learn("name", "port", "mac", 1)
-        self._client.get_port_events("mac", self._on_port_event)
+        self._client.connect("mac", self._on_port_event)
         time.sleep(1)
         self._server.process_port_state("name", "port", False)
         time.sleep(1)
@@ -172,8 +172,8 @@ class DeviceDeviceReportPortEventsMultipleStreams(DeviceReportClientTestBase):
     def test_sending_test_results_terminate_multiple_port_events(self):
         """Test the ability to get port events"""
         self._server.process_port_learn("name", "port", "mac", 1)
-        self._client.get_port_events("mac", self._on_port_event)
-        self._client.get_port_events("mac", self._on_port_event2)
+        self._client.connect("mac", self._on_port_event)
+        self._client.connect("mac", self._on_port_event2)
         time.sleep(1)
         self._server.process_port_state("name", "port", False)
         self._server.process_port_state("name", "port", True)
