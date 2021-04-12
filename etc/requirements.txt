@@ -21,4 +21,4 @@ pytricia
 pyyaml
 requests
 ryu
-WeasyPrint==50
+WeasyPrint==52.4
