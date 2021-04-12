@@ -338,7 +338,7 @@ class FaucetTopology:
         """Return Gauge config"""
         config = {
             'dbs': {
-                'prometheus': {'prometheus_port': _gauge_varz_port, 'type': 'prometheus'}
+                'prometheus': {'prometheus_port': self._gauge_varz_port, 'type': 'prometheus'}
             },
             'faucet_configs': ['/etc/faucet/faucet.yaml'],
             'watchers': {
