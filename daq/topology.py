@@ -101,7 +101,7 @@ class FaucetTopology:
         if as_gauge:
             return
         sock = list(filter(lambda line: line.startswith('FAUCET_EVENT_SOCK='), output.split('\n')))
-        if not len(sock):
+        if not sock:
             assert False, 'FAUCET_EVENT_SOCK not found after exposing faucet'
         os.environ['FAUCET_EVENT_SOCK'] = sock[0].split('=')[1].strip()
 
