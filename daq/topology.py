@@ -91,14 +91,19 @@ class FaucetTopology:
         kill_arg = ' kill' if kill else ''
 
         LOGGER.info('Starting%s%s %s...', native_arg, kill_arg, process_name)
-        cmd = '%s/cmd/faucet%s%s%s && echo SUCCESS' % (
+        cmd = '%s/cmd/faucet%s%s%s && echo FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK && echo SUCCESS' % (
             DAQ_LIB_DIR, native_arg, kill_arg, gauge_arg)
 
         output = self.pri.cmd(cmd)
         if not output.strip().endswith('SUCCESS'):
             LOGGER.error('%s output:\n%s', process_name, output)
             assert False, '%s failed' % process_name
-
+        if as_gauge:
+            return
+        sock = list(filter(lambda line: line.startswith('FAUCET_EVENT_SOCK='), output.split('\n')))
+        if not sock:
+            assert False, 'FAUCET_EVENT_SOCK not found after exposing faucet'
+        os.environ['FAUCET_EVENT_SOCK'] = sock[0].split('=')[1].strip()
 
     def _load_file(self, filename):
         if not os.path.isfile(filename):
