@@ -59,7 +59,7 @@ class FaucetTopology:
         self.ext_intf = switch_setup.get('data_intf')
         self._native_faucet = switch_setup.get('native')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
-        self._gauge_varz_port = switch_setup.get('varz_port_2', self._DEFAULT_GAUGE_VARZ_PORT)
+        self._gauge_varz_port = int(switch_setup.get('varz_port_2', self._DEFAULT_GAUGE_VARZ_PORT))
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self._set_devices = {}
