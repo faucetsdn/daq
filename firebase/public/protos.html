@@ -210,6 +210,10 @@
             <ul>
               
                 <li>
+                  <a href="#SessionEndpoint"><span class="badge">M</span>SessionEndpoint</a>
+                </li>
+              
+                <li>
                   <a href="#SessionParams"><span class="badge">M</span>SessionParams</a>
                 </li>
               
@@ -457,6 +461,37 @@
       <p></p>
 
       
+        <h3 id="SessionEndpoint">SessionEndpoint</h3>
+        <p>Session initialization params.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="SessionParams">SessionParams</h3>
         <p>Params for session initialization.</p>
 
@@ -506,15 +541,15 @@
             <tbody>
               
                 <tr>
-                  <td>endpoint_ip</td>
-                  <td><a href="#string">string</a></td>
+                  <td>endpoint</td>
+                  <td><a href="#SessionEndpoint">SessionEndpoint</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
               
                 <tr>
-                  <td>session_result</td>
-                  <td><a href="#SessionResult.ResultCode">SessionResult.ResultCode</a></td>
+                  <td>result</td>
+                  <td><a href="#SessionResult">SessionResult</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -530,6 +565,23 @@
         <p>Session result codes.</p>
 
         
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>session_result</td>
+                  <td><a href="#SessionResult.ResultCode">SessionResult.ResultCode</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
 
         
       

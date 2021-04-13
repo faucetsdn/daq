@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"O\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\"Y\n\x0fSessionProgress\x12\x13\n\x0b\x65ndpoint_ip\x18\x01 \x01(\t\x12\x31\n\x0esession_result\x18\x02 \x01(\x0e\x32\x19.SessionResult.ResultCode\"M\n\rSessionResult\"<\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x12\n\n\x06PASSED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"O\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\"e\n\x0fSessionProgress\x12$\n\x08\x65ndpoint\x18\x01 \x01(\x0b\x32\x10.SessionEndpointH\x00\x12 \n\x06result\x18\x02 \x01(\x0b\x32\x0e.SessionResultH\x00\x42\n\n\x08progress\"+\n\x0fSessionEndpoint\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"\x80\x01\n\rSessionResult\x12\x31\n\x0esession_result\x18\x01 \x01(\x0e\x32\x19.SessionResult.ResultCode\"<\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x12\n\n\x06PASSED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
 )
 
 
@@ -54,8 +54,8 @@ _SESSIONRESULT_RESULTCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=223,
-  serialized_end=283,
+  serialized_start=332,
+  serialized_end=392,
 )
 _sym_db.RegisterEnumDescriptor(_SESSIONRESULT_RESULTCODE)
 
@@ -115,15 +115,59 @@ _SESSIONPROGRESS = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='endpoint_ip', full_name='SessionProgress.endpoint_ip', index=0,
+      name='endpoint', full_name='SessionProgress.endpoint', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='result', full_name='SessionProgress.result', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='progress', full_name='SessionProgress.progress',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=115,
+  serialized_end=216,
+)
+
+
+_SESSIONENDPOINT = _descriptor.Descriptor(
+  name='SessionEndpoint',
+  full_name='SessionEndpoint',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ip', full_name='SessionEndpoint.ip', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='session_result', full_name='SessionProgress.session_result', index=1,
-      number=2, type=14, cpp_type=8, label=1,
+      name='port', full_name='SessionEndpoint.port', index=1,
+      number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -140,8 +184,8 @@ _SESSIONPROGRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=115,
-  serialized_end=204,
+  serialized_start=218,
+  serialized_end=261,
 )
 
 
@@ -153,6 +197,13 @@ _SESSIONRESULT = _descriptor.Descriptor(
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='session_result', full_name='SessionResult.session_result', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -166,14 +217,23 @@ _SESSIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=206,
-  serialized_end=283,
+  serialized_start=264,
+  serialized_end=392,
 )
 
-_SESSIONPROGRESS.fields_by_name['session_result'].enum_type = _SESSIONRESULT_RESULTCODE
+_SESSIONPROGRESS.fields_by_name['endpoint'].message_type = _SESSIONENDPOINT
+_SESSIONPROGRESS.fields_by_name['result'].message_type = _SESSIONRESULT
+_SESSIONPROGRESS.oneofs_by_name['progress'].fields.append(
+  _SESSIONPROGRESS.fields_by_name['endpoint'])
+_SESSIONPROGRESS.fields_by_name['endpoint'].containing_oneof = _SESSIONPROGRESS.oneofs_by_name['progress']
+_SESSIONPROGRESS.oneofs_by_name['progress'].fields.append(
+  _SESSIONPROGRESS.fields_by_name['result'])
+_SESSIONPROGRESS.fields_by_name['result'].containing_oneof = _SESSIONPROGRESS.oneofs_by_name['progress']
+_SESSIONRESULT.fields_by_name['session_result'].enum_type = _SESSIONRESULT_RESULTCODE
 _SESSIONRESULT_RESULTCODE.containing_type = _SESSIONRESULT
 DESCRIPTOR.message_types_by_name['SessionParams'] = _SESSIONPARAMS
 DESCRIPTOR.message_types_by_name['SessionProgress'] = _SESSIONPROGRESS
+DESCRIPTOR.message_types_by_name['SessionEndpoint'] = _SESSIONENDPOINT
 DESCRIPTOR.message_types_by_name['SessionResult'] = _SESSIONRESULT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -191,6 +251,13 @@ SessionProgress = _reflection.GeneratedProtocolMessageType('SessionProgress', (_
   })
 _sym_db.RegisterMessage(SessionProgress)
 
+SessionEndpoint = _reflection.GeneratedProtocolMessageType('SessionEndpoint', (_message.Message,), {
+  'DESCRIPTOR' : _SESSIONENDPOINT,
+  '__module__' : 'daq.proto.session_server_pb2'
+  # @@protoc_insertion_point(class_scope:SessionEndpoint)
+  })
+_sym_db.RegisterMessage(SessionEndpoint)
+
 SessionResult = _reflection.GeneratedProtocolMessageType('SessionResult', (_message.Message,), {
   'DESCRIPTOR' : _SESSIONRESULT,
   '__module__' : 'daq.proto.session_server_pb2'
@@ -207,8 +274,8 @@ _SESSIONSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=285,
-  serialized_end=354,
+  serialized_start=394,
+  serialized_end=463,
   methods=[
   _descriptor.MethodDescriptor(
     name='StartSession',
