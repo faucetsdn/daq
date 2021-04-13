@@ -17,14 +17,26 @@ message SessionParams {
  * Session progress updates.
  */
 message SessionProgress {
-  string endpoint_ip = 1;
-  SessionResult.ResultCode session_result = 2;
+  oneof progress {
+    SessionEndpoint endpoint = 1;
+    SessionResult result = 2;
+  }
+}
+
+/*
+ * Session initialization params.
+ */
+message SessionEndpoint {
+  string ip = 1;
+  int32 port = 2;
 }
 
 /*
  * Session result codes.
  */
 message SessionResult {
+  SessionResult.ResultCode session_result = 2;
+
   enum ResultCode {
     PENDING = 0;
     ERROR = 1;
