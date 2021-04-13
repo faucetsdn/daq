@@ -21,11 +21,14 @@ message SessionProgress {
   SessionResult.ResultCode session_result = 2;
 }
 
+/*
+ * Session result codes.
+ */
 message SessionResult {
   enum ResultCode {
     PENDING = 0;
     ERROR = 1;
-    CLEAR = 2;
+    PASSED = 2;
     FAILED = 3;
   }
 }

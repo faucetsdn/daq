@@ -9,7 +9,8 @@ import grpc
 
 import logger
 import daq.proto.session_server_pb2_grpc as server_grpc
-from daq.proto.session_server_pb2 import SessionParams, SessionProgress
+from daq.proto.session_server_pb2 import SessionParams, SessionProgress, SessionResult
+from forch.proto.shared_constants_pb2 import PortBehavior
 
 from utils import dict_proto
 
@@ -21,6 +22,11 @@ DEFAULT_SERVER_PORT = 50051
 DEFAULT_BIND_ADDRESS = '0.0.0.0'
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 DEFAULT_RPC_TIMEOUT_SEC = 10
+
+SESSION_DEVICE_RESULT = {
+    PortBehavior.failed: SessionResult.ResultCode.FAILED,
+    PortBehavior.passed: SessionResult.ResultCode.PASSED
+}
 
 
 class SessionServerServicer(server_grpc.SessionServerServicer):
@@ -34,7 +40,7 @@ class SessionServerServicer(server_grpc.SessionServerServicer):
     # pylint: disable=invalid-name
     def StartSession(self, request, context):
         """Start a session servicer"""
-        LOGGER.info('StartSession')
+        LOGGER.info('StartSession %s', request.device_mac)
         self._on_session(request)
         return self._session_stream(request)
 
@@ -67,7 +73,7 @@ class SessionServer:
     def send_device_result(self, mac, device_result):
         """Connect to remote endpoint"""
         LOGGER.info('Send device result %s %s', mac, device_result)
-        self._send_reply(mac, SessionProgress(endpoint_ip=str(device_result)))
+        self._send_reply(mac, SessionProgress(session_result=SESSION_DEVICE_RESULT[device_result]))
 
     def _send_reply(self, mac, event):
         self._return_queues[mac].put(event)
@@ -77,9 +83,14 @@ class SessionServer:
         LOGGER.info('New session stream for %s %s/%s',
                     device_mac, request.device_vlan, request.assigned_vlan)
         assert device_mac not in self._return_queues, 'stream already registered for %s' % device_mac
-        self._return_queues[device_mac] = Queue()
-        self._send_reply(device_mac, SessionProgress(endpoint_ip=('ip-' + mac)))
-        yield iter(self._return_queues[device_mac].get, False)
+        return_queue = Queue()
+        self._return_queues[device_mac] = return_queue
+        self._send_reply(device_mac, SessionProgress(endpoint_ip=('ip-' + device_mac)))
+        while True:
+            item = return_queue.get()
+            if item is False:
+                break
+            yield item
         LOGGER.info('Session ended for %s', device_mac)
         del self._return_queues[device_mac]
 
