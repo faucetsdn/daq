@@ -22,7 +22,7 @@ DEFAULT_MAX_WORKERS = 10
 DEFAULT_SERVER_PORT = 50051
 DEFAULT_BIND_ADDRESS = '0.0.0.0'
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
-DEFAULT_RPC_TIMEOUT_SEC = 10
+DEFAULT_RPC_TIMEOUT_SEC = 600
 
 
 SESSION_DEVICE_RESULT = {
@@ -72,7 +72,7 @@ class SessionServer:
 
     def connect(self, mac, callback):
         """Connect to remote endpoint"""
-        LOGGER.info('Connecting to remote endpoint %s', mac)
+        # LOGGER.info('Connecting to remote endpoint %s', mac)
 
     def send_device_result(self, mac, device_result):
         """Connect to remote endpoint"""
@@ -127,8 +127,10 @@ class TestingSessionServerClient:
             'device_mac': mac
         }
         LOGGER.info('Connecting to stream for mac ' + mac)
-        return self._stub.StartSession(dict_proto(devices_state, SessionParams),
-                                       timeout=self._rpc_timeout_sec)
+        generator = self._stub.StartSession(dict_proto(devices_state, SessionParams),
+                                            timeout=self._rpc_timeout_sec)
+        for message in generator:
+            LOGGER.info('Received %s', str(message).strip())
 
 if __name__ == '__main__':
     # Snippet for testing basic client/server operation from the command line.
