@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"M\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x13\n\x0bnative_vlan\x18\x03 \x01(\x05\"Y\n\x0fSessionProgress\x12\x13\n\x0b\x65ndpoint_ip\x18\x01 \x01(\t\x12\x31\n\x0esession_result\x18\x02 \x01(\x0e\x32\x19.SessionResult.ResultCode\"L\n\rSessionResult\";\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x12\t\n\x05\x43LEAR\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"O\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\"Y\n\x0fSessionProgress\x12\x13\n\x0b\x65ndpoint_ip\x18\x01 \x01(\t\x12\x31\n\x0esession_result\x18\x02 \x01(\x0e\x32\x19.SessionResult.ResultCode\"L\n\rSessionResult\";\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x12\t\n\x05\x43LEAR\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
 )
 
 
@@ -54,8 +54,8 @@ _SESSIONRESULT_RESULTCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=221,
-  serialized_end=280,
+  serialized_start=223,
+  serialized_end=282,
 )
 _sym_db.RegisterEnumDescriptor(_SESSIONRESULT_RESULTCODE)
 
@@ -83,7 +83,7 @@ _SESSIONPARAMS = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='native_vlan', full_name='SessionParams.native_vlan', index=2,
+      name='assigned_vlan', full_name='SessionParams.assigned_vlan', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -102,7 +102,7 @@ _SESSIONPARAMS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=34,
-  serialized_end=111,
+  serialized_end=113,
 )
 
 
@@ -140,8 +140,8 @@ _SESSIONPROGRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=113,
-  serialized_end=202,
+  serialized_start=115,
+  serialized_end=204,
 )
 
 
@@ -166,8 +166,8 @@ _SESSIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=204,
-  serialized_end=280,
+  serialized_start=206,
+  serialized_end=282,
 )
 
 _SESSIONPROGRESS.fields_by_name['session_result'].enum_type = _SESSIONRESULT_RESULTCODE
@@ -207,8 +207,8 @@ _SESSIONSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=282,
-  serialized_end=351,
+  serialized_start=284,
+  serialized_end=353,
   methods=[
   _descriptor.MethodDescriptor(
     name='StartSession',
