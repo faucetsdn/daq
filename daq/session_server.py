@@ -5,6 +5,7 @@ from queue import Queue
 import logging
 import sys
 import time
+import threading
 import grpc
 
 import logger
@@ -22,6 +23,7 @@ DEFAULT_SERVER_PORT = 50051
 DEFAULT_BIND_ADDRESS = '0.0.0.0'
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 DEFAULT_RPC_TIMEOUT_SEC = 10
+
 
 SESSION_DEVICE_RESULT = {
     PortBehavior.failed: SessionResult.ResultCode.FAILED,
@@ -50,16 +52,18 @@ class SessionServer:
 
     def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
         LOGGER.info('Initializing')
+        self._return_queues = {}
+        self._lock = threading.Lock()
+
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
-
         self._servicer = SessionServerServicer(on_session, self._session_stream)
+
         server_grpc.add_SessionServerServicer_to_server(self._servicer, self._server)
 
         self._address = (
             f'{server_address or DEFAULT_BIND_ADDRESS}:{server_port or DEFAULT_SERVER_PORT}')
         self._server.add_insecure_port(self._address)
-        self._return_queues = {}
 
     def start(self):
         """Start the server"""
@@ -68,26 +72,29 @@ class SessionServer:
 
     def connect(self, mac, callback):
         """Connect to remote endpoint"""
-        LOGGER.info('Connecting to remote endpoint %s' % mac)
+        LOGGER.info('Connecting to remote endpoint %s', mac)
 
     def send_device_result(self, mac, device_result):
         """Connect to remote endpoint"""
-        LOGGER.info('Send device result %s %s', mac, device_result)
+        LOGGER.info('Send device result %s %s', mac, PortBehavior.Behavior.Name(device_result))
         self._send_reply(mac, SessionProgress(session_result=SESSION_DEVICE_RESULT[device_result]))
 
-    def _send_reply(self, mac, event):
-        self._return_queues[mac].put(event)
+    def _send_reply(self, mac, item):
+        LOGGER.info('Progress result %s, %s', mac, str(item).strip())
+        self._return_queues[mac].put(item)
 
     def _session_stream(self, request):
         device_mac = request.device_mac
-        LOGGER.info('New session stream for %s %s/%s',
-                    device_mac, request.device_vlan, request.assigned_vlan)
-        assert device_mac not in self._return_queues, 'stream already registered for %s' % device_mac
-        return_queue = Queue()
-        self._return_queues[device_mac] = return_queue
+        with self._lock:
+            LOGGER.info('New session stream for %s %s/%s',
+                        device_mac, request.device_vlan, request.assigned_vlan)
+            assert device_mac not in self._return_queues, 'stream already registered for %s' % device_mac
+            return_queue = Queue()
+            self._return_queues[device_mac] = return_queue
         self._send_reply(device_mac, SessionProgress(endpoint_ip=('ip-' + device_mac)))
         while True:
             item = return_queue.get()
+            LOGGER.info('Sending result %s, %s', device_mac, str(item).strip())
             if item is False:
                 break
             yield item

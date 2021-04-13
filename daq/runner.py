@@ -230,11 +230,12 @@ class DAQRunner:
         return None
 
     def _on_session(self, request):
-        LOGGER.info('New session started for %s %s/%s',
-                    request.device_mac, request.device_vlan, request.assigned_vlan)
-        device = self._devices.create_if_absent(request.device_mac)
-        device.dhcp_mode = DhcpMode.EXTERNAL
-        self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+        with self._event_lock:
+            LOGGER.info('New session started for %s %s/%s',
+                        request.device_mac, request.device_vlan, request.assigned_vlan)
+            device = self._devices.create_if_absent(request.device_mac)
+            device.dhcp_mode = DhcpMode.EXTERNAL
+            self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
 
     def _send_heartbeat(self):
         message = {
