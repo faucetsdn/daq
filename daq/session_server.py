@@ -1,6 +1,7 @@
 """gRPC server to receive devices state"""
 
 from concurrent import futures
+from queue import Queue
 import logging
 import sys
 import time
@@ -41,18 +42,18 @@ class SessionServerServicer(server_grpc.SessionServerServicer):
 class SessionServer:
     """Devices state server"""
 
-    def __init__(self, on_session=None, session_stream=None,
-                 server_address=None, server_port=None, max_workers=None):
+    def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
         LOGGER.info('Initializing')
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
 
-        self._servicer = SessionServerServicer(on_session)
+        self._servicer = SessionServerServicer(on_session, self._session_stream)
         server_grpc.add_SessionServerServicer_to_server(self._servicer, self._server)
 
         self._address = (
             f'{server_address or DEFAULT_BIND_ADDRESS}:{server_port or DEFAULT_SERVER_PORT}')
         self._server.add_insecure_port(self._address)
+        self._return_queues = {}
 
     def start(self):
         """Start the server"""
@@ -62,6 +63,25 @@ class SessionServer:
     def connect(self, mac, callback):
         """Connect to remote endpoint"""
         LOGGER.info('Connecting to remote endpoint %s' % mac)
+
+    def send_device_result(self, mac, device_result):
+        """Connect to remote endpoint"""
+        LOGGER.info('Send device result %s %s', mac, device_result)
+        self._send_reply(mac, SessionProgress(endpoint_ip=str(device_result)))
+
+    def _send_reply(self, mac, event):
+        self._return_queues[mac].put(event)
+
+    def _session_stream(self, request):
+        device_mac = request.device_mac
+        LOGGER.info('New session stream for %s %s/%s',
+                    device_mac, request.device_vlan, request.assigned_vlan)
+        assert device_mac not in self._return_queues, 'stream already registered for %s' % device_mac
+        self._return_queues[device_mac] = Queue()
+        self._send_reply(device_mac, SessionProgress(endpoint_ip=('ip-' + mac)))
+        yield iter(self._return_queues[device_mac].get, False)
+        LOGGER.info('Session ended for %s', device_mac)
+        del self._return_queues[device_mac]
 
     def stop(self):
         """Stop the server"""

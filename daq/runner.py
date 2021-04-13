@@ -225,24 +225,16 @@ class DAQRunner:
             else:
                 # TODO: Make this all configured form run_trigger not device_reporting
                 handler = SessionServer(on_session=self._on_session,
-                                        session_stream=self._session_stream,
                                         server_port=server_port)
-            handler.start()
             return handler
         return None
 
     def _on_session(self, request):
         LOGGER.info('New session started for %s %s/%s',
                     request.device_mac, request.device_vlan, request.assigned_vlan)
-        device = self._devices.get(request.device_mac)
+        device = self._devices.create_if_absent(request.device_mac)
+        device.dhcp_mode = DhcpMode.EXTERNAL
         self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
-
-    # async method to yield session results
-    def _session_stream(self, request):
-        LOGGER.info('New session stream for %s %s/%s',
-                    request.device_mac, request.device_vlan, request.assigned_vlan)
-        yield SessionProgress(endpoint_ip=('ip-' + request.device_mac))
-        LOGGER.info('Session ended for %s', request.device_mac)
 
     def _send_heartbeat(self):
         message = {
@@ -283,6 +275,9 @@ class DAQRunner:
 
         LOGGER.info('Waiting for system to settle...')
         time.sleep(3)
+
+        if self._device_result_handler:
+            self._device_result_handler.start()
 
         LOGGER.debug('Done with initialization')
 
@@ -408,10 +403,7 @@ class DAQRunner:
 
     def _handle_device_learn(self, target_mac, vid):
         LOGGER.info('Learned %s on vid %s', target_mac, vid)
-        if not self._devices.get(target_mac):
-            device = self._devices.new_device(target_mac, vlan=vid)
-        else:
-            device = self._devices.get(target_mac)
+        device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
         # For keeping track of remote port events
@@ -440,8 +432,8 @@ class DAQRunner:
         device.port.flapping_start = 0
         device.port.active = True
 
-        device.vlan = port_event.device_vlan
-        device.assigned = port_event.assigned_vlan
+        device.vlan = device_vlan
+        device.assigned = assigned_vlan
 
         LOGGER.info('Processing remote state %s %s/%s', device,
                     device.vlan, device.assigned)
