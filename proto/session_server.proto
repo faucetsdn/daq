@@ -35,7 +35,7 @@ message SessionEndpoint {
  * Session result codes.
  */
 message SessionResult {
-  SessionResult.ResultCode session_result = 2;
+  SessionResult.ResultCode session_result = 1;
 
   enum ResultCode {
     PENDING = 0;
