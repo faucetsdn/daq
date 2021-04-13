@@ -10,7 +10,7 @@ syntax = "proto3";
 message SessionParams {
   string device_mac = 1;
   int32 device_vlan = 2;
-  int32 native_vlan = 3;
+  int32 assigned_vlan = 3;
 }
 
 /*

@@ -224,15 +224,23 @@ class DAQRunner:
                                              server_port=server_port, rpc_timeout_sec=timeout)
             else:
                 # TODO: Make this all configured form run_trigger not device_reporting
-                handler = SessionServer(on_session=self._on_session, server_port=server_port)
+                handler = SessionServer(on_session=self._on_session,
+                                        session_stream=self._session_stream,
+                                        server_port=server_port)
             handler.start()
             return handler
         return None
 
-    # async method to yield session results
     def _on_session(self, request):
         LOGGER.info('New session started for %s %s/%s',
-                    request.device_mac, request.device_vlan, request.native_vlan)
+                    request.device_mac, request.device_vlan, request.assigned_vlan)
+        device = self._devices.get(request.device_mac)
+        self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+
+    # async method to yield session results
+    def _session_stream(self, request):
+        LOGGER.info('New session stream for %s %s/%s',
+                    request.device_mac, request.device_vlan, request.assigned_vlan)
         yield SessionProgress(endpoint_ip=('ip-' + request.device_mac))
         LOGGER.info('Session ended for %s', request.device_mac)
 
@@ -426,17 +434,20 @@ class DAQRunner:
                 device.port.active = False
                 return
 
-            device.port.flapping_start = 0
-            device.port.active = True
+            self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
 
-            device.vlan = port_event.device_vlan
-            device.assigned = port_event.assigned_vlan
+    def _remote_trigger(self, device, device_vlan, assigned_vlan):
+        device.port.flapping_start = 0
+        device.port.active = True
 
-            LOGGER.info('Processing remote state %s %s/%s', device,
-                        device.vlan, device.assigned)
-            self._target_set_trigger(device, remote_trigger=True)
-            if device.gateway:
-                self._direct_device_traffic(device, device.gateway.port_set)
+        device.vlan = port_event.device_vlan
+        device.assigned = port_event.assigned_vlan
+
+        LOGGER.info('Processing remote state %s %s/%s', device,
+                    device.vlan, device.assigned)
+        self._target_set_trigger(device, remote_trigger=True)
+        if device.gateway:
+            self._direct_device_traffic(device, device.gateway.port_set)
 
     def _queue_callback(self, callback):
         with self._event_lock:

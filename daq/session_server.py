@@ -25,21 +25,24 @@ DEFAULT_RPC_TIMEOUT_SEC = 10
 class SessionServerServicer(server_grpc.SessionServerServicer):
     """gRPC servicer to receive devices state"""
 
-    def __init__(self, on_session):
+    def __init__(self, on_session, session_stream):
         super().__init__()
         self._on_session = on_session
+        self._session_stream = session_stream
 
     # pylint: disable=invalid-name
     def StartSession(self, request, context):
         """Start a session servicer"""
         LOGGER.info('StartSession')
-        return self._on_session(request)
+        self._on_session(request)
+        return self._session_stream(request)
 
 
 class SessionServer:
     """Devices state server"""
 
-    def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
+    def __init__(self, on_session=None, session_stream=None,
+                 server_address=None, server_port=None, max_workers=None):
         LOGGER.info('Initializing')
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
