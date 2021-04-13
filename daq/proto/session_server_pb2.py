@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"O\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\"Y\n\x0fSessionProgress\x12\x13\n\x0b\x65ndpoint_ip\x18\x01 \x01(\t\x12\x31\n\x0esession_result\x18\x02 \x01(\x0e\x32\x19.SessionResult.ResultCode\"L\n\rSessionResult\";\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x12\t\n\x05\x43LEAR\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"O\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\"Y\n\x0fSessionProgress\x12\x13\n\x0b\x65ndpoint_ip\x18\x01 \x01(\t\x12\x31\n\x0esession_result\x18\x02 \x01(\x0e\x32\x19.SessionResult.ResultCode\"M\n\rSessionResult\"<\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x12\n\n\x06PASSED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
 )
 
 
@@ -42,7 +42,7 @@ _SESSIONRESULT_RESULTCODE = _descriptor.EnumDescriptor(
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='CLEAR', index=2, number=2,
+      name='PASSED', index=2, number=2,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
@@ -55,7 +55,7 @@ _SESSIONRESULT_RESULTCODE = _descriptor.EnumDescriptor(
   containing_type=None,
   serialized_options=None,
   serialized_start=223,
-  serialized_end=282,
+  serialized_end=283,
 )
 _sym_db.RegisterEnumDescriptor(_SESSIONRESULT_RESULTCODE)
 
@@ -167,7 +167,7 @@ _SESSIONRESULT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=206,
-  serialized_end=282,
+  serialized_end=283,
 )
 
 _SESSIONPROGRESS.fields_by_name['session_result'].enum_type = _SESSIONRESULT_RESULTCODE
@@ -207,8 +207,8 @@ _SESSIONSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=284,
-  serialized_end=353,
+  serialized_start=285,
+  serialized_end=354,
   methods=[
   _descriptor.MethodDescriptor(
     name='StartSession',
