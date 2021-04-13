@@ -10,7 +10,8 @@ import grpc
 
 import logger
 import daq.proto.session_server_pb2_grpc as server_grpc
-from daq.proto.session_server_pb2 import SessionParams, SessionProgress, SessionResult
+from daq.proto.session_server_pb2 import (
+    SessionParams, SessionProgress, SessionResult, SessionEndpoint)
 from forch.proto.shared_constants_pb2 import PortBehavior
 
 from utils import dict_proto
@@ -77,7 +78,8 @@ class SessionServer:
     def send_device_result(self, mac, device_result):
         """Connect to remote endpoint"""
         LOGGER.info('Send device result %s %s', mac, PortBehavior.Behavior.Name(device_result))
-        self._send_reply(mac, SessionProgress(session_result=SESSION_DEVICE_RESULT[device_result]))
+        result = SessionResult(code=SESSION_DEVICE_RESULT[device_result])
+        self._send_reply(mac, SessionProgress(result=result))
 
     def _send_reply(self, mac, item):
         LOGGER.info('Progress result %s, %s', mac, str(item).strip())
@@ -91,7 +93,8 @@ class SessionServer:
             assert device_mac not in self._return_queues, 'stream already registered for %s' % device_mac
             return_queue = Queue()
             self._return_queues[device_mac] = return_queue
-        self._send_reply(device_mac, SessionProgress(endpoint_ip=('ip-' + device_mac)))
+        endpoint = SessionEndpoint(ip=('ip-' + device_mac))
+        self._send_reply(device_mac, SessionProgress(endpoint=endpoint))
         while True:
             item = return_queue.get()
             LOGGER.info('Sending result %s, %s', device_mac, str(item).strip())
