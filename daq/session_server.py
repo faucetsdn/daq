@@ -27,6 +27,7 @@ DEFAULT_RPC_TIMEOUT_SEC = 600
 
 
 SESSION_DEVICE_RESULT = {
+    PortBehavior.authenticated: SessionResult.ResultCode.STARTED,
     PortBehavior.failed: SessionResult.ResultCode.FAILED,
     PortBehavior.passed: SessionResult.ResultCode.PASSED
 }
@@ -95,6 +96,7 @@ class SessionServer:
             self._return_queues[device_mac] = return_queue
         endpoint = SessionEndpoint(ip=('ip-' + device_mac))
         self._send_reply(device_mac, SessionProgress(endpoint=endpoint))
+        self.send_device_result(device_mac, PortBehavior.Behavior.authenticated)
         while True:
             item = return_queue.get()
             LOGGER.info('Sending result %s, %s', device_mac, str(item).strip())

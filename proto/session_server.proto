@@ -39,9 +39,10 @@ message SessionResult {
 
   enum ResultCode {
     PENDING = 0;
-    ERROR = 1;
-    PASSED = 2;
-    FAILED = 3;
+    STARTED = 1;
+    ERROR = 2;
+    PASSED = 3;
+    FAILED = 4;
   }
 }
 
