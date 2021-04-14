@@ -16,7 +16,6 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 import configurator
 from device_report_client import DeviceReportClient
 from session_server import SessionServer
-
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
 import container_gateway
