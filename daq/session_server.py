@@ -112,6 +112,7 @@ class SessionServer:
 
     def stop(self):
         """Stop the server"""
+        # TODO: Investigate if close_stream should be called here.
         self._server.stop(grace=None)
 
 
