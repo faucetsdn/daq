@@ -16,6 +16,7 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 import configurator
 from device_report_client import DeviceReportClient
 from session_server import SessionServer, SessionProgress
+
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
 import container_gateway
@@ -517,7 +518,7 @@ class DAQRunner:
         for device in self._devices.get_triggered_devices():
             self.target_set_error(device, DaqException('terminated'))
         if self._device_result_handler:
-            self._device_result_handler.terminate()
+            self._device_result_handler.stop()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls

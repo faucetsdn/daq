@@ -76,5 +76,6 @@ with tempfile.TemporaryDirectory(dir='.') as tmp:
             *build_data_files('usi', 'lib/daq/usi'),
             *build_data_files('config/modules', 'lib/daq/config/modules'),
             *build_data_files('config/system', 'lib/daq/config/system'),
+            *build_data_files('config/faucet', 'lib/daq/config/faucet'),
         ]
     )

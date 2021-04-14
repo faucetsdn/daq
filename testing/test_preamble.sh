@@ -133,3 +133,19 @@ function build_if_not_release {
     fi
     cmd/build $build_mode missing
 }
+
+function activate_venv {
+    if [ -d venv ]; then
+        echo Activating venv
+        source venv/bin/activate
+    fi
+
+    if [ -n "$DAQ_CODECOV" ]; then
+        echo Running Python with codecov analysis...
+        PYTHON_CMD="coverage run -a"
+    else
+        PYTHON_CMD="python3"
+    fi
+
+    export PYTHON_CMD
+}
