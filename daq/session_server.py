@@ -56,10 +56,10 @@ class SessionServer:
     def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
         self._return_queues = {}
         self._lock = threading.Lock()
-
+        self._on_session = on_session
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
-        self._servicer = SessionServerServicer(on_session, self._session_stream)
+        self._servicer = SessionServerServicer(self._init_session, self._session_stream)
 
         server_grpc.add_SessionServerServicer_to_server(self._servicer, self._server)
 
@@ -80,10 +80,13 @@ class SessionServer:
         result = SessionResult(code=SESSION_DEVICE_RESULT[device_result])
         self._send_reply(mac, SessionProgress(result=result))
 
+    def close_stream(self, mac):
+        self._send_reply(mac, False)
+
     def _send_reply(self, mac, item):
         self._return_queues[mac].put(item)
 
-    def _session_stream(self, request):
+    def _init_session(self, request):
         device_mac = request.device_mac
         with self._lock:
             LOGGER.info('New session stream for %s %s/%s',
@@ -94,8 +97,12 @@ class SessionServer:
         endpoint = SessionEndpoint(ip=('ip-' + device_mac))
         self._send_reply(device_mac, SessionProgress(endpoint=endpoint))
         self.send_device_result(device_mac, PortBehavior.Behavior.authenticated)
+        self._on_session(request)
+
+    def _session_stream(self, request):
+        device_mac = request.device_mac
         while True:
-            item = return_queue.get()
+            item = self._return_queues[device_mac].get()
             if item is False:
                 break
             yield item
@@ -112,14 +119,10 @@ class TestingSessionServerClient:
 
     def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT,
                  rpc_timeout_sec=DEFAULT_RPC_TIMEOUT_SEC):
-        self._initialize_stub(server_address, server_port)
-        self._rpc_timeout_sec = rpc_timeout_sec
-
-    def _initialize_stub(self, sever_address, server_port):
-        address = f'{sever_address}:{server_port}'
-        LOGGER.info('Connecting to server ' + address)
+        address = f'{server_address}:{server_port}'
         channel = grpc.insecure_channel(address)
         self._stub = server_grpc.SessionServerStub(channel)
+        self._rpc_timeout_sec = rpc_timeout_sec
 
     def start_session(self, mac):
         """Send device result of a device to server"""
@@ -129,8 +132,7 @@ class TestingSessionServerClient:
         LOGGER.info('Connecting to stream for mac ' + mac)
         generator = self._stub.StartSession(dict_proto(devices_state, SessionParams),
                                             timeout=self._rpc_timeout_sec)
-        for message in generator:
-            LOGGER.info('Received %s', str(message).strip())
+        return generator
 
 if __name__ == '__main__':
     # Snippet for testing basic client/server operation from the command line.
@@ -146,4 +148,6 @@ if __name__ == '__main__':
         time.sleep(1000)
     elif sys.argv[1] == 'client':
         CLIENT = TestingSessionServerClient()
-        CLIENT.start_session('123')
+        generator = CLIENT.start_session('123')
+        for message in generator:
+            LOGGER.info('Received %s', str(message).strip())
