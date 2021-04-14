@@ -44,7 +44,7 @@ class SessionServerServicer(server_grpc.SessionServerServicer):
     # pylint: disable=invalid-name
     def StartSession(self, request, context):
         """Start a session servicer"""
-        LOGGER.info('StartSession %s', request.device_mac)
+        LOGGER.info('Start session for %s', request.device_mac)
         self._on_session(request)
         return self._session_stream(request)
 
@@ -53,7 +53,6 @@ class SessionServer:
     """Devices state server"""
 
     def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
-        LOGGER.info('Initializing')
         self._return_queues = {}
         self._lock = threading.Lock()
 
@@ -70,11 +69,9 @@ class SessionServer:
     def start(self):
         """Start the server"""
         self._server.start()
-        LOGGER.info('starting server')
 
     def connect(self, mac, callback):
         """Connect to remote endpoint"""
-        # LOGGER.info('Connecting to remote endpoint %s', mac)
 
     def send_device_result(self, mac, device_result):
         """Connect to remote endpoint"""
@@ -83,7 +80,6 @@ class SessionServer:
         self._send_reply(mac, SessionProgress(result=result))
 
     def _send_reply(self, mac, item):
-        LOGGER.info('Progress result %s, %s', mac, str(item).strip())
         self._return_queues[mac].put(item)
 
     def _session_stream(self, request):
@@ -99,7 +95,6 @@ class SessionServer:
         self.send_device_result(device_mac, PortBehavior.Behavior.authenticated)
         while True:
             item = return_queue.get()
-            LOGGER.info('Sending result %s, %s', device_mac, str(item).strip())
             if item is False:
                 break
             yield item
@@ -108,7 +103,6 @@ class SessionServer:
 
     def stop(self):
         """Stop the server"""
-        LOGGER.info('Stopping')
         self._server.stop(grace=None)
 
 
