@@ -4,4 +4,4 @@ output-format=parseable
 disable=F0401,R0201,R0902,W0703,I0011,W0403,E1102,R0903,E0611,W0511,W0613,E1601,C0302
 max-line-length=100
 ignored-classes=
-    OrchestrationConfig, DevicesState, PortBehavior
+    OrchestrationConfig, DevicesState, PortBehavior, SessionResult

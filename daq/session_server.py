@@ -26,7 +26,6 @@ DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 DEFAULT_RPC_TIMEOUT_SEC = 600
 
 
-# pylint: disable=no-member
 SESSION_DEVICE_RESULT = {
     PortBehavior.authenticated: SessionResult.ResultCode.STARTED,
     PortBehavior.failed: SessionResult.ResultCode.FAILED,
