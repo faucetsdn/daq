@@ -26,6 +26,7 @@ DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 DEFAULT_RPC_TIMEOUT_SEC = 600
 
 
+# pylint: disable=no-member
 SESSION_DEVICE_RESULT = {
     PortBehavior.authenticated: SessionResult.ResultCode.STARTED,
     PortBehavior.failed: SessionResult.ResultCode.FAILED,
@@ -87,7 +88,7 @@ class SessionServer:
         with self._lock:
             LOGGER.info('New session stream for %s %s/%s',
                         device_mac, request.device_vlan, request.assigned_vlan)
-            assert device_mac not in self._return_queues, 'stream already registered for %s' % device_mac
+            assert device_mac not in self._return_queues, 'already registered %s' % device_mac
             return_queue = Queue()
             self._return_queues[device_mac] = return_queue
         endpoint = SessionEndpoint(ip=('ip-' + device_mac))
@@ -145,5 +146,4 @@ if __name__ == '__main__':
         time.sleep(1000)
     elif sys.argv[1] == 'client':
         CLIENT = TestingSessionServerClient()
-        RESULTS = CLIENT.start_session('123')
-        LOGGER.info('Session result: ' + str(list(RESULTS)))
+        CLIENT.start_session('123')
