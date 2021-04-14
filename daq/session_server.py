@@ -81,6 +81,7 @@ class SessionServer:
         self._send_reply(mac, SessionProgress(result=result))
 
     def close_stream(self, mac):
+        """Close the stream"""
         self._send_reply(mac, False)
 
     def _send_reply(self, mac, item):
@@ -148,6 +149,6 @@ if __name__ == '__main__':
         time.sleep(1000)
     elif sys.argv[1] == 'client':
         CLIENT = TestingSessionServerClient()
-        generator = CLIENT.start_session('123')
-        for message in generator:
+        RESULTS = CLIENT.start_session('123')
+        for message in RESULTS:
             LOGGER.info('Received %s', str(message).strip())

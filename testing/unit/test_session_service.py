@@ -27,6 +27,7 @@ class SessionServerTest(unittest.TestCase):
         self._server.send_device_result(TEST_MAC_ADDRESS, PortBehavior.passed)
         self._server.close_stream(TEST_MAC_ADDRESS)
 
+    # pylint: disable=no-member
     def test_server_connect(self):
         """Simple server connetion test"""
         client = TestingSessionServerClient()
