@@ -295,7 +295,7 @@
 
       
         <h3 id="DeviceRuleCounts">DeviceRuleCounts</h3>
-        <p>Rule counts of devices</p>
+        <p>Rule counts for devices</p>
 
         
           <table class="field-table">
@@ -309,6 +309,13 @@
                   <td><a href="#DeviceRuleCounts.DeviceMacRulesEntry">DeviceRuleCounts.DeviceMacRulesEntry</a></td>
                   <td>repeated</td>
                   <td><p>List of Rule counts indexed by device MAC addresses </p></td>
+                </tr>
+              
+                <tr>
+                  <td>error</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>error found when getting the rule counts for the devices </p></td>
                 </tr>
               
             </tbody>
@@ -394,7 +401,7 @@
                   <td>errors</td>
                   <td><a href="#string">string</a></td>
                   <td>repeated</td>
-                  <td><p> </p></td>
+                  <td><p>errors found when analyzing the rule counts of a device </p></td>
                 </tr>
               
             </tbody>
