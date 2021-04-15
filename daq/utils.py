@@ -1,5 +1,7 @@
 """Utility functions for DAQ"""
 
+from __future__ import absolute_import
+
 import os
 
 from google.protobuf import json_format
