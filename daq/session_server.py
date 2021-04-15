@@ -23,7 +23,6 @@ DEFAULT_MAX_WORKERS = 10
 DEFAULT_SERVER_PORT = 50051
 DEFAULT_BIND_ADDRESS = '0.0.0.0'
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
-DEFAULT_RPC_TIMEOUT_SEC = 600
 
 
 SESSION_DEVICE_RESULT = {
@@ -118,12 +117,10 @@ class SessionServer:
 class TestingSessionServerClient:
     """Test-only client as a session server."""
 
-    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT,
-                 rpc_timeout_sec=DEFAULT_RPC_TIMEOUT_SEC):
+    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT)
         address = f'{server_address}:{server_port}'
         channel = grpc.insecure_channel(address)
         self._stub = server_grpc.SessionServerStub(channel)
-        self._rpc_timeout_sec = rpc_timeout_sec
 
     def start_session(self, mac):
         """Send device result of a device to server"""
@@ -131,8 +128,7 @@ class TestingSessionServerClient:
             'device_mac': mac
         }
         LOGGER.info('Connecting to stream for mac ' + mac)
-        generator = self._stub.StartSession(dict_proto(devices_state, SessionParams),
-                                            timeout=self._rpc_timeout_sec)
+        generator = self._stub.StartSession(dict_proto(devices_state, SessionParams))
         return generator
 
 if __name__ == '__main__':
