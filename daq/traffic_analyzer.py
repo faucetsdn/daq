@@ -13,7 +13,7 @@ import logger
 from utils import dict_proto, proto_dict
 from varz_state_collector import VarzStateCollector
 
-from proto.acl_counts_pb2 import DeviceRuleCounts
+from proto.acl_counting_pb2 import DeviceRuleCounts
 
 from faucet import config_parser
 from forch.proto.devices_state_pb2 import DevicePlacement
