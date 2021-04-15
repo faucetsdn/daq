@@ -49,6 +49,7 @@ class IpInfo:
 class Device:
     """Simple container for device info"""
     def __init__(self):
+        # Neutral change that should not impact code coverage.
         self.mac = None
         self.host = None
         self.gateway = None
