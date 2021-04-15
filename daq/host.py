@@ -79,7 +79,6 @@ class ConnectedHost:
     _PORT_CONFIG = 'port_config.json'
     _BASE_CONFIG = 'base_config.json'
     _CONTROL_PATH = 'control/port-%s'
-    _CORE_TESTS = ['pass', 'fail', 'ping', 'hold']
     _AUX_DIR = 'aux/'
     _CONFIG_DIR = 'config/'
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
@@ -176,9 +175,8 @@ class ConnectedHost:
         return get_test_config(self._loaded_config, test)
 
     def _test_enabled(self, test):
-        fallback_config = {'enabled': test in self._CORE_TESTS}
-        test_config = self._get_test_config(test) or fallback_config
-        return test_config.get('enabled', True)
+        test_config = self._get_test_config(test) or {}
+        return test_config.get('enabled', False)
 
     def _get_test_timeout(self, test):
         if test == 'hold':

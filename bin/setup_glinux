@@ -3,7 +3,7 @@
 # gLinux specific setup 
 #
 #
-sudo apt remove docker-engine docker-runc docker-containerd
+sudo apt remove docker-engine docker-runc docker-containerd || true
 
 sudo glinux-add-repo docker-ce-"$(lsb_release -cs)"
 sudo apt update

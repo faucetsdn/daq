@@ -15,6 +15,7 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
 from device_report_client import DeviceReportClient
+from session_server import SessionServer
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
 import container_gateway
@@ -177,9 +178,9 @@ class DAQRunner:
         self._default_port_flap_timeout = int(config.get('port_flap_timeout_sec', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
-        logging_client = self.gcp.get_logging_client()
+        self._device_result_handler = self._init_device_result_handler()
         self.daq_run_id = self._init_daq_run_id()
-        self._device_result_client = self._init_device_result_client()
+        logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
@@ -211,13 +212,21 @@ class DAQRunner:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
 
-    def _init_device_result_client(self):
+    def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         if server_port:
+            egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
+            assert not egress_vlan, 'both egress_vlan and server_port defined'
             timeout = self.config['device_reporting'].get('rpc_timeout_sec')
-            if timeout:
-                return DeviceReportClient(server_port=server_port, rpc_timeout_sec=timeout)
-            return DeviceReportClient(server_port=server_port)
+            server_address = self.config.get('device_reporting', {}).get('server_address')
+            if server_address:
+                handler = DeviceReportClient(server_address=server_address,
+                                             server_port=server_port, rpc_timeout_sec=timeout)
+            else:
+                # TODO: Make this all configured form run_trigger not device_reporting
+                handler = SessionServer(server_port=server_port)
+            handler.start()
+            return handler
         return None
 
     def _send_heartbeat(self):
@@ -391,13 +400,13 @@ class DAQRunner:
         device.dhcp_mode = DhcpMode.EXTERNAL
 
         # For keeping track of remote port events
-        if self._device_result_client:
+        if self._device_result_handler:
             if not device.wait_remote:
                 LOGGER.info('Connecting device result client for %s', target_mac)
                 device.port = PortInfo()
                 device.port.active = True
                 device.wait_remote = True
-                self._device_result_client.get_port_events(
+                self._device_result_handler.connect(
                     device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
             self._target_set_trigger(device)
@@ -496,8 +505,8 @@ class DAQRunner:
     def _terminate(self):
         for device in self._devices.get_triggered_devices():
             self.target_set_error(device, DaqException('terminated'))
-        if self._device_result_client:
-            self._device_result_client.terminate()
+        if self._device_result_handler:
+            self._device_result_handler.terminate()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -940,7 +949,7 @@ class DAQRunner:
         return results
 
     def _send_device_result(self, mac, test_results):
-        if not self._device_result_client:
+        if not self._device_result_handler:
             return
 
         if test_results is None:
@@ -952,7 +961,7 @@ class DAQRunner:
             'Sending device result for device %s: %s',
             mac, PortBehavior.Behavior.Name(device_result))
         try:
-            self._device_result_client.send_device_result(mac, device_result)
+            self._device_result_handler.send_device_result(mac, device_result)
         except Exception as e:
             LOGGER.error("Failed to send device results for device %s: %s ", mac, e)
 

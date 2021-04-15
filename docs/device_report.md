@@ -69,7 +69,7 @@ Syntax: Pass / Fail / Skip
 |Required Pass for BACnet Devices|0|1|2|0|
 |Required Pass for IoT Devices|0|0|1|0|
 |Recommended Pass|0|0|2|0|
-|Other|0|0|4|2|
+|Other|1|0|4|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -95,6 +95,7 @@ Syntax: Pass / Fail / Skip
 |skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Connection|Required Pass|No local IP has been set, check system config|
 |skip|dns.network.hostname_resolution|DNS|Required Pass|Device did not send any DNS requests|
+|pass|dot1x.dot1x|Other|Other|Authentication for 9a:02:57:1e:8f:01 succeeded.|
 |pass|ntp.network.ntp_support|NTP|Required Pass|Using NTPv4.|
 |pass|ntp.network.ntp_update|NTP|Required Pass|Device clock synchronized.|
 |skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
@@ -118,6 +119,15 @@ Syntax: Pass / Fail / Skip
 
 
 ## Module pass
+
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module fail
 
 
 #### Module Config
@@ -167,6 +177,12 @@ See log above
 RESULT pass connection.base.target_ping target reached
 
 ```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
 
 ## Module nmap
 
@@ -655,6 +671,29 @@ dns.network.hostname_resolution
 Check device uses the DNS server from DHCP and resolves hostnames
 --------------------
 RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+
+## Module dot1x
+
+
+#### Report
+
+```
+--------------------
+dot1x.dot1x
+--------------------
+Dot1x authentication tests
+--------------------
+n/a
+--------------------
+RESULT pass dot1x.dot1x Authentication for 9a:02:57:1e:8f:01 succeeded.
+
 ```
 
 #### Module Config

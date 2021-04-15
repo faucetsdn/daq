@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+uname -a
+lsb_release -a
+
 ROOT=$(dirname $0)/..
 cd $ROOT
 

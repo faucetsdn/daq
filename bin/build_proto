@@ -18,7 +18,7 @@ if [ "$1" == check ]; then
     exit 0
 fi
 
-rm -rf build/ libs/proto $WEB_ROOT/protos.*
+rm -rf build/ daq/proto $WEB_ROOT/protos.*
 mkdir build
 
 sha1sum $proto_files > $WEB_ROOT/protos.hash
@@ -57,12 +57,13 @@ done
            $proto_files2
     sed -i'' -e 's/id="\./id="/' -e 's/href="#\./href="#/' protos.html
     sed -i'' -e 's/&lt;/</g' -e 's/&gt;/>/g' protos.html
+
+    python3 -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. $proto_files2
 )
 
-mkdir -p libs/proto/
+python3 -m grpc_tools.protoc -I usi/src/main/ --python_out=build/daq --grpc_python_out=build/daq usi/src/main/proto/usi.proto
 
-touch libs/proto/__init__.py
-cp build/daq/proto/*.py libs/proto/
+mkdir -p daq/proto
+touch daq/proto/__init__.py
+cp build/daq/proto/*.py daq/proto/
 cp build/protos.html $WEB_ROOT/
-
-python3 -m grpc_tools.protoc -I usi/src/main/ --python_out=libs/ --grpc_python_out=libs/ usi/src/main/proto/usi.proto

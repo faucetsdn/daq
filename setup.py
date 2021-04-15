@@ -31,7 +31,7 @@ export DAQ_SYS_UNAME=$(uname -a)
 
 export DAQ_DIR=`python3 -c 'import daq; import os; print(os.path.dirname(daq.__file__))'`
 source $DAQ_LIB/bin/config_base.sh
-python3 $DAQ_DIR/daq.py $conf_file $@
+python3 $DAQ_DIR/entry.py $conf_file $@
         """ % (";".join(get_files_mapping_env()), get_version())
         f.write(script)
     return os.path.join(tmp, 'daq')
@@ -49,7 +49,6 @@ def build_data_files(prefix, package_prefix):
 def build_source_files(tmp):
     shutil.rmtree(tmp, ignore_errors=True)
     shutil.copytree('daq', tmp, symlinks=True)
-    shutil.copytree('libs/proto', os.path.join(tmp, 'proto'), symlinks=True)
     shutil.copytree('faucet/clib', os.path.join(tmp, 'clib'), symlinks=True)
     return tmp
 
@@ -76,5 +75,6 @@ with tempfile.TemporaryDirectory(dir='.') as tmp:
             *build_data_files('usi', 'lib/daq/usi'),
             *build_data_files('config/modules', 'lib/daq/config/modules'),
             *build_data_files('config/system', 'lib/daq/config/system'),
+            *build_data_files('config/faucet', 'lib/daq/config/faucet'),
         ]
     )
