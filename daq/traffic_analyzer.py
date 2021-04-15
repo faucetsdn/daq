@@ -135,10 +135,10 @@ class TrafficAnalyzer:
 def parse_args(raw_args):
     """Parse sys args"""
     parser = argparse.ArgumentParser(description='Varz collector')
+    parser.add_argument('-f', '--faucet-config', type=str, default='inst/faucet.yaml',
+                        help='Faucet config file')
     parser.add_argument('device_specs', type=str, help='Device specs file')
     parser.add_argument('output_file', type=str, help='Output file for device rule counts')
-    parser.add_argument('faucet_config', type=str, default='inst/faucet.yaml',
-                        help='Faucet config file')
     return parser.parse_args(raw_args)
 
 def main():
