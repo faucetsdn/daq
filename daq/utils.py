@@ -41,6 +41,7 @@ def dict_proto(message, proto_func, ignore_unknown_fields=False):
 
 
 def write_pid_file(pid_file, logger=None):
+    """Write the PID of current process to file"""
     pid = os.getpid()
     if logger:
         logger.info('Writing pid %d to file %s', pid, pid_file)

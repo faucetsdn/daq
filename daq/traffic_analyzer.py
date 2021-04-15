@@ -42,9 +42,10 @@ class TrafficAnalyzer:
         self._device_placements = {}
         self._lock = threading.Lock()
         self._initialized = False
-        self._run = True
+        self._run = False
 
     def initialize(self):
+        """Initialize internal data"""
         self._reload_device_specs()
         self._initialized = True
 
@@ -55,6 +56,7 @@ class TrafficAnalyzer:
         threading.Thread(target=self._periodic_tasks, daemon=True).start()
 
     def stop(self):
+        """Stop periodic tasks"""
         self._run = False
 
     def get_device_rule_counts(self):
@@ -148,13 +150,14 @@ def parse_args(raw_args):
 
 
 def main():
+    """Entry point for standalone Traffic Analyzer"""
     args = parse_args(sys.argv[1:])
     logging.basicConfig(level='INFO')
     write_pid_file(PID_FILE, LOGGER)
     signal.signal(signal.SIGINT, signal.default_int_handler)
 
     logging.info(
-        'Initializing traffic analyzer with: %s, %s', args.device_specs, args.faucet_config)
+        'Initializing Traffic Analyzer with: %s, %s', args.device_specs, args.faucet_config)
 
     traffic_analyzer = TrafficAnalyzer(args.device_specs, args.faucet_config)
     traffic_analyzer.initialize()
