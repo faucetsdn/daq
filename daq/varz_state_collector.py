@@ -68,9 +68,9 @@ def parse_args(raw_args):
     parser = argparse.ArgumentParser(description='Varz collector')
     parser.add_argument('-a', '--address', type=str, default=DEFAULT_VARZ_ADDRESS,
                         help='Varz endpoint address')
-    parser.add_argument('-f', '--faucet-varz-port', type=str, default=DEFAULT_FAUCET_VARZ_PORT,
+    parser.add_argument('-f', '--faucet-varz-port', type=int, default=DEFAULT_FAUCET_VARZ_PORT,
                         help='Faucet varz port')
-    parser.add_argument('-g', '--gauge-varz-port', type=str, default=DEFAULT_GAUGE_VARZ_PORT,
+    parser.add_argument('-g', '--gauge-varz-port', type=int, default=DEFAULT_GAUGE_VARZ_PORT,
                         help='Gauge varz port')
     parser.add_argument('-l', '--label-matches', type=str,
                         help='Only output samples whose labels match specified key value pairs')

@@ -49,6 +49,7 @@ class IpInfo:
 class Device:
     """Simple container for device info"""
     def __init__(self):
+        # Neutral change that should not impact code coverage.
         self.mac = None
         self.host = None
         self.gateway = None
@@ -224,10 +225,18 @@ class DAQRunner:
                                              server_port=server_port, rpc_timeout_sec=timeout)
             else:
                 # TODO: Make this all configured form run_trigger not device_reporting
-                handler = SessionServer(server_port=server_port)
-            handler.start()
+                handler = SessionServer(on_session=self._on_session,
+                                        server_port=server_port)
             return handler
         return None
+
+    def _on_session(self, request):
+        with self._event_lock:
+            LOGGER.info('New session started for %s %s/%s',
+                        request.device_mac, request.device_vlan, request.assigned_vlan)
+            device = self._devices.create_if_absent(request.device_mac)
+            device.dhcp_mode = DhcpMode.EXTERNAL
+            self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
 
     def _send_heartbeat(self):
         message = {
@@ -268,6 +277,9 @@ class DAQRunner:
 
         LOGGER.info('Waiting for system to settle...')
         time.sleep(3)
+
+        if self._device_result_handler:
+            self._device_result_handler.start()
 
         LOGGER.debug('Done with initialization')
 
@@ -393,10 +405,7 @@ class DAQRunner:
 
     def _handle_device_learn(self, target_mac, vid):
         LOGGER.info('Learned %s on vid %s', target_mac, vid)
-        if not self._devices.get(target_mac):
-            device = self._devices.new_device(target_mac, vlan=vid)
-        else:
-            device = self._devices.get(target_mac)
+        device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
         # For keeping track of remote port events
@@ -419,17 +428,20 @@ class DAQRunner:
                 device.port.active = False
                 return
 
-            device.port.flapping_start = 0
-            device.port.active = True
+            self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
 
-            device.vlan = port_event.device_vlan
-            device.assigned = port_event.assigned_vlan
+    def _remote_trigger(self, device, device_vlan, assigned_vlan):
+        device.port.flapping_start = 0
+        device.port.active = True
 
-            LOGGER.info('Processing remote state %s %s/%s', device,
-                        device.vlan, device.assigned)
-            self._target_set_trigger(device, remote_trigger=True)
-            if device.gateway:
-                self._direct_device_traffic(device, device.gateway.port_set)
+        device.vlan = device_vlan
+        device.assigned = assigned_vlan
+
+        LOGGER.info('Processing remote state %s %s/%s', device,
+                    device.vlan, device.assigned)
+        self._target_set_trigger(device, remote_trigger=True)
+        if device.gateway:
+            self._direct_device_traffic(device, device.gateway.port_set)
 
     def _queue_callback(self, callback):
         with self._event_lock:
@@ -506,7 +518,7 @@ class DAQRunner:
         for device in self._devices.get_triggered_devices():
             self.target_set_error(device, DaqException('terminated'))
         if self._device_result_handler:
-            self._device_result_handler.terminate()
+            self._device_result_handler.stop()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls

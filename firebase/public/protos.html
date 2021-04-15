@@ -210,6 +210,10 @@
             <ul>
               
                 <li>
+                  <a href="#SessionEndpoint"><span class="badge">M</span>SessionEndpoint</a>
+                </li>
+              
+                <li>
                   <a href="#SessionParams"><span class="badge">M</span>SessionParams</a>
                 </li>
               
@@ -217,6 +221,14 @@
                   <a href="#SessionProgress"><span class="badge">M</span>SessionProgress</a>
                 </li>
               
+                <li>
+                  <a href="#SessionResult"><span class="badge">M</span>SessionResult</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#SessionResult.ResultCode"><span class="badge">E</span>SessionResult.ResultCode</a>
+                </li>
               
               
               
@@ -456,6 +468,37 @@
       <p></p>
 
       
+        <h3 id="SessionEndpoint">SessionEndpoint</h3>
+        <p>Session initialization params.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="SessionParams">SessionParams</h3>
         <p>Params for session initialization.</p>
 
@@ -469,6 +512,20 @@
                 <tr>
                   <td>device_mac</td>
                   <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>device_vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>assigned_vlan</td>
+                  <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -491,8 +548,39 @@
             <tbody>
               
                 <tr>
-                  <td>endpoint_ip</td>
-                  <td><a href="#string">string</a></td>
+                  <td>endpoint</td>
+                  <td><a href="#SessionEndpoint">SessionEndpoint</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>result</td>
+                  <td><a href="#SessionResult">SessionResult</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SessionResult">SessionResult</h3>
+        <p>Session result codes.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>code</td>
+                  <td><a href="#SessionResult.ResultCode">SessionResult.ResultCode</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -505,6 +593,47 @@
         
       
 
+      
+        <h3 id="SessionResult.ResultCode">SessionResult.ResultCode</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>PENDING</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>STARTED</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ERROR</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>PASSED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
       
 
       
