@@ -54,7 +54,7 @@ function test_acl_count {
     device_num=$1
     device_mac=9a:02:57:1e:8f:0$device_num
 
-    jq_filter=".device_mac_rules\"$device_mac\".rules | to_entries[] | select(.key|match(\"bacnet\").value[]"
+    jq_filter=".device_mac_rules.\"$device_mac\".rules | to_entries[] | select(.key|match(\"bacnet\")).value[]"
     packet_count=$(jq "$jq_filter" $rule_counts_file || true)
     echo device-$device_num $type $((packet_count > 2)) | tee -a $TEST_RESULTS
 }
@@ -77,9 +77,11 @@ function test_mud {
     device_specs_file="resources/device_specs/bacnet_$type.json"
     rule_counts_file=inst/device_rule_counts.json
 
-    cmd/run -k -s device_specs=$device_spces_file &
+    cmd/run -k -s device_specs=$device_specs_file &
+    sleep 60
+
     $PYTHON_CMD daq/traffic_analyzer.py $device_specs_file $rule_counts_file &
-    sleep 180
+    sleep 120
 
     echo result $type | tee -a $TEST_RESULTS
 
