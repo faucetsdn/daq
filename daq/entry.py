@@ -100,13 +100,6 @@ def _stripped_alt_logger(self, level, msg, *args, **kwargs):
         ALT_LOG._log(level, stripped, *args, **kwargs)
 
 
-def _write_pid_file():
-    pid = os.getpid()
-    LOGGER.info('pid is %d', pid)
-    with open(_PID_FILE, 'w') as pid_file:
-        pid_file.write(str(pid))
-
-
 def _execute():
     daq = DAQ(sys.argv)
     configurator.print_config(daq.config)
@@ -120,7 +113,7 @@ def _execute():
     if not daq.validate_config():
         return 1
 
-    _write_pid_file()
+    utils.write_pid_file(_PID_FILE, LOGGER)
 
     signal.signal(signal.SIGINT, signal.default_int_handler)
     signal.signal(signal.SIGTERM, signal.default_int_handler)

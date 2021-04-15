@@ -5,13 +5,15 @@ from __future__ import absolute_import
 import argparse
 import json
 import logging
+import os
+import signal
 import sys
 import threading
 import time
 
 from acl_state_collector import AclStateCollector
 import logger
-from utils import dict_proto, proto_dict
+from utils import dict_proto, proto_dict, write_pid_file
 from varz_state_collector import VarzStateCollector
 
 from proto.acl_counting_pb2 import DeviceRuleCounts
@@ -20,6 +22,7 @@ from faucet import config_parser
 from forch.proto.devices_state_pb2 import DevicePlacement
 
 LOGGER = logger.get_logger('ta')
+PID_FILE = 'inst/ta.pid'
 
 
 class TrafficAnalyzer:
@@ -143,9 +146,13 @@ def parse_args(raw_args):
     parser.add_argument('output_file', type=str, help='Output file for device rule counts')
     return parser.parse_args(raw_args)
 
+
 def main():
     args = parse_args(sys.argv[1:])
     logging.basicConfig(level='INFO')
+    write_pid_file(PID_FILE, LOGGER)
+
+    signal.signal(signal.SIGINT, signal.default_int_handler)
 
     logging.info(
         'Initializing traffic analyzer with: %s, %s', args.device_specs, args.faucet_config)
@@ -166,6 +173,7 @@ def main():
         logging.info('Keyboard interrupt. Exiting.')
 
     traffic_analyzer.stop()
+    os.remove(PID_FILE)
 
 
 if __name__ == '__main__':
