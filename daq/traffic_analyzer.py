@@ -151,7 +151,6 @@ def main():
     args = parse_args(sys.argv[1:])
     logging.basicConfig(level='INFO')
     write_pid_file(PID_FILE, LOGGER)
-
     signal.signal(signal.SIGINT, signal.default_int_handler)
 
     logging.info(
