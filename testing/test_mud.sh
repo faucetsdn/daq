@@ -22,7 +22,8 @@ cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
-echo 'include=../config/system/muddy.conf' > local/system.conf
+echo 'include=../config/system/muddy.conf
+switch_setup.varz_port=9302' > local/system.conf
 
 if [ -z `which tcpdump` ]; then
     export PATH=/usr/sbin:$PATH
