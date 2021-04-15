@@ -70,8 +70,9 @@ class TrafficAnalyzer:
 
         for mac, device_placement in self._device_placements.items():
             rule_counts_map = device_rule_counts.setdefault('device_mac_rules', {})
-            rule_counts_map[mac] = self._acl_state_collector.get_port_acl_count(
+            port_rule_counts = self._acl_state_collector.get_port_rule_counts(
                 device_placement.switch, device_placement.port, port_acl_metrics.samples)
+            rule_counts_map[mac] = proto_dict(port_rule_counts)
 
         return device_rule_counts
 
@@ -84,7 +85,7 @@ class TrafficAnalyzer:
         rule_count_metric = metrics.get(self._RULE_COUNT_METRIC)
 
         if not rule_count_metric:
-            error = 'No flow_packet_count_port_acl metric available'
+            error = f'No {self._RULE_COUNT_METRIC} metric available'
             return None, error
 
         return rule_count_metric, None
@@ -111,9 +112,9 @@ class TrafficAnalyzer:
         if not device_learning_metric:
             LOGGER.info('No devices are learned')
 
-        device_placements = {}
+        self._device_placements = {}
         for sample in device_learning_metric.samples:
-            if sample.labels.get('dp_name' != self._SEC_SWITCH):
+            if sample.labels.get('dp_name') != self._SEC_SWITCH:
                 continue
 
             mac = sample.labels.get('eth_src')
@@ -121,7 +122,7 @@ class TrafficAnalyzer:
                 continue
 
             port = int(sample.value)
-            device_placements[mac] = DevicePlacement(switch=self._SEC_SWITCH, port=port)
+            self._device_placements[mac] = DevicePlacement(switch=self._SEC_SWITCH, port=port)
 
     def _periodic_tasks(self):
         if not self._run:
@@ -148,15 +149,14 @@ def main():
 
     logging.info(
         'Initializing traffic analyzer with: %s, %s', args.device_specs, args.faucet_config)
+
     traffic_analyzer = TrafficAnalyzer(args.device_specs, args.faucet_config)
     traffic_analyzer.initialize()
     traffic_analyzer.start()
 
+    logging.info('Periodically saving device rule counts to file %s.', args.output_file)
+
     try:
-        time.sleep(10)
-        logging.info(
-            'Traffic analyzer started. Periodically saving device rule counts to file %s.',
-            args.output_file)
         while True:
             device_rule_counts = proto_dict(traffic_analyzer.get_device_rule_counts())
             with open(args.output_file, 'w') as file:
