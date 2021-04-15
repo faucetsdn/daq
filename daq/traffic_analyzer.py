@@ -48,7 +48,7 @@ class TrafficAnalyzer:
         """Start periodic tasks"""
         assert self._initialized
         self._run = True
-        threading.Thread(target=self._periodic_update_device_placements, daemon=True).start()
+        threading.Thread(target=self._periodic_tasks, daemon=True).start()
 
     def stop(self):
         self._run = False
@@ -112,10 +112,10 @@ class TrafficAnalyzer:
 
         device_placements = {}
         for sample in device_learning_metric.samples:
-            if sample.lables.get('dp_name' != self._SEC_SWITCH):
+            if sample.labels.get('dp_name' != self._SEC_SWITCH):
                 continue
 
-            mac = sample.lables.get('eth_src')
+            mac = sample.labels.get('eth_src')
             if mac not in self._duts:
                 continue
 
@@ -143,7 +143,9 @@ def parse_args(raw_args):
 
 def main():
     args = parse_args(sys.argv[1:])
-    traffic_analyzer = TrafficAnalyzer(args.device_spces, args.faucet_config)
+    LOGGER.info(
+        'Initializing traffic analyzer with: %s, %s', args.device_specs, args.faucet_config)
+    traffic_analyzer = TrafficAnalyzer(args.device_specs, args.faucet_config)
     traffic_analyzer.initialize()
     traffic_analyzer.start()
 
@@ -158,7 +160,7 @@ def main():
                 json.dump(device_rule_counts, file)
             time.sleep(30)
     except KeyboardInterrupt:
-        logger.info('Keyboard interrupt. Exiting.')
+        LOGGER.info('Keyboard interrupt. Exiting.')
 
     traffic_analyzer.stop()
 
