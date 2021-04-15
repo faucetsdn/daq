@@ -52,28 +52,32 @@ function test_acl_count {
     peer_num=$((3-device_num))
     device_mac=9a:02:57:1e:8f:0$device_num
     peer_mac=9a:02:57:1e:8f:0$peer_num
-    metric_output_file=inst/run-9a02571e8f0$device_num/metric_output.json
-    rule_filter=eth_src=$peer_mac,eth_dst=$device_mac,dp_name=sec
 
-    $PYTHON_CMD daq/varz_state_collector.py -y flow_packet_count_port_acl -o $metric_output_file -l $rule_filter
-
-    packet_count=$(jq '.gauge_metrics.flow_packet_count_port_acl.samples[0].value' $metric_output_file || true)
+    packet_count=$(jq ".device_mac_rules\"$device_mac\".bacnet" $rule_counts_file || true)
     echo device-$device_num $type $((packet_count > 2)) | tee -a $TEST_RESULTS
 }
 
-function terminate_daq {
-    daq_pid=$(<inst/daq.pid)
-    sudo kill -SIGINT $daq_pid
-    while [ -f inst/daq.pid ]; do
-        echo Waiting for DAQ to exit...
-        sleep 5
+function terminate_processes {
+    for process in daq ta; do
+        pid=$(<inst/$process.pid)
+        sudo kill -SIGINT $pid
+        while [ -f inst/$process.pid ]; do
+            echo Waiting for $process to exit...
+            sleep 5
+        done
     done
 }
 
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -k -s device_specs=resources/device_specs/bacnet_$type.json &
+    
+    device_specs_file="resources/device_specs/bacnet_$type.json"
+    rule_counts_file=inst/device_rule_counts.json
+
+    cmd/run -k -s device_specs=$device_spces_file &
+    $PYTHON_CMD daq/traffic_analyzer.py $device_specs_file $rule_counts_file &
+
     sleep 180
 
     echo result $type | tee -a $TEST_RESULTS
@@ -86,7 +90,7 @@ function test_mud {
 
     more inst/run-*/nodes/*/activate.log | cat
 
-    terminate_daq
+    terminate_processes
 }
 
 activate_venv
