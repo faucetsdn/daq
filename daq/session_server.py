@@ -117,7 +117,7 @@ class SessionServer:
 class TestingSessionServerClient:
     """Test-only client as a session server."""
 
-    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT)
+    def __init__(self, server_address=DEFAULT_SERVER_ADDRESS, server_port=DEFAULT_SERVER_PORT):
         address = f'{server_address}:{server_port}'
         channel = grpc.insecure_channel(address)
         self._stub = server_grpc.SessionServerStub(channel)
