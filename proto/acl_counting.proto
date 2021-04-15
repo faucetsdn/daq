@@ -9,7 +9,8 @@ syntax = "proto3";
 message DeviceRuleCounts {
   // List of Rule counts indexed by device MAC addresses
   map<string, RuleCounts> device_mac_rules = 1;
-  // error found when getting the rule counts for the devices
+
+  // error that is found when getting the rule counts for the devices
   string error = 2;
 }
 
@@ -19,7 +20,8 @@ message DeviceRuleCounts {
 message RuleCounts {
   // List of rule counts indexed by the descriptions of the rules
   map<string, RuleCount> rules = 1;
-  // errors found when analyzing the rule counts of a device
+
+  // errors that are found when analyzing the rule counts of a device
   repeated string errors = 2;
 }
 
