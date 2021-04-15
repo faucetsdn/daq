@@ -45,6 +45,7 @@ class FaucetTopology:
     _EXT_STACK = 'EXT_STACK'
     _OFPP_IN_PORT = 0xfffffff8
     _DOT1X_ETH_TYPE = 0x888e
+    _DEFAULT_GAUGE_VARZ_PORT = 9303
 
     def __init__(self, config):
         self.config = config
@@ -58,6 +59,7 @@ class FaucetTopology:
         self.ext_intf = switch_setup.get('data_intf')
         self._native_faucet = switch_setup.get('native')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
+        self._gauge_varz_port = int(switch_setup.get('varz_port_2', self._DEFAULT_GAUGE_VARZ_PORT))
         self._device_specs = self._load_device_specs()
         self._port_targets = {}
         self._set_devices = {}
@@ -336,7 +338,7 @@ class FaucetTopology:
         """Return Gauge config"""
         config = {
             'dbs': {
-                'prometheus': {'prometheus_port': 9303, 'type': 'prometheus'}
+                'prometheus': {'prometheus_port': self._gauge_varz_port, 'type': 'prometheus'}
             },
             'faucet_configs': ['/etc/faucet/faucet.yaml'],
             'watchers': {
