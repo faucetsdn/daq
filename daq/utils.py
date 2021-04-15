@@ -43,6 +43,6 @@ def dict_proto(message, proto_func, ignore_unknown_fields=False):
 def write_pid_file(pid_file, logger=None):
     pid = os.getpid()
     if logger:
-        logger.info('pid is %d', pid)
+        logger.info('Writing pid %d to file %s', pid, pid_file)
     with open(pid_file, 'w') as file:
         file.write(str(pid))
