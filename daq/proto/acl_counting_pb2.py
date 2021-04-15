@@ -19,29 +19,29 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1c\x64\x61q/proto/acl_counting.proto\"r\n\tAclCounts\x12(\n\x07\x64\x65vices\x18\x01 \x03(\x0b\x32\x17.AclCounts.DevicesEntry\x1a;\n\x0c\x44\x65vicesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1a\n\x05value\x18\x02 \x01(\x0b\x32\x0b.RuleCounts:\x02\x38\x01\"}\n\nRuleCounts\x12%\n\x05rules\x18\x01 \x03(\x0b\x32\x16.RuleCounts.RulesEntry\x12\x0e\n\x06\x65rrors\x18\x02 \x03(\t\x1a\x38\n\nRulesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.RuleCount:\x02\x38\x01\"!\n\tRuleCount\x12\x14\n\x0cpacket_count\x18\x01 \x01(\x05\x62\x06proto3'
+  serialized_pb=b'\n\x1c\x64\x61q/proto/acl_counting.proto\"\x97\x01\n\x10\x44\x65viceRuleCounts\x12?\n\x10\x64\x65vice_mac_rules\x18\x01 \x03(\x0b\x32%.DeviceRuleCounts.DeviceMacRulesEntry\x1a\x42\n\x13\x44\x65viceMacRulesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1a\n\x05value\x18\x02 \x01(\x0b\x32\x0b.RuleCounts:\x02\x38\x01\"}\n\nRuleCounts\x12%\n\x05rules\x18\x01 \x03(\x0b\x32\x16.RuleCounts.RulesEntry\x12\x0e\n\x06\x65rrors\x18\x02 \x03(\t\x1a\x38\n\nRulesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.RuleCount:\x02\x38\x01\"!\n\tRuleCount\x12\x14\n\x0cpacket_count\x18\x01 \x01(\x05\x62\x06proto3'
 )
 
 
 
 
-_ACLCOUNTS_DEVICESENTRY = _descriptor.Descriptor(
-  name='DevicesEntry',
-  full_name='AclCounts.DevicesEntry',
+_DEVICERULECOUNTS_DEVICEMACRULESENTRY = _descriptor.Descriptor(
+  name='DeviceMacRulesEntry',
+  full_name='DeviceRuleCounts.DeviceMacRulesEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='AclCounts.DevicesEntry.key', index=0,
+      name='key', full_name='DeviceRuleCounts.DeviceMacRulesEntry.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='AclCounts.DevicesEntry.value', index=1,
+      name='value', full_name='DeviceRuleCounts.DeviceMacRulesEntry.value', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -59,20 +59,20 @@ _ACLCOUNTS_DEVICESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=87,
-  serialized_end=146,
+  serialized_start=118,
+  serialized_end=184,
 )
 
-_ACLCOUNTS = _descriptor.Descriptor(
-  name='AclCounts',
-  full_name='AclCounts',
+_DEVICERULECOUNTS = _descriptor.Descriptor(
+  name='DeviceRuleCounts',
+  full_name='DeviceRuleCounts',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='devices', full_name='AclCounts.devices', index=0,
+      name='device_mac_rules', full_name='DeviceRuleCounts.device_mac_rules', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -81,7 +81,7 @@ _ACLCOUNTS = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_ACLCOUNTS_DEVICESENTRY, ],
+  nested_types=[_DEVICERULECOUNTS_DEVICEMACRULESENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -90,8 +90,8 @@ _ACLCOUNTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=32,
-  serialized_end=146,
+  serialized_start=33,
+  serialized_end=184,
 )
 
 
@@ -129,8 +129,8 @@ _RULECOUNTS_RULESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=217,
-  serialized_end=273,
+  serialized_start=255,
+  serialized_end=311,
 )
 
 _RULECOUNTS = _descriptor.Descriptor(
@@ -167,8 +167,8 @@ _RULECOUNTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=148,
-  serialized_end=273,
+  serialized_start=186,
+  serialized_end=311,
 )
 
 
@@ -199,35 +199,35 @@ _RULECOUNT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=275,
-  serialized_end=308,
+  serialized_start=313,
+  serialized_end=346,
 )
 
-_ACLCOUNTS_DEVICESENTRY.fields_by_name['value'].message_type = _RULECOUNTS
-_ACLCOUNTS_DEVICESENTRY.containing_type = _ACLCOUNTS
-_ACLCOUNTS.fields_by_name['devices'].message_type = _ACLCOUNTS_DEVICESENTRY
+_DEVICERULECOUNTS_DEVICEMACRULESENTRY.fields_by_name['value'].message_type = _RULECOUNTS
+_DEVICERULECOUNTS_DEVICEMACRULESENTRY.containing_type = _DEVICERULECOUNTS
+_DEVICERULECOUNTS.fields_by_name['device_mac_rules'].message_type = _DEVICERULECOUNTS_DEVICEMACRULESENTRY
 _RULECOUNTS_RULESENTRY.fields_by_name['value'].message_type = _RULECOUNT
 _RULECOUNTS_RULESENTRY.containing_type = _RULECOUNTS
 _RULECOUNTS.fields_by_name['rules'].message_type = _RULECOUNTS_RULESENTRY
-DESCRIPTOR.message_types_by_name['AclCounts'] = _ACLCOUNTS
+DESCRIPTOR.message_types_by_name['DeviceRuleCounts'] = _DEVICERULECOUNTS
 DESCRIPTOR.message_types_by_name['RuleCounts'] = _RULECOUNTS
 DESCRIPTOR.message_types_by_name['RuleCount'] = _RULECOUNT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-AclCounts = _reflection.GeneratedProtocolMessageType('AclCounts', (_message.Message,), {
+DeviceRuleCounts = _reflection.GeneratedProtocolMessageType('DeviceRuleCounts', (_message.Message,), {
 
-  'DevicesEntry' : _reflection.GeneratedProtocolMessageType('DevicesEntry', (_message.Message,), {
-    'DESCRIPTOR' : _ACLCOUNTS_DEVICESENTRY,
+  'DeviceMacRulesEntry' : _reflection.GeneratedProtocolMessageType('DeviceMacRulesEntry', (_message.Message,), {
+    'DESCRIPTOR' : _DEVICERULECOUNTS_DEVICEMACRULESENTRY,
     '__module__' : 'daq.proto.acl_counting_pb2'
-    # @@protoc_insertion_point(class_scope:AclCounts.DevicesEntry)
+    # @@protoc_insertion_point(class_scope:DeviceRuleCounts.DeviceMacRulesEntry)
     })
   ,
-  'DESCRIPTOR' : _ACLCOUNTS,
+  'DESCRIPTOR' : _DEVICERULECOUNTS,
   '__module__' : 'daq.proto.acl_counting_pb2'
-  # @@protoc_insertion_point(class_scope:AclCounts)
+  # @@protoc_insertion_point(class_scope:DeviceRuleCounts)
   })
-_sym_db.RegisterMessage(AclCounts)
-_sym_db.RegisterMessage(AclCounts.DevicesEntry)
+_sym_db.RegisterMessage(DeviceRuleCounts)
+_sym_db.RegisterMessage(DeviceRuleCounts.DeviceMacRulesEntry)
 
 RuleCounts = _reflection.GeneratedProtocolMessageType('RuleCounts', (_message.Message,), {
 
@@ -252,6 +252,6 @@ RuleCount = _reflection.GeneratedProtocolMessageType('RuleCount', (_message.Mess
 _sym_db.RegisterMessage(RuleCount)
 
 
-_ACLCOUNTS_DEVICESENTRY._options = None
+_DEVICERULECOUNTS_DEVICEMACRULESENTRY._options = None
 _RULECOUNTS_RULESENTRY._options = None
 # @@protoc_insertion_point(module_scope)
