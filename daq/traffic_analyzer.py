@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import argparse
 import json
+import logging
 import sys
 import threading
 import time
@@ -143,7 +144,9 @@ def parse_args(raw_args):
 
 def main():
     args = parse_args(sys.argv[1:])
-    LOGGER.info(
+    logging.basicConfig(level='INFO')
+
+    logging.info(
         'Initializing traffic analyzer with: %s, %s', args.device_specs, args.faucet_config)
     traffic_analyzer = TrafficAnalyzer(args.device_specs, args.faucet_config)
     traffic_analyzer.initialize()
@@ -151,7 +154,7 @@ def main():
 
     try:
         time.sleep(10)
-        LOGGER.info(
+        logging.info(
             'Traffic analyzer started. Periodically saving device rule counts to file %s.',
             args.output_file)
         while True:
@@ -160,7 +163,7 @@ def main():
                 json.dump(device_rule_counts, file)
             time.sleep(30)
     except KeyboardInterrupt:
-        LOGGER.info('Keyboard interrupt. Exiting.')
+        logging.info('Keyboard interrupt. Exiting.')
 
     traffic_analyzer.stop()
 
