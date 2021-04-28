@@ -4,7 +4,7 @@ from eap_module import EapModule
 from heartbeat_scheduler import HeartbeatScheduler
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
-from utils import get_logger, get_interface_name, get_interface_ip, get_interface_mac
+from utils import get_logger, get_interface_name, get_interface_ip, get_interface_mac, enable_debug_logs
 
 import json
 import threading
@@ -153,6 +153,7 @@ class Authenticator:
         self._idle_time = None
         self._max_retry_count = None
         self._current_timeout = None
+        self._debug = False
 
         self._setup()
 
@@ -160,6 +161,10 @@ class Authenticator:
         with open(self._config_file, 'r') as file_stream:
             full_config = json.load(file_stream)
         config = full_config.get('modules').get('dot1x')
+
+        self._debug = config.get('debug')
+        if self._debug:
+            enable_debug_logs(self.logger)
 
         self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
@@ -183,6 +188,10 @@ class Authenticator:
             self._radius_socket_info, self._radius_secret,
             self._radius_id, self.received_radius_response)
         self.eap_module = EapModule(self._interface, self.received_eap_request)
+
+        if self._debug:
+            enable_debug_logs(self.radius_module.logger)
+            enable_debug_logs(self.eap_module.logger)
 
         # TODO: Take value from config and then revert to default
         interval = self.HEARTBEAT_INTERVAL

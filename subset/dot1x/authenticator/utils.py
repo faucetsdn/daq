@@ -27,6 +27,13 @@ def get_logger(logname):
     return logger
 
 
+def enable_debug_logs(logger):
+    """Enable debug logs for logger"""
+    logger.setLevel(logging.DEBUG)
+    for handler in logger.handlers:
+        handler.setLevel(logging.DEBUG)
+
+
 def get_interface_name():
     """Get main interface name from test container"""
     return '%s-eth0' % socket.gethostname()
