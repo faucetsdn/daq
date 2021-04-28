@@ -1,5 +1,9 @@
 """Utility functions for DAQ"""
 
+from __future__ import absolute_import
+
+import os
+
 from google.protobuf import json_format
 import yaml
 
@@ -34,3 +38,12 @@ def proto_json(message):
 def dict_proto(message, proto_func, ignore_unknown_fields=False):
     """Convert a standard dict object to a proto object"""
     return json_format.ParseDict(message, proto_func(), ignore_unknown_fields)
+
+
+def write_pid_file(pid_file, logger=None):
+    """Write the PID of current process to file"""
+    pid = os.getpid()
+    if logger:
+        logger.info('Writing pid %d to file %s', pid, pid_file)
+    with open(pid_file, 'w') as file:
+        file.write(str(pid))

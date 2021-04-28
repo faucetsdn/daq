@@ -41,6 +41,11 @@ class AclStateCollector:
                     acl_config._id, rule_config.get('description'))
                 continue
 
+            rule_description = rule_config.get('description')
+            if not rule_description:
+                LOGGER.error('Rule with cookie %s does not have a description', cookie_num)
+                continue
+
             has_sample = False
             for sample in rule_samples:
                 if str(sample.labels.get('cookie')) != str(cookie_num):
@@ -49,14 +54,15 @@ class AclStateCollector:
                     continue
                 if int(sample.labels.get('in_port')) != port:
                     continue
-                rule_map = rules_map.setdefault(rule_config['description'], {})
+
+                rule_map = rules_map.setdefault(rule_description, {})
                 rule_map['packet_count'] = int(sample.value)
                 has_sample = True
                 break
 
             if not has_sample:
                 error = (f'No ACL metric sample available for switch, port, ACL, rule: '
-                         f'{switch}, {port}, {acl_config._id}, {rule_config["description"]} '
+                         f'{switch}, {port}, {acl_config._id}, {rule_description} '
                          f'(cookie={cookie_num})')
                 errors.append(error)
                 LOGGER.error(error)
