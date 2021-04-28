@@ -4,11 +4,11 @@ from eap_module import EapModule
 from heartbeat_scheduler import HeartbeatScheduler
 from radius_module import RadiusModule, RadiusPacketInfo, RadiusSocketInfo, port_id_to_int
 from message_parser import IdentityMessage, FailureMessage
-from utils import get_logger, get_interface_name, get_interface_ip, get_interface_mac, enable_debug_logs
 
 import json
 import threading
 import time
+import utils
 
 
 class AuthStateMachine:
@@ -24,7 +24,7 @@ class AuthStateMachine:
         self.state = None
         self._state_lock = threading.Lock()
         self._timer_lock = threading.RLock()
-        self.logger = get_logger('AuthSM')
+        self.logger = utils.get_logger('AuthSM')
         self.src_mac = src_mac
         self.eap_send_callback = eap_send_callback
         self.radius_send_callback = radius_send_callback
@@ -143,7 +143,7 @@ class Authenticator:
         self.results = {}
         self.eap_module = None
         self.radius_module = None
-        self.logger = get_logger('Authenticator')
+        self.logger = utils.get_logger('Authenticator')
         self._config_file = config_file
         self._threads = []
         self._radius_socket_info = None
@@ -164,23 +164,23 @@ class Authenticator:
 
         self._debug = config.get('debug')
         if self._debug:
-            enable_debug_logs(self.logger)
+            utils.enable_debug_logs(self.logger)
 
         self.logger.debug('Loaded config from %s:\n %s', self._config_file, config)
 
-        self._interface = config.get('interface', get_interface_name())
+        self._interface = config.get('interface', utils.get_interface_name())
 
         radius_config = config.get('radius_server', {})
         radius_socket_info = radius_config.get('radius_socket_info', {})
 
-        listen_ip = radius_socket_info.get('listen_ip', get_interface_ip(self._interface))
+        listen_ip = radius_socket_info.get('listen_ip', utils.get_interface_ip(self._interface))
         listen_port = radius_socket_info.get('listen_port', 0)
         remote_ip = radius_socket_info.get('remote_ip', '127.0.0.1')
         remote_port = radius_socket_info.get('remote_port', self.RADIUS_PORT)
 
         self._radius_socket_info = RadiusSocketInfo(listen_ip, listen_port, remote_ip, remote_port)
         self._radius_secret = radius_config.get('secret', 'SECRET')
-        self._radius_id = radius_config.get('id', get_interface_mac(self._interface))
+        self._radius_id = radius_config.get('id', utils.get_interface_mac(self._interface))
 
     def _setup(self):
         self._load_config()
@@ -190,8 +190,8 @@ class Authenticator:
         self.eap_module = EapModule(self._interface, self.received_eap_request)
 
         if self._debug:
-            enable_debug_logs(self.radius_module.logger)
-            enable_debug_logs(self.eap_module.logger)
+            utils.enable_debug_logs(self.radius_module.logger)
+            utils.enable_debug_logs(self.eap_module.logger)
 
         # TODO: Take value from config and then revert to default
         interval = self.HEARTBEAT_INTERVAL
