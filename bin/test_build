@@ -5,7 +5,7 @@ faux=faux1,faux2
 faucet=faucet,gauge
 base=test_bacnet,test_mudgee,test_brute,test_discover,usi,test_ipaddr
 # TODO: Enable test_password once ssl is fixed
-subset=test_switch,test_bacext,test_ssh,test_udmi,test_manual,test_network #,test_password
+subset=test_switch,test_bacext,test_udmi,test_manual,test_network #,test_password, test_ssh
 
 target_set=$1
 targets=${!target_set}
