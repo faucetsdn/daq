@@ -48,11 +48,11 @@
       "enabled": true
     },
     "password": {
-      "enabled": true,
+      "enabled": false,
       "timeout_sec": 0
     },
     "ssh": {
-      "enabled": true
+      "enabled": false
     },
     "dot1x": {
       "enabled": true
