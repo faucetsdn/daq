@@ -65,7 +65,7 @@
       }
     },
     "tls": {
-      "enabled": true,
+      "enabled": false,
       "timeout_sec": 0
     },
     "hold": {
