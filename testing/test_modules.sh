@@ -12,22 +12,23 @@ if [ -d venv ]; then
     source venv/bin/activate
 fi
 
-# TODO: Enable TLS tests once fixed
-# TLS_CONFIG_DIR=inst/modules/tls/config
-# echo Resolve module config to $TLS_CONFIG_DIR
-# mkdir -p $TLS_CONFIG_DIR
-# python3 daq/configurator.py --json \
-#    resources/test_site/site_config.json > $TLS_CONFIG_DIR/module_config.json
+TLS_CONFIG_DIR=inst/modules/tls/config
+echo Resolve module config to $TLS_CONFIG_DIR
+mkdir -p $TLS_CONFIG_DIR
+python3 daq/configurator.py --json \
+    resources/test_site/site_config.json > $TLS_CONFIG_DIR/module_config.json
 
-# TEST_LIST=/tmp/module_tests.txt
+TEST_LIST=/tmp/module_tests.txt
+# TODO: Enable TLS tests once fixed
 # cat > $TEST_LIST <<EOF
 # tls alt
 # tls alt tls
 # tls alt expiredtls
-# ssh
-# ssh ssh
-# ssh sshv1
-# EOF
+cat > $TEST_LIST <<EOF
+ssh
+ssh ssh
+ssh sshv1
+EOF
 
 DAQ_TARGETS=aardvark,aardvark2,faux1,faux2 cmd/build missing inline
 
