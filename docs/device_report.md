@@ -109,6 +109,11 @@ Syntax: Pass / Fail / Skip
 |skip|security.password.ssh|Security|Required Pass|Port 22 not open on target device.|
 |skip|security.password.telnet|Security|Required Pass|Port 23 not open on target device.|
 |gone|security.ssh.version|Security|Required Pass||
+|gone|security.tls.v1_2_client|Security|Required Pass||
+|gone|security.tls.v1_2_server|Security|Required Pass||
+|gone|security.tls.v1_3_client|Security|Recommended Pass||
+|gone|security.tls.v1_3_server|Security|Recommended Pass||
+|gone|security.tls.v1_server|Security|Required Pass||
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
