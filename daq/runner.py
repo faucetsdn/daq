@@ -248,6 +248,14 @@ class DAQRunner:
         }
         message.update(self.get_run_info())
         self.gcp.publish_message('daq_runner', 'heartbeat', message)
+        self._send_device_heartbeats()
+
+    def _send_device_heartbeats(self):
+        LOGGER.info('TAP Sending %s device heartbeats', len(self._devices.get_all_devices()))
+        for device in self._devices.get_all_devices():
+            LOGGER.info('TAP Sending device heartbeat %s', device.mac)
+            self._device_result_handler.send_device_result(device.mac, PortBehavior.unknown)
+
 
     def get_run_info(self):
         """Return basic run info dict"""
@@ -463,6 +471,7 @@ class DAQRunner:
     def _handle_system_idle(self):
         with self._event_lock:
             self._handle_system_idle_raw()
+            self._send_heartbeat()
 
     def _handle_system_idle_raw(self):
         # Some synthetic faucet events don't come in on the socket, so process them here.

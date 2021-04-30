@@ -26,6 +26,7 @@ DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 
 
 SESSION_DEVICE_RESULT = {
+    PortBehavior.unknown: SessionResult.ResultCode.PENDING,
     PortBehavior.authenticated: SessionResult.ResultCode.STARTED,
     PortBehavior.failed: SessionResult.ResultCode.FAILED,
     PortBehavior.passed: SessionResult.ResultCode.PASSED
@@ -74,6 +75,8 @@ class SessionServer:
 
     def send_device_result(self, mac, device_result):
         """Connect to remote endpoint"""
+        if mac not in self._return_queues:
+            return
         LOGGER.info('Send device result %s %s', mac, PortBehavior.Behavior.Name(device_result))
         result = SessionResult(code=SESSION_DEVICE_RESULT[device_result])
         self._send_reply(mac, SessionProgress(result=result))
@@ -101,6 +104,7 @@ class SessionServer:
     def _session_stream(self, request):
         device_mac = request.device_mac
         while True:
+            LOGGER.info('TAP Item loop %s', device_mac)
             item = self._return_queues[device_mac].get()
             if item is False:
                 break
