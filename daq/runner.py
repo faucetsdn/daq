@@ -224,7 +224,7 @@ class DAQRunner:
                 handler = DeviceReportClient(server_address=server_address,
                                              server_port=server_port, rpc_timeout_sec=timeout)
             else:
-                # TODO: Make this all configured form run_trigger not device_reporting
+                # TODO: Make this all configured from run_trigger not device_reporting
                 handler = SessionServer(on_session=self._on_session,
                                         server_port=server_port)
             return handler
@@ -248,14 +248,8 @@ class DAQRunner:
         }
         message.update(self.get_run_info())
         self.gcp.publish_message('daq_runner', 'heartbeat', message)
-        self._send_device_heartbeats()
-
-    def _send_device_heartbeats(self):
-        LOGGER.info('TAP Sending %s device heartbeats', len(self._devices.get_all_devices()))
-        for device in self._devices.get_all_devices():
-            LOGGER.info('TAP Sending device heartbeat %s', device.mac)
-            self._device_result_handler.send_device_result(device.mac, PortBehavior.unknown)
-
+        if self._device_result_handler:
+            self._device_result_handler.send_device_heartbeats()
 
     def get_run_info(self):
         """Return basic run info dict"""
@@ -379,7 +373,6 @@ class DAQRunner:
             device = self._devices.get_by_port_info(port_info)
             if device and device.host and not port_info.flapping_start:
                 port_info.flapping_start = time.time()
-                LOGGER.info('Device %s flapping state', device.mac)
             if port_info.active:
                 if device and not port_info.flapping_start:
                     self._direct_port_traffic(device, port, None)
@@ -392,7 +385,6 @@ class DAQRunner:
             self._ports[port].port_no = port
         port_info = self._ports[port]
         port_info.flapping_start = 0
-        LOGGER.info('Port %s flapping clear', port)
         port_info.active = True
 
     def _is_port_active(self, port):
@@ -434,7 +426,6 @@ class DAQRunner:
         with self._event_lock:
             if port_event.state == PortBehavior.PortState.down:
                 if not device.port.flapping_start:
-                    LOGGER.info('Device %s flapping remote', device.mac)
                     device.port.flapping_start = time.time()
                 device.port.active = False
                 return
@@ -444,7 +435,6 @@ class DAQRunner:
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
         device.port.flapping_start = 0
         device.port.active = True
-        LOGGER.info('Device %s flapping trigger', device.mac)
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
@@ -510,8 +500,6 @@ class DAQRunner:
                 exception = DaqException('port not active for %ds' % timeout_sec)
                 self.target_set_error(device, exception)
                 device.port.flapping_start = 0
-                LOGGER.info('Device %s flapping reset', device.mac)
-
 
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
