@@ -77,7 +77,6 @@ class SessionServer:
 
     def connect(self, mac, callback):
         """Connect to remote endpoint"""
-        LOGGER.info('Registering done callback for %s', mac)
         self._done_callbacks[mac] = callback
 
     def send_device_result(self, mac, device_result):
@@ -133,6 +132,7 @@ class SessionServer:
 
     def send_device_heartbeats(self):
         """Send PRC heartbeats to all devices"""
+        # TODO: Replace this with proper grpc.aio state-change callback to detect disconnect.
         disconnects = []
         with self._lock:
             for device_mac in self._return_queues:
