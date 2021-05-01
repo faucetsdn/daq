@@ -148,7 +148,8 @@ done
 
 # Add the RESULT lines from all aux test report files.
 capture_test_results bacext
-capture_test_results tls
+# TODO: Capture TLS results once tests are enabled
+# capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
