@@ -132,8 +132,9 @@ class SessionServer:
         self._server.stop(grace=None)
 
     def send_device_heartbeats(self):
+        """Send PRC heartbeats to all devices"""
         with self._lock:
-            for device_mac in self._return_queues.keys():
+            for device_mac in self._return_queues:
                 delta = time.time() - self._last_streamed[device_mac]
                 if delta < self._disconnect_timeout_sec:
                     self._send_reply(device_mac, SessionProgress())
