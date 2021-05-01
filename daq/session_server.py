@@ -133,6 +133,7 @@ class SessionServer:
 
     def send_device_heartbeats(self):
         """Send PRC heartbeats to all devices"""
+        disconnects = []
         with self._lock:
             for device_mac in self._return_queues:
                 delta = time.time() - self._last_streamed[device_mac]
@@ -140,9 +141,11 @@ class SessionServer:
                     self._send_reply(device_mac, SessionProgress())
                 else:
                     LOGGER.warning('Disconnect timeout for %s after %s', device_mac, delta)
-                    port_event = DevicePortEvent(state=PortBehavior.PortState.down)
-                    self._done_callbacks[device_mac](port_event)
-                    self._reap_session(device_mac)
+                    disconnects.append(device_mac)
+            for device_mac in disconnects:
+                port_event = DevicePortEvent(state=PortBehavior.PortState.down)
+                self._done_callbacks[device_mac](port_event)
+                self._reap_session(device_mac)
 
 
 class TestingSessionServerClient:
