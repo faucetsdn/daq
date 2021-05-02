@@ -215,11 +215,13 @@ class DAQRunner:
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
+        egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
+        server_address = self.config.get('device_reporting', {}).get('server_address')
+        LOGGER.info('Device result handler configuration %s:%s %s',
+                    server_port, server_address, egress_vlan)
         if server_port:
-            egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             timeout = self.config['device_reporting'].get('rpc_timeout_sec')
-            server_address = self.config.get('device_reporting', {}).get('server_address')
             if server_address:
                 handler = DeviceReportClient(server_address=server_address,
                                              server_port=server_port, rpc_timeout_sec=timeout)
