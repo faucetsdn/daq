@@ -157,7 +157,7 @@ class DAQRunner:
         self._devices = Devices()
         self._ports = {}
         self._callback_queue = []
-        self._event_lock = threading.Lock()
+        self._event_lock = threading.RLock()
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
@@ -215,16 +215,18 @@ class DAQRunner:
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
+        egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
+        server_address = self.config.get('device_reporting', {}).get('server_address')
+        LOGGER.info('Device result handler configuration %s:%s %s',
+                    server_port, server_address, egress_vlan)
         if server_port:
-            egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             timeout = self.config['device_reporting'].get('rpc_timeout_sec')
-            server_address = self.config.get('device_reporting', {}).get('server_address')
             if server_address:
                 handler = DeviceReportClient(server_address=server_address,
                                              server_port=server_port, rpc_timeout_sec=timeout)
             else:
-                # TODO: Make this all configured form run_trigger not device_reporting
+                # TODO: Make this all configured from run_trigger not device_reporting
                 handler = SessionServer(on_session=self._on_session,
                                         server_port=server_port)
             return handler
@@ -248,6 +250,8 @@ class DAQRunner:
         }
         message.update(self.get_run_info())
         self.gcp.publish_message('daq_runner', 'heartbeat', message)
+        if self._device_result_handler:
+            self._device_result_handler.send_device_heartbeats()
 
     def get_run_info(self):
         """Return basic run info dict"""
@@ -459,6 +463,7 @@ class DAQRunner:
     def _handle_system_idle(self):
         with self._event_lock:
             self._handle_system_idle_raw()
+            self._send_heartbeat()
 
     def _handle_system_idle_raw(self):
         # Some synthetic faucet events don't come in on the socket, so process them here.

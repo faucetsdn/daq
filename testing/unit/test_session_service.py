@@ -14,12 +14,16 @@ class SessionServerTest(unittest.TestCase):
     """Test basic session server operation"""
 
     def setUp(self):
+        self._server_results = []
         self._server = SessionServer(self._new_connection)
         self._server.start()
-        self._server_results = []
+        self._server.connect(TEST_MAC_ADDRESS, self._callback)
 
     def tearDown(self):
         self._server.stop()
+
+    def _callback(self, port_event):
+        pass
 
     def _new_connection(self, result):
         print('receive result')

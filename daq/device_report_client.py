@@ -56,3 +56,6 @@ class DeviceReportClient:
         """Terminates all onging grpc calls"""
         for handler in self._active_requests:
             handler()
+
+    def send_device_heartbeats(self):
+        """Null function for sending device heartbeats"""
