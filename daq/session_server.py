@@ -112,8 +112,8 @@ class SessionServer:
     def _session_stream(self, request):
         device_mac = request.device_mac
         while True:
-            self._last_streamed[device_mac] = time.time()
             item = self._return_queues[device_mac].get()
+            self._last_streamed[device_mac] = time.time()
             if item is False:
                 break
             yield item
