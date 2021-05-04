@@ -101,6 +101,7 @@ class TestNetwork:
         return self.switch_links[host].intf2
 
     def _switch_attach(self, switch, intf):
+        LOGGER.info('TAP Switch attach %s %s %s', intf, switch.shell, switch.waiting)
         switch.attach(intf)
         # This really should be done in attach, but currently only automatic on switch startup.
         switch.vsctl(switch.intfOpts(intf))
