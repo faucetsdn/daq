@@ -126,6 +126,7 @@ class ConnectedHost:
         self.reload_config()
         assert self._loaded_config, 'config was not loaded'
         self._write_module_config(self._loaded_config, self._device_aux_path())
+        self.logger.info('Loaded config %s', self._loaded_config)
         self.remaining_tests = self._get_enabled_tests()
         self.logger.info('Host %s running with enabled tests %s', self.target_mac,
                          self.remaining_tests)
@@ -370,7 +371,7 @@ class ConnectedHost:
         self.record_result('acquire', state=MODE.EXEC)
         static_ip = self._get_static_ip()
         if static_ip:
-            self.logger.info('Target device %s using static ip', self)
+            self.logger.info('Target device %s using ip mode static', self)
             self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
@@ -386,7 +387,7 @@ class ConnectedHost:
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
                 if self.device.dhcp_mode == DhcpMode.LONG_RESPONSE else 0
-            self.logger.info('Target device %s using %s DHCP mode, wait %s',
+            self.logger.info('Target device %s ip mode %s, wait %s',
                              self, DhcpMode.Name(self.device.dhcp_mode), wait_time)
             if self.device.dhcp_mode != DhcpMode.EXTERNAL:
                 self.gateway.change_dhcp_response_time(self.target_mac, wait_time)

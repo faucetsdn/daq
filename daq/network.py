@@ -100,8 +100,15 @@ class TestNetwork:
         """Get the internal link interface for this host"""
         return self.switch_links[host].intf2
 
+
     def _switch_attach(self, switch, intf):
-        switch.attach(intf)
+        while True:
+            try:
+                switch.attach(intf)
+                break
+            except Exception as e:
+                LOGGER.info('TAPTAP Switch failure %s %s %s', switch, bool(switch.shell), switch.waiting)
+                time.sleep(10)
         # This really should be done in attach, but currently only automatic on switch startup.
         switch.vsctl(switch.intfOpts(intf))
 

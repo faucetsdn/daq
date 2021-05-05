@@ -185,9 +185,11 @@ class BaseGateway(ABC):
             self.name, self.targets)
         LOGGER.info('Terminating gateway %d/%s', self.port_set, self.name)
         if self.dhcp_monitor:
+            LOGGER.info('Cleanup dhcp_monitor')
             self.dhcp_monitor.cleanup()
         if self.host:
             try:
+                LOGGER.info('Terminate host')
                 self.host.terminate()
                 self.runner.remove_host(self.host)
                 self.host = None
@@ -196,12 +198,14 @@ class BaseGateway(ABC):
                 LOGGER.exception(e)
         if self.dummy:
             try:
+                LOGGER.info('Terminate dummy')
                 self.dummy.terminate()
                 self.runner.remove_host(self.dummy)
                 self.dummy = None
             except Exception as e:
                 LOGGER.error('Gateway %s terminating dummy: %s', self.name, e)
                 LOGGER.exception(e)
+        LOGGER.info('All done')
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)
