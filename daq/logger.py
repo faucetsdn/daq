@@ -26,6 +26,7 @@ def set_stackdriver_client(client, labels=None):
             logger.addHandler(stackdriver_handler)
     set_stackdriver_client.stackdriver_handler = stackdriver_handler
 
+
 def get_file_handler():
     if not get_file_handler.log_handler:
         log_file_path = os.getenv('DAQ_LOG', _DEFAULT_LOG_FILE)
@@ -33,16 +34,18 @@ def get_file_handler():
         get_file_handler.log_handler = WatchedFileHandler(log_file_path)
     return get_file_handler.log_handler
 
+
 def get_logger(name=None):
     """Gets the named logger"""
     if name not in LOGGERS:
         LOGGERS[name] = logging.getLogger(name)
-        if not name: # Root logger
+        if not name:  # Root logger
             LOGGERS[name].addHandler(get_file_handler())
             LOGGERS[name].addHandler(logging.StreamHandler(sys.stdout))
         if name and set_stackdriver_client.stackdriver_handler:
-                LOGGERS[name].addHandler(set_stackdriver_client.stackdriver_handler)
+            LOGGERS[name].addHandler(set_stackdriver_client.stackdriver_handler)
     return LOGGERS[name]
+
 
 def set_config(level='info', fmt=None, datefmt=None):
     """Sets config for all loggers"""
