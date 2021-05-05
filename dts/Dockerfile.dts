@@ -26,13 +26,16 @@ COPY bin/ bin/
 COPY faucet/ faucet/
 RUN bin/install_faucet && rm -rf faucet/.git
 
+COPY forch/ forch/
+
 COPY etc/ etc/
 RUN bin/setup_dev simple && rm -rf daq/.git
 
 COPY daq/ daq/
 COPY cmd/ cmd/
 COPY config/ config/
-COPY dts/base_config.yaml bin/
-COPY dts/service_start bin/
+COPY resources/ resources/
+COPY dts/start_service bin/
+COPY subset/pentests subset/pentests
 
-CMD ["bin/service_start"]
+CMD ["bin/start_service"]
