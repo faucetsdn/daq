@@ -143,10 +143,10 @@ class TestNetwork:
                 if host1.waiting:
                     LOGGER.info('TAPTAP List pre-failure %s', host1)
                 link = self.net.addLink(host1, host2, port1=port1, port2=port2, fast=fast)
-                LOGGER.info('Added link %s <-> %s', link.intf1.name, link.intf2.name)
+                LOGGER.info('Added link %s %s:%s', host1, link.intf1.name, link.intf2.name)
                 break
             except Exception as e:
-                LOGGER.info('TAPTAP Link failure %s %s %s', link, host1.waiting)
+                LOGGER.info('TAPTAP Link failure %s %s', host1, host1.waiting)
                 time.sleep(10)
         return link
 
