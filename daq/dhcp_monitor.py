@@ -86,12 +86,16 @@ class DhcpMonitor:
     def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
         if self.dhcp_log:
+            LOGGER.info('Close log')
             self.dhcp_log.close()
             self.dhcp_log = None
         if self.dhcp_traffic:
+            LOGGER.info('Forget monitor')
             self.runner.monitor_forget(self.dhcp_traffic.stream())
+            LOGGER.info('Terminate traffic')
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
+        LOGGER.info('Done with cleanup')
 
     def _dhcp_complete(self, dhcp_type):
         if dhcp_type not in ('ACK', 'Offer'):
