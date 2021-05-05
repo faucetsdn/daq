@@ -41,19 +41,18 @@ echo Global IP addresses:
 ip addr | fgrep inet | fgrep 'scope global'
 
 # User might already exist if docker restarted.
-echo "kronkiteman::$USERID:$USERID::/:bin/bash" >> /etc/passwd
+#echo "kronkiteman::$USERID:$USERID::/:bin/bash" >> /etc/passwd
 
 # Clean up some permissions that are necessary for operation.
 mkdir -p $DAQ_ROOT/inst
-chmod a+rx $ROOT
-chown kronkiteman -R $DAQ_ROOT
+#chmod a+rx $ROOT
+#chown kronkiteman -R $DAQ_ROOT
 
 # Prepare for the daq faucet instance.
 cp /etc/faucet/ryu.conf $DAQ_ROOT/inst/
 echo > $DYNAMIC_CONFIG
 
-sudo -u kronkiteman \
-    FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK \
+FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK \
     FAUCET_EVENT_SOCK_HEARTBEAT=$FAUCET_EVENT_SOCK_HEARTBEAT \
     FAUCET_CONFIG_STAT_RELOAD=$FAUCET_CONFIG_STAT_RELOAD \
     FAUCET_CONFIG=$FAUCET_CONFIG \
@@ -66,11 +65,10 @@ echo Configuring for vxlan ip $VXLAN_IP
 echo switch_setup.vxlan.key=cntrl_tap >> $DYNAMIC_CONFIG
 echo switch_setup.vxlan.remote_ip=$VXLAN_IP >> $DYNAMIC_CONFIG
 
-echo Starting daq, output in daq/inst/cmdrun.log
-sudo \
-    PYTHONPATH=$PYTHONPATH \
+echo Starting daq, output in $DAQ_ROOT/inst/cmdrun.log
+PYTHONPATH=$PYTHONPATH \
     PATH=$DAQ_ROOT/mininet:$PATH \
     FAUCET_EVENT_SOCK=$DAQ_EVENT_SOCK \
     $DAQ_ROOT/cmd/start $BASE_CONFIG $DYNAMIC_CONFIG -k $no_test > $DAQ_ROOT/inst/cmdrun.log 2>&1 &
 
-tail -f $DAQ_ROOT/inst/cmdrun.log
+tail --tail -f $DAQ_ROOT/inst/cmdrun.log

@@ -16,3 +16,6 @@ spec:
       - name: hello
         image: "docker.io/daqf/dts"
         imagePullPolicy: Always
+        resources:
+          requests:
+            memory: 101Mi
