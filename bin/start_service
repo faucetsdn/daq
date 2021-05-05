@@ -1,5 +1,0 @@
-#!/bin/bash -e
-
-echo Hello.
-
-tail -f /dev/null
