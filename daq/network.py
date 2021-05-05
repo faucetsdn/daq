@@ -101,10 +101,14 @@ class TestNetwork:
         return self.switch_links[host].intf2
 
     def _switch_attach(self, switch, intf):
-        LOGGER.info('TAP Switch attach %s %s %s', intf, switch.shell, switch.waiting)
+        LOGGER.info('TAP Switch attach1 %s %s %s', intf, switch.shell, switch.waiting)
+        switch.waitOutput()
+        LOGGER.info('TAP Switch attach2 %s %s %s', intf, switch.shell, switch.waiting)
         switch.attach(intf)
         # This really should be done in attach, but currently only automatic on switch startup.
+        LOGGER.info('TAP Switch attach3 %s %s %s', intf, switch.shell, switch.waiting)
         switch.vsctl(switch.intfOpts(intf))
+        LOGGER.info('TAP Switch attach4 %s %s %s', intf, switch.shell, switch.waiting)
 
     def _switch_del_intf(self, switch, intf):
         del switch.intfs[switch.ports[intf]]
