@@ -18,6 +18,7 @@ from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import gcp
 import logger
 LOGGER = logger.get_logger('report')
+REPORT_BASE_DIR = os.path.join(DAQ_RUN_DIR, "reports")
 
 class ResultType(Enum):
     """Enum for all test module info"""
@@ -80,7 +81,7 @@ class ReportGenerator:
     _INDEX_FAIL = 1
     _INDEX_SKIP = 2
 
-    def __init__(self, config, tmp_base, target_mac, module_config):
+    def __init__(self, config, target_mac, module_config):
         self._config = config
         self._module_config = copy.deepcopy(module_config)
         self._repitems = {}
@@ -89,13 +90,12 @@ class ReportGenerator:
         self._start_time = datetime.datetime.now(pytz.utc).replace(microsecond=0)
         report_mark = self._start_time.isoformat().replace(':', '').replace('+0000', '')
         self._report_name = self._NAME_FORMAT % (self._clean_mac, report_mark)
-        self._report_base = os.path.join(tmp_base, 'reports')
-        if not os.path.isdir(self._report_base):
-            os.makedirs(self._report_base)
-        self._report_prefix = os.path.join(self._report_base, self._report_name)
+        if not os.path.isdir(REPORT_BASE_DIR):
+            os.makedirs(REPORT_BASE_DIR)
+        self._report_prefix = os.path.join(REPORT_BASE_DIR, self._report_name)
         LOGGER.info('Writing report to %s.*', self._report_prefix)
 
-        out_base = config.get('site_path', tmp_base)
+        out_base = config.get('site_path', DAQ_RUN_DIR)
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
         self._alt_path = out_path if os.path.isdir(out_path) else None
         self._alt_prefix = os.path.join(out_path, self._SIMPLE_REPORT) if out_path else None
