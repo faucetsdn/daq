@@ -73,7 +73,7 @@ class SessionServer:
 
     def start(self):
         """Start the server"""
-        LOGGER.info('Starting on bind address %s', self._address)
+        LOGGER.info('Listening on bind address %s', self._address)
         self._server.start()
 
     def connect(self, mac, callback):
