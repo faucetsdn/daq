@@ -1,4 +1,4 @@
-"""DHCP monitor/startup"""
+"""Encapsulate DHCP monitor/startup"""
 
 import re
 import time
@@ -83,25 +83,15 @@ class DhcpMonitor:
             else:
                 LOGGER.info('Unknown dhcp match: %s', dhcp_line.strip())
 
-    def _logflush(self):
-        for x in range(1, 20):
-            LOGGER.info('Flush %d', x)
-
     def cleanup(self):
         """Cleanup any ongoing dhcp activity"""
         if self.dhcp_log:
-            LOGGER.info('Close log')
             self.dhcp_log.close()
             self.dhcp_log = None
         if self.dhcp_traffic:
-            LOGGER.info('Forget monitor')
             self.runner.monitor_forget(self.dhcp_traffic.stream())
-            LOGGER.info('Terminate traffic')
-            self._logflush()
             self.dhcp_traffic.terminate()
             self.dhcp_traffic = None
-        LOGGER.info('Done with cleanup')
-        self._logflush()
 
     def _dhcp_complete(self, dhcp_type):
         if dhcp_type not in ('ACK', 'Offer'):

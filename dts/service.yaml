@@ -5,11 +5,11 @@ metadata:
   annotations:
     networking.gke.io/load-balancer-type: "Internal"
   labels:
-    app: hello
+    app: ilb-internal
 spec:
   type: LoadBalancer
   selector:
-    app: hello
+    app: ilb-internal
   ports:
   - port: 80
     targetPort: 8080

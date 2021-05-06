@@ -86,7 +86,7 @@ class TestNetwork:
         host = self.net.addHost(name, cls, **params)
         try:
             LOGGER.debug('Created host %s with pid %s/%s', name, host.pid, host.shell.pid)
-            switch_link = self._net_add_link(self.pri, host, port1=port, fast=False)
+            switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
             self.switch_links[host] = switch_link
             if self.net.built:
                 host.configDefault()
@@ -100,17 +100,8 @@ class TestNetwork:
         """Get the internal link interface for this host"""
         return self.switch_links[host].intf2
 
-
     def _switch_attach(self, switch, intf):
-        while True:
-            try:
-                if switch.waiting:
-                    LOGGER.info('TAPTAP Switch pre-failure %s', switch)
-                switch.attach(intf)
-                break
-            except Exception as e:
-                LOGGER.info('TAPTAP Switch failure %s %s %s', switch, bool(switch.shell), switch.waiting)
-                time.sleep(10)
+        switch.attach(intf)
         # This really should be done in attach, but currently only automatic on switch startup.
         switch.vsctl(switch.intfOpts(intf))
 
@@ -137,19 +128,6 @@ class TestNetwork:
         """Gets the internal mininet subnet"""
         return copy.copy(self._mininet_subnet)
 
-    def _net_add_link(self, host1, host2, port1=None, port2=None, fast=False):
-        while True:
-            try:
-                if host1.waiting:
-                    LOGGER.info('TAPTAP List pre-failure %s', host1)
-                link = self.net.addLink(host1, host2, port1=port1, port2=port2, fast=fast)
-                LOGGER.info('Added link %s %s:%s', host1, link.intf1.name, link.intf2.name)
-                break
-            except Exception as e:
-                LOGGER.info('TAPTAP Link failure %s %s', host1, host1.waiting)
-                time.sleep(10)
-        return link
-
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
@@ -162,8 +140,9 @@ class TestNetwork:
             LOGGER.info('Creating ovs sec with dpid/port %s/%d', self.sec_dpid, self.sec_port)
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=self.OVS_CLS)
 
-            link = self._net_add_Link(self.pri, self.sec, port1=1,
-                                      port2=self.sec_port, fast=False)
+            link = self.net.addLink(self.pri, self.sec, port1=1,
+                                    port2=self.sec_port, fast=False)
+            LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
             self.ext_intf = link.intf1.name
             self._attach_sec_device_links()
 

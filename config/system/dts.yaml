@@ -5,7 +5,6 @@ include: ${DAQ_LIB}/config/system/default.yaml
 base_conf: ${DAQ_LIB}/resources/setups/orchestration/base_config.json
 
 host_tests: config/modules/dts.conf
-mininet_loglevel: debug
 
 switch_setup:
   data_intf: data0
