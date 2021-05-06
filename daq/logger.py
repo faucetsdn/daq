@@ -27,12 +27,12 @@ def set_stackdriver_client(client, labels=None):
     set_stackdriver_client.stackdriver_handler = stackdriver_handler
 
 
-def get_file_handler():
-    if not get_file_handler.log_handler:
+def _get_file_handler():
+    if not _get_file_handler.log_handler:
         log_file_path = os.getenv('DAQ_LOG', _DEFAULT_LOG_FILE)
         os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
-        get_file_handler.log_handler = WatchedFileHandler(log_file_path)
-    return get_file_handler.log_handler
+        _get_file_handler.log_handler = WatchedFileHandler(log_file_path)
+    return _get_file_handler.log_handler
 
 
 def get_logger(name=None):
@@ -40,7 +40,7 @@ def get_logger(name=None):
     if name not in LOGGERS:
         LOGGERS[name] = logging.getLogger(name)
         if not name:  # Root logger
-            LOGGERS[name].addHandler(get_file_handler())
+            LOGGERS[name].addHandler(_get_file_handler())
             LOGGERS[name].addHandler(logging.StreamHandler(sys.stdout))
         if name and set_stackdriver_client.stackdriver_handler:
             LOGGERS[name].addHandler(set_stackdriver_client.stackdriver_handler)
@@ -56,4 +56,4 @@ def set_config(level='info', fmt=None, datefmt=None):
         handler.setFormatter(formatter)
 
 set_stackdriver_client.stackdriver_handler = None
-get_file_handler.log_handler = None
+_get_file_handler.log_handler = None
