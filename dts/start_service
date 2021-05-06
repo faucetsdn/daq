@@ -38,8 +38,8 @@ if [[ $RUN_MODE == no-test ]]; then
     no_test=-n
 fi
 
-echo Global IP addresses:
-ip addr | fgrep inet | fgrep 'scope global'
+ip_address=$(ip addr show eth0 | fgrep inet | sed -nr 's~.*inet ([0-9.]+)/.*~\1~p')
+echo Target ip address is $ip_address
 
 # User might already exist if docker restarted.
 #echo "kronkiteman::$USERID:$USERID::/:bin/bash" >> /etc/passwd
@@ -62,8 +62,8 @@ FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK \
 echo Starting ovs...
 sudo /usr/share/openvswitch/scripts/ovs-ctl start
 
-echo Configuring for vxlan ip $VXLAN_IP
-echo switch_setup.endpoint.ip=$VXLAN_IP >> $DYNAMIC_CONFIG
+echo Configuring for vxlan endpoint ip $ip_address
+echo switch_setup.endpoint.ip=$ip_address >> $DYNAMIC_CONFIG
 
 echo Starting daq, output in $DAQ_ROOT/inst/cmdrun.log
 PYTHONPATH=$PYTHONPATH \
