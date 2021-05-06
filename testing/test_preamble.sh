@@ -3,6 +3,10 @@ if [ `whoami` != 'root' ]; then
     exit -1
 fi
 
+if [[ -z $DAQ_LIB ]]; then
+    source etc/FILES_MAPPING
+fi
+
 mkdir -p out
 test_script=${0##*/}
 def_name=${test_script%.sh}.out

@@ -261,7 +261,7 @@ monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 15; sud
 monitor_log "Target device 9a02571e8f00 test hold running" "sudo ifconfig faux down"
 rm -r inst/run-*
 cmd/run -s -k
-disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
+disconnections=$(cat inst/daq.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
 echo Enough port disconnects: $((disconnections >= 2)) | tee -a $TEST_RESULTS
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS
