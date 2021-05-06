@@ -52,9 +52,11 @@ class ExternalModule(HostModule):
             pipe = host.activate(log_name=None)
             # For devcies with ips that are not in the same subnet as test hosts' ips.
             host_ip = self._get_host_ip(params)
-            LOGGER.info('Assigning host ip %s', host_ip)
+            LOGGER.info('TAPTAP Assigning host %s ip %s', host, host_ip)
             if host.intf() and host_ip:
                 host.cmd('ip addr add %s dev %s' % (host_ip, host.intf()))
+                output = host.cmd('ip addr')
+                LOGGER.info('TAPTAP ip addr: %s', output)
             self.log = host.open_log()
             if self._should_raise_test_exception('initialize'):
                 LOGGER.error('%s inducing initialization failure', self)
