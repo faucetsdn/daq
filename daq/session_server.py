@@ -120,11 +120,13 @@ class SessionServer:
         with self._lock:
             self._reap_session(device_mac)
 
-    def _reap_session(self, device_mac):
-        LOGGER.info('Session ended for %s', device_mac)
+    def _reap_session(self, device_mac, port_event=None):
+        LOGGER.info('Session ended for %s with %s', device_mac, port_event)
         del self._return_queues[device_mac]
         del self._last_streamed[device_mac]
-        del self._done_callbacks[device_mac]
+        callback = self._done_callbacks.pop(device_mac)
+        if callback:
+            callback(port_event)
 
     def stop(self):
         """Stop the server"""
@@ -145,8 +147,7 @@ class SessionServer:
                     disconnects.append(device_mac)
             for device_mac in disconnects:
                 port_event = DevicePortEvent(state=PortBehavior.PortState.down)
-                self._done_callbacks[device_mac](port_event)
-                self._reap_session(device_mac)
+                self._reap_session(device_mac, port_event=port_event)
 
 
 class TestingSessionServerClient:

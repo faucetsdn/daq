@@ -211,14 +211,21 @@ class TestNetwork:
         if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
 
-        self.tap_intf = self._configure_tap_intf()
+        self.tap_intf = self._create_tap_intf()
 
-    def _configure_tap_intf(self):
-        vxlan_config = self.config.get('switch_setup', {}).get('vxlan', {})
+    def _create_tap_intf(self):
+        vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
         if 'ip' not in vxlan_config:
             return self.ext_intf
 
-        remote_ip = vxlan_config['ip']
+        # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
+        dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
+        intf_name = 'vxlan_sys_%d' % dst_port
+        LOGGER.info('Using %s as tap interface', intf_name)
+        return intf_name
+
+    def configure_tap_intf(self, remote_ip):
+        vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
         vxlan_vni = vxlan_config.get('vni', self._DEFAULT_VXLAN_VNI)
         dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
         ovs_config = self._VXLAN_CONFIG_FMT % (self.ext_intf, remote_ip, vxlan_vni, dst_port)
@@ -226,9 +233,6 @@ class TestNetwork:
         if self._settle_sec:
             time.sleep(self._settle_sec)
         self.pri.vsctl('set interface %s' % ovs_config)
-
-        # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
-        return 'vxlan_sys_%d' % dst_port
 
     def direct_port_traffic(self, device, port, target):
         """Direct traffic for a given mac to target port"""
