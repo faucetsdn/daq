@@ -999,7 +999,7 @@ class DAQRunner:
                 failed = True
 
             if module_result.get(report.ResultType.RETURN_CODE.value):
-                LOGGER.warning('Failing report due to module return code %s', return_code)
+                LOGGER.warning('Failing report due to module non-zero return code')
                 failed = True
 
             module_tests = module_result.get('tests', {})
