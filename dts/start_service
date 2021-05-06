@@ -4,6 +4,7 @@ ROOT=$(realpath $(dirname $0)/..)
 DAQ_ROOT=$ROOT
 FAUCET_ROOT=$ROOT/faucet
 FORCH_ROOT=$ROOT/forch
+VXLAN_IP=1.2.3.4
 
 BASE_CONFIG=config/system/dts.yaml
 DYNAMIC_CONFIG=startup.conf
