@@ -46,4 +46,4 @@ if ! docker images > /dev/null; then
     false
 fi
 
-unbuffer cmd/exrun $run_args 2>&1 | tee $cmdrun_log
+cmd/exrun $run_args 2>&1 | tee $cmdrun_log
