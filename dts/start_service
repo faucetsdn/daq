@@ -71,4 +71,4 @@ PYTHONPATH=$PYTHONPATH \
     FAUCET_EVENT_SOCK=$DAQ_EVENT_SOCK \
     $DAQ_ROOT/cmd/start $BASE_CONFIG $DYNAMIC_CONFIG -k $no_test > $DAQ_ROOT/inst/cmdrun.log 2>&1 &
 
-tail --tail -f $DAQ_ROOT/inst/cmdrun.log
+tail --retry -f $DAQ_ROOT/inst/cmdrun.log

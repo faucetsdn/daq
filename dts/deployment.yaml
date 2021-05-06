@@ -19,3 +19,5 @@ spec:
         resources:
           requests:
             memory: 101Mi
+        securityContext:
+          privileged: true
