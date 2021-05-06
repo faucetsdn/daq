@@ -226,9 +226,10 @@ class DAQRunner:
                 handler = DeviceReportClient(server_address=server_address,
                                              server_port=server_port, rpc_timeout_sec=timeout)
             else:
+                local_ip = self.config.get('switch_setup', {}).get('endpoint', {}).get('ip')
                 # TODO: Make this all configured from run_trigger not device_reporting
                 handler = SessionServer(on_session=self._on_session,
-                                        server_port=server_port)
+                                        server_port=server_port, local_ip=local_ip)
             return handler
         return None
 

@@ -63,8 +63,7 @@ echo Starting ovs...
 sudo /usr/share/openvswitch/scripts/ovs-ctl start
 
 echo Configuring for vxlan ip $VXLAN_IP
-echo switch_setup.vxlan.ip=$VXLAN_IP >> $DYNAMIC_CONFIG
-echo switch_setup.vxlan.key=cntrl_tap >> $DYNAMIC_CONFIG
+echo switch_setup.endpoint.ip=$VXLAN_IP >> $DYNAMIC_CONFIG
 
 echo Starting daq, output in $DAQ_ROOT/inst/cmdrun.log
 PYTHONPATH=$PYTHONPATH \
