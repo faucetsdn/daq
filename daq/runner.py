@@ -994,13 +994,12 @@ class DAQRunner:
     def _calculate_device_result(self, test_results):
         failed = False
         for module_result in test_results.get('modules', {}).values():
-            if report.ResultType.EXCEPTION in module_result:
+            if module_result.get(report.ResultType.EXCEPTION.value):
                 LOGGER.warning('Failing report due to module exception')
                 failed = True
 
-            return_code = module_result.get(report.ResultType.RETURN_CODE)
-            if return_code:
-                LOGGER.warning('Failing report due to module return code %s', return_code)
+            if module_result.get(report.ResultType.RETURN_CODE.value):
+                LOGGER.warning('Failing report due to module non-zero return code')
                 failed = True
 
             module_tests = module_result.get('tests', {})
