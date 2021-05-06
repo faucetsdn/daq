@@ -1,7 +1,9 @@
 /*
  * Specification for DAQ configuration.
  */
+
 syntax = "proto3";
+import "daq/proto/session_server.proto";
 
 /*
  * DAQ configuration.
@@ -223,18 +225,7 @@ message SwitchSetup {
   string password = 46;
 
   // VXLAN configuration information
-  VxlanSetup vxlan = 47;
-}
-
-/*
- * Information for configuring a vxlan interface.
- */
-message VxlanSetup {
-  // Remote endpoint for vxlan interface.
-  string remote_ip = 1;
-
-  // Tunnel key id.
-  string key = 2;
+  TunnelEndpoint endpoint = 47;
 }
 
 /*

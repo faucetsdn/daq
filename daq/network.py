@@ -50,8 +50,9 @@ class TestNetwork:
     INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
     INTERMEDIATE_GAUGE_FILE = os.path.join(DAQ_RUN_DIR, "gauge.yaml")
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
-    _VXLAN_DEFAULT_PORT = 4789
-    _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s'
+    _DEFAULT_VXLAN_PORT = 4789
+    _DEFAULT_VXLAN_VNI = 0
+    _VXLAN_CONFIG_FMT = '%s type=vxlan options:remote_ip=%s options:key=%s options:dst_port=%s'
 
     def __init__(self, config):
         self.config = config
@@ -214,20 +215,20 @@ class TestNetwork:
 
     def _configure_tap_intf(self):
         vxlan_config = self.config.get('switch_setup', {}).get('vxlan', {})
-        if 'key' not in vxlan_config:
+        if 'ip' not in vxlan_config:
             return self.ext_intf
 
-        key = vxlan_config['key']
-        remote_ip = vxlan_config['remote_ip']
-        port = self._VXLAN_DEFAULT_PORT
-        ovs_config = self._VXLAN_CONFIG_FMT % (self.ext_intf, remote_ip, key)
+        remote_ip = vxlan_config['ip']
+        vxlan_vni = vxlan_config.get('vni', self._DEFAULT_VXLAN_VNI)
+        dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
+        ovs_config = self._VXLAN_CONFIG_FMT % (self.ext_intf, remote_ip, vxlan_vni, dst_port)
         LOGGER.info('Configuring interface %s', ovs_config)
         if self._settle_sec:
             time.sleep(self._settle_sec)
         self.pri.vsctl('set interface %s' % ovs_config)
 
         # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
-        return 'vxlan_sys_%d' % port
+        return 'vxlan_sys_%d' % dst_port
 
     def direct_port_traffic(self, device, port, target):
         """Direct traffic for a given mac to target port"""
