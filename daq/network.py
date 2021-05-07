@@ -224,7 +224,9 @@ class TestNetwork:
         LOGGER.info('Using %s as tap interface', intf_name)
         return intf_name
 
-    def configure_tap_intf(self, remote_ip):
+    def configure_remote_tap(self, remote):
+        """Configure the tap for remote connection"""
+        remote_ip = remote.ip
         vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
         vxlan_vni = vxlan_config.get('vni', self._DEFAULT_VXLAN_VNI)
         dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
