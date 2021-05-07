@@ -239,7 +239,7 @@ class DAQRunner:
             LOGGER.info('New session started for %s %s/%s at %s', request.device_mac,
                         request.device_vlan, request.assigned_vlan, remote_ip)
             assert remote_ip, 'remote request ip not specified'
-            self.network.configure_tap_intf(remote_ip)
+            self.network.configure_remote_tap(remote)
             device = self._devices.create_if_absent(request.device_mac)
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
@@ -379,7 +379,7 @@ class DAQRunner:
             device = self._devices.get_by_port_info(port_info)
             if device and device.host and not port_info.flapping_start:
                 port_info.flapping_start = time.time()
-                LOGGER.info('TAPTAP flap set %s %s', port, point_info.flapping_start)
+                LOGGER.info('TAPTAP flap set %s %s', port, port_info.flapping_start)
             if port_info.active:
                 if device and not port_info.flapping_start:
                     self._direct_port_traffic(device, port, None)
