@@ -3,6 +3,7 @@
 import copy
 import os
 import re
+import shutil
 import threading
 import time
 import traceback
@@ -181,6 +182,7 @@ class DAQRunner:
         self._system_active = False
         self._device_result_handler = self._init_device_result_handler()
         self.daq_run_id = self._init_daq_run_id()
+        self._cleanup_previous_runs()
         logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
@@ -212,6 +214,13 @@ class DAQRunner:
         with open(daq_run_id_file, 'w') as output_stream:
             output_stream.write(daq_run_id + '\n')
         return daq_run_id
+
+    def _cleanup_previous_runs(self):
+        if os.path.isdir(report.REPORT_BASE_DIR):
+            shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
+        for path in os.listdir(DAQ_RUN_DIR):
+            if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(path):
+                shutil.rmtree(path, ignore_errors=True)
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
@@ -989,13 +998,12 @@ class DAQRunner:
     def _calculate_device_result(self, test_results):
         failed = False
         for module_result in test_results.get('modules', {}).values():
-            if report.ResultType.EXCEPTION in module_result:
+            if module_result.get(report.ResultType.EXCEPTION.value):
                 LOGGER.warning('Failing report due to module exception')
                 failed = True
 
-            return_code = module_result.get(report.ResultType.RETURN_CODE)
-            if return_code:
-                LOGGER.warning('Failing report due to module return code %s', return_code)
+            if module_result.get(report.ResultType.RETURN_CODE.value):
+                LOGGER.warning('Failing report due to module non-zero return code')
                 failed = True
 
             module_tests = module_result.get('tests', {})

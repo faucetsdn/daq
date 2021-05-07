@@ -76,10 +76,7 @@ class DAQ:
         daq_env = config.get('daq_loglevel', log_def)
         level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
 
-        logger.set_config(level=level, format=_LOG_FORMAT, datefmt=_DATE_FORMAT)
-
-        # For some reason this is necessary for travis.ci
-        ROOT_LOG.setLevel(level)
+        logger.set_config(level=level, fmt=_LOG_FORMAT, datefmt=_DATE_FORMAT)
 
         # This handler is used by everything, so be permissive here.
         ROOT_LOG.handlers[0].setLevel(minilog.LEVELS['debug'])

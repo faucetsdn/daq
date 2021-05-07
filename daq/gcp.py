@@ -304,7 +304,7 @@ class GcpManager:
 
 
 if __name__ == '__main__':
-    logger.set_config(format='%(levelname)s:%(message)s', level="INFO")
+    logger.set_config(fmt='%(levelname)s:%(message)s', level="INFO")
     CONFIGURATOR = configurator.Configurator()
     CONFIG = CONFIGURATOR.parse_args(sys.argv)
     GCP = GcpManager(CONFIG, None)
