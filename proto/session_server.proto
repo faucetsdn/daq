@@ -68,5 +68,5 @@ message SessionResult {
  */
 service SessionServer {
   rpc StartSession(SessionParams) returns (stream SessionProgress) {}
-  rpc ConfigureEndpoint(TunnelEndpoint) returns () {}
+  rpc ConfigureEndpoint(TunnelEndpoint) returns (SessionResult) {}
 }
