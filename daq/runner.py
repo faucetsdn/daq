@@ -1020,8 +1020,8 @@ class DAQRunner:
                     failed = True
 
             if len(device.host.enabled_tests) != len(module_tests):
-                LOGGER.info('Test report only had %s out of expected %s',
-                            len(device.host.enabled_tests), len(module_tests))
+                LOGGER.info('%s report had %s out of expected %s', device.mac,
+                            len(module_tests), len(device.host.enabled_tests))
                 failed = True
 
         return PortBehavior.failed if failed else PortBehavior.passed
