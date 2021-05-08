@@ -997,7 +997,7 @@ class DAQRunner:
         try:
             self._device_result_handler.send_device_result(device.mac, device_result)
         except Exception as e:
-            LOGGER.error("Failed to send device results for device %s: %s ", mac, e)
+            LOGGER.error("Failed to send device results for device %s: %s ", device.mac, e)
 
     def _calculate_device_result(self, device, test_results):
         failed = False
