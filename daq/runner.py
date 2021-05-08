@@ -1001,7 +1001,8 @@ class DAQRunner:
 
     def _calculate_device_result(self, device, test_results):
         failed = False
-        for module_result in test_results.get('modules', {}).values():
+        module_results = test_results.get('modules', {}).values()
+        for module_result in module_results:
             exception = module_result.get(report.ResultType.EXCEPTION.value)
             if exception:
                 LOGGER.warning('Failing run with exception: %s', exception)
@@ -1019,10 +1020,10 @@ class DAQRunner:
                 if result not in ('pass', 'skip'):
                     failed = True
 
-            if len(device.host.enabled_tests) != len(module_tests):
-                LOGGER.info('%s report had %s out of expected %s', device.mac,
-                            len(module_tests), len(device.host.enabled_tests))
-                failed = True
+        if len(device.host.enabled_tests) != len(module_results):
+            LOGGER.info('%s report had %s out of expected %s modules', device.mac,
+                        len(module_results), len(device.host.enabled_tests))
+            failed = True
 
         return PortBehavior.failed if failed else PortBehavior.passed
 
