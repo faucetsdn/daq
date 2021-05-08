@@ -150,7 +150,7 @@ class ExternalModule(HostModule):
         LOGGER.info('%s test host finalize %s', self, return_code)
         modified_code = return_code if self.test_name != 'fail' else not return_code
         if modified_code != return_code:
-            LOGGER.warning('%s inverting result code to %s', modified_code)
+            LOGGER.warning('Inverting result code to %s', modified_code)
         self.host = None
         self.log.close()
         self.log = None
