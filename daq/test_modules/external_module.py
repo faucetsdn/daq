@@ -148,6 +148,9 @@ class ExternalModule(HostModule):
             self.pipe = None
         return_code = self.host.terminate()
         LOGGER.info('%s test host finalize %s', self, return_code)
+        if self.test_name is 'fail':
+            return_code = 0 if code else 1
+            LOGGER.warning('%s inverting result code to %s', return_code)
         self.host = None
         self.log.close()
         self.log = None

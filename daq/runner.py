@@ -871,7 +871,7 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
-            self._send_device_result(device.mac, None)
+            self._send_device_result(device, None)
             self._detach_gateway(device)
 
     def target_set_complete(self, device, reason):
@@ -932,7 +932,7 @@ class DAQRunner:
             if target_gateway:
                 self._detach_gateway(device)
             test_results = target_host.terminate('_target_set_cancel', trigger=False)
-            self._send_device_result(device.mac, test_results)
+            self._send_device_result(device, test_results)
 
     def _detach_gateway(self, device):
         target_gateway = device.gateway
@@ -977,29 +977,29 @@ class DAQRunner:
             code = int(code_string) if code_string else 0
             name = result['name'] if 'name' in result else result_set_key
             exp_msg = result.get('exception')
-            status = exp_msg if exp_msg else code if name != 'fail' else not code
+            status = exp_msg if exp_msg else code
             if status != 0:
                 results.append('%s:%s:%s' % (set_key, name, status))
         return results
 
-    def _send_device_result(self, mac, test_results):
+    def _send_device_result(self, device, test_results):
         if not self._device_result_handler:
             return
 
         if test_results is None:
             device_result = PortBehavior.failed
         else:
-            device_result = self._calculate_device_result(test_results)
+            device_result = self._calculate_device_result(device, test_results)
 
         LOGGER.info(
             'Sending device result for device %s: %s',
-            mac, PortBehavior.Behavior.Name(device_result))
+            device.mac, PortBehavior.Behavior.Name(device_result))
         try:
-            self._device_result_handler.send_device_result(mac, device_result)
+            self._device_result_handler.send_device_result(device.mac, device_result)
         except Exception as e:
             LOGGER.error("Failed to send device results for device %s: %s ", mac, e)
 
-    def _calculate_device_result(self, test_results):
+    def _calculate_device_result(self, device, test_results):
         failed = False
         for module_result in test_results.get('modules', {}).values():
             exception = module_result.get(report.ResultType.EXCEPTION.value)
@@ -1018,6 +1018,11 @@ class DAQRunner:
                 LOGGER.info('Test report for %s is %s', test_name, result)
                 if result not in ('pass', 'skip'):
                     failed = True
+
+            if len(device.host.enabled_tests) != len(module_tests):
+                LOGGER.info('Test report only had %s out of expected %s',
+                            len(device.host.enabled_tests), len(module_tests))
+                failed = True
 
         return PortBehavior.failed if failed else PortBehavior.passed
 
