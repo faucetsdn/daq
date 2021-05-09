@@ -1021,6 +1021,8 @@ class DAQRunner:
                     failed = True
 
         if len(device.host.enabled_tests) != len(module_results):
+            LOGGER.info('module results %s', module_results)
+            LOGGER.info('enabled modules %s', device.host.enabled_tests)
             LOGGER.info('%s report had %s out of expected %s modules', device.mac,
                         len(module_results), len(device.host.enabled_tests))
             failed = True
