@@ -106,6 +106,7 @@ class TestNetwork:
                 LOGGER.error('Caught exception on try %s: %s', retry, e)
                 if retry is retries:
                     raise e
+            time.sleep(1)
         raise Exception('unknown')
 
     def get_host_interface(self, host):
