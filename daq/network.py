@@ -87,7 +87,8 @@ class TestNetwork:
         host = self.net.addHost(name, cls, **params)
         try:
             LOGGER.debug('Created host %s with pid %s/%s', name, host.pid, host.shell.pid)
-            switch_link = self._retry_func(partial(self.net.addLink, self.pri, host, port1=port, fast=False))
+            switch_link = self._retry_func(
+                partial(self.net.addLink, self.pri, host, port1=port, fast=False))
             self.switch_links[host] = switch_link
             if self.net.built:
                 host.configDefault()
