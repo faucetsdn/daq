@@ -83,24 +83,24 @@ class TestRunner(unittest.TestCase):
         host.test_name = "test_test"
         device.host = host
         host.get_port_flap_timeout = MagicMock(return_value=10000)
-        mock_port_event = DevicePortEvent(state=PortBehavior.PortState.up)
-        self.runner._handle_remote_port_state(device, mock_port_event)
+        port_up_event = DevicePortEvent(state=PortBehavior.PortState.up,
+                                        device_vlan=1, assigned_vlan=2)
+        port_down_event = DevicePortEvent(state=PortBehavior.PortState.down)
+
+        self.runner._handle_remote_port_state(device, port_up_event)
 
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
 
         host.get_port_flap_timeout = MagicMock(return_value=None)
-        mock_port_event = DevicePortEvent(state=PortBehavior.PortState.down)
-        self.runner._handle_remote_port_state(device, mock_port_event)
+        self.runner._handle_remote_port_state(device, port_down_event)
 
-        mock_port_event = DevicePortEvent(state=PortBehavior.PortState.up)
-        self.runner._handle_remote_port_state(device, mock_port_event)
+        self.runner._handle_remote_port_state(device, port_up_event)
 
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
 
-        mock_port_event = DevicePortEvent(state=PortBehavior.PortState.down)
-        self.runner._handle_remote_port_state(device, mock_port_event)
+        self.runner._handle_remote_port_state(device, port_down_event)
 
         self.runner._reap_stale_ports()
         host.get_port_flap_timeout.assert_called_with(host.test_name)
