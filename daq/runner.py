@@ -1023,7 +1023,6 @@ class DAQRunner:
                 if result not in ('pass', 'skip'):
                     failed = True
 
-        LOGGER.info('processed results %s', processed)
         if len(device.host.enabled_tests) != len(processed):
             LOGGER.info('%s report had %s out of expected %s modules', device.mac,
                         len(processed), len(device.host.enabled_tests))
