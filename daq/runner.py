@@ -445,9 +445,12 @@ class DAQRunner:
                 device.port.active = False
                 return
 
-            self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
+            LOGGER.info('Processing remote state %s %s/%s', device, device.vlan, device.assigned)
+            if port_event.device_vlan and port_event.assigned_vlan:
+                self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
 
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
+        assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
         device.port.flapping_start = 0
         LOGGER.info('TAPTAP flap clear2 %s', device.mac)
         device.port.active = True
@@ -455,9 +458,6 @@ class DAQRunner:
         device.vlan = device_vlan
         device.assigned = assigned_vlan
 
-        LOGGER.info('Processing remote state %s %s/%s', device,
-                    device.vlan, device.assigned)
-        assert device_vlan and assigned_vlan, 'missing vlan value'
         self._target_set_trigger(device, remote_trigger=True)
         if device.gateway:
             self._direct_device_traffic(device, device.gateway.port_set)
