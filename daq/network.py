@@ -153,7 +153,7 @@ class TestNetwork:
             LOGGER.info('Creating ovs sec with dpid/port %s/%d', self.sec_dpid, self.sec_port)
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=self.OVS_CLS)
 
-            link = self._retry_func(partial(self._net_add_link, self.pri, self.sec, port1=1,
+            link = self._retry_func(partial(self.net.addLink, self.pri, self.sec, port1=1,
                                             port2=self.sec_port, fast=False))
             LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
             self.ext_intf = link.intf1.name

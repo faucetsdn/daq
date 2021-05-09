@@ -384,7 +384,6 @@ class DAQRunner:
             device = self._devices.get_by_port_info(port_info)
             if device and device.host and not port_info.flapping_start:
                 port_info.flapping_start = time.time()
-                LOGGER.info('TAPTAP flap set2 %s %s', port, port_info.flapping_start)
             if port_info.active:
                 if device and not port_info.flapping_start:
                     self._direct_port_traffic(device, port, None)
@@ -397,7 +396,6 @@ class DAQRunner:
             self._ports[port].port_no = port
         port_info = self._ports[port]
         port_info.flapping_start = 0
-        LOGGER.info('TAPTAP flap clear1 %s', port)
         port_info.active = True
 
     def _is_port_active(self, port):
@@ -437,11 +435,9 @@ class DAQRunner:
 
     def _handle_remote_port_state(self, device, port_event):
         with self._event_lock:
-            LOGGER.info('TAPTAP remote port state %s %s', device.mac, port_event)
             if port_event.state == PortBehavior.PortState.down:
                 if not device.port.flapping_start:
                     device.port.flapping_start = time.time()
-                    LOGGER.info('TAPTAP flap set1 %s %s', device.mac, device.port.flapping_start)
                 device.port.active = False
                 return
 
@@ -452,7 +448,6 @@ class DAQRunner:
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
         assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
         device.port.flapping_start = 0
-        LOGGER.info('TAPTAP flap clear2 %s', device.mac)
         device.port.active = True
 
         device.vlan = device_vlan
@@ -513,12 +508,10 @@ class DAQRunner:
             timeout_sec = device.host.get_port_flap_timeout(device.host.test_name)
             if timeout_sec is None:
                 timeout_sec = self._default_port_flap_timeout
-            LOGGER.info('TAPTAP flap %s %s %s', device.mac, device.port.flapping_start, timeout_sec)
             if (device.port.flapping_start + timeout_sec) <= time.time():
                 exception = DaqException('port not active for %ds' % timeout_sec)
                 self.target_set_error(device, exception)
                 device.port.flapping_start = 0
-                LOGGER.info('TAPTAP flap clear3 %s', device.mac)
 
     def shutdown(self):
         """Shutdown this runner by closing all active components"""
