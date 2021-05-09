@@ -104,7 +104,7 @@ class TestNetwork:
             try:
                 return func()
             except Exception as e:
-                LOGGER.error('Caught exception on try %s: %s', retry, e)
+                LOGGER.error('Caught exception on try %s: %s', retry, repr(e))
                 if retry is retries:
                     raise e
             time.sleep(1)
