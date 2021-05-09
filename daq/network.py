@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from ipaddress import ip_network
 import copy
+from functools import partial
 import os
 import time
 import yaml
@@ -86,7 +87,7 @@ class TestNetwork:
         host = self.net.addHost(name, cls, **params)
         try:
             LOGGER.debug('Created host %s with pid %s/%s', name, host.pid, host.shell.pid)
-            switch_link = self.net.addLink(self.pri, host, port1=port, fast=False)
+            switch_link = self._retry_func(partial(self.net.addLink, self.pri, host, port1=port, fast=False))
             self.switch_links[host] = switch_link
             if self.net.built:
                 host.configDefault()
@@ -96,12 +97,23 @@ class TestNetwork:
             raise e
         return host
 
+    def _retry_func(self, func):
+        retries = 3
+        for retry in range(1, retries + 1):
+            try:
+                return func()
+            except Exception as e:
+                LOGGER.error('Caught exception on try %s: %s', retry, e)
+                if retry is retries:
+                    raise e
+        raise Exception('unknown')
+
     def get_host_interface(self, host):
         """Get the internal link interface for this host"""
         return self.switch_links[host].intf2
 
     def _switch_attach(self, switch, intf):
-        switch.attach(intf)
+        self._retry_func(partial(switch.attach, intf))
         # This really should be done in attach, but currently only automatic on switch startup.
         switch.vsctl(switch.intfOpts(intf))
 
@@ -140,8 +152,8 @@ class TestNetwork:
             LOGGER.info('Creating ovs sec with dpid/port %s/%d', self.sec_dpid, self.sec_port)
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=self.OVS_CLS)
 
-            link = self.net.addLink(self.pri, self.sec, port1=1,
-                                    port2=self.sec_port, fast=False)
+            link = self._retry_func(partial(self._net_add_link, self.pri, self.sec, port1=1,
+                                            port2=self.sec_port, fast=False))
             LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
             self.ext_intf = link.intf1.name
             self._attach_sec_device_links()
