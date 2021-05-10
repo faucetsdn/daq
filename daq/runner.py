@@ -441,17 +441,18 @@ class DAQRunner:
                 device.port.active = False
                 return
 
-            self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
+            LOGGER.info('Processing remote state %s %s/%s', device, device.vlan, device.assigned)
+            if port_event.device_vlan and port_event.assigned_vlan:
+                self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
 
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
+        assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
         device.port.flapping_start = 0
         device.port.active = True
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
 
-        LOGGER.info('Processing remote state %s %s/%s', device,
-                    device.vlan, device.assigned)
         self._target_set_trigger(device, remote_trigger=True)
         if device.gateway:
             self._direct_device_traffic(device, device.gateway.port_set)
@@ -863,7 +864,7 @@ class DAQRunner:
                                       {'exception': {'exception': str(exception),
                                                      'traceback': stack}},
                                       str(exception))
-            self._send_device_result(device.mac, None)
+            self._send_device_result(device, None)
             self._detach_gateway(device)
 
     def target_set_complete(self, device, reason):
@@ -924,7 +925,7 @@ class DAQRunner:
             if target_gateway:
                 self._detach_gateway(device)
             test_results = target_host.terminate('_target_set_cancel', trigger=False)
-            self._send_device_result(device.mac, test_results)
+            self._send_device_result(device, test_results)
 
     def _detach_gateway(self, device):
         target_gateway = device.gateway
@@ -969,38 +970,44 @@ class DAQRunner:
             code = int(code_string) if code_string else 0
             name = result['name'] if 'name' in result else result_set_key
             exp_msg = result.get('exception')
-            status = exp_msg if exp_msg else code if name != 'fail' else not code
+            status = exp_msg if exp_msg else code
             if status != 0:
                 results.append('%s:%s:%s' % (set_key, name, status))
         return results
 
-    def _send_device_result(self, mac, test_results):
+    def _send_device_result(self, device, test_results):
         if not self._device_result_handler:
             return
 
         if test_results is None:
             device_result = PortBehavior.failed
         else:
-            device_result = self._calculate_device_result(test_results)
+            device_result = self._calculate_device_result(device, test_results)
 
         LOGGER.info(
             'Sending device result for device %s: %s',
-            mac, PortBehavior.Behavior.Name(device_result))
+            device.mac, PortBehavior.Behavior.Name(device_result))
         try:
-            self._device_result_handler.send_device_result(mac, device_result)
+            self._device_result_handler.send_device_result(device.mac, device_result)
         except Exception as e:
-            LOGGER.error("Failed to send device results for device %s: %s ", mac, e)
+            LOGGER.error("Failed to send device results for device %s: %s ", device.mac, e)
 
-    def _calculate_device_result(self, test_results):
+    def _calculate_device_result(self, device, test_results):
         failed = False
-        for module_result in test_results.get('modules', {}).values():
-            if module_result.get(report.ResultType.EXCEPTION.value):
-                LOGGER.warning('Failing report due to module exception')
+        processed = set()
+        module_results = test_results.get('modules', {}).items()
+        for module_key, module_result in module_results:
+            exception = module_result.get(report.ResultType.EXCEPTION.value)
+            if exception:
+                LOGGER.warning('Failing run with exception: %s', exception)
                 failed = True
 
-            if module_result.get(report.ResultType.RETURN_CODE.value):
-                LOGGER.warning('Failing report due to module non-zero return code')
+            return_code = module_result.get(report.ResultType.RETURN_CODE.value)
+            if return_code:
+                LOGGER.warning('Failing run with return code %s', return_code)
                 failed = True
+            if return_code is not None:
+                processed.add(module_key)
 
             module_tests = module_result.get('tests', {})
             for test_name, test_result in module_tests.items():
@@ -1008,6 +1015,11 @@ class DAQRunner:
                 LOGGER.info('Test report for %s is %s', test_name, result)
                 if result not in ('pass', 'skip'):
                     failed = True
+
+        if len(device.host.enabled_tests) != len(processed):
+            LOGGER.info('%s report had %s out of expected %s modules', device.mac,
+                        len(processed), len(device.host.enabled_tests))
+            failed = True
 
         return PortBehavior.failed if failed else PortBehavior.passed
 

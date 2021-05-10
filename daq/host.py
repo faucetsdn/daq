@@ -128,7 +128,8 @@ class ConnectedHost:
         self.reload_config()
         assert self._loaded_config, 'config was not loaded'
         self._write_module_config(self._loaded_config, self._device_aux_path())
-        self.remaining_tests = self._get_enabled_tests()
+        self.enabled_tests = self._get_enabled_tests()
+        self.remaining_tests = list(self.enabled_tests)
         self.logger.info('Host %s running with enabled tests %s', self.target_mac,
                          self.remaining_tests)
         self._report = ReportGenerator(config, self.target_mac, self._loaded_config)
