@@ -12,5 +12,5 @@ linters:
     config: ./.checkstyle.xml
 files:
   ignore:
-    - 'libs/proto/*'
+    - 'daq/proto/*'
     - '*__init__.py'

@@ -13,6 +13,12 @@
     "pass": {
       "enabled": true
     },
+    "fail": {
+      "enabled": true
+    },
+    "ping": {
+      "enabled": true
+    },
     "nmap": {
       "timeout_sec": 600,
       "enabled": true
@@ -59,10 +65,10 @@
       }
     },
     "tls": {
-      "enabled": true,
+      "enabled": false,
       "timeout_sec": 0
     },
-    "usi": {
+    "hold": {
       "enabled": true
     }
   }

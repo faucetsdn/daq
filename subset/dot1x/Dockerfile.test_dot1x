@@ -1,12 +1,12 @@
 FROM daqf/aardvark:latest
 
 RUN apt-get update && \
-    apt-get install -y freeradius git gcc python3-dev musl-dev g++
+    apt-get install -y freeradius git gcc python3-dev musl-dev g++ python3-yaml
 
-COPY subset/dot1x/freeradius/users /etc/freeradius/3.0/users
-COPY subset/dot1x/freeradius/certs /etc/freeradius/3.0/certs
-COPY subset/dot1x/freeradius/default/eap /etc/freeradius/3.0/mods-enabled/eap
-COPY subset/dot1x/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
+COPY misc/freeradius/users /etc/freeradius/3.0/users
+COPY misc/freeradius/certs /etc/freeradius/3.0/certs
+COPY misc/freeradius/default/eap /etc/freeradius/3.0/mods-enabled/eap
+COPY misc/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
 
 
 COPY subset/dot1x/authenticator/ authenticator/

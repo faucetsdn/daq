@@ -1,0 +1,54 @@
+/*
+ * Collection of messages for testing service endpoing.
+ */
+
+syntax = "proto3";
+
+/*
+ * Params for session initialization.
+ */
+message SessionParams {
+  string device_mac = 1;
+  int32 device_vlan = 2;
+  int32 assigned_vlan = 3;
+}
+
+/*
+ * Session progress updates.
+ */
+message SessionProgress {
+  oneof progress {
+    SessionEndpoint endpoint = 1;
+    SessionResult result = 2;
+  }
+}
+
+/*
+ * Session initialization params.
+ */
+message SessionEndpoint {
+  string ip = 1;
+  int32 port = 2;
+}
+
+/*
+ * Session result codes.
+ */
+message SessionResult {
+  SessionResult.ResultCode code = 1;
+
+  enum ResultCode {
+    PENDING = 0;
+    STARTED = 1;
+    ERROR = 2;
+    PASSED = 3;
+    FAILED = 4;
+  }
+}
+
+/*
+ * Device testing session server endpoint.
+ */
+service SessionServer {
+  rpc StartSession(SessionParams) returns (stream SessionProgress) {}
+}

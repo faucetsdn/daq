@@ -3,6 +3,15 @@
     "nmap": {
       "timeout_sec": 600,
       "enabled": true
+    },
+    "pass": {
+      "enabled": true
+    },
+    "fail": {
+      "enabled": true
+    },
+    "ping": {
+      "enabled": true
     }
   }
 }

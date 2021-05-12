@@ -15,7 +15,16 @@ if [ "$1" == simple ]; then
     shift
 fi
 
-PVERSION=3.8
+PVERSION=${PVERSION:-3.8}
+
+INSTALLED_PYTHON=`python3 -V | sed -nr 's~Python (3?\..+)\..+$~\1~p'`
+echo Installed python version is $INSTALLED_PYTHON
+
+if [[ $PVERSION != $INSTALLED_PYTHON ]]; then
+    echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON
+    echo Set the PVERSION environment variable to specify a different expected value
+    false
+fi
 
 MININET=https://github.com/mininet/mininet
 MININETV=$(cat etc/MININET_VERSION)
@@ -51,12 +60,16 @@ release=$(lsb_release -cs)
 echo LSB release version $release
 
 $AG install \
-    software-properties-common apt-transport-https iproute2 \
-    git ethtool curl apache2-utils iputils-ping lsof jq pandoc \
+    software-properties-common apt-transport-https iproute2 emacs-nox \
+    git ethtool curl apache2-utils iputils-ping lsof jq pandoc nmap \
     ca-certificates sudo net-tools tcpdump build-essential pango-1.0 \
     isc-dhcp-client network-manager netcat gnupg2 strace libffi-dev \
-    python$PVERSION python3-pkg-resources python3-setuptools \
-    python$PVERSION-dev python3-pip python emacs-nox python$PVERSION-venv nmap
+    python python$PVERSION python3-pkg-resources python3-setuptools \
+    python$PVERSION-dev python3-pip python$PVERSION-venv \
+    python3-distutils
+
+PYTHON_BIN=$(readlink -f $(which python))
+echo Python binary is at $PYTHON_BIN
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -80,6 +93,8 @@ else
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
+        export PYTHON_BIN
+        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON_BIN} make install/' util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
@@ -91,9 +106,12 @@ if [ -n "$CI" ]; then
     mkdir -p venv/bin
     touch venv/bin/activate
 else
-    # Fix permissions in case they have wandered...
-    test -f venv && sudo chown `stat . -c %u:%g` -R venv/
-    python$PVERSION -m venv venv
+    if [ -d venv ]; then
+        # Fix permissions in case they have wandered...
+        sudo chown `stat . -c %u:%g` -R venv/
+    else
+        python$PVERSION -m venv venv
+    fi
     source venv/bin/activate
 fi
 
@@ -109,19 +127,9 @@ $PIP -V
 echo Installing python dependencies...
 $PIP install wheel
 $PIP install --upgrade --index-url=https://pypi.python.org/simple setuptools
-$PIP install --upgrade --index-url=https://pypi.python.org/simple Jinja2 \
-    pylint==2.4.2 cryptography requests netifaces codecov coverage \
-    pyyaml cairocffi==1.0.2 WeasyPrint==50 pypandoc==1.4 \
-    firebase-admin==2.16.0 \
-    google-api-core==1.16.0 \
-    google-cloud-core==1.3.0 \
-    google-cloud-firestore==1.6.0 \
-    google-cloud-logging==1.14.0 \
-    google-cloud-pubsub==0.40.0 \
-    google-cloud-storage==1.16.1 \
-    grpcio-tools==1.30.0
-
+$PIP install --upgrade -r etc/requirements.txt --index-url=https://pypi.python.org/simple
 $PIP freeze
+
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
 

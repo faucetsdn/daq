@@ -15,7 +15,7 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 
 RUN $AG update && $AG install dnsmasq ethtool iptables netcat ntp \
-    python3 python3-pip python3-setuptools gnupg google-cloud-sdk
+    python3 python3-pip python3-setuptools gnupg google-cloud-sdk freeradius
 
 COPY docker/include/network/scripts/* ./
 RUN mkdir -p /etc
@@ -32,5 +32,10 @@ RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 COPY docker/include/security/nginxfail.conf /root/nginx/
 COPY docker/include/security/nginx-site /var/www/nginx-site
 COPY docker/include/security/tlsfaux tlsfaux/
+
+COPY misc/freeradius/users /etc/freeradius/3.0/users
+COPY misc/freeradius/certs /etc/freeradius/3.0/certs
+COPY misc/freeradius/default/eap /etc/freeradius/3.0/mods-enabled/eap
+COPY misc/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
 
 ENTRYPOINT ["./start_networking"]

@@ -175,6 +175,72 @@
         
           
           <li>
+            <a href="#daq%2fproto%2facl_counting.proto">daq/proto/acl_counting.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#DeviceRuleCounts"><span class="badge">M</span>DeviceRuleCounts</a>
+                </li>
+              
+                <li>
+                  <a href="#DeviceRuleCounts.DeviceMacRulesEntry"><span class="badge">M</span>DeviceRuleCounts.DeviceMacRulesEntry</a>
+                </li>
+              
+                <li>
+                  <a href="#RuleCount"><span class="badge">M</span>RuleCount</a>
+                </li>
+              
+                <li>
+                  <a href="#RuleCounts"><span class="badge">M</span>RuleCounts</a>
+                </li>
+              
+                <li>
+                  <a href="#RuleCounts.RulesEntry"><span class="badge">M</span>RuleCounts.RulesEntry</a>
+                </li>
+              
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#daq%2fproto%2fsession_server.proto">daq/proto/session_server.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#SessionEndpoint"><span class="badge">M</span>SessionEndpoint</a>
+                </li>
+              
+                <li>
+                  <a href="#SessionParams"><span class="badge">M</span>SessionParams</a>
+                </li>
+              
+                <li>
+                  <a href="#SessionProgress"><span class="badge">M</span>SessionProgress</a>
+                </li>
+              
+                <li>
+                  <a href="#SessionResult"><span class="badge">M</span>SessionResult</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#SessionResult.ResultCode"><span class="badge">E</span>SessionResult.ResultCode</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#SessionServer"><span class="badge">S</span>SessionServer</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
             <a href="#daq%2fproto%2fsystem_config.proto">daq/proto/system_config.proto</a>
             <ul>
               
@@ -232,6 +298,366 @@
       </ul>
     </div>
 
+    
+      
+      <div class="file-heading">
+        <h2 id="daq/proto/acl_counting.proto">daq/proto/acl_counting.proto</h2><a href="#title">Top</a>
+      </div>
+      <p>ACL counts for devices</p>
+
+      
+        <h3 id="DeviceRuleCounts">DeviceRuleCounts</h3>
+        <p>Rule counts for devices</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>device_mac_rules</td>
+                  <td><a href="#DeviceRuleCounts.DeviceMacRulesEntry">DeviceRuleCounts.DeviceMacRulesEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>List of Rule counts indexed by device MAC addresses </p></td>
+                </tr>
+              
+                <tr>
+                  <td>error</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>error that is found when getting the rule counts for the devices </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="DeviceRuleCounts.DeviceMacRulesEntry">DeviceRuleCounts.DeviceMacRulesEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#RuleCounts">RuleCounts</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="RuleCount">RuleCount</h3>
+        <p>Rule count</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>packet_count</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>packet count </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="RuleCounts">RuleCounts</h3>
+        <p>Rule counts for a device</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>rules</td>
+                  <td><a href="#RuleCounts.RulesEntry">RuleCounts.RulesEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>List of rule counts indexed by the descriptions of the rules </p></td>
+                </tr>
+              
+                <tr>
+                  <td>errors</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>errors that are found when analyzing the rule counts of a device </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="RuleCounts.RulesEntry">RuleCounts.RulesEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#RuleCount">RuleCount</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="daq/proto/session_server.proto">daq/proto/session_server.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="SessionEndpoint">SessionEndpoint</h3>
+        <p>Session initialization params.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SessionParams">SessionParams</h3>
+        <p>Params for session initialization.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>device_mac</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>device_vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>assigned_vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SessionProgress">SessionProgress</h3>
+        <p>Session progress updates.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>endpoint</td>
+                  <td><a href="#SessionEndpoint">SessionEndpoint</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>result</td>
+                  <td><a href="#SessionResult">SessionResult</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SessionResult">SessionResult</h3>
+        <p>Session result codes.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>code</td>
+                  <td><a href="#SessionResult.ResultCode">SessionResult.ResultCode</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="SessionResult.ResultCode">SessionResult.ResultCode</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>PENDING</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>STARTED</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ERROR</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>PASSED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="SessionServer">SessionServer</h3>
+        <p>Device testing session server endpoint.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>StartSession</td>
+                <td><a href="#SessionParams">.SessionParams</a></td>
+                <td><a href="#SessionProgress">.SessionProgress</a> stream</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
     
       
       <div class="file-heading">
@@ -642,6 +1068,13 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>Server port </p></td>
+                </tr>
+              
+                <tr>
+                  <td>server_address</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Server address </p></td>
                 </tr>
               
                 <tr>

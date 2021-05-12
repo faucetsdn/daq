@@ -22,13 +22,16 @@ services:
             context: ../..
             dockerfile: ./subset/dot1x/Dockerfile.test_dot1x
         image: 'authenticator/authenticator:latest'
-        #command: ./start_radius_and_auth
+        command: './test_dot1x /config/device/test_config.json'
         networks:
             00wpasupplicant-net:
                 ipv4_address: 10.20.0.3
                 priority: 200
         cap_add:
             - ALL
+        volumes:
+            - ../../resources/setups/common/base_config.json:/config/device/module_config.json
+            - ./../../subset/dot1x/base_config.json:/config/device/test_config.json
 
     tcpdump:
         image: kaazing/tcpdump

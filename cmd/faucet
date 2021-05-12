@@ -6,7 +6,7 @@ source bin/config_base.sh
 
 RUNTIME=$(realpath $DAQ_RUN)
 SYSTEM_CONF=system.conf
-RYU_CONF=$(realpath $DAQ_RUN/ryu.conf)
+RYU_CONF=$(realpath $DAQ_LIB/config/faucet/ryu.conf)
 
 ext_ofpt=
 prom_pt=
@@ -30,10 +30,10 @@ fi
 
 if [ "$1" == "gauge" ]; then
     BASECMD=gauge
-    PROM_TARGET=9303
+    PROM_TARGET=${switch_setup_varz_port_2:-9303}
     FAUCET_SOCK=
     ext_ofpt=${switch_setup_lo_port_2:-6654}
-    prom_pt=${switch_setup_varz_port_2:-9303}
+    prom_pt=$PROM_TARGET
     shift
 else
     BASECMD=faucet

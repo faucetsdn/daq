@@ -84,10 +84,12 @@ echo RESULT $local_status connection.base.target_ping $summary %% $TARGET_IP | t
 echo | tee -a $MONO_LOG
 echo Done with basic connectivity tests | tee -a $MONO_LOG
 
-echo Checking startup NTP
+SCAN_FILE=$TEST_ROOT/scans/monitor.pcap
+
+echo Checking NTP activity
 ntp_target=${TARGET_IP%.*}.2
-ntp_request=`tcpdump -env -c 1 -r $TEST_ROOT/scans/monitor.pcap dst port 123 | wc -l`
-ntp_proper=`tcpdump -env -c 1 -r $TEST_ROOT/scans/monitor.pcap dst port 123 and dst host $ntp_target | wc -l`
+ntp_request=`tcpdump -env -c 1 -r $SCAN_FILE dst port 123 | wc -l`
+ntp_proper=`tcpdump -env -c 1 -r $SCAN_FILE dst port 123 and dst host $ntp_target | wc -l`
 if [ "$ntp_request" == 0 ]; then
     ntp_result=skip
     ntp_summary="No NTP traffic detected"
@@ -100,10 +102,10 @@ else
 fi
 echo RESULT $ntp_result base.startup.ntp $ntp_summary %% NTP server $ntp_target | tee -a $RESULT_LINES
 
-echo Checking startup DNS activity...
+echo Checking DNS activity
 dns_target=${TARGET_IP%.*}.2
-dns_request=`tcpdump -env -c 1 -r $TEST_ROOT/scans/startup.pcap dst port 53 | wc -l`
-dns_proper=`tcpdump -env -c 1 -r $TEST_ROOT/scans/startup.pcap dst port 53 and dst host $dns_target | wc -l`
+dns_request=`tcpdump -env -c 1 -r $SCAN_FILE dst port 53 | wc -l`
+dns_proper=`tcpdump -env -c 1 -r $SCAN_FILE dst port 53 and dst host $dns_target | wc -l`
 if [ "$dns_request" == 0 ]; then
     dns_result=skip
     dns_summary="No dns traffic detected"

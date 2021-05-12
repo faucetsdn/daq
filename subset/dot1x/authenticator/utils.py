@@ -1,6 +1,9 @@
 """Utility Functions"""
 from __future__ import absolute_import
 import logging
+import fcntl
+import socket
+import struct
 import sys
 
 
@@ -22,6 +25,35 @@ def get_logger(logname):
     logger.addHandler(logfile_handler)
 
     return logger
+
+
+def enable_debug_logs(logger):
+    """Enable debug logs for logger"""
+    logger.setLevel(logging.DEBUG)
+    for handler in logger.handlers:
+        handler.setLevel(logging.DEBUG)
+
+
+def get_interface_name():
+    """Get main interface name from test container"""
+    return '%s-eth0' % socket.gethostname()
+
+
+def get_interface_ip(ifname):
+    """Get interface IP"""
+    _socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+        _socket.fileno(), 0x8915, struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+    )[20:24])
+
+
+def get_interface_mac(ifname):
+    """Get interface MAC"""
+    _socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    mac_addr = fcntl.ioctl(
+        _socket.fileno(), 0x8927,  struct.pack('256s', bytes(ifname, 'utf-8')[:15]))
+    formatted_mac = ':'.join('%02x' % b for b in mac_addr[18:24])
+    return formatted_mac
 
 
 class MessageParseError(Exception):

@@ -52,6 +52,9 @@ fi
 # Start the NTP server
 service ntp start
 
+# Start radius server
+freeradius -xx -l /tmp/radius_log
+
 # For cloud-based provisioning tests.
 GCP_CRED_FILE=/config/inst/gcp_service_account.json
 SITE_MODEL=$PWD/test_site

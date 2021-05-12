@@ -1,0 +1,9 @@
+{
+  "modules": {
+    "dot1x": {
+      "enabled": true,
+      "interface": "eth0",
+      "debug": true
+    }
+  }
+}

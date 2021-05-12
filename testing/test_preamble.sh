@@ -3,6 +3,10 @@ if [ `whoami` != 'root' ]; then
     exit -1
 fi
 
+if [[ -z $DAQ_LIB ]]; then
+    source etc/FILES_MAPPING
+fi
+
 mkdir -p out
 test_script=${0##*/}
 def_name=${test_script%.sh}.out
@@ -132,4 +136,25 @@ function build_if_not_release {
         build_mode=pull
     fi
     cmd/build $build_mode missing
+}
+
+function activate_venv {
+    if [ -d venv ]; then
+        echo Activating venv
+        source venv/bin/activate
+    fi
+
+    if [ -n "$DAQ_CODECOV" ]; then
+        echo Running Python with codecov analysis...
+        PYTHON_CMD="coverage run -a"
+    else
+        PYTHON_CMD="python3"
+    fi
+
+    local ROOT=$(realpath $(dirname $0)/..)
+    local FAUCET=$(realpath $ROOT/faucet)
+    local FORCH=$(realpath $ROOT/forch)
+    local PYTHON_PATH=$FAUCET:$FORCH:$ROOT:$PYTHONPATH
+
+    export PYTHON_CMD="env PYTHONPATH=$PYTHON_PATH $PYTHON_CMD"
 }

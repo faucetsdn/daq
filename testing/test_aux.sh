@@ -72,7 +72,6 @@ cp -r resources/test_site/device_types/rocket local/site/device_types/
 mkdir -p local/site/device_types/rocket/aux/
 cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
 cp -r resources/test_site/mac_addrs local/site/
-
 # Create config for the password test to select which dictionaries to use.
 cat <<EOF > local/base_config.json
 {
@@ -95,9 +94,9 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4
+    opts: brute broadcast_client ntpv4 wpa
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl wpawrong
   faux-3:
     opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl
 long_dhcp_response_sec: 0
@@ -149,10 +148,12 @@ done
 
 # Add the RESULT lines from all aux test report files.
 capture_test_results bacext
-capture_test_results tls
+# TODO: Capture TLS results once tests are enabled
+# capture_test_results tls
 capture_test_results password
 capture_test_results discover
 capture_test_results network
+capture_test_results dot1x
 
 # Capture peripheral logs
 more inst/run-*/scans/ip_triggers.txt | cat
@@ -260,7 +261,7 @@ monitor_log "Port 1 dpid 2 is now active" "sudo ifconfig faux down;sleep 15; sud
 monitor_log "Target device 9a02571e8f00 test hold running" "sudo ifconfig faux down"
 rm -r inst/run-*
 cmd/run -s -k
-disconnections=$(cat inst/cmdrun.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
+disconnections=$(cat inst/daq.log | grep "Port 1 dpid 2 is now inactive" | wc -l)
 echo Enough port disconnects: $((disconnections >= 2)) | tee -a $TEST_RESULTS
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 echo Done with tests | tee -a $TEST_RESULTS

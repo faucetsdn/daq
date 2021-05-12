@@ -1,16 +1,21 @@
 #!/bin/bash -e
 
+dot1x_config=$1
+
 freeradius -xx -l /tmp/radius_log
 
 source reporting.sh
 
 REPORT=/tmp/report.txt
-TEST_NAME="dot1x"
+TEST_NAME="dot1x.dot1x"
 TEST_DESCRIPTION="Dot1x authentication tests"
 
+if [ -n "$GATEWAY_IP" ] ; then
+    route add default gw $GATEWAY_IP
+fi
 echo 'Dot1x Authentication tests'
 
-python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt
+python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt $1
 
 RESULT_AND_SUMMARY=$(cat /tmp/dot1x_result.txt)
 

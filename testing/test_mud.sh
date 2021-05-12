@@ -22,7 +22,10 @@ cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 
 echo %%%%%%%%%%%%%%%%%%%%%% Mud profile tests | tee -a $TEST_RESULTS
 rm -f local/system.yaml
-echo 'include=../config/system/muddy.conf' > local/system.conf
+cat > local/system.conf << EOF
+include=../config/system/muddy.conf
+switch_setup.varz_port=9302
+EOF
 
 if [ -z `which tcpdump` ]; then
     export PATH=/usr/sbin:$PATH
@@ -47,18 +50,53 @@ function test_device_traffic {
     echo device-$device_num $type $((bfr_peer > 2)) $((bfr_ngbr > 0)) $((ufr_peer > 2)) $((ufr_ngbr > 0)) | tee -a $TEST_RESULTS
 }
 
+function test_acl_count {
+    device_num=$1
+    device_mac=9a:02:57:1e:8f:0$device_num
+
+    jq_filter=".device_mac_rules.\"$device_mac\".rules | to_entries[] | select(.key|match(\"bacnet\")).value[]"
+    packet_count=$(jq "$jq_filter" $rule_counts_file || true)
+    echo device-$device_num $type $((packet_count > 2)) | tee -a $TEST_RESULTS
+}
+
+function terminate_processes {
+    for process in daq ta; do
+        pid=$(<inst/$process.pid)
+        sudo kill -SIGINT $pid
+        while [ -f inst/$process.pid ]; do
+            echo Waiting for $process to exit...
+            sleep 5
+        done
+    done
+}
+
 function test_mud {
     type=$1
     echo %%%%%%%%%%%%%%%%% test mud profile $type
-    cmd/run -s device_specs=resources/device_specs/bacnet_$type.json
+    
+    device_specs_file="resources/device_specs/bacnet_$type.json"
+    rule_counts_file=inst/device_rule_counts.json
 
-    echo result $type $(sort inst/result.log) | tee -a $TEST_RESULTS
+    cmd/run -k -s device_specs=$device_specs_file &
+    sleep 60
+
+    $PYTHON_CMD daq/traffic_analyzer.py $device_specs_file $rule_counts_file &
+    sleep 120
+
+    echo result $type | tee -a $TEST_RESULTS
 
     test_device_traffic 1
     test_device_traffic 2
 
+    test_acl_count 1
+    test_acl_count 2
+
     more inst/run-*/nodes/*/activate.log | cat
+
+    terminate_processes
 }
+
+activate_venv
 
 test_mud open
 test_mud todev
