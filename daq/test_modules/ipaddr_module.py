@@ -60,7 +60,7 @@ class IpAddrModule(HostModule):
         if not self._lease_time_seconds:
             return
         self._timeout = datetime.now() + timedelta(seconds=self._lease_time_seconds)
-        self._logger.info('Setting %s DHCP timeout at %s', self.device, self._timeout)
+        self._logger.info('Device %s setting dhcp timeout at %s', self.device, self._timeout)
 
     def _next_test(self):
         try:
@@ -139,7 +139,7 @@ class IpAddrModule(HostModule):
                 self.terminate()
                 self.callback(exception=self._TIMEOUT_EXCEPTION)
             else:
-                self._logger.error('DHCP %s times out after %ds lease time',
+                self._logger.error('Device %s dhcp timeout after %ds lease time',
                                    self.device, self._lease_time_seconds)
                 self.tests = self.tests[-1:]
                 self._next_test()

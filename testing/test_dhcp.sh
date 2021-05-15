@@ -106,7 +106,7 @@ for iface in $(seq 1 6); do
     ip_change=$(cat $report_file | fgrep 'pass connection.ipaddr.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
     if [ $iface == 6 ]; then
-      device_dhcp_timeouts=$(fgrep 'DHCP times out after 120s lease time' $activate_log | wc -l)
+      device_dhcp_timeouts=$(fgrep 'dhcp timeout after 120s lease time' $activate_log | wc -l)
       echo "Device $iface dhcp timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
       echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
