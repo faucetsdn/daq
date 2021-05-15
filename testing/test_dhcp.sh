@@ -98,7 +98,7 @@ for iface in $(seq 1 6); do
     ip_file=inst/run-9a02571e8f0$iface/scans/ip_triggers.txt
     report_file=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/report.txt
     activate_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/activate.log
-    cat $ip_file
+    more $ip_file $report_file $activate_log | cat
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
