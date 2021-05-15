@@ -4,8 +4,9 @@ from __future__ import absolute_import
 
 from abc import ABC
 import datetime
-import logger
 import os
+
+import logger
 
 
 LOGGER = logger.get_logger('module')
