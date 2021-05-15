@@ -29,6 +29,7 @@ class HostModule(ABC):
         self.port = None
         self.params = None
         self.start_time = None
+        self._log_file = os.path.join(tmpdir, 'nodes', self.host_name, 'tmp', 'activate.log')
 
     def start(self, port, params, callback, finish_hook):
         """Start a test module"""

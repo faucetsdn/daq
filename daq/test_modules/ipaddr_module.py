@@ -4,10 +4,10 @@ from __future__ import absolute_import
 
 import time
 from datetime import datetime, timedelta
-import os
 import copy
+
+import logger
 from proto.system_config_pb2 import DhcpMode
-from daq.utils import ForkingLogger
 from .docker_module import DockerModule
 from .base_module import HostModule
 
@@ -37,8 +37,7 @@ class IpAddrModule(HostModule):
             ('dhcp change test', self._dhcp_change_test),
             ('analyze results', self._analyze)
         ]
-        log_file = os.path.join(self.tmpdir, 'nodes', self.host_name, 'tmp', 'activate.log')
-        self._logger = ForkingLogger('ipaddr', log_file)
+        self._logger = logger.get_logger('ipaddr', log_file=self._log_file)
         self._force_terminated = False
         self._timeout = None
 
