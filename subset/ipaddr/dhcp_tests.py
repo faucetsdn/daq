@@ -20,9 +20,9 @@ def main():
     description_ip_change = 'Device communicates after IP change.'
     description_private_address = 'Device supports all private address ranges.'
     description_dhcp_change = 'Device receives new IP address after IP change and port toggle.'
-    running_port_toggle = 'Running dhcp port_toggle test'
-    running_dhcp_change = 'Running dhcp change test'
-    running_ip_change = 'Running ip change test'
+    running_port_toggle = 'running dhcp port_toggle test'
+    running_dhcp_change = 'running dhcp change test'
+    running_ip_change = 'running ip change test'
     ip_notification = 'ip notification'
     result = None
     summary = None

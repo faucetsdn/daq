@@ -3,9 +3,10 @@
 from __future__ import absolute_import
 
 import os
-
 from google.protobuf import json_format
 import yaml
+
+import logger
 
 
 def yaml_proto(file_name, proto_func):
@@ -40,10 +41,44 @@ def dict_proto(message, proto_func, ignore_unknown_fields=False):
     return json_format.ParseDict(message, proto_func(), ignore_unknown_fields)
 
 
-def write_pid_file(pid_file, logger=None):
+def write_pid_file(pid_file, out_logger=None):
     """Write the PID of current process to file"""
     pid = os.getpid()
-    if logger:
-        logger.info('Writing pid %d to file %s', pid, pid_file)
+    if out_logger:
+        out_logger.info('Writing pid %d to file %s', pid, pid_file)
     with open(pid_file, 'w') as file:
         file.write(str(pid))
+
+
+class ForkingLogger:
+    """Simple wrapper class for logging to normal place and a file"""
+
+    def __init__(self, prefix, log_file):
+        self._prefix = prefix
+        self._logger = logger.get_logger('ipaddr')
+        self._log_file = log_file
+        os.makedirs(os.path.dirname(log_file))
+
+    def _write(self, prefix, fmt, *args):
+        with open(self._log_file, 'a') as output_stream:
+            output_stream.write('%s %s %s\n' % (self._prefix, prefix, fmt % args))
+
+    def debug(self, *args):
+        """Debug"""
+        self._logger.debug(*args)
+        self._write('DEBUG', *args)
+
+    def info(self, *args):
+        """Info log"""
+        self._logger.info(*args)
+        self._write('INFO ', *args)
+
+    def warning(self, *args):
+        """Warning log"""
+        self._logger.warning(*args)
+        self._write('WARN ', *args)
+
+    def error(self, *args):
+        """Error log"""
+        self._logger.error(*args)
+        self._write('ERROR', *args)
