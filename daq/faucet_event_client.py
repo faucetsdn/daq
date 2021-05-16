@@ -53,7 +53,7 @@ class FaucetEventClient():
                 connected = True
                 break
             except socket.error as err:
-                LOGGER.info("Failed to connect because: %s" % err)
+                LOGGER.info("Failed to connect because: %s", err)
         assert connected, "Failed to connect to %s after %d retries" % \
             (self._sock_path, self.FAUCET_RETRIES)
 
