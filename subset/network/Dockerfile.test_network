@@ -4,11 +4,11 @@ RUN $AG update && $AG install openjdk-8-jre
 
 RUN $AG update && $AG install openjdk-8-jdk git
 
-RUN $AG update && $AG install python python-setuptools python-pip netcat
+RUN $AG update && $AG install python3.8 python3-setuptools python3-pip netcat
 
 RUN $AG update && $AG install curl
 
-RUN pip install scapy
+RUN python3.8 -m pip install scapy
 
 COPY subset/network/ .
 

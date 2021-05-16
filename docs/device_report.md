@@ -53,7 +53,7 @@ Overall device result FAIL
 |Base|2|FAIL|1/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Connection|12|FAIL|3/5/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Security|13|FAIL|2/4/4|0/0/0|0/0/1|0/0/0|0/2/0|0/0/0|
-|NTP|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|NTP|3|PASS|2/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |DNS|1|SKIP|0/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Communication|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Protocol|2|FAIL|0/0/0|0/0/0|0/1/1|0/0/0|0/0/0|0/0/0|
@@ -64,7 +64,7 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required Pass|10|1|10|8|
+|Required Pass|10|1|11|8|
 |Required Pass for PoE Devices|0|0|1|0|
 |Required Pass for BACnet Devices|0|1|2|0|
 |Required Pass for IoT Devices|0|0|1|0|
@@ -97,7 +97,8 @@ Syntax: Pass / Fail / Skip
 |skip|dns.network.hostname_resolution|DNS|Required Pass|Device did not send any DNS requests|
 |pass|dot1x.dot1x|Other|Other|Authentication for 9a:02:57:1e:8f:01 succeeded.|
 |pass|ntp.network.ntp_support|NTP|Required Pass|Using NTPv4.|
-|pass|ntp.network.ntp_update|NTP|Required Pass|Device clock synchronized.|
+|pass|ntp.network.ntp_update_dhcp|NTP|Required Pass|Device clock synchronized.|
+|skip|ntp.network.ntp_update_dns|NTP|Required Pass|Device not configured for NTP via DNS|
 |skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
 |fail|protocol.bacext.pic|Protocol|Required Pass for BACnet Devices|PICS file defined however a BACnet device was not found.|
 |skip|protocol.bacext.version|Protocol|Required Pass for BACnet Devices|Bacnet device not found.|
@@ -557,11 +558,17 @@ Device supports NTP version 4.
 --------------------
 RESULT pass ntp.network.ntp_support Using NTPv4.
 --------------------
-ntp.network.ntp_update
+ntp.network.ntp_update_dhcp
 --------------------
-Device synchronizes its time to the NTP server.
+Device synchronizes its time to the NTP server using DHCP
 --------------------
-RESULT pass ntp.network.ntp_update Device clock synchronized.
+RESULT pass ntp.network.ntp_update_dhcp Device clock synchronized.
+--------------------
+ntp.network.ntp_update_dns
+--------------------
+Device synchronizes its time to the NTP server using DNS
+--------------------
+RESULT skip ntp.network.ntp_update_dns Device not configured for NTP via DNS
 --------------------
 connection.network.mac_oui
 --------------------

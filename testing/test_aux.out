@@ -38,21 +38,24 @@ RESULT pass security.discover.firmware version found: ?\xFF\xFF\x19,>u\x08\x00no
 RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT pass communication.network.type Broadcast packets received. Unicast packets received.
 RESULT pass ntp.network.ntp_support Using NTPv4.
-RESULT pass ntp.network.ntp_update Device clock synchronized.
+RESULT pass ntp.network.ntp_update_dhcp Device clock synchronized.
+RESULT skip ntp.network.ntp_update_dns Device not configured for NTP via DNS
 RESULT fail connection.network.mac_oui Manufacturer prefix not found!
 RESULT pass connection.network.mac_address Device MAC address is 9a:02:57:1e:8f:01
 RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
 RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT pass communication.network.type Broadcast packets received. Unicast packets received.
 RESULT fail ntp.network.ntp_support Not using NTPv4.
-RESULT fail ntp.network.ntp_update Device clock not synchronized with local NTP server.
+RESULT fail ntp.network.ntp_update_dhcp Device clock not synchronized with local NTP server.
+RESULT skip ntp.network.ntp_update_dns Device not configured for NTP via DNS
 RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0b
 RESULT pass connection.network.mac_address Device MAC address is 3c:5a:b4:1e:8f:0b
 RESULT fail dns.network.hostname_resolution Device sent DNS requests to servers other than the DHCP provided server
 RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 RESULT pass communication.network.type Broadcast packets received. Unicast packets received.
 RESULT skip ntp.network.ntp_support No NTP packets received.
-RESULT skip ntp.network.ntp_update Not enough NTP packets received.
+RESULT skip ntp.network.ntp_update_dhcp Not enough NTP packets received.
+RESULT skip ntp.network.ntp_update_dns Not enough NTP packets received.
 RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 RESULT pass connection.network.mac_address Device MAC address is 3c:5a:b4:1e:8f:0a
 RESULT pass dns.network.hostname_resolution Device sends DNS requests and resolves host names

@@ -1,18 +1,18 @@
-#!/bin/bash -e
+#!/bin/bash 
 
 REPORT=/tmp/report.txt
 
 MONITOR=/scans/monitor.pcap
 
 # General Network Tests
-python network_tests.py communication.network.min_send $MONITOR $TARGET_IP
-python network_tests.py communication.network.type $MONITOR $TARGET_IP
+python3.8 network_tests.py communication.network.min_send $MONITOR $TARGET_IP
+python3.8 network_tests.py communication.network.type $MONITOR $TARGET_IP
 
 cat network_tests.txt >> $REPORT
 
 # NTP Tests
-python ntp_tests.py ntp.network.ntp_support $MONITOR $TARGET_IP
-python ntp_tests.py ntp.network.ntp_update $MONITOR $TARGET_IP
+python3.8 ntp_tests.py ntp.network.ntp_support $MONITOR $TARGET_IP
+python3.8 ntp_tests.py ntp.network.ntp_update $MONITOR $TARGET_IP
 
 cat ntp_tests.txt >> $REPORT
 
@@ -20,6 +20,6 @@ cat ntp_tests.txt >> $REPORT
 ./run_macoui_test $TARGET_MAC $REPORT
 
 # DNS Tests
-python dns_tests.py dns.network.hostname_resolution $MONITOR $TARGET_IP
+python3.8 dns_tests.py dns.network.hostname_resolution $MONITOR $TARGET_IP
 
 cat dns_tests.txt >> $REPORT
