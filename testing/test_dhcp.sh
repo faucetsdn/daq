@@ -120,7 +120,7 @@ for iface in $(seq 1 6); do
       subnet1_ip=$(fgrep "ip notification 192.168." $activate_log | wc -l)
       subnet2_ip=$(fgrep "ip notification 10.255.255." $activate_log | wc -l)
       subnet3_ip=$(fgrep "ip notification 172.16.0." $activate_log | wc -l)
-      uniq_subnet_ips=$(fgrep "ip notification 172.16.0." $activate_log | awk '{print $7}' | uniq | wc -l)
+      uniq_subnet_ips=$(fgrep "ip notification 172.16.0." $activate_log | awk '{print $6}' | uniq | wc -l)
       echo "Device $iface subnet 1 ip: $subnet1_ip subnet 2 ip: $subnet2_ip subnet 3 ip: $subnet3_ip ip_changed: $((uniq_subnet_ips > 1))" | tee -a $TEST_RESULTS
     elif [ $iface == 3 ]; then
       echo "Device $iface long ip triggers: $((long_triggers > 0))" | tee -a $TEST_RESULTS
