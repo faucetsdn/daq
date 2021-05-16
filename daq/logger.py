@@ -13,6 +13,8 @@ from env import DAQ_RUN_DIR
 
 LOGGERS = {}
 _DEFAULT_LOG_FILE = os.path.join(DAQ_RUN_DIR, "daq.log")
+_LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
+FORMATTER = logging.Formatter(_LOG_FORMAT)
 
 def set_stackdriver_client(client, labels=None):
     """Sets stackdriver client"""
@@ -35,53 +37,34 @@ def _get_file_handler():
     return _get_file_handler.log_handler
 
 
+def _make_logger(name):
+    logger = logging.getLogger(name)
+    if not name:  # Root logger
+        logger.addHandler(_get_file_handler())
+        logger.addHandler(logging.StreamHandler(sys.stdout))
+    if name and set_stackdriver_client.stackdriver_handler:
+        logger.addHandler(set_stackdriver_client.stackdriver_handler)
+    return logger
+
+
+def _host_file_handler(log_file):
+    os.makedirs(os.path.dirname(log_file))
+    file_handler = WatchedFileHandler(log_file)
+    file_handler.setFormatter(FORMATTER)
+    return file_handler
+
+
 def get_logger(name=None, log_file=None):
     """Gets the named logger"""
-    if name not in LOGGERS:
-        LOGGERS[name] = logging.getLogger(name)
-        if not name:  # Root logger
-            LOGGERS[name].addHandler(_get_file_handler())
-            LOGGERS[name].addHandler(logging.StreamHandler(sys.stdout))
-        if name and set_stackdriver_client.stackdriver_handler:
-            LOGGERS[name].addHandler(set_stackdriver_client.stackdriver_handler)
 
     if log_file:
-        return ForkingLogger(LOGGERS[name], log_file)
+        logger = _make_logger(name)
+        logger.addHandler(_host_file_handler(log_file))
+    elif name not in LOGGERS:
+        logger = _make_logger(name)
+        LOGGERS[name] = logger
 
-    return LOGGERS[name]
-
-
-class ForkingLogger:
-    """Simple wrapper class for logging to normal place and a file"""
-
-    def __init__(self, logger, log_file):
-        self._logger = logger
-        self._log_file = log_file
-        os.makedirs(os.path.dirname(log_file))
-
-    def _write(self, prefix, fmt, *args):
-        with open(self._log_file, 'a') as output_stream:
-            output_stream.write('%s %s\n' % (prefix, fmt % args))
-
-    def debug(self, *args):
-        """Debug"""
-        self._logger.debug(*args)
-        self._write('DEBUG', *args)
-
-    def info(self, *args):
-        """Info log"""
-        self._logger.info(*args)
-        self._write('INFO ', *args)
-
-    def warning(self, *args):
-        """Warning log"""
-        self._logger.warning(*args)
-        self._write('WARN ', *args)
-
-    def error(self, *args):
-        """Error log"""
-        self._logger.error(*args)
-        self._write('ERROR', *args)
+    return logger
 
 
 def set_config(level='info', fmt=None, datefmt=None):

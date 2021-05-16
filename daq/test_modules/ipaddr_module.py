@@ -6,7 +6,6 @@ import time
 from datetime import datetime, timedelta
 import copy
 
-import logger
 from proto.system_config_pb2 import DhcpMode
 from .docker_module import DockerModule
 from .base_module import HostModule
@@ -37,7 +36,7 @@ class IpAddrModule(HostModule):
             ('dhcp change test', self._dhcp_change_test),
             ('analyze results', self._analyze)
         ]
-        self._logger = logger.get_logger('ipaddr', log_file=self._log_file)
+        self._logger = self.get_logger('ipaddr')
         self._force_terminated = False
         self._timeout = None
 
