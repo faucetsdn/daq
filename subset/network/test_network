@@ -11,8 +11,8 @@ python network_tests.py communication.network.type $MONITOR $TARGET_IP
 cat network_tests.txt >> $REPORT
 
 # NTP Tests
-python ntp_tests.py ntp.network.ntp_support $MONITOR
-python ntp_tests.py ntp.network.ntp_update $MONITOR
+python ntp_tests.py ntp.network.ntp_support $MONITOR $TARGET_IP
+python ntp_tests.py ntp.network.ntp_update $MONITOR $TARGET_IP
 
 cat ntp_tests.txt >> $REPORT
 

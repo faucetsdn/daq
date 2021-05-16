@@ -1,12 +1,15 @@
 from __future__ import absolute_import, division
-from scapy.all import NTP, rdpcap
+from scapy.all import NTP, DNSQR, rdpcap, DNS
 import sys
 import os
+import re
+import json
 
 arguments = sys.argv
 
 test_request = str(arguments[1])
 pcap_file = str(arguments[2])
+device_address = str(arguments[3])
 
 report_filename = 'ntp_tests.txt'
 ignore = '%%'
@@ -14,7 +17,8 @@ summary_text = ''
 result = 'fail'
 dash_break_line = '--------------------\n'
 description_ntp_support = 'Device supports NTP version 4.'
-description_ntp_update = 'Device synchronizes its time to the NTP server.'
+description_ntp_update_dhcp = 'Device synchronizes its time to the NTP server using DHCP.'
+description_ntp_update_dns = 'Device synchronizes its time to the NTP server using DNS'
 
 NTP_VERSION_PASS = 4
 LOCAL_PREFIX = '10.20.'
@@ -26,22 +30,25 @@ SECONDS_BETWEEN_1900_1970 = 2208988800
 OFFSET_ALLOWANCE = 0.128
 LEAP_ALARM = 3
 
+IP_REGEX = r'(([0-9]{1,3}\.){3}[0-9]{1,3})'
+NTP_SERVER_IP_SUFFIX = '.2'
+NTP_SERVER_HOSTNAME = 'ntp.daqlocal'
 
 def write_report(string_to_append):
     with open(report_filename, 'a+') as file_open:
         file_open.write(string_to_append)
 
 
-# Extracts the NTP version from the first client NTP packet
 def ntp_client_version(capture):
+    """ Extracts the NTP version from the first client NTP packet """
     client_packets = ntp_packets(capture, MODE_CLIENT)
     if len(client_packets) == 0:
         return None
     return ntp_payload(client_packets[0]).version
 
 
-# Filters the packets by type (NTP)
 def ntp_packets(capture, mode=None):
+    """ Filters the packets by type (NTP) """
     packets = []
     for packet in capture:
         if NTP in packet:
@@ -53,8 +60,30 @@ def ntp_packets(capture, mode=None):
     return packets
 
 
-# Extracts the NTP payload from a packet of type NTP
+def ntp_configured_by_dns():
+    """Checks module_config
+    """
+    module_config =  open('module_config.json')
+    module_config = json.load(module_config)
+    try:
+        ntp_by_dns = bool(module_config['modules']['network']['ntp_dns'])
+    except KeyError:
+        ntp_by_dns = False
+    return ntp_by_dns
+
+
+
+def dns_query_for_hostname(capture, mode=None):
+    """Finds if """
+    packets = []
+    for packet in capture:
+        if DNS in packet:
+            packets.append(packet.qd.qname)
+    return packets
+
+
 def ntp_payload(packet):
+    """ Extracts the NTP payload from a packet of type NTP """
     ip = packet.payload
     udp = ip.payload
     ntp = udp.payload
@@ -62,6 +91,7 @@ def ntp_payload(packet):
 
 
 def test_ntp_support():
+    """ Tests support for NTPv4 """
     capture = rdpcap(pcap_file)
     packets = ntp_packets(capture)
     if len(packets) > 0:
@@ -80,26 +110,60 @@ def test_ntp_support():
         return 'skip'
 
 
-def test_ntp_update():
-    capture = rdpcap(pcap_file)
-    packets = ntp_packets(capture)
-    if len(packets) < 2:
-        add_summary("Not enough NTP packets received.")
-        return 'skip'
-    # Check that DAQ NTP server has been used
-    using_local_server = False
+def dns_requests_for_hostname(hostname, packet_capture):
+    """Checks for DNS requests for a given hostname
+
+    Args:
+        packet_capture  path to tcpdump packet capture file
+        hostname        hostname to look for
+    
+    Returns:
+        true/false if any matching DNS requests detected to hostname
+    """
+    capture = rdpcap(packet_capture)
+    fqdn = hostname + '.'
+    for packet in capture:
+        if DNS in packet:
+            if (packet.qd.qname.decode("utf8") == fqdn):
+                return True
+    return False
+
+
+def ntp_server_from_ip(ip_address):
+    """Returns the IP address of the NTP server provided by DAQ
+
+    Args:
+        ip_address: IP address of the device under test
+
+    Returns:
+        IP address of NTP server 
+    """
+    return re.sub(r'\.\d+$', NTP_SERVER_IP_SUFFIX, ip_address)
+
+
+def check_ntp_synchronized(ntp_packets_array, ntp_server_ip):
+    """ Checks if NTP packets indicate a device is syncronized with the provided
+    IP address
+
+    Args: 
+        packet_capture  Array of scapy object of packet capture with NTP
+                        packets from  ntp_packets()  
+        ntp_server_ip   IP address of server to check 
+
+    Returns:
+        boolean true/false if synchronized with provided NTP server.
+    """
+
     local_ntp_packets = []
-    for packet in packets:
-        # Packet is to or from local NTP server
-        if ((packet.payload.dst.startswith(LOCAL_PREFIX) and
-                packet.payload.dst.endswith(NTP_SERVER_SUFFIX)) or
-                (packet.payload.src.startswith(LOCAL_PREFIX) and
-                    packet.payload.src.endswith(NTP_SERVER_SUFFIX))):
-            using_local_server = True
+    for packet in ntp_packets_array:
+        # Packet is to or from NTP server
+        if (packet.payload.dst == ntp_server_ip or packet.payload.dst == ntp_server_ip):
+            using_given_server = True
             local_ntp_packets.append(packet)
-    if not using_local_server or len(local_ntp_packets) < 2:
-        add_summary("Device clock not synchronized with local NTP server.")
-        return 'fail'
+
+    if not using_given_server or len(local_ntp_packets) < 2:
+        return False
+    
     # Obtain the latest NTP poll
     p1 = p2 = p3 = p4 = None
     for i in range(len(local_ntp_packets)):
@@ -122,9 +186,10 @@ def test_ntp_update():
                 p3 = p4 = None
             else:
                 p3 = local_ntp_packets[i]
+    
     if p1 is None or p2 is None:
-        add_summary("Device clock not synchronized with local NTP server.")
-        return 'fail'
+       return False
+
     t1 = ntp_payload(p1).sent
     t2 = ntp_payload(p1).time
     t3 = ntp_payload(p2).sent
@@ -142,6 +207,22 @@ def test_ntp_update():
 
     offset = abs((t2 - t1) + (t3 - t4))/2
     if offset < OFFSET_ALLOWANCE and not ntp_payload(p1).leap == LEAP_ALARM:
+        return True
+    else:
+        return False
+
+def test_ntp_update():
+    """Runs NTP Update Test """
+    capture = rdpcap(pcap_file)
+    packets = ntp_packets(capture)
+    if len(packets) < 2:
+        add_summary("Not enough NTP packets received.")
+        return 'skip'
+
+    local_ntp_ip = ntp_server_from_ip(device_address)
+    is_sync_with_local = check_ntp_synchronized(packets, local_ntp_ip)
+
+    if is_sync_with_local:
         add_summary("Device clock synchronized.")
         return 'pass'
     else:
@@ -153,7 +234,7 @@ def add_summary(text):
     global summary_text
     summary_text = summary_text + " " + text if summary_text else text
 
-
+"""
 write_report("{b}{t}\n{b}".format(b=dash_break_line, t=test_request))
 
 
@@ -165,3 +246,8 @@ elif test_request == 'ntp.network.ntp_update':
     result = test_ntp_update()
 
 write_report("RESULT {r} {t} {s}\n".format(r=result, t=test_request, s=summary_text.strip()))
+"""
+
+print(dns_requests_for_hostname('ntp.ubuntu.com','monitor.pcap'))
+print(ntp_server_from_ip('123.123.123.123'))
+print(ntp_configured_by_dns())
