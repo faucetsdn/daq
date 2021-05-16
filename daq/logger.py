@@ -56,14 +56,14 @@ def _host_file_handler(log_file):
 
 def get_logger(name=None, log_file=None):
     """Gets the named logger"""
-
     if log_file:
         logger = _make_logger(name)
         logger.addHandler(_host_file_handler(log_file))
     elif name not in LOGGERS:
         logger = _make_logger(name)
         LOGGERS[name] = logger
-
+    else:
+        logger = LOGGERS[name]
     return logger
 
 
