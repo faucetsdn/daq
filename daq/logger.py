@@ -62,12 +62,14 @@ def get_logger(name=None, log_file=None):
     return LOGGERS[name]
 
 
-def set_config(level='info'):
+def set_config(fmt=None, level='info'):
     """Sets config for all loggers"""
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
+    formatter = _FORMATTER if not fmt else (
+        logging.Formatter(fmt=fmt, datefmt=_DATE_FORMAT))
     for handler in root_logger.handlers:
-        handler.setFormatter(_FORMATTER)
+        handler.setFormatter(formatter)
 
 set_stackdriver_client.stackdriver_handler = None
 _get_file_handler.log_handler = None
