@@ -15,7 +15,7 @@ LOGGERS = {}
 _DEFAULT_LOG_FILE = os.path.join(DAQ_RUN_DIR, "daq.log")
 _LOG_FORMAT = "%(asctime)s %(name)-8s %(levelname)-7s %(message)s"
 _DATE_FORMAT = '%b %02d %H:%M:%S'
-_FORMATTER = logging.Formatter(_LOG_FORMAT)
+_FORMATTER = logging.Formatter(fmt=_LOG_FORMAT, datefmt=_DATE_FORMAT)
 
 def set_stackdriver_client(client, labels=None):
     """Sets stackdriver client"""
@@ -66,9 +66,8 @@ def set_config(level='info'):
     """Sets config for all loggers"""
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
-    formatter = logging.Formatter(fmt=_LOG_FORMAT, datefmt=_DATE_FORMAT)
     for handler in root_logger.handlers:
-        handler.setFormatter(formatter)
+        handler.setFormatter(_FORMATTER)
 
 set_stackdriver_client.stackdriver_handler = None
 _get_file_handler.log_handler = None
