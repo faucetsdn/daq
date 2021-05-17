@@ -35,7 +35,7 @@ class HostModule(ABC):
     def get_logger(self, log_name):
         """Get a logger that also logs to host-specific path"""
         log_file = os.path.join(self.tmpdir, 'nodes', self.host_name, 'tmp', 'activate.log')
-        return logger.get_logger(log_name, log_file)
+        return logger.get_logger(f'{log_name}.{self.host_name}', log_file)
 
     def start(self, port, params, callback, finish_hook):
         """Start a test module"""
