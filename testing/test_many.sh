@@ -98,8 +98,8 @@ cat inst/result.log
 results=$(fgrep [] inst/result.log | wc -l)
 timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
 ipaddr_timeouts=$(fgrep "ipaddr:TimeoutError" inst/result.log | wc -l)
-ip_notifications=$(fgrep "ip notification" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
-alternate_subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
+ip_notifications=$(fgrep "ip notification" inst/run-*/nodes/ipaddr*/tmp/module.log | wc -l)
+alternate_subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/module.log | wc -l)
 
 cat inst/run-*/scans/ip_triggers.txt
 static_ips=$(fgrep nope inst/run-*/scans/ip_triggers.txt | wc -l)
@@ -107,7 +107,7 @@ ntp_traffic=$(fgrep "RESULT fail base.startup.ntp" inst/run-*/nodes/ping*/tmp/re
 dns_traffic=$(fgrep "RESULT fail base.startup.dns" inst/run-*/nodes/ping*/tmp/result_lines.txt | wc -l)
 
 more inst/run-*/nodes/ping*/activate.log | cat
-more inst/run-*/nodes/ipaddr*/tmp/activate.log | cat
+more inst/run-*/nodes/ipaddr*/tmp/module.log | cat
 
 echo Found $results clean runs, $timeouts timeouts, and $static_ips static_ips.
 echo ipaddr had $ip_notifications notifications and $ipaddr_timeouts timeouts.

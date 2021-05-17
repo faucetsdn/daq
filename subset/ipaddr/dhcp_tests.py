@@ -10,7 +10,7 @@ DHCP_ACKNOWLEDGE = 5
 def main():
     """main"""
     scan_file = '/scans/test_ipaddr.pcap'
-    ipaddr_log = '/tmp/activate.log'
+    ipaddr_log = '/tmp/module.log'
     module_config_file = '/config/device/module_config.json'
     dhcp_ranges = []
     scan_file = '/scans/test_ipaddr.pcap'

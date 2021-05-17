@@ -98,8 +98,8 @@ for iface in $(seq 1 6); do
     ip_file=inst/run-9a02571e8f0$iface/scans/ip_triggers.txt
     report_file=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/report.txt
     base_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/activate.log
-    activate_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/activate.log
-    more $ip_file $report_file $base_log $activate_log | cat
+    module_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/module.log
+    more $ip_file $report_file $base_log $module_log | cat
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
@@ -107,7 +107,7 @@ for iface in $(seq 1 6); do
     ip_change=$(cat $report_file | fgrep 'pass connection.ipaddr.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
     if [ $iface == 6 ]; then
-      device_dhcp_timeouts=$(fgrep 'dhcp timeout after 120s lease time' $activate_log | wc -l)
+      device_dhcp_timeouts=$(fgrep 'dhcp timeout after 120s lease time' $module_log | wc -l)
       echo "Device $iface dhcp timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
       echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
@@ -118,10 +118,10 @@ for iface in $(seq 1 6); do
       echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
-      subnet1_ip=$(fgrep "ip notification 192.168." $activate_log | wc -l)
-      subnet2_ip=$(fgrep "ip notification 10.255.255." $activate_log | wc -l)
-      subnet3_ip=$(fgrep "ip notification 172.16.0." $activate_log | wc -l)
-      uniq_subnet_ips=$(fgrep "ip notification 172.16.0." $activate_log | awk '{print $6}' | uniq | wc -l)
+      subnet1_ip=$(fgrep "ip notification 192.168." $module_log | wc -l)
+      subnet2_ip=$(fgrep "ip notification 10.255.255." $module_log | wc -l)
+      subnet3_ip=$(fgrep "ip notification 172.16.0." $module_log | wc -l)
+      uniq_subnet_ips=$(fgrep "ip notification 172.16.0." $module_log | awk '{print $6}' | uniq | wc -l)
       echo "Device $iface subnet 1 ip: $subnet1_ip subnet 2 ip: $subnet2_ip subnet 3 ip: $subnet3_ip ip_changed: $((uniq_subnet_ips > 1))" | tee -a $TEST_RESULTS
     elif [ $iface == 3 ]; then
       echo "Device $iface long ip triggers: $((long_triggers > 0))" | tee -a $TEST_RESULTS
