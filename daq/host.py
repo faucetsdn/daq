@@ -493,7 +493,7 @@ class ConnectedHost:
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
         """Handle device trigger"""
         if not self.target_ip and not self.trigger_ready():
-            self.logger.warn('Target device %s ignoring premature trigger', self)
+            self.logger.warning('Target device %s ignoring premature trigger', self)
             return False
         if self.target_ip:
             self.logger.debug('Target device %s already triggered', self)

@@ -21,8 +21,6 @@ LOGGER = logger.get_logger('daq')
 ALT_LOG = logger.get_logger('mininet')
 
 _PID_FILE = os.path.join(DAQ_RUN_DIR, 'daq.pid')
-_LOG_FORMAT = "%(asctime)s %(name)-8s %(levelname)-7s %(message)s"
-_DATE_FORMAT = '%b %02d %H:%M:%S'
 
 _CONFIG_MIGRATIONS = {
     'sec_port': 'switch_setup.uplink_port',
@@ -76,7 +74,7 @@ class DAQ:
         daq_env = config.get('daq_loglevel', log_def)
         level = minilog.LEVELS.get(daq_env, minilog.LEVELS['info'])
 
-        logger.set_config(level=level, fmt=_LOG_FORMAT, datefmt=_DATE_FORMAT)
+        logger.set_config(level=level)
 
         # This handler is used by everything, so be permissive here.
         ROOT_LOG.handlers[0].setLevel(minilog.LEVELS['debug'])

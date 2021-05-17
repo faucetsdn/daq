@@ -15,7 +15,7 @@ Device 5 ip triggers: 1
 Device 5 num of ips: 3
 Device 5 ip change: 1
 Device 5 dhcp change: 1
-Device 6 DHCP timeouts: 1
+Device 6 dhcp timeouts: 1
 Device 6 ip change: 0
 Device 6 dhcp change: 0
 Done with tests

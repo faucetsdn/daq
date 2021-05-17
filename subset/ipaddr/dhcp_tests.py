@@ -10,7 +10,7 @@ DHCP_ACKNOWLEDGE = 5
 def main():
     """main"""
     scan_file = '/scans/test_ipaddr.pcap'
-    ipaddr_log = '/tmp/activate.log'
+    ipaddr_log = '/tmp/module.log'
     module_config_file = '/config/device/module_config.json'
     dhcp_ranges = []
     scan_file = '/scans/test_ipaddr.pcap'
@@ -20,9 +20,9 @@ def main():
     description_ip_change = 'Device communicates after IP change.'
     description_private_address = 'Device supports all private address ranges.'
     description_dhcp_change = 'Device receives new IP address after IP change and port toggle.'
-    running_port_toggle = 'Running dhcp port_toggle test'
-    running_dhcp_change = 'Running dhcp change test'
-    running_ip_change = 'Running ip change test'
+    running_port_toggle = 'running dhcp port_toggle test'
+    running_dhcp_change = 'running dhcp change test'
+    running_ip_change = 'running ip change test'
     ip_notification = 'ip notification'
     result = None
     summary = None
@@ -85,29 +85,34 @@ def main():
         return 'fail', 'No DHCP request received.'
 
     def _test_ip_change():
-
         fd = open(ipaddr_log, 'r')
         run_ip_change = False
         ip_change_ip = None
         for line in fd:
             if run_ip_change:
                 if ip_notification in line:
-                    ip_change_ip = line.split(ip_notification + ' ')[1].rstrip()
+                    ip_parts = line.split(ip_notification + ' ')[1].rstrip()
+                    ip_change_ip = ip_parts.split()[0]
                     break
             if running_ip_change in line:
                 run_ip_change = True
         fd.close()
 
-        if ip_change_ip is None:
+        if not run_ip_change:
             return 'skip', 'IP change test did not run.'
 
+        if not ip_change_ip:
+            return 'fail', 'No ip change found.'
+
+        print('ip_change looking for ping src IP %s' % ip_change_ip)
         capture = rdpcap(scan_file)
         pingFound = False
         for packet in capture:
-            if ICMP in packet and packet[IP].src == ip_change_ip:
-                pingFound = True
-        if pingFound:
-            return 'pass', 'Ping response received after IP change.'
+            if ICMP in packet:
+                if packet[IP].src == ip_change_ip:
+                    return 'pass', 'Ping response received after IP change.'
+                else:
+                    print('Unexpected ping src %s' % packet[IP].src)
         return 'fail', 'No ping response received after IP change.'
 
     def _test_private_address():
@@ -159,6 +164,7 @@ def main():
         result, summary = _test_dhcp_change()
         _write_report("{d}\n{b}".format(b=dash_break_line, d=description_dhcp_change))
 
+    print('%s is %s because %s' % (TEST_REQUEST, result, summary))
     _write_report("RESULT {r} {t} {s}\n".format(r=result, t=TEST_REQUEST, s=summary))
 
 

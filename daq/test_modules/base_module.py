@@ -2,8 +2,10 @@
 
 from __future__ import absolute_import
 
-import datetime
 from abc import ABC
+import datetime
+import os
+
 import logger
 
 
@@ -29,6 +31,12 @@ class HostModule(ABC):
         self.port = None
         self.params = None
         self.start_time = None
+
+    def get_logger(self, log_name):
+        """Get a logger that also logs to host-specific path"""
+        # TODO: Should be extracted to an intermediate InlineModule class.
+        log_file = os.path.join(self.tmpdir, 'nodes', self.host_name, 'tmp', 'module.log')
+        return logger.get_logger(f'{log_name}.{self.host_name}', log_file)
 
     def start(self, port, params, callback, finish_hook):
         """Start a test module"""

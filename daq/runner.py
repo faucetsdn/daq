@@ -194,12 +194,12 @@ class DAQRunner:
                 test_list.append('hold')
         config['test_list'] = test_list
         config['test_metadata'] = self._get_test_metadata()
-        LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
+        LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
-        LOGGER.info('Configured with tests %s' % tests_string)
-        LOGGER.info('DAQ version %s' % self._daq_version)
-        LOGGER.info('LSB release %s' % self._lsb_release)
-        LOGGER.info('system uname %s' % self._sys_uname)
+        LOGGER.info('Configured with tests %s', tests_string)
+        LOGGER.info('DAQ version %s', self._daq_version)
+        LOGGER.info('LSB release %s', self._lsb_release)
+        LOGGER.info('system uname %s', self._sys_uname)
 
     def _open_result_log(self):
         return open(self._RESULT_LOG_FILE, 'w')

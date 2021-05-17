@@ -18,7 +18,7 @@ LOGGER = logger.get_logger('exmodule')
 
 
 class ExternalModule(HostModule):
-    """Class for running non inline modules"""
+    """Class for running non-inline modules"""
 
     # pylint: disable=too-many-arguments
     def __init__(self, host, tmpdir, test_name, module_config, basedir="/"):
