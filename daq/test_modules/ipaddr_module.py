@@ -126,7 +126,8 @@ class IpAddrModule(HostModule):
 
     def ip_listener(self, target_ip):
         """Respond to a ip notification event"""
-        self._logger.info('Device %s ip notification %s', self.device, target_ip)
+        self._logger.info('Device %s ip notification %s %s',
+                          self.device, target_ip, self.host.target_ip)
         self.host.runner.ping_test(self.host.gateway.host, self.host.target_ip)
         if self._ip_callback:
             self._ip_callback()
