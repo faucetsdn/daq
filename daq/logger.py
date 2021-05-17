@@ -13,7 +13,8 @@ from env import DAQ_RUN_DIR
 
 LOGGERS = {}
 _DEFAULT_LOG_FILE = os.path.join(DAQ_RUN_DIR, "daq.log")
-_LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
+_LOG_FORMAT = "%(asctime)s %(name)-8s %(levelname)-7s %(message)s"
+_DATE_FORMAT = '%b %02d %H:%M:%S'
 _FORMATTER = logging.Formatter(_LOG_FORMAT)
 
 def set_stackdriver_client(client, labels=None):
@@ -61,11 +62,11 @@ def get_logger(name=None, log_file=None):
     return LOGGERS[name]
 
 
-def set_config(level='info', fmt=None, datefmt=None):
+def set_config(level='info'):
     """Sets config for all loggers"""
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
-    formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
+    formatter = logging.Formatter(fmt=_LOG_FORMAT, datefmt=_DATE_FORMAT)
     for handler in root_logger.handlers:
         handler.setFormatter(formatter)
 
