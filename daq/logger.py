@@ -13,6 +13,8 @@ from env import DAQ_RUN_DIR
 
 LOGGERS = {}
 _DEFAULT_LOG_FILE = os.path.join(DAQ_RUN_DIR, "daq.log")
+_LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
+_FORMATTER = logging.Formatter(_LOG_FORMAT)
 
 def set_stackdriver_client(client, labels=None):
     """Sets stackdriver client"""
