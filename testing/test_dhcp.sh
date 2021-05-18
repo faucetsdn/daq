@@ -4,8 +4,8 @@ source testing/test_preamble.sh
 
 echo DHCP Tests >> $TEST_RESULTS
 
-cat <<EOF > local/system.conf
-include=../config/system/default.yaml
+cat <<EOF > /tmp/daq.conf
+include=${DAQ_LIB}/config/system/default.yaml
 site_description="Multi-Device Configuration"
 switch_setup.uplink_port=7
 interfaces.faux-1.opts=
@@ -89,7 +89,7 @@ function kill_dhcp_client {
 # Check that killing the dhcp client on a device times out the ipaddr test.
 monitor_log "Target port 6 connect successful" "kill_dhcp_client daq-faux-6"
 build_if_not_release
-cmd/run -s settle_sec=0 dhcp_lease_time=120s
+DAQ_CONFIG_FILE=/tmp/daq.conf cmd/run -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 
