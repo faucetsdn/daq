@@ -23,7 +23,7 @@ class BaseGateway(ABC):
 
     TEST_IP_FORMAT = '192.168.84.%d'
 
-    def __init__(self, runner, name, port_set):
+    def __init__(self, runner, name, port_set, env_params=None):
         self.name = name
         self.runner = runner
         assert port_set > 0, 'port_set %d, must be > 0' % port_set
@@ -39,6 +39,9 @@ class BaseGateway(ABC):
         self.activated = False
         self.result_linger = False
         self.dhcp_monitor = None
+        self._env_params = env_params
+        self._ext_intf = env_params.get('ext_intf') if env_params else None
+        self._is_native = bool(self._ext_intf)
 
     def initialize(self):
         """Initialize the gateway host"""
@@ -52,18 +55,25 @@ class BaseGateway(ABC):
 
     def _initialize(self):
         host_name = 'gw%02d' % self.port_set
-        host_port = self._switch_port(self.GATEWAY_OFFSET)
+        host_port = 1 if self._is_native else self._switch_port(self.GATEWAY_OFFSET)
         LOGGER.info('Initializing gateway %s as %s/%d',
                     self.name, host_name, host_port)
         self.tmpdir = self._setup_tmpdir(host_name)
         cls = self._get_host_class()
+        env_vars = self._get_env_vars()
+        LOGGER.info('host env vars: %s', env_vars)
         vol_maps = [os.path.abspath(os.path.join(DAQ_RUN_DIR, 'config')) + ':/config/inst']
-        host = self.runner.add_host(
-            host_name, port=host_port, cls=cls, tmpdir=self.tmpdir, vol_maps=vol_maps)
+        host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir,
+                                    vol_maps=vol_maps, env_vars=env_vars)
         host.activate()
         self.host = host
-        LOGGER.info("Added networking host %s on port %d at %s",
-                    host_name, host_port, host.IP())
+        self.host_intf = self.runner.get_host_interface(host)
+        LOGGER.info("Added networking host %s on port %d at %s as %s",
+                    host_name, host_port, host.IP(), self.host_intf)
+
+        if self._is_native:
+            self._move_intf_to_host(self._ext_intf, host)
+            return
 
         dummy_name = 'dummy%02d' % self.port_set
         dummy_port = self._switch_port(self.DUMMY_OFFSET)
@@ -75,10 +85,10 @@ class BaseGateway(ABC):
                     dummy_name, dummy_port, dummy.IP())
 
         self.fake_target = self.TEST_IP_FORMAT % self.port_set
-        self.host_intf = self.runner.get_host_interface(host)
         LOGGER.debug('Adding fake target at %s to %s',
                      self.fake_target, self.host_intf)
         host.cmd('ip addr add %s dev %s' % (self.fake_target, self.host_intf))
+
         ping_retry = self._PING_RETRY_COUNT
         while not self._ping_test(self.host, self.dummy):
             ping_retry -= 1
@@ -91,6 +101,17 @@ class BaseGateway(ABC):
         assert self._ping_test(dummy, self.fake_target), 'fake ping failed'
         assert self._ping_test(
             self.host, dummy, src_addr=self.fake_target), 'reverse ping failed'
+
+    def _get_env_vars(self):
+        env_vars = []
+        if self._env_params:
+            for key, value in self._env_params.items():
+                env_vars.append(f'{key.upper()}={value}')
+        return env_vars
+
+    def _move_intf_to_host(self, iface, host):
+        result = self.runner.network.pri.cmd('ip link set %s netns %s' % (iface, host.pid))
+        LOGGER.info('Move iface %s into %s/%s: %s', iface, host, host.pid, result)
 
     @abstractmethod
     def _get_host_class(self):
@@ -128,15 +149,15 @@ class BaseGateway(ABC):
         target_mac = target['mac']
         if target_mac in self.targets:
             return True
-        LOGGER.warning('No target match found for %s in %s',
-                       target_mac, self.name)
         return False
 
     def _dhcp_callback(self, state, target, exception=None):
         if exception:
             LOGGER.error('Gateway DHCP exception %s', exception)
-        if self._is_target_expected(target) or exception:
-            self.runner.ip_notify(state, target, self, exception=exception)
+        expected = self._is_target_expected(target)
+        use_state = 'NEW' if (self._is_native and not expected) else state
+        if expected or self._is_native or exception:
+            self.runner.ip_notify(use_state, target, self, exception=exception)
 
     def _setup_tmpdir(self, base_name):
         tmpdir = os.path.join(DAQ_RUN_DIR, base_name)

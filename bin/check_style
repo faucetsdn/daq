@@ -21,7 +21,9 @@ rm -f $RESULTS
 failure=
 results=
 count=0
-files=`find daq/ bin/python/ testing/ -name \*.py -not -path daq/proto\*`
+files1=`find daq/ bin/python/ testing/ -name \*.py -not -path daq/proto\*`
+files2=`fgrep -v \# etc/check_files.txt`
+files="$files1 $files2"
 for file in $files; do
     echo Checking file $file... | tee -a $RESULTS.$count
     pylint --rcfile=$PYLINTRC $file > $RESULTS.$count &

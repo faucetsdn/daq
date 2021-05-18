@@ -309,7 +309,7 @@ class ConnectedHost:
             message = 'state was %s expected %s' % (self.state, expected)
             assert self.state == expected, message
         assert self.state != _STATE.TERM, 'host already terminated'
-        self.logger.debug('Target device %s state: %s -> %s', self, self.state, target)
+        self.logger.info('Target device %s state: %s -> %s', self, self.state, target)
         self.state = target
 
     def _build_switch_info(self) -> usi.SwitchInfo:
@@ -372,7 +372,7 @@ class ConnectedHost:
         self.record_result('acquire', state=MODE.EXEC)
         static_ip = self._get_static_ip()
         if static_ip:
-            self.logger.info('Target device %s using static ip', self)
+            self.logger.info('Target device %s using STATIC_IP %s', self, static_ip)
             self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
@@ -477,7 +477,7 @@ class ConnectedHost:
         if self.target_ip:
             self.target_ip = target_ip
         if self.test_host:
-            self.test_host.ip_listener(target_ip)
+            self.test_host.ip_listener(target_ip, state)
 
     def trigger_ready(self):
         """Check if this host is ready to be triggered"""

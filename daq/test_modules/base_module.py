@@ -47,7 +47,7 @@ class HostModule(ABC):
         self._finish_hook = finish_hook
         self.start_time = datetime.datetime.now()
 
-    def ip_listener(self, target_ip):
+    def ip_listener(self, target_ip, state):
         """Defaults to do nothing about ip notifications"""
 
     def heartbeat(self):

@@ -66,8 +66,9 @@ class TestNetwork:
         subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
         self._mininet_subnet = ip_network(subnet)
         self.topology = FaucetTopology(self.config)
-        self.ext_intf = self.topology.get_ext_intf()
         switch_setup = config.get('switch_setup', {})
+        self.ext_intf = switch_setup.get('data_intf')
+        self.ext_mac = switch_setup.get('data_mac')
         self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
         self.ext_gauge_ofpt = int(switch_setup.get('lo_port_2', self.DEFAULT_GAUGE_OF_PORT))
         self.ext_loip = switch_setup.get('mods_addr')
@@ -86,13 +87,15 @@ class TestNetwork:
         params['vol_maps'] = vol_maps if vol_maps else []
         host = self.net.addHost(name, cls, **params)
         try:
-            LOGGER.debug('Created host %s with pid %s/%s', name, host.pid, host.shell.pid)
             switch_link = self._retry_func(
                 partial(self.net.addLink, self.pri, host, port1=port, fast=False))
+            LOGGER.info('Created host %s with pid %s/%s, intf %s',
+                        name, host.pid, host.shell.pid, switch_link.intf1)
+            host.switch_intf = switch_link.intf1
             self.switch_links[host] = switch_link
             if self.net.built:
                 host.configDefault()
-                self._switch_attach(self.pri, switch_link.intf1)
+                self._switch_attach(self.pri, host.switch_intf)
         except Exception as e:
             host.terminate()
             raise e
@@ -142,6 +145,9 @@ class TestNetwork:
         """Gets the internal mininet subnet"""
         return copy.copy(self._mininet_subnet)
 
+    def _link_secondary(self, sec_intf):
+        self.pri.addIntf(sec_intf, port=1)
+
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
@@ -149,7 +155,7 @@ class TestNetwork:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
             sec_intf = mininet_link.Intf(self.ext_intf, node=DummyNode(), port=1)
-            self.pri.addIntf(sec_intf, port=1)
+            self._link_secondary(sec_intf)
         else:
             LOGGER.info('Creating ovs sec with dpid/port %s/%d', self.sec_dpid, self.sec_port)
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=self.OVS_CLS)
@@ -179,7 +185,7 @@ class TestNetwork:
 
     def is_device_port(self, dpid, port):
         """Check if the dpid/port combo is for a valid device"""
-        target_dpid = int(self.sec_dpid)
+        target_dpid = int(self.sec_dpid) if self.sec_dpid else None
         return dpid == target_dpid and port < self.sec_port
 
     def cli(self):
@@ -215,8 +221,17 @@ class TestNetwork:
         self.net.addController('gauge', controller=controller,
                                ip=target_ip, port=self.ext_gauge_ofpt)
 
-        LOGGER.debug("Adding secondary...")
-        self._create_secondary()
+    def activate(self, native_gateway=None):
+        """Activate the network"""
+
+        if native_gateway:
+            gateway_intf = str(native_gateway.host.switch_intf)
+            LOGGER.info('Setting native gateway %s on %s', native_gateway,
+                        gateway_intf)
+            self._link_secondary(native_gateway.host.switch_intf)
+        else:
+            LOGGER.debug("Adding secondary...")
+            self._create_secondary()
 
         LOGGER.info("Starting mininet...")
         self.net.start()

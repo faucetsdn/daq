@@ -15,13 +15,13 @@ LOGGER = logger.get_logger('gateway')
 class ContainerGateway(BaseGateway):
     """Gateway collection class for managing testing services"""
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._scan_monitor = None
         self.dhcp_monitor = None
 
-    def _initialize(self):
-        super()._initialize()
+    def _initialize(self, **kwargs):
+        super()._initialize(**kwargs)
         self._change_lease_time(
             self.runner.config.get('initial_dhcp_lease_time'))
         self._startup_scan(self.host)
@@ -31,8 +31,8 @@ class ContainerGateway(BaseGateway):
         self.dhcp_monitor.start()
 
     def _get_host_class(self):
-        cls = docker_host.make_docker_host(
-            'daqf/networking', prefix='daq', network='bridge')
+        network = 'none' if self._ext_intf else 'bridge'
+        cls = docker_host.make_docker_host('daqf/networking', prefix='daq', network=network)
         # Work around an instability in the faucet/clib/docker library, b/152520627.
         if getattr(cls, 'pullImage'):
             setattr(cls, 'pullImage', lambda x: True)

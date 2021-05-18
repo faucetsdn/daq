@@ -1,18 +1,32 @@
 #!/bin/bash -e
 
 LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
-EXT_IF=eth0
+EXT_INTF=${EXT_INTF:-eth0}
+NET_PREFIX=${NET_PREFIX:-10.20}
 
 function finished {
     echo gateway terminating
 }
 trap finished EXIT
 
-echo Starting networking for $LOCAL_IF and $EXT_IF
+echo Starting networking for $LOCAL_IF and $EXT_INTF
 
-while ! ifconfig -a | fgrep -q $LOCAL_IF; do
-    echo Waiting for interface $LOCAL_IF to exist...
-    sleep 1
+while ! ip link show $EXT_INTF; do
+    sleep 5
+done
+
+if [[ $EXT_MAC ]]; then
+    echo Setting interface $EXT_INTF mac to $EXT_MAC
+    ip link set $EXT_INTF address $EXT_MAC
+fi
+
+if ! ip addr show $EXT_INTF | fgrep 'inet '; then
+    echo No inet address for $EXT_INTF, initiating dhcp...
+    dhclient $EXT_INTF
+fi
+
+while ! ip link show $LOCAL_IF; do
+    sleep 5
 done
 
 # Enable a web-server for configuration access.
@@ -21,28 +35,31 @@ mkdir -p /tmp/public
 
 # Enable NAT to the outside world, through the docker bridge.
 echo 1 > /proc/sys/net/ipv4/ip_forward
-iptables -t nat -A POSTROUTING -o $EXT_IF -j MASQUERADE
-iptables -A FORWARD -i $EXT_IF -o $LOCAL_IF -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i $LOCAL_IF -o $EXT_IF -j ACCEPT
+iptables -t nat -A POSTROUTING -o $EXT_INTF -j MASQUERADE
+iptables -A FORWARD -i $EXT_INTF -o $LOCAL_IF -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i $LOCAL_IF -o $EXT_INTF -j ACCEPT
+
+# Only do DHCP on the internal network
+echo interface=$LOCAL_IF >> /etc/dnsmasq.conf
 
 # Pick a random DHCP range to force clients to pick a new address.
 random_subnet=$((RANDOM % 99 + 1))
 subnet=${IP_SUBNET:-$random_subnet}
-echo Configuring with subnet 10.20.$subnet.XX
-echo dhcp-range=10.20.$subnet.100,10.20.$subnet.254 >> /etc/dnsmasq.conf
+echo Configuring with subnet $NET_PREFIX.$subnet.XX
+echo dhcp-range=$NET_PREFIX.$subnet.100,$NET_PREFIX.$subnet.254 >> /etc/dnsmasq.conf
 
 # Use ourself as the DNS and NTP server explicitly specified
-ip addr add 10.20.$subnet.2 dev $LOCAL_IF
-echo dhcp-option=6,10.20.$subnet.2 >> /etc/dnsmasq.conf
-echo dhcp-option=42,10.20.$subnet.2 >> /etc/dnsmasq.conf
+ip addr add $NET_PREFIX.$subnet.2 dev $LOCAL_IF
+echo dhcp-option=6,$NET_PREFIX.$subnet.2 >> /etc/dnsmasq.conf
+echo dhcp-option=42,$NET_PREFIX.$subnet.2 >> /etc/dnsmasq.conf
 
 if ! ip addr show dev $LOCAL_IF | fgrep -q 'inet '; then
-  echo Assigning gateway address 10.20.$subnet.1/16
-  ip addr add 10.20.$subnet.1/16 dev $LOCAL_IF
+  echo Assigning gateway address $NET_PREFIX.$subnet.1/16
+  ip addr add $NET_PREFIX.$subnet.1/16 dev $LOCAL_IF
 fi
 
 # For static ip devices' default gateway IP
-ip addr add 10.20.255.254/16 dev $LOCAL_IF
+ip addr add $NET_PREFIX.255.254/16 dev $LOCAL_IF
 
 # Block execution until first host attaches unless being used as a faux device.
 if [ "$LOCAL_IF" != faux-eth0 ]; then
@@ -75,6 +92,13 @@ fi
 echo Starting expired tls server on port 443 https.
 mv /root/nginx/nginxfail.conf /etc/nginx/nginx.conf
 service nginx start
+
+if [[ $EXT_INTF != eth0 ]]; then
+    # Relay arp messages to facilitate discovery
+    echo ./relay_arp $EXT_INTF $LOCAL_IF
+    ./relay_arp $EXT_INTF $LOCAL_IF 1>&2 &
+    sleep 2
+fi
 
 echo Blocking for all eternity.
 ./autorestart_dnsmasq

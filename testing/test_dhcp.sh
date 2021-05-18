@@ -96,6 +96,7 @@ cat inst/result.log | sort | tee -a $TEST_RESULTS
 for iface in $(seq 1 6); do
     intf_mac=9a:02:57:1e:8f:0$iface
     ip_file=inst/run-9a02571e8f0$iface/scans/ip_triggers.txt
+    host_pcap=inst/run-9a02571e8f0$iface/scans/test_ipaddr.pcap
     report_file=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/report.txt
     base_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/activate.log
     module_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/module.log
@@ -103,19 +104,19 @@ for iface in $(seq 1 6); do
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
-    dhcp_change=$(cat $report_file | fgrep 'pass connection.ipaddr.disconnect_ip_change' | wc -l)
+    discon_change=$(cat $report_file | fgrep 'pass connection.ipaddr.disconnect_ip_change' | wc -l)
     ip_change=$(cat $report_file | fgrep 'pass connection.ipaddr.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
     if [ $iface == 6 ]; then
       device_dhcp_timeouts=$(fgrep 'dhcp timeout after 120s lease time' $module_log | wc -l)
       echo "Device $iface dhcp timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
-      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface disconnect change: $((discon_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 5 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 3))" | tee -a $TEST_RESULTS
       echo "Device $iface num of ips: $num_ips" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
-      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface disconnect change: $((discon_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
       subnet1_ip=$(fgrep "ip notification 192.168." $module_log | wc -l)
@@ -129,7 +130,8 @@ for iface in $(seq 1 6); do
     else
       echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
     fi
-
+    echo $host_pcap
+    tcpdump -en -r $host_pcap
 done
 
 echo Done with tests | tee -a $TEST_RESULTS

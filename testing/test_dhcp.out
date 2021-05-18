@@ -14,8 +14,8 @@ Device 4 subnet 1 ip: 1 subnet 2 ip: 1 subnet 3 ip: 3 ip_changed: 1
 Device 5 ip triggers: 1
 Device 5 num of ips: 3
 Device 5 ip change: 1
-Device 5 dhcp change: 1
+Device 5 disconnect change: 1
 Device 6 dhcp timeouts: 1
 Device 6 ip change: 0
-Device 6 dhcp change: 0
+Device 6 disconnect change: 0
 Done with tests
