@@ -12,6 +12,7 @@ alt_faux=
 image=daqf/faux1
 build=
 realintf=
+net_opt=
 
 cd $ROOT
 source bin/config_base.sh
@@ -26,7 +27,7 @@ fi
 
 # If the argument is -n then create a networking container
 if [ "$1" == "-n" ]; then
-    networking=1
+    networking=gateway
     shift
 fi
 
@@ -63,7 +64,6 @@ fi
 if [ -n "$networking" ]; then
     container_prefix=daq-networking
     image=daqf/networking
-    net_opt=
     docker_args+=" -e IP_SUBNET=99"
 else
     container_prefix=daq-faux
@@ -108,7 +108,7 @@ elif [ -n "$test_config" ]; then
     echo Config dir $CONFIG_DIR not found.
 fi
 
-if [ -n "$realintf" ]; then
+if [[ -n $realintf ]]; then
     docker_args+=" -e LOCAL_IF=$realintf"
 else
     docker_args+=" -e LOCAL_IF=faux-eth0"
@@ -119,8 +119,8 @@ pid=$(docker inspect --format="{{ .State.Pid }}" $cid)
 
 echo DAQ autoclean docker kill $CONTAINER
 
-if [ -n "$realintf" ]; then
-    echo Moving $realintf into $pid...
+if [[ -n $realintf ]]; then
+    echo Moving interface $realintf into $pid...
     sudo ip link set $realintf netns $pid
     docker exec $CONTAINER ip link set $realintf up
     docker exec $CONTAINER ip link show $realintf
@@ -135,7 +135,7 @@ else
     docker exec $CONTAINER ip link set faux-eth0 up
 fi
 
-if [ -n "$create_local" ]; then
+if [[ -n $create_local ]]; then
     sudo ip addr add 10.20.0.1/16 broadcast 10.20.255.255 dev $virtintf
     sudo ip addr show dev $virtintf
 fi

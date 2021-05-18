@@ -112,7 +112,7 @@ more inst/run-*/nodes/ping*/activate.log | cat
 more inst/run-*/nodes/ipaddr*/tmp/module.log | cat
 
 echo Found $results clean runs, $timeouts timeouts, and $static_ips static_ips.
-echo ipaddr had $ip_notifications notifications and $ipaddr_timeouts timeouts, with $alternate_subnet_ip alternate ips.
+echo ipaddr had $ip_notifications notifications, $ipaddr_timeouts timeouts, and $alternate_subnet_ip alternates.
 
 # This is broken -- should have many more results available!
 echo Enough results: $((results >= 5*RUN_LIMIT/10)) | tee -a $TEST_RESULTS

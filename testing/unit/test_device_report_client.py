@@ -127,6 +127,7 @@ class DeviceDeviceReportPortEventsWithTestResultsTestCase(DeviceReportClientTest
         self._server.process_port_state("name", "port", False)
         self._server.process_port_state("name", "port", True)
         self._client.send_device_result("mac", "passed")
+        time.sleep(1)  # Wait for async RPC to complete.
         self.assertEqual(len(self._received_port_events), 3)
 
 

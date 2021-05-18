@@ -58,7 +58,7 @@ EOF
 function capture_test_results {
     module_name=$1
     for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
-      fgrep -h RESULT inst/run-$mac/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
+      fgrep -h 'RESULT ' inst/run-$mac/nodes/$module_name*/tmp/report.txt | tee -a $TEST_RESULTS
     done
 }
 
@@ -142,7 +142,7 @@ cmd/run -s
 
 # Capture RESULT lines from ping activation logs (not generated report).
 for mac in 9a02571e8f01 3c5ab41e8f0b 3c5ab41e8f0a; do
-  fgrep -h RESULT inst/run-$mac/nodes/ping*/activate.log \
+  fgrep -h 'RESULT ' inst/run-$mac/nodes/ping*/activate.log \
     | sed -e 's/\s*\(%%.*\)*$//' | tee -a $TEST_RESULTS
 done
 
@@ -181,7 +181,7 @@ cat inst/run-3c5ab41e8f0a/nodes/ping*/tmp/lizard.txt | tee -a $TEST_RESULTS
 
 # Add the results for cloud tests into a different file, since cloud tests may not run if
 # our test environment isn't set up correctly. See bin/test_daq for more insight.
-fgrep -h RESULT inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
+fgrep -h 'RESULT ' inst/run-*/nodes/udmi*/tmp/report.txt | redact | tee -a $GCP_RESULTS
 
 # Check that configuration is properly mapped into the container.
 fgrep 'Config contains' inst/run-*/nodes/udmi*/activate.log | tee -a $TEST_RESULTS

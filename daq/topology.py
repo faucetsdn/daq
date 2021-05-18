@@ -64,6 +64,7 @@ class FaucetTopology:
         self._port_targets = {}
         self._set_devices = {}
         self._egress_vlan = self.config.setdefault('run_trigger', {}).get('egress_vlan')
+        self._native_vlan = self.config.setdefault('run_trigger', {}).get('native_vlan')
         self.topology = None
 
     def initialize(self, pri):
@@ -151,7 +152,7 @@ class FaucetTopology:
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
         device_set, vlan = self._populate_set_devices(device, port_set)
-        assert vlan
+        assert vlan, 'device as no vlan to direct'
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
@@ -234,7 +235,10 @@ class FaucetTopology:
     def _make_pri_trunk_interface(self):
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.pri_name
-        interface['tagged_vlans'] = self._vlan_tags()
+        if self._native_vlan:
+            interface['native_vlan'] = self._native_vlan
+        else:
+            interface['tagged_vlans'] = self._vlan_tags()
         interface['name'] = self.PRI_TRUNK_NAME
         return interface
 
@@ -420,7 +424,7 @@ class FaucetTopology:
                                    udp_src=67, udp_dst=68, vlan_vid=egress_vlan,
                                    swap_vid=device.vlan, port=self._OFPP_IN_PORT, allow=True)
 
-        # Allow any unrecognized requests for learning, but don't reflect.
+        # Allow any unrecognized DHCP requests for learning, but don't reflect.
         self._add_acl_rule(acl_list, dl_type='0x800', allow=True,
                            nw_proto=17, udp_src=68, udp_dst=67)
 
@@ -440,12 +444,12 @@ class FaucetTopology:
                     if device_port:
                         self._add_dot1x_allow_rule(secondary_acl, [device_port], vlan_vid=vlan)
 
-    def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vlan=None):
+    def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vid=None):
         """Add dot1x reflection rule to acl"""
         if vlan_vid:
             self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, vlan_vid=vlan_vid)
-        elif out_vlan:
-            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vlan=out_vlan)
+        elif out_vid:
+            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vid=out_vid)
 
     def _generate_main_acls(self):
         incoming_acl = []
@@ -474,7 +478,7 @@ class FaucetTopology:
 
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)
-            self._add_dot1x_allow_rule(portset_acls[port_set], [self.PRI_TRUNK_PORT], out_vlan=vlan)
+            self._add_dot1x_allow_rule(portset_acls[port_set], [self.PRI_TRUNK_PORT], out_vid=vlan)
             self._add_acl_rule(portset_acls[port_set], allow=1)
             acls[self.PORTSET_ACL_FORMAT % (self.pri_name, port_set)] = portset_acls[port_set]
 
@@ -510,7 +514,7 @@ class FaucetTopology:
         output = {}
         self._maybe_apply(output, 'port', kwargs)
         self._maybe_apply(output, 'ports', kwargs)
-        self._maybe_apply(output, 'vlan_vid', kwargs, 'out_vlan')
+        self._maybe_apply(output, 'vlan_vid', kwargs, 'out_vid')
         self._maybe_apply(output, 'swap_vid', kwargs)
         self._maybe_apply(output, 'pop_vlans', in_vlan)
 
@@ -553,7 +557,7 @@ class FaucetTopology:
         rules = []
 
         vlan = self._get_port_vlan(port)
-        self._add_dot1x_allow_rule(rules, [self.sec_port], out_vlan=vlan)
+        self._add_dot1x_allow_rule(rules, [self.sec_port], out_vid=vlan)
 
         if self._device_specs and port in self._port_targets:
             target = self._port_targets[port]
