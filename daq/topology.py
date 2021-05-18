@@ -152,7 +152,7 @@ class FaucetTopology:
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
         device_set, vlan = self._populate_set_devices(device, port_set)
-        assert vlan, 'device as no vlan to direct'
+        assert vlan, 'device has no vlan to direct'
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan

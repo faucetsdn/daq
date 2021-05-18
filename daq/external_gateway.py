@@ -27,8 +27,8 @@ class ExternalGateway(BaseGateway):
         self.dhcp_monitor = None
         self._tap_intf = None
 
-    def _initialize(self, **kwargs):
-        super()._initialize(**kwargs)
+    def _initialize(self):
+        super()._initialize()
         log_file = os.path.join(self.tmpdir, 'dhcp_monitor.txt')
         self.dhcp_monitor = dhcp_monitor.DhcpMonitor(self.runner, self.runner.network.pri,
                                                      self._dhcp_callback, log_file=log_file,
