@@ -229,7 +229,6 @@ def test_ntp_update():
         for test in ntp_tests:
             ntp_tests[test].add_summary("Not enough NTP packets received.")
             ntp_tests[test].result = test_result.SKIP
-            ntp_tests[test].write_results(report_filename)
     else:
         test_dns = ntp_configured_by_dns()
         local_ntp_ip = ntp_server_from_ip(device_address)

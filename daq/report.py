@@ -270,7 +270,9 @@ class ReportGenerator:
 
                 # The device overall fails if any result is unexpected
                 if result_dict["result"] != required_result:
-                    if required_result == 'notfail' and result_dict["result"] == 'fail':
+                    if required_result == 'notfail' and result_dict["result"] != 'fail':
+                        pass
+                    else:
                         passes = False
 
                 if result_dict["result"] == 'gone':
@@ -336,8 +338,8 @@ class ReportGenerator:
                         # TODO remove when info tests are removed
                         if result_dict["result"] == 'info':
                             result_dict["result"] = 'pass'
-                        elif (result_dict["result"] == 'skip' 
-                            and test_info['required'] == 'notfail'):
+                        elif (result_dict["result"] == 'skip'
+                              and test_info['required'] == 'notfail'):
                             result = 'pass'
                         else:
                             result = "fail"
