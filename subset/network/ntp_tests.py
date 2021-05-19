@@ -66,7 +66,7 @@ def ntp_configured_by_dns():
 
     Parameter must be (bool) True, else will be considered false
     """
-    module_config =  open(MODULE_CONFIG_PATH)
+    module_config = open(MODULE_CONFIG_PATH)
     module_config = json.load(module_config)
     try:
         ntp_by_dns = (module_config['modules']['network']['ntp_dns'])
@@ -191,8 +191,8 @@ def test_ntp_support():
     """ Tests support for NTPv4 """
     capture = rdpcap(pcap_file)
     packets = ntp_packets(capture)
-    test_ntp = test_result.test_result( name='ntp.network.ntp_support',
-                                        description=description_ntp_support)
+    test_ntp = test_result.test_result(name='ntp.network.ntp_support',
+                                       description=description_ntp_support)
     if len(packets) > 0:
         version = ntp_client_version(packets)
         if version is None:
@@ -213,7 +213,7 @@ def test_ntp_support():
 
 def test_ntp_update():
     """Runs NTP Update Test for both DHCP and DNS"""
-    # Used to always print test output in the same order 
+    # Used to always print test output in the same order
     ntp_tests = {}
     ntp_tests[TEST_DHCP] = test_result.test_result(
         name='ntp.network.ntp_update_dhcp',
@@ -221,7 +221,7 @@ def test_ntp_update():
     ntp_tests[TEST_DNS] = test_result.test_result(
         name='ntp.network.ntp_update_dns',
         description=description_ntp_update_dns)
-    
+
     capture = rdpcap(pcap_file)
     packets = ntp_packets(capture)
 
@@ -236,20 +236,20 @@ def test_ntp_update():
         device_sync_local_server = check_ntp_synchronized(packets, local_ntp_ip)
 
         if test_dns:
-            active_test = TEST_DNS
+            active = TEST_DNS
             ntp_tests[TEST_DHCP].add_summary("Device not configured for NTP via DHCP")
             ntp_tests[TEST_DHCP].result = test_result.SKIP
         else:
-            active_test = TEST_DHCP
+            active = TEST_DHCP
             ntp_tests[TEST_DNS].add_summary("Device not configured for NTP via DNS")
             ntp_tests[TEST_DNS].result = test_result.SKIP
 
         if device_sync_local_server:
-            ntp_tests[active_test].add_summary("Device clock synchronized.")
-            ntp_tests[active_test].result = test_result.PASS
+            ntp_tests[active].add_summary("Device clock synchronized.")
+            ntp_tests[active].result = test_result.PASS
         else:
-            ntp_tests[active_test].add_summary("Device clock not synchronized with local NTP server.")
-            ntp_tests[active_test].result = test_result.FAIL
+            ntp_tests[active].add_summary("Device clock not synchronized with local NTP server.")
+            ntp_tests[active].result = test_result.FAIL
 
     ntp_tests[TEST_DHCP].write_results(report_filename)
     ntp_tests[TEST_DNS].write_results(report_filename)
