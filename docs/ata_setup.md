@@ -1,7 +1,11 @@
 # Assembly Test Appliance (ATA) Setup Documentation
 
-The [ata.yaml](../config/system/ata.yaml) daq configuration file
-shows a baseline example of how to setup a DAQ install for network diagnostics.
+Start with a basic [DAQ Quickstart Setup](quickstart.md), and make sure the
+base install is working. No physical switch in required, rather the system
+just needs a single network port (either USB adapter or built-in NIC will work).
+
+The [ata.yaml](../config/system/ata.yaml) DAQ configuration file
+shows a baseline example of how to setup an install for network diagnostics.
 
 Key fields of interest:
 * `switch_setup:`
