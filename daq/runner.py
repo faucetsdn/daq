@@ -15,7 +15,6 @@ from datetime import datetime, timedelta, timezone
 from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
-from device_report_client import DeviceReportClient
 from session_server import SessionServer
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
@@ -238,19 +237,12 @@ class DAQRunner:
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
-        server_address = self.config.get('device_reporting', {}).get('server_address')
-        LOGGER.info('Device result handler configuration %s:%s %s',
-                    server_port, server_address, egress_vlan)
+        LOGGER.info('Device result handler listening on port %s %s', server_port, egress_vlan)
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             timeout = self.config['device_reporting'].get('rpc_timeout_sec')
-            if server_address:
-                handler = DeviceReportClient(server_address=server_address,
-                                             server_port=server_port, rpc_timeout_sec=timeout)
-            else:
-                # TODO: Make this all configured from run_trigger not device_reporting
-                handler = SessionServer(on_session=self._on_session,
-                                        server_port=server_port)
+            # TODO: Make this all configured from run_trigger not device_reporting
+            handler = SessionServer(on_session=self._on_session, server_port=server_port)
             return handler
         return None
 
