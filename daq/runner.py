@@ -240,7 +240,6 @@ class DAQRunner:
         LOGGER.info('Device result handler listening on port %s %s', server_port, egress_vlan)
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
-            timeout = self.config['device_reporting'].get('rpc_timeout_sec')
             # TODO: Make this all configured from run_trigger not device_reporting
             handler = SessionServer(on_session=self._on_session, server_port=server_port)
             return handler

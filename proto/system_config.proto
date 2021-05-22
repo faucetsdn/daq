@@ -274,7 +274,4 @@ message Interface {
 message DeviceReporting {
   // Server port
   int32 server_port = 1;
-
-  // RPC timeout in seconds
-  int32 rpc_timeout_sec = 3;
 }
