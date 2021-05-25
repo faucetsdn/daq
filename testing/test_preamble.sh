@@ -75,7 +75,7 @@ function redact {
         -e 's/[A-Za-z]{3} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/XXX/' \
         -e 's/[0-9]{4}-(0|1)[0-9]-(0|1|2|3)[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2}(\+00:00)?/XXX/g' \
         -e 's/[0-9]+\.[0-9]{2} seconds/XXX/' \
-        -e 's/0\.[0-9]+s latency/XXX/' \
+        -e 's/-?0\.[0-9]+s latency/XXX/' \
         -e 's/open\|filtered/closed/' \
         -e 's/DAQ version.*//' \
         -e 's/Seq Index.*//' \

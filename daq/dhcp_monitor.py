@@ -15,12 +15,14 @@ class DhcpMonitor:
 
     DHCP_START_PATTERN = 'BOOTP/DHCP'
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
-    DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-z0-9:]+)'
+    DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-f0-9:]+)'
     DHCP_TYPE_PATTERN = 'DHCP-Message .*53.*, length 1: ([a-zA-Z]+)'
-    DHCP_PATTERN = '(%s)|(%s)|(%s)|(%s)' % (DHCP_START_PATTERN,
-                                            DHCP_IP_PATTERN,
-                                            DHCP_MAC_PATTERN,
-                                            DHCP_TYPE_PATTERN)
+    DHCP_ARP_PATTERN = '([a-f0-9:]+) > ff:ff:ff:ff:ff:ff, ethertype ARP .* tell ([0-9.]+),'
+    DHCP_PATTERN = '(%s)|(%s)|(%s)|(%s)|(%s)' % (DHCP_START_PATTERN,
+                                                 DHCP_IP_PATTERN,
+                                                 DHCP_MAC_PATTERN,
+                                                 DHCP_TYPE_PATTERN,
+                                                 DHCP_ARP_PATTERN)
     DHCP_THRESHHOLD_SEC = 80
 
     # pylint: disable=too-many-arguments
@@ -40,14 +42,14 @@ class DhcpMonitor:
 
     def start(self):
         """Start monitoring DHCP"""
-        LOGGER.info('DHCP monitor %s waiting for replies...', self.name,)
+        LOGGER.info('DHCP monitor %s on %s', self.name, self.intf_name)
         if self.log_file:
             LOGGER.debug('Logging results to %s', self.log_file)
             self.dhcp_log = open(self.log_file, "w")
         self.scan_start = int(time.time())
         # Because there's buffering somewhere, can't reliably filter out DHCP with "src port 67"
         tcp_filter = ""
-        flags = "-v -l"  # use line buffering
+        flags = "-Q out -v -l"  # use line buffering
         helper = tcpdump_helper.TcpdumpHelper(self.host, tcp_filter, packets=None,
                                               vflags=flags, timeout=None, blocking=False,
                                               intf_name=self.intf_name)
@@ -80,6 +82,11 @@ class DhcpMonitor:
             elif match.group(6):
                 LOGGER.debug('Message type %s', match.group(7))
                 self._dhcp_complete(match.group(7))
+            elif match.group(8):
+                LOGGER.debug('ARP message %s %s', match.group(9), match.group(10))
+                self.target_mac = match.group(9)
+                self.target_ip = match.group(10)
+                self._dhcp_complete('STATIC')
             else:
                 LOGGER.info('Unknown dhcp match: %s', dhcp_line.strip())
 
@@ -94,14 +101,17 @@ class DhcpMonitor:
             self.dhcp_traffic = None
 
     def _dhcp_complete(self, dhcp_type):
-        if dhcp_type not in ('ACK', 'Offer'):
+        if dhcp_type not in ('ACK', 'Offer', 'STATIC'):
             return
+        is_dhcp = dhcp_type != 'STATIC'
         assert self.target_ip, 'dhcp missing ip address'
         assert self.target_mac, 'dhcp missing mac address'
         delta = int(time.time()) - self.device_dhcps.get(self.target_mac, self.scan_start)
-        LOGGER.info('DHCP monitor %s received %s reply after %ds: %s/%s',
-                    self.name, dhcp_type, delta, self.target_ip, self.target_mac)
-        mode = MODE.LONG if delta > self.DHCP_THRESHHOLD_SEC else MODE.DONE
+        if is_dhcp:
+            LOGGER.info('DHCP monitor %s received %s reply after %ds: %s/%s',
+                        self.name, dhcp_type, delta, self.target_ip, self.target_mac)
+        dhcp_long = is_dhcp and delta > self.DHCP_THRESHHOLD_SEC
+        mode = MODE.LONG if dhcp_long else MODE.DONE
         target = {
             'type': dhcp_type,
             'ip': self.target_ip,

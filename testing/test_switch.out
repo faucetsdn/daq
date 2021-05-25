@@ -10,7 +10,7 @@ Switch test with target 192.0.2.138:2
 Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Alt switch tests
-XXX runner   INFO    Learned 9a:02:57:1e:8f:01 on vid 1002
+XXX runner   INFO    Learning 9a:02:57:1e:8f:01 on vid 1002
 Unique IPs: 1
 RESULT skip base.startup.dhcp Using external DHCP
 RESULT skip base.switch.ping No local IP has been set, check system config

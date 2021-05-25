@@ -18,7 +18,7 @@ LOGGER = logger.get_logger('exmodule')
 
 
 class ExternalModule(HostModule):
-    """Class for running non inline modules"""
+    """Class for running non-inline modules"""
 
     # pylint: disable=too-many-arguments
     def __init__(self, host, tmpdir, test_name, module_config, basedir="/"):
@@ -28,6 +28,7 @@ class ExternalModule(HostModule):
         self.pipe = None
         self.basedir = basedir
         self.external_subnets = self.runner.config.get('external_subnets', [])
+        self._gateway_ip = None
 
     @abc.abstractmethod
     def _get_module_class(self):
@@ -37,6 +38,7 @@ class ExternalModule(HostModule):
         """Start the external module"""
         super().start(port, params, callback, finish_hook)
         cls = self._get_module_class()
+        self._gateway_ip = params['gateway_ip']
         env_vars = self._get_env_vars(params)
         vol_maps = self._get_vol_maps(params)
 
@@ -49,9 +51,11 @@ class ExternalModule(HostModule):
             raise wrappers.DaqException(e)
 
         try:
+            self._configure_host(host)
             pipe = host.activate(log_name=None)
             # For devcies with ips that are not in the same subnet as test hosts' ips.
             host_ip = self._get_host_ip(params)
+            LOGGER.info('Assigning host %s ip %s', host, host_ip)
             if host.intf() and host_ip:
                 host.cmd('ip addr add %s dev %s' % (host_ip, host.intf()))
             self.log = host.open_log()
@@ -75,6 +79,10 @@ class ExternalModule(HostModule):
                 self.pipe = None
             raise e
         LOGGER.info("%s running", self)
+
+    def _configure_host(self, host):
+        LOGGER.info('Configuring host to use gateway %s', self._gateway_ip)
+        host.cmd('ip route add default via %s' % self._gateway_ip)
 
     def terminate(self):
         """Forcibly terminate this module"""

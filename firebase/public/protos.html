@@ -1070,20 +1070,6 @@
                   <td><p>Server port </p></td>
                 </tr>
               
-                <tr>
-                  <td>server_address</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Server address </p></td>
-                </tr>
-              
-                <tr>
-                  <td>rpc_timeout_sec</td>
-                  <td><a href="#int32">int32</a></td>
-                  <td></td>
-                  <td><p>RPC timeout in seconds </p></td>
-                </tr>
-              
             </tbody>
           </table>
 
@@ -1151,6 +1137,13 @@
                   <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p>egress vlan </p></td>
+                </tr>
+              
+                <tr>
+                  <td>native_vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>native tap vlan </p></td>
                 </tr>
               
             </tbody>
@@ -1290,6 +1283,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Interface name for external switch data plane </p></td>
+                </tr>
+              
+                <tr>
+                  <td>data_mac</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>MAC address for data interface used to proxy data </p></td>
                 </tr>
               
                 <tr>

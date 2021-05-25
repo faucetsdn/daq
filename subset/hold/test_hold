@@ -4,6 +4,12 @@ if [ -n "$LOCAL_IP" ]; then
     ip addr add $LOCAL_IP dev `ifconfig | grep eth0 | cut -d ":" -f 1`
 fi
 
+echo Execution environment
+env
+
+echo Network setup
+ip addr
+
 echo Holding for all eternity.
 
 tail -f /dev/null

@@ -1,0 +1,21 @@
+# Configuration for ATA proxy architecture (working with upstream direct network)
+
+# Load defaults.
+include: ${DAQ_LIB}/config/system/default.yaml
+
+# Description for dashboard.
+site_description: "ATA Proxy Configuration"
+
+# Network switch configuration.
+switch_setup:
+  model: EXT_STACK
+  data_intf: alt-intf
+  data_mac: '22:22:22:22:22:22'
+
+run_trigger:
+  native_vlan: 122
+
+internal_subnet:
+  subnet: 10.21.0.0/16
+
+default_timeout_sec: 120

@@ -8,9 +8,13 @@ MODULE_CONFIG=$TEST_ROOT/config/device/module_config.json
 MANIFEST=$TEST_ROOT/module_manifest.json
 status=pass
 
+echo Running environment
+env
+
 echo Baseline ping test report | tee -a $MONO_LOG
+
 # This is a check that the startup.pcap file exists and is proper.
-tcpdump -en -r $TEST_ROOT/scans/startup.pcap ip
+tcpdump -en -r $TEST_ROOT/scans/startup.pcap ip | head
 
 echo %% $(tcpdump -n -r $TEST_ROOT/scans/startup.pcap | wc -l) packets captured. | tee -a $MONO_LOG
 echo

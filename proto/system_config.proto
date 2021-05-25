@@ -210,6 +210,9 @@ message SwitchSetup {
   // Interface name for external switch data plane
   string data_intf = 42;
 
+  // MAC address for data interface used to proxy data
+  string data_mac = 48;
+
   // Name for external OVS bridge in lieu of physical switch
   string ext_br = 43;
 
@@ -249,6 +252,9 @@ message RunTrigger {
 
   // egress vlan
   int32 egress_vlan = 3;
+
+  // native tap vlan
+  int32 native_vlan = 4;
 }
 
 /*
@@ -268,10 +274,4 @@ message Interface {
 message DeviceReporting {
   // Server port
   int32 server_port = 1;
-
-  // Server address
-  string server_address = 2;
-
-  // RPC timeout in seconds
-  int32 rpc_timeout_sec = 3;
 }

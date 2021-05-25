@@ -3,7 +3,9 @@
 ## General
 
 The ipaddr module is triggered by native ipaddr test.
-This is because the functional code included in ipaddr communicates with the openflow supported switch via the universal switch interface. This module analyzes the output of the ipaddr in the tmp/activate.log file for DHCP activity.
+This is because the functional code included in ipaddr communicates with the openflow supported switch
+via the universal switch interface. This module analyzes the output of the ipaddr in the
+tmp/module.log file for DHCP activity.
 
 ## Tests
 

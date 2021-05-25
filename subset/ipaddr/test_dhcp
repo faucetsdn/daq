@@ -2,6 +2,8 @@
 source reporting.sh
 REPORT=/tmp/report.txt
 
+echo Processing dhcp results to $REPORT
+
 python dhcp_tests.py connection.ipaddr.dhcp_disconnect
 python dhcp_tests.py connection.ipaddr.private_address
 python dhcp_tests.py connection.ipaddr.ip_change

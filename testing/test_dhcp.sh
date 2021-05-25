@@ -4,8 +4,8 @@ source testing/test_preamble.sh
 
 echo DHCP Tests >> $TEST_RESULTS
 
-cat <<EOF > local/system.conf
-include=../config/system/default.yaml
+cat <<EOF > /tmp/daq.conf
+include=${DAQ_LIB}/config/system/default.yaml
 site_description="Multi-Device Configuration"
 switch_setup.uplink_port=7
 interfaces.faux-1.opts=
@@ -89,44 +89,49 @@ function kill_dhcp_client {
 # Check that killing the dhcp client on a device times out the ipaddr test.
 monitor_log "Target port 6 connect successful" "kill_dhcp_client daq-faux-6"
 build_if_not_release
-cmd/run -s settle_sec=0 dhcp_lease_time=120s
+DAQ_CONFIG_FILE=/tmp/daq.conf cmd/run -s settle_sec=0 dhcp_lease_time=120s
 
 cat inst/result.log | sort | tee -a $TEST_RESULTS
 
 for iface in $(seq 1 6); do
     intf_mac=9a:02:57:1e:8f:0$iface
     ip_file=inst/run-9a02571e8f0$iface/scans/ip_triggers.txt
+    host_pcap=inst/run-9a02571e8f0$iface/scans/test_ipaddr.pcap
     report_file=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/report.txt
-    cat $ip_file
+    base_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/activate.log
+    module_log=inst/run-9a02571e8f0$iface/nodes/ipaddr0$iface/tmp/module.log
+    more $ip_file $report_file $base_log $module_log | cat
     ip_triggers=$(fgrep done $ip_file | wc -l)
     long_triggers=$(fgrep long $ip_file | wc -l)
     num_ips=$(cat $ip_file | cut -d ' ' -f 1 | sort | uniq | wc -l)
-    dhcp_change=$(cat $report_file | fgrep 'pass connection.ipaddr.disconnect_ip_change' | wc -l)
+    discon_change=$(cat $report_file | fgrep 'pass connection.ipaddr.disconnect_ip_change' | wc -l)
     ip_change=$(cat $report_file | fgrep 'pass connection.ipaddr.ip_change' | wc -l)
     echo Found $ip_triggers ip triggers and $long_triggers long ip responses.
     if [ $iface == 6 ]; then
-      device_dhcp_timeouts=$(cat inst/cmdrun.log | fgrep 'DHCP times out after 120s lease time' | fgrep "ipaddr_ipaddr0$iface" | wc -l)
-      echo "Device $iface DHCP timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
+      device_dhcp_timeouts=$(fgrep 'dhcp timeout after 120s lease time' $module_log | wc -l)
+      echo "Device $iface dhcp timeouts: $device_dhcp_timeouts" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
-      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface disconnect change: $((discon_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 5 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 3))" | tee -a $TEST_RESULTS
       echo "Device $iface num of ips: $num_ips" | tee -a $TEST_RESULTS
       echo "Device $iface ip change: $((ip_change))" | tee -a $TEST_RESULTS
-      echo "Device $iface dhcp change: $((dhcp_change))" | tee -a $TEST_RESULTS
+      echo "Device $iface disconnect change: $((discon_change))" | tee -a $TEST_RESULTS
     elif [ $iface == 4 ]; then
       echo "Device $iface ip triggers: $(((ip_triggers + long_triggers) >= 4))" | tee -a $TEST_RESULTS
-      subnet_ip=$(fgrep "ip notification 192.168" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
-      subnet2_ip=$(fgrep "ip notification 10.255.255" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
-      subnet3_ip=$(fgrep "ip notification 172.16.0" inst/run-*/nodes/ipaddr*/tmp/activate.log | wc -l)
-      subnet_ip_change=$(fgrep "ip notification 172.16.0" inst/run-*/nodes/ipaddr*/tmp/activate.log | awk '{print $6}' | uniq | wc -l)
-      echo "Device $iface subnet 1 ip: $subnet_ip subnet 2 ip: $subnet2_ip subnet 3 ip: $subnet3_ip ip_changed: $((subnet_ip_change > 1))" | tee -a $TEST_RESULTS
+      subnet1_ip=$(fgrep "ip notification 192.168." $module_log | wc -l)
+      subnet2_ip=$(fgrep "ip notification 10.255.255." $module_log | wc -l)
+      subnet3_ip=$(fgrep "ip notification 172.16.0." $module_log | wc -l)
+      # This unique subnet filter is very sensitive to log format changes.
+      uniq_subnet_ips=$(fgrep "ip notification 172.16.0." $module_log | awk '{print $10}' | uniq | wc -l)
+      echo "Device $iface subnet 1 ip: $subnet1_ip subnet 2 ip: $subnet2_ip subnet 3 ip: $subnet3_ip ip_changed: $((uniq_subnet_ips > 1))" | tee -a $TEST_RESULTS
     elif [ $iface == 3 ]; then
       echo "Device $iface long ip triggers: $((long_triggers > 0))" | tee -a $TEST_RESULTS
     else
       echo "Device $iface ip triggers: $((ip_triggers > 0)) $((long_triggers > 0))" | tee -a $TEST_RESULTS
     fi
-
+    echo $host_pcap
+    tcpdump -en -r $host_pcap
 done
 
 echo Done with tests | tee -a $TEST_RESULTS

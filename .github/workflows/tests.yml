@@ -12,6 +12,7 @@ on:
 jobs:
   build_docker:
     runs-on: ubuntu-18.04
+    timeout-minutes: 20
     strategy:
       matrix:
         build: [faucet, faux, setup, base, subset]
@@ -39,10 +40,11 @@ jobs:
   integration_tests:
     needs: build_docker
     runs-on: ubuntu-18.04
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        test: [base, many, aux, topo, modules, dhcp, switch, mud]
+        test: [base, many, aux, topo, modules, dhcp, switch, mud, ata]
     steps:
     - uses: actions/download-artifact@v2
       with:
@@ -105,6 +107,7 @@ jobs:
 
   unit_tests:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -125,6 +128,7 @@ jobs:
 
   usi_tests:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.11

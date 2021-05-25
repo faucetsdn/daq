@@ -162,7 +162,7 @@ class TestingSessionServerClient:
         devices_state = {
             'device_mac': mac
         }
-        LOGGER.info('Connecting to stream for mac ' + mac)
+        LOGGER.info('Connecting to stream for mac %s', mac)
         generator = self._stub.StartSession(dict_proto(devices_state, SessionParams))
         return generator
 

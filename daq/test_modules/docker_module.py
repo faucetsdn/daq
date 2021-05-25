@@ -22,9 +22,6 @@ class DockerModule(ExternalModule):
         """Start the docker module"""
         super().start(port, params, callback, finish_hook)
         LOGGER.debug("%s activating docker test %s", self)
-        # Docker modules don't use DHCP, so manually set up DNS.
-        if self.host:
-            self.host.cmd('echo nameserver $GATEWAY_IP > /etc/resolv.conf')
 
     def _get_env_vars(self, params):
         env_vars = super()._get_env_vars(params)
@@ -48,3 +45,10 @@ class DockerModule(ExternalModule):
         expected = self.TAGGED_IMAGE_FORMAT % self.test_name
         lines = str(lines, 'utf-8').splitlines()
         assert expected in lines, 'Could not find image %s, maybe rebuild images.' % expected
+
+    def _configure_host(self, host):
+        super()._configure_host(host)
+        LOGGER.info('Configuring docker host to use nameserver %s', self._gateway_ip)
+        host.cmd('echo nameserver %s > /etc/resolv.conf' % self._gateway_ip)
+        # TODO: Get this to work for native modules, as per
+        #     https://unix.stackexchange.com/questions/443898/

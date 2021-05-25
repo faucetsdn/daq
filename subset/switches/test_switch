@@ -7,8 +7,8 @@ MONO_LOG=/tmp/monolog.switch.txt
 RESULT_LINES=/tmp/results.switch.txt
 MODULE_CONFIG=/config/device/module_config.json
 
-route add default gw $GATEWAY_IP
 ping -c 2 $GATEWAY_IP
+
 # Setup for accessing control plane switch. If LOCAL_IP is defined, which
 # is the intended local address for this node on the control plane then
 # SWITCH_IP will be the IP address of the OpenFlow switch.

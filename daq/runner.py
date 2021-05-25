@@ -15,7 +15,6 @@ from datetime import datetime, timedelta, timezone
 from forch.proto.shared_constants_pb2 import PortBehavior
 
 import configurator
-from device_report_client import DeviceReportClient
 from session_server import SessionServer
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 import faucet_event_client
@@ -31,6 +30,9 @@ import logger
 from proto.system_config_pb2 import DhcpMode
 
 LOGGER = logger.get_logger('runner')
+
+NATIVE_GATEWAY_INTF = 'pri-eth1'
+NATIVE_NET_PREFIX = '10.21'
 
 
 class PortInfo:
@@ -159,7 +161,8 @@ class DAQRunner:
         self._ports = {}
         self._callback_queue = []
         self._event_lock = threading.RLock()
-        self.gcp = gcp.GcpManager(self.config, self._queue_callback)
+        self.daq_run_id = self._init_daq_run_id()
+        self._init_gcp()
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
         self._daq_version = os.environ['DAQ_VERSION']
@@ -167,6 +170,8 @@ class DAQRunner:
         self._sys_uname = os.environ['DAQ_SYS_UNAME']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
+        self._native_vlan = self.config.setdefault('run_trigger', {}).get('native_vlan')
+        self._native_gateway = None
         self._linger_exit = 0
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
@@ -181,12 +186,25 @@ class DAQRunner:
         self.result_log = self._open_result_log()
         self._system_active = False
         self._device_result_handler = self._init_device_result_handler()
-        self.daq_run_id = self._init_daq_run_id()
         self._cleanup_previous_runs()
+        self._init_test_list()
+
+        LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
+        tests_string = ', '.join(config['test_list']) or '**none**'
+        LOGGER.info('Configured with tests %s', tests_string)
+        LOGGER.info('DAQ version %s', self._daq_version)
+        LOGGER.info('LSB release %s', self._lsb_release)
+        LOGGER.info('system uname %s', self._sys_uname)
+
+    def _init_gcp(self):
+        self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
+
+    def _init_test_list(self):
+        config = self.config
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE))
         if self.config.get('keep_hold'):
             LOGGER.info('Appending test_hold to master test list')
@@ -194,12 +212,6 @@ class DAQRunner:
                 test_list.append('hold')
         config['test_list'] = test_list
         config['test_metadata'] = self._get_test_metadata()
-        LOGGER.info('DAQ RUN id: %s' % self.daq_run_id)
-        tests_string = ', '.join(config['test_list']) or '**none**'
-        LOGGER.info('Configured with tests %s' % tests_string)
-        LOGGER.info('DAQ version %s' % self._daq_version)
-        LOGGER.info('LSB release %s' % self._lsb_release)
-        LOGGER.info('system uname %s' % self._sys_uname)
 
     def _open_result_log(self):
         return open(self._RESULT_LOG_FILE, 'w')
@@ -225,19 +237,11 @@ class DAQRunner:
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
-        server_address = self.config.get('device_reporting', {}).get('server_address')
-        LOGGER.info('Device result handler configuration %s:%s %s',
-                    server_port, server_address, egress_vlan)
+        LOGGER.info('Device result handler listening on port %s %s', server_port, egress_vlan)
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
-            timeout = self.config['device_reporting'].get('rpc_timeout_sec')
-            if server_address:
-                handler = DeviceReportClient(server_address=server_address,
-                                             server_port=server_port, rpc_timeout_sec=timeout)
-            else:
-                # TODO: Make this all configured from run_trigger not device_reporting
-                handler = SessionServer(on_session=self._on_session,
-                                        server_port=server_port)
+            # TODO: Make this all configured from run_trigger not device_reporting
+            handler = SessionServer(on_session=self._on_session, server_port=server_port)
             return handler
         return None
 
@@ -284,6 +288,11 @@ class DAQRunner:
 
         self.network.initialize()
 
+        self.stream_monitor = self._create_stream_monitor()
+        self._native_gateway = self._create_gateway(None) if self._native_vlan else None
+
+        self.network.activate(self._native_gateway)
+
         LOGGER.debug('Attaching event channel...')
         self.faucet_events = faucet_event_client.FaucetEventClient(self.config)
         self.faucet_events.connect()
@@ -295,6 +304,11 @@ class DAQRunner:
             self._device_result_handler.start()
 
         LOGGER.debug('Done with initialization')
+
+    def _create_stream_monitor(self):
+        return stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
+                                            loop_hook=self._loop_hook,
+                                            timeout_sec=20)  # Polling rate
 
     def cleanup(self):
         """Cleanup instance"""
@@ -417,7 +431,7 @@ class DAQRunner:
             LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, target_mac, vid):
-        LOGGER.info('Learned %s on vid %s', target_mac, vid)
+        LOGGER.info('Learning %s on vid %s', target_mac, vid)
         device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
@@ -431,7 +445,9 @@ class DAQRunner:
                 self._device_result_handler.connect(
                     device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
-            self._target_set_trigger(device)
+            triggered = self._target_set_trigger(device)
+            if not triggered:
+                LOGGER.warning('Learned device not triggered %s', target_mac)
 
     def _handle_remote_port_state(self, device, port_event):
         with self._event_lock:
@@ -543,10 +559,6 @@ class DAQRunner:
         """Run main loop to execute tests"""
 
         try:
-            monitor = stream_monitor.StreamMonitor(idle_handler=self._handle_system_idle,
-                                                   loop_hook=self._loop_hook,
-                                                   timeout_sec=20)  # Polling rate
-            self.stream_monitor = monitor
             self._monitor_faucet_events()
             LOGGER.info('Entering main event loop.')
             LOGGER.info('See docs/troubleshooting.md if this blocks for more than a few minutes.')
@@ -583,7 +595,7 @@ class DAQRunner:
             return False
 
         if device.wait_remote and not remote_trigger:
-            LOGGER.debug('Ingoring local trigger for remote target %s', device)
+            LOGGER.debug('Ignoring local trigger for remote target %s', device)
             return False
 
         return True
@@ -597,16 +609,18 @@ class DAQRunner:
             assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
         device.wait_remote = False
+        external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         try:
             group_name = self.network.device_group_for(device)
             device.group = group_name
-            gateway = self._activate_device_group(device)
-            if gateway.activated:
-                LOGGER.debug('Target device %s trigger ignored b/c activated gateway', device.mac)
+            gateway = self._create_gateway(device)
+            if gateway.activated and not external_dhcp:
+                LOGGER.warning('Target device %s trigger ignored b/c activated gateway', device.mac)
                 return False
         except Exception as e:
             LOGGER.error('Target device %s target trigger error %s', device.mac, str(e))
+            LOGGER.exception(e)
             if self.fail_mode:
                 LOGGER.warning('Suppressing further tests due to failure.')
                 self.run_tests = False
@@ -614,7 +628,7 @@ class DAQRunner:
 
         # Stops all DHCP response initially
         # Selectively enables dhcp response at ipaddr stage based on dhcp mode
-        if device.dhcp_mode != DhcpMode.EXTERNAL:
+        if not external_dhcp:
             gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
@@ -636,9 +650,11 @@ class DAQRunner:
                 self._direct_port_traffic(device, device.port.port_no, target)
             else:
                 self._direct_device_traffic(device, gateway.port_set)
-            return True
         except Exception as e:
             self.target_set_error(device, e)
+            return False
+
+        return True
 
     def _direct_device_traffic(self, device, port_set):
         self.network.direct_device_traffic(device, port_set)
@@ -700,33 +716,56 @@ class DAQRunner:
                 }
         return metadata
 
-    def _activate_device_group(self, device):
-        group_name = device.group
-        group_devices = self._devices.get_by_group(group_name)
-        existing_gateways = {device.gateway for device in group_devices if device.gateway}
-        if existing_gateways:
-            existing = existing_gateways.pop()
-            LOGGER.info('Gateway for existing device group %s is %s', group_name, existing)
-            return existing
+    def _create_gateway(self, device):
+        is_native = device is None
+        assert not is_native or not self._native_gateway, 'native gateway already initialized'
+        if self._native_gateway:
+            return self._native_gateway
 
-        set_num = self._find_gateway_set(device)
-        LOGGER.info('Gateway for device group %s not found, initializing base %d...',
-                    device.group, set_num)
-        if device.dhcp_mode == DhcpMode.EXTERNAL:
+        group_name = 'native' if is_native else device.group
+        if not is_native:
+            group_devices = self._devices.get_by_group(group_name)
+            existing_gateways = {device.gateway for device in group_devices if device.gateway}
+            assert len(existing_gateways) <= 1, 'only one existing gateway per group allowed'
+            if existing_gateways:
+                existing = existing_gateways.pop()
+                LOGGER.debug('Gateway for existing device group %s is %s', group_name, existing)
+                return existing
+
+        set_num = 1 if is_native else self._find_gateway_set(device)
+        LOGGER.info('Gateway for device group %s not found, creating set num %d',
+                    group_name, set_num)
+
+        env_params = {}
+        if is_native:
+            env_params.update({
+                'net_prefix': NATIVE_NET_PREFIX,
+                'ext_intf': self.network.ext_intf,
+                'ext_mac': self.network.ext_mac
+            })
+
+        if is_native or device.dhcp_mode != DhcpMode.EXTERNAL:
+            gateway = container_gateway.ContainerGateway(
+                self, group_name, set_num, env_params=env_params)
+        else:
             # Under vlan trigger, start a external gateway that doesn't utilize a DHCP server.
             gateway = external_gateway.ExternalGateway(self, group_name, set_num)
             gateway.set_tap_intf(self.network.tap_intf)
-        else:
-            gateway = container_gateway.ContainerGateway(self, group_name, set_num)
 
         try:
             gateway.initialize()
+            if is_native:
+                assert str(gateway.host.switch_intf) == NATIVE_GATEWAY_INTF, 'iface mismatch'
         except Exception:
             LOGGER.error('Cleaning up from failed gateway initialization')
             LOGGER.debug('Clearing %s gateway group %s for %s',
                          device, set_num, group_name)
             self.gateway_sets.add(set_num)
             raise
+
+        if is_native:
+            self._activate_gateway(None, gateway, [], None)
+
         return gateway
 
     def ip_notify(self, state, target, gateway, exception=None):
@@ -740,18 +779,32 @@ class DAQRunner:
 
         target_type = target['type']
         target_mac, target_ip, delta_sec = target['mac'], target['ip'], target['delta']
-        LOGGER.info('IP notify %s %s is %s on %s (%s/%d)', target_type, target_mac,
-                    target_ip, gateway, state, delta_sec)
+
+        if target_mac == self.network.ext_mac:
+            LOGGER.debug('Ignoring external gateway mac %s', target_mac)
+            return
+
+        if target_type != 'STATIC':
+            LOGGER.info('IP notify %s %s is %s on %s (%s/%d)', target_type, target_mac,
+                        target_ip, gateway, state, delta_sec)
+
+        if state == 'NEW':
+            LOGGER.warning('Learning unexpected device %s, type %s, ip %s', target_mac,
+                           target_type, target_ip)
+            self._handle_device_learn(target_mac, self._native_vlan)
 
         assert target_mac
         assert target_ip
         assert delta_sec is not None
 
         device = self._devices.get(target_mac)
+        assert device, 'Count not find %s, %s, %s' % (target_mac, target_type, state)
+        if target_ip != device.ip_info.ip_addr:
+            LOGGER.info('Assigning device %s to ip %s', target_mac, target_ip)
         device.ip_info.ip_addr = target_ip
         device.ip_info.state = state
         device.ip_info.delta_sec = delta_sec
-        if device and device.host and target_type in ('ACK', 'STATIC'):
+        if device.host and target_type in ('ACK', 'STATIC'):
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
 
@@ -794,7 +847,7 @@ class DAQRunner:
             return False, False
         gateway, group_name = device.gateway, device.group
         if gateway.activated:
-            LOGGER.info('DHCP activation group %s already activated', group_name)
+            LOGGER.debug('DHCP activation group %s already activated', group_name)
             return gateway, True
 
         if not device.host.notify_activate():
@@ -814,6 +867,7 @@ class DAQRunner:
             LOGGER.info('DHCP device group %s not ready to trigger', group_name)
             return gateway, False
 
+        LOGGER.info('DHCP ready devices %s %s', gateway, ready_devices)
         return gateway, ready_devices
 
     def _terminate_gateway_set(self, gateway):
@@ -832,7 +886,7 @@ class DAQRunner:
         return self.gateway_sets.pop()
 
     @staticmethod
-    def ping_test(src, dst, src_addr=None):
+    def ping_test(src, dst, src_addr=None, count=2):
         """Test ping between hosts"""
         dst_name = dst if isinstance(dst, str) else dst.name
         dst_ip = dst if isinstance(dst, str) else dst.IP()
@@ -842,7 +896,8 @@ class DAQRunner:
         assert dst_ip != "0.0.0.0", "IP address not assigned, can't ping"
         ping_opt = '-I %s' % src_addr if src_addr else ''
         try:
-            output = src.cmd('ping -c2', ping_opt, dst_ip, '> /dev/null 2>&1 || echo ', failure)
+            output = src.cmd('ping -c', count, ping_opt, dst_ip,
+                             '> /dev/null 2>&1 || echo ', failure)
             return output.strip() != failure
         except Exception as e:
             LOGGER.info('Test ping failure: %s', e)

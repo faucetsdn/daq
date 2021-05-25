@@ -11,10 +11,6 @@ SITE_DIR=/config/inst
 CLOUD_IOT_CONFIG_FILE=$SITE_DIR/cloud_iot_config.json
 MODULE_CONFIG_FILE=/config/device/module_config.json
 
-# Necessary to reach gcp. Should be done by framework but this works for now.
-route add default gw $GATEWAY_IP
-echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-
 schema_path=schema
 timeout=60
 message_types="state_system state_pointset event_system event_pointset"
