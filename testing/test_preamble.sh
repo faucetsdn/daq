@@ -3,6 +3,10 @@ if [ `whoami` != 'root' ]; then
     exit -1
 fi
 
+if [[ -z $DAQ_LIB ]]; then
+    source etc/FILES_MAPPING
+fi
+
 mkdir -p out
 test_script=${0##*/}
 def_name=${test_script%.sh}.out
@@ -147,5 +151,10 @@ function activate_venv {
         PYTHON_CMD="python3"
     fi
 
-    export PYTHON_CMD
+    local ROOT=$(realpath $(dirname $0)/..)
+    local FAUCET=$(realpath $ROOT/faucet)
+    local FORCH=$(realpath $ROOT/forch)
+    local PYTHON_PATH=$FAUCET:$FORCH:$ROOT:$PYTHONPATH
+
+    export PYTHON_CMD="env PYTHONPATH=$PYTHON_PATH $PYTHON_CMD"
 }

@@ -4,19 +4,24 @@
 syntax = "proto3";
 
 /*
- * ACL counts for devices
+ * Rule counts for devices
  */
-message AclCounts {
-  // List of ACL counts indexed by device MAC addresses
-  map<string, RuleCounts> devices = 1;
+message DeviceRuleCounts {
+  // List of Rule counts indexed by device MAC addresses
+  map<string, RuleCounts> device_mac_rules = 1;
+
+  // error that is found when getting the rule counts for the devices
+  string error = 2;
 }
 
 /*
- *  ACL counts for a device
+ *  Rule counts for a device
  */
 message RuleCounts {
   // List of rule counts indexed by the descriptions of the rules
   map<string, RuleCount> rules = 1;
+
+  // errors that are found when analyzing the rule counts of a device
   repeated string errors = 2;
 }
 

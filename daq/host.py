@@ -20,6 +20,8 @@ from env import DAQ_RUN_DIR
 import gcp
 import logger
 
+DEV_DIR_PREFIX = 'run-'
+
 class _STATE:
     """Host state enum for testing cycle"""
     ERROR = 'Error condition'
@@ -126,11 +128,11 @@ class ConnectedHost:
         self.reload_config()
         assert self._loaded_config, 'config was not loaded'
         self._write_module_config(self._loaded_config, self._device_aux_path())
-        self.remaining_tests = self._get_enabled_tests()
+        self.enabled_tests = self._get_enabled_tests()
+        self.remaining_tests = list(self.enabled_tests)
         self.logger.info('Host %s running with enabled tests %s', self.target_mac,
                          self.remaining_tests)
-        self._report = ReportGenerator(config, self._INST_DIR, self.target_mac,
-                                       self._loaded_config)
+        self._report = ReportGenerator(config, self.target_mac, self._loaded_config)
         self.record_result('startup', state=MODE.PREP)
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._trigger_path = None
@@ -145,7 +147,7 @@ class ConnectedHost:
         return '%06x' % int(time.time())
 
     def _init_devdir(self):
-        devdir = os.path.join(self._INST_DIR, 'run-%s' % self.target_mac.replace(':', ''))
+        devdir = os.path.join(self._INST_DIR, DEV_DIR_PREFIX + self.target_mac.replace(':', ''))
         shutil.rmtree(devdir, ignore_errors=True)
         os.makedirs(devdir)
         return devdir

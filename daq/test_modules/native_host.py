@@ -41,7 +41,8 @@ class NativeHost(Host):
         """Active a container and return STDOUT to it."""
         assert not self.active_pipe, '%s already activated' % self.name
 
-        env = dict(self.env_vars)
+        # Need to inherit current process's env, otherwise there may be permission errs
+        env = {**os.environ, **dict(self.env_vars)}
 
         self.cmd('mkdir %s' % os.path.join(self.basedir, "config"))
 

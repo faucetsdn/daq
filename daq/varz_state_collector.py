@@ -23,7 +23,7 @@ class VarzStateCollector:
 
     METRIC_RETRY_INTERVAL_SEC = 3
 
-    def __init__(self, varz_address, faucet_varz_port, gauge_varz_port):
+    def __init__(self, varz_address=None, faucet_varz_port=None, gauge_varz_port=None):
         endpoint_address = varz_address or DEFAULT_VARZ_ADDRESS
         self._faucet_varz_endpoint = (
             f'http://{endpoint_address}:{faucet_varz_port or DEFAULT_FAUCET_VARZ_PORT}')

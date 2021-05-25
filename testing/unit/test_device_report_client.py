@@ -148,7 +148,7 @@ class DeviceDeviceReportPortEventsStreamCleanup(DeviceReportClientTestBase):
         time.sleep(1)
         self._server.process_port_state("name", "port", False)
         time.sleep(1)
-        self._client.terminate()
+        self._client.stop()
         time.sleep(1)
         self._server.process_port_state("name", "port", False)
         self.assertEqual(len(self._received_port_events), 2)

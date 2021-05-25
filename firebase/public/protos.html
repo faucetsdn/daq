@@ -179,11 +179,11 @@
             <ul>
               
                 <li>
-                  <a href="#AclCounts"><span class="badge">M</span>AclCounts</a>
+                  <a href="#DeviceRuleCounts"><span class="badge">M</span>DeviceRuleCounts</a>
                 </li>
               
                 <li>
-                  <a href="#AclCounts.DevicesEntry"><span class="badge">M</span>AclCounts.DevicesEntry</a>
+                  <a href="#DeviceRuleCounts.DeviceMacRulesEntry"><span class="badge">M</span>DeviceRuleCounts.DeviceMacRulesEntry</a>
                 </li>
               
                 <li>
@@ -210,6 +210,10 @@
             <ul>
               
                 <li>
+                  <a href="#SessionEndpoint"><span class="badge">M</span>SessionEndpoint</a>
+                </li>
+              
+                <li>
                   <a href="#SessionParams"><span class="badge">M</span>SessionParams</a>
                 </li>
               
@@ -217,6 +221,14 @@
                   <a href="#SessionProgress"><span class="badge">M</span>SessionProgress</a>
                 </li>
               
+                <li>
+                  <a href="#SessionResult"><span class="badge">M</span>SessionResult</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#SessionResult.ResultCode"><span class="badge">E</span>SessionResult.ResultCode</a>
+                </li>
               
               
               
@@ -294,8 +306,8 @@
       <p>ACL counts for devices</p>
 
       
-        <h3 id="AclCounts">AclCounts</h3>
-        <p>ACL counts for devices</p>
+        <h3 id="DeviceRuleCounts">DeviceRuleCounts</h3>
+        <p>Rule counts for devices</p>
 
         
           <table class="field-table">
@@ -305,10 +317,17 @@
             <tbody>
               
                 <tr>
-                  <td>devices</td>
-                  <td><a href="#AclCounts.DevicesEntry">AclCounts.DevicesEntry</a></td>
+                  <td>device_mac_rules</td>
+                  <td><a href="#DeviceRuleCounts.DeviceMacRulesEntry">DeviceRuleCounts.DeviceMacRulesEntry</a></td>
                   <td>repeated</td>
-                  <td><p>List of ACL counts indexed by device MAC addresses </p></td>
+                  <td><p>List of Rule counts indexed by device MAC addresses </p></td>
+                </tr>
+              
+                <tr>
+                  <td>error</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>error that is found when getting the rule counts for the devices </p></td>
                 </tr>
               
             </tbody>
@@ -318,7 +337,7 @@
 
         
       
-        <h3 id="AclCounts.DevicesEntry">AclCounts.DevicesEntry</h3>
+        <h3 id="DeviceRuleCounts.DeviceMacRulesEntry">DeviceRuleCounts.DeviceMacRulesEntry</h3>
         <p></p>
 
         
@@ -374,7 +393,7 @@
         
       
         <h3 id="RuleCounts">RuleCounts</h3>
-        <p>ACL counts for a device</p>
+        <p>Rule counts for a device</p>
 
         
           <table class="field-table">
@@ -394,7 +413,7 @@
                   <td>errors</td>
                   <td><a href="#string">string</a></td>
                   <td>repeated</td>
-                  <td><p> </p></td>
+                  <td><p>errors that are found when analyzing the rule counts of a device </p></td>
                 </tr>
               
             </tbody>
@@ -449,6 +468,37 @@
       <p></p>
 
       
+        <h3 id="SessionEndpoint">SessionEndpoint</h3>
+        <p>Session initialization params.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="SessionParams">SessionParams</h3>
         <p>Params for session initialization.</p>
 
@@ -462,6 +512,20 @@
                 <tr>
                   <td>device_mac</td>
                   <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>device_vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>assigned_vlan</td>
+                  <td><a href="#int32">int32</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -484,8 +548,39 @@
             <tbody>
               
                 <tr>
-                  <td>endpoint_ip</td>
-                  <td><a href="#string">string</a></td>
+                  <td>endpoint</td>
+                  <td><a href="#SessionEndpoint">SessionEndpoint</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>result</td>
+                  <td><a href="#SessionResult">SessionResult</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="SessionResult">SessionResult</h3>
+        <p>Session result codes.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>code</td>
+                  <td><a href="#SessionResult.ResultCode">SessionResult.ResultCode</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -498,6 +593,47 @@
         
       
 
+      
+        <h3 id="SessionResult.ResultCode">SessionResult.ResultCode</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>PENDING</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>STARTED</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ERROR</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>PASSED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILED</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
       
 
       

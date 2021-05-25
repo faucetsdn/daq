@@ -52,7 +52,10 @@ class DeviceReportClient:
         threading.Thread(target=self._port_event_handler,
                          args=(callback, result_generator, cancel_request)).start()
 
-    def terminate(self):
+    def stop(self):
         """Terminates all onging grpc calls"""
         for handler in self._active_requests:
             handler()
+
+    def send_device_heartbeats(self):
+        """Null function for sending device heartbeats"""
