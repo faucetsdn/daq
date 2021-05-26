@@ -10,7 +10,6 @@ site_description: "ATA Proxy Configuration"
 switch_setup:
   model: EXT_STACK
   data_intf: alt-intf
-  data_mac: '22:22:22:22:22:22'
 
 run_trigger:
   native_vlan: 122
