@@ -87,6 +87,7 @@ class SessionServer:
         LOGGER.info('Send device result %s %s', mac, PortBehavior.Behavior.Name(device_result))
         result = SessionResult(code=SESSION_DEVICE_RESULT[device_result])
         self._send_reply(mac, SessionProgress(result=result))
+        self._reap_session(mac)
 
     def close_stream(self, mac):
         """Close the stream"""
