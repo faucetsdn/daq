@@ -64,7 +64,7 @@ $AG install \
     git ethtool curl apache2-utils iputils-ping lsof jq pandoc nmap \
     ca-certificates sudo net-tools tcpdump build-essential pango-1.0 \
     isc-dhcp-client network-manager netcat gnupg2 strace libffi-dev \
-    python python$PVERSION python3-pkg-resources python3-setuptools \
+    python3 python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python$PVERSION-venv \
     python3-distutils
 
