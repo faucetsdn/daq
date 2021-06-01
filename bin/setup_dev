@@ -64,12 +64,12 @@ $AG install \
     git ethtool curl apache2-utils iputils-ping lsof jq pandoc nmap \
     ca-certificates sudo net-tools tcpdump build-essential pango-1.0 \
     isc-dhcp-client network-manager netcat gnupg2 strace libffi-dev \
-    python3 python$PVERSION python3-pkg-resources python3-setuptools \
+    python2 python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python$PVERSION-venv \
     python3-distutils
 
-PYTHON_BIN=$(readlink -f $(which python))
-echo Python binary is at $PYTHON_BIN
+PYTHON2_BIN=$(readlink -f $(which python2))
+echo Python binary is at $PYTHON2_BIN
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -93,8 +93,8 @@ else
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
-        export PYTHON_BIN
-        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON_BIN} make install/' util/install.sh
+        export PYTHON2_BIN
+        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON2_BIN} make install/' util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
