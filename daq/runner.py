@@ -1044,6 +1044,7 @@ class DAQRunner:
             device.mac, PortBehavior.Behavior.Name(device_result))
         try:
             self._device_result_handler.send_device_result(device.mac, device_result)
+            self._device_result_handler.close_stream(device.mac)
         except Exception as e:
             LOGGER.error("Failed to send device results for device %s: %s ", device.mac, e)
 
