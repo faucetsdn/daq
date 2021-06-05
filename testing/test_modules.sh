@@ -19,11 +19,10 @@ python3 daq/configurator.py --json \
     resources/test_site/site_config.json > $TLS_CONFIG_DIR/module_config.json
 
 TEST_LIST=/tmp/module_tests.txt
-# TODO: Enable TLS tests once fixed
-# tls alt
-# tls alt tls
-# tls alt expiredtls
 cat > $TEST_LIST <<EOF
+tls alt
+tls alt tls
+tls alt expiredtls
 ssh
 ssh ssh
 ssh sshv1
