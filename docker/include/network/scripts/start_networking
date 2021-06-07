@@ -70,7 +70,7 @@ fi
 service ntp start
 
 # Start radius server
-freeradius -xx -l /tmp/radius_log
+freeradius -xx -l /tmp/radius_log || true
 
 # For cloud-based provisioning tests.
 GCP_CRED_FILE=/config/inst/gcp_service_account.json
