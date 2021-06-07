@@ -101,6 +101,7 @@ activate_venv
 test_mud open
 test_mud todev
 test_mud none
-test_mud star
+# Disabled as per b/190329518
+# test_mud star
 
 echo %%%%%%%%%%%%%%%%%%%%%% Done with tests | tee -a $TEST_RESULTS
