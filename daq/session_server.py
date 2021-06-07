@@ -125,7 +125,8 @@ class SessionServer:
         LOGGER.info('Session ended for %s', device_mac)
         del self._return_queues[device_mac]
         del self._last_streamed[device_mac]
-        self._done_callbacks.pop(device_mac)
+        if device_mac in self._done_callbacks:
+            del self._done_callbacks[device_mac]
 
     def stop(self):
         """Stop the server"""
