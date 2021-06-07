@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: entrypoint
+  labels:
+    app: default-init
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    date
+    echo Enabling openvswitch
+    chroot /root modprobe openvswitch
+    lsmod | fgrep openvswitch

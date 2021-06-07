@@ -237,18 +237,24 @@ class DAQRunner:
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
         egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
-        LOGGER.info('Device result handler listening on port %s %s', server_port, egress_vlan)
+        local_ip = self.config.get('switch_setup', {}).get('endpoint', {}).get('ip')
+        LOGGER.info('Device result handler on port %s, vlan %s, ip %s',
+                    server_port, egress_vlan, local_ip)
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             # TODO: Make this all configured from run_trigger not device_reporting
-            handler = SessionServer(on_session=self._on_session, server_port=server_port)
+            handler = SessionServer(on_session=self._on_session, server_port=server_port,
+                                    local_ip=local_ip)
             return handler
         return None
 
     def _on_session(self, request):
         with self._event_lock:
-            LOGGER.info('New session started for %s %s/%s',
-                        request.device_mac, request.device_vlan, request.assigned_vlan)
+            remote_ip = request.endpoint.ip
+            LOGGER.info('New session started for %s %s/%s at %s', request.device_mac,
+                        request.device_vlan, request.assigned_vlan, remote_ip)
+            assert remote_ip, 'remote request ip not specified'
+            self.network.configure_remote_tap(request.endpoint)
             device = self._devices.create_if_absent(request.device_mac)
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
@@ -524,6 +530,7 @@ class DAQRunner:
             timeout_sec = device.host.get_port_flap_timeout(device.host.test_name)
             if timeout_sec is None:
                 timeout_sec = self._default_port_flap_timeout
+            LOGGER.info('flap %s %s %s', device.mac, device.port.flapping_start, timeout_sec)
             if (device.port.flapping_start + timeout_sec) <= time.time():
                 exception = DaqException('port not active for %ds' % timeout_sec)
                 self.target_set_error(device, exception)

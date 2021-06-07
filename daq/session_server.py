@@ -11,7 +11,7 @@ import grpc
 import logger
 import daq.proto.session_server_pb2_grpc as server_grpc
 from daq.proto.session_server_pb2 import (
-    SessionParams, SessionProgress, SessionResult, SessionEndpoint)
+    SessionParams, SessionProgress, SessionResult, TunnelEndpoint)
 from forch.proto.devices_state_pb2 import DevicePortEvent
 from forch.proto.shared_constants_pb2 import PortBehavior
 
@@ -20,7 +20,6 @@ from utils import dict_proto
 LOGGER = logger.get_logger('sessserv')
 
 
-DEFAULT_MAX_WORKERS = 10
 DEFAULT_SERVER_PORT = 50051
 DEFAULT_BIND_ADDRESS = '0.0.0.0'
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
@@ -54,16 +53,17 @@ class SessionServerServicer(server_grpc.SessionServerServicer):
 class SessionServer:
     """Devices state server"""
 
-    def __init__(self, on_session=None, server_address=None, server_port=None, max_workers=None):
+    def __init__(self, on_session=None, server_address=None, server_port=None, local_ip=None):
         self._return_queues = {}
         self._last_streamed = {}
         self._done_callbacks = {}
         self._lock = threading.Lock()
         self._on_session = on_session
-        self._server = grpc.server(
-            futures.ThreadPoolExecutor(max_workers=max_workers or DEFAULT_MAX_WORKERS))
+        self._local_ip = local_ip
+        self._server = grpc.server(futures.ThreadPoolExecutor())
         self._servicer = SessionServerServicer(self._init_session, self._session_stream)
 
+        LOGGER.info('Configured with local endpoint ip %s', local_ip)
         server_grpc.add_SessionServerServicer_to_server(self._servicer, self._server)
 
         self._address = (
@@ -73,7 +73,7 @@ class SessionServer:
 
     def start(self):
         """Start the server"""
-        LOGGER.info('Starting on bind address %s', self._address)
+        LOGGER.info('Listening on bind address %s', self._address)
         self._server.start()
 
     def connect(self, mac, callback):
@@ -104,7 +104,8 @@ class SessionServer:
             return_queue = Queue()
             self._return_queues[device_mac] = return_queue
             self._last_streamed[device_mac] = time.time()
-        endpoint = SessionEndpoint(ip=('ip-' + device_mac))
+        LOGGER.info('Sending %s endpoint %s start', device_mac, self._local_ip)
+        endpoint = TunnelEndpoint(ip=self._local_ip)
         self._send_reply(device_mac, SessionProgress(endpoint=endpoint))
         self.send_device_result(device_mac, PortBehavior.Behavior.authenticated)
         self._on_session(request)
@@ -124,7 +125,7 @@ class SessionServer:
         LOGGER.info('Session ended for %s', device_mac)
         del self._return_queues[device_mac]
         del self._last_streamed[device_mac]
-        del self._done_callbacks[device_mac]
+        self._done_callbacks.pop(device_mac)
 
     def stop(self):
         """Stop the server"""
@@ -145,7 +146,8 @@ class SessionServer:
                     disconnects.append(device_mac)
             for device_mac in disconnects:
                 port_event = DevicePortEvent(state=PortBehavior.PortState.down)
-                self._done_callbacks[device_mac](port_event)
+                if device_mac in self._done_callbacks:
+                    self._done_callbacks[device_mac](port_event)
                 self._reap_session(device_mac)
 
 

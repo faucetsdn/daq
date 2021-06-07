@@ -5,6 +5,8 @@
 .build_built
 .project
 
+/tmp/
+
 daq-*.tar.bz2
 
 protoc-gen-doc/

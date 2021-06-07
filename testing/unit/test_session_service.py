@@ -8,14 +8,14 @@ from daq.proto.session_server_pb2 import SessionResult
 
 
 TEST_MAC_ADDRESS = 'aa:bb:cc:dd:ee:ff'
-
+LOCAL_IP = '127.0.0.3'
 
 class SessionServerTest(unittest.TestCase):
     """Test basic session server operation"""
 
     def setUp(self):
         self._server_results = []
-        self._server = SessionServer(self._new_connection)
+        self._server = SessionServer(self._new_connection, local_ip=LOCAL_IP)
         self._server.start()
         self._server.connect(TEST_MAC_ADDRESS, self._callback)
 
@@ -39,7 +39,7 @@ class SessionServerTest(unittest.TestCase):
         print('session running')
         results = list(session)
         self.assertEqual(len(results), 3)
-        self.assertEqual(results[0].endpoint.ip, 'ip-' + TEST_MAC_ADDRESS)
+        self.assertEqual(results[0].endpoint.ip, LOCAL_IP)
         self.assertEqual(results[1].result.code, SessionResult.ResultCode.STARTED)
         self.assertEqual(len(self._server_results), 1)
         self.assertEqual(self._server_results[0].device_mac, TEST_MAC_ADDRESS)
