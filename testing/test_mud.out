@@ -22,9 +22,4 @@ device-1 none 0 0 0 0
 device-2 none 0 0 0 0
 device-1 none 0
 device-2 none 0
-result star
-device-1 star 1 1 1 1
-device-2 star 1 1 1 0
-device-1 star 1
-device-2 star 1
 %%%%%%%%%%%%%%%%%%%%%% Done with tests
