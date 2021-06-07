@@ -15,7 +15,7 @@ while ! ip link show $EXT_INTF; do
     sleep 5
 done
 
-if [[ $EXT_MAC -a $EXT_MAC != None ]]; then
+if [[ -n $EXT_MAC -a $EXT_MAC != None ]]; then
     echo Setting interface $EXT_INTF mac to $EXT_MAC
     ip link set $EXT_INTF address $EXT_MAC
 fi
