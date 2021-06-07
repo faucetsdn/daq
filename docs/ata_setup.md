@@ -32,7 +32,8 @@ switch_setup:
     data_intf: enx00e04c680029
 ```
 (i.e., only the `data_intf` field is likely necessitated to be unique to a given system
-intall, everything else can likely just be the defaults)
+intall, everything else can likely just be the defaults. The base `ata.yaml` file does
+not need to be edited directly, as its values will be overridden.)
 
 To run the system, a simple `cmd/run` should suffice, or `cmd/run -s` if you just want
 to scan the network for at least one device.
