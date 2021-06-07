@@ -69,6 +69,6 @@ echo Starting daq, output in $DAQ_ROOT/inst/cmdrun.log
 PYTHONPATH=$PYTHONPATH \
     PATH=$DAQ_ROOT/mininet:$PATH \
     FAUCET_EVENT_SOCK=$DAQ_EVENT_SOCK \
-    $DAQ_ROOT/cmd/start $BASE_CONFIG $DYNAMIC_CONFIG -k $no_test > $DAQ_ROOT/inst/cmdrun.log 2>&1 &
+    $DAQ_ROOT/cmd/start $BASE_CONFIG $DYNAMIC_CONFIG $no_test > $DAQ_ROOT/inst/cmdrun.log 2>&1 &
 
 tail --retry -f $DAQ_ROOT/inst/cmdrun.log
