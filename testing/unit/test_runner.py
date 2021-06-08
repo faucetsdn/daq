@@ -14,6 +14,7 @@ from forch.proto.devices_state_pb2 import DevicePortEvent
 
 from daq.host import ConnectedHost
 from daq.runner import DAQRunner, configurator
+from daq.proto.session_server_pb2 import SessionParams
 
 LOGGER = logging.getLogger()
 LOGGER.level = logging.INFO
@@ -73,8 +74,8 @@ class TestRunner(unittest.TestCase):
         """Test device learn on vlan trigger"""
         self.runner.target_set_error = MagicMock()
         device = self.runner._devices.new_device("0000000000", None)
-        mock_port_event = DevicePortEvent(state=PortBehavior.PortState.down)
-        self.runner._handle_remote_port_state(device, mock_port_event)
+        session_params = SessionParams(device_mac=device.mac)
+        self.runner._on_session_end(session_params)
         self.runner._reap_stale_ports()
         self.runner.target_set_error.assert_not_called()
 
@@ -83,24 +84,12 @@ class TestRunner(unittest.TestCase):
         host.test_name = "test_test"
         device.host = host
         host.get_port_flap_timeout = MagicMock(return_value=10000)
-        port_up_event = DevicePortEvent(state=PortBehavior.PortState.up,
-                                        device_vlan=1, assigned_vlan=2)
-        port_down_event = DevicePortEvent(state=PortBehavior.PortState.down)
-
-        self.runner._handle_remote_port_state(device, port_up_event)
 
         self.runner._reap_stale_ports()
+        host.get_port_flap_timeout.assert_called_with(host.test_name)
         self.runner.target_set_error.assert_not_called()
 
         host.get_port_flap_timeout = MagicMock(return_value=None)
-        self.runner._handle_remote_port_state(device, port_down_event)
-
-        self.runner._handle_remote_port_state(device, port_up_event)
-
-        self.runner._reap_stale_ports()
-        self.runner.target_set_error.assert_not_called()
-
-        self.runner._handle_remote_port_state(device, port_down_event)
 
         self.runner._reap_stale_ports()
         host.get_port_flap_timeout.assert_called_with(host.test_name)
