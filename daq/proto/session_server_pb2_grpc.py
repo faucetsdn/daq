@@ -21,11 +21,6 @@ class SessionServerStub(object):
                 request_serializer=daq_dot_proto_dot_session__server__pb2.SessionParams.SerializeToString,
                 response_deserializer=daq_dot_proto_dot_session__server__pb2.SessionProgress.FromString,
                 )
-        self.ConfigureEndpoint = channel.unary_unary(
-                '/SessionServer/ConfigureEndpoint',
-                request_serializer=daq_dot_proto_dot_session__server__pb2.TunnelEndpoint.SerializeToString,
-                response_deserializer=daq_dot_proto_dot_session__server__pb2.SessionResult.FromString,
-                )
 
 
 class SessionServerServicer(object):
@@ -40,13 +35,6 @@ class SessionServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ConfigureEndpoint(self, request, context):
-        """Mechanism to configure vxlan endpoints on network fabrics separate from the controller.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
 
 def add_SessionServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -54,11 +42,6 @@ def add_SessionServerServicer_to_server(servicer, server):
                     servicer.StartSession,
                     request_deserializer=daq_dot_proto_dot_session__server__pb2.SessionParams.FromString,
                     response_serializer=daq_dot_proto_dot_session__server__pb2.SessionProgress.SerializeToString,
-            ),
-            'ConfigureEndpoint': grpc.unary_unary_rpc_method_handler(
-                    servicer.ConfigureEndpoint,
-                    request_deserializer=daq_dot_proto_dot_session__server__pb2.TunnelEndpoint.FromString,
-                    response_serializer=daq_dot_proto_dot_session__server__pb2.SessionResult.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -85,21 +68,5 @@ class SessionServer(object):
         return grpc.experimental.unary_stream(request, target, '/SessionServer/StartSession',
             daq_dot_proto_dot_session__server__pb2.SessionParams.SerializeToString,
             daq_dot_proto_dot_session__server__pb2.SessionProgress.FromString,
-            options, channel_credentials,
-            call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def ConfigureEndpoint(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/SessionServer/ConfigureEndpoint',
-            daq_dot_proto_dot_session__server__pb2.TunnelEndpoint.SerializeToString,
-            daq_dot_proto_dot_session__server__pb2.SessionResult.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)

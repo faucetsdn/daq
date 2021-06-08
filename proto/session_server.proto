@@ -78,7 +78,4 @@ message SessionResult {
 service SessionServer {
   // Session between host network and testing service.
   rpc StartSession(SessionParams) returns (stream SessionProgress) {}
-
-  // Mechanism to configure vxlan endpoints on network fabrics separate from the controller.
-  rpc ConfigureEndpoint(TunnelEndpoint) returns (SessionResult) {}
 }
