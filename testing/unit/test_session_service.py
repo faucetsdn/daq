@@ -21,8 +21,8 @@ class BaseSessionServerTest(unittest.TestCase):
         self._server_results = []
         self._on_session_end = MagicMock(return_value=None)
         self._server = SessionServer(on_session=self._new_connection,
-                                    on_session_end=self._on_session_end, server_port=self.port,
-                                    local_ip=_LOCAL_IP)
+                                     on_session_end=self._on_session_end, server_port=self.port,
+                                     local_ip=_LOCAL_IP)
         self._server.start()
 
     def tearDown(self):
