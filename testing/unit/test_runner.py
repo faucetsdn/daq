@@ -9,9 +9,6 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import network
 
-from forch.proto.shared_constants_pb2 import PortBehavior
-from forch.proto.devices_state_pb2 import DevicePortEvent
-
 from daq.host import ConnectedHost
 from daq.runner import DAQRunner, configurator
 from daq.proto.session_server_pb2 import SessionParams

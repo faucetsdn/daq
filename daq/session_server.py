@@ -15,7 +15,6 @@ import logger
 import daq.proto.session_server_pb2_grpc as server_grpc
 from daq.proto.session_server_pb2 import (
     SessionParams, SessionProgress, SessionResult, TunnelEndpoint)
-from forch.proto.devices_state_pb2 import DevicePortEvent
 from forch.proto.shared_constants_pb2 import PortBehavior
 
 from utils import dict_proto
@@ -55,13 +54,14 @@ class SessionServerServicer(server_grpc.SessionServerServicer):
 
 @dataclass
 class SessionClient:
+    """Data class for a session client."""
     return_queue: Queue = field(default_factory=Queue)
     last_streamed: float = field(default_factory=time.time)
     init_request: SessionParams = None
 
 class SessionServer:
     """Devices state server"""
-
+    # pylint: disable=too-many-arguments
     def __init__(self, on_session=None, on_session_end=None, server_address=None,
                  server_port=None, local_ip=None):
         self._clients: Dict[str, SessionClient] = {}

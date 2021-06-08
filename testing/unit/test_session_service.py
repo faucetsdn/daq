@@ -15,6 +15,7 @@ _LOCAL_IP = '127.0.0.3'
 
 
 class BaseSessionServerTest(unittest.TestCase):
+    """Base session server test class for setup."""
     port = _BASE_PORT
 
     def setUp(self):
@@ -58,6 +59,8 @@ class SessionServerTest(BaseSessionServerTest):
 
 
 class SessionServerDisallowSameClient(BaseSessionServerTest):
+    """Test session server behavior with multiples of the same clients."""
+
     port = _BASE_PORT + 1
 
     def _new_connection(self, result):
@@ -69,6 +72,7 @@ class SessionServerDisallowSameClient(BaseSessionServerTest):
         return super().tearDown()
 
     def test_disallow_same_client(self):
+        """Test when the same client connects twice, the second session is terminated."""
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
         client = TestingSessionServerClient(server_port=self.port)
@@ -78,14 +82,17 @@ class SessionServerDisallowSameClient(BaseSessionServerTest):
 
 
 class SessionServerClientDisconnect(BaseSessionServerTest):
+    """Test session server behavior when clients disconnect."""
+
     port = _BASE_PORT + 2
 
     def _new_connection(self, result):
         super()._new_connection(result)
         self._server.send_device_result(_TEST_MAC_ADDRESS, PortBehavior.passed)
 
-    # pylint: disable=no-member
+    # pylint: disable=no-member,protected-access
     def test_client_disconnect(self):
+        """Test when client disconnects the session is terminated."""
         # Connection not timed out.
         client = TestingSessionServerClient(server_port=self.port)
         session = client.start_session(_TEST_MAC_ADDRESS)
