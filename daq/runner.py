@@ -243,8 +243,9 @@ class DAQRunner:
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             # TODO: Make this all configured from run_trigger not device_reporting
-            handler = SessionServer(on_session=self._on_session, on_session_end=self._on_session_end,
-                                    server_port=server_port, local_ip=local_ip)
+            handler = SessionServer(on_session=self._on_session,
+                                    on_session_end=self._on_session_end, server_port=server_port,
+                                    local_ip=local_ip)
             return handler
         return None
 
@@ -256,7 +257,7 @@ class DAQRunner:
             assert remote_ip, 'remote request ip not specified'
             self.network.configure_remote_tap(request.endpoint)
             device = self._devices.create_if_absent(request.device_mac)
-            device.port.flapping_start = None # In case this was set from last disconnect.
+            device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
 

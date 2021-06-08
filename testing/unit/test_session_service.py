@@ -1,5 +1,5 @@
 """Unit tests for session server"""
-
+from __future__ import absolute_import
 import time
 import unittest
 from unittest.mock import MagicMock
@@ -13,13 +13,16 @@ _TEST_MAC_ADDRESS = 'aa:bb:cc:dd:ee:ff'
 _BASE_PORT = DEFAULT_SERVER_PORT
 _LOCAL_IP = '127.0.0.3'
 
+
 class BaseSessionServerTest(unittest.TestCase):
     port = _BASE_PORT
 
     def setUp(self):
         self._server_results = []
         self._on_session_end = MagicMock(return_value=None)
-        self._server = SessionServer(on_session=self._new_connection, on_session_end=self._on_session_end, server_port=self.port, local_ip=_LOCAL_IP)
+        self._server = SessionServer(on_session=self._new_connection,
+                                    on_session_end=self._on_session_end, server_port=self.port,
+                                    local_ip=_LOCAL_IP)
         self._server.start()
 
     def tearDown(self):
@@ -28,6 +31,7 @@ class BaseSessionServerTest(unittest.TestCase):
     def _new_connection(self, result):
         print('receive result')
         self._server_results.append(result)
+
 
 class SessionServerTest(BaseSessionServerTest):
     """Test basic session server operation"""
@@ -52,6 +56,7 @@ class SessionServerTest(BaseSessionServerTest):
         self.assertEqual(self._server_results[0].device_mac, _TEST_MAC_ADDRESS)
         self._on_session_end.assert_called_once_with(self._server_results[0])
 
+
 class SessionServerDisallowSameClient(BaseSessionServerTest):
     port = _BASE_PORT + 1
 
@@ -70,6 +75,7 @@ class SessionServerDisallowSameClient(BaseSessionServerTest):
         results = client.start_session(_TEST_MAC_ADDRESS)
         time.sleep(1)
         self.assertIn("already registered", repr(results))
+
 
 class SessionServerClientDisconnect(BaseSessionServerTest):
     port = _BASE_PORT + 2
@@ -93,7 +99,7 @@ class SessionServerClientDisconnect(BaseSessionServerTest):
         self.assertEqual(results[1].result.code, SessionResult.ResultCode.STARTED)
         self.assertEqual(results[2].result.code, SessionResult.ResultCode.PASSED)
         self.assertEqual(results[3].result.code, SessionResult.ResultCode.PENDING)
-        
+
         # Connection timed out
         session = client.start_session(_TEST_MAC_ADDRESS)
         self._server._disconnect_timeout_sec = 0

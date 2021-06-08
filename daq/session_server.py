@@ -14,7 +14,7 @@ import grpc
 import logger
 import daq.proto.session_server_pb2_grpc as server_grpc
 from daq.proto.session_server_pb2 import (
-    SessionParams, SessionProgress, SessionResult, TunnelEndpoint )
+    SessionParams, SessionProgress, SessionResult, TunnelEndpoint)
 from forch.proto.devices_state_pb2 import DevicePortEvent
 from forch.proto.shared_constants_pb2 import PortBehavior
 
@@ -52,6 +52,7 @@ class SessionServerServicer(server_grpc.SessionServerServicer):
         self._on_session(request)
         return self._session_stream(request)
 
+
 @dataclass
 class SessionClient:
     return_queue: Queue = field(default_factory=Queue)
@@ -61,7 +62,7 @@ class SessionClient:
 class SessionServer:
     """Devices state server"""
 
-    def __init__(self, on_session=None, on_session_end=None, server_address=None, 
+    def __init__(self, on_session=None, on_session_end=None, server_address=None,
                  server_port=None, local_ip=None):
         self._clients: Dict[str, SessionClient] = {}
         self._lock = threading.Lock()
