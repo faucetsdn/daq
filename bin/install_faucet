@@ -1,0 +1,23 @@
+#!/bin/bash -ex
+
+set -uo pipefail
+
+APK="apt-get -qqy"
+BUILDDEPS="gcc python3-dev musl-dev parallel"
+PIP3="pip3 -q --no-cache-dir install --upgrade"
+FROOT="/root/faucet"
+
+dir=$(dirname "$0")
+
+${APK} install git ${BUILDDEPS}
+"${dir}/retry_cmd" "${PIP3} pip"
+"${dir}/retry_cmd" "${PIP3} setuptools"
+"${dir}/retry_cmd" "${PIP3} -r ${FROOT}/requirements.txt"
+${PIP3} ${FROOT}
+
+for i in ${BUILDDEPS} ; do
+    ${APK} remove "$i"
+done
+
+# Smoke test
+faucet -V

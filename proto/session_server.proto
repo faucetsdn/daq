@@ -8,9 +8,17 @@ syntax = "proto3";
  * Params for session initialization.
  */
 message SessionParams {
+  // MAC of the device to test.
   string device_mac = 1;
+
+  // Which device (port) vlan it will be on.
   int32 device_vlan = 2;
+
+  // Which upstream (corp) vlan it should be on.
   int32 assigned_vlan = 3;
+
+  // Information about client tunnel endpoint.
+  TunnelEndpoint endpoint = 4;
 }
 
 /*
@@ -18,17 +26,26 @@ message SessionParams {
  */
 message SessionProgress {
   oneof progress {
-    SessionEndpoint endpoint = 1;
+    // Information about server tunnel endpoint.
+    TunnelEndpoint endpoint = 1;
+
+    // Incremental/terminal results.
     SessionResult result = 2;
   }
 }
 
 /*
- * Session initialization params.
+ * Tunnel endpoint params.
  */
-message SessionEndpoint {
+message TunnelEndpoint {
+  // IP address of tunnel endpoint.
   string ip = 1;
+
+  // UDP port for tunnel.
   int32 port = 2;
+
+  // Tunnel key index.
+  int32 vni = 3;
 }
 
 /*
@@ -38,10 +55,19 @@ message SessionResult {
   SessionResult.ResultCode code = 1;
 
   enum ResultCode {
+    // No-op code indicating testing is in progress. Only used for heartbeat messages.
     PENDING = 0;
+
+    // Testing is being started for the designated host.
     STARTED = 1;
+
+    // An error condition occured while testing the host.
     ERROR = 2;
+
+    // The host testing passed.
     PASSED = 3;
+
+    // The host failed testing for some reason.
     FAILED = 4;
   }
 }
@@ -50,5 +76,6 @@ message SessionResult {
  * Device testing session server endpoint.
  */
 service SessionServer {
+  // Session between host network and testing service.
   rpc StartSession(SessionParams) returns (stream SessionProgress) {}
 }

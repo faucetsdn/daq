@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dts
+spec:
+  selector:
+    matchLabels:
+      app: hello
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      containers:
+      - name: hello
+        image: "docker.io/daqf/dts"
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: 101Mi
+        securityContext:
+          privileged: true

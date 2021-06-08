@@ -1,0 +1,27 @@
+# DAQ FOT configuration.
+
+include: ${DAQ_LIB}/config/system/default.yaml
+
+base_conf: ${DAQ_LIB}/resources/setups/orchestration/base_config.json
+
+host_tests: config/modules/dts.conf
+
+switch_setup:
+  data_intf: data0
+  lo_port: 3984
+  varz_port: 5678
+  model: EXT_STACK
+  native: True
+  of_dpid: '0'
+
+run_trigger:
+  vlan_start: 272
+  vlan_end: 276
+
+device_reporting:
+  server_port: 50051
+
+external_subnets:
+  - subnet: 192.168.1.0/24
+
+site_path: /site

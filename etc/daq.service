@@ -1,14 +1,11 @@
 [Unit]
-Description=DAQ service
-After=network.target
-StartLimitIntervalSec=0
+Description="Faucet Device Automated Qualification"
 
 [Service]
-Type=simple
+EnvironmentFile=/etc/default/daq
+ExecStart=/usr/bin/daq
+ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
-RestartSec=5
-User=root
-ExecStart=%ROOT%/cmd/run
 
 [Install]
 WantedBy=multi-user.target
