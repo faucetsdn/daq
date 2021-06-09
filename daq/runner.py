@@ -243,7 +243,8 @@ class DAQRunner:
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             # TODO: Make this all configured from run_trigger not device_reporting
-            handler = SessionServer(on_session=self._on_session, server_port=server_port,
+            handler = SessionServer(on_session=self._on_session,
+                                    on_session_end=self._on_session_end, server_port=server_port,
                                     local_ip=local_ip)
             return handler
         return None
@@ -256,8 +257,18 @@ class DAQRunner:
             assert remote_ip, 'remote request ip not specified'
             self.network.configure_remote_tap(request.endpoint)
             device = self._devices.create_if_absent(request.device_mac)
+            device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+
+    def _on_session_end(self, request):
+        with self._event_lock:
+            remote_ip = request.endpoint.ip
+            LOGGER.info('Session ended for %s %s/%s at %s', request.device_mac,
+                        request.device_vlan, request.assigned_vlan, remote_ip)
+            device = self._devices.get(request.device_mac)
+            if device and not device.port.flapping_start:
+                device.port.flapping_start = time.time()
 
     def _send_heartbeat(self):
         message = {
@@ -441,31 +452,15 @@ class DAQRunner:
         device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
-        # For keeping track of remote port events
         if self._device_result_handler:
             if not device.wait_remote:
-                LOGGER.info('Connecting device result client for %s', target_mac)
                 device.port = PortInfo()
                 device.port.active = True
                 device.wait_remote = True
-                self._device_result_handler.connect(
-                    device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
             triggered = self._target_set_trigger(device)
             if not triggered:
                 LOGGER.warning('Learned device not triggered %s', target_mac)
-
-    def _handle_remote_port_state(self, device, port_event):
-        with self._event_lock:
-            if port_event.state == PortBehavior.PortState.down:
-                if not device.port.flapping_start:
-                    device.port.flapping_start = time.time()
-                device.port.active = False
-                return
-
-            LOGGER.info('Processing remote state %s %s/%s', device, device.vlan, device.assigned)
-            if port_event.device_vlan and port_event.assigned_vlan:
-                self._remote_trigger(device, port_event.device_vlan, port_event.assigned_vlan)
 
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
         assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
