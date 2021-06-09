@@ -101,7 +101,7 @@ jobs:
       if: ${{ always() }}
       run: |
         echo %%%%%%% daq log cmdrun.log
-        cat inst/cmdrun.log
+        cat inst/cmdrun.log || true
 
   unit_tests:
     runs-on: ubuntu-18.04
