@@ -29,7 +29,8 @@ class SessionServerServicer(object):
     """
 
     def StartSession(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Session between host network and testing service.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
