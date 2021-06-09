@@ -59,17 +59,23 @@ $AG install lsb-release
 release=$(lsb_release -cs)
 echo LSB release version $release
 
+if [[ $release == bionic ]]; then
+    $AG install python
+else
+    $AG install python2
+fi
+
 $AG install \
     software-properties-common apt-transport-https iproute2 emacs-nox \
     git ethtool curl apache2-utils iputils-ping lsof jq pandoc nmap \
     ca-certificates sudo net-tools tcpdump build-essential pango-1.0 \
     isc-dhcp-client network-manager netcat gnupg2 strace libffi-dev \
-    python2 python$PVERSION python3-pkg-resources python3-setuptools \
+    python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python$PVERSION-venv \
     python3-distutils
 
 PYTHON2_BIN=$(readlink -f $(which python2))
-echo Python binary is at $PYTHON2_BIN
+echo Python2 binary is $PYTHON2_BIN
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -117,6 +123,8 @@ fi
 
 which python
 python --version
+which python2
+python2 --version
 which python3
 python3 --version
 
