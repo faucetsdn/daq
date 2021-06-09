@@ -267,7 +267,7 @@ class DAQRunner:
             LOGGER.info('Session ended for %s %s/%s at %s', request.device_mac,
                         request.device_vlan, request.assigned_vlan, remote_ip)
             device = self._devices.get(request.device_mac)
-            if not device.port.flapping_start:
+            if device and not device.port.flapping_start:
                 device.port.flapping_start = time.time()
 
     def _send_heartbeat(self):

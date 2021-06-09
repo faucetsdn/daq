@@ -114,12 +114,16 @@ class SessionServer:
 
     def _session_stream(self, request):
         device_mac = request.device_mac
-        while True:
-            item = self._clients[device_mac].return_queue.get()
-            self._clients[device_mac].last_streamed = time.time()
-            if item is False:
-                break
-            yield item
+        try:
+            while True:
+                item = self._clients[device_mac].return_queue.get()
+                self._clients[device_mac].last_streamed = time.time()
+                if item is False:
+                    break
+                yield item
+        except GeneratorExit:
+            # Catching early generator exit so session may be cleaned up.
+            pass
         with self._lock:
             self._reap_session(device_mac)
 
@@ -137,16 +141,12 @@ class SessionServer:
     def send_device_heartbeats(self):
         """Send PRC heartbeats to all devices"""
         # TODO: Replace this with proper grpc.aio state-change callback to detect disconnect.
-        disconnects = []
-        with self._lock:
-            for device_mac in self._clients:
-                delta = time.time() - self._clients[device_mac].last_streamed
-                if delta < self._disconnect_timeout_sec:
-                    self._send_reply(device_mac, SessionProgress())
-                else:
-                    LOGGER.warning('Disconnect timeout for %s after %s', device_mac, delta)
-                    disconnects.append(device_mac)
-            for device_mac in disconnects:
+        for device_mac in self._clients:
+            delta = time.time() - self._clients[device_mac].last_streamed
+            if delta < self._disconnect_timeout_sec:
+                self._send_reply(device_mac, SessionProgress())
+            else:
+                LOGGER.warning('Disconnect timeout for %s after %s', device_mac, delta)
                 self.close_stream(device_mac)
 
 
