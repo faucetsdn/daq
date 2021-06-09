@@ -8,6 +8,7 @@
 
 ROOT=$(dirname $0)/..
 cd $ROOT
+CMDLINE=$*
 
 SIMPLE=
 if [ "$1" == simple ]; then
@@ -21,8 +22,8 @@ INSTALLED_PYTHON=`python3 -V | sed -nr 's~Python (3?\..+)\..+$~\1~p'`
 echo Installed python version is $INSTALLED_PYTHON
 
 if [[ $PVERSION != $INSTALLED_PYTHON ]]; then
-    echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON
-    echo Set the PVERSION environment variable to specify a different expected value
+    echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON. Try running:
+    echo "  $ PVERSION=$INSTALLED_PYTHON" $0 $CMDLINE
     false
 fi
 
