@@ -6,6 +6,9 @@ include: ${DAQ_LIB}/config/system/default.yaml
 # Description for dashboard.
 site_description: "ATA Proxy Configuration"
 
+# For large-scale network, no room for sleeping.
+settle_sec: 0
+
 # Network switch configuration.
 switch_setup:
   model: EXT_STACK
