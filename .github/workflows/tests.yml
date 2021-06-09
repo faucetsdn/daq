@@ -97,13 +97,11 @@ jobs:
         GCP_REFLECT_KEY_BASE64: ${{ secrets.GCP_REFLECT_KEY_BASE64 }}
       run: |
         bin/test_daq ${{ matrix.test }}
-    - name: Generated test report
+    - name: Runtime logs
       if: ${{ always() }}
       run: |
-        echo '************* Use sed to filter out timestamp prefix *************'
-        echo 'Download log archive, find the right job, and use:'
-        echo "  sed -e 's/^[-:.0-9TZ]\+ //' 7_Generated\ test\ report.txt"
-        cat inst/test_${{ matrix.test }}.out
+        echo %%%%%%% daq log cmdrun.log
+        cat inst/cmdrun.log
 
   unit_tests:
     runs-on: ubuntu-18.04
