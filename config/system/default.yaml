@@ -12,9 +12,6 @@ switch_setup:
   of_dpid: 2
   uplink_port: 7
 
-# Time to let the network settle after some operations.
-settle_sec: 5
-
 # Default time to monitor before starting tests.
 monitor_scan_sec: 30
 
