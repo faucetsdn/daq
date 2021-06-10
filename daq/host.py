@@ -372,7 +372,7 @@ class ConnectedHost:
         self.record_result('acquire', state=MODE.EXEC)
         static_ip = self._get_static_ip()
         if static_ip:
-            self.logger.info('Target device %s using STATIC_IP %s', self, static_ip)
+            self.logger.info('Target device %s using ip mode STATIC %s', self, static_ip)
             self.device.dhcp_mode = DhcpMode.STATIC_IP
             time.sleep(self._STARTUP_MIN_TIME_SEC)
             self.runner.ip_notify(MODE.NOPE, {
@@ -388,7 +388,7 @@ class ConnectedHost:
             # enables dhcp response for this device
             wait_time = self.runner.config.get("long_dhcp_response_sec") \
                 if self.device.dhcp_mode == DhcpMode.LONG_RESPONSE else 0
-            self.logger.info('Target device %s using %s DHCP mode, wait %s',
+            self.logger.info('Target device %s ip mode %s, wait %s',
                              self, DhcpMode.Name(self.device.dhcp_mode), wait_time)
             if self.device.dhcp_mode != DhcpMode.EXTERNAL:
                 self.gateway.change_dhcp_response_time(self.target_mac, wait_time)

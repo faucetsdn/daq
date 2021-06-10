@@ -1,0 +1,74 @@
+#!/bin/bash -x
+
+ROOT=$(realpath $(dirname $0)/..)
+DAQ_ROOT=$ROOT
+FAUCET_ROOT=$ROOT/faucet
+FORCH_ROOT=$ROOT/forch
+VXLAN_IP=1.2.3.4
+
+BASE_CONFIG=config/system/dts.yaml
+DYNAMIC_CONFIG=startup.conf
+
+ls -ld /var/log/faucet
+USERID=`ls -ldn /var/log/faucet | awk '{print $3}'`
+
+PROMETHEUS_PORT=9302
+FAUCET_EVENT_SOCK=/var/log/faucet/faucet_event.sock
+FAUCET_CONFIG=/etc/faucet/faucet.yaml
+FAUCET_CONFIG_STAT_RELOAD=1
+export FAUCET_CONFIG_DIR=/etc/faucet
+FAUCET_EVENT_SOCK_HEARTBEAT=10
+FAUCET_LISTEN_PORT=6653
+FAUCET_RYU_CONF=/etc/faucet/ryu.conf
+WSAPI_LISTEN_HOST=localhost
+WSAPI_LISTEN_PORT=4000
+GAUGE_RYU_CONF=/etc/faucet/ryu.conf
+GAUGE_LISTEN_PORT=6654
+GAUGE_CONFIG=/etc/faucet/gauge.yaml
+GAUGE_LOG=/var/log/faucet/gauge.log
+GAUGE_EXCEPTION_LOG=/var/log/faucet/gauge_exception.log
+GAUGE_CONFIG_STAT_RELOAD=1
+DAQ_EVENT_SOCK=$DAQ_ROOT/inst/faucet_event.sock
+export PYTHONPATH=$FORCH_ROOT:$DAQ_ROOT:$FAUCET_ROOT:$DAQ_ROOT/mininet
+
+env
+
+no_test=
+if [[ $RUN_MODE == no-test ]]; then
+    no_test=-n
+fi
+
+ip_address=$(ip addr show eth0 | fgrep inet | sed -nr 's~.*inet ([0-9.]+)/.*~\1~p')
+echo Target ip address is $ip_address
+
+# User might already exist if docker restarted.
+#echo "kronkiteman::$USERID:$USERID::/:bin/bash" >> /etc/passwd
+
+# Clean up some permissions that are necessary for operation.
+mkdir -p $DAQ_ROOT/inst
+#chmod a+rx $ROOT
+#chown kronkiteman -R $DAQ_ROOT
+
+# Prepare for the daq faucet instance.
+cp /etc/faucet/ryu.conf $DAQ_ROOT/inst/
+echo > $DYNAMIC_CONFIG
+
+FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK \
+    FAUCET_EVENT_SOCK_HEARTBEAT=$FAUCET_EVENT_SOCK_HEARTBEAT \
+    FAUCET_CONFIG_STAT_RELOAD=$FAUCET_CONFIG_STAT_RELOAD \
+    FAUCET_CONFIG=$FAUCET_CONFIG \
+    faucet --ryu-config-file=${FAUCET_RYU_CONF} --ryu-ofp-tcp-listen-port=${FAUCET_LISTEN_PORT} &
+
+echo Starting ovs...
+sudo /usr/share/openvswitch/scripts/ovs-ctl start
+
+echo Configuring for vxlan endpoint ip $ip_address
+echo switch_setup.endpoint.ip=$ip_address >> $DYNAMIC_CONFIG
+
+echo Starting daq, output in $DAQ_ROOT/inst/cmdrun.log
+PYTHONPATH=$PYTHONPATH \
+    PATH=$DAQ_ROOT/mininet:$PATH \
+    FAUCET_EVENT_SOCK=$DAQ_EVENT_SOCK \
+    $DAQ_ROOT/cmd/start $BASE_CONFIG $DYNAMIC_CONFIG $no_test > $DAQ_ROOT/inst/cmdrun.log 2>&1 &
+
+tail --retry -f $DAQ_ROOT/inst/cmdrun.log
