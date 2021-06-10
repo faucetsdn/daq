@@ -7,7 +7,7 @@ services:
             dockerfile: ./docker/modules/Dockerfile.faux1
         image: 'authenticator/wpasupplicant:latest'
         depends_on: [authenticator]
-        #command: bash -c "wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired"
+        command: bash -c "wpa_supplicant -dd -c/tmp/wpasupplicant/wired-peap.conf -ieth0 -Dwired"
         networks:
             00wpasupplicant-net:
                 ipv4_address: 10.20.0.11
@@ -26,7 +26,6 @@ services:
         networks:
             00wpasupplicant-net:
                 ipv4_address: 10.20.0.3
-                priority: 200
         cap_add:
             - ALL
         volumes:
