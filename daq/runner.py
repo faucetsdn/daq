@@ -191,6 +191,7 @@ class DAQRunner:
         self._cleanup_previous_runs()
         self._init_test_list()
         self._target_set_queue = Queue()
+        self._concurrent_runs = self.config.get('run_trigger', {}).get('concurrent_runs', 0)
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -618,9 +619,18 @@ class DAQRunner:
         LOGGER.info('TAPTAP queue device %s', device)
         device.queued = True
         self._target_set_queue.put(device)
+        if self._target_triggered_maxed(additional=self._target_set_queue.qsize()):
+            LOGGER.info('Target device %s triggering queued (%s)',
+                        device, self._target_set_queue.qsize())
+
+    def _target_triggered_maxed(self, additional=0):
+        num_triggered = len(self._devices.get_triggered_devices())
+        return self._concurrent_runs > 0 and (num_triggered + additional) >= self._concurrent_runs
 
     def _target_set_consider(self):
         if self._target_set_queue.empty():
+            return
+        if self._target_triggered_maxed():
             return
         device = self._target_set_queue.get()
         if device.queued:
