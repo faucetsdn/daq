@@ -612,8 +612,9 @@ class DAQRunner:
 
     def _target_set_trigger(self, device, remote_trigger=False):
         if not self._target_set_check_state(device, remote_trigger):
-            return False
+            return
         device.wait_remote = False
+        LOGGER.info('TAPTAP queue device %s', device)
         self._target_set_queue.put(device)
 
     def _target_set_consider(self):
@@ -623,6 +624,7 @@ class DAQRunner:
         self._target_set_release(device)
 
     def _target_set_release(self, device):
+        LOGGER.info('TAPTAP release device %s', device)
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         port_trigger = device.port.port_no is not None
