@@ -66,7 +66,6 @@ class Device:
         self.set_id = None
         self.assigned = None
         self.wait_remote = False
-        self.queued = False
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -172,13 +171,13 @@ class DAQRunner:
         self._sys_uname = os.environ['DAQ_SYS_UNAME']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
-        self._native_vlan = self.config.setdefault('run_trigger', {}).get('native_vlan')
+        self.run_trigger = config.setdefault('run_trigger', {})
+        self._native_vlan = self.run_trigger.get('native_vlan')
         self._native_gateway = None
         self._linger_exit = 0
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
-        self.run_trigger = config.get('run_trigger', {})
         self.run_tests = True
         self.stream_monitor = None
         self.exception = None
@@ -190,8 +189,8 @@ class DAQRunner:
         self._device_result_handler = self._init_device_result_handler()
         self._cleanup_previous_runs()
         self._init_test_list()
-        self._target_set_queue = Queue()
-        self._concurrent_runs = self.config.get('run_trigger', {}).get('concurrent_runs', 0)
+        self._target_set_queue = []
+        self._concurrent_runs = self.run_trigger.get('concurrent_runs') or float('inf')
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -240,7 +239,7 @@ class DAQRunner:
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
-        egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
+        egress_vlan = self.run_trigger.get('egress_vlan')
         local_ip = self.config.get('switch_setup', {}).get('endpoint', {}).get('ip')
         LOGGER.info('Device result handler on port %s, vlan %s, ip %s',
                     server_port, egress_vlan, local_ip)
@@ -611,33 +610,27 @@ class DAQRunner:
             LOGGER.debug('Ignoring local trigger for remote target %s', device)
             return
 
-        if device.queued:
+        if device in self._target_set_queue:
             LOGGER.debug('Target device %s already queued', device)
             return
 
         device.wait_remote = False
-        LOGGER.info('TAPTAP queue device %s', device)
-        device.queued = True
-        self._target_set_queue.put(device)
-        if self._target_triggered_maxed(additional=self._target_set_queue.qsize()):
-            LOGGER.info('Target device %s triggering queued (%s)',
-                        device, self._target_set_queue.qsize())
+        self._target_set_queue.append(device)
+        if self._target_queue_full(at_queue_end=True):
+            LOGGER.info('Target device %s triggering deferred (%s)',
+                        device, len(self._target_set_queue))
 
-    def _target_triggered_maxed(self, additional=0):
+    def _target_queue_full(self, at_queue_end=False):
         num_triggered = len(self._devices.get_triggered_devices())
-        return self._concurrent_runs > 0 and (num_triggered + additional) >= self._concurrent_runs
+        queue_position = len(self._target_set_queue) if at_queue_end else 0
+        return (num_triggered + queue_position) >= self._concurrent_runs
 
     def _target_set_consider(self):
-        if self._target_set_queue.empty():
+        if not len(self._target_set_queue) or self._target_queue_full():
             return
-        if self._target_triggered_maxed():
-            return
-        device = self._target_set_queue.get()
-        if device.queued:
-            self._target_set_release(device)
+        self._target_set_release(self._target_set_queue.pop(0))
 
     def _target_set_release(self, device):
-        LOGGER.info('TAPTAP release device %s', device)
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         port_trigger = device.port.port_no is not None
@@ -991,7 +984,8 @@ class DAQRunner:
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
     def _target_set_cancel(self, device):
-        device.queued = False
+        if device in self._target_set_queue:
+            self._target_set_queue.remove(device)
         target_host = device.host
         if not target_host:
             return
