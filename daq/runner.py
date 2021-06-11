@@ -4,6 +4,7 @@ import copy
 import os
 import re
 import shutil
+from queue import Queue
 import threading
 import time
 import traceback
@@ -188,6 +189,7 @@ class DAQRunner:
         self._device_result_handler = self._init_device_result_handler()
         self._cleanup_previous_runs()
         self._init_test_list()
+        self._target_set_queue = Queue()
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -451,9 +453,7 @@ class DAQRunner:
                 self._device_result_handler.connect(
                     device.mac, lambda event: self._handle_remote_port_state(device, event))
         else:
-            triggered = self._target_set_trigger(device)
-            if not triggered:
-                LOGGER.warning('Learned device not triggered %s', target_mac)
+            self._target_set_trigger(device)
 
     def _handle_remote_port_state(self, device, port_event):
         with self._event_lock:
@@ -510,9 +510,12 @@ class DAQRunner:
                     self.target_set_complete(device, 'target set not active')
             except Exception as e:
                 self.target_set_error(device, e)
+
         for device in self._devices.get_all_devices():
             self._target_set_trigger(device)
             all_idle = False
+        self._target_set_consider()
+
         if not self._devices.get_triggered_devices() and not self.run_tests:
             if self.faucet_events and not self._linger_exit:
                 self.shutdown()
@@ -610,13 +613,21 @@ class DAQRunner:
     def _target_set_trigger(self, device, remote_trigger=False):
         if not self._target_set_check_state(device, remote_trigger):
             return False
+        device.wait_remote = False
+        self._target_set_queue.put(device)
+
+    def _target_set_consider(self):
+        if self._target_set_queue.empty():
+            return
+        device = self._target_set_queue.get()
+        self._target_set_release(device)
+
+    def _target_set_release(self, device):
+        external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         port_trigger = device.port.port_no is not None
         if port_trigger:
             assert device.port.active, 'Target port %d is not active' % device.port.port_no
-
-        device.wait_remote = False
-        external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         try:
             group_name = self.network.device_group_for(device)
