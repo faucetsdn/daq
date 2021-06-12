@@ -590,6 +590,10 @@ class DAQRunner:
 
         self._terminate()
 
+    def _target_set_has_capacity(self):
+        num_triggered = len(self._devices.get_triggered_devices())
+        return num_triggered < self._max_hosts
+
     def _target_set_trigger(self, device, remote_trigger=False):
         assert self._devices.contains(device), 'Target device %s is not expected' % device
 
@@ -616,18 +620,18 @@ class DAQRunner:
         device.wait_remote = False
 
         if self._target_set_has_capacity():
+            LOGGER.info('Target device %s direct activate',
+                        device, len(self._target_set_queue))
             self._target_set_activate(device)
         else:
             self._target_set_queue.append(device)
-            LOGGER.info('Target device %s queing (%s)',
+            LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
-
-    def _target_set_has_capacity(self):
-        num_triggered = len(self._devices.get_triggered_devices())
-        return num_triggered < self._max_hosts
 
     def _target_set_consider(self):
         if self._target_set_queue and self._target_set_has_capacity():
+            LOGGER.info('Target device %s pop activate (%s)',
+                        device, len(self._target_set_queue))
             self._target_set_activate(self._target_set_queue.pop(0))
 
     def _target_set_activate(self, device):
