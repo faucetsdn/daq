@@ -8,7 +8,7 @@ import errno
 import socket
 
 from mac_address import MacAddress
-from utils import get_logger
+from utils import get_logger, get_interface_mac
 
 
 class PromiscuousSocket(ABC):
@@ -17,7 +17,6 @@ class PromiscuousSocket(ABC):
     PACKET_MR_PROMISC = 1
     SOL_PACKET = 263
     PACKET_ADD_MEMBERSHIP = 1
-    EAP_ADDRESS = MacAddress.from_string("01:80:c2:00:00:03")
 
     @abstractmethod
     def send(self, data):  # pylint: disable=missing-docstring
@@ -36,6 +35,7 @@ class PromiscuousSocket(ABC):
         self.interface_index = None
         self.interface_name = interface_name
         self.logger = get_logger(log_prefix)
+        self.eap_address = MacAddress.from_string(get_interface_mac(interface_name))
 
     def _setup(self, socket_filter):
         """Set up the socket"""
@@ -63,7 +63,7 @@ class PromiscuousSocket(ABC):
     def set_interface_promiscuous(self):
         """Sets the EAP interface to be able to receive EAP messages"""
         request = struct.pack("IHH8s", self.interface_index, self.PACKET_MR_PROMISC,
-                              len(self.EAP_ADDRESS.address), self.EAP_ADDRESS.address)
+                              len(self.eap_address.address), self.eap_address.address)
         self.socket.setsockopt(self.SOL_PACKET, self.PACKET_ADD_MEMBERSHIP, request)
 
     def shutdown(self):

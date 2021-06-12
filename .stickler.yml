@@ -1,13 +1,15 @@
 ---
 linters:
   flake8:
+    ignore: E701
     python: 3
     max-line-length: 100
   pep8:
+    ignore: E701
     python: 3
     max-line-length: 100
   py3k:
-    ignore: E1601
+    ignore: E1601, E701
   checkstyle:
     config: ./.checkstyle.xml
 files:

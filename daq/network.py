@@ -63,7 +63,7 @@ class TestNetwork:
         self.sec_dpid = None
         self.sec_port = None
         self.tap_intf = None
-        self._settle_sec = int(config['settle_sec'])
+        self._settle_sec = int(config.get('settle_sec', 0))
         subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
         self._mininet_subnet = ip_network(subnet)
         self.topology = FaucetTopology(self.config)

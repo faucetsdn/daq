@@ -55,7 +55,7 @@ class EapModule:
             is_eapol = False
             if isinstance(eap, EapolStartMessage):
                 is_eapol = True
-                self.authenticator_mac = dst_mac
+                self.authenticator_mac = self.eap_socket.eap_address
             if self.auth_callback:
                 self.auth_callback(str(eap.src_mac), eap, is_eapol)
 
@@ -75,6 +75,8 @@ class EapModule:
     def send_eap_message(self, src_mac, data):
         src_mac_address = MacAddress.from_string(src_mac)
         port_id = self.authenticator_mac
+        self.logger.debug('Packing eap message: src_mac: %s port_id: %s data: %s',
+                          src_mac_address, port_id, data)
         packed_message = MessagePacker.ethernet_pack(data, port_id, src_mac_address)
         self.send_packed_eap_message(packed_message)
 
