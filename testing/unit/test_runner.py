@@ -110,6 +110,7 @@ class TestRunner(unittest.TestCase):
         self.runner.target_set_error.assert_called()
 
     def test_target_set_queue_capacity(self):
+        """Test the target set running queue"""
         self.runner._system_active = True
 
         device1 = self.runner._devices.new_device("0000000001", None)
