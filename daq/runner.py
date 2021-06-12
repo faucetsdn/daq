@@ -501,7 +501,6 @@ class DAQRunner:
         # Some synthetic faucet events don't come in on the socket, so process them here.
         self._handle_faucet_events()
         all_idle = True
-        LOGGER.info('TAPTAP idle handler')
         for device in self._devices.get_triggered_devices():
             try:
                 if device.host.is_running():
