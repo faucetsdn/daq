@@ -614,22 +614,23 @@ class DAQRunner:
             return
 
         device.wait_remote = False
-        self._target_set_queue.append(device)
-        if self._target_queue_full(at_queue_end=True):
-            LOGGER.info('Target device %s triggering deferred (%s)',
+
+        if self._target_set_has_capacity():
+            self._target_set_activate(device)
+        else:
+            self._target_set_queue.append(device)
+            LOGGER.info('Target device %s queing (%s)',
                         device, len(self._target_set_queue))
 
-    def _target_queue_full(self, at_queue_end=False):
+    def _target_set_has_capcity(self):
         num_triggered = len(self._devices.get_triggered_devices())
-        queue_position = len(self._target_set_queue) if at_queue_end else 0
-        return (num_triggered + queue_position) >= self._concurrent_runs
+        return num_triggered < self._concurrent_runs
 
     def _target_set_consider(self):
-        if not self._target_set_queue or self._target_queue_full():
-            return
-        self._target_set_release(self._target_set_queue.pop(0))
+        if self._target_set_queue and self._target_set_has_capacity():
+            self._target_set_activate(self._target_set_queue.pop(0))
 
-    def _target_set_release(self, device):
+    def _target_set_activate(self, device):
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         port_trigger = device.port.port_no is not None
