@@ -16,7 +16,7 @@ switch_setup:
 
 run_trigger:
   native_vlan: 122
-  max_hosts: 8
+  max_hosts: 3
 
 internal_subnet:
   subnet: 10.21.0.0/16
