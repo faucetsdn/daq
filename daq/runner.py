@@ -4,7 +4,6 @@ import copy
 import os
 import re
 import shutil
-from queue import Queue
 import threading
 import time
 import traceback
@@ -626,7 +625,7 @@ class DAQRunner:
         return (num_triggered + queue_position) >= self._concurrent_runs
 
     def _target_set_consider(self):
-        if not len(self._target_set_queue) or self._target_queue_full():
+        if not self._target_set_queue or self._target_queue_full():
             return
         self._target_set_release(self._target_set_queue.pop(0))
 
