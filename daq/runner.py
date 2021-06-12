@@ -620,8 +620,7 @@ class DAQRunner:
         device.wait_remote = False
 
         if self._target_set_has_capacity():
-            LOGGER.info('Target device %s direct activate',
-                        device, len(self._target_set_queue))
+            LOGGER.info('Target device %s direct activate', device)
             self._target_set_activate(device)
         else:
             self._target_set_queue.append(device)
