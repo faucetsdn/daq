@@ -26,13 +26,13 @@ class TestRunner(unittest.TestCase):
     """Test class for Configurator"""
 
     config = {
-        'monitor_scan_sec' : '30',
-        'default_timeout_sec' : '350',
-        'base_conf' : 'resources/setups/baseline/base_config.json',
-        'site_path' : 'local/site/',
-        'initial_dhcp_lease_time' : '120s',
-        'dhcp_lease_time' : '500s',
-        'long_dhcp_response_sec' : '105',
+        'monitor_scan_sec': '30',
+        'default_timeout_sec': '350',
+        'base_conf': 'resources/setups/baseline/base_config.json',
+        'site_path': 'local/site/',
+        'initial_dhcp_lease_time': '120s',
+        'dhcp_lease_time': '500s',
+        'long_dhcp_response_sec': '105',
         'run_trigger': {
             'max_hosts': 2
         }
