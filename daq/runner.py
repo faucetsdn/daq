@@ -451,7 +451,8 @@ class DAQRunner:
             LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, target_mac, vid):
-        LOGGER.info('Learning %s on vid %s', target_mac, vid)
+        if not self._devices.get(target_mac):
+            LOGGER.info('Learning %s on vid %s', target_mac, vid)
         device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
@@ -824,8 +825,8 @@ class DAQRunner:
                         target_ip, gateway, state, delta_sec)
 
         if state == 'NEW':
-            LOGGER.warning('Learning unexpected device %s, type %s, ip %s', target_mac,
-                           target_type, target_ip)
+            LOGGER.debug('Learning unexpected device %s, type %s, ip %s', target_mac,
+                         target_type, target_ip)
             self._handle_device_learn(target_mac, self._native_vlan)
 
         assert target_mac
