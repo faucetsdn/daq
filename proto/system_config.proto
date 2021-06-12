@@ -247,8 +247,8 @@ message RunTrigger {
   // native tap vlan
   int32 native_vlan = 4;
 
-  // limit on the number of active testing sessions
-  int32 concurrent_runs = 5;
+  // limit on the number of active testing hosts
+  int32 max_hosts = 5;
 }
 
 /*
