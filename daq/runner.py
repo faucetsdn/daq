@@ -175,21 +175,22 @@ class DAQRunner:
         self._native_gateway = None
         self._linger_exit = 0
         self.faucet_events = None
-        self.single_shot = config.get('single_shot', False)
+        self._single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
-        self.run_tests = True
+        self._run_tests = True
         self.stream_monitor = None
         self.exception = None
-        self.run_count = 0
-        self.run_limit = int(config.get('run_limit', 0))
+        self._run_count = 0
+        self._run_limit = int(config.get('run_limit', 0))
         self._default_port_flap_timeout = int(config.get('port_flap_timeout_sec', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
         self._device_result_handler = self._init_device_result_handler()
         self._cleanup_previous_runs()
         self._init_test_list()
-        self._target_set_queue = []
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
+        self._target_set_queue = []
+        self._target_set_block = set()
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -511,7 +512,9 @@ class DAQRunner:
             all_idle = False
         self._target_set_consider()
 
-        if not self._devices.get_triggered_devices() and not self.run_tests:
+        active_tests = bool(self._devices.get_triggered_devices() or self._target_set_queue)
+        more_testing = self._run_tests and not self._single_shot
+        if not active_tests and not more_testing:
             if self.faucet_events and not self._linger_exit:
                 self.shutdown()
             if self._linger_exit == 1:
@@ -600,8 +603,8 @@ class DAQRunner:
             LOGGER.debug('Target device %s already triggered', device)
             return
 
-        if not self.run_tests:
-            LOGGER.debug('Target device %s trigger suppressed', device)
+        if not self._run_tests:
+            LOGGER.debug('Target device %s ignore, not running more tests', device)
             return
 
         if device.wait_remote and not remote_trigger:
@@ -611,6 +614,13 @@ class DAQRunner:
         if device in self._target_set_queue:
             LOGGER.debug('Target device %s already queued', device)
             return
+
+        if device in self._target_set_block:
+            LOGGER.debug('Target device %s blocked', device)
+            return
+
+        if self._single_shot:
+            self._target_set_block.add(device)
 
         device.wait_remote = False
 
@@ -648,7 +658,7 @@ class DAQRunner:
             LOGGER.exception(e)
             if self.fail_mode:
                 LOGGER.warning('Suppressing further tests due to failure.')
-                self.run_tests = False
+                self._run_tests = False
             return False
 
         # Stops all DHCP response initially
@@ -658,7 +668,7 @@ class DAQRunner:
         gateway.attach_target(device)
         device.gateway = gateway
         try:
-            self.run_count += 1
+            self._run_count += 1
             new_host = connected_host.ConnectedHost(self, device, self.config)
             device.host = new_host
             new_host.register_dhcp_ready_listener(self._dhcp_ready_listener)
@@ -883,7 +893,7 @@ class DAQRunner:
         group_size = self.network.device_group_size(group_name)
 
         remaining = group_size - len(ready_devices)
-        if remaining and self.run_tests:
+        if remaining and self._run_tests:
             LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
             return gateway, False
 
@@ -966,18 +976,15 @@ class DAQRunner:
         suppress_tests = self.fail_mode or self.result_linger
         if results and suppress_tests:
             LOGGER.warning('Suppressing further tests due to failure.')
-            self.run_tests = False
+            self._run_tests = False
             if self.result_linger:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-        if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
+        if self._run_limit and self._run_count >= self._run_limit and self._run_tests:
             LOGGER.warning('Suppressing future tests because run limit reached.')
-            self.run_tests = False
-        if self.single_shot and self.run_tests:
-            LOGGER.warning('Suppressing future tests because test done in single shot.')
-            self._handle_faucet_events()  # Process remaining queued faucet events
-            self.run_tests = False
+            self._run_tests = False
+
         device.host = None
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
@@ -990,8 +997,8 @@ class DAQRunner:
             return
         target_gateway = device.gateway
         target_port = device.port.port_no
-        LOGGER.info('Target device %s cancel (#%d/%s).', device, self.run_count,
-                    self.run_limit)
+        LOGGER.info('Target device %s cancel (#%d/%s).', device, self._run_count,
+                    self._run_limit)
 
         results = self._combine_result_set(device, self._result_sets.get(device))
         this_result_linger = results and self.result_linger
