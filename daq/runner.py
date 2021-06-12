@@ -170,13 +170,13 @@ class DAQRunner:
         self._sys_uname = os.environ['DAQ_SYS_UNAME']
         self.network = network.TestNetwork(config)
         self.result_linger = config.get('result_linger', False)
-        self._native_vlan = self.config.setdefault('run_trigger', {}).get('native_vlan')
+        self.run_trigger = config.setdefault('run_trigger', {})
+        self._native_vlan = self.run_trigger.get('native_vlan')
         self._native_gateway = None
         self._linger_exit = 0
         self.faucet_events = None
         self.single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
-        self.run_trigger = config.get('run_trigger', {})
         self.run_tests = True
         self.stream_monitor = None
         self.exception = None
@@ -188,6 +188,8 @@ class DAQRunner:
         self._device_result_handler = self._init_device_result_handler()
         self._cleanup_previous_runs()
         self._init_test_list()
+        self._target_set_queue = []
+        self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -236,7 +238,7 @@ class DAQRunner:
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
-        egress_vlan = self.config.get('run_trigger', {}).get('egress_vlan')
+        egress_vlan = self.run_trigger.get('egress_vlan')
         local_ip = self.config.get('switch_setup', {}).get('endpoint', {}).get('ip')
         LOGGER.info('Device result handler on port %s, vlan %s, ip %s',
                     server_port, egress_vlan, local_ip)
@@ -458,9 +460,7 @@ class DAQRunner:
                 device.port.active = True
                 device.wait_remote = True
         else:
-            triggered = self._target_set_trigger(device)
-            if not triggered:
-                LOGGER.warning('Learned device not triggered %s', target_mac)
+            self._target_set_trigger(device)
 
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
         assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
@@ -505,9 +505,12 @@ class DAQRunner:
                     self.target_set_complete(device, 'target set not active')
             except Exception as e:
                 self.target_set_error(device, e)
+
         for device in self._devices.get_all_devices():
             self._target_set_trigger(device)
             all_idle = False
+        self._target_set_consider()
+
         if not self._devices.get_triggered_devices() and not self.run_tests:
             if self.faucet_events and not self._linger_exit:
                 self.shutdown()
@@ -525,7 +528,7 @@ class DAQRunner:
             timeout_sec = device.host.get_port_flap_timeout(device.host.test_name)
             if timeout_sec is None:
                 timeout_sec = self._default_port_flap_timeout
-            LOGGER.info('flap %s %s %s', device.mac, device.port.flapping_start, timeout_sec)
+            LOGGER.info('Flap device %s %s %s', device, device.port.flapping_start, timeout_sec)
             if (device.port.flapping_start + timeout_sec) <= time.time():
                 exception = DaqException('port not active for %ds' % timeout_sec)
                 self.target_set_error(device, exception)
@@ -582,46 +585,66 @@ class DAQRunner:
 
         self._terminate()
 
-    def _target_set_check_state(self, device, remote_trigger):
-        assert self._devices.contains(device), 'Target device %s is not expected' % device.mac
+    def _target_set_has_capacity(self):
+        num_triggered = len(self._devices.get_triggered_devices())
+        return num_triggered < self._max_hosts
+
+    def _target_set_trigger(self, device, remote_trigger=False):
+        assert self._devices.contains(device), 'Target device %s is not expected' % device
+
         if not self._system_active:
-            LOGGER.warning('Target device %s ignored, system is not active', device.mac)
-            return False
+            LOGGER.warning('Target device %s ignored, system is not active', device)
+            return
 
         if device.host:
-            LOGGER.debug('Target device %s already triggered', device.mac)
-            return False
+            LOGGER.debug('Target device %s already triggered', device)
+            return
 
         if not self.run_tests:
-            LOGGER.debug('Target device %s trigger suppressed', device.mac)
-            return False
+            LOGGER.debug('Target device %s trigger suppressed', device)
+            return
 
         if device.wait_remote and not remote_trigger:
             LOGGER.debug('Ignoring local trigger for remote target %s', device)
-            return False
+            return
 
-        return True
+        if device in self._target_set_queue:
+            LOGGER.debug('Target device %s already queued', device)
+            return
 
-    def _target_set_trigger(self, device, remote_trigger=False):
-        if not self._target_set_check_state(device, remote_trigger):
-            return False
+        device.wait_remote = False
+
+        if self._target_set_has_capacity():
+            LOGGER.info('Target device %s direct activate', device)
+            self._target_set_activate(device)
+        else:
+            self._target_set_queue.append(device)
+            LOGGER.info('Target device %s queing activate (%s)',
+                        device, len(self._target_set_queue))
+
+    def _target_set_consider(self):
+        if self._target_set_queue and self._target_set_has_capacity():
+            device = self._target_set_queue.pop(0)
+            LOGGER.info('Target device %s pop activate (%s)',
+                        device, len(self._target_set_queue))
+            self._target_set_activate(device)
+
+    def _target_set_activate(self, device):
+        external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         port_trigger = device.port.port_no is not None
         if port_trigger:
             assert device.port.active, 'Target port %d is not active' % device.port.port_no
-
-        device.wait_remote = False
-        external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
         try:
             group_name = self.network.device_group_for(device)
             device.group = group_name
             gateway = self._create_gateway(device)
             if gateway.activated and not external_dhcp:
-                LOGGER.warning('Target device %s trigger ignored b/c activated gateway', device.mac)
+                LOGGER.warning('Target device %s trigger ignored b/c activated gateway', device)
                 return False
         except Exception as e:
-            LOGGER.error('Target device %s target trigger error %s', device.mac, str(e))
+            LOGGER.error('Target device %s target trigger error %s', device, str(e))
             LOGGER.exception(e)
             if self.fail_mode:
                 LOGGER.warning('Suppressing further tests due to failure.')
@@ -960,19 +983,21 @@ class DAQRunner:
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
     def _target_set_cancel(self, device):
+        if device in self._target_set_queue:
+            self._target_set_queue.remove(device)
         target_host = device.host
         if not target_host:
             return
         target_gateway = device.gateway
         target_port = device.port.port_no
-        LOGGER.info('Target device %s cancel (#%d/%s).', device.mac, self.run_count,
+        LOGGER.info('Target device %s cancel (#%d/%s).', device, self.run_count,
                     self.run_limit)
 
         results = self._combine_result_set(device, self._result_sets.get(device))
         this_result_linger = results and self.result_linger
         target_gateway_linger = target_gateway and target_gateway.result_linger
         if target_gateway_linger or this_result_linger:
-            LOGGER.warning('Target device %s result_linger: %s', device.mac, results)
+            LOGGER.warning('Target device %s result_linger: %s', device, results)
             if target_port:
                 self._activate_port(target_port)
             target_gateway.result_linger = True
@@ -1043,12 +1068,12 @@ class DAQRunner:
 
         LOGGER.info(
             'Sending device result for device %s: %s',
-            device.mac, PortBehavior.Behavior.Name(device_result))
+            device, PortBehavior.Behavior.Name(device_result))
         try:
             self._device_result_handler.send_device_result(device.mac, device_result)
             self._device_result_handler.close_stream(device.mac)
         except Exception as e:
-            LOGGER.error("Failed to send device results for device %s: %s ", device.mac, e)
+            LOGGER.error("Failed to send device results for device %s: %s ", device, e)
 
     def _calculate_device_result(self, device, test_results):
         failed = False
@@ -1075,7 +1100,7 @@ class DAQRunner:
                     failed = True
 
         if len(device.host.enabled_tests) != len(processed):
-            LOGGER.info('%s report had %s out of expected %s modules', device.mac,
+            LOGGER.info('Device %s report had %s out of expected %s modules', device,
                         len(processed), len(device.host.enabled_tests))
             failed = True
 

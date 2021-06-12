@@ -24,13 +24,16 @@ class TestRunner(unittest.TestCase):
     """Test class for Configurator"""
 
     config = {
-        'monitor_scan_sec' : '30',
-        'default_timeout_sec' : '350',
-        'base_conf' : 'resources/setups/baseline/base_config.json',
-        'site_path' : 'local/site/',
-        'initial_dhcp_lease_time' : '120s',
-        'dhcp_lease_time' : '500s',
-        'long_dhcp_response_sec' : '105'
+        'monitor_scan_sec': '30',
+        'default_timeout_sec': '350',
+        'base_conf': 'resources/setups/baseline/base_config.json',
+        'site_path': 'local/site/',
+        'initial_dhcp_lease_time': '120s',
+        'dhcp_lease_time': '500s',
+        'long_dhcp_response_sec': '105',
+        'run_trigger': {
+            'max_hosts': 2
+        }
     }
 
     def setUp(self):
@@ -91,6 +94,51 @@ class TestRunner(unittest.TestCase):
         self.runner._reap_stale_ports()
         host.get_port_flap_timeout.assert_called_with(host.test_name)
         self.runner.target_set_error.assert_called()
+
+    def test_target_set_queue_capacity(self):
+        """Test the target set running queue"""
+        self.runner._system_active = True
+
+        device1 = self.runner._devices.new_device("0000000001", None)
+        device2 = self.runner._devices.new_device("0000000002", None)
+        device3 = self.runner._devices.new_device("0000000003", None)
+        device4 = self.runner._devices.new_device("0000000004", None)
+        device5 = self.runner._devices.new_device("0000000005", None)
+
+        def activate_device(device):
+            device.host = True
+
+        self.runner._target_set_activate = MagicMock(side_effect=activate_device)
+
+        self.runner._target_set_trigger(device1)
+        self.runner._target_set_trigger(device2)
+        self.runner._target_set_trigger(device3)
+        self.runner._target_set_trigger(device4)
+        self.assertEqual(self.runner._target_set_activate.call_count, 2)
+        self.assertTrue(device1.host)
+        self.assertTrue(device2.host)
+        self.assertFalse(device3.host)
+
+        self.assertEqual(len(self.runner._target_set_queue), 2)
+
+        device2.host = False
+        self.runner._target_set_consider()
+        self.assertEqual(self.runner._target_set_activate.call_count, 3)
+        self.assertTrue(device3.host)
+
+        self.runner._target_set_trigger(device4)
+        self.runner._target_set_trigger(device5)
+        self.runner._target_set_consider()
+        self.assertEqual(self.runner._target_set_activate.call_count, 3)
+        self.assertEqual(len(self.runner._target_set_queue), 2)
+
+        self.runner._target_set_cancel(device4)
+        device1.host = False
+        self.runner._target_set_consider()
+        self.assertEqual(self.runner._target_set_activate.call_count, 4)
+        self.assertEqual(len(self.runner._target_set_queue), 0)
+        self.assertFalse(device4.host)
+        self.assertTrue(device5.host)
 
 if __name__ == '__main__':
     unittest.main()
