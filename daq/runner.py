@@ -620,9 +620,6 @@ class DAQRunner:
             LOGGER.debug('Target device %s blocked', device)
             return
 
-        if self._single_shot:
-            self._target_set_block.add(device)
-
         device.wait_remote = False
 
         if self._target_set_has_capacity():
@@ -632,6 +629,10 @@ class DAQRunner:
             self._target_set_queue.append(device)
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
+
+        if self._single_shot:
+            self._target_set_block.add(device)
+            LOGGER.info('Target device %s blocked (%s)', device, len(self._target_set_block))
 
     def _target_set_consider(self):
         if self._target_set_queue and self._target_set_has_capacity():
