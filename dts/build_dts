@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash -ex
+
+git remote -v
 
 bin/setup_remote faucet
 bin/setup_remote forch
