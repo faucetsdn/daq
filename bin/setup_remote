@@ -36,6 +36,6 @@ echo Switching $TARGET to version $TARGET_VERSION
 pwd
 (cd $TARGET; git remote -v)
 (cd $TARGET; git rev-parse $TARGET_VERSION || true)
-(cd $TARGET; git checkout $TARGET_VERSION --)
+(cd $TARGET; git reset --hard $TARGET_VERSION)
 echo -n "Last $TARGET commit: "
 (cd $TARGET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
