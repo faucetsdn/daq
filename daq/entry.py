@@ -65,9 +65,7 @@ class DAQ:
         # Validate structure of config by reading it into a pb message.
         utils.dict_proto(self.config, sys_config.DaqConfig)
 
-        LOGGER.info('DAQ_RUN_DIR is %s', DAQ_RUN_DIR)
-        LOGGER.info('DAQ_CONF_DIR is %s', DAQ_CONF_DIR)
-        LOGGER.info('DAQ_LIB_DIR is %s', DAQ_LIB_DIR)
+        LOGGER.info('env setup %s %s %s %s', os.getcwd(), DAQ_RUN_DIR, DAQ_CONF_DIR, DAQ_LIB_DIR)
 
         return True
 
