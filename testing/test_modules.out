@@ -1,5 +1,23 @@
 Running testing/test_modules.sh
 Base Tests
+Testing tls alt
+RESULT skip security.tls.v1_2_client No client initiated TLS communication detected
+RESULT skip security.tls.v1_2_server IOException unable to connect to server.
+RESULT skip security.tls.v1_3_client No client initiated TLS communication detected
+RESULT skip security.tls.v1_3_server IOException unable to connect to server.
+RESULT skip security.tls.v1_server IOException unable to connect to server.
+Testing tls alt tls
+RESULT skip security.tls.v1_2_client No client initiated TLS communication detected
+RESULT pass security.tls.v1_2_server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher Valid.
+RESULT skip security.tls.v1_3_client No client initiated TLS communication detected
+RESULT pass security.tls.v1_3_server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher check not required.
+RESULT pass security.tls.v1_server Certificate public key length is >= 224. Certificate active for current date. Certificate has been signed by a CA. Cipher Valid.
+Testing tls alt expiredtls
+RESULT skip security.tls.v1_2_client No client initiated TLS communication detected
+RESULT fail security.tls.v1_2_server Certificate is expired. Certificate has not been signed by a CA.
+RESULT skip security.tls.v1_3_client No client initiated TLS communication detected
+RESULT fail security.tls.v1_3_server Certificate is expired. Certificate has not been signed by a CA.
+RESULT fail security.tls.v1_server Certificate is expired. Certificate has not been signed by a CA.
 Testing ssh
 RESULT skip security.ssh.version Device is not running an SSH server
 Testing ssh ssh
