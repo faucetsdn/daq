@@ -8,7 +8,7 @@ import signal
 import sys
 
 from mininet import log as minilog
-from env import DAQ_RUN_DIR
+from env import DAQ_RUN_DIR, DAQ_LIB_DIR, DAQ_CONF_DIR
 import logger
 import runner
 import configurator
@@ -64,6 +64,10 @@ class DAQ:
 
         # Validate structure of config by reading it into a pb message.
         utils.dict_proto(self.config, sys_config.DaqConfig)
+
+        LOGGER.info('DAQ_RUN_DIR is %s', DAQ_RUN_DIR)
+        LOGGER.info('DAQ_CONF_DIR is %s', DAQ_CONF_DIR)
+        LOGGER.info('DAQ_LIB_DIR is %s', DAQ_LIB_DIR)
 
         return True
 
