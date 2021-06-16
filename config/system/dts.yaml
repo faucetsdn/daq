@@ -8,7 +8,7 @@ host_tests: config/modules/dts.conf
 
 switch_setup:
   data_intf: data0
-  lo_port: 3984
+  lo_port: 6653
   varz_port: 5678
   model: EXT_STACK
   native: True
