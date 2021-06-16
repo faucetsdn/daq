@@ -1,11 +1,6 @@
-#!/bin/bash -ex
-
-git remote -v
+#!/bin/bash -e
 
 bin/setup_remote faucet
 bin/setup_remote forch
-
-pwd
-ls -l
 
 docker build . -f dts/Dockerfile.dts -t daqf/dts
