@@ -17,7 +17,7 @@ else
     echo Using base GIT_URL from environment.
 fi
 
-GIT_PEER=`echo $GIT_URL | sed s/daq/$TARGET/`
+GIT_PEER=`echo $GIT_URL | sed -E "s/(daq|forch)/$TARGET/"`
 echo Using $TARGET target git repo $GIT_PEER
 
 TARGET_REPO=$GIT_PEER
