@@ -22,6 +22,9 @@ interfaces:
     opts: 
     port: 2
   faux-2:
+    opts: xdhcp=10.20.1.100
+    port: 3
+  faux-3:
     opts: -n 
     port: 11
 

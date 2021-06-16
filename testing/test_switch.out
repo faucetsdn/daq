@@ -11,12 +11,13 @@ Monolog processing base.switch.ping...
 switch ping 2
 %%%%%%%%%%%%%%%%%%%%%% Alt switch tests
 XXX runner   INFO    Learning 9a:02:57:1e:8f:01 on vid 1002
-Unique IPs: 1
+9a:02:57:1e:8f:01 Unique IPs: 1
 RESULT skip base.startup.dhcp Using external DHCP
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass connection.base.target_ping target reached %% 10.20.99.164
 RESULT skip base.startup.ntp No NTP traffic detected %% NTP server 10.20.99.2
 RESULT fail base.startup.dns Invalid DNS server address %% DNS server 10.20.99.2
-9a02571e8f02: ['9a02571e8f02:acquire:TimeoutError']
+9a:02:57:1e:8f:02 Unique IPs: 1
+9a02571e8f03: ['9a02571e8f03:acquire:TimeoutError']
 %%%%%%%%%%%%%%%%%%%%%% Native gauge test
 %%%%%%%%%%%%%%%%%%%%%% Done with tests

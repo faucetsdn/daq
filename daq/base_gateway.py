@@ -1,9 +1,14 @@
 """Gateway module for device testing"""
 
 import datetime
+from ipaddress import ip_address, ip_network
 import os
+import netaddr
 import shutil
+from subprocess import PIPE
 from abc import ABC, abstractmethod
+from typing import Callable, List
+from clib.mininet_test_util import DEVNULL
 
 import logger
 from env import DAQ_RUN_DIR
@@ -223,6 +228,49 @@ class BaseGateway(ABC):
             except Exception as e:
                 LOGGER.error('Gateway %s terminating dummy: %s', self.name, e)
                 LOGGER.exception(e)
+
+    def _get_scan_interface(self):
+        return self.host, self.host_intf
+
+    def discover_host(self, subnets: List[ip_network], mac: str, callback: Callable, vid=None) -> ip_address:
+        cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s %s %s'
+        host, intf = self._get_scan_interface()
+        LOGGER.info('Starting host discovery for %s', mac)
+        def hangup_callback(log_fd, log_file):
+            log_fd.close()
+            with open(log_file, 'r') as fd:
+                lines = fd.read().split('\n')
+                for line in lines:
+                    device_ip = process_line(line)
+                    if device_ip:
+                        LOGGER.info('Host discovery for %s completed. Found ip %s.',
+                                    mac, device_ip)
+                        return callback(device_ip)
+            LOGGER.info('Host discovery for %s completed. Found no ip.', mac)
+            callback(None)
+
+        def process_line(line):
+            sections = [section for section in line.split('\t') if section]
+            if len(sections) >= 2:
+                try:
+                    device_ip = ip_address(sections[0])
+                    if netaddr.EUI(mac) == netaddr.EUI(sections[1]):
+                        return device_ip
+                except ValueError or netaddr.core.AddrFormatError:
+                    pass
+            return None
+
+        for subnet in subnets:
+            address = next(subnet.hosts())
+            log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
+            log_fd = open(log_file, 'w')
+            host.cmd('ip addr add %s dev %s' % (str(address), intf))
+            active_pipe = host.popen(cmd % (intf, mac, 
+                                                 '' if vid is None else '--vlan=%s' % vid,
+                                                 str(subnet)), 
+                                          stdin=DEVNULL, stdout=PIPE, env=os.environ)
+            self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
+                                       hangup=lambda:hangup_callback(log_fd, log_file))
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)

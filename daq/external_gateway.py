@@ -39,5 +39,8 @@ class ExternalGateway(BaseGateway):
         """Set the tap interface to use for monitoring network traffic"""
         self._tap_intf = tap_intf
 
+    def _get_scan_interface(self):
+        return self.runner.network.pri, self._tap_intf
+    
     def _get_host_class(self):
         return ExternalGatewayHost
