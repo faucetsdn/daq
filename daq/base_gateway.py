@@ -232,7 +232,7 @@ class BaseGateway(ABC):
     def _get_scan_interface(self):
         return self.host, self.host_intf
     
-    def _discover_host_hangup_callback(self, log_fd, log_file, callback):
+    def _discover_host_hangup_callback(self, mac, log_fd, log_file, callback):
         def process_line(line):
             sections = [section for section in line.split('\t') if section]
             if len(sections) >= 2:
@@ -270,7 +270,7 @@ class BaseGateway(ABC):
                                             str(subnet)), 
                                           stdin=DEVNULL, stdout=PIPE, env=os.environ)
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
-                                       hangup=lambda: self._discover_host_hangup_callback(log_fd, log_file, callback))
+                                       hangup=lambda: self._discover_host_hangup_callback(mac, log_fd, log_file, callback))
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)
