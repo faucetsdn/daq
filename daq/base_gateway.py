@@ -231,24 +231,8 @@ class BaseGateway(ABC):
 
     def _get_scan_interface(self):
         return self.host, self.host_intf
-
-    def discover_host(self, subnets: List[ip_network], mac: str, callback: Callable, vid=None) -> ip_address:
-        cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s %s %s'
-        host, intf = self._get_scan_interface()
-        LOGGER.info('Starting host discovery for %s', mac)
-        def hangup_callback(log_fd, log_file):
-            log_fd.close()
-            with open(log_file, 'r') as fd:
-                lines = fd.read().split('\n')
-                for line in lines:
-                    device_ip = process_line(line)
-                    if device_ip:
-                        LOGGER.info('Host discovery for %s completed. Found ip %s.',
-                                    mac, device_ip)
-                        return callback(device_ip)
-            LOGGER.info('Host discovery for %s completed. Found no ip.', mac)
-            callback(None)
-
+    
+    def _discover_host_hangup_callback(self, log_fd, log_file, callback):
         def process_line(line):
             sections = [section for section in line.split('\t') if section]
             if len(sections) >= 2:
@@ -259,6 +243,22 @@ class BaseGateway(ABC):
                 except ValueError or netaddr.core.AddrFormatError:
                     pass
             return None
+        log_fd.close()
+        with open(log_file, 'r') as fd:
+            lines = fd.read().split('\n')
+            for line in lines:
+                device_ip = process_line(line)
+                if device_ip:
+                    LOGGER.info('Host discovery for %s completed. Found ip %s.',
+                                mac, device_ip)
+                    return callback(device_ip)
+        LOGGER.info('Host discovery for %s completed. Found no ip.', mac)
+        callback(None)
+
+    def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable, vid=None):
+        cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s %s %s'
+        host, intf = self._get_scan_interface()
+        LOGGER.info('Starting host discovery for %s', mac)
 
         for subnet in subnets:
             address = next(subnet.hosts())
@@ -266,11 +266,11 @@ class BaseGateway(ABC):
             log_fd = open(log_file, 'w')
             host.cmd('ip addr add %s dev %s' % (str(address), intf))
             active_pipe = host.popen(cmd % (intf, mac, 
-                                                 '' if vid is None else '--vlan=%s' % vid,
-                                                 str(subnet)), 
+                                            '' if vid is None else '--vlan=%s' % vid,
+                                            str(subnet)), 
                                           stdin=DEVNULL, stdout=PIPE, env=os.environ)
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
-                                       hangup=lambda:hangup_callback(log_fd, log_file))
+                                       hangup=lambda: self._discover_host_hangup_callback(log_fd, log_file, callback))
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)

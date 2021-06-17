@@ -41,6 +41,6 @@ class ExternalGateway(BaseGateway):
 
     def _get_scan_interface(self):
         return self.runner.network.pri, self._tap_intf
-    
+
     def _get_host_class(self):
         return ExternalGatewayHost

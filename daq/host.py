@@ -4,7 +4,6 @@ import functools
 import os
 import shutil
 import time
-import threading
 from datetime import timedelta, datetime
 from ipaddress import ip_network
 import grpc
@@ -422,7 +421,7 @@ class ConnectedHost:
                          'Attempting to scan for device %s', self.target_mac)
         external_subnets = [ip_network(subnet['subnet']) for subnet in self.runner.config.get(
                             'external_subnets', [])]
-        self.gateway.discover_host(external_subnets, self.target_mac, callback, vid=self.device.vlan)
+        self.gateway.discover_host(self.target_mac, external_subnets, callback, vid=self.device.vlan)
 
     def heartbeat(self):
         """Checks module run time for each event loop"""
