@@ -45,6 +45,7 @@ class StreamMonitor:
                      name, self.get_fd(data_source), self.get_fd(data_sink))
         data = data_source.read(1024)
         data_sink.write(data.decode('utf-8'))
+        data_sink.flush()
 
     def make_nonblock(self, data_source):
         """Make the given source non-blocking"""
