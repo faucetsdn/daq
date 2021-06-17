@@ -409,9 +409,9 @@ class ConnectedHost:
         # Attempt to scan for this device
         def callback(device_ip):
             if device_ip:
-                if self.state !=_STATE.WAITING:
+                if self.state != _STATE.WAITING:
                     self.logger.warn('Dropping dhcp callback %s in state %s',
-                                     self.target_mac, self._state)
+                                     self.target_mac, self.state)
                     return
                 self.runner.ip_notify(MODE.NOPE, {
                     'type': 'STATIC',
