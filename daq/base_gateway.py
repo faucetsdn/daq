@@ -1,13 +1,14 @@
 """Gateway module for device testing"""
 
+from abc import ABC, abstractmethod
 import datetime
 from ipaddress import ip_address, ip_network
 import os
-import netaddr
 import shutil
 from subprocess import PIPE
-from abc import ABC, abstractmethod
 from typing import Callable, List
+
+import netaddr
 from clib.mininet_test_util import DEVNULL
 
 import logger
@@ -231,7 +232,7 @@ class BaseGateway(ABC):
 
     def _get_scan_interface(self):
         return self.host, self.host_intf
-    
+
     def _discover_host_hangup_callback(self, mac, log_fd, log_file, callback):
         def process_line(line):
             sections = [section for section in line.split('\t') if section]
@@ -240,7 +241,7 @@ class BaseGateway(ABC):
                     device_ip = ip_address(sections[0])
                     if netaddr.EUI(mac) == netaddr.EUI(sections[1]):
                         return device_ip
-                except ValueError or netaddr.core.AddrFormatError:
+                except (ValueError, netaddr.core.AddrFormatError):
                     pass
             return None
         log_fd.close()
@@ -256,21 +257,28 @@ class BaseGateway(ABC):
         callback(None)
 
     def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable, vid=None):
+        """Discovers a host using arp-scan in a list of subnets."""
         cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s %s %s'
         host, intf = self._get_scan_interface()
         LOGGER.info('Starting host discovery for %s', mac)
-
-        for subnet in subnets:
+        def recursive_discover():
+            if not subnets:
+                callback(None)
+                return
+            subnet = subnets.pop(0)
             address = next(subnet.hosts())
             log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
             log_fd = open(log_file, 'w')
             host.cmd('ip addr add %s dev %s' % (str(address), intf))
-            active_pipe = host.popen(cmd % (intf, mac, 
+            active_pipe = host.popen(cmd % (intf, mac,
                                             '' if vid is None else '--vlan=%s' % vid,
-                                            str(subnet)), 
-                                          stdin=DEVNULL, stdout=PIPE, env=os.environ)
+                                            str(subnet)),
+                                     stdin=DEVNULL, stdout=PIPE, env=os.environ)
+            hangup_callback_callback = lambda ip: callback(ip) if ip else recursive_discover()
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
-                                       hangup=lambda: self._discover_host_hangup_callback(mac, log_fd, log_file, callback))
+                                       hangup=lambda: self._discover_host_hangup_callback(
+                                           mac, log_fd, log_file, hangup_callback_callback))
+        recursive_discover()
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)

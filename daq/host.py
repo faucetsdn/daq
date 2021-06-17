@@ -407,12 +407,12 @@ class ConnectedHost:
 
     def _external_dhcp_timeout_handler(self):
         # Attempt to scan for this device
-        def callback(ip):
-            if ip:
+        def callback(device_ip):
+            if device_ip:
                 self.runner.ip_notify(MODE.NOPE, {
                     'type': 'STATIC',
                     'mac': self.target_mac,
-                    'ip': str(ip),
+                    'ip': str(device_ip),
                     'delta': -1
                 }, self.gateway)
             else:
@@ -420,8 +420,9 @@ class ConnectedHost:
         self.logger.warn('Monitoring timeout for external dhcp. '
                          'Attempting to scan for device %s', self.target_mac)
         external_subnets = [ip_network(subnet['subnet']) for subnet in self.runner.config.get(
-                            'external_subnets', [])]
-        self.gateway.discover_host(self.target_mac, external_subnets, callback, vid=self.device.vlan)
+            'external_subnets', [])]
+        self.gateway.discover_host(self.target_mac, external_subnets, callback,
+                                   vid=self.device.vlan)
 
     def heartbeat(self):
         """Checks module run time for each event loop"""
