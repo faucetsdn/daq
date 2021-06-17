@@ -36,6 +36,6 @@ COPY cmd/ cmd/
 COPY config/ config/
 COPY resources/ resources/
 COPY dts/start_service bin/
-COPY subset/pentests subset/pentests
+COPY subset/ subset/
 
 CMD ["bin/start_service"]
