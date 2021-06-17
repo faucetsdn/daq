@@ -261,6 +261,11 @@ class BaseGateway(ABC):
         cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s %s %s'
         host, intf = self._get_scan_interface()
         LOGGER.info('Starting host discovery for %s', mac)
+        def hangup_callback_callback(device_ip):
+            if device_ip:
+                callback(device_ip)
+            else:
+                recursive_discover()
         def recursive_discover():
             if not subnets:
                 callback(None)
@@ -274,7 +279,6 @@ class BaseGateway(ABC):
                                             '' if vid is None else '--vlan=%s' % vid,
                                             str(subnet)),
                                      stdin=DEVNULL, stdout=PIPE, env=os.environ)
-            hangup_callback_callback = lambda ip: callback(ip) if ip else recursive_discover()
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
                                        hangup=lambda: self._discover_host_hangup_callback(
                                            mac, log_fd, log_file, hangup_callback_callback))
