@@ -276,11 +276,12 @@ class BaseGateway(ABC):
             address = next(subnet.hosts())
             log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
             log_fd = open(log_file, 'w')
+            LOGGER.info('Scanning subnet %s from %s for %s', subnet, address, mac)
             host.cmd('ip addr add %s dev %s' % (str(address), intf))
-            active_pipe = host.popen(cmd % (intf, mac,
-                                            '' if vid is None else '--vlan=%s' % vid,
-                                            str(subnet)),
-                                     stdin=DEVNULL, stdout=PIPE, env=os.environ)
+            vid_opt = '' # if vid is None else '--vlan=%s' % vid
+            full_cmd = cmd % (intf, mac, vid_opt, str(subnet))
+            LOGGER.info('arp-scan command: %s', full_cmd)
+            active_pipe = host.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
                                        hangup=lambda: self._discover_host_hangup_callback(
                                            mac, log_fd, log_file, hangup_callback_callback))

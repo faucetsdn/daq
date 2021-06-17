@@ -1,6 +1,6 @@
 ## Image name: daqf/dts
 
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 WORKDIR /root
 
