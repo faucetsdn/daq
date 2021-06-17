@@ -21,6 +21,7 @@ run_trigger:
 device_reporting:
   server_port: 50051
 
+default_timeout_sec: 120
 external_subnets:
   - subnet: 192.168.1.0/24
 
