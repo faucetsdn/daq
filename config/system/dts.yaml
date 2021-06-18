@@ -26,4 +26,4 @@ default_timeout_sec: 120
 external_subnets:
   - subnet: 192.168.1.0/24
 
-site_path: /site
+site_path: /root/inst/site_config
