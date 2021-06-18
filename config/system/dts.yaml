@@ -18,8 +18,12 @@ run_trigger:
   vlan_start: 272
   vlan_end: 276
 
+
 device_reporting:
   server_port: 50051
+
+# The hold test will only run for devices explicitly enabled.
+keep_hold: True
 
 default_timeout_sec: 120
 
