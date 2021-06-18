@@ -258,7 +258,7 @@ class BaseGateway(ABC):
 
     def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable, vid=None):
         """Discovers a host using arp-scan in a list of subnets."""
-        cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s %s'
+        cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s -s %s %s'
         host, intf = self._get_scan_interface()
         LOGGER.info('Starting host discovery for %s', mac)
 
@@ -278,7 +278,7 @@ class BaseGateway(ABC):
             log_fd = open(log_file, 'w')
             LOGGER.info('Scanning subnet %s from %s for %s', subnet, address, mac)
             host.cmd('ip addr add %s dev %s' % (str(address), intf))
-            full_cmd = cmd % (intf, mac, str(subnet))
+            full_cmd = cmd % (intf, mac, str(address), str(subnet))
             LOGGER.info('arp-scan command: %s', full_cmd)
             active_pipe = host.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
