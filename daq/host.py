@@ -425,8 +425,7 @@ class ConnectedHost:
                          'Attempting to scan for device %s', self.target_mac)
         external_subnets = [ip_network(subnet['subnet']) for subnet in self.runner.config.get(
             'external_subnets', [])]
-        self.gateway.discover_host(self.target_mac, external_subnets, callback,
-                                   vid=self.device.vlan)
+        self.gateway.discover_host(self.target_mac, external_subnets, callback)
 
     def heartbeat(self):
         """Checks module run time for each event loop"""

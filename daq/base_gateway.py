@@ -256,7 +256,7 @@ class BaseGateway(ABC):
         LOGGER.info('Host discovery for %s completed. Found no ip.', mac)
         callback(None)
 
-    def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable, vid=None):
+    def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable):
         """Discovers a host using arp-scan in a list of subnets."""
         cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s -s %s %s'
         host, intf = self._get_scan_interface()
