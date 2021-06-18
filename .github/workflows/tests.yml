@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [switch]
+        test: [base, many, aux, topo, modules, dhcp, switch, mud, ata]
     steps:
     - uses: actions/download-artifact@v2
       with:
