@@ -41,23 +41,12 @@ fi
 ip_address=$(ip addr show eth0 | fgrep inet | sed -nr 's~.*inet ([0-9.]+)/.*~\1~p')
 echo Target ip address is $ip_address
 
-# User might already exist if docker restarted.
-#echo "kronkiteman::$USERID:$USERID::/:bin/bash" >> /etc/passwd
-
 # Clean up some permissions that are necessary for operation.
 mkdir -p $DAQ_ROOT/inst
-#chmod a+rx $ROOT
-#chown kronkiteman -R $DAQ_ROOT
 
 # Prepare for the daq faucet instance.
 cp /etc/faucet/ryu.conf $DAQ_ROOT/inst/
 echo > $DYNAMIC_CONFIG
-
-FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK \
-    FAUCET_EVENT_SOCK_HEARTBEAT=$FAUCET_EVENT_SOCK_HEARTBEAT \
-    FAUCET_CONFIG_STAT_RELOAD=$FAUCET_CONFIG_STAT_RELOAD \
-    FAUCET_CONFIG=$FAUCET_CONFIG \
-    faucet --ryu-config-file=${FAUCET_RYU_CONF} --ryu-ofp-tcp-listen-port=${FAUCET_LISTEN_PORT} &
 
 echo Starting ovs...
 sudo /usr/share/openvswitch/scripts/ovs-ctl start

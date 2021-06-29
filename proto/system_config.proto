@@ -232,7 +232,7 @@ message SwitchSetup {
 }
 
 /*
- * Information for test vlan ranges.
+ * Information for test triggering.
  */
 message RunTrigger {
   // start of vlan range
@@ -246,6 +246,9 @@ message RunTrigger {
 
   // native tap vlan
   int32 native_vlan = 4;
+
+  // limit on the number of active testing hosts
+  int32 max_hosts = 5;
 }
 
 /*

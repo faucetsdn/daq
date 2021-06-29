@@ -22,6 +22,9 @@ interfaces:
     opts: 
     port: 2
   faux-2:
+    opts: xdhcp=10.20.1.100
+    port: 3
+  faux-3:
     opts: -n 
     port: 11
 
@@ -38,4 +41,5 @@ internal_subnet:
 
 # Define external DHCP subnets to be used by test hosts
 external_subnets:
+  - subnet: 10.20.100.0/24 # To test multi subnet
   - subnet: 10.20.0.0/16

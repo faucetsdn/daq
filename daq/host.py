@@ -5,6 +5,7 @@ import os
 import shutil
 import time
 from datetime import timedelta, datetime
+from ipaddress import ip_network
 import grpc
 
 from clib import tcpdump_helper
@@ -390,7 +391,9 @@ class ConnectedHost:
                 if self.device.dhcp_mode == DhcpMode.LONG_RESPONSE else 0
             self.logger.info('Target device %s ip mode %s, wait %s',
                              self, DhcpMode.Name(self.device.dhcp_mode), wait_time)
-            if self.device.dhcp_mode != DhcpMode.EXTERNAL:
+            if self.device.dhcp_mode == DhcpMode.EXTERNAL:
+                self.timeout_handler = self._external_dhcp_timeout_handler
+            else:
                 self.gateway.change_dhcp_response_time(self.target_mac, wait_time)
         _ = [listener(self.device) for listener in self._dhcp_listeners]
 
@@ -401,6 +404,28 @@ class ConnectedHost:
     def _main_module_timeout_handler(self):
         self.test_host.terminate()
         self._module_callback(exception=self._TIMEOUT_EXCEPTION)
+
+    def _external_dhcp_timeout_handler(self):
+        # Attempt to scan for this device
+        def callback(device_ip):
+            if device_ip:
+                if self.state != _STATE.WAITING:
+                    self.logger.warn('Dropping dhcp callback %s in state %s',
+                                     self.target_mac, self.state)
+                    return
+                self.runner.ip_notify(MODE.NOPE, {
+                    'type': 'STATIC',
+                    'mac': self.target_mac,
+                    'ip': str(device_ip),
+                    'delta': -1
+                }, self.gateway)
+            else:
+                self._aux_module_timeout_handler()
+        self.logger.warn('Monitoring timeout for external dhcp. '
+                         'Attempting to scan for device %s', self.target_mac)
+        external_subnets = [ip_network(subnet['subnet']) for subnet in self.runner.config.get(
+            'external_subnets', [])]
+        self.gateway.discover_host(self.target_mac, external_subnets, callback)
 
     def heartbeat(self):
         """Checks module run time for each event loop"""

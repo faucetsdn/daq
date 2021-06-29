@@ -11,6 +11,5 @@ spec:
   selector:
     app: ilb-internal
   ports:
-  - port: 80
-    targetPort: 8080
+  - port: 50051
     protocol: TCP
