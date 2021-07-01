@@ -146,3 +146,6 @@ ENV/
 testing/*dream*
 *.swp
 *.swo
+
+# misc terraform files
+dts/**/.terraform*

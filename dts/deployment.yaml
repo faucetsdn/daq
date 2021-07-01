@@ -6,7 +6,12 @@ spec:
   selector:
     matchLabels:
       app: hello
-  replicas: 3
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -14,10 +19,19 @@ spec:
     spec:
       containers:
       - name: hello
-        image: "docker.io/daqf/dts"
+        image: "us.gcr.io/dts-scale-testing/dts:8086b7e25606"
         imagePullPolicy: Always
         resources:
           requests:
             memory: 101Mi
+            cpu: 120m
         securityContext:
           privileged: true
+        volumeMounts:
+        - name: daq-config
+          mountPath: /daq-config
+      volumes:
+      - name: daq-config
+        configMap:
+          name: daq-configmap
+
