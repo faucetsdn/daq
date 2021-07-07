@@ -9,7 +9,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: ilb-internal
+    app: hello 
   ports:
   - port: 50051
     protocol: TCP
