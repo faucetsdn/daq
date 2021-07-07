@@ -1,3 +1,0 @@
-include: ${DAQ_LIB}/config/system/dts-base.yaml
-
-default_timeout_sec: 0

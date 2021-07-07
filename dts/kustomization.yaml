@@ -12,4 +12,4 @@ generatorOptions:
 configMapGenerator:
 - name: daq-configmap
   files:
-  - dts.yaml
+  - dts-cluster.yaml
