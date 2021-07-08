@@ -5,8 +5,9 @@ DAQ_ROOT=$ROOT
 FAUCET_ROOT=$ROOT/faucet
 FORCH_ROOT=$ROOT/forch
 VXLAN_IP=1.2.3.4
+source $DAQ_ROOT/etc/FILES_MAPPING
 
-BASE_CONFIG=config/system/dts.yaml
+BASE_CONFIG=/daq-config/dts-cluster.yaml
 DYNAMIC_CONFIG=startup.conf
 
 ls -ld /var/log/faucet
