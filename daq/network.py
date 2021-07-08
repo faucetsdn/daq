@@ -53,7 +53,7 @@ class TestNetwork:
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
     _DEFAULT_VXLAN_PORT = 4789
     _DEFAULT_VXLAN_VNI = 0
-    _VXLAN_CMD_FMT = 'ip link add %s type vxlan id %s remote %s dstport %s nolearning'
+    _VXLAN_CMD_FMT = 'ip link add %s type vxlan id %s remote %s dstport %s srcport %s %s nolearning'
 
     def __init__(self, config):
         self.config = config
@@ -264,7 +264,8 @@ class TestNetwork:
         remote_ip = remote.ip
         vxlan_vni = vxlan_config.get('vni', self._DEFAULT_VXLAN_VNI)
         dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
-        vxlan_cmd = self._VXLAN_CMD_FMT % (self.ext_intf, vxlan_vni, remote_ip, dst_port)
+        vxlan_cmd = self._VXLAN_CMD_FMT % (self.ext_intf, vxlan_vni, remote_ip,
+                                           dst_port, dst_port, dst_port)
         LOGGER.info('Configuring interface: %s', vxlan_cmd)
         self.pri.vsctl(vxlan_cmd)
         self.pri.vsctl('ip link set %s up' % self.ext_intf)
