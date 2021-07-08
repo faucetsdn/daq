@@ -53,7 +53,7 @@ class TestNetwork:
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
     _DEFAULT_VXLAN_PORT = 4789
     _DEFAULT_VXLAN_VNI = 0
-    _VXLAN_CMD_FMT = 'ip link add %s type vxlan id %s remote %s dstport %s nolearning'
+    _VXLAN_CMD_FMT = 'ip link add %s type vxlan id %s remote %s dstport %s srcport %s %s nolearning'
 
     def __init__(self, config):
         self.config = config
@@ -240,21 +240,7 @@ class TestNetwork:
         if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
 
-        self.tap_intf = self._create_tap_intf()
-
-    def _create_tap_intf(self):
-        return self.ext_intf
-
-    def _create_vxlan_sys(self):
-        vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
-        if 'ip' not in vxlan_config:
-            return self.ext_intf
-
-        # Use the synthetic vxlan interface, since ext_intf is only virtual (can't run tcpdump).
-        dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
-        intf_name = 'vxlan_sys_%d' % dst_port
-        LOGGER.info('Using %s as tap interface', intf_name)
-        return intf_name
+        self.tap_intf = self.ext_intf
 
     def configure_remote_tap(self, remote):
         """Configure the tap for remote connection"""
@@ -264,10 +250,11 @@ class TestNetwork:
         remote_ip = remote.ip
         vxlan_vni = vxlan_config.get('vni', self._DEFAULT_VXLAN_VNI)
         dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
-        vxlan_cmd = self._VXLAN_CMD_FMT % (self.ext_intf, vxlan_vni, remote_ip, dst_port)
+        vxlan_cmd = self._VXLAN_CMD_FMT % (self.ext_intf, vxlan_vni, remote_ip,
+                                           dst_port, dst_port, dst_port)
         LOGGER.info('Configuring interface: %s', vxlan_cmd)
-        self.pri.vsctl(vxlan_cmd)
-        self.pri.vsctl('ip link set %s up' % self.ext_intf)
+        self.pri.cmd(vxlan_cmd)
+        self.pri.cmd('ip link set %s up' % self.ext_intf)
         return True
 
     def direct_port_traffic(self, device, port, target):
