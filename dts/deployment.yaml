@@ -19,11 +19,11 @@ spec:
     spec:
       containers:
       - name: hello
-        image: "us.gcr.io/dts-scale-testing/dts:c7a17ce3d00a"
+        image: "us.gcr.io/dts-scale-testing/dts:1c6e1a409088"
         imagePullPolicy: Always
         resources:
           requests:
-            memory: 101Mi
+            memory: 100Mi
             cpu: 120m
         securityContext:
           privileged: true
