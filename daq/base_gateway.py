@@ -277,7 +277,7 @@ class BaseGateway(ABC):
             log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
             log_fd = open(log_file, 'w')
             LOGGER.info('Scanning subnet %s from %s for %s', subnet, address, mac)
-            host.cmd('ip addr add %s dev %s' % (str(address), intf))
+            host.cmd('ip addr add %s/%s dev %s' % (str(address), subnet.prefixlen, intf))
             full_cmd = cmd % (intf, mac, str(address), str(subnet))
             LOGGER.info('arp-scan command: %s', full_cmd)
             active_pipe = host.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
