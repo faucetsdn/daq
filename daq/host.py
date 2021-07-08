@@ -509,10 +509,11 @@ class ConnectedHost:
         if self.state != _STATE.WAITING:
             return False
         delta_t = datetime.now() - self._startup_time
-        if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
-            return False
+        min_delta = timedelta(seconds=self._STARTUP_MIN_TIME_SEC)
         if self._get_dhcp_mode() == DhcpMode.IP_CHANGE:
             return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
+        if delta_t < min_delta:
+            time.sleep(min_delta - delta_t)
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
