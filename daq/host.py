@@ -513,7 +513,7 @@ class ConnectedHost:
         if self._get_dhcp_mode() == DhcpMode.IP_CHANGE:
             return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
         if delta_t < min_delta:
-            time.sleep(min_delta - delta_t)
+            time.sleep((min_delta - delta_t).seconds)
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
