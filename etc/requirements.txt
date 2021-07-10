@@ -22,3 +22,4 @@ pyyaml
 requests
 ryu
 WeasyPrint==52.4
+xcffib
