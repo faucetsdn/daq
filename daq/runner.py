@@ -13,7 +13,6 @@ import pathlib
 from datetime import datetime, timedelta, timezone
 
 from forch.proto.shared_constants_pb2 import PortBehavior
-from proto.report_pb2 import DeviceReport
 
 import configurator
 from session_server import SessionServer
@@ -29,7 +28,9 @@ import stream_monitor
 from utils import dict_proto
 from wrappers import DaqException, DisconnectedException
 import logger
+
 from proto.system_config_pb2 import DhcpMode
+from proto.report_pb2 import DeviceReport
 
 LOGGER = logger.get_logger('runner')
 
@@ -1078,9 +1079,10 @@ class DAQRunner:
             LOGGER.error("Failed to send device results for device %s: %s ", device, e)
 
     def report_sink(self, report_dict):
+        """Process a generated report"""
         # TODO: Make the DeviceReport proto complete so ignore_unknown_fields isn't required.
-        report = dict_proto(report_dict, DeviceReport, ignore_unknown_fields=True)
-        LOGGER.info('Report sink with report %s', bool(report))
+        report_proto = dict_proto(report_dict, DeviceReport, ignore_unknown_fields=True)
+        LOGGER.info('Report sink with report %s', bool(report_proto))
         # TODO: Make this actually upload the report somewhere.
 
     def _calculate_device_result(self, device, test_results):
