@@ -1,4 +1,4 @@
 56713c6cdd7b93379f964971d5ba18c18ee89cc5  proto/acl_counting.proto
-b09c76a45296e23018dc975f694407890eb8606d  proto/report.proto
+cc789bbb35a430dd430d037805a1999da7f89f55  proto/report.proto
 5e33ec6500d7d3f5a337740bc81373c9775385e2  proto/session_server.proto
 7fb288e7c2ab052a819fdfeee2c05e4005ad7c52  proto/system_config.proto

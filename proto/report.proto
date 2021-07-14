@@ -17,10 +17,21 @@ message TestModule {
 }
 
 message TestItem {
+  // Test result (pass/fail)
   string result = 1;
+
+  // Full test name.
   string test_name = 2;
+
+  // Name of enclosing module.
   string module_name = 3;
+
+  // Category of test.
   string category = 4;
+
+  // Expected state for test.
   string expected = 5;
+
+  // Information description of result.
   string result_description = 6;
 }
