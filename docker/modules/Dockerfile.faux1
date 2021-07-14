@@ -16,6 +16,7 @@ RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-bran
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
 
 COPY udmi/pubber/ pubber/
+COPY udmi/gencode/ gencode/
 RUN pubber/bin/build
 
 # Seperate stage to build older version of SSH and SSL
