@@ -6,9 +6,6 @@ RUN apk add -q build-base
 
 COPY faucet/ /faucet-src/
 
-# Workaround for numpy/alpine dependency problem.
-RUN sed -i 's/networkx>=1.9/networkx<=2.2/' /faucet-src/requirements.txt
-
 # We don't need no stinkin' unit-tests...
 RUN sed -i 's/.*unit.*//' /faucet-src/docker/install-faucet.sh
 
