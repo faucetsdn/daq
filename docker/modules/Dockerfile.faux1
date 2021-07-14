@@ -6,9 +6,9 @@
 FROM daqf/aardvark:latest as java_build
 
 # Run this separately so it can be shared with other builds.
-RUN $AG update && $AG install openjdk-9-jre
+RUN $AG update && $AG install openjdk-11-jre
 
-RUN $AG update && $AG install openjdk-9-jdk git
+RUN $AG update && $AG install openjdk-11-jdk git
 
 ENV BACHASH=3d4df538935eb461331c156e9e14d2df276e8cea
 
@@ -32,8 +32,8 @@ RUN sh ssh_build.sh
 FROM daqf/aardvark:latest
 
 # Run this separately so it can be shared with other builds.
-RUN $AG update && $AG install openjdk-9-jre
-RUN $AG update && $AG install openjdk-9-jdk git
+RUN $AG update && $AG install openjdk-11-jre
+RUN $AG update && $AG install openjdk-11-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
     python ifupdown openssl nano apache2-utils ntpdate vzctl
 
