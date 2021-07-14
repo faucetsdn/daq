@@ -1,0 +1,26 @@
+/*
+ * Proto for generated reports.
+ */
+syntax = "proto3";
+
+/*
+ * Overall report generated for each device run.
+ */
+message DeviceReport {
+  // Test modules included in this report.
+  map<string, TestModule> modules = 1;
+}
+
+message TestModule {
+  // Line items test results from this module.
+  map<string, TestItem> tests = 1;
+}
+
+message TestItem {
+  string result = 1;
+  string test_name = 2;
+  string module_name = 3;
+  string category = 4;
+  string expected = 5;
+  string result_description = 6;
+}
