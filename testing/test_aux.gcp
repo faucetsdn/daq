@@ -10,10 +10,10 @@ Running testing/test_aux.sh
     "main" : "1.3.10"
   }
 }
-inst/test_site/devices/AHU-1/out/metadata_norm.json:  "hash": "5fd5d112"
-inst/test_site/devices/AHU-22/out/metadata_norm.json:  "hash": "e43caf9e"
-inst/test_site/devices/GAT-123/out/metadata_norm.json:  "hash": "ffb0322e"
-inst/test_site/devices/SNS-4/out/metadata_norm.json:  "hash": "3f8187c9"
+inst/test_site/devices/AHU-1/out/metadata_norm.json:  "hash": "5fd5d112",
+inst/test_site/devices/AHU-22/out/metadata_norm.json:  "hash": "e43caf9e",
+inst/test_site/devices/GAT-123/out/metadata_norm.json:  "hash": "ffb0322e",
+inst/test_site/devices/SNS-4/out/metadata_norm.json:  "hash": "3f8187c9",
 RESULT fail cloud.udmi.provision No provisioning request
 RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
