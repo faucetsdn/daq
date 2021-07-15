@@ -7,13 +7,13 @@ Running testing/test_aux.sh
     "SNS-4" : "XXX"
   },
   "Version" : {
-    "main" : "1.3.7"
+    "main" : "1.3.10"
   }
 }
-inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "175e704a"
-inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf0ba5fa"
-inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "cbcf045e"
-inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "879557b4"
+inst/test_site/devices/AHU-1/out/metadata_norm.json:  "hash": "175e704a"
+inst/test_site/devices/AHU-22/out/metadata_norm.json:  "hash": "bf0ba5fa"
+inst/test_site/devices/GAT-123/out/metadata_norm.json:  "hash": "cbcf045e"
+inst/test_site/devices/SNS-4/out/metadata_norm.json:  "hash": "879557b4"
 RESULT fail cloud.udmi.provision No provisioning request
 RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
