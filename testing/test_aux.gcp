@@ -19,15 +19,15 @@ RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
 RESULT pass cloud.udmi.event_system Payload successfully validated
 RESULT fail cloud.udmi.event_pointset #: extraneous key [extraField] is not permitted
-RESULT pass cloud.udmi.pointset_etag Sequence completed
 RESULT pass cloud.udmi.writeback_states Sequence completed
+RESULT pass cloud.udmi.system_last_update Sequence completed
 RESULT pass cloud.udmi.provision Found provisioning request
 RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
 RESULT pass cloud.udmi.event_system Payload successfully validated
 RESULT pass cloud.udmi.event_pointset Payload successfully validated
-RESULT pass cloud.udmi.pointset_etag Sequence completed
 RESULT pass cloud.udmi.writeback_states Sequence completed
+RESULT pass cloud.udmi.system_last_update Sequence completed
 RESULT skip cloud.udmi.provision No device id
 RESULT skip cloud.udmi.state_system No device id
 RESULT skip cloud.udmi.state_pointset No device id
