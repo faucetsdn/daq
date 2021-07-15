@@ -93,7 +93,7 @@ for message_type in $message_types; do
     message_report $message_type
 done
 
-cat <<EOF > validator_config.json
+cat <<EOF > /tmp/validator_config.json
 {
   "project_id": "$project_id",
   "site_model": "$site_model",
