@@ -444,7 +444,7 @@ class FaucetTopology:
                     if device_port:
                         self._add_dot1x_allow_rule(secondary_acl, [device_port], in_vlan=vlan)
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vid=None, in_vlan=None):
         """Add dot1x reflection rule to acl"""
         if vlan_vid:
