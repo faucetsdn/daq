@@ -51,11 +51,11 @@ Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet,
       "enabled": true
     }
 ```
-* The site model shoud be copied into the `inst/config` folder
-* The file `inst/config/validator/rsa_private.pkcs8` should be moved to  `inst/config/gcp_reflect_key.pkcs8` 
+* The site model needs be copied into the `inst/config` folder
+* The file `inst/config/validator/rsa_private.pkcs8` needs be moved to  `inst/config/gcp_reflect_key.pkcs8` 
 * `{site_path}/mac_addrs/{mac_addr}/device_config.json` needs to have a `device_id` defined, e.g.
 as in `resources/test_site/mac_addrs/3c5ab41e8f0b/device_config.json`.
-* A file `gcp_reflect_config.json` should be created in the `inst/config` folder with the following contents:
+* A file `gcp_reflect_config.json` needs to be created in the `inst/config` folder with the following contents:
   ```
   {
     "project_id": <GCP PROJECT ID>,
