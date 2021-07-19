@@ -43,8 +43,6 @@ message that includes `udmi`:
 ```
 Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet, mudgee, nmap, discover, switch, macoui, bacext, tls, password, udmi, manual
 ```
-* A testing gcp service account `gcp_cred` needs to be setup as described in
-[service account setup instructions](service.md).
 * The system's default config needs to enable the `udmi` test, e.g. as per
 `resources/setups/baseline/base_config.json`. This can be validated by (runtime) checking
 `inst/run-port-01/nodes/udmi01/tmp/module_config.json` to see if it has something like the following:
@@ -53,13 +51,33 @@ Jun 22 08:32:52 runner   INFO    Configured with tests pass, fail, ping, bacnet,
       "enabled": true
     }
 ```
-* `site_path` config needs to point to a site definition directory, or defaults to `local/site`.
-This contains all the site-specific information about devices needed for testing.
+* The site model shoud be copied into the `inst/config` folder
+* The file `inst/config/validator/rsa_private.pkcs8` should be moved to  `inst/config/gcp_reflect_key.pkcs8` 
 * `{site_path}/mac_addrs/{mac_addr}/device_config.json` needs to have a `device_id` defined, e.g.
 as in `resources/test_site/mac_addrs/3c5ab41e8f0b/device_config.json`.
+* A file `gcp_reflect_config.json` should be created in the `inst/config` folder with the following contents:
+  ```
+  {
+    "project_id": <GCP PROJECT ID>,
+    "registry_id" <REGISTRY NAME>
+  }
+  ```
 * The GCP IoT Core setup needs to have a proper registry and device configured. This can either
 be done manually or using the [registrar
-tool](https://github.com/faucetsdn/udmi/blob/master/docs/registrar.md) tool.
+tool](https://github.com/faucetsdn/udmi/blob/master/docs/registrar.md) tool. Cloud configuration guidance is given 
+
+## Testing Devices Remotely
+
+The cloud tests can be run remotely on devices without physically connecting them to the DAQ host 
+machine, provided that both the IoT registry and DAQ host machine have been set up.
+
+A minimal cloud only hosts file is provided which configures only the cloud tests to run. 
+This can be configured using  `hosts_tests: ${DAQ_LIB}/config/modules/cloudonly.conf`
+in the `system.yaml` file.
+
+The remote devices can then be tested using faux devices. The `device_id` and
+`device_info.serial` fields in the `device_config.json` for the faux device should
+correspond to the remote device. 
 
 ## Integration Testing
 
