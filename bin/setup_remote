@@ -27,7 +27,7 @@ if git submodule status $FAUCET; then
     echo $TARGET is a git submodule, removing.
     rm -rf $TARGET
 fi
-    
+
 if [ -d $TARGET ]; then
     echo Dir $TARGET/ already exists. Fetching updates...
     (cd $TARGET; git fetch)
