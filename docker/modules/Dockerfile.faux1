@@ -6,9 +6,9 @@
 FROM daqf/aardvark:latest as java_build
 
 # Run this separately so it can be shared with other builds.
-RUN $AG update && $AG install openjdk-8-jre
+RUN $AG update && $AG install openjdk-11-jre
 
-RUN $AG update && $AG install openjdk-8-jdk git
+RUN $AG update && $AG install openjdk-11-jdk git
 
 ENV BACHASH=3d4df538935eb461331c156e9e14d2df276e8cea
 
@@ -16,6 +16,7 @@ RUN bin/retry_cmd git clone https://github.com/grafnu/bacnet4j.git --single-bran
   && cd bacnet4j && git reset --hard $BACHASH && ../bin/retry_cmd ./gradlew shadow
 
 COPY udmi/pubber/ pubber/
+COPY udmi/gencode/ gencode/
 RUN pubber/bin/build
 
 # Seperate stage to build older version of SSH and SSL
@@ -31,8 +32,8 @@ RUN sh ssh_build.sh
 FROM daqf/aardvark:latest
 
 # Run this separately so it can be shared with other builds.
-RUN $AG update && $AG install openjdk-8-jre
-RUN $AG update && $AG install openjdk-8-jdk git
+RUN $AG update && $AG install openjdk-11-jre
+RUN $AG update && $AG install openjdk-11-jdk git
 RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
     python ifupdown openssl nano apache2-utils ntpdate vzctl
 

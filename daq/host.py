@@ -133,7 +133,8 @@ class ConnectedHost:
         self.remaining_tests = list(self.enabled_tests)
         self.logger.info('Host %s running with enabled tests %s', self.target_mac,
                          self.remaining_tests)
-        self._report = ReportGenerator(config, self.target_mac, self._loaded_config)
+        self._report = ReportGenerator(config, self.target_mac, self._loaded_config,
+                                       self.runner.report_sink)
         self.record_result('startup', state=MODE.PREP)
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._trigger_path = None
@@ -509,10 +510,11 @@ class ConnectedHost:
         if self.state != _STATE.WAITING:
             return False
         delta_t = datetime.now() - self._startup_time
-        if delta_t < timedelta(seconds=self._STARTUP_MIN_TIME_SEC):
-            return False
+        min_delta = timedelta(seconds=self._STARTUP_MIN_TIME_SEC)
         if self._get_dhcp_mode() == DhcpMode.IP_CHANGE:
             return len(set(map(lambda ip: ip["ip"], self._all_ips))) > 1
+        if delta_t < min_delta:
+            time.sleep((min_delta - delta_t).seconds)
         return True
 
     def trigger(self, state=MODE.DONE, target_ip=None, exception=None, delta_sec=-1):
