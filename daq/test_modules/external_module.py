@@ -132,7 +132,6 @@ class ExternalModule(HostModule):
 
     def _map_if_exists(self, params, kind):
         base = params.get('%s_base' % kind)
-        LOGGER.info('TAP checking %s %s', kind, base)
         if base and os.path.exists(base):
             abs_base = os.path.abspath(base)
             dst = os.path.join(self.basedir, 'config', kind)
