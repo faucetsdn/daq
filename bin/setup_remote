@@ -23,7 +23,7 @@ echo Using $TARGET target git repo $GIT_PEER
 TARGET_REPO=$GIT_PEER
 TARGET_VERSION=$(cat etc/${TARGET^^}_VERSION)
 
-if [ git submodule status $FAUCET ]; then
+if git submodule status $FAUCET; then
     echo $TARGET is a git submodule, ignoring.
     exit 0
 elif [ -d $TARGET ]; then
