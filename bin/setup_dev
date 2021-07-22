@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 #
 # Setup things for directly running the core system. Not required for just
 # running a downloaded container.
