@@ -15,7 +15,7 @@ netaddr
 netifaces
 networkx
 prometheus_client
-pylint==2.4.2
+pylint==2.9.6
 pypandoc==1.5
 pytricia
 pyyaml
