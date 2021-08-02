@@ -25,6 +25,7 @@ import host as connected_host
 import network
 import report
 import stream_monitor
+import udmi_manager
 from utils import dict_proto
 from wrappers import DaqException, DisconnectedException
 import logger
@@ -165,7 +166,7 @@ class DAQRunner:
         self._callback_queue = []
         self._event_lock = threading.RLock()
         self.daq_run_id = self._init_daq_run_id()
-        self._init_gcp()
+        self._init_cloud()
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
         self._daq_version = os.environ['DAQ_VERSION']
@@ -201,12 +202,13 @@ class DAQRunner:
         LOGGER.info('LSB release %s', self._lsb_release)
         LOGGER.info('system uname %s', self._sys_uname)
 
-    def _init_gcp(self):
+    def _init_cloud(self):
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
+        self._udmi = udmi_manager.UdmiManager(self.config)
 
     def _init_test_list(self):
         config = self.config
