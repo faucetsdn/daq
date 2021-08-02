@@ -9,7 +9,7 @@ google-cloud-firestore==1.6.0
 google-cloud-logging==1.15.1
 google-cloud-pubsub==0.45.0
 google-cloud-storage==1.16.1
-grpcio-tools==1.30.0
+grpcio-tools==1.39.0
 Jinja2
 netaddr
 netifaces
