@@ -161,7 +161,7 @@ class DAQRunner:
         switch_setup = self.config.get('switch_setup', {})
         max_devices = float(switch_setup.get('uplink_port', 'inf')) - 1
         self.gateway_sets = set(range(1, int(min(self._DEFAULT_MAX_GATEWAYS, max_devices) + 1)))
-        # TODO: uplink port should not be required for base topology 
+        # TODO: uplink port should not be required for base topology
         # Uplink port is used to configure device ports on the pri switch.
         switch_setup['uplink_port'] = switch_setup.get('uplink_port', len(self.gateway_sets))
         self.config['switch_setup'] = switch_setup
@@ -773,7 +773,6 @@ class DAQRunner:
         existing = self._get_existing_gateway(device)
         if existing:
             return existing
-        
         group_name = 'native' if is_native else device.group
         set_num = 1 if is_native else self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, creating set num %d',

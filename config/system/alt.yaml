@@ -14,6 +14,8 @@ switch_setup:
   ext_br: alt-switch
   model: EXT_STACK
   native: True
+  of_dpid: 2
+  uplink_port: 7
 
 # Faux device connection for testing.
 interfaces:
