@@ -198,7 +198,7 @@ class DAQRunner:
         self._cleanup_previous_runs()
         self._init_test_list()
         self._target_set_queue = []
-        self._max_hosts = self.run_trigger.get('max_hosts', float('inf'))
+        self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -634,12 +634,12 @@ class DAQRunner:
 
     def _target_set_consider(self):
         if self._target_set_queue:
-            for i, device in enumerate(self._target_set_queue):
+            for num, device in enumerate(self._target_set_queue):
                 if self._target_set_has_capacity(device):
                     LOGGER.info('Target device %s pop activate (%s)',
                                 device, len(self._target_set_queue))
                     self._target_set_activate(device)
-                    self._target_set_queue.pop(i)
+                    self._target_set_queue.pop(num)
                     break
 
     def _target_set_activate(self, device):
