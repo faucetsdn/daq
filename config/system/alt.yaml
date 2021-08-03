@@ -15,7 +15,7 @@ switch_setup:
   model: EXT_STACK
   native: True
   of_dpid: 2
-  uplink_port: 7
+  uplink_port: 10
 
 # Faux device connection for testing.
 interfaces:

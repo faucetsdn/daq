@@ -634,11 +634,13 @@ class DAQRunner:
 
     def _target_set_consider(self):
         if self._target_set_queue:
-            device = self._target_set_queue.pop(0)
-            if self._target_set_has_capacity(device):
-                LOGGER.info('Target device %s pop activate (%s)',
-                            device, len(self._target_set_queue))
-                self._target_set_activate(device)
+            for i, device in enumerate(self._target_set_queue):
+                if self._target_set_has_capacity(device):
+                    LOGGER.info('Target device %s pop activate (%s)',
+                                device, len(self._target_set_queue))
+                    self._target_set_activate(device)
+                    self._target_set_queue.pop(i)
+                    break
 
     def _target_set_activate(self, device):
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
