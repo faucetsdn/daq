@@ -11,7 +11,6 @@ switch_setup:
   data_intf: alt-intf
   alt_of_port: 6669
   alt_varz_port: 9305
-  uplink_port: 10
   ext_br: alt-switch
   model: EXT_STACK
   native: True
