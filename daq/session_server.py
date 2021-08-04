@@ -146,7 +146,7 @@ class SessionServer:
             if delta < self._disconnect_timeout_sec:
                 self._send_reply(device_mac, SessionProgress())
             else:
-                LOGGER.warning('Disconnect timeout for %s after %s', device_mac, delta)
+                LOGGER.warning('Disconnect timeout for %s after %ss', device_mac, round(delta))
                 self.close_stream(device_mac)
 
 

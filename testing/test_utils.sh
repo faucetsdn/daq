@@ -15,6 +15,7 @@ function generate {
   rm -rf inst/runtime_conf
 
   echo switch_setup.uplink_port=$((faux_num+1)) >> local/system.conf
+  echo switch_setup.of_dpid=2 >> local/system.conf
 
   # Create required number of faux devices
   for iface in $(seq 1 $faux_num); do
