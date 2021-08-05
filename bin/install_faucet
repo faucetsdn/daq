@@ -9,6 +9,7 @@ FROOT="/root/faucet"
 
 dir=$(dirname "$0")
 
+${APK} update
 ${APK} install git ${BUILDDEPS}
 "${dir}/retry_cmd" "${PIP3} pip"
 "${dir}/retry_cmd" "${PIP3} setuptools"

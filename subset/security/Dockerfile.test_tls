@@ -8,6 +8,8 @@ RUN $AG update && $AG install openjdk-11-jdk git tshark
 
 COPY subset/security/ .
 
+RUN sh enable_tls1.sh
+
 RUN cd tlstest && ./gradlew build
 
 CMD ["./test_tls"]

@@ -1,9 +1,15 @@
 """Gateway module for device testing"""
 
+from abc import ABC, abstractmethod
 import datetime
+from ipaddress import ip_address, ip_network
 import os
 import shutil
-from abc import ABC, abstractmethod
+from subprocess import PIPE
+from typing import Callable, List
+
+import netaddr
+from clib.mininet_test_util import DEVNULL
 
 import logger
 from env import DAQ_RUN_DIR
@@ -223,6 +229,62 @@ class BaseGateway(ABC):
             except Exception as e:
                 LOGGER.error('Gateway %s terminating dummy: %s', self.name, e)
                 LOGGER.exception(e)
+
+    def _get_scan_interface(self):
+        return self.host, self.host_intf
+
+    def _discover_host_hangup_callback(self, mac, log_fd, log_file, callback):
+        def process_line(line):
+            sections = [section for section in line.split('\t') if section]
+            if len(sections) >= 2:
+                try:
+                    device_ip = ip_address(sections[0])
+                    if netaddr.EUI(mac) == netaddr.EUI(sections[1]):
+                        return device_ip
+                except (ValueError, netaddr.core.AddrFormatError):
+                    pass
+            return None
+        log_fd.close()
+        with open(log_file, 'r') as fd:
+            lines = fd.read().split('\n')
+            for line in lines:
+                device_ip = process_line(line)
+                if device_ip:
+                    LOGGER.info('Host discovery for %s completed. Found ip %s.',
+                                mac, device_ip)
+                    return callback(device_ip)
+        LOGGER.info('Host discovery for %s completed. Found no ip.', mac)
+        callback(None)
+
+    def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable):
+        """Discovers a host using arp-scan in a list of subnets."""
+        cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s -s %s %s'
+        host, intf = self._get_scan_interface()
+        LOGGER.info('Starting host discovery for %s', mac)
+
+        def hangup_callback_callback(device_ip):
+            if device_ip:
+                callback(device_ip)
+            else:
+                recursive_discover()
+
+        def recursive_discover():
+            if not subnets:
+                callback(None)
+                return
+            subnet = subnets.pop(0)
+            address = next(subnet.hosts())
+            log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
+            log_fd = open(log_file, 'w')
+            LOGGER.info('Scanning subnet %s from %s for %s', subnet, address, mac)
+            host.cmd('ip addr add %s/%s dev %s' % (str(address), subnet.prefixlen, intf))
+            full_cmd = cmd % (intf, mac, str(address), str(subnet))
+            LOGGER.info('arp-scan command: %s', full_cmd)
+            active_pipe = host.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
+            self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
+                                       hangup=lambda: self._discover_host_hangup_callback(
+                                           mac, log_fd, log_file, hangup_callback_callback))
+        recursive_discover()
 
     def _ping_test(self, src, dst, src_addr=None):
         return self.runner.ping_test(src, dst, src_addr=src_addr)

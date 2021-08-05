@@ -7,6 +7,7 @@ echo DHCP Tests >> $TEST_RESULTS
 cat <<EOF > /tmp/daq.conf
 include=${DAQ_LIB}/config/system/default.yaml
 site_description="Multi-Device Configuration"
+switch_setup.of_dpid=2
 switch_setup.uplink_port=7
 interfaces.faux-1.opts=
 interfaces.faux-2.opts=xdhcp

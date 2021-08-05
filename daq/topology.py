@@ -54,7 +54,7 @@ class FaucetTopology:
         self.sec_name = 'sec'
         switch_setup = self.config.get('switch_setup', {})
         self.sec_port = int(switch_setup['uplink_port'])
-        self.sec_dpid = int(switch_setup['of_dpid'], 0)
+        self.sec_dpid = int(switch_setup.get('of_dpid', 0))
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
         self._native_faucet = switch_setup.get('native')
@@ -442,14 +442,17 @@ class FaucetTopology:
                         self._add_dot1x_allow_rule(incoming_acl, test_ports, vlan_vid=vlan)
                     device_port = device.port.port_no
                     if device_port:
-                        self._add_dot1x_allow_rule(secondary_acl, [device_port], vlan_vid=vlan)
+                        self._add_dot1x_allow_rule(secondary_acl, [device_port], in_vlan=vlan)
 
-    def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vid=None):
+    # pylint: disable=too-many-arguments
+    def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vid=None, in_vlan=None):
         """Add dot1x reflection rule to acl"""
         if vlan_vid:
             self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, vlan_vid=vlan_vid)
         elif out_vid:
             self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, out_vid=out_vid)
+        elif in_vlan:
+            self._add_acl_rule(acl, eth_type=self._DOT1X_ETH_TYPE, ports=ports, in_vlan=in_vlan)
 
     def _generate_main_acls(self):
         incoming_acl = []

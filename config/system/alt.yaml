@@ -11,10 +11,11 @@ switch_setup:
   data_intf: alt-intf
   alt_of_port: 6669
   alt_varz_port: 9305
-  uplink_port: 10
   ext_br: alt-switch
   model: EXT_STACK
   native: True
+  of_dpid: 2
+  uplink_port: 10
 
 # Faux device connection for testing.
 interfaces:
@@ -22,6 +23,9 @@ interfaces:
     opts: 
     port: 2
   faux-2:
+    opts: xdhcp=10.20.1.100
+    port: 3
+  faux-3:
     opts: -n 
     port: 11
 
@@ -38,4 +42,5 @@ internal_subnet:
 
 # Define external DHCP subnets to be used by test hosts
 external_subnets:
+  - subnet: 10.20.100.0/24 # To test multi subnet
   - subnet: 10.20.0.0/16

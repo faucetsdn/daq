@@ -17,11 +17,16 @@ else
     echo Using base GIT_URL from environment.
 fi
 
-GIT_PEER=`echo $GIT_URL | sed s/daq/$TARGET/`
+GIT_PEER=`echo $GIT_URL | sed -E "s/(daq|forch)/$TARGET/"`
 echo Using $TARGET target git repo $GIT_PEER
 
 TARGET_REPO=$GIT_PEER
 TARGET_VERSION=$(cat etc/${TARGET^^}_VERSION)
+
+if git submodule status $FAUCET; then
+    echo $TARGET is a git submodule, removing.
+    rm -rf $TARGET
+fi
 
 if [ -d $TARGET ]; then
     echo Dir $TARGET/ already exists. Fetching updates...
@@ -33,6 +38,9 @@ else
 fi
 
 echo Switching $TARGET to version $TARGET_VERSION
-(cd $TARGET; git checkout $TARGET_VERSION)
+(cd $TARGET
+ git checkout --detach --no-guess $TARGET_VERSION -- || git checkout --detach --no-guess origin/$TARGET_VERSION --
+)
+
 echo -n "Last $TARGET commit: "
 (cd $TARGET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)

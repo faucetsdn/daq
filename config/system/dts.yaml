@@ -8,20 +8,25 @@ host_tests: config/modules/dts.conf
 
 switch_setup:
   data_intf: data0
-  lo_port: 3984
+  lo_port: 6653
   varz_port: 5678
   model: EXT_STACK
   native: True
-  of_dpid: '0'
 
 run_trigger:
   vlan_start: 272
   vlan_end: 276
 
+
 device_reporting:
   server_port: 50051
+
+# The hold test will only run for devices explicitly enabled.
+keep_hold: True
+
+default_timeout_sec: 120
 
 external_subnets:
   - subnet: 192.168.1.0/24
 
-site_path: /site
+site_path: /root/inst/site_config

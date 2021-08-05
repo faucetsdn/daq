@@ -81,8 +81,9 @@ class ReportGenerator:
     _INDEX_FAIL = 1
     _INDEX_SKIP = 2
 
-    def __init__(self, config, target_mac, module_config):
+    def __init__(self, config, target_mac, module_config, report_sink):
         self._config = config
+        self._report_sink = report_sink
         self._module_config = copy.deepcopy(module_config)
         self._repitems = {}
         self._clean_mac = target_mac.replace(':', '')
@@ -155,6 +156,7 @@ class ReportGenerator:
         self._write_md_report()
         self._write_pdf_report()
         self._write_json_report()
+        self._report_sink(self._all_results)
         LOGGER.info('Copying reports to %s.*', self._alt_prefix)
         report_paths = {}
         for extension in ['.md', '.pdf', '.json']:

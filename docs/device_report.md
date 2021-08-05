@@ -52,7 +52,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|---|---|---|
 |Base|2|FAIL|1/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Connection|12|FAIL|3/5/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Security|13|FAIL|2/4/4|0/0/0|0/0/1|0/0/0|0/2/0|0/0/0|
+|Security|13|FAIL|2/1/7|0/0/0|0/0/1|0/0/0|0/0/2|0/0/0|
 |NTP|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |DNS|1|SKIP|0/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Communication|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
@@ -64,11 +64,11 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required Pass|10|1|10|8|
+|Required Pass|10|1|13|5|
 |Required Pass for PoE Devices|0|0|1|0|
 |Required Pass for BACnet Devices|0|1|2|0|
 |Required Pass for IoT Devices|0|0|1|0|
-|Recommended Pass|0|0|0|2|
+|Recommended Pass|0|0|2|0|
 |Other|1|0|4|2|
 
 |Result|Test|Category|Expectation|Notes|
@@ -109,11 +109,11 @@ Syntax: Pass / Fail / Skip
 |skip|security.password.ssh|Security|Required Pass|Port 22 not open on target device.|
 |skip|security.password.telnet|Security|Required Pass|Port 23 not open on target device.|
 |gone|security.ssh.version|Security|Required Pass||
-|gone|security.tls.v1_2_client|Security|Required Pass||
-|gone|security.tls.v1_2_server|Security|Required Pass||
-|gone|security.tls.v1_3_client|Security|Recommended Pass||
-|gone|security.tls.v1_3_server|Security|Recommended Pass||
-|gone|security.tls.v1_server|Security|Required Pass||
+|skip|security.tls.v1_2_client|Security|Required Pass|No client initiated TLS communication detected|
+|skip|security.tls.v1_2_server|Security|Required Pass|IOException unable to connect to server.|
+|skip|security.tls.v1_3_client|Security|Recommended Pass|No client initiated TLS communication detected|
+|skip|security.tls.v1_3_server|Security|Recommended Pass|IOException unable to connect to server.|
+|skip|security.tls.v1_server|Security|Required Pass|IOException unable to connect to server.|
 |gone|unknown.fake.llama|Other|Other||
 |gone|unknown.fake.monkey|Other|Other||
 
@@ -335,6 +335,90 @@ RESULT fail protocol.bacext.pic PICS file defined however a BACnet device was no
 |Attribute|Value|
 |---|---|
 |enabled|True|
+
+## Module tls
+
+
+#### Report
+
+```
+--------------------
+Collecting TLS cert from target address
+
+Gathering TLS 1 Server Information....
+TLS 1Server Implementation Skipping Test, could not open connection
+TLS 1 Server Information Complete.
+
+
+Gathering TLS 1.2 Server Information....
+TLS 1.2Server Implementation Skipping Test, could not open connection
+TLS 1.2 Server Information Complete.
+
+
+Gathering TLS 1.3 Server Information....
+TLS 1.3Server Implementation Skipping Test, could not open connection
+TLS 1.3 Server Information Complete.
+
+
+Gathering TLS Client X.X.X.X Information....
+TLS Client Information Complete.
+Gathering TLS Client X.X.X.X Information....
+TLS Client Information Complete.
+
+--------------------
+security.tls.v1_2_client
+--------------------
+Verify the device supports at least TLS 1.2 (as a client)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_2_client No client initiated TLS communication detected
+
+--------------------
+security.tls.v1_2_server
+--------------------
+Verify the device supports TLS 1.2 (as a server)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_2_server IOException unable to connect to server.
+
+--------------------
+security.tls.v1_3_client
+--------------------
+Verify the device supports at least TLS 1.3 (as a client)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_3_client No client initiated TLS communication detected
+
+--------------------
+security.tls.v1_3_server
+--------------------
+Verify the device supports TLS 1.3 (as a server)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_3_server IOException unable to connect to server.
+
+--------------------
+security.tls.v1_server
+--------------------
+Verify the device supports at least TLS 1.0 (as a server)
+--------------------
+See log above
+--------------------
+RESULT skip security.tls.v1_server IOException unable to connect to server.
+
+```
+
+#### Module Config
+
+|Attribute|Value|
+|---|---|
+|enabled|True|
+|timeout_sec|0|
+|ca_file|CA_Faux.pem|
 
 ## Module password
 

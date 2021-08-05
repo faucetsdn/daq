@@ -13,6 +13,9 @@ settle_sec: 0
 switch_setup:
   model: EXT_STACK
   data_intf: alt-intf
+  data_mac: '22:22:22:22:22:22'
+  of_dpid: 2
+  uplink_port: 7
 
 run_trigger:
   native_vlan: 122
