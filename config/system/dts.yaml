@@ -12,7 +12,6 @@ switch_setup:
   varz_port: 5678
   model: EXT_STACK
   native: True
-  of_dpid: '0'
 
 run_trigger:
   vlan_start: 272
