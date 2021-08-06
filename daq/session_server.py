@@ -62,11 +62,11 @@ class SessionClient:
 class SessionServer:
     """Devices state server"""
     # pylint: disable=too-many-arguments
-    def __init__(self, on_session=None, on_session_end=None, server_address=None,
+    def __init__(self, on_session_start=None, on_session_end=None, server_address=None,
                  server_port=None, local_ip=None):
         self._clients: Dict[str, SessionClient] = {}
         self._lock = threading.Lock()
-        self._on_session = on_session
+        self._on_session_start = on_session_start
         self._on_session_end = on_session_end
         self._local_ip = local_ip
         self._server = grpc.server(futures.ThreadPoolExecutor())
@@ -110,7 +110,7 @@ class SessionServer:
         endpoint = TunnelEndpoint(ip=self._local_ip)
         self._send_reply(device_mac, SessionProgress(endpoint=endpoint))
         self.send_device_result(device_mac, PortBehavior.Behavior.authenticated)
-        self._on_session(request)
+        self._on_session_start(request)
 
     def _session_stream(self, request):
         device_mac = request.device_mac

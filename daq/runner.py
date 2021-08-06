@@ -256,13 +256,13 @@ class DAQRunner:
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             # TODO: Make this all configured from run_trigger not device_reporting
-            handler = SessionServer(on_session=self._on_session,
+            handler = SessionServer(on_session_start=self._on_session_start,
                                     on_session_end=self._on_session_end, server_port=server_port,
                                     local_ip=local_ip)
             return handler
         return None
 
-    def _on_session(self, request):
+    def _on_session_start(self, request):
         with self._event_lock:
             remote_ip = request.endpoint.ip
             LOGGER.info('New session started for %s %s/%s at %s', request.device_mac,
@@ -273,6 +273,7 @@ class DAQRunner:
             device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+            self._udmi.discovery(device)
 
     def _on_session_end(self, request):
         with self._event_lock:
@@ -853,6 +854,7 @@ class DAQRunner:
         if device.host and target_type in ('ACK', 'STATIC'):
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
+            self._udmi.discovery(device)
 
     def _get_active_ports(self):
         return [p.port_no for p in self._ports.values() if p.active]
