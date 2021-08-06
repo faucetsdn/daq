@@ -1102,8 +1102,7 @@ class DAQRunner:
         """Process a generated report"""
         # TODO: Make the DeviceReport proto complete so ignore_unknown_fields isn't required.
         report_proto = dict_proto(report_dict, DeviceReport, ignore_unknown_fields=True)
-        LOGGER.info('Report sink with report %s', bool(report_proto))
-        # TODO: Make this actually upload the report somewhere.
+        self._udmi.report(report_proto)
 
     def _calculate_device_result(self, device, test_results):
         failed = False
