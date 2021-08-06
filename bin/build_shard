@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 setup=aardvark,aardvark2,default,networking,switch
 faux=faux1,faux2
@@ -26,6 +26,7 @@ if [ "$target_set" == "subset" ]; then
 fi
 
 host_tests=$host_tests DAQ_TARGETS=$targets cmd/build
+
 for target in $(echo $targets | sed 's/,/ /g'); do
     tag=daqf/$target
     echo $target $tag

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 if [ "$1" == help ]; then
  echo The following are expected modes of builds:
