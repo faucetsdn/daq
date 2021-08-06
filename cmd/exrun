@@ -40,21 +40,28 @@ done
 FAUCET=$(realpath $ROOT/faucet)
 FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
+UDMI=$(realpth $ROOT/udmi)
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found, try running bin/setup_dev.
     false
 fi
+(cd $FAUCET; git checkout $(< $ROOT/etc/FAUCET_VERSION)) || \
+    echo Could not update faucet, try 'bin/clean_dev && bin/setup_dev' to reset.
 
 if [ ! -d $FORCH ]; then
     echo Forch directory $FORCH not found, try running bin/setup_dev.
     false
 fi
-
-(cd $FAUCET; git checkout $(< $ROOT/etc/FAUCET_VERSION)) || \
-    echo Could not update faucet, try 'bin/clean_dev && bin/setup_dev' to reset.
 (cd $FORCH; git checkout $(< $ROOT/etc/FORCH_VERSION)) || \
     echo Could not update forch, try 'bin/clean_dev && bin/setup_dev' to reset.
+
+if [ ! -d $UDMI ]; then
+    echo Forch directory $UDMI not found, try running bin/setup_dev.
+    false
+fi
+(cd $UDMI; git switch $(< $ROOT/etc/UDMI_VERSION)) || \
+    echo Could not update udmi, try 'bin/clean_dev && bin/setup_dev' to reset.
 
 echo Release version $DAQ_VERSION
 
@@ -62,7 +69,7 @@ if [ "$1" == "-h" ]; then
     skip_autostart=y
 fi
 
-export PYTHONPATH=$FORCH:$FAUCET:$MININET:$ROOT
+export PYTHONPATH=$FORCH:$FAUCET:$MININET:$UDMI/gencode/python:$ROOT
 
 mkdir -p $INSTDIR
 rm -f $cleanup_file
