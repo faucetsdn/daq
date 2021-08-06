@@ -38,7 +38,10 @@ else
 fi
 
 echo Switching $TARGET to version $TARGET_VERSION
-(cd $TARGET && git switch $TARGET_VERSION)
+(
+    cd $TARGET
+    git switch $TARGET_VERSION || git switch --detach $TARGET_VERSION
+)
 
 echo -n "Last $TARGET commit: "
 (cd $TARGET; git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true)
