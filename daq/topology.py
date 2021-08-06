@@ -54,7 +54,7 @@ class FaucetTopology:
         self.sec_name = 'sec'
         switch_setup = self.config.get('switch_setup', {})
         self.sec_port = int(switch_setup['uplink_port'])
-        self.sec_dpid = int(switch_setup['of_dpid'], 0)
+        self.sec_dpid = int(switch_setup.get('of_dpid', 0))
         self.ext_ofip = switch_setup.get('lo_addr')
         self.ext_intf = switch_setup.get('data_intf')
         self._native_faucet = switch_setup.get('native')
