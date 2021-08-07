@@ -4,25 +4,6 @@ Start with a basic [DAQ Quickstart Setup](quickstart.md), and make sure the
 base install is working. No physical switch in required, rather the system
 just needs a single network port (either USB adapter or built-in NIC will work).
 
-The [ata.yaml](../config/system/ata.yaml) DAQ configuration file
-shows a baseline example of how to setup an install for network diagnostics.
-
-Key fields of interest:
-* `switch_setup:`
-  * `data_intf:` Network interface used to talk to the target test network. This could
-  either be a built-in ethernet adapter or USB dongle.
-  * `data_mac:` MAC address (optional) to use for the network interface. This is
-  necessary if, for example, there is a specific MAC address required for network auth.
-  * `model: EXT_STACK` Indicator that this is running with an external network stack.
-* `run_trigger:`
-  * `native_vlan: 122` The vlan to use internally. Actual value shouldn't matter
-  as long as it's non-zero.
-* `internal_subnet:`
-  * `subnet: 10.21.0.0./16` This specifies the subnet to use internally to the
-  system. If it conflicts with the external target network subnet, then there
-  will be problems (requiring dev work to fix).
-
-
 A minimum system can be setup by creating a `local/system.yaml` file that contains
 something like:
 ```
@@ -31,9 +12,22 @@ include: ${DAQ_LIB}/config/system/ata.yaml
 switch_setup:
     data_intf: enx00e04c680029
 ```
-(i.e., only the `data_intf` field is likely necessitated to be unique to a given system
-intall, everything else can likely just be the defaults. The base `ata.yaml` file does
-not need to be edited directly, as its values will be overridden.)
+The minimum setup likely only requires the `data_intf` field,
+everything else can likely just be the included defaults.
+
+Key fields of interest (see `ata.yaml` for examples):
+* `switch_setup:`
+  * `data_intf:` Network interface used to talk to the target test network. This could
+  either be a built-in ethernet adapter or USB dongle.
+  * `data_mac:` MAC address (optional) to use for the network interface. This is
+  necessary if, for example, there is a specific MAC address required for network auth.
+* `run_trigger:`
+  * `native_vlan:` The vlan to use internally. Actual value shouldn't matter
+  as long as it's non-zero.
+* `internal_subnet:`
+  * `subnet:` This specifies the subnet to use internally to the
+  system. If it conflicts with the external target network subnet, then there
+  will be problems. 
 
 To run the system, a simple `cmd/run` should suffice, or `cmd/run -s` if you just want
 to scan the network for at least one device.
