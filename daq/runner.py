@@ -524,8 +524,10 @@ class DAQRunner:
 
         active_tests = bool(self._devices.get_triggered_devices() or self._target_set_queue)
         more_testing = self._run_tests and not self._single_shot
+        LOGGER.info('TAPTAP %s %s %s %s', active_tests, more_testing, self._run_tests, self._single_shot)
         if not active_tests and not more_testing:
             if self.faucet_events and not self._linger_exit:
+                LOGGER.warning('All expected test runs complete, terminating.')
                 self.shutdown()
             if self._linger_exit == 1:
                 self._linger_exit = 2
