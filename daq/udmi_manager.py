@@ -5,7 +5,7 @@ import utils
 
 from proto import system_config_pb2 as sys_config
 
-from udmi.agent.mqtt_manager import MqttManager
+from udmi.agent.mqtt_manager import MqttManager, MqttCallbacks
 from udmi.schema.event_discovery import Discovery
 from udmi.schema.event_audit import Audit
 
@@ -17,15 +17,18 @@ class UdmiManager:
     def __init__(self, config):
         self._config = config.get('cloud_config', {})
         cloud_config = utils.dict_proto(self._config, sys_config.CloudConfig)
-        if cloud_config.project_id:
-            LOGGER.info('Creating mqtt connection to %s/%s/%s',
-                        cloud_config.project_id, cloud_config.registry_id,
-                        cloud_config.device_id)
-            self._mqtt = MqttManager(cloud_config, self._on_message)
-            self._mqtt.loop_start()
-        else:
+        if not cloud_config.project_id:
             LOGGER.info('No project_id defined, skipping mqtt client creation')
             self._mqtt = None
+            return
+
+        LOGGER.info('Creating mqtt connection to %s/%s/%s',
+                    cloud_config.project_id, cloud_config.registry_id,
+                    cloud_config.device_id)
+        callbacks = MqttCallbacks()
+        callbacks.on_message = self._on_message
+        self._mqtt = MqttManager(cloud_config, callbacks)
+        self._mqtt.loop_start()
 
     def _send(self, message_type, message):
         LOGGER.debug('Sending udmi %s message', message_type)
