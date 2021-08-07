@@ -22,6 +22,7 @@ class UdmiManager:
                         cloud_config.project_id, cloud_config.registry_id,
                         cloud_config.device_id)
             self._mqtt = MqttManager(cloud_config, self._on_message)
+            self._mqtt.loop_start()
         else:
             LOGGER.info('No project_id defined, skipping mqtt client creation')
             self._mqtt = None
