@@ -6,8 +6,7 @@ import utils
 from proto import system_config_pb2 as sys_config
 
 from udmi.agent.mqtt_manager import MqttManager, MqttCallbacks
-from udmi.schema.event_discovery import Discovery
-from udmi.schema.event_audit import Audit
+from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
 
 LOGGER = logger.get_logger('udmi')
 
@@ -38,9 +37,19 @@ class UdmiManager:
 
     def discovery(self, device):
         """Handle a device discovery update"""
-        LOGGER.info('Sending udmi discovery message for device')
         discovery = Discovery()
-        self._send('discovery', discovery)
+        discovery.families = {}
+        if device.mac:
+            hwaddr = discovery.families.setdefault('hwaddr', FamilyDiscoveryEvent())
+            hwaddr.id = device.mac
+            hwaddr.group = device.assigned
+            hwaddr.active = device.assigned == device.vlan
+        if device.ip_info.ip_addr:
+            inet = discovery.families.setdefault('inet', FamilyDiscoveryEvent())
+            inet.id = device.ip_info.ip_addr
+        if discovery.families:
+            LOGGER.info('Sending udmi discovery message for device %s', device.mac)
+            self._send('discovery', discovery)
 
     def report(self, report):
         """Handle a device result report"""
