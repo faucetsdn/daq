@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 setup=aardvark,aardvark2,default,networking,switch
 faux=faux1,faux2

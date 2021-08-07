@@ -40,7 +40,7 @@ done
 FAUCET=$(realpath $ROOT/faucet)
 FORCH=$(realpath $ROOT/forch)
 MININET=$(realpath $ROOT/mininet)
-UDMI=$(realpth $ROOT/udmi)
+UDMI=$(realpath $ROOT/udmi)
 
 if [ ! -d $FAUCET ]; then
     echo Faucet directory $FAUCET not found, try running bin/setup_dev.
