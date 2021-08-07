@@ -140,6 +140,9 @@ message DaqConfig {
 
   // Path to include file
   string include = 56;
+
+  // Configuration for cloud uplink
+  CloudConfig cloud_config = 57;
 }
 
 enum DhcpMode {
@@ -268,4 +271,36 @@ message Interface {
 message DeviceReporting {
   // Server port
   int32 server_port = 1;
+}
+
+/*
+ * Configuration for cloud result reporting.
+ */
+message CloudConfig {
+  // Cloud project id.
+  string project_id = 1;
+
+  // Cloud project region.
+  string cloud_region = 2;
+
+  // Cloud registry id.
+  string registry_id = 3;
+
+  // Cloud reporting device id.
+  string device_id = 4;
+
+  // File for private key.
+  string private_key_file = 5;
+
+  // Key algorithm type.
+  string algorithm = 6;
+
+  // CA certs file.
+  string ca_certs = 7;
+
+  // Bridge hostname.
+  string mqtt_bridge_hostname = 8;
+
+  // Bridge port.
+  string mqtt_bridge_port = 9;
 }

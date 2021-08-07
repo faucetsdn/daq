@@ -11,9 +11,11 @@ google-cloud-pubsub==0.45.0
 google-cloud-storage==1.16.1
 grpcio-tools==1.30.0
 Jinja2
+jwt
 netaddr
 netifaces
 networkx
+paho_mqtt
 prometheus_client
 pylint==2.4.2
 pypandoc==1.5

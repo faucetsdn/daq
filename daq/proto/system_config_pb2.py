@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1d\x64\x61q/proto/system_config.proto\x1a\x1e\x64\x61q/proto/session_server.proto\"\xf2\t\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x15\n\rtopology_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x12\x1c\n\tusi_setup\x18\x31 \x01(\x0b\x32\t.UsiSetup\x12 \n\x0brun_trigger\x18\x32 \x01(\x0b\x32\x0b.RunTrigger\x12\x12\n\ndebug_mode\x18\x33 \x01(\x08\x12\x13\n\x0buse_console\x18\x34 \x01(\x08\x12*\n\x10\x64\x65vice_reporting\x18\x35 \x01(\x0b\x32\x10.DeviceReporting\x12%\n\x10\x65xternal_subnets\x18\x36 \x03(\x0b\x32\x0b.SubnetSpec\x12$\n\x0finternal_subnet\x18\x37 \x01(\x0b\x32\x0b.SubnetSpec\x12\x0f\n\x07include\x18\x38 \x01(\t\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1c\n\nSubnetSpec\x12\x0e\n\x06subnet\x18\x01 \x01(\t\"0\n\x08UsiSetup\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x17\n\x0frpc_timeout_sec\x18\x02 \x01(\x05\"\x8e\x03\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\x05\x12\x11\n\tlo_port_2\x18\x0f \x01(\x05\x12\x11\n\tvarz_port\x18\x1e \x01(\x05\x12\x13\n\x0bvarz_port_2\x18\x1f \x01(\x05\x12\x13\n\x0b\x61lt_of_port\x18\x10 \x01(\x05\x12\x15\n\ralt_varz_port\x18\x11 \x01(\x05\x12\x0e\n\x06native\x18\x12 \x01(\x08\x12\x0f\n\x07lo_addr\x18\x13 \x01(\t\x12\x11\n\tmods_addr\x18\x14 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x10\n\x08\x64\x61ta_mac\x18\x30 \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\x12!\n\x08\x65ndpoint\x18/ \x01(\x0b\x32\x0f.TunnelEndpoint\"o\n\nRunTrigger\x12\x12\n\nvlan_start\x18\x01 \x01(\x05\x12\x10\n\x08vlan_end\x18\x02 \x01(\x05\x12\x13\n\x0b\x65gress_vlan\x18\x03 \x01(\x05\x12\x13\n\x0bnative_vlan\x18\x04 \x01(\x05\x12\x11\n\tmax_hosts\x18\x05 \x01(\x05\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"&\n\x0f\x44\x65viceReporting\x12\x13\n\x0bserver_port\x18\x01 \x01(\x05*U\n\x08\x44hcpMode\x12\n\n\x06NORMAL\x10\x00\x12\r\n\tSTATIC_IP\x10\x01\x12\x0c\n\x08\x45XTERNAL\x10\x02\x12\x11\n\rLONG_RESPONSE\x10\x03\x12\r\n\tIP_CHANGE\x10\x04\x62\x06proto3'
+  serialized_pb=b'\n\x1d\x64\x61q/proto/system_config.proto\x1a\x1e\x64\x61q/proto/session_server.proto\"\x96\n\n\tDaqConfig\x12\x18\n\x10site_description\x18\x01 \x01(\t\x12\x18\n\x10monitor_scan_sec\x18\x02 \x01(\x05\x12\x1b\n\x13\x64\x65\x66\x61ult_timeout_sec\x18\x03 \x01(\x05\x12\x12\n\nsettle_sec\x18& \x01(\x05\x12\x11\n\tbase_conf\x18\x04 \x01(\t\x12\x11\n\tsite_path\x18\x05 \x01(\t\x12\x1f\n\x17initial_dhcp_lease_time\x18\x06 \x01(\t\x12\x17\n\x0f\x64hcp_lease_time\x18\x07 \x01(\t\x12\x19\n\x11\x64hcp_response_sec\x18\' \x01(\x05\x12\x1e\n\x16long_dhcp_response_sec\x18\x08 \x01(\x05\x12\"\n\x0cswitch_setup\x18\t \x01(\x0b\x32\x0c.SwitchSetup\x12\x12\n\nhost_tests\x18\x10 \x01(\t\x12\x13\n\x0b\x62uild_tests\x18$ \x01(\x08\x12\x11\n\trun_limit\x18\x11 \x01(\x05\x12\x11\n\tfail_mode\x18\x12 \x01(\x08\x12\x13\n\x0bsingle_shot\x18\" \x01(\x08\x12\x15\n\rresult_linger\x18\x13 \x01(\x08\x12\x0f\n\x07no_test\x18\x14 \x01(\x08\x12\x11\n\tkeep_hold\x18( \x01(\x08\x12\x14\n\x0c\x64\x61q_loglevel\x18\x15 \x01(\t\x12\x18\n\x10mininet_loglevel\x18\x16 \x01(\t\x12\x13\n\x0b\x66inish_hook\x18# \x01(\t\x12\x10\n\x08gcp_cred\x18\x17 \x01(\t\x12\x11\n\tgcp_topic\x18\x18 \x01(\t\x12\x13\n\x0bschema_path\x18\x19 \x01(\t\x12\x11\n\tmud_files\x18\x1a \x01(\t\x12\x14\n\x0c\x64\x65vice_specs\x18\x1b \x01(\t\x12\x13\n\x0btest_config\x18\x1c \x01(\t\x12\x19\n\x11port_debounce_sec\x18\x1d \x01(\x05\x12\x15\n\rtopology_hook\x18\x1e \x01(\t\x12\x17\n\x0f\x64\x65vice_template\x18\x1f \x01(\t\x12\x14\n\x0csite_reports\x18  \x01(\t\x12\x1f\n\x17run_data_retention_days\x18! \x01(\x02\x12.\n\ninterfaces\x18% \x03(\x0b\x32\x1a.DaqConfig.InterfacesEntry\x12/\n\x0b\x66\x61il_module\x18/ \x03(\x0b\x32\x1a.DaqConfig.FailModuleEntry\x12\x1d\n\x15port_flap_timeout_sec\x18\x30 \x01(\x05\x12\x1c\n\tusi_setup\x18\x31 \x01(\x0b\x32\t.UsiSetup\x12 \n\x0brun_trigger\x18\x32 \x01(\x0b\x32\x0b.RunTrigger\x12\x12\n\ndebug_mode\x18\x33 \x01(\x08\x12\x13\n\x0buse_console\x18\x34 \x01(\x08\x12*\n\x10\x64\x65vice_reporting\x18\x35 \x01(\x0b\x32\x10.DeviceReporting\x12%\n\x10\x65xternal_subnets\x18\x36 \x03(\x0b\x32\x0b.SubnetSpec\x12$\n\x0finternal_subnet\x18\x37 \x01(\x0b\x32\x0b.SubnetSpec\x12\x0f\n\x07include\x18\x38 \x01(\t\x12\"\n\x0c\x63loud_config\x18\x39 \x01(\x0b\x32\x0c.CloudConfig\x1a=\n\x0fInterfacesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x19\n\x05value\x18\x02 \x01(\x0b\x32\n.Interface:\x02\x38\x01\x1a\x31\n\x0f\x46\x61ilModuleEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1c\n\nSubnetSpec\x12\x0e\n\x06subnet\x18\x01 \x01(\t\"0\n\x08UsiSetup\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x17\n\x0frpc_timeout_sec\x18\x02 \x01(\x05\"\x8e\x03\n\x0bSwitchSetup\x12\x11\n\tctrl_intf\x18\t \x01(\t\x12\x0f\n\x07ip_addr\x18\x0b \x01(\t\x12\x13\n\x0buplink_port\x18\r \x01(\x05\x12\x0f\n\x07lo_port\x18\x0e \x01(\x05\x12\x11\n\tlo_port_2\x18\x0f \x01(\x05\x12\x11\n\tvarz_port\x18\x1e \x01(\x05\x12\x13\n\x0bvarz_port_2\x18\x1f \x01(\x05\x12\x13\n\x0b\x61lt_of_port\x18\x10 \x01(\x05\x12\x15\n\ralt_varz_port\x18\x11 \x01(\x05\x12\x0e\n\x06native\x18\x12 \x01(\x08\x12\x0f\n\x07lo_addr\x18\x13 \x01(\t\x12\x11\n\tmods_addr\x18\x14 \x01(\t\x12\x0f\n\x07of_dpid\x18) \x01(\t\x12\x11\n\tdata_intf\x18* \x01(\t\x12\x10\n\x08\x64\x61ta_mac\x18\x30 \x01(\t\x12\x0e\n\x06\x65xt_br\x18+ \x01(\t\x12\r\n\x05model\x18, \x01(\t\x12\x10\n\x08username\x18- \x01(\t\x12\x10\n\x08password\x18. \x01(\t\x12!\n\x08\x65ndpoint\x18/ \x01(\x0b\x32\x0f.TunnelEndpoint\"o\n\nRunTrigger\x12\x12\n\nvlan_start\x18\x01 \x01(\x05\x12\x10\n\x08vlan_end\x18\x02 \x01(\x05\x12\x13\n\x0b\x65gress_vlan\x18\x03 \x01(\x05\x12\x13\n\x0bnative_vlan\x18\x04 \x01(\x05\x12\x11\n\tmax_hosts\x18\x05 \x01(\x05\"\'\n\tInterface\x12\x0c\n\x04opts\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"&\n\x0f\x44\x65viceReporting\x12\x13\n\x0bserver_port\x18\x01 \x01(\x05\"\xd6\x01\n\x0b\x43loudConfig\x12\x12\n\nproject_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63loud_region\x18\x02 \x01(\t\x12\x13\n\x0bregistry_id\x18\x03 \x01(\t\x12\x11\n\tdevice_id\x18\x04 \x01(\t\x12\x18\n\x10private_key_file\x18\x05 \x01(\t\x12\x11\n\talgorithm\x18\x06 \x01(\t\x12\x10\n\x08\x63\x61_certs\x18\x07 \x01(\t\x12\x1c\n\x14mqtt_bridge_hostname\x18\x08 \x01(\t\x12\x18\n\x10mqtt_bridge_port\x18\t \x01(\t*U\n\x08\x44hcpMode\x12\n\n\x06NORMAL\x10\x00\x12\r\n\tSTATIC_IP\x10\x01\x12\x0c\n\x08\x45XTERNAL\x10\x02\x12\x11\n\rLONG_RESPONSE\x10\x03\x12\r\n\tIP_CHANGE\x10\x04\x62\x06proto3'
   ,
   dependencies=[daq_dot_proto_dot_session__server__pb2.DESCRIPTOR,])
 
@@ -60,8 +60,8 @@ _DHCPMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2009,
-  serialized_end=2094,
+  serialized_start=2262,
+  serialized_end=2347,
 )
 _sym_db.RegisterEnumDescriptor(_DHCPMODE)
 
@@ -108,8 +108,8 @@ _DAQCONFIG_INTERFACESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1220,
-  serialized_end=1281,
+  serialized_start=1256,
+  serialized_end=1317,
 )
 
 _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
@@ -146,8 +146,8 @@ _DAQCONFIG_FAILMODULEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1283,
-  serialized_end=1332,
+  serialized_start=1319,
+  serialized_end=1368,
 )
 
 _DAQCONFIG = _descriptor.Descriptor(
@@ -466,6 +466,13 @@ _DAQCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cloud_config', full_name='DaqConfig.cloud_config', index=44,
+      number=57, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -479,7 +486,7 @@ _DAQCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=66,
-  serialized_end=1332,
+  serialized_end=1368,
 )
 
 
@@ -510,8 +517,8 @@ _SUBNETSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1334,
-  serialized_end=1362,
+  serialized_start=1370,
+  serialized_end=1398,
 )
 
 
@@ -549,8 +556,8 @@ _USISETUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1364,
-  serialized_end=1412,
+  serialized_start=1400,
+  serialized_end=1448,
 )
 
 
@@ -714,8 +721,8 @@ _SWITCHSETUP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1415,
-  serialized_end=1813,
+  serialized_start=1451,
+  serialized_end=1849,
 )
 
 
@@ -774,8 +781,8 @@ _RUNTRIGGER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1815,
-  serialized_end=1926,
+  serialized_start=1851,
+  serialized_end=1962,
 )
 
 
@@ -813,8 +820,8 @@ _INTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1928,
-  serialized_end=1967,
+  serialized_start=1964,
+  serialized_end=2003,
 )
 
 
@@ -845,8 +852,96 @@ _DEVICEREPORTING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1969,
-  serialized_end=2007,
+  serialized_start=2005,
+  serialized_end=2043,
+)
+
+
+_CLOUDCONFIG = _descriptor.Descriptor(
+  name='CloudConfig',
+  full_name='CloudConfig',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project_id', full_name='CloudConfig.project_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cloud_region', full_name='CloudConfig.cloud_region', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='registry_id', full_name='CloudConfig.registry_id', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='device_id', full_name='CloudConfig.device_id', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='private_key_file', full_name='CloudConfig.private_key_file', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='algorithm', full_name='CloudConfig.algorithm', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='ca_certs', full_name='CloudConfig.ca_certs', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='mqtt_bridge_hostname', full_name='CloudConfig.mqtt_bridge_hostname', index=7,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='mqtt_bridge_port', full_name='CloudConfig.mqtt_bridge_port', index=8,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2046,
+  serialized_end=2260,
 )
 
 _DAQCONFIG_INTERFACESENTRY.fields_by_name['value'].message_type = _INTERFACE
@@ -860,6 +955,7 @@ _DAQCONFIG.fields_by_name['run_trigger'].message_type = _RUNTRIGGER
 _DAQCONFIG.fields_by_name['device_reporting'].message_type = _DEVICEREPORTING
 _DAQCONFIG.fields_by_name['external_subnets'].message_type = _SUBNETSPEC
 _DAQCONFIG.fields_by_name['internal_subnet'].message_type = _SUBNETSPEC
+_DAQCONFIG.fields_by_name['cloud_config'].message_type = _CLOUDCONFIG
 _SWITCHSETUP.fields_by_name['endpoint'].message_type = daq_dot_proto_dot_session__server__pb2._TUNNELENDPOINT
 DESCRIPTOR.message_types_by_name['DaqConfig'] = _DAQCONFIG
 DESCRIPTOR.message_types_by_name['SubnetSpec'] = _SUBNETSPEC
@@ -868,6 +964,7 @@ DESCRIPTOR.message_types_by_name['SwitchSetup'] = _SWITCHSETUP
 DESCRIPTOR.message_types_by_name['RunTrigger'] = _RUNTRIGGER
 DESCRIPTOR.message_types_by_name['Interface'] = _INTERFACE
 DESCRIPTOR.message_types_by_name['DeviceReporting'] = _DEVICEREPORTING
+DESCRIPTOR.message_types_by_name['CloudConfig'] = _CLOUDCONFIG
 DESCRIPTOR.enum_types_by_name['DhcpMode'] = _DHCPMODE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -935,6 +1032,13 @@ DeviceReporting = _reflection.GeneratedProtocolMessageType('DeviceReporting', (_
   # @@protoc_insertion_point(class_scope:DeviceReporting)
   })
 _sym_db.RegisterMessage(DeviceReporting)
+
+CloudConfig = _reflection.GeneratedProtocolMessageType('CloudConfig', (_message.Message,), {
+  'DESCRIPTOR' : _CLOUDCONFIG,
+  '__module__' : 'daq.proto.system_config_pb2'
+  # @@protoc_insertion_point(class_scope:CloudConfig)
+  })
+_sym_db.RegisterMessage(CloudConfig)
 
 
 _DAQCONFIG_INTERFACESENTRY._options = None
