@@ -135,6 +135,11 @@ if [ -z "$usi_setup_url" -o "$usi_setup_url" == "localhost:5000" -o "$usi_setup_
     uri_url_override="usi_setup.url=$docker0_ip:5000"
 fi
 
+# Fetch the CA root certificates if necessary..
+if [ ! -f inst/roots.pem ]; then
+    curl -L https://pki.google.com/roots.pem -o inst/roots.pem
+fi
+
 # Kill any gateways so that they don't prematurely assign an IP address.
 gwids=$(docker ps --format '{{ .Image }} {{ .Names }}' | fgrep daqf/networking | awk '{print $2}') || true
 for gwid in $gwids; do

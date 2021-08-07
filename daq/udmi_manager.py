@@ -18,8 +18,12 @@ class UdmiManager:
         self._config = config.get('cloud_config', {})
         cloud_config = utils.dict_proto(self._config, sys_config.CloudConfig)
         if cloud_config.project_id:
+            LOGGER.info('Creating mqtt connection to %s/%s/%s',
+                        cloud_config.project_id, cloud_config.registry_id,
+                        cloud_config.device_id)
             self._mqtt = MqttManager(cloud_config, self._on_message)
         else:
+            LOGGER.info('No project_id defined, skipping mqtt client creation')
             self._mqtt = None
 
     def _send(self, message_type, message):

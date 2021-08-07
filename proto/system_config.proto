@@ -302,5 +302,5 @@ message CloudConfig {
   string mqtt_bridge_hostname = 8;
 
   // Bridge port.
-  string mqtt_bridge_port = 9;
+  int32 mqtt_bridge_port = 9;
 }
