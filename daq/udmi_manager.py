@@ -5,7 +5,7 @@ import utils
 
 from proto import system_config_pb2 as sys_config
 
-from udmi.agent.mqtt_manager import MqttManager, MqttCallbacks
+from udmi.agent.mqtt_manager import MqttManager
 from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
 
 LOGGER = logger.get_logger('udmi')
@@ -24,9 +24,7 @@ class UdmiManager:
         LOGGER.info('Creating mqtt connection to %s/%s/%s',
                     cloud_config.project_id, cloud_config.registry_id,
                     cloud_config.device_id)
-        callbacks = MqttCallbacks()
-        callbacks.on_message = self._on_message
-        self._mqtt = MqttManager(cloud_config, callbacks)
+        self._mqtt = MqttManager(cloud_config, on_message=self._on_message)
         self._mqtt.loop_start()
 
     def _send(self, message_type, message):
@@ -48,7 +46,7 @@ class UdmiManager:
             inet = discovery.families.setdefault('inet', FamilyDiscoveryEvent())
             inet.id = device.ip_info.ip_addr
         if discovery.families:
-            LOGGER.info('Sending udmi discovery message for device %s', device.mac)
+            LOGGER.debug('Sending udmi discovery message for device %s', device.mac)
             self._send('discovery', discovery)
 
     def report(self, report):
