@@ -627,7 +627,7 @@ class DAQRunner:
             LOGGER.debug('Target device %s already queued', device)
             return
 
-        if device in self._target_set_block:
+        if device.mac in self._target_set_block:
             LOGGER.debug('Target device %s blocked', device)
             return
 
@@ -642,7 +642,7 @@ class DAQRunner:
                         device, len(self._target_set_queue))
 
         if self._single_shot:
-            self._target_set_block.add(device)
+            self._target_set_block.add(device.mac)
             LOGGER.info('Target device %s blocked (%s)', device, len(self._target_set_block))
 
     def _target_set_consider(self):
