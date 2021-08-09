@@ -10,102 +10,9 @@ on:
     - cron: '0 16 * * *'
 
 jobs:
-  build_docker:
-    runs-on: ubuntu-18.04
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        build: [faucet, faux, setup, base, subset]
-    steps:
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Installing dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
-      run: |
-        bin/setup_daq
-    - name: Build docker images for tests
-      run: |
-          bin/test_build ${{ matrix.build }} compress /tmp/build_artifacts/docker_images/
-    - uses: actions/upload-artifact@v2
-      with:
-          name: build_artifacts_${{ matrix.build  }}
-          path: /tmp/build_artifacts/
-
-  integration_tests:
-    needs: build_docker
-    runs-on: ubuntu-18.04
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        test: [base, many, aux, topo, modules, dhcp, switch, mud, ata]
-    steps:
-    - uses: actions/download-artifact@v2
-      with:
-          name: build_artifacts_faucet
-          path: /tmp/build_artifacts_faucet
-    - uses: actions/download-artifact@v2
-      with:
-          name: build_artifacts_faux
-          path: /tmp/build_artifacts_faux
-    - uses: actions/download-artifact@v2
-      with:
-          name: build_artifacts_setup
-          path: /tmp/build_artifacts_setup
-    - uses: actions/download-artifact@v2
-      with:
-          name: build_artifacts_base
-          path: /tmp/build_artifacts_base
-    - uses: actions/download-artifact@v2
-      with:
-          name: build_artifacts_subset
-          path: /tmp/build_artifacts_subset
-      if: matrix.test == 'aux'
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Set up JDK 1.11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.11
-    - name: Installing dependencies
-      env:
-        GIT_URL: ${{ secrets.GIT_URL }}
-      run: |
-        bin/setup_daq
-    - name: Loading docker images
-      run: |
-        bin/load_images faucet faux setup base
-    - name: Loading subset docker images
-      run: |
-        bin/load_images subset
-      if: matrix.test == 'aux'
-    - name: Running ${{ matrix.test }} test
-      env:
-        DOCKER_STARTUP_TIMEOUT_MS: 60000
-        GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
-        GCP_REFLECT_KEY_BASE64: ${{ secrets.GCP_REFLECT_KEY_BASE64 }}
-      run: |
-        bin/test_daq ${{ matrix.test }}
-    - name: Runtime logs
-      if: ${{ always() }}
-      run: |
-        echo %%%%%%% daq log cmdrun.log
-        cat inst/cmdrun.log || true
-
   unit_tests:
     runs-on: ubuntu-18.04
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -126,7 +33,7 @@ jobs:
 
   usi_tests:
     runs-on: ubuntu-18.04
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.11
