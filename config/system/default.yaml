@@ -43,6 +43,8 @@ internal_subnet:
   subnet: 10.20.0.0/16
 
 cloud_config:
+  # project_id: <GCP_PROJECT_ID>
+  # device_id: <device_id>
   cloud_region: us-central1
   registry_id: UDMS-AUDITOR
   private_key_file: inst/config/udmi_auditor_key.pem
