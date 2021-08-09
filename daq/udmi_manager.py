@@ -1,5 +1,6 @@
 """Module for managing a UDMI/MQTT connection to GCP IoT Core"""
 
+import json
 import logger
 import utils
 
@@ -29,6 +30,7 @@ class UdmiManager:
 
     def _send(self, message_type, message):
         LOGGER.debug('Sending udmi %s message', message_type)
+        self._mqtt.publish(message_type, json.dumps(message.to_dict()))
 
     def _on_message(self, topic, message):
         LOGGER.info('Received udmi message on %s', topic)
@@ -46,7 +48,7 @@ class UdmiManager:
             inet = discovery.families.setdefault('inet', FamilyDiscoveryEvent())
             inet.id = device.ip_info.ip_addr
         if discovery.families:
-            LOGGER.debug('Sending udmi discovery message for device %s', device.mac)
+            LOGGER.info('Sending udmi discovery message for device %s', device.mac)
             self._send('discovery', discovery)
 
     def report(self, report):
