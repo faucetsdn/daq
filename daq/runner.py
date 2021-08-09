@@ -1011,6 +1011,9 @@ class DAQRunner:
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
 
+        # Make sure any pending learning event are processed to avoid premature exit.
+        self._handle_faucet_events()
+
     def _target_set_cancel(self, device):
         if device in self._target_set_queue:
             self._target_set_queue.remove(device)
