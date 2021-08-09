@@ -40,7 +40,7 @@ jobs:
   integration_tests:
     needs: build_docker
     runs-on: ubuntu-18.04
-    timeout-minutes: 60
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -105,7 +105,7 @@ jobs:
 
   unit_tests:
     runs-on: ubuntu-18.04
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -126,7 +126,7 @@ jobs:
 
   usi_tests:
     runs-on: ubuntu-18.04
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.11
