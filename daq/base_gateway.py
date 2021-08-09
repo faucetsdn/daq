@@ -109,10 +109,12 @@ class BaseGateway(ABC):
             self.host, dummy, src_addr=self.fake_target), 'reverse ping failed'
 
     def _get_env_vars(self):
+        def opt_param(key):
+            return params.get(key) or ''  # Substitute empty string for None
         env_vars = []
         if self._env_params:
             for key, value in self._env_params.items():
-                env_vars.append(f'{key.upper()}={value}')
+                env_vars.append(f'{key.upper()}={opt_param(value)}')
         return env_vars
 
     def _move_intf_to_host(self, iface, host):
