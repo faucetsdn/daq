@@ -112,7 +112,7 @@ class BaseGateway(ABC):
         env_vars = []
         if self._env_params:
             for key, value in self._env_params.items():
-                env_vars.append(f'{key.upper()}={value or ''}')
+                env_vars.append(f'{key.upper()}={value or ""}')
         return env_vars
 
     def _move_intf_to_host(self, iface, host):
