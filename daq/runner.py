@@ -199,7 +199,7 @@ class DAQRunner:
         self._init_test_list()
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
         self._target_set_queue = []
-        self._target_set_block = set()
+        self._blocked_devices = set()
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -523,7 +523,7 @@ class DAQRunner:
         self._target_set_consider()
 
         active_tests = bool(self._devices.get_triggered_devices() or self._target_set_queue)
-        more_testing = self._run_tests and not (self._single_shot and self._target_set_block)
+        more_testing = self._run_tests and not (self._single_shot and self._blocked_devices)
         if not active_tests and not more_testing:
             if self.faucet_events and not self._linger_exit:
                 LOGGER.warning('All expected test runs complete, terminating.')
@@ -627,7 +627,7 @@ class DAQRunner:
             LOGGER.debug('Target device %s already queued', device)
             return
 
-        if device.mac in self._target_set_block:
+        if device.mac in self._blocked_devices:
             LOGGER.debug('Target device %s blocked', device)
             return
 
@@ -642,8 +642,8 @@ class DAQRunner:
                         device, len(self._target_set_queue))
 
         if self._single_shot:
-            self._target_set_block.add(device.mac)
-            LOGGER.info('Target device %s blocked (%s)', device, len(self._target_set_block))
+            self._blocked_devices.add(device.mac)
+            LOGGER.info('Target device %s in now blocked (%s)', device, len(self._blocked_devices))
 
     def _target_set_consider(self):
         if self._target_set_queue:
