@@ -1,5 +1,7 @@
 """Module for managing a UDMI/MQTT connection to GCP IoT Core"""
 
+from __future__ import absolute_import
+
 import json
 import logger
 import utils
@@ -10,6 +12,7 @@ from udmi.agent.mqtt_manager import MqttManager
 from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
 
 LOGGER = logger.get_logger('udmi')
+
 
 class UdmiManager:
     """Manager class for managing UDMI connection"""
