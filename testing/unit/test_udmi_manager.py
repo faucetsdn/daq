@@ -12,6 +12,7 @@ from udmi.agent.mqtt_manager import MqttManager
 
 from proto.report_pb2 import DeviceReport
 
+
 class UdmiDiscoverBase(unittest.TestCase):
     """Base tests for UDMI discovery"""
 
