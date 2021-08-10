@@ -58,4 +58,5 @@ class UdmiManager:
         """Handle a device result report"""
         LOGGER.info('Sending udmi report message for device')
         audit = Audit()
+        # TODO: Define Audit message and fill in with report results.
         self._send('audit', audit)
