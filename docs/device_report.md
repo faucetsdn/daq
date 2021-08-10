@@ -95,7 +95,7 @@ Syntax: Pass / Fail / Skip
 |skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Connection|Required Pass|No local IP has been set, check system config|
 |skip|dns.network.hostname_resolution|DNS|Required Pass|Device did not send any DNS requests|
-|pass|dot1x.dot1x|Other|Other|Authentication for 9a:02:57:1e:8f:01 succeeded.|
+|pass|connection.dot1x.authentication|Connection|Required Pass|Authentication for 9a:02:57:1e:8f:01 succeeded.|
 |pass|ntp.network.ntp_support|NTP|Required Pass|Using NTPv4.|
 |pass|ntp.network.ntp_update|NTP|Required Pass|Device clock synchronized.|
 |skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
@@ -686,13 +686,13 @@ RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
 
 ```
 --------------------
-dot1x.dot1x
+connection.dot1x.authentication
 --------------------
-Dot1x authentication tests
+Verifies general support for 802.1x authentication."
 --------------------
 n/a
 --------------------
-RESULT pass dot1x.dot1x Authentication for 9a:02:57:1e:8f:01 succeeded.
+RESULT pass connection.dot1x.authentication Authentication for 9a:02:57:1e:8f:01 succeeded.
 
 ```
 
