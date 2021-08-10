@@ -32,6 +32,8 @@ class UdmiManager:
         self._mqtt.loop_start()
 
     def _send(self, message_type, message):
+        if not self._mqtt:
+            return
         LOGGER.debug('Sending udmi %s message', message_type)
         self._mqtt.publish(message_type, json.dumps(message.to_dict()))
 
