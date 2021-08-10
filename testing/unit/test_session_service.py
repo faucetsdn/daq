@@ -75,6 +75,7 @@ class SessionServerDisallowSameClient(BaseSessionServerTest):
         """Test when the same client connects twice, the second session is terminated."""
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
+        time.sleep(1)
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
         time.sleep(1)

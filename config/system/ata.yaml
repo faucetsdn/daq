@@ -6,6 +6,9 @@ include: ${DAQ_LIB}/config/system/default.yaml
 # Description for dashboard.
 site_description: "ATA Proxy Configuration"
 
+# For large-scale network, no room for sleeping.
+settle_sec: 0
+
 # Network switch configuration.
 switch_setup:
   model: EXT_STACK
@@ -16,7 +19,7 @@ switch_setup:
 
 run_trigger:
   native_vlan: 122
-  max_hosts: 8
+  max_hosts: 3
 
 internal_subnet:
   subnet: 10.21.0.0/16
