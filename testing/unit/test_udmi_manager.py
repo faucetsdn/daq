@@ -2,17 +2,13 @@
 
 from __future__ import absolute_import
 import copy
-import time
 import unittest
 from unittest.mock import create_autospec
 
 from udmi_manager import UdmiManager
-
 from runner import Device
 
 from udmi.agent.mqtt_manager import MqttManager
-from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
-
 
 class UdmiDiscoverBase(unittest.TestCase):
     """Base tests for UDMI discovery"""
@@ -35,8 +31,10 @@ class UdmiDiscoverBase(unittest.TestCase):
 
 
 class UdmiDiscoverTest(UdmiDiscoverBase):
+    """Basic discovery tests"""
+
     def test_basic_send(self):
-        self.assertTrue(self._mqtt)
+        """Test that sending works when there's something to send"""
         device = Device()
         self._udmi.discovery(device)
         self._mqtt.publish.assert_not_called()
@@ -52,4 +50,5 @@ class UdmiEmptyConfigTest(UdmiDiscoverBase):
     del BASE_CONFIG['cloud_config']['project_id']
 
     def test_no_manager(self):
+        """Test the case when there is an empty configuraiton"""
         self.assertIsNone(self._mqtt)
