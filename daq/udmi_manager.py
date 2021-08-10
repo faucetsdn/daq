@@ -17,7 +17,7 @@ LOGGER = logger.get_logger('udmi')
 class UdmiManager:
     """Manager class for managing UDMI connection"""
 
-    def __init__(self, config):
+    def __init__(self, config, mqtt_factory=MqttManager):
         self._config = config.get('cloud_config', {})
         cloud_config = utils.dict_proto(self._config, sys_config.CloudConfig)
         if not cloud_config.project_id:
@@ -28,7 +28,7 @@ class UdmiManager:
         LOGGER.info('Creating mqtt connection to %s/%s/%s',
                     cloud_config.project_id, cloud_config.registry_id,
                     cloud_config.device_id)
-        self._mqtt = MqttManager(cloud_config, on_message=self._on_message)
+        self._mqtt = mqtt_factory(cloud_config, on_message=self._on_message)
         self._mqtt.loop_start()
 
     def _send(self, message_type, message):
