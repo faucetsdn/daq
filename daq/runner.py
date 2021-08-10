@@ -25,6 +25,7 @@ import host as connected_host
 import network
 import report
 import stream_monitor
+import udmi_manager
 from utils import dict_proto
 from wrappers import DaqException, DisconnectedException
 import logger
@@ -171,7 +172,7 @@ class DAQRunner:
         self._callback_queue = []
         self._event_lock = threading.RLock()
         self.daq_run_id = self._init_daq_run_id()
-        self._init_gcp()
+        self._init_cloud()
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
         self._daq_version = os.environ['DAQ_VERSION']
@@ -208,12 +209,13 @@ class DAQRunner:
         LOGGER.info('LSB release %s', self._lsb_release)
         LOGGER.info('system uname %s', self._sys_uname)
 
-    def _init_gcp(self):
+    def _init_cloud(self):
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
+        self._udmi = udmi_manager.UdmiManager(self.config)
 
     def _init_test_list(self):
         config = self.config
@@ -255,13 +257,13 @@ class DAQRunner:
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             # TODO: Make this all configured from run_trigger not device_reporting
-            handler = SessionServer(on_session=self._on_session,
+            handler = SessionServer(on_session_start=self._on_session_start,
                                     on_session_end=self._on_session_end, server_port=server_port,
                                     local_ip=local_ip)
             return handler
         return None
 
-    def _on_session(self, request):
+    def _on_session_start(self, request):
         with self._event_lock:
             remote_ip = request.endpoint.ip
             LOGGER.info('New session started for %s %s/%s at %s', request.device_mac,
@@ -272,6 +274,7 @@ class DAQRunner:
             device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+            self._udmi.discovery(device)
 
     def _on_session_end(self, request):
         with self._event_lock:
@@ -864,6 +867,7 @@ class DAQRunner:
         if device.host and target_type in ('ACK', 'STATIC'):
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
+            self._udmi.discovery(device)
 
     def _get_active_ports(self):
         return [p.port_no for p in self._ports.values() if p.active]
@@ -1111,8 +1115,7 @@ class DAQRunner:
         """Process a generated report"""
         # TODO: Make the DeviceReport proto complete so ignore_unknown_fields isn't required.
         report_proto = dict_proto(report_dict, DeviceReport, ignore_unknown_fields=True)
-        LOGGER.info('Report sink with report %s', bool(report_proto))
-        # TODO: Make this actually upload the report somewhere.
+        self._udmi.report(report_proto)
 
     def _calculate_device_result(self, device, test_results):
         failed = False

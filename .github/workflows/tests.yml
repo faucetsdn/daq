@@ -31,7 +31,7 @@ jobs:
         bin/setup_daq
     - name: Build docker images for tests
       run: |
-          bin/test_build ${{ matrix.build }} compress /tmp/build_artifacts/docker_images/
+          bin/build_shard ${{ matrix.build }} compress /tmp/build_artifacts/docker_images/
     - uses: actions/upload-artifact@v2
       with:
           name: build_artifacts_${{ matrix.build  }}
