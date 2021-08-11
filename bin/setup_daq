@@ -2,14 +2,13 @@
 
 uname -a
 
-if ! command -v lsb_release &> /dev/null
-then
+if ! command -v lsb_release &> /dev/null; then
     echo "Warning: Command 'lsb_release' was not found. Is the 'lsb-core' package installed?"
 else
     lsb_release -a
 fi
 
-echo ""
+echo
 
 ROOT=$(dirname $0)/..
 cd $ROOT
