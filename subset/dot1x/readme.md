@@ -23,29 +23,29 @@ can authenticate using 802.1x with one of the following supported protocols:
 - MD5
 
 #### Supported Protocols/Supplicant Credentials
-The module includes a set of credentials which should be the device/supplicant
-should be configured to use. These are located
-[here](docker/include/etc/wpasupplicant). Different suppliants may use different
-names for the below fields or may not provide the ability to modify all these
-fields. 
+The module includes a set of credential, from which one should used to configure
+the device/supplicant. These are located
+[here](../..docker/include/etc/wpasupplicant). Different suppliants may use
+different names for the below fields or may not provide the ability to modify
+all these fields. 
 - **TTLS**
    - Username: `user`
    - Password: `microphone`
-   - CA Certificate: [ca.pem](/etc/wpasupplicant/cert/ca.pem)
+   - CA Certificate: [ca.pem](../../etc/wpasupplicant/cert/ca.pem)
    - Inner (Phase 2) Authentication: MSCHAPV2
 - **TLS**
    - Identity: `user@example.org`
-   - CA Certificate: Upload [ca.pem](/etc/wpasupplicant/cert/ca.pem)
-   - Client Certificate: [user@example.org.pem](/etc/wpasupplicant/cert/user@example.org.pem)
-   - Private Key: [user@example.org.pem](/etc/wpasupplicant/cert/user@example.org.pem)
+   - CA Certificate: Upload [ca.pem](../../etc/wpasupplicant/cert/ca.pem)
+   - Client Certificate: [user@example.org.pem](../../etc/wpasupplicant/cert/user@example.org.pem)
+   - Private Key: [user@example.org.pem](../../etc/wpasupplicant/cert/user@example.org.pem)
    - Private Key Password: `whatever`
 - **Protected EAP (PEAP)**
-   - CA Certificate: [ca.pem](/etc/wpasupplicant/cert/ca.pem)
+   - CA Certificate: [ca.pem](../../etc/wpasupplicant/cert/ca.pem)
    - Outer (Phase 1) Authentication: PEAP Version 1
    - Inner (Phase 2) Authentication: MSCHAPV2
    - Username: `user`
    - Password: `microphone`
-- **EMD5**
+- **MD5**
    - Username: `user`
    - Password: `microphone`
 
