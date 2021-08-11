@@ -276,6 +276,10 @@
             <ul>
               
                 <li>
+                  <a href="#CloudConfig"><span class="badge">M</span>CloudConfig</a>
+                </li>
+              
+                <li>
                   <a href="#DaqConfig"><span class="badge">M</span>DaqConfig</a>
                 </li>
               
@@ -890,6 +894,86 @@
       <p></p>
 
       
+        <h3 id="CloudConfig">CloudConfig</h3>
+        <p>Configuration for cloud result reporting.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>project_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud project id. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>cloud_region</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud project region. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>registry_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud registry id. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>device_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud reporting device id. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>private_key_file</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>File for private key. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Key algorithm type. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ca_certs</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>CA certs file. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mqtt_bridge_hostname</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Bridge hostname. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mqtt_bridge_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Bridge port. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="DaqConfig">DaqConfig</h3>
         <p>DAQ configuration.</p>
 
@@ -1206,6 +1290,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Path to include file </p></td>
+                </tr>
+              
+                <tr>
+                  <td>cloud_config</td>
+                  <td><a href="#CloudConfig">CloudConfig</a></td>
+                  <td></td>
+                  <td><p>Configuration for cloud uplink </p></td>
                 </tr>
               
             </tbody>

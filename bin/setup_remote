@@ -38,8 +38,9 @@ else
 fi
 
 echo Switching $TARGET to version $TARGET_VERSION
-(cd $TARGET
- git checkout --detach --no-guess $TARGET_VERSION -- || git checkout --detach --no-guess origin/$TARGET_VERSION --
+(
+    cd $TARGET
+    git switch $TARGET_VERSION || git switch --detach $TARGET_VERSION
 )
 
 echo -n "Last $TARGET commit: "

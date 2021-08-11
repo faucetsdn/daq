@@ -34,10 +34,21 @@ finish_hook: ${DAQ_LIB}/bin/dump_network
 topology_hook: ${DAQ_LIB}/bin/dump_network
 
 # usi url for DAQ to connect to
-usi_setup: 
+usi_setup:
   url: localhost:5000
   rpc_timeout_sec: 20
 
 # internal test host subnet
 internal_subnet:
   subnet: 10.20.0.0/16
+
+cloud_config:
+  # project_id: <GCP_PROJECT_ID>
+  # device_id: <device_id>
+  cloud_region: us-central1
+  registry_id: UDMS-AUDITOR
+  private_key_file: inst/config/udmi_auditor_key.pem
+  algorithm: RS256
+  ca_certs: inst/roots.pem
+  mqtt_bridge_hostname: mqtt.googleapis.com
+  mqtt_bridge_port: 443

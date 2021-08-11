@@ -21,7 +21,7 @@ class BaseSessionServerTest(unittest.TestCase):
     def setUp(self):
         self._server_results = []
         self._on_session_end = MagicMock(return_value=None)
-        self._server = SessionServer(on_session=self._new_connection,
+        self._server = SessionServer(on_session_start=self._new_connection,
                                      on_session_end=self._on_session_end, server_port=self.port,
                                      local_ip=_LOCAL_IP)
         self._server.start()
@@ -75,6 +75,7 @@ class SessionServerDisallowSameClient(BaseSessionServerTest):
         """Test when the same client connects twice, the second session is terminated."""
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
+        time.sleep(1)
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
         time.sleep(1)

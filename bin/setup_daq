@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+echo DAQ version `git describe`
 uname -a
 
 if ! command -v lsb_release &> /dev/null; then
