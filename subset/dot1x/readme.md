@@ -4,10 +4,11 @@
 - The dot1x module provides a:
    - 802.1x authenticator, which runs during the module
    - radius server (FreeRadius)
-- The authenticator only runs when the dot1x is running
-- The authenticator listens to EAP-Start packets sent from a supplicant on a
-  device. If any are recieved, it will communicate with the device and radius
-  server
+- The authenticator only runs while the dot1x test module is running (it will
+  not be running during the startup or other test modules)
+- The authenticator listens to EAPOL-Start packets sent from a supplicant on a
+  device. If any are received, it will respond with the EAP-RequestIdentity
+  packet, and continue the 802.1x authentication process  
 
 ## Tests
 
@@ -28,35 +29,29 @@ should be configured to use. These are located
 names for the below fields or may not provide the ability to modify all these
 fields. 
 - **TTLS**
-   - EAP: TTLS
-   - identity="user"
-   - CA Certificate: Upload `/etc/wpasupplicant/cert/ca.pem`
-   - password="microphone"
-   - phase2="auth=MSCHAPV2"
-   - eapol_flags=0
+   - Username: `user`
+   - Password: `microphone`
+   - CA Certificate: [ca.pem](/etc/wpasupplicant/cert/ca.pem)
+   - Inner (Phase 2) Authentication: MSCHAPV2
 - **TLS**
-   - EAP: TLS
-   - Identity/Username: "user@example.org"
-   - CA Certificate: Upload `/etc/wpasupplicant/cert/ca.pem`
-   - client_cert: Upload file `/etc/wpasupplicant/cert/user@example.org.pem`
-   - Private Key: Upload file `/etc/wpasupplicant/cert/user@example.org.pem`
+   - Identity: `user@example.org`
+   - CA Certificate: Upload [ca.pem](/etc/wpasupplicant/cert/ca.pem)
+   - Client Certificate: [user@example.org.pem](/etc/wpasupplicant/cert/user@example.org.pem)
+   - Private Key: [user@example.org.pem](/etc/wpasupplicant/cert/user@example.org.pem)
    - Private Key Password: `whatever`
-   - eapol_flags=0
-- **PEAP/MSChapv2**
-   - EAP:PEAP
-   - ca_cert="/etc/wpasupplicant/cert/ca.pem"
-   - Phase 1 Authentication: "peaplabel=1"
-   - Phase 2 Authentication: auth=MSCHAPV2"
-   - identity: `user`
-   - password: `microphone`
-- **MD5**
-   - eap=MD5
-   - identity: `user`
-   - password: `microphone`
+- **Protected EAP (PEAP)**
+   - CA Certificate: [ca.pem](/etc/wpasupplicant/cert/ca.pem)
+   - Outer (Phase 1) Authentication: PEAP Version 1
+   - Inner (Phase 2) Authentication: MSCHAPV2
+   - Username: `user`
+   - Password: `microphone`
+- **EMD5**
+   - Username: `user`
+   - Password: `microphone`
 
 ### Result Cases
 - PASS: The device successfully authenticates using 802.1x 
-- Fail: The device could not succesfuly authenticate using 802.1x. Reasons could be:
+- Fail: The device could not successfully authenticate using 802.1x. Reasons could be:
     - Invalid credentials or configuration
     - Device did not respond to EAP packets
-- SKIP: Device did not send any EAP pakcets (likely does not support 802.1x or not configured for 802.1x)
+- SKIP: Device did not send any EAP packets (likely does not support 802.1x or not configured for 802.1x)
