@@ -64,12 +64,12 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required Pass|10|1|13|5|
+|Required Pass|11|1|13|5|
 |Required Pass for PoE Devices|0|0|1|0|
 |Required Pass for BACnet Devices|0|1|2|0|
 |Required Pass for IoT Devices|0|0|1|0|
 |Recommended Pass|0|0|2|0|
-|Other|1|0|4|2|
+|Other|0|0|4|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -688,7 +688,7 @@ RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
 --------------------
 connection.dot1x.authentication
 --------------------
-Verifies general support for 802.1x authentication."
+Verifies general support for 802.1x authentication.
 --------------------
 n/a
 --------------------

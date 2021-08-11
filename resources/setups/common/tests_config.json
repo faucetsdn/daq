@@ -185,7 +185,7 @@
             "expected": "Required Pass for BACnet Devices"
         },
         "connection.dot1x.authentication": {
-            "category": "Network",
+            "category": "Connection",
             "required": "pass",
             "expected": "Required Pass"
         }
