@@ -66,6 +66,7 @@ class TestNetwork:
         self._settle_sec = int(config.get('settle_sec', 0))
         subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
         self._mininet_subnet = ip_network(subnet)
+        self._used_ip_indices = set()
         self.topology = FaucetTopology(self.config)
         switch_setup = config.get('switch_setup', {})
         self.ext_intf = switch_setup.get('data_intf')
@@ -82,6 +83,12 @@ class TestNetwork:
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
                  port=None, tmpdir=None):
         """Add a host to the ecosystem"""
+        if self._used_ip_indices and not ip_addr:
+            for index in range(1, max(self._used_ip_indices)):
+                if index not in self._used_ip_indices:
+                    ip_addr = mininet_util.ipAdd(index, ipBaseNum=self.net.ipBaseNum,
+                                                 prefixLen=self._mininet_subnet.prefixlen)
+                    break
         params = {'ip': ip_addr} if ip_addr else {}
         params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
         params['env_vars'] = env_vars if env_vars else []
@@ -100,6 +107,7 @@ class TestNetwork:
         except Exception as e:
             host.terminate()
             raise e
+        self._used_ip_indices.add(self._get_host_ip_index(host))
         return host
 
     def _retry_func(self, func):
@@ -131,6 +139,9 @@ class TestNetwork:
     def remove_host(self, host):
         """Remove a host from the ecosystem"""
         index = self.net.hosts.index(host)
+        # Resets Mininet's next ip so subnet ip doesn't run out.
+        self._used_ip_indices.remove(self._get_host_ip_index(host))
+        self.net.nextIP = max(self._used_ip_indices or [0]) + 1
         if index:
             del self.net.hosts[index]
         if host in self.switch_links:
@@ -179,6 +190,10 @@ class TestNetwork:
             intf.port = intf_port
             self.sec.addIntf(intf, port=intf_port)
             self._switch_attach(self.sec, intf)
+
+    def _get_host_ip_index(self, host):
+        """Returns the ip index within the mininet subnet."""
+        return mininet_util.ipParse(host.IP()) - self.net.ipBaseNum
 
     def is_system_port(self, dpid, port):
         """Check if the dpid/port combo is the system trunk port"""

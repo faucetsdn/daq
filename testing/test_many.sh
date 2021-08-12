@@ -17,6 +17,7 @@ echo Many Tests >> $TEST_RESULTS
 
 echo include=../config/system/default.yaml > local/system.conf
 echo monitor_scan_sec=5 >> local/system.conf
+echo internal_subnet.subnet=10.20.0.0/27 >> local/system.conf
 echo switch_setup.of_dpid=2 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
 echo gcp_cred=$gcp_cred >> local/system.conf
