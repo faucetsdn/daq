@@ -60,7 +60,7 @@ if [ ! -d $UDMI ]; then
     echo Forch directory $UDMI not found, try running bin/setup_dev.
     false
 fi
-(cd $UDMI; git switch $(< $ROOT/etc/UDMI_VERSION)) || \
+(cd $UDMI; git checkout $(< $ROOT/etc/UDMI_VERSION)) || \
     echo Could not update udmi, try 'bin/clean_dev && bin/setup_dev' to reset.
 
 echo Release version $DAQ_VERSION

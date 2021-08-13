@@ -111,7 +111,7 @@ if [[ -n $native ]]; then
     export WSAPI_LISTEN_PORT=4567
     echo Launching $BASECMD $RYU_LISTEN_PORT $FAUCET_PROMETHEUS_PORT $WSAPI_LISTEN_PORT
     env | fgrep ${PREFIX}_
-    $BASECMD --ryu-config-file=$RYU_CONF --ryu-ofp-tcp-listen-port=$RYU_LISTEN_PORT &
+    $BASECMD --ryu-config-file=$RYU_CONF --ryu-ofp-tcp-listen-port=$RYU_LISTEN_PORT --ryu-wsapi-port=$WSAPI_LISTEN_PORT --ryu-wsapi-host=localhost --ryu-ofp-listen-host=localhost &
     echo $! > $PID_FILE
     echo Started $BASECMD pid $(< $PID_FILE)
 else
