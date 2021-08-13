@@ -8,8 +8,11 @@ import utils
 
 from proto import system_config_pb2 as sys_config
 
-from udmi.agent.mqtt_manager import MqttManager
-from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
+try:
+    from udmi.agent.mqtt_manager import MqttManager
+    from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
+except ImportError:
+    MqttManager = None
 
 LOGGER = logger.get_logger('udmi')
 
@@ -24,6 +27,8 @@ class UdmiManager:
             LOGGER.info('No project_id defined, skipping mqtt client creation')
             self._mqtt = None
             return
+
+        assert mqtt_factory, 'missing mqtt_factory import/definition'
 
         LOGGER.info('Creating mqtt connection to %s/%s/%s',
                     cloud_config.project_id, cloud_config.registry_id,
