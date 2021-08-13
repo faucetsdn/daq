@@ -83,11 +83,14 @@ class TestNetwork:
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
                  port=None, tmpdir=None):
         """Add a host to the ecosystem"""
+        override_ip = bool(ip_addr)
         if self._used_ip_indices and not ip_addr:
             for index in range(1, max(self._used_ip_indices)):
                 if index not in self._used_ip_indices:
-                    ip_addr = mininet_util.ipAdd(index, ipBaseNum=self.net.ipBaseNum,
-                                                 prefixLen=self._mininet_subnet.prefixlen)
+                    prefix_length = self._mininet_subnet.prefixlen
+                    ip_addr = '%s/%s' % (mininet_util.ipAdd(index, prefixLen=prefix_length,
+                                                            ipBaseNum=self.net.ipBaseNum),
+                                         prefix_length)
                     break
         params = {'ip': ip_addr} if ip_addr else {}
         params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
@@ -107,7 +110,9 @@ class TestNetwork:
         except Exception as e:
             host.terminate()
             raise e
-        self._used_ip_indices.add(self._get_host_ip_index(host))
+
+        if not override_ip and host.IP():
+            self._used_ip_indices.add(self._get_host_ip_index(host))
         return host
 
     def _retry_func(self, func):
@@ -139,9 +144,11 @@ class TestNetwork:
     def remove_host(self, host):
         """Remove a host from the ecosystem"""
         index = self.net.hosts.index(host)
-        # Resets Mininet's next ip so subnet ip doesn't run out.
-        self._used_ip_indices.remove(self._get_host_ip_index(host))
-        self.net.nextIP = max(self._used_ip_indices or [0]) + 1
+        if host.IP() and self._get_host_ip_index(host) in self._used_ip_indices:
+            # Resets Mininet's next ip so subnet ips don't run out.
+            # IP overrides are excluded from this set.
+            self._used_ip_indices.remove(self._get_host_ip_index(host))
+            self.net.nextIP = max(self._used_ip_indices or [0]) + 1
         if index:
             del self.net.hosts[index]
         if host in self.switch_links:
@@ -254,6 +261,11 @@ class TestNetwork:
 
         if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
+
+        if native_gateway:
+            # Native gateway is initialized prior to mininet start
+            # which caused the mininet host to have no IP
+            self._used_ip_indices.add(self._get_host_ip_index(native_gateway.host))
 
         self.tap_intf = self.ext_intf
 
