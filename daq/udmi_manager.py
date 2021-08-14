@@ -8,8 +8,11 @@ import utils
 
 from proto import system_config_pb2 as sys_config
 
-from udmi.agent.mqtt_manager import MqttManager
-from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
+try:
+    from udmi.agent.mqtt_manager import MqttManager
+    from udmi.schema import Discovery, FamilyDiscoveryEvent, Audit
+except ImportError:
+    MqttManager = None
 
 LOGGER = logger.get_logger('udmi')
 
@@ -25,6 +28,8 @@ class UdmiManager:
             self._mqtt = None
             return
 
+        assert mqtt_factory, 'missing mqtt_factory import/definition'
+
         LOGGER.info('Creating mqtt connection to %s/%s/%s',
                     cloud_config.project_id, cloud_config.registry_id,
                     cloud_config.device_id)
@@ -32,8 +37,6 @@ class UdmiManager:
         self._mqtt.loop_start()
 
     def _send(self, message_type, message):
-        if not self._mqtt:
-            return
         LOGGER.debug('Sending udmi %s message', message_type)
         self._mqtt.publish(message_type, json.dumps(message.to_dict()))
 
@@ -42,6 +45,8 @@ class UdmiManager:
 
     def discovery(self, device):
         """Handle a device discovery update"""
+        if not self._mqtt:
+            return
         discovery = Discovery()
         discovery.families = {}
         if device.mac:
@@ -58,7 +63,8 @@ class UdmiManager:
 
     def report(self, report):
         """Handle a device result report"""
-        LOGGER.info('Sending udmi report message for device')
+        if not self._mqtt:
+            return
         audit = Audit()
         # TODO: Define Audit message and fill in with report results.
         self._send('audit', audit)
