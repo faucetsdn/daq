@@ -37,8 +37,6 @@ class UdmiManager:
         self._mqtt.loop_start()
 
     def _send(self, message_type, message):
-        if not self._mqtt:
-            return
         LOGGER.debug('Sending udmi %s message', message_type)
         self._mqtt.publish(message_type, json.dumps(message.to_dict()))
 
@@ -47,6 +45,8 @@ class UdmiManager:
 
     def discovery(self, device):
         """Handle a device discovery update"""
+        if not self._mqtt:
+            return
         discovery = Discovery()
         discovery.families = {}
         if device.mac:
@@ -63,7 +63,8 @@ class UdmiManager:
 
     def report(self, report):
         """Handle a device result report"""
-        LOGGER.info('Sending udmi report message for device')
+        if not self._mqtt:
+            return
         audit = Audit()
         # TODO: Define Audit message and fill in with report results.
         self._send('audit', audit)
