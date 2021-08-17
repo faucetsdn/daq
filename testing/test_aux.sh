@@ -119,9 +119,9 @@ if [ -f "$gcp_cred" ]; then
     GOOGLE_APPLICATION_CREDENTIALS=$gcp_cred udmi/bin/registrar inst/test_site $project_id
     cat inst/test_site/registration_summary.json | redact | tee -a $GCP_RESULTS
     echo | tee -a $GCP_RESULTS
-    fgrep hash inst/test_site/devices/*/metadata_norm.json | tee -a $GCP_RESULTS
+    fgrep hash inst/test_site/devices/*/out/metadata_norm.json | tee -a $GCP_RESULTS
     find inst/test_site -name errors.json | tee -a $GCP_RESULTS
-    more inst/test_site/devices/*/errors.json
+    more inst/test_site/devices/*/out/errors.json
 
     setup_reflector
 else

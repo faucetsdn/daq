@@ -4,6 +4,7 @@ bin/setup_remote faucet
 bin/setup_remote forch
 
 echo Starting docker build...
-docker build . -f dts/Dockerfile.dts -t daqf/dts
+
+docker build . -f dts/Dockerfile.dts --build-arg GIT_URL -t daqf/dts
 
 echo Done with dts build.

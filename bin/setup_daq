@@ -2,6 +2,7 @@
 
 uname -a
 lsb_release -a
+echo DAQ version `git describe`
 
 ROOT=$(dirname $0)/..
 cd $ROOT

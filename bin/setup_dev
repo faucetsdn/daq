@@ -8,6 +8,7 @@
 
 ROOT=$(dirname $0)/..
 cd $ROOT
+CMDLINE=$*
 
 SIMPLE=
 if [ "$1" == simple ]; then
@@ -21,8 +22,8 @@ INSTALLED_PYTHON=`python3 -V | sed -nr 's~Python (3?\..+)\..+$~\1~p'`
 echo Installed python version is $INSTALLED_PYTHON
 
 if [[ $PVERSION != $INSTALLED_PYTHON ]]; then
-    echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON
-    echo Set the PVERSION environment variable to specify a different expected value
+    echo Target python $PVERSION does not match installed version $INSTALLED_PYTHON. Try running:
+    echo "  $ PVERSION=$INSTALLED_PYTHON" $0 $CMDLINE
     false
 fi
 
@@ -59,6 +60,12 @@ $AG install lsb-release
 release=$(lsb_release -cs)
 echo LSB release version $release
 
+if [[ $release == bionic ]]; then
+    $AG install python
+else
+    $AG install python2
+fi
+
 $AG install \
     software-properties-common apt-transport-https iproute2 emacs-nox \
     git ethtool curl apache2-utils iputils-ping lsof jq pandoc nmap \
@@ -68,8 +75,8 @@ $AG install \
     python$PVERSION-dev python3-pip python$PVERSION-venv \
     python3-distutils
 
-PYTHON_BIN=$(readlink -f $(which python))
-echo Python binary is at $PYTHON_BIN
+PYTHON2_BIN=$(readlink -f $(which python2))
+echo Python2 binary is $PYTHON2_BIN
 
 if [ -d mininet ]; then
     echo Checking mininet version matches $MININETV...
@@ -93,8 +100,8 @@ else
             perl -pi -e "s/${i}//g" util/install.sh ;
         done
         sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
-        export PYTHON_BIN
-        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON_BIN} make install/' util/install.sh
+        export PYTHON2_BIN
+        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON2_BIN} make install/' util/install.sh
         util/install.sh -n
     )
     touch mininet/.the_house_that_daq_built
@@ -117,6 +124,8 @@ fi
 
 which python
 python --version
+which python2
+python2 --version
 which python3
 python3 --version
 

@@ -206,6 +206,37 @@
         
           
           <li>
+            <a href="#daq%2fproto%2freport.proto">daq/proto/report.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#DeviceReport"><span class="badge">M</span>DeviceReport</a>
+                </li>
+              
+                <li>
+                  <a href="#DeviceReport.ModulesEntry"><span class="badge">M</span>DeviceReport.ModulesEntry</a>
+                </li>
+              
+                <li>
+                  <a href="#TestItem"><span class="badge">M</span>TestItem</a>
+                </li>
+              
+                <li>
+                  <a href="#TestModule"><span class="badge">M</span>TestModule</a>
+                </li>
+              
+                <li>
+                  <a href="#TestModule.TestsEntry"><span class="badge">M</span>TestModule.TestsEntry</a>
+                </li>
+              
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
             <a href="#daq%2fproto%2fsession_server.proto">daq/proto/session_server.proto</a>
             <ul>
               
@@ -243,6 +274,10 @@
           <li>
             <a href="#daq%2fproto%2fsystem_config.proto">daq/proto/system_config.proto</a>
             <ul>
+              
+                <li>
+                  <a href="#CloudConfig"><span class="badge">M</span>CloudConfig</a>
+                </li>
               
                 <li>
                   <a href="#DaqConfig"><span class="badge">M</span>DaqConfig</a>
@@ -439,6 +474,189 @@
                 <tr>
                   <td>value</td>
                   <td><a href="#RuleCount">RuleCount</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="daq/proto/report.proto">daq/proto/report.proto</h2><a href="#title">Top</a>
+      </div>
+      <p>Proto for generated reports.</p>
+
+      
+        <h3 id="DeviceReport">DeviceReport</h3>
+        <p>Overall report generated for each device run.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>modules</td>
+                  <td><a href="#DeviceReport.ModulesEntry">DeviceReport.ModulesEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Test modules included in this report. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="DeviceReport.ModulesEntry">DeviceReport.ModulesEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#TestModule">TestModule</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="TestItem">TestItem</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>result</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Test result (pass/fail) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>test_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Full test name. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>module_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of enclosing module. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>category</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Category of test. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>expected</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Expected state for test. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>result_description</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Information description of result. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="TestModule">TestModule</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tests</td>
+                  <td><a href="#TestModule.TestsEntry">TestModule.TestsEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Line items test results from this module. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="TestModule.TestsEntry">TestModule.TestsEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#TestItem">TestItem</a></td>
                   <td></td>
                   <td><p> </p></td>
                 </tr>
@@ -675,6 +893,86 @@
       </div>
       <p></p>
 
+      
+        <h3 id="CloudConfig">CloudConfig</h3>
+        <p>Configuration for cloud result reporting.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>project_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud project id. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>cloud_region</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud project region. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>registry_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud registry id. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>device_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Cloud reporting device id. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>private_key_file</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>File for private key. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>algorithm</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Key algorithm type. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ca_certs</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>CA certs file. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mqtt_bridge_hostname</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Bridge hostname. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mqtt_bridge_port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Bridge port. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
       
         <h3 id="DaqConfig">DaqConfig</h3>
         <p>DAQ configuration.</p>
@@ -992,6 +1290,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Path to include file </p></td>
+                </tr>
+              
+                <tr>
+                  <td>cloud_config</td>
+                  <td><a href="#CloudConfig">CloudConfig</a></td>
+                  <td></td>
+                  <td><p>Configuration for cloud uplink </p></td>
                 </tr>
               
             </tbody>

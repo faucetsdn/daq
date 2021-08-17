@@ -7,27 +7,27 @@ Running testing/test_aux.sh
     "SNS-4" : "XXX"
   },
   "Version" : {
-    "main" : "1.3.7"
+    "main" : "1.3.10"
   }
 }
-inst/test_site/devices/AHU-1/metadata_norm.json:  "hash": "175e704a"
-inst/test_site/devices/AHU-22/metadata_norm.json:  "hash": "bf0ba5fa"
-inst/test_site/devices/GAT-123/metadata_norm.json:  "hash": "cbcf045e"
-inst/test_site/devices/SNS-4/metadata_norm.json:  "hash": "879557b4"
+inst/test_site/devices/AHU-1/out/metadata_norm.json:  "hash": "5fd5d112",
+inst/test_site/devices/AHU-22/out/metadata_norm.json:  "hash": "e43caf9e",
+inst/test_site/devices/GAT-123/out/metadata_norm.json:  "hash": "ffb0322e",
+inst/test_site/devices/SNS-4/out/metadata_norm.json:  "hash": "3f8187c9",
 RESULT fail cloud.udmi.provision No provisioning request
 RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
 RESULT pass cloud.udmi.event_system Payload successfully validated
 RESULT fail cloud.udmi.event_pointset #: extraneous key [extraField] is not permitted
-RESULT pass cloud.udmi.pointset_etag Sequence completed
 RESULT pass cloud.udmi.writeback_states Sequence completed
+RESULT pass cloud.udmi.system_last_update Sequence completed
 RESULT pass cloud.udmi.provision Found provisioning request
 RESULT pass cloud.udmi.state_system Payload successfully validated
 RESULT pass cloud.udmi.state_pointset Payload successfully validated
 RESULT pass cloud.udmi.event_system Payload successfully validated
 RESULT pass cloud.udmi.event_pointset Payload successfully validated
-RESULT pass cloud.udmi.pointset_etag Sequence completed
 RESULT pass cloud.udmi.writeback_states Sequence completed
+RESULT pass cloud.udmi.system_last_update Sequence completed
 RESULT skip cloud.udmi.provision No device id
 RESULT skip cloud.udmi.state_system No device id
 RESULT skip cloud.udmi.state_pointset No device id

@@ -10,6 +10,11 @@ include: default.yaml
 # Description for dashboard.
 site_description: "Baseline Configuration"
 
+# Default switch configuration.
+switch_setup:
+  of_dpid: 2
+  uplink_port: 7
+
 # Faux interface devices
 interfaces:
   faux:

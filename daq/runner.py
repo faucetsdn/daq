@@ -25,9 +25,13 @@ import host as connected_host
 import network
 import report
 import stream_monitor
+import udmi_manager
+from utils import dict_proto
 from wrappers import DaqException, DisconnectedException
 import logger
+
 from proto.system_config_pb2 import DhcpMode
+from proto.report_pb2 import DeviceReport
 
 LOGGER = logger.get_logger('runner')
 
@@ -145,7 +149,7 @@ class DAQRunner:
     faucet events, connected hosts (to test), and gcp for logging. This
     class owns the main event loop and shards out work to subclasses."""
 
-    MAX_GATEWAYS = 9
+    _DEFAULT_MAX_GATEWAYS = 9
     _DEFAULT_RETENTION_DAYS = 30
     _SITE_CONFIG = 'site_config.json'
     _RUNNER_CONFIG_PATH = 'runner/setup'
@@ -154,15 +158,21 @@ class DAQRunner:
 
     def __init__(self, config):
         self.configurator = configurator.Configurator()
-        self.gateway_sets = set(range(1, self.MAX_GATEWAYS+1))
         self.config = config
+        switch_setup = self.config.get('switch_setup', {})
+        max_devices = float(switch_setup.get('uplink_port', 'inf')) - 1
+        self.gateway_sets = set(range(1, int(min(self._DEFAULT_MAX_GATEWAYS, max_devices) + 1)))
+        # TODO: uplink port should not be required for base topology
+        # Uplink port is used to configure device ports on the pri switch.
+        switch_setup['uplink_port'] = switch_setup.get('uplink_port', len(self.gateway_sets))
+        self.config['switch_setup'] = switch_setup
         self._result_sets = {}
         self._devices = Devices()
         self._ports = {}
         self._callback_queue = []
         self._event_lock = threading.RLock()
         self.daq_run_id = self._init_daq_run_id()
-        self._init_gcp()
+        self._init_cloud()
         self._base_config = self._load_base_config()
         self.description = config.get('site_description', '').strip('\"')
         self._daq_version = os.environ['DAQ_VERSION']
@@ -175,21 +185,22 @@ class DAQRunner:
         self._native_gateway = None
         self._linger_exit = 0
         self.faucet_events = None
-        self.single_shot = config.get('single_shot', False)
+        self._single_shot = config.get('single_shot', False)
         self.fail_mode = config.get('fail_mode', False)
-        self.run_tests = True
+        self._run_tests = True
         self.stream_monitor = None
         self.exception = None
-        self.run_count = 0
-        self.run_limit = int(config.get('run_limit', 0))
+        self._run_count = 0
+        self._run_limit = int(config.get('run_limit', 0))
         self._default_port_flap_timeout = int(config.get('port_flap_timeout_sec', 0))
         self.result_log = self._open_result_log()
         self._system_active = False
         self._device_result_handler = self._init_device_result_handler()
         self._cleanup_previous_runs()
         self._init_test_list()
-        self._target_set_queue = []
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
+        self._target_set_queue = []
+        self._blocked_devices = set()
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -198,12 +209,13 @@ class DAQRunner:
         LOGGER.info('LSB release %s', self._lsb_release)
         LOGGER.info('system uname %s', self._sys_uname)
 
-    def _init_gcp(self):
+    def _init_cloud(self):
         self.gcp = gcp.GcpManager(self.config, self._queue_callback)
         logging_client = self.gcp.get_logging_client()
         if logging_client:
             logger.set_stackdriver_client(logging_client,
                                           labels={"daq_run_id": self.daq_run_id})
+        self._udmi = udmi_manager.UdmiManager(self.config)
 
     def _init_test_list(self):
         config = self.config
@@ -245,13 +257,13 @@ class DAQRunner:
         if server_port:
             assert not egress_vlan, 'both egress_vlan and server_port defined'
             # TODO: Make this all configured from run_trigger not device_reporting
-            handler = SessionServer(on_session=self._on_session,
+            handler = SessionServer(on_session_start=self._on_session_start,
                                     on_session_end=self._on_session_end, server_port=server_port,
                                     local_ip=local_ip)
             return handler
         return None
 
-    def _on_session(self, request):
+    def _on_session_start(self, request):
         with self._event_lock:
             remote_ip = request.endpoint.ip
             LOGGER.info('New session started for %s %s/%s at %s', request.device_mac,
@@ -262,6 +274,7 @@ class DAQRunner:
             device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+            self._udmi.discovery(device)
 
     def _on_session_end(self, request):
         with self._event_lock:
@@ -450,7 +463,8 @@ class DAQRunner:
             LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
 
     def _handle_device_learn(self, target_mac, vid):
-        LOGGER.info('Learning %s on vid %s', target_mac, vid)
+        if not self._devices.get(target_mac):
+            LOGGER.info('Learning %s on vid %s', target_mac, vid)
         device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
@@ -511,8 +525,11 @@ class DAQRunner:
             all_idle = False
         self._target_set_consider()
 
-        if not self._devices.get_triggered_devices() and not self.run_tests:
+        active_tests = bool(self._devices.get_triggered_devices() or self._target_set_queue)
+        more_testing = self._run_tests and not (self._single_shot and self._blocked_devices)
+        if not active_tests and not more_testing:
             if self.faucet_events and not self._linger_exit:
+                LOGGER.warning('All expected test runs complete, terminating.')
                 self.shutdown()
             if self._linger_exit == 1:
                 self._linger_exit = 2
@@ -585,9 +602,10 @@ class DAQRunner:
 
         self._terminate()
 
-    def _target_set_has_capacity(self):
+    def _target_set_has_capacity(self, device):
         num_triggered = len(self._devices.get_triggered_devices())
-        return num_triggered < self._max_hosts
+        existing = self._get_existing_gateway(device)
+        return num_triggered < self._max_hosts and (existing or self.gateway_sets)
 
     def _target_set_trigger(self, device, remote_trigger=False):
         assert self._devices.contains(device), 'Target device %s is not expected' % device
@@ -600,8 +618,8 @@ class DAQRunner:
             LOGGER.debug('Target device %s already triggered', device)
             return
 
-        if not self.run_tests:
-            LOGGER.debug('Target device %s trigger suppressed', device)
+        if not self._run_tests:
+            LOGGER.debug('Target device %s ignore, not running more tests', device)
             return
 
         if device.wait_remote and not remote_trigger:
@@ -612,9 +630,13 @@ class DAQRunner:
             LOGGER.debug('Target device %s already queued', device)
             return
 
+        if device.mac in self._blocked_devices:
+            LOGGER.debug('Target device %s blocked', device)
+            return
+
         device.wait_remote = False
 
-        if self._target_set_has_capacity():
+        if self._target_set_has_capacity(device):
             LOGGER.info('Target device %s direct activate', device)
             self._target_set_activate(device)
         else:
@@ -622,12 +644,19 @@ class DAQRunner:
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
 
+        if self._single_shot:
+            self._blocked_devices.add(device.mac)
+            LOGGER.info('Target device %s in now blocked (%s)', device, len(self._blocked_devices))
+
     def _target_set_consider(self):
-        if self._target_set_queue and self._target_set_has_capacity():
-            device = self._target_set_queue.pop(0)
-            LOGGER.info('Target device %s pop activate (%s)',
-                        device, len(self._target_set_queue))
-            self._target_set_activate(device)
+        if self._target_set_queue:
+            for num, device in enumerate(self._target_set_queue):
+                if self._target_set_has_capacity(device):
+                    LOGGER.info('Target device %s pop activate (%s)',
+                                device, len(self._target_set_queue))
+                    self._target_set_activate(device)
+                    self._target_set_queue.pop(num)
+                    break
 
     def _target_set_activate(self, device):
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
@@ -648,7 +677,7 @@ class DAQRunner:
             LOGGER.exception(e)
             if self.fail_mode:
                 LOGGER.warning('Suppressing further tests due to failure.')
-                self.run_tests = False
+                self._run_tests = False
             return False
 
         # Stops all DHCP response initially
@@ -658,7 +687,7 @@ class DAQRunner:
         gateway.attach_target(device)
         device.gateway = gateway
         try:
-            self.run_count += 1
+            self._run_count += 1
             new_host = connected_host.ConnectedHost(self, device, self.config)
             device.host = new_host
             new_host.register_dhcp_ready_listener(self._dhcp_ready_listener)
@@ -741,22 +770,28 @@ class DAQRunner:
                 }
         return metadata
 
-    def _create_gateway(self, device):
+    def _get_existing_gateway(self, device):
         is_native = device is None
-        assert not is_native or not self._native_gateway, 'native gateway already initialized'
         if self._native_gateway:
             return self._native_gateway
 
-        group_name = 'native' if is_native else device.group
         if not is_native:
-            group_devices = self._devices.get_by_group(group_name)
+            group_devices = self._devices.get_by_group(device.group)
             existing_gateways = {device.gateway for device in group_devices if device.gateway}
             assert len(existing_gateways) <= 1, 'only one existing gateway per group allowed'
             if existing_gateways:
                 existing = existing_gateways.pop()
-                LOGGER.debug('Gateway for existing device group %s is %s', group_name, existing)
+                LOGGER.debug('Gateway for existing device group %s is %s', device.group, existing)
                 return existing
+        return None
 
+    def _create_gateway(self, device):
+        is_native = device is None
+        assert not is_native or not self._native_gateway, 'native gateway already initialized'
+        existing = self._get_existing_gateway(device)
+        if existing:
+            return existing
+        group_name = 'native' if is_native else device.group
         set_num = 1 if is_native else self._find_gateway_set(device)
         LOGGER.info('Gateway for device group %s not found, creating set num %d',
                     group_name, set_num)
@@ -814,8 +849,8 @@ class DAQRunner:
                         target_ip, gateway, state, delta_sec)
 
         if state == 'NEW':
-            LOGGER.warning('Learning unexpected device %s, type %s, ip %s', target_mac,
-                           target_type, target_ip)
+            LOGGER.debug('Learning unexpected device %s, type %s, ip %s', target_mac,
+                         target_type, target_ip)
             self._handle_device_learn(target_mac, self._native_vlan)
 
         assert target_mac
@@ -832,6 +867,7 @@ class DAQRunner:
         if device.host and target_type in ('ACK', 'STATIC'):
             device.host.ip_notify(target_ip, state, delta_sec)
             self._check_and_activate_gateway(device)
+            self._udmi.discovery(device)
 
     def _get_active_ports(self):
         return [p.port_no for p in self._ports.values() if p.active]
@@ -883,7 +919,7 @@ class DAQRunner:
         group_size = self.network.device_group_size(group_name)
 
         remaining = group_size - len(ready_devices)
-        if remaining and self.run_tests:
+        if remaining and self._run_tests:
             LOGGER.info('DHCP waiting for %d additional members of group %s', remaining, group_name)
             return gateway, False
 
@@ -966,21 +1002,21 @@ class DAQRunner:
         suppress_tests = self.fail_mode or self.result_linger
         if results and suppress_tests:
             LOGGER.warning('Suppressing further tests due to failure.')
-            self.run_tests = False
+            self._run_tests = False
             if self.result_linger:
                 self._linger_exit = 1
         self._result_sets[device] = result_set
 
-        if self.run_limit and self.run_count >= self.run_limit and self.run_tests:
+        if self._run_limit and self._run_count >= self._run_limit and self._run_tests:
             LOGGER.warning('Suppressing future tests because run limit reached.')
-            self.run_tests = False
-        if self.single_shot and self.run_tests:
-            LOGGER.warning('Suppressing future tests because test done in single shot.')
-            self._handle_faucet_events()  # Process remaining queued faucet events
-            self.run_tests = False
+            self._run_tests = False
+
         device.host = None
         self._devices.remove(device)
         LOGGER.info('Remaining target sets: %s', self._devices.get_triggered_devices())
+
+        # Make sure any pending learning event are processed to avoid premature exit.
+        self._handle_faucet_events()
 
     def _target_set_cancel(self, device):
         if device in self._target_set_queue:
@@ -990,8 +1026,8 @@ class DAQRunner:
             return
         target_gateway = device.gateway
         target_port = device.port.port_no
-        LOGGER.info('Target device %s cancel (#%d/%s).', device, self.run_count,
-                    self.run_limit)
+        LOGGER.info('Target device %s cancel (#%d/%s).', device, self._run_count,
+                    self._run_limit)
 
         results = self._combine_result_set(device, self._result_sets.get(device))
         this_result_linger = results and self.result_linger
@@ -1074,6 +1110,12 @@ class DAQRunner:
             self._device_result_handler.close_stream(device.mac)
         except Exception as e:
             LOGGER.error("Failed to send device results for device %s: %s ", device, e)
+
+    def report_sink(self, report_dict):
+        """Process a generated report"""
+        # TODO: Make the DeviceReport proto complete so ignore_unknown_fields isn't required.
+        report_proto = dict_proto(report_dict, DeviceReport, ignore_unknown_fields=True)
+        self._udmi.report(report_proto)
 
     def _calculate_device_result(self, device, test_results):
         failed = False
