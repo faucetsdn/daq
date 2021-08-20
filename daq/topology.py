@@ -170,6 +170,7 @@ class FaucetTopology:
                 egress_vlan = device.assigned if device.assigned else self._egress_vlan
                 interface['tagged_vlans'] = [vlan, egress_vlan]
                 interface['name'] = str(device)
+                interface['acl_in'] = self.INCOMING_ACL_FORMAT % 'vxlan'
                 sec_topology['interfaces'][
                     self.VXLAN_SEC_TRUNK_PORT
                 ] = self._make_sec_trunk_interface(addition=(egress_vlan,))
@@ -497,6 +498,8 @@ class FaucetTopology:
 
         self._add_acl_rule(secondary_acl, allow=1)
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
+
+        acls[self.INCOMING_ACL_FORMAT % 'vxlan'] = [self._make_acl_rule(ports=[1])]
 
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)
