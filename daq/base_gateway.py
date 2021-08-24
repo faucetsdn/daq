@@ -21,7 +21,7 @@ class BaseGateway(ABC):
     """Gateway collection class for managing testing services"""
 
     GATEWAY_OFFSET = 0
-    FAKE_OFFSET = 1
+    FAKE_HOST_OFFSET = 1
     TEST_OFFSET_START = 2
     NUM_SET_PORTS = 6
     SET_SPACING = 10
@@ -82,7 +82,7 @@ class BaseGateway(ABC):
             return
 
         fake_name = 'fake%02d' % self.port_set
-        fake_port = self._switch_port(self.FAKE_OFFSET)
+        fake_port = self._switch_port(self.FAKE_HOST_OFFSET)
         fake_host = self.runner.add_host(fake_name, port=fake_port)
         # Fake host does not use DHCP, so need to set default route manually.
         fake_host.cmd('route add -net 0.0.0.0 gw %s' % host.IP())
