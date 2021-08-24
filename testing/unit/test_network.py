@@ -3,9 +3,8 @@
 import os
 import logging
 import sys
-import time
 import unittest
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock
 from forch import faucetizer
 
 from runner import Devices
@@ -18,10 +17,17 @@ LOGGER.level = logging.INFO
 STREAM_HANDLER = logging.StreamHandler(sys.stdout)
 LOGGER.addHandler(STREAM_HANDLER)
 
+
+def _default_fn(*args, **kwargs):
+    return None
+
+
 class FakeSwitch:
+    """Mock switch"""
     name = "Fake switch"
-    cmd = lambda *args: None
-    vsctl = lambda *args: None
+    cmd = _default_fn
+    vsctl = _default_fn
+
 
 # pylint: disable=protected-access
 class TestNetwork(unittest.TestCase):

@@ -44,6 +44,7 @@ class SessionServerTest(BaseSessionServerTest):
         self._server.close_stream(_TEST_MAC_ADDRESS)
 
     # pylint: disable=no-member
+    # pylint: disable=protected-access
     def test_server_connect(self):
         """Simple server connetion test"""
         client = TestingSessionServerClient(server_port=self.port)
