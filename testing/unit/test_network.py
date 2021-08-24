@@ -113,5 +113,6 @@ class TestNetwork(unittest.TestCase):
         net._configure_remote_tap(device1)
         self.assertEqual(net._vxlan_port_sets, set([2, 3, 4]))
 
+
 if __name__ == '__main__':
     unittest.main()
