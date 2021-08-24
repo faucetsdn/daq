@@ -197,7 +197,7 @@ class GcpManager:
         project = cred['project_id']
         assert project == self._project, 'inconsistent credential projects'
         client_email = cred['client_email']
-        (client, other) = client_email.split('@', 2)
+        (client, _) = client_email.split('@', 2)
         return client
 
     def publish_message(self, topic, message_type, message):

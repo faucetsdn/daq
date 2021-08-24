@@ -21,7 +21,7 @@ class BaseGateway(ABC):
     """Gateway collection class for managing testing services"""
 
     GATEWAY_OFFSET = 0
-    PHONY_OFFSET = 1
+    FAKE_OFFSET = 1
     TEST_OFFSET_START = 2
     NUM_SET_PORTS = 6
     SET_SPACING = 10
@@ -37,7 +37,7 @@ class BaseGateway(ABC):
         self.fake_target = None
         self.host = None
         self.host_intf = None
-        self.phony = None
+        self.fake_host = None
         self.tmpdir = None
         self.targets = {}
         self.test_ports = set()
@@ -81,14 +81,14 @@ class BaseGateway(ABC):
             self._move_intf_to_host(self._ext_intf, host)
             return
 
-        phony_name = 'phony%02d' % self.port_set
-        phony_port = self._switch_port(self.PHONY_OFFSET)
-        phony = self.runner.add_host(phony_name, port=phony_port)
-        # Phony does not use DHCP, so need to set default route manually.
-        phony.cmd('route add -net 0.0.0.0 gw %s' % host.IP())
-        self.phony = phony
-        LOGGER.info("Added phony target %s on port %d at %s",
-                    phony_name, phony_port, phony.IP())
+        fake_name = 'fake%02d' % self.port_set
+        fake_port = self._switch_port(self.FAKE_OFFSET)
+        fake_host = self.runner.add_host(fake_name, port=fake_port)
+        # Fake host does not use DHCP, so need to set default route manually.
+        fake_host.cmd('route add -net 0.0.0.0 gw %s' % host.IP())
+        self.fake_host = fake_host
+        LOGGER.info("Added fake target %s on port %d at %s",
+                    fake_name, fake_port, fake_host.IP())
 
         self.fake_target = self.TEST_IP_FORMAT % self.port_set
         LOGGER.debug('Adding fake target at %s to %s',
@@ -96,17 +96,17 @@ class BaseGateway(ABC):
         host.cmd('ip addr add %s dev %s' % (self.fake_target, self.host_intf))
 
         ping_retry = self._PING_RETRY_COUNT
-        while not self._ping_test(self.host, self.phony):
+        while not self._ping_test(self.host, self.fake_host):
             ping_retry -= 1
             LOGGER.info('Gateway %s warmup failed at %s with %d',
                         host_name, datetime.datetime.now(), ping_retry)
             assert ping_retry, 'warmup ping failure'
 
-        assert self._ping_test(self.host, phony), 'phony ping failed'
-        assert self._ping_test(phony, host), 'host ping failed'
-        assert self._ping_test(phony, self.fake_target), 'fake ping failed'
+        assert self._ping_test(self.host, fake_host), 'fake ping failed'
+        assert self._ping_test(fake_host, host), 'host ping failed'
+        assert self._ping_test(fake_host, self.fake_target), 'fake ping failed'
         assert self._ping_test(
-            self.host, phony, src_addr=self.fake_target), 'reverse ping failed'
+            self.host, fake_host, src_addr=self.fake_target), 'reverse ping failed'
 
     def _get_env_vars(self):
         env_vars = []
@@ -221,13 +221,13 @@ class BaseGateway(ABC):
             except Exception as e:
                 LOGGER.error('Gateway %s terminating host: %s', self.name, e)
                 LOGGER.exception(e)
-        if self.phony:
+        if self.fake_host:
             try:
-                self.phony.terminate()
-                self.runner.remove_host(self.phony)
-                self.phony = None
+                self.fake_host.terminate()
+                self.runner.remove_host(self.fake_host)
+                self.fake_host = None
             except Exception as e:
-                LOGGER.error('Gateway %s terminating phony: %s', self.name, e)
+                LOGGER.error('Gateway %s terminating fake_host: %s', self.name, e)
                 LOGGER.exception(e)
 
     def _get_scan_interface(self):

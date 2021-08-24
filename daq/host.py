@@ -109,7 +109,7 @@ class ConnectedHost:
         self.state = None
         self._state_transition(_STATE.READY)
         self.results = {}
-        self.placeholder = None
+        self.fake_host = None
         self.test_name = None
         self.test_start = gcp.get_timestamp()
         self.test_host = None
