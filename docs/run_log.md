@@ -134,12 +134,12 @@ MM dd hh:mm:ss runner   INFO    Port 3 dpid 2 learned 9a:02:57:1e:8f:03
 MM dd hh:mm:ss runner   INFO    Gateway for device group 9a02571e8f03 not found, initializing base 3...
 MM dd hh:mm:ss gateway  INFO    Initializing gateway 9a02571e8f03 as gw03/30
 MM dd hh:mm:ss gateway  INFO    Added networking host gw03 on port 30 at 10.20.0.1
-MM dd hh:mm:ss gateway  INFO    Added dummy target dummy03 on port 31 at 10.20.0.2
-MM dd hh:mm:ss runner   INFO    Test ping gw03->dummy03
-MM dd hh:mm:ss runner   INFO    Test ping gw03->dummy03
-MM dd hh:mm:ss runner   INFO    Test ping dummy03->gw03
-MM dd hh:mm:ss runner   INFO    Test ping dummy03->192.168.84.3
-MM dd hh:mm:ss runner   INFO    Test ping gw03->dummy03 from 192.168.84.3
+MM dd hh:mm:ss gateway  INFO    Added phony target phony03 on port 31 at 10.20.0.2
+MM dd hh:mm:ss runner   INFO    Test ping gw03->phony03
+MM dd hh:mm:ss runner   INFO    Test ping gw03->phony03
+MM dd hh:mm:ss runner   INFO    Test ping phony03->gw03
+MM dd hh:mm:ss runner   INFO    Test ping phony03->192.168.84.3
+MM dd hh:mm:ss runner   INFO    Test ping gw03->phony03 from 192.168.84.3
 MM dd hh:mm:ss gateway  INFO    Gateway 3 change lease time to 120s
 MM dd hh:mm:ss gateway  INFO    Gateway 3 startup capture gw03-eth0 in container's /tmp/gateway.pcap
 MM dd hh:mm:ss dhcp     INFO    DHCP monitor gw03 waiting for replies...
@@ -163,12 +163,12 @@ MM dd hh:mm:ss runner   INFO    Port 2 dpid 2 learned 9a:02:57:1e:8f:02
 MM dd hh:mm:ss runner   INFO    Gateway for device group 9a02571e8f02 not found, initializing base 2...
 MM dd hh:mm:ss gateway  INFO    Initializing gateway 9a02571e8f02 as gw02/20
 MM dd hh:mm:ss gateway  INFO    Added networking host gw02 on port 20 at 10.20.0.3
-MM dd hh:mm:ss gateway  INFO    Added dummy target dummy02 on port 21 at 10.20.0.4
-MM dd hh:mm:ss runner   INFO    Test ping gw02->dummy02
-MM dd hh:mm:ss runner   INFO    Test ping gw02->dummy02
-MM dd hh:mm:ss runner   INFO    Test ping dummy02->gw02
-MM dd hh:mm:ss runner   INFO    Test ping dummy02->192.168.84.2
-MM dd hh:mm:ss runner   INFO    Test ping gw02->dummy02 from 192.168.84.2
+MM dd hh:mm:ss gateway  INFO    Added phony target phony02 on port 21 at 10.20.0.4
+MM dd hh:mm:ss runner   INFO    Test ping gw02->phony02
+MM dd hh:mm:ss runner   INFO    Test ping gw02->phony02
+MM dd hh:mm:ss runner   INFO    Test ping phony02->gw02
+MM dd hh:mm:ss runner   INFO    Test ping phony02->192.168.84.2
+MM dd hh:mm:ss runner   INFO    Test ping gw02->phony02 from 192.168.84.2
 MM dd hh:mm:ss gateway  INFO    Gateway 2 change lease time to 120s
 MM dd hh:mm:ss gateway  INFO    Gateway 2 startup capture gw02-eth0 in container's /tmp/gateway.pcap
 MM dd hh:mm:ss dhcp     INFO    DHCP monitor gw02 waiting for replies...
@@ -192,12 +192,12 @@ MM dd hh:mm:ss runner   INFO    Port 1 dpid 2 learned 9a:02:57:1e:8f:01
 MM dd hh:mm:ss runner   INFO    Gateway for device group 9a02571e8f01 not found, initializing base 1...
 MM dd hh:mm:ss gateway  INFO    Initializing gateway 9a02571e8f01 as gw01/10
 MM dd hh:mm:ss gateway  INFO    Added networking host gw01 on port 10 at 10.20.0.5
-MM dd hh:mm:ss gateway  INFO    Added dummy target dummy01 on port 11 at 10.20.0.6
-MM dd hh:mm:ss runner   INFO    Test ping gw01->dummy01
-MM dd hh:mm:ss runner   INFO    Test ping gw01->dummy01
-MM dd hh:mm:ss runner   INFO    Test ping dummy01->gw01
-MM dd hh:mm:ss runner   INFO    Test ping dummy01->192.168.84.1
-MM dd hh:mm:ss runner   INFO    Test ping gw01->dummy01 from 192.168.84.1
+MM dd hh:mm:ss gateway  INFO    Added phony target phony01 on port 11 at 10.20.0.6
+MM dd hh:mm:ss runner   INFO    Test ping gw01->phony01
+MM dd hh:mm:ss runner   INFO    Test ping gw01->phony01
+MM dd hh:mm:ss runner   INFO    Test ping phony01->gw01
+MM dd hh:mm:ss runner   INFO    Test ping phony01->192.168.84.1
+MM dd hh:mm:ss runner   INFO    Test ping gw01->phony01 from 192.168.84.1
 MM dd hh:mm:ss gateway  INFO    Gateway 1 change lease time to 120s
 MM dd hh:mm:ss gateway  INFO    Gateway 1 startup capture gw01-eth0 in container's /tmp/gateway.pcap
 MM dd hh:mm:ss dhcp     INFO    DHCP monitor gw01 waiting for replies...
