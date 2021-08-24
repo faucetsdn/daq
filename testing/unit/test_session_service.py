@@ -52,11 +52,12 @@ class SessionServerTest(BaseSessionServerTest):
         results = list(session)
         self.assertEqual(len(results), 3)
         self.assertEqual(results[0].endpoint.ip, _LOCAL_IP)
+        self.assertEqual(results[0].endpoint.vni, 1)
         self.assertEqual(results[1].result.code, SessionResult.ResultCode.STARTED)
         self.assertEqual(len(self._server_results), 1)
         self.assertEqual(self._server_results[0].device_mac, _TEST_MAC_ADDRESS)
         self._on_session_end.assert_called_once_with(self._server_results[0])
-
+        self.assertEqual(self._server._vni_allocations[''], set())
 
 class SessionServerDisallowSameClient(BaseSessionServerTest):
     """Test session server behavior with multiples of the same clients."""
