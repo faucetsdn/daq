@@ -29,8 +29,8 @@ class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
 
 
-class DummyNode:
-    """Dummy node used to handle shadow devices"""
+class FakeNode:
+    """Fake node used to handle shadow devices"""
     # pylint: disable=invalid-name
     def addIntf(self, node, port=None):
         """No-op for adding an interface"""
@@ -175,7 +175,7 @@ class TestNetwork:
         if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
-            sec_intf = mininet_link.Intf(self.ext_intf, node=DummyNode(), port=1)
+            sec_intf = mininet_link.Intf(self.ext_intf, node=FakeNode(), port=1)
             self._link_secondary(sec_intf)
             self.tap_intf = self.ext_intf
         elif vxlan_taps:
@@ -205,7 +205,7 @@ class TestNetwork:
         for intf_port in range(1, len(topology_intfs) + 1):
             intf_name = topology_intfs[intf_port-1]
             LOGGER.info("Attaching device interface %s on port %d.", intf_name, intf_port)
-            intf = mininet_link.Intf(intf_name, node=DummyNode(), port=intf_port)
+            intf = mininet_link.Intf(intf_name, node=FakeNode(), port=intf_port)
             intf.port = intf_port
             self.sec.addIntf(intf, port=intf_port)
             self._switch_attach(self.sec, intf)

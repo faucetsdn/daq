@@ -223,7 +223,7 @@ class DAQRunner:
         config = self.config
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE))
         if self.config.get('keep_hold'):
-            LOGGER.info('Appending test_hold to master test list')
+            LOGGER.info('Appending test_hold to primary test list')
             if 'hold' not in test_list:
                 test_list.append('hold')
         config['test_list'] = test_list
