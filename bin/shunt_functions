@@ -11,9 +11,9 @@ function build_vxlan_ssh_conn {
     LOCAL_IP=${5:-"192.168.21.2"}
 
     # create virtual i/f and assign IP
-    sudo ip link add dummy0 type dummy
-    sudo ip addr add $LOCAL_IP/24 dev dummy0
-    sudo ip link set dummy0 up
+    sudo ip link add faux0 type dummy
+    sudo ip addr add $LOCAL_IP/24 dev faux0
+    sudo ip link set faux0 up
 
     # socat session to move packets from ssh tunnel to UDP port
     socat -T15 tcp4-listen:30001,reuseaddr,fork UDP:localhost:4789 &
@@ -21,8 +21,8 @@ function build_vxlan_ssh_conn {
     # iptables command to change source IP from localhost
     sudo iptables -t nat -A POSTROUTING -p udp -d 127.0.0.1 --dport 4789 -j SNAT --to-source $REMOTE_IP:38000-45000
 
-    # iptables rule to divert traffic from dummy0:4789 to UDP port
-    sudo iptables -t nat -A OUTPUT -o dummy0 -p udp --dport 4789 -j REDIRECT --to-ports 20000
+    # iptables rule to divert traffic from faux0:4789 to UDP port
+    sudo iptables -t nat -A OUTPUT -o faux0 -p udp --dport 4789 -j REDIRECT --to-ports 20000
 
     # socat session to move packets from UDP port to ssh session
     socat -T15 udp4-recvfrom:20000,reuseaddr,fork tcp:localhost:30000 &
@@ -45,8 +45,8 @@ function clean_vxlan_ssh_conn {
     sudo ip link set vxlan down || true
     sudo ip link del vxlan || true
 
-    sudo ip link set dummy0 down || true
-    sudo ip link del dummy0 || true
+    sudo ip link set faux0 down || true
+    sudo ip link del faux0 || true
 }
 
 function build_ssh_tunnel {
