@@ -50,7 +50,6 @@ function clean_vxlan_ssh_conn {
 }
 
 function build_ssh_tunnel {
-
     SSH_IN_PORT=$1
     SSH_OUT_PORT=$2
     REMOTE_HOST=$3

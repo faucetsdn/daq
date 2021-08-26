@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 
 source etc/FILES_MAPPING
 
@@ -35,7 +36,6 @@ docker-compose -f ./shunt/docker-compose.yaml down
 
 echo Done with tests | tee -a $TEST_RESULTS
 
-set -o pipefail
 exit_code=0
 echo
 echo Test results $TEST_RESULTS
