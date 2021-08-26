@@ -69,7 +69,7 @@ class SessionServer:
         self._on_session_start = on_session_start
         self._on_session_end = on_session_end
         self._local_ip = local_ip
-        self._vni_allocations = {}
+        self._vni_allocations = set()
         self._server = grpc.server(futures.ThreadPoolExecutor())
         self._servicer = SessionServerServicer(self._init_session, self._session_stream)
 
@@ -106,12 +106,11 @@ class SessionServer:
             LOGGER.info('New session stream for %s %s/%s',
                         device_mac, request.device_vlan, request.assigned_vlan)
             assert device_mac not in self._clients, 'already registered %s' % device_mac
-            vni_set = self._vni_allocations.setdefault(request.endpoint.ip, set())
             # vni should be unique across devices in a given remote ip.
             vni = 1
-            while vni in vni_set:
+            while vni in self._vni_allocations:
                 vni += 1
-            vni_set.add(vni)
+            self._vni_allocations.add(vni)
             request.endpoint.vni = vni
             self._clients[device_mac] = SessionClient(init_request=request)
         LOGGER.info('Sending %s endpoint %s start', device_mac, self._local_ip)
@@ -146,7 +145,7 @@ class SessionServer:
         init_request = self._clients[device_mac].init_request
         if self._on_session_end:
             self._on_session_end(init_request)
-        self._vni_allocations[init_request.endpoint.ip].remove(init_request.endpoint.vni)
+        self._vni_allocations.remove(init_request.endpoint.vni)
         del self._clients[device_mac]
 
     def stop(self):
