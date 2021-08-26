@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: hello
-        image: "us.gcr.io/dts-scale-testing/dts:1c6e1a409088"
+        image: "us.gcr.io/dts-scale-testing/dts:644695b351e3"
         imagePullPolicy: Always
         resources:
           requests:

@@ -35,7 +35,7 @@ Device port 1 is handled by ports 10-19 on the primary switch, with interfaces p
 to pri-eth19. You can tap in there to see where data is doing into/out-of modules, e.g.:
 
 * `pri-eth10`: gateway for port set 1, including DHCP server
-* `pri-eth11`: dummy test host
+* `pri-eth11`: fake test host
 * `pri-eth12`: running test (e.g. ping, hold, bacnet, nmap, etc..)
 
 # Test containers

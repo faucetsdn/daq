@@ -6,7 +6,7 @@ from utils import get_logger
 
 def main():
 
-    TEST_NAME = "dot1x.dot1x"
+    TEST_NAME = "connection.dot1x.authentication"
 
     LOGGER = get_logger('test_dot1x')
     arg_length = len(sys.argv)

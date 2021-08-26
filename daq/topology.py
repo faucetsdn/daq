@@ -40,6 +40,8 @@ class FaucetTopology:
     _DUMP_VLAN = 999
     PRI_DPID = 1
     PRI_TRUNK_PORT = 1
+    VXLAN_SEC_DPID = 2
+    VXLAN_SEC_TRUNK_PORT = 1
     PRI_TRUNK_NAME = 'trunk_pri'
     _NO_VLAN = "0x0000/0x1000"
     _EXT_STACK = 'EXT_STACK'
@@ -156,6 +158,24 @@ class FaucetTopology:
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
+        if device.port.vxlan:
+            sec_topology = self.topology['dps'].setdefault(self.sec_name, {
+                'dp_id': self.VXLAN_SEC_DPID,
+                'interfaces': {
+                    self.VXLAN_SEC_TRUNK_PORT: self._make_sec_trunk_interface()
+                }
+            })
+            if port_set:
+                interface = sec_topology['interfaces'].setdefault(device.port.vxlan, {})
+                egress_vlan = device.assigned if device.assigned else self._egress_vlan
+                interface['tagged_vlans'] = [vlan, egress_vlan]
+                interface['name'] = str(device)
+                interface['acl_in'] = self.INCOMING_ACL_FORMAT % 'vxlan'
+                sec_topology['interfaces'][
+                    self.VXLAN_SEC_TRUNK_PORT
+                ] = self._make_sec_trunk_interface(addition=(egress_vlan,))
+            else:
+                sec_topology['interfaces'].pop(device.port.vxlan, None)
         self._generate_acls()
 
     def direct_port_traffic(self, device, port_no, target):
@@ -242,10 +262,10 @@ class FaucetTopology:
         interface['name'] = self.PRI_TRUNK_NAME
         return interface
 
-    def _make_sec_trunk_interface(self):
+    def _make_sec_trunk_interface(self, addition=()):
         interface = {}
         interface['acl_in'] = self.INCOMING_ACL_FORMAT % self.sec_name
-        interface['tagged_vlans'] = self._vlan_tags()
+        interface['tagged_vlans'] = list(set(self._vlan_tags() + list(addition)))
         interface['name'] = self.get_ext_intf() or self._DEFAULT_SEC_TRUNK_NAME
         return interface
 
@@ -478,6 +498,8 @@ class FaucetTopology:
 
         self._add_acl_rule(secondary_acl, allow=1)
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
+
+        acls[self.INCOMING_ACL_FORMAT % 'vxlan'] = [self._make_acl_rule(ports=[1])]
 
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)

@@ -64,7 +64,7 @@ class FaucetEventClient():
 
     def has_data(self):
         """Check to see if the event socket has any data to read"""
-        read, dummy_write, dummy_error = select.select([self.sock], [], [], 0)
+        read, _, _ = select.select([self.sock], [], [], 0)
         return read
 
     def has_event(self, blocking=False):

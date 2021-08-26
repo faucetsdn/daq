@@ -226,7 +226,7 @@ public class MudAclGenerator {
     for (Ace ace : aces) {
       Rule rule = ace.rule;
       try {
-        checkWhitelistedRules(rule);
+        checkAllowlistedRules(rule);
         checkWildcardedAcls(isEdge, rule);
       } catch (Exception e) {
         throw new RuntimeException("While processing " + rule.description, e);
@@ -235,7 +235,7 @@ public class MudAclGenerator {
     return aces;
   }
 
-  private void checkWhitelistedRules(Rule rule) {
+  private void checkAllowlistedRules(Rule rule) {
     if (AclHelper.UDP_NTP_PORT.equals(rule.udp_src) ||
         AclHelper.UDP_NTP_PORT.equals(rule.udp_dst)) {
       throw new IllegalArgumentException("Should not include NTP ports in ACLs");

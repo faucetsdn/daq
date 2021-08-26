@@ -71,9 +71,9 @@ RESULT skip ntp.network.ntp_update Not enough NTP packets received.
 RESULT pass connection.network.mac_oui Manufacturer: Google found for address 3c:5a:b4:1e:8f:0a
 RESULT pass connection.network.mac_address Device MAC address is 3c:5a:b4:1e:8f:0a
 RESULT pass dns.network.hostname_resolution Device sends DNS requests and resolves host names
-RESULT pass dot1x.dot1x Authentication for 9a:02:57:1e:8f:01 succeeded.
-RESULT fail dot1x.dot1x Authentication for 3c:5a:b4:1e:8f:0b failed.
-RESULT skip dot1x.dot1x Authentication failed. No EAPOL messages received.
+RESULT pass connection.dot1x.authentication Authentication for 9a:02:57:1e:8f:01 succeeded.
+RESULT fail connection.dot1x.authentication Authentication for 3c:5a:b4:1e:8f:0b failed.
+RESULT skip connection.dot1x.authentication Authentication failed. No EAPOL messages received.
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
 3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']

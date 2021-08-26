@@ -7,8 +7,8 @@ freeradius -xx -l /tmp/radius_log
 source reporting.sh
 
 REPORT=/tmp/report.txt
-TEST_NAME="dot1x.dot1x"
-TEST_DESCRIPTION="Dot1x authentication tests"
+TEST_NAME="connection.dot1x.authentication"
+TEST_DESCRIPTION="Verifies general support for 802.1x authentication."
 
 echo 'Dot1x Authentication tests'
 

@@ -41,6 +41,7 @@ class PortInfo:
     active = False
     flapping_start = None
     port_no = None
+    vxlan = None
 
 
 class IpInfo:
@@ -66,6 +67,7 @@ class Device:
         self.set_id = None
         self.assigned = None
         self.wait_remote = False
+        self.session_endpoint = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -161,7 +163,7 @@ class DAQRunner:
         self.gateway_sets = set(range(1, int(min(self._DEFAULT_MAX_GATEWAYS, max_devices) + 1)))
         # TODO: uplink port should not be required for base topology
         # Uplink port is used to configure device ports on the pri switch.
-        switch_setup['uplink_port'] = switch_setup.get('uplink_port', len(self.gateway_sets))
+        switch_setup['uplink_port'] = switch_setup.get('uplink_port', len(self.gateway_sets) + 1)
         self.config['switch_setup'] = switch_setup
         self._result_sets = {}
         self._devices = Devices()
@@ -218,7 +220,7 @@ class DAQRunner:
         config = self.config
         test_list = self._get_test_list(config.get('host_tests', self._DEFAULT_TESTS_FILE))
         if self.config.get('keep_hold'):
-            LOGGER.info('Appending test_hold to master test list')
+            LOGGER.info('Appending test_hold to primary test list')
             if 'hold' not in test_list:
                 test_list.append('hold')
         config['test_list'] = test_list
@@ -263,13 +265,14 @@ class DAQRunner:
     def _on_session_start(self, request):
         with self._event_lock:
             remote_ip = request.endpoint.ip
-            LOGGER.info('New session started for %s %s/%s at %s', request.device_mac,
-                        request.device_vlan, request.assigned_vlan, remote_ip)
+            vni = request.endpoint.vni
+            LOGGER.info('New session started for %s %s/%s at %s with vni %s', request.device_mac,
+                        request.device_vlan, request.assigned_vlan, remote_ip, vni)
             assert remote_ip, 'remote request ip not specified'
-            self.network.configure_remote_tap(request.endpoint)
             device = self._devices.create_if_absent(request.device_mac)
             device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL
+            device.session_endpoint = request.endpoint
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
             self._udmi.discovery(device)
 
@@ -683,6 +686,7 @@ class DAQRunner:
             gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
         device.gateway = gateway
+
         try:
             self._run_count += 1
             new_host = connected_host.ConnectedHost(self, device, self.config)
