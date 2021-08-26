@@ -285,7 +285,6 @@ class ConnectedHost:
         os.makedirs(self.scan_base)
         self._initialize_config()
         network = self.runner.network
-        self.logger.info('TAP1 TAP %s, EXT %s', network.tap_intf, network.ext_intf)
         if self.target_port:
             self._mirror_intf_name = network.create_mirror_interface(self.target_port)
         else:
@@ -561,8 +560,6 @@ class ConnectedHost:
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
         tcp_filter = ''
-        self.logger.info('TAP2 TAP %s, EXT %s', network.tap_intf, network.ext_intf)
-        self.logger.info(network.pri.cmd('ovs-vsctl show'))
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
                          self._shorten_filename(output_file))

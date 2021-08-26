@@ -290,7 +290,7 @@ fi
 # Do random DNS queries to make sure DNS is exercised w/o caching.
 (
     while true; do
-        nslookup $RANDOM.com
+        # nslookup $RANDOM.com
         sleep 10
     done
 ) &
