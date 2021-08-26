@@ -24,6 +24,10 @@ from forch.proto.forch_configuration_pb2 import OrchestrationConfig
 LOGGER = logger.get_logger('network')
 
 
+NATIVE_GATEWAY_INTF = 'pri-eth1'
+NATIVE_NET_PREFIX = '10.21'
+
+
 # pylint: disable=too-few-public-methods
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
@@ -267,7 +271,7 @@ class TestNetwork:
             # which caused the mininet host to have no IP
             self._used_ip_indices.add(self._get_host_ip_index(native_gateway.host))
 
-        self.tap_intf = self.ext_intf
+        self.tap_intf = NATIVE_GATEWAY_INTF if native_gateway else self.ext_intf
 
     def configure_remote_tap(self, remote):
         """Configure the tap for remote connection"""
