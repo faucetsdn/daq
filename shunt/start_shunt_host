@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 
-set -x
 host=$1
 service ssh start
 source bin/shunt_functions

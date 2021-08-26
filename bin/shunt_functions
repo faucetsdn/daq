@@ -34,14 +34,18 @@ function build_vxlan_ssh_conn {
 }
 
 function clean_vxlan_ssh_conn {
+    set -x
     # Remove iptables rules
+    echo Removing iptables rules
     sudo iptables -t nat -S | grep 4789 | awk '{$1=""}1' | while read line; do sudo iptables -t nat -D $line || true ; done
 
     # Kill socat processes
+    echo Killing socat processes
     kill `ps ax | grep socat | grep 4789 | awk '{print $1}'` || true
     kill `ps ax | grep socat | grep 20000 | awk '{print $1}'` || true
 
     # Delete interfaces
+    echo Deleting interfaces
     sudo ip link set vxlan down || true
     sudo ip link del vxlan || true
 

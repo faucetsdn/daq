@@ -22,9 +22,11 @@ else
     echo Ping unsuccesful | tee -a $TEST_RESULTS
 fi
 
-docker exec -it shunt_host2_1 bash -c "source bin/shunt_functions; clean_vxlan_ssh_conn"
+docker exec shunt_host2_1 bash -c "source bin/shunt_functions; clean_vxlan_ssh_conn"
 
 sleep 10
+docker logs shunt_host2_1
+
 
 docker exec shunt_host2_1 ps ax
 docker exec shunt_host1_1 ping -c 1 192.168.1.2
