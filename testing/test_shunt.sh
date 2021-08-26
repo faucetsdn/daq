@@ -24,6 +24,8 @@ fi
 
 docker exec -it shunt_host2_1 bash -c "source bin/shunt_functions; clean_vxlan_ssh_conn"
 
+sleep 5
+
 docker exec shunt_host1_1 ping -c 1 192.168.1.2
 
 if [ $? -eq 0 ]; then
