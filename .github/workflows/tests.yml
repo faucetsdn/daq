@@ -102,3 +102,7 @@ jobs:
       run: |
         echo %%%%%%% daq log cmdrun.log
         cat inst/cmdrun.log || true
+    - name: Monitor logs
+      if: ${{ always() }}
+      run: |
+        tcpdump -en -r inst/run-9a02571e8f01/scans/monitor.pcap
