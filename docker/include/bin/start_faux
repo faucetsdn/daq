@@ -287,14 +287,6 @@ if [ -n "${options[curl]}" ]; then
     (while true; do curl -o - http://google.com 2> /dev/null 1>&2; sleep 5; done) &
 fi
 
-# Do random DNS queries to make sure DNS is exercised w/o caching.
-(
-    while true; do
-        # nslookup $RANDOM.com
-        sleep 10
-    done
-) &
-
 conf_file=/config/start/start_faux.sh
 if [ -f $conf_file ]; then
     echo Loading $conf_file...
