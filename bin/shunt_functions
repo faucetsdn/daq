@@ -4,11 +4,11 @@
 #
 
 function build_vxlan_ssh_conn {
-    REMOTE_IP=$1
-    LOCAL_IP=$2
-    LOCAL_VXLAN_IP=$3
-    SSH_IN_PORT=$4
-    SSH_OUT_PORT=$5
+    SSH_IN_PORT=$1
+    SSH_OUT_PORT=$2
+    REMOTE_IP=$3
+    LOCAL_IP=$4
+    LOCAL_VXLAN_IP=$5
 
     if [[ -z "$REMOTE_IP" ]]; then
         REMOTE_IP="192.168.21.1"
@@ -20,14 +20,6 @@ function build_vxlan_ssh_conn {
 
     if [[ -z "$LOCAL_VXLAN_IP"   ]]; then
         LOCAL_VXLAN_IP="192.168.1.2"
-    fi
-
-    if [[ -z "$SSH_IN_PORT"    ]]; then
-        SSH_IN_PORT="30001"
-    fi
-
-    if [[ -z "$SSH_OUT_PORT"    ]]; then
-        SSH_OUT_PORT="30000"
     fi
 
     # create virtual i/f and assign IP
@@ -74,14 +66,6 @@ function build_ssh_tunnel {
     SSH_IN_PORT=$1
     SSH_OUT_PORT=$2
     REMOTE_HOST=$3
-
-    if [[ -z "$SSH_IN_PORT"    ]]; then
-        SSH_IN_PORT="30001"
-    fi
-
-    if [[ -z "$SSH_OUT_PORT"    ]]; then
-        SSH_OUT_PORT="30000"
-    fi
 
     sleep 5
     ssh -o StrictHostKeyChecking=no -L $SSH_OUT_PORT:127.0.0.1:$SSH_IN_PORT -N -f $REMOTE_HOST
