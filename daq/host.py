@@ -556,6 +556,12 @@ class ConnectedHost:
 
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
+
+        if not self._mirror_intf_name:
+            self.logger.info('Target device %s skipping monitor pcap', self)
+            self._monitor_continue()
+            return
+
         network = self.runner.network
         tcp_filter = ''
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
