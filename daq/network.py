@@ -283,6 +283,7 @@ class TestNetwork:
         """Configure the tap for remote connection"""
         if not device.session_endpoint:
             return
+        self._cleanup_remote_tap(device)
         remote = device.session_endpoint
         vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
         vxlan_port = self.topology.VXLAN_SEC_TRUNK_PORT + 1
