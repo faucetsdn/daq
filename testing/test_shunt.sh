@@ -11,6 +11,17 @@ GOLDEN_FILE=testing/$def_name
 echo Shunt Test > $TEST_RESULTS
 
 docker-compose -f ./shunt/docker-compose.yaml up --build -d
+docker exec shunt_host1_1 ps ax
+docker exec shunt_host1_1 ping -c 1 192.168.1.2
+
+if [ $? -eq 0 ]; then
+    echo Ping succesful | tee -a $TEST_RESULTS
+else
+    echo Ping unsuccesful | tee -a $TEST_RESULTS
+fi
+
+docker exec -it shunt_host2_1 bash -c "source bin/shunt_functions; clean_vxlan_ssh_conn"
+
 docker exec shunt_host1_1 ping -c 1 192.168.1.2
 
 if [ $? -eq 0 ]; then

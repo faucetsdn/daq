@@ -6,10 +6,10 @@ service ssh start
 source bin/shunt_functions
 
 if [ $host -eq 1 ]; then
-    build_ssh_tunnel shunt_host2_1
-    build_vxlan_ssh_conn 192.168.21.2 192.168.21.1 192.168.1.1
+    build_ssh_tunnel shunt_host2_1 30001 30000
+    build_vxlan_ssh_conn 192.168.21.2 192.168.21.1 192.168.1.1 30001 30000
 else
-    build_vxlan_ssh_conn 192.168.21.1 192.168.21.2 192.168.1.2
+    build_vxlan_ssh_conn 192.168.21.1 192.168.21.2 192.168.1.2 30001 30000
 fi
 
 tail -f /dev/null
