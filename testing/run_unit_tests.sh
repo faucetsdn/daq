@@ -15,7 +15,7 @@ coverage run \
     --source $BASEDIR/daq,$BASEDIR/bin/python/ \
     -m unittest discover \
     -s $TESTDIR/unit/ \
-    -p "test_network.py"
+    -p "test_*.py"
 
 coverage combine || true
 coverage report -m
