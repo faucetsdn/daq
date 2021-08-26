@@ -559,6 +559,7 @@ class ConnectedHost:
 
         if not self._mirror_intf_name:
             self.logger.info('Target device %s skipping monitor pcap', self)
+            self._state_transition(_STATE.MONITOR, _STATE.INIT)
             self._monitor_continue()
             return
 
