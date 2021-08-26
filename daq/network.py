@@ -181,7 +181,7 @@ class TestNetwork:
                         self.sec_dpid, self.ext_intf)
             sec_intf = mininet_link.Intf(self.ext_intf, node=FakeNode(), port=1)
             self._link_secondary(sec_intf)
-            self.tap_intf = NATIVE_GATEWAY_INTF if native_gateway else self.ext_intf
+            self.tap_intf = self.ext_intf
         elif vxlan_taps:
             LOGGER.info('Creating ovs sec with dpid %s for vxlan taps',
                         self.topology.VXLAN_SEC_DPID)
@@ -282,6 +282,9 @@ class TestNetwork:
             # Native gateway is initialized prior to mininet start
             # which caused the mininet host to have no IP
             self._used_ip_indices.add(self._get_host_ip_index(native_gateway.host))
+
+        if native_gateway:
+            self.tap_intf = NATIVE_GATEWAY_INTF
 
     def _configure_remote_tap(self, device):
         """Configure the tap for remote connection"""
