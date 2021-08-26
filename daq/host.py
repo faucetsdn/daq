@@ -557,14 +557,13 @@ class ConnectedHost:
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
 
+        tcp_filter = ''
+
         if not self._mirror_intf_name:
-            self.logger.info('Target device %s skipping monitor pcap', self)
-            self._state_transition(_STATE.MONITOR, _STATE.INIT)
-            self._monitor_continue()
-            return
+            self.logger.info('Target device %s squashing monitor pcap', self)
+            tcp_filter = 'port 23713'
 
         network = self.runner.network
-        tcp_filter = ''
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
                          self._shorten_filename(output_file))
