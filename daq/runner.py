@@ -811,8 +811,8 @@ class DAQRunner:
 
         try:
             gateway.initialize()
-            if is_native:
-                assert str(gateway.host.switch_intf) == network.NATIVE_GATEWAY_INTF, 'iface mismatch'
+            if is_native and str(gateway.host.switch_intf) != network.NATIVE_GATEWAY_INTF:
+                assert False, 'iface mismatch'
         except Exception:
             LOGGER.error('Cleaning up from failed gateway initialization')
             LOGGER.debug('Clearing %s gateway group %s for %s',
