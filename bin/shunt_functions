@@ -6,21 +6,9 @@
 function build_vxlan_ssh_conn {
     SSH_IN_PORT=$1
     SSH_OUT_PORT=$2
-    REMOTE_IP=$3
-    LOCAL_IP=$4
-    LOCAL_VXLAN_IP=$5
-
-    if [[ -z "$REMOTE_IP" ]]; then
-        REMOTE_IP="192.168.21.1"
-    fi
-
-    if [[ -z "$LOCAL_IP"  ]]; then
-        LOCAL_IP="192.168.21.2"
-    fi
-
-    if [[ -z "$LOCAL_VXLAN_IP"   ]]; then
-        LOCAL_VXLAN_IP="192.168.1.2"
-    fi
+    LOCAL_VXLAN_IP=${3:-"192.168.1.2"}
+    REMOTE_IP=${4:-"192.168.21.1"}
+    LOCAL_IP=${5:-"192.168.21.2"}
 
     # create virtual i/f and assign IP
     sudo ip link add dummy0 type dummy
