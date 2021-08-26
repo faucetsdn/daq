@@ -7,10 +7,10 @@ FROM daqf/aardvark
 
 RUN $AG update && $AG install openssh-server socat sudo iptables
 
-COPY ./shunt/id_rsa .ssh/
-COPY ./shunt/id_rsa.pub .ssh/
-COPY ./shunt/authorized_keys .ssh/
-COPY ./shunt/start_shunt_host ./
+COPY ./testing/shunt/id_rsa .ssh/
+COPY ./testing/shunt/id_rsa.pub .ssh/
+COPY ./testing/shunt/authorized_keys .ssh/
+COPY ./testing/shunt/start_shunt_host ./
 
 RUN chmod -R 700 .ssh
 

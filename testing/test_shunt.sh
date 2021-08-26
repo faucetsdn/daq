@@ -11,7 +11,7 @@ GOLDEN_FILE=testing/$def_name
 
 echo Shunt Test > $TEST_RESULTS
 
-docker-compose -f ./shunt/docker-compose.yaml up --build -d
+docker-compose -f ./testing/shunt/docker-compose.yaml up --build -d
 sleep 6
 docker exec shunt_host1_1 ps ax
 docker exec shunt_host1_1 ping -c 1 192.168.1.2
@@ -37,7 +37,7 @@ else
     echo Ping unsuccesful | tee -a $TEST_RESULTS
 fi
 
-docker-compose -f ./shunt/docker-compose.yaml down
+docker-compose -f ./testing/shunt/docker-compose.yaml down
 
 echo Done with tests | tee -a $TEST_RESULTS
 
