@@ -562,7 +562,7 @@ class ConnectedHost:
         network = self.runner.network
         tcp_filter = ''
         self.logger.info('TAP2 TAP %s, EXT %s', network.tap_intf, network.ext_intf)
-        self.logger.info(self.newtwork.pri.cmd('ovs-vsctl show'))
+        self.logger.info(newtwork.pri.cmd('ovs-vsctl show'))
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
                          self._shorten_filename(output_file))
