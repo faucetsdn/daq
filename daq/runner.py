@@ -35,9 +35,6 @@ from proto.report_pb2 import DeviceReport
 
 LOGGER = logger.get_logger('runner')
 
-NATIVE_GATEWAY_INTF = 'pri-eth1'
-NATIVE_NET_PREFIX = '10.21'
-
 
 class PortInfo:
     """Simple container for device port info"""
@@ -803,7 +800,7 @@ class DAQRunner:
         env_params = {}
         if is_native:
             env_params.update({
-                'net_prefix': NATIVE_NET_PREFIX,
+                'net_prefix': network.NATIVE_NET_PREFIX,
                 'ext_intf': self.network.ext_intf,
                 'ext_mac': self.network.ext_mac
             })
@@ -818,8 +815,8 @@ class DAQRunner:
 
         try:
             gateway.initialize()
-            if is_native:
-                assert str(gateway.host.switch_intf) == NATIVE_GATEWAY_INTF, 'iface mismatch'
+            if is_native and str(gateway.host.switch_intf) != network.NATIVE_GATEWAY_INTF:
+                assert False, 'iface mismatch'
         except Exception:
             LOGGER.error('Cleaning up from failed gateway initialization')
             LOGGER.debug('Clearing %s gateway group %s for %s',

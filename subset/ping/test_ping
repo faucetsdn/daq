@@ -112,7 +112,7 @@ dns_request=`tcpdump -env -c 1 -r $SCAN_FILE dst port 53 | wc -l`
 dns_proper=`tcpdump -env -c 1 -r $SCAN_FILE dst port 53 and dst host $dns_target | wc -l`
 if [ "$dns_request" == 0 ]; then
     dns_result=skip
-    dns_summary="No dns traffic detected"
+    dns_summary="No DNS traffic detected"
 elif [ "$dns_proper" == 0 ]; then
     dns_result=fail
     dns_summary="Invalid DNS server address"

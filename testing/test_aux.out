@@ -4,7 +4,7 @@ RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass connection.base.target_ping target reached
 RESULT pass base.startup.ntp Correct NTP server address
-RESULT skip base.startup.dns No dns traffic detected
+RESULT skip base.startup.dns No DNS traffic detected
 RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass connection.base.target_ping target reached
