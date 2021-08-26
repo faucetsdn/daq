@@ -288,7 +288,7 @@ class ConnectedHost:
         if self.target_port:
             self._mirror_intf_name = network.create_mirror_interface(self.target_port)
         else:
-            self._mirror_intf_name = 'pri-eth1'
+            self._mirror_intf_name = network.ext_intf
         self._topology_hook()
         if self.config['test_list']:
             self._start_run()
