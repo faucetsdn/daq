@@ -287,6 +287,8 @@ class ConnectedHost:
         network = self.runner.network
         if self.target_port:
             self._mirror_intf_name = network.create_mirror_interface(self.target_port)
+        else:
+            self._mirror_intf_name = 'pri-eth1'
         self._topology_hook()
         if self.config['test_list']:
             self._start_run()
@@ -556,14 +558,8 @@ class ConnectedHost:
 
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
-
-        tcp_filter = ''
-
-        if not self._mirror_intf_name:
-            self.logger.info('Target device %s squashing monitor pcap', self)
-            tcp_filter = 'port 23713'
-
         network = self.runner.network
+        tcp_filter = ''
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
                          self._shorten_filename(output_file))
