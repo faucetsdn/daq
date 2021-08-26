@@ -124,6 +124,24 @@ jobs:
       run: |
         testing/run_unit_tests.sh
 
+  shunt_test:
+    runs-on: ubuntu-18.04
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      env:
+        GIT_URL: ${{ secrets.GIT_URL }}
+      run: |
+        bin/setup_dev
+    - name: Shunt test
+      run: |
+        testing/test_shunt.sh
+
   usi_tests:
     runs-on: ubuntu-18.04
     timeout-minutes: 20
