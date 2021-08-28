@@ -17,10 +17,14 @@ function build_vxlan_ssh_conn {
     sudo ip link set ep0 up
 
     # socat session to move packets from ssh tunnel to UDP port
-    socat -T15 tcp4-listen:30001,reuseaddr,fork UDP:localhost:4789 &
+    socat -T15 tcp4-listen:30001,reuseaddr,fork UDP:localhost:20001 &
+
+    # iptables command to mark and divert traffic from 20001 to 4789
+    sudo iptables -t nat -A OUTPUT -o lo -p udp --dport 20001 -j MARK --set-mark 1
+    sudo iptables -t nat -A OUTPUT -o lo -p udp --dport 20001 -j REDIRECT --to-ports 4789
 
     # iptables command to change source IP from localhost
-    sudo iptables -t nat -A POSTROUTING -p udp -d 127.0.0.1 --dport 4789 -j SNAT --to-source $REMOTE_IP:38000-45000
+    sudo iptables -t nat -A POSTROUTING -d 127.0.0.1/32 -p udp -m mark --mark 1 -j SNAT --to-source 192.168.21.1:38000-45000
 
     # iptables rule to divert traffic from ep0:4789 to UDP port
     sudo iptables -t nat -A OUTPUT -o ep0 -p udp --dport 4789 -j REDIRECT --to-ports 20000
@@ -38,11 +42,12 @@ function clean_vxlan_ssh_conn {
     # Remove iptables rules
     echo Removing iptables rules
     sudo iptables -t nat -S | grep 4789 | awk '{$1=""}1' | while read line; do sudo iptables -t nat -D $line || true ; done
+    sudo iptables -t nat -S | grep -i mark | awk '{$1=""}1' | while read line; do sudo iptables -t nat -D $line || true ; done
 
     # Kill socat processes
     echo Killing socat processes
-    kill `ps ax | grep socat | grep 4789 | awk '{print $1}'` || true
     kill `ps ax | grep socat | grep 20000 | awk '{print $1}'` || true
+    kill `ps ax | grep socat | grep 20001 | awk '{print $1}'` || true
 
     # Delete interfaces
     echo Deleting interfaces
