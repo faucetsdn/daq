@@ -20,11 +20,11 @@ function build_vxlan_ssh_conn {
     socat -T15 tcp4-listen:30001,reuseaddr,fork UDP:localhost:20001 &
 
     # iptables command to mark and divert traffic from 20001 to 4789
-    sudo iptables -t nat -A OUTPUT -o lo -p udp --dport 20001 -j MARK --set-mark 1
+    sudo iptables -t nat -A OUTPUT -o lo -p udp --dport 20001 -j MARK --set-mark $VNI
     sudo iptables -t nat -A OUTPUT -o lo -p udp --dport 20001 -j REDIRECT --to-ports 4789
 
     # iptables command to change source IP from localhost
-    sudo iptables -t nat -A POSTROUTING -d 127.0.0.1/32 -p udp -m mark --mark 1 -j SNAT --to-source 192.168.21.1:38000-45000
+    sudo iptables -t nat -A POSTROUTING -d 127.0.0.1/32 -p udp -m mark --mark $VNI -j SNAT --to-source 192.168.21.1:38000-45000
 
     # iptables rule to divert traffic from ep0:4789 to UDP port
     sudo iptables -t nat -A OUTPUT -o ep0 -p udp --dport 4789 -j REDIRECT --to-ports 20000
