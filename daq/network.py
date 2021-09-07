@@ -24,13 +24,17 @@ from forch.proto.forch_configuration_pb2 import OrchestrationConfig
 LOGGER = logger.get_logger('network')
 
 
+NATIVE_GATEWAY_INTF = 'pri-eth1'
+NATIVE_NET_PREFIX = '10.21'
+
+
 # pylint: disable=too-few-public-methods
 class DAQHost(mininet_node.Host):
     """Base Mininet Host class, for Mininet-based tests."""
 
 
-class DummyNode:
-    """Dummy node used to handle shadow devices"""
+class FakeNode:
+    """Fake node used to handle shadow devices"""
     # pylint: disable=invalid-name
     def addIntf(self, node, port=None):
         """No-op for adding an interface"""
@@ -47,12 +51,11 @@ class TestNetwork:
     DEFAULT_FAUCET_OF_PORT = 6653
     DEFAULT_GAUGE_OF_PORT = 6654
     DEFAULT_MININET_SUBNET = "10.20.0.0/16"
-    _CTRL_PRI_IFACE = 'ctrl-pri'
     INTERMEDIATE_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet_intermediate.yaml")
     INTERMEDIATE_GAUGE_FILE = os.path.join(DAQ_RUN_DIR, "gauge.yaml")
     OUTPUT_FAUCET_FILE = os.path.join(DAQ_RUN_DIR, "faucet.yaml")
+    _CTRL_PRI_IFACE = 'ctrl-pri'
     _DEFAULT_VXLAN_PORT = 4789
-    _DEFAULT_VXLAN_VNI = 0
     _VXLAN_CMD_FMT = 'ip link add %s type vxlan id %s remote %s dstport %s srcport %s %s nolearning'
 
     def __init__(self, config):
@@ -66,6 +69,7 @@ class TestNetwork:
         self._settle_sec = int(config.get('settle_sec', 0))
         subnet = config.get('internal_subnet', {}).get('subnet', self.DEFAULT_MININET_SUBNET)
         self._mininet_subnet = ip_network(subnet)
+        self._used_ip_indices = set()
         self.topology = FaucetTopology(self.config)
         switch_setup = config.get('switch_setup', {})
         self.ext_intf = switch_setup.get('data_intf')
@@ -77,11 +81,21 @@ class TestNetwork:
         orch_config = OrchestrationConfig()
         self.faucitizer = faucetizer.Faucetizer(
             orch_config, self.INTERMEDIATE_FAUCET_FILE, self.OUTPUT_FAUCET_FILE)
+        self._vxlan_port_sets = set()
 
     # pylint: disable=too-many-arguments
     def add_host(self, name, cls=DAQHost, ip_addr=None, env_vars=None, vol_maps=None,
                  port=None, tmpdir=None):
         """Add a host to the ecosystem"""
+        override_ip = bool(ip_addr)
+        if self._used_ip_indices and not ip_addr:
+            for index in range(1, max(self._used_ip_indices)):
+                if index not in self._used_ip_indices:
+                    prefix_length = self._mininet_subnet.prefixlen
+                    ip_addr = '%s/%s' % (mininet_util.ipAdd(index, prefixLen=prefix_length,
+                                                            ipBaseNum=self.net.ipBaseNum),
+                                         prefix_length)
+                    break
         params = {'ip': ip_addr} if ip_addr else {}
         params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
         params['env_vars'] = env_vars if env_vars else []
@@ -100,6 +114,9 @@ class TestNetwork:
         except Exception as e:
             host.terminate()
             raise e
+
+        if not override_ip and host.IP():
+            self._used_ip_indices.add(self._get_host_ip_index(host))
         return host
 
     def _retry_func(self, func):
@@ -131,6 +148,11 @@ class TestNetwork:
     def remove_host(self, host):
         """Remove a host from the ecosystem"""
         index = self.net.hosts.index(host)
+        if host.IP() and self._get_host_ip_index(host) in self._used_ip_indices:
+            # Resets Mininet's next ip so subnet ips don't run out.
+            # IP overrides are excluded from this set.
+            self._used_ip_indices.remove(self._get_host_ip_index(host))
+            self.net.nextIP = max(self._used_ip_indices or [0]) + 1
         if index:
             del self.net.hosts[index]
         if host in self.switch_links:
@@ -147,16 +169,29 @@ class TestNetwork:
         return copy.copy(self._mininet_subnet)
 
     def _link_secondary(self, sec_intf):
-        self.pri.addIntf(sec_intf, port=1)
+        self.pri.addIntf(sec_intf, port=self.topology.PRI_TRUNK_PORT)
 
     def _create_secondary(self):
         self.sec_dpid = self.topology.get_sec_dpid()
         self.sec_port = self.topology.get_sec_port()
+        vxlan_taps = self.config.get('device_reporting', {}).get('server_port')
+
         if self.ext_intf:
             LOGGER.info('Configuring external secondary with dpid %s on intf %s',
                         self.sec_dpid, self.ext_intf)
-            sec_intf = mininet_link.Intf(self.ext_intf, node=DummyNode(), port=1)
+            sec_intf = mininet_link.Intf(self.ext_intf, node=FakeNode(), port=1)
             self._link_secondary(sec_intf)
+            self.tap_intf = self.ext_intf
+        elif vxlan_taps:
+            LOGGER.info('Creating ovs sec with dpid %s for vxlan taps',
+                        self.topology.VXLAN_SEC_DPID)
+            self.sec = self.net.addSwitch('sec', dpid=str(self.topology.VXLAN_SEC_DPID),
+                                          cls=self.OVS_CLS)
+            link = self._retry_func(partial(self.net.addLink, self.pri, self.sec,
+                                            port1=self.topology.PRI_TRUNK_PORT,
+                                            port2=self.topology.VXLAN_SEC_TRUNK_PORT, fast=False))
+            LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
+            self.tap_intf = link.intf1.name
         else:
             LOGGER.info('Creating ovs sec with dpid/port %s/%d', self.sec_dpid, self.sec_port)
             self.sec = self.net.addSwitch('sec', dpid=str(self.sec_dpid), cls=self.OVS_CLS)
@@ -164,7 +199,6 @@ class TestNetwork:
             link = self._retry_func(partial(self.net.addLink, self.pri, self.sec, port1=1,
                                             port2=self.sec_port, fast=False))
             LOGGER.info('Added switch link %s <-> %s', link.intf1.name, link.intf2.name)
-            self.ext_intf = link.intf1.name
             self._attach_sec_device_links()
 
     def _is_dpid_external(self, dpid):
@@ -175,10 +209,14 @@ class TestNetwork:
         for intf_port in range(1, len(topology_intfs) + 1):
             intf_name = topology_intfs[intf_port-1]
             LOGGER.info("Attaching device interface %s on port %d.", intf_name, intf_port)
-            intf = mininet_link.Intf(intf_name, node=DummyNode(), port=intf_port)
+            intf = mininet_link.Intf(intf_name, node=FakeNode(), port=intf_port)
             intf.port = intf_port
             self.sec.addIntf(intf, port=intf_port)
             self._switch_attach(self.sec, intf)
+
+    def _get_host_ip_index(self, host):
+        """Returns the ip index within the mininet subnet."""
+        return mininet_util.ipParse(host.IP()) - self.net.ipBaseNum
 
     def is_system_port(self, dpid, port):
         """Check if the dpid/port combo is the system trunk port"""
@@ -205,7 +243,7 @@ class TestNetwork:
         self.net = mininet_net.Mininet(ipBase=str(self._mininet_subnet))
 
         LOGGER.debug("Adding primary...")
-        self.pri = self.net.addSwitch('pri', dpid='1', cls=self.OVS_CLS)
+        self.pri = self.net.addSwitch('pri', dpid=str(self.topology.PRI_DPID), cls=self.OVS_CLS)
 
         LOGGER.info("Initializing topology and faucitizer...")
         self.topology.initialize(self.pri)
@@ -240,22 +278,47 @@ class TestNetwork:
         if self.ext_loip:
             self._attach_switch_interface(self._CTRL_PRI_IFACE)
 
-        self.tap_intf = self.ext_intf
+        if native_gateway:
+            # Native gateway is initialized prior to mininet start
+            # which caused the mininet host to have no IP
+            self._used_ip_indices.add(self._get_host_ip_index(native_gateway.host))
 
-    def configure_remote_tap(self, remote):
+        if native_gateway:
+            self.tap_intf = NATIVE_GATEWAY_INTF
+
+    def _configure_remote_tap(self, device):
         """Configure the tap for remote connection"""
+        if not device.session_endpoint or self.ext_intf:
+            return
+        self._cleanup_remote_tap(device)
+        remote = device.session_endpoint
         vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
-        if 'ip' not in vxlan_config:
-            return False
-        remote_ip = remote.ip
-        vxlan_vni = vxlan_config.get('vni', self._DEFAULT_VXLAN_VNI)
-        dst_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
-        vxlan_cmd = self._VXLAN_CMD_FMT % (self.ext_intf, vxlan_vni, remote_ip,
-                                           dst_port, dst_port, dst_port)
+        vxlan_port = self.topology.VXLAN_SEC_TRUNK_PORT + 1
+        while vxlan_port in self._vxlan_port_sets:
+            vxlan_port += 1
+        self._vxlan_port_sets.add(vxlan_port)
+        device.port.vxlan = vxlan_port
+        interface = "vxlan" + str(vxlan_port)
+        dst_port = remote.port or self._DEFAULT_VXLAN_PORT
+        src_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
+        vxlan_cmd = self._VXLAN_CMD_FMT % (interface, remote.vni, remote.ip,
+                                           dst_port, src_port, dst_port)
         LOGGER.info('Configuring interface: %s', vxlan_cmd)
-        self.pri.cmd(vxlan_cmd)
-        self.pri.cmd('ip link set %s up' % self.ext_intf)
-        return True
+        self.sec.cmd(vxlan_cmd)
+        self.sec.cmd('ip link set %s up' % interface)
+        self.sec.vsctl('add-port', self.sec.name, interface, '--',
+                       'set', 'interface', interface, 'ofport_request=%s' % vxlan_port)
+
+    def _cleanup_remote_tap(self, device):
+        if not device.port.vxlan:
+            return
+        interface = "vxlan" + str(device.port.vxlan)
+        LOGGER.info('Cleaning up interface: %s', interface)
+        self.sec.cmd('ip link set %s down' % interface)
+        self.sec.cmd('ip link del %s' % interface)
+        self.sec.vsctl('del-port', self.sec.name, interface)
+        self._vxlan_port_sets.remove(device.port.vxlan)
+        device.port.vxlan = None
 
     def direct_port_traffic(self, device, port, target):
         """Direct traffic for a given mac to target port"""
@@ -287,6 +350,10 @@ class TestNetwork:
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_device_traffic(device, port_set)
         self._generate_behavioral_config()
+        if port_set:
+            self._configure_remote_tap(device)
+        else:
+            self._cleanup_remote_tap(device)
 
     def _attach_switch_interface(self, switch_intf_name):
         switch_port = self.topology.switch_port()

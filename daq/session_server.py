@@ -62,13 +62,14 @@ class SessionClient:
 class SessionServer:
     """Devices state server"""
     # pylint: disable=too-many-arguments
-    def __init__(self, on_session=None, on_session_end=None, server_address=None,
+    def __init__(self, on_session_start=None, on_session_end=None, server_address=None,
                  server_port=None, local_ip=None):
         self._clients: Dict[str, SessionClient] = {}
-        self._lock = threading.Lock()
-        self._on_session = on_session
+        self._lock = threading.RLock()
+        self._on_session_start = on_session_start
         self._on_session_end = on_session_end
         self._local_ip = local_ip
+        self._vni_allocations = set()
         self._server = grpc.server(futures.ThreadPoolExecutor())
         self._servicer = SessionServerServicer(self._init_session, self._session_stream)
 
@@ -105,12 +106,24 @@ class SessionServer:
             LOGGER.info('New session stream for %s %s/%s',
                         device_mac, request.device_vlan, request.assigned_vlan)
             assert device_mac not in self._clients, 'already registered %s' % device_mac
+            # vni should be unique across devices in a given remote ip.
+            vni = 1
+            while vni in self._vni_allocations:
+                vni += 1
+            self._vni_allocations.add(vni)
+            request.endpoint.vni = vni
             self._clients[device_mac] = SessionClient(init_request=request)
         LOGGER.info('Sending %s endpoint %s start', device_mac, self._local_ip)
-        endpoint = TunnelEndpoint(ip=self._local_ip)
+        endpoint = TunnelEndpoint(ip=self._local_ip, vni=vni)
         self._send_reply(device_mac, SessionProgress(endpoint=endpoint))
         self.send_device_result(device_mac, PortBehavior.Behavior.authenticated)
-        self._on_session(request)
+        try:
+            self._on_session_start(request)
+        except Exception as e:
+            LOGGER.error('Cleaning up session for %s that failed to initialize.', device_mac)
+            with self._lock:
+                self._reap_session(device_mac)
+            raise e
 
     def _session_stream(self, request):
         device_mac = request.device_mac
@@ -123,14 +136,16 @@ class SessionServer:
                 yield item
         except GeneratorExit:
             # Catching early generator exit so session may be cleaned up.
-            pass
+            LOGGER.info('Remote disconnected for %s', device_mac)
         with self._lock:
             self._reap_session(device_mac)
 
     def _reap_session(self, device_mac):
         LOGGER.info('Session ended for %s', device_mac)
+        init_request = self._clients[device_mac].init_request
         if self._on_session_end:
-            self._on_session_end(self._clients[device_mac].init_request)
+            self._on_session_end(init_request)
+        self._vni_allocations.remove(init_request.endpoint.vni)
         del self._clients[device_mac]
 
     def stop(self):

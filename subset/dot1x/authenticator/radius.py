@@ -249,7 +249,7 @@ class RadiusAttributesList:
     @classmethod
     def merge_concat_attributes(cls, attributes, attributes_to_concat):
         """
-        Removes concat attributes for attributes list, and inserts a single new master attribute
+        Removes concat attributes for attributes list, and inserts a single new primary attribute
         for all concat attributes of the same type (e.g. EAPMessage, EAPMessage, = 1 EAPMessage)
         Args:
             attributes (list):

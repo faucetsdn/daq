@@ -51,7 +51,7 @@ Overall device result FAIL
 |Category|Total Tests|Result|Required Pass|Required Pass for PoE Devices|Required Pass for BACnet Devices|Required Pass for IoT Devices|Recommended Pass|Other|
 |---|---|---|---|---|---|---|---|---|
 |Base|2|FAIL|1/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Connection|12|FAIL|3/5/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
+|Connection|13|FAIL|4/5/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Security|13|FAIL|2/1/7|0/0/0|0/0/1|0/0/0|0/0/2|0/0/0|
 |NTP|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |DNS|1|SKIP|0/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
@@ -64,12 +64,12 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required Pass|10|1|13|5|
+|Required Pass|11|1|13|5|
 |Required Pass for PoE Devices|0|0|1|0|
 |Required Pass for BACnet Devices|0|1|2|0|
 |Required Pass for IoT Devices|0|0|1|0|
 |Recommended Pass|0|0|2|0|
-|Other|1|0|4|2|
+|Other|0|0|4|2|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -83,6 +83,7 @@ Syntax: Pass / Fail / Skip
 |pass|communication.network.min_send|Communication|Required Pass|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|communication.network.type|Communication|Required Pass|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connection|Required Pass|target reached|
+|pass|connection.dot1x.authentication|Connection|Required Pass|Authentication for 9a:02:57:1e:8f:01 succeeded.|
 |gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
 |gone|connection.ipaddr.disconnect_ip_change|Connection|Required Pass||
 |gone|connection.ipaddr.ip_change|Connection|Required Pass||
@@ -95,7 +96,6 @@ Syntax: Pass / Fail / Skip
 |skip|connection.switch.port_link|Connection|Required Pass|No local IP has been set, check system config|
 |skip|connection.switch.port_speed|Connection|Required Pass|No local IP has been set, check system config|
 |skip|dns.network.hostname_resolution|DNS|Required Pass|Device did not send any DNS requests|
-|pass|dot1x.dot1x|Other|Other|Authentication for 9a:02:57:1e:8f:01 succeeded.|
 |pass|ntp.network.ntp_support|NTP|Required Pass|Using NTPv4.|
 |pass|ntp.network.ntp_update|NTP|Required Pass|Device clock synchronized.|
 |skip|poe.switch.power|PoE|Required Pass for PoE Devices|No local IP has been set, check system config|
@@ -686,13 +686,13 @@ RESULT skip dns.network.hostname_resolution Device did not send any DNS requests
 
 ```
 --------------------
-dot1x.dot1x
+connection.dot1x.authentication
 --------------------
-Dot1x authentication tests
+Verifies general support for 802.1x authentication.
 --------------------
 n/a
 --------------------
-RESULT pass dot1x.dot1x Authentication for 9a:02:57:1e:8f:01 succeeded.
+RESULT pass connection.dot1x.authentication Authentication for 9a:02:57:1e:8f:01 succeeded.
 
 ```
 

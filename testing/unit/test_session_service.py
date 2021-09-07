@@ -21,7 +21,7 @@ class BaseSessionServerTest(unittest.TestCase):
     def setUp(self):
         self._server_results = []
         self._on_session_end = MagicMock(return_value=None)
-        self._server = SessionServer(on_session=self._new_connection,
+        self._server = SessionServer(on_session_start=self._new_connection,
                                      on_session_end=self._on_session_end, server_port=self.port,
                                      local_ip=_LOCAL_IP)
         self._server.start()
@@ -44,6 +44,7 @@ class SessionServerTest(BaseSessionServerTest):
         self._server.close_stream(_TEST_MAC_ADDRESS)
 
     # pylint: disable=no-member
+    # pylint: disable=protected-access
     def test_server_connect(self):
         """Simple server connetion test"""
         client = TestingSessionServerClient(server_port=self.port)
@@ -52,11 +53,12 @@ class SessionServerTest(BaseSessionServerTest):
         results = list(session)
         self.assertEqual(len(results), 3)
         self.assertEqual(results[0].endpoint.ip, _LOCAL_IP)
+        self.assertEqual(results[0].endpoint.vni, 1)
         self.assertEqual(results[1].result.code, SessionResult.ResultCode.STARTED)
         self.assertEqual(len(self._server_results), 1)
         self.assertEqual(self._server_results[0].device_mac, _TEST_MAC_ADDRESS)
         self._on_session_end.assert_called_once_with(self._server_results[0])
-
+        self.assertEqual(self._server._vni_allocations, set())
 
 class SessionServerDisallowSameClient(BaseSessionServerTest):
     """Test session server behavior with multiples of the same clients."""
@@ -75,6 +77,7 @@ class SessionServerDisallowSameClient(BaseSessionServerTest):
         """Test when the same client connects twice, the second session is terminated."""
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
+        time.sleep(1)
         client = TestingSessionServerClient(server_port=self.port)
         results = client.start_session(_TEST_MAC_ADDRESS)
         time.sleep(1)

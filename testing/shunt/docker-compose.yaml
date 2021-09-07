@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+    host1:
+        build:
+            context: ../..
+            dockerfile: ./testing/shunt/Dockerfile.shunthost
+        command: bash -c "./start_shunt_host 1"
+        cap_add:
+            - ALL
+    host2:
+        build:
+            context: ../..
+            dockerfile: ./testing/shunt/Dockerfile.shunthost
+        command: bash -c "./start_shunt_host 2"
+        cap_add:
+            - ALL

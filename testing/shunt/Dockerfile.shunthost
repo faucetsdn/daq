@@ -1,0 +1,19 @@
+# Image name: daqf/default
+#
+# Default image used for mininet docker hosts.
+#
+
+FROM daqf/aardvark
+
+RUN $AG update && $AG install openssh-server socat sudo iptables
+
+COPY ./testing/shunt/id_rsa .ssh/
+COPY ./testing/shunt/id_rsa.pub .ssh/
+COPY ./testing/shunt/authorized_keys .ssh/
+COPY ./testing/shunt/start_shunt_host ./
+
+RUN chmod -R 700 .ssh
+
+RUN service ssh start
+
+COPY ./bin/shunt_functions bin/

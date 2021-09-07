@@ -183,6 +183,11 @@
             "category": "Security",
             "required": "pass",
             "expected": "Required Pass for BACnet Devices"
+        },
+        "connection.dot1x.authentication": {
+            "category": "Connection",
+            "required": "pass",
+            "expected": "Required Pass"
         }
     }
 }

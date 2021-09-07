@@ -39,10 +39,11 @@ fi
 docker_files=$(host_tests=$host_tests bin/docker_build_files)
 
 build_target() {
+    docker_build_args="-t $tag -f $file --build-arg GIT_URL ."
     if [ -n "$inline" ]; then
-        bin/retry_cmd docker build -t $tag -f $file . 2>&1 | tee -a $logfile || failed=y
+        bin/retry_cmd docker build $docker_build_args 2>&1 | tee -a $logfile || failed=y
     else
-        bin/retry_cmd docker build -t $tag -f $file . >> $logfile 2>&1 || failed=y
+        bin/retry_cmd docker build $docker_build_args >> $logfile 2>&1 || failed=y
     fi
     if [ -n "$failed" ]; then
         tail $logfile

@@ -109,7 +109,7 @@ class ConnectedHost:
         self.state = None
         self._state_transition(_STATE.READY)
         self.results = {}
-        self.dummy = None
+        self.fake_host = None
         self.test_name = None
         self.test_start = gcp.get_timestamp()
         self.test_host = None
@@ -287,6 +287,8 @@ class ConnectedHost:
         network = self.runner.network
         if self.target_port:
             self._mirror_intf_name = network.create_mirror_interface(self.target_port)
+        else:
+            self._mirror_intf_name = network.tap_intf
         self._topology_hook()
         if self.config['test_list']:
             self._start_run()
