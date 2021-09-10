@@ -43,7 +43,7 @@ The ATA includes a cloud logging facility, which publishes device discovery even
 The following are required to enable this functionality
 
 * A GCP IoT Core Registry with the name `UDMS-AUDITOR`, with a default telemetry
-  topic named `auditor
+  topic named `auditor`
 * A device created in the `UDMS-AUDITOR` registry created with an appropriate
   name and an RS256 authentication credentials
 * The private key saved as `udmi_auditor_key.pem` in the `<DAQ_ROOT>/inst/config/` 
