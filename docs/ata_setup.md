@@ -50,9 +50,9 @@ The following are required to enable this functionality
 directory
 *  The following added to the system.yaml
   ```
-  #cloud_config:
-  #  project_id: <GCP PROJECT ID>
-  #  device_id: <NAME OF DEVICE>
+  cloud_config:
+    project_id: <GCP PROJECT ID>
+    device_id: <NAME OF DEVICE>
   ```
 
 The data can be stored in GCP BigQuery where it can be queried or analysed. For
