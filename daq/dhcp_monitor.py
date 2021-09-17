@@ -4,7 +4,7 @@ import re
 import time
 
 import logger
-from clib import tcpdump_helper
+import tcpdump_helper
 from host import MODE
 
 LOGGER = logger.get_logger('dhcp')

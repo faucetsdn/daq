@@ -3,10 +3,10 @@
 import os
 
 from clib import docker_host
-from clib import tcpdump_helper
 
 import dhcp_monitor
 import logger
+import tcpdump_helper
 from base_gateway import BaseGateway
 
 LOGGER = logger.get_logger('gateway')
