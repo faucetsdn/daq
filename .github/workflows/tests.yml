@@ -153,3 +153,52 @@ jobs:
         java-version: 1.11
     - name: Build with Maven
       run: mvn -B clean compile test assembly:single --file usi/pom.xml
+
+  fot_tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: setup forch
+        run: bin/setup_remote forch
+      - name: setup forch
+        env:
+          GIT_URL: ${{ secrets.GIT_URL }}
+        run: |
+          cd forch
+          bin/setup_base
+          bin/setup_remote faucet
+          bin/setup_remote daq
+      - name: build docker
+        env:
+          GIT_URL: ${{ secrets.GIT_URL }}
+        run: |
+          cd forch
+          bin/retry_cmd bin/build_docker controller
+          bin/build_dts
+      - name: run fot integration tests
+        run: |
+          cd forch
+          bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot
+          timeout 10m bin/run_test_set fot
+      - name: post-run logs
+        if: ${{ always() }}
+        run: |
+          cd forch
+          echo %%%%%%%%%%%%% Controller log
+          docker logs forch-controller-1
+          echo %%%%%%%%%%%%% DAQ log
+          cat inst/forch-controller-1/daq/inst/cmdrun.log || cat inst/forch-dts/cmdrun.log
+          echo %%%%%%%%%%%%% Forch log
+          cat inst/forch-controller-1/forch.log
+          echo %%%%%%%%%%%%% Faucet log
+          cat inst/forch-controller-1/faucet.log
+          echo %%%%%%%%%%%%% Endpoint log
+          cat inst/endpoint.log || true
+          echo %%%%%%%%%%%%% Log line lengths
+          (cd inst/forch-controller-1; wc -l faucet.log forch.log daq/inst/cmdrun.log)
+
