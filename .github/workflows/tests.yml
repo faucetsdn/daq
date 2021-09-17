@@ -169,7 +169,7 @@ jobs:
         run: |
           set -x
           bin/setup_remote forch
-          git describe > forch/etc/DAQ_VERSION
+          git rev-list HEAD --max-count=1 > forch/etc/DAQ_VERSION
           cd forch
           bin/setup_base
           bin/setup_remote faucet
