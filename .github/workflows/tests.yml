@@ -154,7 +154,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean compile test assembly:single --file usi/pom.xml
 
-  fot_tests:
+  test_fot:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -164,11 +164,11 @@ jobs:
         with:
           python-version: 3.8
       - name: setup forch
-        run: bin/setup_remote forch
-      - name: setup forch
         env:
           GIT_URL: ${{ secrets.GIT_URL }}
         run: |
+          bin/setup_remote forch
+          git describe > forch/etc/DAQ_VERSION
           cd forch
           bin/setup_base
           bin/setup_remote faucet
