@@ -8,14 +8,13 @@ from datetime import timedelta, datetime
 from ipaddress import ip_network
 import grpc
 
-from clib import tcpdump_helper
-
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
 from proto.system_config_pb2 import DhcpMode
 
 import configurator
+import tcpdump_helper
 from test_modules import DockerModule, IpAddrModule, NativeModule
 from env import DAQ_RUN_DIR
 import gcp
