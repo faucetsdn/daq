@@ -7,6 +7,7 @@ function build_vxlan_ssh_conn {
     SSH_IN_PORT=$1
     SSH_OUT_PORT=$2
     LOCAL_VXLAN_IP=${3:-"192.168.1.2"}
+    VNI=${4:-0}
     REMOTE_IP=${4:-"192.168.21.1"}
     LOCAL_IP=${5:-"192.168.21.2"}
 
@@ -28,7 +29,7 @@ function build_vxlan_ssh_conn {
     socat -T15 udp4-recvfrom:20000,reuseaddr,fork tcp:localhost:$SSH_OUT_PORT &
 
     # create vxlan tunnel
-    sudo ip link add vxlan type vxlan id 0 remote $REMOTE_IP dstport 4789 srcport 4789 4789 nolearning
+    sudo ip link add vxlan type vxlan id $VNI remote $REMOTE_IP dstport 4789 srcport 4789 4789 nolearning
     sudo ip addr add $LOCAL_VXLAN_IP/24 dev vxlan
     sudo ip link set vxlan up
 }
