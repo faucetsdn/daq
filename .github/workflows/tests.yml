@@ -167,6 +167,7 @@ jobs:
         env:
           GIT_URL: ${{ secrets.GIT_URL }}
         run: |
+          set -x
           bin/setup_remote forch
           git describe > forch/etc/DAQ_VERSION
           cd forch
