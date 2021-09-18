@@ -161,7 +161,7 @@ class FaucetTopology:
         sec_topology = self.topology['dps'].setdefault(self.sec_name, {
             'dp_id': self.VXLAN_SEC_DPID,
             'interfaces': {
-                self._make_sec_trunk_interface()
+                self.VXLAN_SEC_TRUNK_PORT: self._make_sec_trunk_interface()
             }
         })
         sec_interfaces = sec_topology['interfaces']
