@@ -176,6 +176,10 @@ class FaucetTopology:
                 ] = self._make_sec_trunk_interface(addition=(egress_vlan,))
             else:
                 sec_topology['interfaces'].pop(device.port.vxlan, None)
+
+            # This logging statement is used for integration testing.
+            LOGGER.info('Configured topology with %d interfaces', len(sec_topology['interfaces']))
+
         self._generate_acls()
 
     def direct_port_traffic(self, device, port_no, target):
