@@ -158,27 +158,29 @@ class FaucetTopology:
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
         for port in self._get_gw_ports(device_set):
             interfaces[port]['native_vlan'] = vlan
+        sec_topology = self.topology['dps'].setdefault(self.sec_name, {
+            'dp_id': self.VXLAN_SEC_DPID,
+            'interfaces': {
+            }
+        })
+        sec_interfaces = sec_topology['interfaces']
         if device.port.vxlan:
-            sec_topology = self.topology['dps'].setdefault(self.sec_name, {
-                'dp_id': self.VXLAN_SEC_DPID,
-                'interfaces': {
-                    self.VXLAN_SEC_TRUNK_PORT: self._make_sec_trunk_interface()
-                }
-            })
+            sec_interfaces.setdefault(self.VXLAN_SEC_TRUNK_PORT,
+                                                  self._make_sec_trunk_interface())
             if port_set:
-                interface = sec_topology['interfaces'].setdefault(device.port.vxlan, {})
+                interface = sec_interfaces.setdefault(device.port.vxlan, {})
                 egress_vlan = device.assigned if device.assigned else self._egress_vlan
                 interface['tagged_vlans'] = [vlan, egress_vlan]
                 interface['name'] = str(device)
                 interface['acl_in'] = self.INCOMING_ACL_FORMAT % 'vxlan'
-                sec_topology['interfaces'][
+                sec_interfaces[
                     self.VXLAN_SEC_TRUNK_PORT
                 ] = self._make_sec_trunk_interface(addition=(egress_vlan,))
             else:
-                sec_topology['interfaces'].pop(device.port.vxlan, None)
+                sec_interfaces.pop(device.port.vxlan, None)
 
-            # This logging statement is used for integration testing.
-            LOGGER.info('Configured topology with %d interfaces', len(sec_topology['interfaces']))
+        # This logging statement is used for integration testing.
+        LOGGER.info('Configured topology with %d interfaces', len(sec_interfaces))
 
         self._generate_acls()
 
