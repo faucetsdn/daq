@@ -166,7 +166,7 @@ class FaucetTopology:
         sec_interfaces = sec_topology['interfaces']
         if device.port.vxlan:
             sec_interfaces.setdefault(self.VXLAN_SEC_TRUNK_PORT,
-                                                  self._make_sec_trunk_interface())
+                                      self._make_sec_trunk_interface())
             if port_set:
                 interface = sec_interfaces.setdefault(device.port.vxlan, {})
                 egress_vlan = device.assigned if device.assigned else self._egress_vlan
