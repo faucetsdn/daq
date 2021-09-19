@@ -177,11 +177,13 @@ jobs:
           bin/retry_cmd bin/build_docker controller
           bin/build_dts
       - name: run fot integration tests
+        if: ${{ always() }}
         run: |
           cd forch
           bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot
           timeout 15m bin/run_test_set fot
-      - name: run fot integration tests
+      - name: run dts integration tests
+        if: ${{ always() }}
         run: |
           cd forch
           bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot dts localhost
