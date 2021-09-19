@@ -165,6 +165,8 @@ class FaucetTopology:
             }
         })
         sec_interfaces = sec_topology['interfaces']
+
+        LOGGER.info('Direct device %s traffic to %s %s', device.mac, device.port.vxlan, port_set)
         if device.port.vxlan:
             if port_set:
                 interface = sec_interfaces.setdefault(device.port.vxlan, {})
