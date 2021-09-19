@@ -303,7 +303,7 @@ class TestNetwork:
         src_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
         vxlan_cmd = self._VXLAN_CMD_FMT % (interface, remote.vni, remote.ip,
                                            dst_port, src_port, dst_port)
-        LOGGER.info('Configuring interface: %s', vxlan_cmd)
+        LOGGER.info('Configuring interface %s: %s', device.mac, vxlan_cmd)
         self.sec.cmd(vxlan_cmd)
         self.sec.cmd('ip link set %s up' % interface)
         self.sec.vsctl('add-port', self.sec.name, interface, '--',
@@ -313,7 +313,7 @@ class TestNetwork:
         if not device.port.vxlan:
             return
         interface = "vxlan" + str(device.port.vxlan)
-        LOGGER.info('Cleaning up interface: %s', interface)
+        LOGGER.info('Cleaning interface %s: %s', device.mac, interface)
         self.sec.cmd('ip link set %s down' % interface)
         self.sec.cmd('ip link del %s' % interface)
         self.sec.vsctl('del-port', self.sec.name, interface)
@@ -345,8 +345,8 @@ class TestNetwork:
 
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
-        LOGGER.info('Directing traffic for %s on %s/%s to %s',
-                    device.mac, device.vlan, device.assigned, port_set)
+        LOGGER.info('Directing traffic for %s on %s/%s/%s to %s',
+                    device.mac, device.vlan, device.assigned, device.port.vxlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_device_traffic(device, port_set)
         self._generate_behavioral_config()
