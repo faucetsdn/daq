@@ -318,7 +318,7 @@ class TestNetwork:
         self.sec.cmd('ip link set %s down' % interface)
         self.sec.cmd('ip link del %s' % interface)
         self.sec.vsctl('del-port', self.sec.name, interface)
-        self._vxlan_port_sets.remove(vxlan)
+        self._vxlan_port_sets.discard(vxlan)
         device.port.vxlan = None
 
     def direct_port_traffic(self, device, port, target):
