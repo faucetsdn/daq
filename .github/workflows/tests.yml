@@ -202,4 +202,3 @@ jobs:
           cat inst/endpoint.log || true
           echo %%%%%%%%%%%%% Log line lengths
           (cd inst/forch-controller-1; wc -l faucet.log forch.log daq/inst/cmdrun.log)
-
