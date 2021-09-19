@@ -156,7 +156,7 @@ jobs:
 
   test_fot:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
       - name: Set up python 3.8
@@ -174,18 +174,18 @@ jobs:
           bin/setup_base
           bin/setup_remote faucet
           bin/setup_remote daq
-      - name: build docker
-        env:
-          GIT_URL: ${{ secrets.GIT_URL }}
-        run: |
-          cd forch
           bin/retry_cmd bin/build_docker controller
           bin/build_dts
       - name: run fot integration tests
         run: |
           cd forch
           bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot
-          timeout 10m bin/run_test_set fot
+          timeout 15m bin/run_test_set fot
+      - name: run fot integration tests
+        run: |
+          cd forch
+          bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot dts localhost
+          timeout 15m bin/run_test_set fot
       - name: post-run logs
         if: ${{ always() }}
         run: |
@@ -200,5 +200,5 @@ jobs:
           cat inst/forch-controller-1/faucet.log
           echo %%%%%%%%%%%%% Endpoint log
           cat inst/endpoint.log || true
-          echo %%%%%%%%%%%%% Log line lengths
-          (cd inst/forch-controller-1; wc -l faucet.log forch.log daq/inst/cmdrun.log)
+          echo %%%%%%%%%%%%% Log lengths
+          find inst -name \*.log | fgrep -v nodes/ | xargs wc -l
