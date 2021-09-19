@@ -181,7 +181,8 @@ class FaucetTopology:
                 sec_interfaces.pop(device.port.vxlan, None)
 
         # This logging statement is used for integration testing.
-        LOGGER.info('Configured topology with %d interfaces', len(sec_interfaces))
+        LOGGER.info('Configured topology with %d interfaces: %s',
+                    len(sec_interfaces), list(sec_interfaces.keys()))
 
         self._generate_acls()
 

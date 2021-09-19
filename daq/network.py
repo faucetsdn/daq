@@ -288,14 +288,14 @@ class TestNetwork:
 
     def _configure_remote_tap(self, device):
         """Configure the tap for remote connection"""
-        if not device.session_endpoint or self.ext_intf:
+        if not device.session_endpoint or self.ext_intf or device.port.vxlan:
             return
-        self._cleanup_remote_tap(device)
         remote = device.session_endpoint
         vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
         vxlan_port = self.topology.VXLAN_SEC_TRUNK_PORT + 1
         while vxlan_port in self._vxlan_port_sets:
             vxlan_port += 1
+        self._cleanup_remote_tap(device, vxlan_port=vxlan_port)
         self._vxlan_port_sets.add(vxlan_port)
         device.port.vxlan = vxlan_port
         interface = "vxlan" + str(vxlan_port)
@@ -309,15 +309,16 @@ class TestNetwork:
         self.sec.vsctl('add-port', self.sec.name, interface, '--',
                        'set', 'interface', interface, 'ofport_request=%s' % vxlan_port)
 
-    def _cleanup_remote_tap(self, device):
-        if not device.port.vxlan:
+    def _cleanup_remote_tap(self, device, vxlan_port=None):
+        vxlan = vxlan_port if vxlan_port else device.port.vxlan
+        if not vxlan:
             return
-        interface = "vxlan" + str(device.port.vxlan)
+        interface = "vxlan" + str(vxlan)
         LOGGER.info('Cleaning interface %s: %s', device.mac, interface)
         self.sec.cmd('ip link set %s down' % interface)
         self.sec.cmd('ip link del %s' % interface)
         self.sec.vsctl('del-port', self.sec.name, interface)
-        self._vxlan_port_sets.remove(device.port.vxlan)
+        self._vxlan_port_sets.discard(vxlan)
         device.port.vxlan = None
 
     def direct_port_traffic(self, device, port, target):
