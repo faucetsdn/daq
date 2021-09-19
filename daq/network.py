@@ -288,7 +288,7 @@ class TestNetwork:
 
     def _configure_remote_tap(self, device):
         """Configure the tap for remote connection"""
-        if not device.session_endpoint or self.ext_intf:
+        if not device.session_endpoint or self.ext_intf or device.port.vxlan:
             return
         self._cleanup_remote_tap(device)
         remote = device.session_endpoint

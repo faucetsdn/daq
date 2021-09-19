@@ -470,7 +470,7 @@ class DAQRunner:
 
         if self._device_result_handler:
             if not device.wait_remote:
-                device.port = PortInfo()
+                assert not device.port.vxlan, 'vxlan already allocated'
                 device.port.active = True
                 device.wait_remote = True
         else:
