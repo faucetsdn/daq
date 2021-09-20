@@ -467,7 +467,7 @@ class DAQRunner:
         if not self._devices.get(target_mac):
             LOGGER.info('Learning %s on vid %s', target_mac, vid)
         else:
-            LOGGER.info('Redundant device %s on vid %s', target_mac, vid)
+            LOGGER.debug('Ignoring redundant learn %s on vid %s', target_mac, vid)
             return
 
         device = self._devices.create_if_absent(target_mac, vlan=vid)
