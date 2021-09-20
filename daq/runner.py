@@ -466,6 +466,10 @@ class DAQRunner:
     def _handle_device_learn(self, target_mac, vid):
         if not self._devices.get(target_mac):
             LOGGER.info('Learning %s on vid %s', target_mac, vid)
+        else:
+            LOGGER.info('Redundant device %s on vid %s', target_mac, vid)
+            return
+
         device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
