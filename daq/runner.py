@@ -82,6 +82,7 @@ class Devices:
     def new_device(self, mac, port_info=None, vlan=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
+        LOGGER.info('Creating new device %s on %s, port info %s', mac, vlan, bool(port_info))
         device = Device()
         device.mac = mac
         self._devices[mac] = device
