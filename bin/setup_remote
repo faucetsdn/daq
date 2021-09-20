@@ -40,6 +40,8 @@ fi
 echo Switching $TARGET to version $TARGET_VERSION
 (
     cd $TARGET
+    # Necessary if target isn't a named branch or tag, a noop otherwise.
+    git fetch origin $TARGET_VERSION
     git checkout --detach --no-guess $TARGET_VERSION -- || git checkout --detach --no-guess origin/$TARGET_VERSION --
 )
 
