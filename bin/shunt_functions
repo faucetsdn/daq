@@ -58,7 +58,6 @@ function build_ssh_tunnel {
     SSH_OUT_PORT=$2
     REMOTE_HOST=$3
 
-    sleep 5
     ssh -o StrictHostKeyChecking=no -L $SSH_OUT_PORT:127.0.0.1:$SSH_IN_PORT -N -f $REMOTE_HOST
     ssh -o StrictHostKeyChecking=no -R $SSH_OUT_PORT:127.0.0.1:$SSH_IN_PORT -N -f $REMOTE_HOST
 }
