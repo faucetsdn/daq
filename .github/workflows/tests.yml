@@ -178,16 +178,9 @@ jobs:
           bin/build_dts
       - name: run fot integration tests
         if: ${{ always() }}
-        run: |
-          cd forch
-          bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot
-          timeout 15m bin/run_test_set fot
+        run: bin/retry_cmd bin/run_fot_test vxlan
       - name: run dts integration tests
-        if: ${{ always() }}
-        run: |
-          cd forch
-          bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot dts localhost
-          timeout 15m bin/run_test_set fot
+        run: bin/retry_cmd bin/run_fot_test dts localhost
       - name: post-run logs
         if: ${{ always() }}
         run: |
