@@ -178,9 +178,13 @@ jobs:
           bin/build_dts
       - name: run fot integration tests
         if: ${{ always() }}
-        run: bin/retry_cmd bin/run_fot_test vxlan
+        run: |
+          cd forch
+          bin/retry_cmd bin/run_fot_test vxlan
       - name: run dts integration tests
-        run: bin/retry_cmd bin/run_fot_test dts localhost
+        run: |
+          cd forch
+          bin/retry_cmd bin/run_fot_test dts localhost
       - name: post-run logs
         if: ${{ always() }}
         run: |
