@@ -156,7 +156,7 @@ jobs:
 
   test_fot:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v2
       - name: Set up python 3.8
@@ -180,14 +180,11 @@ jobs:
         if: ${{ always() }}
         run: |
           cd forch
-          bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot
-          timeout 15m bin/run_test_set fot
+          bin/retry_cmd bin/run_fot_test vxlan
       - name: run dts integration tests
-        if: ${{ always() }}
         run: |
           cd forch
-          bin/setup_stack devices 5 faux-mac-prefix "9a:99:57:1e" skip-conn-check dhcp fot dts localhost
-          timeout 15m bin/run_test_set fot
+          bin/retry_cmd bin/run_fot_test dts localhost
       - name: post-run logs
         if: ${{ always() }}
         run: |
