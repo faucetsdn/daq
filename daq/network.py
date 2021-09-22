@@ -100,7 +100,12 @@ class TestNetwork:
         params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
         params['env_vars'] = env_vars if env_vars else []
         params['vol_maps'] = vol_maps if vol_maps else []
-        host = self.net.addHost(name, cls, **params)
+        try:
+            host = self._retry_func(partial(self.net.addHost, name, cls, **params))
+        except Exception as e:
+            # If addHost fails, ip allocation needs to be explicityly cleaned up.
+            self._reset_mininet_next_ip()
+            raise e
         try:
             switch_link = self._retry_func(
                 partial(self.net.addLink, self.pri, host, port1=port, fast=False))
@@ -145,14 +150,17 @@ class TestNetwork:
         del switch.ports[intf]
         del switch.nameToIntf[intf.name]
 
+    def _reset_mininet_next_ip(self):
+        # Resets Mininet's next ip so subnet ips don't run out.
+        # IP overrides are excluded from this set.
+        self.net.nextIP = max(self._used_ip_indices or [0]) + 1
+
     def remove_host(self, host):
         """Remove a host from the ecosystem"""
         index = self.net.hosts.index(host)
         if host.IP() and self._get_host_ip_index(host) in self._used_ip_indices:
-            # Resets Mininet's next ip so subnet ips don't run out.
-            # IP overrides are excluded from this set.
             self._used_ip_indices.remove(self._get_host_ip_index(host))
-            self.net.nextIP = max(self._used_ip_indices or [0]) + 1
+            self._reset_mininet_next_ip()
         if index:
             del self.net.hosts[index]
         if host in self.switch_links:
@@ -288,14 +296,14 @@ class TestNetwork:
 
     def _configure_remote_tap(self, device):
         """Configure the tap for remote connection"""
-        if not device.session_endpoint or self.ext_intf:
+        if not device.session_endpoint or self.ext_intf or device.port.vxlan:
             return
-        self._cleanup_remote_tap(device)
         remote = device.session_endpoint
         vxlan_config = self.config.get('switch_setup', {}).get('endpoint', {})
         vxlan_port = self.topology.VXLAN_SEC_TRUNK_PORT + 1
         while vxlan_port in self._vxlan_port_sets:
             vxlan_port += 1
+        self._cleanup_remote_tap(device, vxlan_port=vxlan_port)
         self._vxlan_port_sets.add(vxlan_port)
         device.port.vxlan = vxlan_port
         interface = "vxlan" + str(vxlan_port)
@@ -303,21 +311,22 @@ class TestNetwork:
         src_port = int(vxlan_config.get('port', self._DEFAULT_VXLAN_PORT))
         vxlan_cmd = self._VXLAN_CMD_FMT % (interface, remote.vni, remote.ip,
                                            dst_port, src_port, dst_port)
-        LOGGER.info('Configuring interface: %s', vxlan_cmd)
+        LOGGER.info('Configuring interface %s: %s', device.mac, vxlan_cmd)
         self.sec.cmd(vxlan_cmd)
         self.sec.cmd('ip link set %s up' % interface)
         self.sec.vsctl('add-port', self.sec.name, interface, '--',
                        'set', 'interface', interface, 'ofport_request=%s' % vxlan_port)
 
-    def _cleanup_remote_tap(self, device):
-        if not device.port.vxlan:
+    def _cleanup_remote_tap(self, device, vxlan_port=None):
+        vxlan = vxlan_port if vxlan_port else device.port.vxlan
+        if not vxlan:
             return
-        interface = "vxlan" + str(device.port.vxlan)
-        LOGGER.info('Cleaning up interface: %s', interface)
+        interface = "vxlan" + str(vxlan)
+        LOGGER.info('Cleaning interface %s: %s', device.mac, interface)
         self.sec.cmd('ip link set %s down' % interface)
         self.sec.cmd('ip link del %s' % interface)
         self.sec.vsctl('del-port', self.sec.name, interface)
-        self._vxlan_port_sets.remove(device.port.vxlan)
+        self._vxlan_port_sets.discard(vxlan)
         device.port.vxlan = None
 
     def direct_port_traffic(self, device, port, target):
@@ -345,8 +354,8 @@ class TestNetwork:
 
     def direct_device_traffic(self, device, port_set):
         """Modify gateway set's vlan to match triggering vlan"""
-        LOGGER.info('Directing traffic for %s on %s/%s to %s',
-                    device.mac, device.vlan, device.assigned, port_set)
+        LOGGER.info('Directing traffic for %s on %s/%s/%s to %s',
+                    device.mac, device.vlan, device.assigned, device.port.vxlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
         self.topology.direct_device_traffic(device, port_set)
         self._generate_behavioral_config()

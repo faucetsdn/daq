@@ -8,14 +8,13 @@ from datetime import timedelta, datetime
 from ipaddress import ip_network
 import grpc
 
-from clib import tcpdump_helper
-
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
 from proto.system_config_pb2 import DhcpMode
 
 import configurator
+import tcpdump_helper
 from test_modules import DockerModule, IpAddrModule, NativeModule
 from env import DAQ_RUN_DIR
 import gcp
@@ -559,7 +558,7 @@ class ConnectedHost:
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
-        tcp_filter = ''
+        tcp_filter = 'ether broadcast or ether host %s' % self.device.mac
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
                          self._shorten_filename(output_file))

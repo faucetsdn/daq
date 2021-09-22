@@ -82,6 +82,7 @@ class Devices:
     def new_device(self, mac, port_info=None, vlan=None):
         """Adding a new device"""
         assert mac not in self._devices, "Device with mac: %s is already added." % mac
+        LOGGER.info('Creating new device %s on %s, port info %s', mac, vlan, bool(port_info))
         device = Device()
         device.mac = mac
         self._devices[mac] = device
@@ -465,12 +466,16 @@ class DAQRunner:
     def _handle_device_learn(self, target_mac, vid):
         if not self._devices.get(target_mac):
             LOGGER.info('Learning %s on vid %s', target_mac, vid)
+        else:
+            LOGGER.debug('Ignoring redundant learn %s on vid %s', target_mac, vid)
+            return
+
         device = self._devices.create_if_absent(target_mac, vlan=vid)
         device.dhcp_mode = DhcpMode.EXTERNAL
 
         if self._device_result_handler:
             if not device.wait_remote:
-                device.port = PortInfo()
+                assert not device.port.vxlan, 'vxlan already allocated'
                 device.port.active = True
                 device.wait_remote = True
         else:
