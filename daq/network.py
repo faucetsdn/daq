@@ -103,7 +103,7 @@ class TestNetwork:
         try:
             host = self._retry_func(partial(self.net.addHost, name, cls, **params))
         except Exception as e:
-            # Need to free any ip allocations.
+            # If addHost fails, ip allocation needs to be explicityly cleaned up.
             self._reset_mininet_next_ip()
             raise e
         try:
