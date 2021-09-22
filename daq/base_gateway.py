@@ -71,8 +71,8 @@ class BaseGateway(ABC):
         vol_maps = [os.path.abspath(os.path.join(DAQ_RUN_DIR, 'config')) + ':/config/inst']
         host = self.runner.add_host(host_name, port=host_port, cls=cls, tmpdir=self.tmpdir,
                                     vol_maps=vol_maps, env_vars=env_vars)
-        host.activate()
         self.host = host
+        host.activate()
         self.host_intf = self.runner.get_host_interface(host)
         LOGGER.info("Added networking host %s on port %d at %s as %s",
                     host_name, host_port, host.IP(), self.host_intf)

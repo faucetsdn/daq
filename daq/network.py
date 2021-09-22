@@ -100,7 +100,12 @@ class TestNetwork:
         params['tmpdir'] = os.path.join(tmpdir, 'nodes') if tmpdir else None
         params['env_vars'] = env_vars if env_vars else []
         params['vol_maps'] = vol_maps if vol_maps else []
-        host = self.net.addHost(name, cls, **params)
+        try:
+            host = self._retry_func(partial(self.net.addHost, name, cls, **params))
+        except Exception as e:
+            # If addHost fails, ip allocation needs to be explicityly cleaned up.
+            self._reset_mininet_next_ip()
+            raise e
         try:
             switch_link = self._retry_func(
                 partial(self.net.addLink, self.pri, host, port1=port, fast=False))
@@ -145,14 +150,17 @@ class TestNetwork:
         del switch.ports[intf]
         del switch.nameToIntf[intf.name]
 
+    def _reset_mininet_next_ip(self):
+        # Resets Mininet's next ip so subnet ips don't run out.
+        # IP overrides are excluded from this set.
+        self.net.nextIP = max(self._used_ip_indices or [0]) + 1
+
     def remove_host(self, host):
         """Remove a host from the ecosystem"""
         index = self.net.hosts.index(host)
         if host.IP() and self._get_host_ip_index(host) in self._used_ip_indices:
-            # Resets Mininet's next ip so subnet ips don't run out.
-            # IP overrides are excluded from this set.
             self._used_ip_indices.remove(self._get_host_ip_index(host))
-            self.net.nextIP = max(self._used_ip_indices or [0]) + 1
+            self._reset_mininet_next_ip()
         if index:
             del self.net.hosts[index]
         if host in self.switch_links:
