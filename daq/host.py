@@ -558,7 +558,7 @@ class ConnectedHost:
     def _monitor_scan(self, output_file, timeout=None):
         assert not self._monitor_ref, 'tcp_monitor already active'
         network = self.runner.network
-        tcp_filter = ''
+        tcp_filter = 'ether broadcast or ether host %s' %  self.device.mac
         self.logger.info('Target device %s pcap intf %s for %s seconds output in %s',
                          self, self._mirror_intf_name, timeout if timeout else 'infinite',
                          self._shorten_filename(output_file))
