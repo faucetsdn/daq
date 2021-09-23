@@ -17,6 +17,12 @@ interfaces:
   faux-2:
     opts: telnet
     port: 2
+  faux-3:
+    opts: curl telnet
+    port: 3
+  faux-4:
+    opts: ssh
+    port: 4
   faux-8:
     opts: -n
     port: 8
@@ -24,7 +30,22 @@ EOF
 
 cmd/run -s
 
+echo Looking for lack of queing activate...
+! egrep 'Target device 9a02571e8f0. queing activate' inst/cmdrun.log
+
+cat <<EOF >> local/system.yaml
+run_trigger:
+  max_hosts: 2
+EOF
+
+cmd/run -s
+
+echo Looking for lack of queing activate...
+egrep 'Target device 9a02571e8f0. queing activate \(2\)' inst/cmdrun.log
+
 fgrep RESULT inst/reports/report_9a02571e8f01_*.md | tee -a $TEST_RESULTS
 fgrep RESULT inst/reports/report_9a02571e8f02_*.md | tee -a $TEST_RESULTS
+fgrep RESULT inst/reports/report_9a02571e8f03_*.md | tee -a $TEST_RESULTS
+fgrep RESULT inst/reports/report_9a02571e8f04_*.md | tee -a $TEST_RESULTS
 
 echo Done with tests | tee -a $TEST_RESULTS

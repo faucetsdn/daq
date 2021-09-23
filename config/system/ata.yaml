@@ -6,6 +6,9 @@ include: ${DAQ_LIB}/config/system/default.yaml
 # Description for dashboard.
 site_description: "ATA Proxy Configuration"
 
+# Configure with proper set of tests.
+host_tests: config/modules/ata.conf
+
 # For large-scale network, no room for sleeping.
 settle_sec: 0
 
@@ -19,7 +22,10 @@ switch_setup:
 
 run_trigger:
   native_vlan: 122
-  max_hosts: 3
+  max_hosts: 10
+  block_time: 10
+  block_existing: True
+  scan_interval: 600
 
 internal_subnet:
   subnet: 10.21.0.0/16

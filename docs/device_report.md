@@ -195,7 +195,7 @@ security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG XXX/tmp/nmap.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T3 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG XXX/tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X () Status: Up
 Host: X.X.X.X () Ports: 47808/closed/udp//bacnet///
@@ -209,7 +209,7 @@ security.nmap.http
 --------------------
 Check that the device does not have open ports exposing an unencrypted web interface using HTTP
 --------------------
-# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T3 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X () Status: Up
 Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///

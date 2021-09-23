@@ -3,6 +3,7 @@
 LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_INTF=${EXT_INTF:-eth0}
 NET_PREFIX=${NET_PREFIX:-10.20}
+SCAN_INTERVAL=${SCAN_INTERVAL:-0}
 
 function finished {
     echo gateway terminating
@@ -98,6 +99,18 @@ if [[ $EXT_INTF != eth0 ]]; then
     echo ./relay_arp $EXT_INTF $LOCAL_IF
     ./relay_arp $EXT_INTF $LOCAL_IF 1>&2 &
     sleep 2
+fi
+
+if [[ -n $SCAN_INTERVAL && $SCAN_INTERVAL > 0 ]]; then
+    echo Doing arp-scan with interval $SCAN_INTERVAL
+    (
+        while true; do
+            sleep $SCAN_INTERVAL
+            subnet=`ip addr show $EXT_INTF | fgrep 'inet ' | awk '{print $2}'`
+            echo Initiating arp-scan on $EXT_INTF for $subnet
+            arp-scan -I $EXT_INTF $subnet
+        done
+    ) &
 fi
 
 echo Blocking for all eternity.

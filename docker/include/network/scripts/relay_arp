@@ -10,8 +10,8 @@ IFACE_OUT = sys.argv[2]
 print('Relay ARP from %s to %s' % (IFACE_IN, IFACE_OUT))
 
 def arp_monitor_callback(pkt):
-    """Receive an ARP packate and reflect it back out the other interface"""
-    if ARP in pkt and pkt[ARP].op == 1: # who-has
+    """Receive an ARP packet and forward it out the other interface"""
+    if ARP in pkt:
         print('Relay ARP %s' % pkt.sprintf("%ARP.hwsrc% %ARP.psrc%"))
         sendp(pkt, iface=IFACE_OUT, verbose=False)
 

@@ -81,7 +81,8 @@ class ReportGenerator:
     _INDEX_FAIL = 1
     _INDEX_SKIP = 2
 
-    def __init__(self, config, target_mac, module_config, report_sink):
+    # pylint: disable=too-many-arguments
+    def __init__(self, config, target_mac, module_config, report_sink, dev_base):
         self._config = config
         self._report_sink = report_sink
         self._module_config = copy.deepcopy(module_config)
@@ -98,9 +99,12 @@ class ReportGenerator:
 
         out_base = config.get('site_path', DAQ_RUN_DIR)
         out_path = os.path.join(out_base, 'mac_addrs', self._clean_mac)
-        self._alt_path = out_path if os.path.isdir(out_path) else None
-        self._alt_prefix = os.path.join(out_path, self._SIMPLE_REPORT) if out_path else None
+        alt_path = out_path if os.path.isdir(out_path) else None
+        self._alt_prefix = os.path.join(alt_path, self._SIMPLE_REPORT) if alt_path else None
         LOGGER.info('Writing alternate report to %s.*', self._alt_prefix)
+
+        self._dev_prefix = os.path.join(dev_base, self._report_name) if dev_base else None
+        LOGGER.info('Writing device report to %s.*', self._dev_prefix)
 
         self._all_results = None
         self._result_headers = list(self._module_config.get('report', {}).get('results', []))
@@ -158,11 +162,15 @@ class ReportGenerator:
         self._write_json_report()
         self._report_sink(self._all_results)
         LOGGER.info('Copying reports to %s.*', self._alt_prefix)
+        LOGGER.info('Copying reports to %s.*', self._dev_prefix)
         report_paths = {}
         for extension in ['.md', '.pdf', '.json']:
-            if self._alt_path:
-                shutil.copyfile(self._report_prefix + extension, self._alt_prefix + extension)
-            report_paths.update({self._PATH_PREFIX + extension: self._report_prefix + extension})
+            report_path = self._report_prefix + extension
+            if self._alt_prefix:
+                shutil.copyfile(report_path, self._alt_prefix + extension)
+            if self._dev_prefix:
+                shutil.copyfile(report_path, self._dev_prefix + extension)
+            report_paths.update({self._PATH_PREFIX + extension: report_path})
         return report_paths, self._all_results
 
     def _write_json_report(self):

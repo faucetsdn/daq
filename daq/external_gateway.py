@@ -21,8 +21,8 @@ class ExternalGatewayHost(Host):
 class ExternalGateway(BaseGateway):
     """Gateway collection class for managing testing services"""
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._scan_monitor = None
         self.dhcp_monitor = None
         self._tap_intf = None
@@ -33,6 +33,7 @@ class ExternalGateway(BaseGateway):
         self.dhcp_monitor = dhcp_monitor.DhcpMonitor(self.runner, self.runner.network.pri,
                                                      self._dhcp_callback, log_file=log_file,
                                                      intf_name=self._tap_intf)
+        LOGGER.info('Starting gateway %s DHCP monitor on %s', self.port_set, self._tap_intf)
         self.dhcp_monitor.start()
 
     def set_tap_intf(self, tap_intf):

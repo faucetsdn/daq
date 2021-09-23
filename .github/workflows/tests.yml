@@ -176,7 +176,7 @@ jobs:
           bin/setup_remote daq
           bin/retry_cmd bin/build_docker controller
           bin/build_dts
-      - name: run fot integration tests
+      - name: run vxlan integration tests
         if: ${{ always() }}
         run: |
           cd forch

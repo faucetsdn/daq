@@ -344,12 +344,13 @@ class TestNetwork:
             LOGGER.info('Waiting %ds for network to settle', self._settle_sec)
             time.sleep(self._settle_sec)
 
-    def direct_device_traffic(self, device, port_set):
+    def direct_device_traffic(self, device):
         """Modify gateway set's vlan to match triggering vlan"""
+        port_set = device.gateway.port_set if device.gateway else None
         LOGGER.info('Directing traffic for %s on %s/%s/%s to %s',
                     device.mac, device.vlan, device.assigned, device.port.vxlan, port_set)
         # TODO: Convert this to use faucitizer to change vlan
-        self.topology.direct_device_traffic(device, port_set)
+        self.topology.direct_device_traffic(device)
         self._generate_behavioral_config()
         if port_set:
             self._configure_remote_tap(device)

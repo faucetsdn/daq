@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Same problem as cited here:
+#   https://discuss.linuxcontainers.org/t/tcpdump-inside-a-container-failed/6637
+#
+# Really not sure what's going on, but piping the output through cat fixes the problem.
+#
+
+$@ 2>&1 | cat
