@@ -268,7 +268,7 @@ class BaseGateway(ABC):
     def discover_host(self, mac: str, all_subnets: List[ip_network], host_callback: Callable):
         """Discovers a host using arp-scan in a list of subnets."""
         cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s -s %s %s'
-        hostx, intf = self._get_scan_interface()
+        host, intf = self._get_scan_interface()
         scans = 5
         subnets = list(all_subnets)
         LOGGER.info('Starting host discovery for %s', mac)
@@ -293,14 +293,17 @@ class BaseGateway(ABC):
             subnet = subnets.pop(0)
             hosts = subnet.hosts()
             address = next(hosts)
+            # This handles the case where the local IP conflicts with the remote.
+            # Not really a good general solution, but works in many cases.
+            # TODO: Generalize a bit more to (e.g.) pick a random src IP.
             if scans % 2:
                 address = next(hosts)
             log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
             log_fd = open(log_file, 'w')
             LOGGER.info('Scanning %s subnet %s from %s for %s', scans, subnet, address, mac)
-            hostx.cmd('ip addr add %s/%s dev %s' % (str(address), subnet.prefixlen, intf))
+            host.cmd('ip addr add %s/%s dev %s' % (str(address), subnet.prefixlen, intf))
             full_cmd = cmd % (intf, mac, str(address), str(subnet))
-            active_pipe = hostx.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
+            active_pipe = host.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
                                        hangup=lambda: self._discover_host_hangup_callback(
                                            mac, log_fd, log_file, scan_callback))
