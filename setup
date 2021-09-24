@@ -1,0 +1,10 @@
+#!/bin/bash -ex
+rm -rf forch
+bin/setup_remote forch
+git rev-list HEAD --max-count=1 > forch/etc/DAQ_VERSION
+cd forch
+bin/setup_base
+bin/setup_remote faucet
+bin/setup_remote daq
+bin/retry_cmd bin/build_docker controller
+bin/build_dts
