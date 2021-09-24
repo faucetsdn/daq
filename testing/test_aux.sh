@@ -201,7 +201,8 @@ echo End generated report.
 # Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
 cat docs/device_report.md | redact > out/redacted_docs.md
 cp inst/reports/report_9a02571e8f01_*.md out/
-cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
+# Filter out the nmap /closed/ lines since they are indeterminate.
+cat inst/reports/report_9a02571e8f01_*.md | fgrep -v "/closed/" | redact > out/redacted_file.md
 
 fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
