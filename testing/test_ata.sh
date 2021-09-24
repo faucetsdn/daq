@@ -38,6 +38,10 @@ run_trigger:
   max_hosts: 2
 EOF
 
+# Remove run dirs except one to properly check block_existing
+rm -rf inst/run-*
+mkdir inst/run-9a02571e8f03/
+
 cmd/run -s
 
 echo Looking for lack of queing activate...
