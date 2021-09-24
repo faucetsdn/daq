@@ -58,17 +58,21 @@ def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'acquire', 'base', 'monitor']
 
+
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
+
 
 def get_test_config(config, test):
     """Get a single test module's config"""
     return config["modules"].get(test)
 
+
 def get_devdir(target_mac):
     """Return the run directory for the device"""
     return os.path.join(DAQ_RUN_DIR, DEV_DIR_PREFIX + target_mac.replace(':', ''))
+
 
 def run_exists(target_mac):
     """Check if the run directory exists"""
