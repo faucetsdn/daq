@@ -197,8 +197,6 @@ Automatic TCP/UDP port scan using nmap
 --------------------
 # Nmap XXX scan initiated XXX as: nmap -v -n -T3 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG XXX/tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 47808/closed/udp//bacnet///
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
 --------------------
