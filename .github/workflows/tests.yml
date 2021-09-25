@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [aux, aux, aux, aux, aux]
+        test: [aux, aux, aux, aux, aux, aux, aux, aux, aux, aux]
     steps:
     - uses: actions/download-artifact@v2
       with:
@@ -87,9 +87,9 @@ jobs:
       run: |
         bin/load_images faucet faux setup base
     - name: Loading subset docker images
+      if: matrix.test == 'aux'
       run: |
         bin/load_images subset
-      if: matrix.test == 'aux'
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
