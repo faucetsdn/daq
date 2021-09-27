@@ -153,12 +153,7 @@ class BaseGateway(ABC):
         return self.port_set * self._gw_set_size + offset
 
     def _is_target_expected(self, target):
-        if not target:
-            return False
-        target_mac = target['mac']
-        if target_mac in self.targets:
-            return target_mac
-        return False
+        return target and target['mac'] in self.targets:
 
     def _dhcp_callback(self, state, target, exception=None):
         if exception:
