@@ -104,6 +104,7 @@ if [[ -n $native ]]; then
     [ -f $RYU_CONF ] || (echo $RYU_CONF not found.; exit 1)
     export ${PREFIX}_EXCEPTION_LOG=$RUNTIME/${BASECMD}_exception.log
     export ${PREFIX}_PROMETHEUS_PORT=${prom_pt:-$PROM_TARGET}
+    export ${PREFIX}_PROMETHEUS_ADDR=localhost
     export ${PREFIX}_CONFIG=$RUNTIME/$BASECMD.yaml
     export ${PREFIX}_EVENT_SOCK=$RUNTIME/$FAUCET_SOCK
     export ${PREFIX}_CONFIG_STAT_RELOAD=1
@@ -111,7 +112,7 @@ if [[ -n $native ]]; then
     export WSAPI_LISTEN_PORT=4567
     echo Launching $BASECMD $RYU_LISTEN_PORT $FAUCET_PROMETHEUS_PORT $WSAPI_LISTEN_PORT
     env | fgrep ${PREFIX}_
-    $BASECMD --ryu-config-file=$RYU_CONF --ryu-ofp-tcp-listen-port=$RYU_LISTEN_PORT --ryu-wsapi-port=$WSAPI_LISTEN_PORT --ryu-wsapi-host=localhost --ryu-ofp-listen-host=localhost &
+    $BASECMD --ryu-config-file=$RYU_CONF --ryu-ofp-tcp-listen-port=$RYU_LISTEN_PORT --ryu-wsapi-port=$WSAPI_LISTEN_PORT --ryu-wsapi-host=localhost --ryu-ofp-listen-host=localhost > /dev/null 2>&1 &
     echo $! > $PID_FILE
     echo Started $BASECMD pid $(< $PID_FILE)
 else
