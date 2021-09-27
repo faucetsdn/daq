@@ -243,9 +243,11 @@ class DAQRunner:
         return daq_run_id
 
     def _cleanup_previous_runs(self):
+        LOGGER.info('Cleaning previous runs')
         if os.path.isdir(report.REPORT_BASE_DIR):
             shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
         for path in os.listdir(DAQ_RUN_DIR):
+            LOGGER.info('Checking to clean %s', path)
             if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(path):
                 shutil.rmtree(path, ignore_errors=True)
 
