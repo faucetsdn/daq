@@ -245,11 +245,13 @@ class DAQRunner:
     def _cleanup_previous_runs(self):
         LOGGER.info('Cleaning previous runs')
         if os.path.isdir(report.REPORT_BASE_DIR):
+            LOGGER.info('Removing existing %s', report.REPORT_BASE_DIR)
             shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
         for path in os.listdir(DAQ_RUN_DIR):
-            LOGGER.info('Checking to clean %s', path)
-            if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(path):
-                shutil.rmtree(path, ignore_errors=True)
+            fullpath = os.path.join(DAQ_RUN_DIR, path)
+            if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(fullpath):
+                LOGGER.info('Removing existing %s', fullpath)
+                shutil.rmtree(fullpath, ignore_errors=True)
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
