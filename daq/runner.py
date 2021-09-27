@@ -247,6 +247,10 @@ class DAQRunner:
         if os.path.isdir(report.REPORT_BASE_DIR):
             LOGGER.info('Removing existing %s', report.REPORT_BASE_DIR)
             shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
+
+        if self.run_trigger.get('block_existing'):
+            return
+
         for path in os.listdir(DAQ_RUN_DIR):
             fullpath = os.path.join(DAQ_RUN_DIR, path)
             if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(fullpath):
