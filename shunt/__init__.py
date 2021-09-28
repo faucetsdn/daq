@@ -1,0 +1,3 @@
+"""Shunt module"""
+
+pass
