@@ -82,9 +82,9 @@ class Device:
             endtime = datetime.fromisoformat(stream.read().strip())
         return endtime > datetime.now(timezone.utc)
 
-    def _set_block(self, block_sec=None):
+    def _set_block(self, block_sec):
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
-        endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec or LONG_TIME_SEC))
+        endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
         with open(block_file, 'w') as stream:
             stream.write(str(endtime))
 
@@ -216,7 +216,7 @@ class DAQRunner:
         self._init_test_list()
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
         self._target_set_queue = []
-        self._blocked_devices = {}
+        self._one_test_started = False
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -556,7 +556,7 @@ class DAQRunner:
         self._target_set_consider()
 
         active_tests = bool(self._devices.get_triggered_devices() or self._target_set_queue)
-        more_testing = self._run_tests and not (self._single_shot and self._blocked_devices)
+        more_testing = self._run_tests and not (self._single_shot and self._one_test_started)
         if not active_tests and not more_testing:
             if self.faucet_events and not self._linger_exit:
                 LOGGER.warning('All expected test runs complete, terminating.')
@@ -680,9 +680,11 @@ class DAQRunner:
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
 
+        self._one_test_started = True
         if self._single_shot:
-            device._set_block(block_sec=self.run_trigger.get('device_block_sec'))
-            LOGGER.info('Target device %s in now blocked from future runs', device)
+            block_sec=self.run_trigger.get('device_block_sec') or LONG_TIME_SEC
+            device._set_block(block_sec)
+            LOGGER.info('Target device %s in now blocked for %ss', device, block_sec)
 
     def _target_set_consider(self):
         if self._target_set_queue:
