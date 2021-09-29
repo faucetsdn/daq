@@ -22,10 +22,13 @@ CONN_PARAMS_SERVER = {
 }
 CONN_PARAMS_SERVER.update(CONN_PARAMS)
 
+def main():
+    if sys.argv[1] == 'client':
+        build_bidirectional_ssh_tunnel(
+            CONN_PARAMS['ssh_in_port'], CONN_PARAMS['ssh_out_port'], 'shunt_host_server_1')
+        build_vxlan_ssh_conn(CONN_PARAMS_CLIENT)
+    elif sys.argv[1] == 'server':
+        build_vxlan_ssh_conn(CONN_PARAMS_SERVER)
 
-if sys.argv[1] == 'client':
-    build_bidirectional_ssh_tunnel(
-        CONN_PARAMS['ssh_in_port'], CONN_PARAMS['ssh_out_port'], 'shunt_host_server_1')
-    build_vxlan_ssh_conn(CONN_PARAMS_CLIENT)
-elif sys.argv[1] == 'server':
-    build_vxlan_ssh_conn(CONN_PARAMS_SERVER)
+if __name__ == "__main__":
+    main()
