@@ -651,7 +651,7 @@ class DAQRunner:
             return False
 
         if device._should_block():
-            LOGGER.info('Target device %s blocked', device)
+            LOGGER.debug('Target device %s blocked', device)
             return False
 
         return True
