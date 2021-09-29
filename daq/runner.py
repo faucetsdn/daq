@@ -199,7 +199,7 @@ class DAQRunner:
         self._cleanup_previous_runs()
         self._init_test_list()
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
-        self._block_time = self.run_trigger.get('block_time', 0)
+        self._device_block_sec = self.run_trigger.get('device_block_sec', 0)
         self._target_set_queue = []
         self._blocked_devices = set()
 
@@ -670,7 +670,7 @@ class DAQRunner:
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
 
-        if self._single_shot or self._block_time:
+        if self._single_shot or self._device_block_sec:
             self._blocked_devices.add(device.mac)
             LOGGER.info('Target device %s in now blocked (%s)', device, len(self._blocked_devices))
 
@@ -831,7 +831,7 @@ class DAQRunner:
                 'net_prefix': network.NATIVE_NET_PREFIX,
                 'ext_intf': self.network.ext_intf,
                 'ext_mac': self.network.ext_mac,
-                'scan_interval': self.run_trigger.get('scan_interval') or 0
+                'arp_scan': self.run_trigger.get('arp_scan_sec') or 0
             })
 
         if is_native or device.dhcp_mode != DhcpMode.EXTERNAL:

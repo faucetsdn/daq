@@ -23,9 +23,9 @@ switch_setup:
 run_trigger:
   native_vlan: 122
   max_hosts: 10
-  block_time: 10
-  block_existing: True
-  scan_interval: 600
+  device_block_sec: 10
+  retail_results: True
+  arp_scan_sec: 600
 
 internal_subnet:
   subnet: 10.21.0.0/16

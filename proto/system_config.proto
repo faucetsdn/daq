@@ -254,13 +254,13 @@ message RunTrigger {
   int32 max_hosts = 5;
 
   // blockout time for tested hosts in sec
-  int32 block_time = 6;
+  int32 device_block_sec = 6;
 
-  // block devices with existing run directories
-  bool block_existing = 7;
+  // retain existing local results from run to run
+  bool retain_results = 7;
 
   // arp-scan interval for native gateways in sec
-  int32 scan_interval = 8;
+  int32 arp_scan_sec = 8;
 }
 
 /*

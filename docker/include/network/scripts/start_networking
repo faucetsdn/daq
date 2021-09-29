@@ -3,7 +3,7 @@
 LOCAL_IF=${LOCAL_IF:-$HOSTNAME-eth0}
 EXT_INTF=${EXT_INTF:-eth0}
 NET_PREFIX=${NET_PREFIX:-10.20}
-SCAN_INTERVAL=${SCAN_INTERVAL:-0}
+ARP_SCAN_SEC=${ARP_SCAN_SEC:-0}
 
 function finished {
     echo gateway terminating
@@ -101,11 +101,11 @@ if [[ $EXT_INTF != eth0 ]]; then
     sleep 2
 fi
 
-if [[ -n $SCAN_INTERVAL && $SCAN_INTERVAL > 0 ]]; then
-    echo Doing arp-scan with interval $SCAN_INTERVAL
+if [[ -n $ARP_SCAN_SEC && $ARP_SCAN_SEC > 0 ]]; then
+    echo Doing arp-scan with interval $ARP_SCAN_SEC
     (
         while true; do
-            sleep $SCAN_INTERVAL
+            sleep $ARP_SCAN_SEC
             subnet=`ip addr show $EXT_INTF | fgrep 'inet ' | awk '{print $2}'`
             echo Initiating arp-scan on $EXT_INTF for $subnet
             arp-scan -I $EXT_INTF $subnet
