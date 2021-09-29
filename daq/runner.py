@@ -75,6 +75,7 @@ class Device:
         return self.mac.replace(":", "")
 
     def should_block(self):
+        """Determine if this device should be blocked from test or not"""
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         if not os.path.exists(block_file):
             return False
@@ -83,6 +84,7 @@ class Device:
         return endtime > datetime.now(timezone.utc)
 
     def set_block(self, block_sec):
+        """Set the block time for this device"""
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
         with open(block_file, 'w') as stream:
