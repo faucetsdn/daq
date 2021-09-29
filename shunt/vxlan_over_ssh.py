@@ -112,7 +112,7 @@ def create_vxlan_tunnel(vni, remote_ip, vxlan_port, vtep_ip):
     shellcmd = ShellCommandHelper()
     shellcmd.run_cmd(
         "sudo ip link add vxlan type vxlan id %s remote %s dstport %s srcport %s %s nolearning"
-                     % (vni, remote_ip, vxlan_port, vxlan_port, vxlan_port))
+        % (vni, remote_ip, vxlan_port, vxlan_port, vxlan_port))
     shellcmd.run_cmd("sudo ip addr add %s/24 dev vxlan" % (vtep_ip))
     shellcmd.run_cmd("sudo ip link set vxlan up")
 
