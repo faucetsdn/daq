@@ -76,7 +76,7 @@ class Device:
 
     def _should_block(self):
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
-        if not os.path_exists(block_file):
+        if not os.path.exists(block_file):
             return False
         with open(block_file, 'r') as stream:
             endtime = datetime.fromisoformat(stream.read().strip())
@@ -85,7 +85,7 @@ class Device:
     def _set_block(self, block_sec=None):
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec or LONG_TIME_SEC))
-        with open(block_file, 'r') as stream:
+        with open(block_file, 'w') as stream:
             stream.write(str(endtime))
 
 

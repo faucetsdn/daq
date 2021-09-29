@@ -253,13 +253,13 @@ message RunTrigger {
   // limit on the number of active testing hosts
   int32 max_hosts = 5;
 
-  // blockout time for tested hosts in sec
+  // blockout time for tested hosts in seconds
   int32 device_block_sec = 6;
 
   // retain existing local results from run to run
   bool retain_results = 7;
 
-  // arp-scan interval for native gateways in sec
+  // arp-scan interval for native gateways in seconds
   int32 arp_scan_sec = 8;
 }
 
