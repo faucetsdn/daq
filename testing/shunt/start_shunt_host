@@ -3,13 +3,9 @@
 
 host=$1
 service ssh start
-source bin/shunt_functions
 
-if [ $host -eq 1 ]; then
-    build_ssh_tunnel 30001 30000 shunt_host2_1
-    build_vxlan_ssh_conn 30001 30000 192.168.1.1
-else
-    build_vxlan_ssh_conn 30001 30000 192.168.1.2
-fi
+export PYTHONPATH=$PYTHONPATH:/root/shunt
+
+python3 testing/shunt/build_vxlan_ssh_conn.py $host
 
 tail -f /dev/null

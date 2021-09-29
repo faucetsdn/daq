@@ -13,8 +13,8 @@ echo Shunt Test > $TEST_RESULTS
 
 docker-compose -f ./testing/shunt/docker-compose.yaml up --build -d
 sleep 6
-docker exec shunt_host1_1 ps ax
-docker exec shunt_host1_1 ping -c 1 192.168.1.2
+docker exec shunt_host_client_1 ps ax
+docker exec shunt_host_client_1 ping -c 1 192.168.1.1
 
 if [ $? -eq 0 ]; then
     echo Ping succesful | tee -a $TEST_RESULTS
@@ -22,14 +22,14 @@ else
     echo Ping unsuccesful | tee -a $TEST_RESULTS
 fi
 
-docker exec shunt_host2_1 bash -c "source bin/shunt_functions; clean_vxlan_ssh_conn"
+docker exec shunt_host_server_1 bash -c "source bin/shunt_functions; clean_vxlan_ssh_conn"
 
 sleep 10
-docker logs shunt_host2_1
+docker logs shunt_host_server_1
 
 
-docker exec shunt_host2_1 ps ax
-docker exec shunt_host1_1 ping -c 1 192.168.1.2
+docker exec shunt_host_server_1 ps ax
+docker exec shunt_host_client_1 ping -c 1 192.168.1.1
 
 if [ $? -eq 0 ]; then
     echo Ping succesful | tee -a $TEST_RESULTS

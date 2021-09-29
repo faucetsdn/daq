@@ -7,6 +7,7 @@ function build_vxlan_ssh_conn {
     SSH_IN_PORT=$1
     SSH_OUT_PORT=$2
     LOCAL_VXLAN_IP=${3:-"192.168.1.2"}
+    VNI=${4:-0}
     REMOTE_IP=${4:-"192.168.21.1"}
     LOCAL_IP=${5:-"192.168.21.2"}
 
@@ -16,7 +17,7 @@ function build_vxlan_ssh_conn {
     sudo ip link set ep0 up
 
     # socat session to move packets from ssh tunnel to UDP port
-    socat -T15 tcp4-listen:30001,reuseaddr,fork UDP:localhost:4789 &
+    socat -T15 tcp4-listen:$SSH_IN_PORT,reuseaddr,fork UDP:localhost:4789 &
 
     # iptables command to change source IP from localhost
     sudo iptables -t nat -A POSTROUTING -p udp -d 127.0.0.1 --dport 4789 -j SNAT --to-source $REMOTE_IP:38000-45000
@@ -25,10 +26,10 @@ function build_vxlan_ssh_conn {
     sudo iptables -t nat -A OUTPUT -o ep0 -p udp --dport 4789 -j REDIRECT --to-ports 20000
 
     # socat session to move packets from UDP port to ssh session
-    socat -T15 udp4-recvfrom:20000,reuseaddr,fork tcp:localhost:30000 &
+    socat -T15 udp4-recvfrom:20000,reuseaddr,fork tcp:localhost:$SSH_OUT_PORT &
 
     # create vxlan tunnel
-    sudo ip link add vxlan type vxlan id 0 remote $REMOTE_IP dstport 4789 srcport 4789 4789 nolearning
+    sudo ip link add vxlan type vxlan id $VNI remote $REMOTE_IP dstport 4789 srcport 4789 4789 nolearning
     sudo ip addr add $LOCAL_VXLAN_IP/24 dev vxlan
     sudo ip link set vxlan up
 }
@@ -57,7 +58,6 @@ function build_ssh_tunnel {
     SSH_OUT_PORT=$2
     REMOTE_HOST=$3
 
-    sleep 5
     ssh -o StrictHostKeyChecking=no -L $SSH_OUT_PORT:127.0.0.1:$SSH_IN_PORT -N -f $REMOTE_HOST
     ssh -o StrictHostKeyChecking=no -R $SSH_OUT_PORT:127.0.0.1:$SSH_IN_PORT -N -f $REMOTE_HOST
 }
