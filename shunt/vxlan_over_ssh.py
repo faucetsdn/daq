@@ -1,5 +1,6 @@
 """Module to build VxLAN tunnels over SSH tunnels using shell commands"""
 
+from __future__ import absolute_import
 from shunt.shell_command_helper import ShellCommandHelper
 
 
@@ -17,6 +18,7 @@ def build_ssh_tunnel(ssh_in_port, ssh_out_port, remote_host, reverse=False):
     shellcmd.run_cmd("ssh -o StrictHostKeyChecking=no -%s %s:127.0.0.1:%s -N -f %s"
                      % (direction, ssh_out_port, ssh_in_port, remote_host))
 
+
 def build_bidirectional_ssh_tunnel(ssh_in_port, ssh_out_port, remote_host):
     """
     Args:
@@ -27,6 +29,7 @@ def build_bidirectional_ssh_tunnel(ssh_in_port, ssh_out_port, remote_host):
     """
     build_ssh_tunnel(ssh_in_port, ssh_out_port, remote_host, reverse=False)
     build_ssh_tunnel(ssh_in_port, ssh_out_port, remote_host, reverse=True)
+
 
 def create_virtual_if(if_name, if_ip):
     """
@@ -40,6 +43,7 @@ def create_virtual_if(if_name, if_ip):
     shellcmd.run_cmd("sudo ip addr add %s/24 dev %s" % (if_ip, if_name))
     shellcmd.run_cmd("sudo ip link set %s up" % (if_name))
 
+
 def socat_tcp_to_udp(src_port, dst_port):
     """
     Socat command to map TCP port to UDP port
@@ -52,6 +56,7 @@ def socat_tcp_to_udp(src_port, dst_port):
     shellcmd.run_cmd("socat -T15 tcp4-listen:%s,reuseaddr,fork udp:localhost:%s"
                      % (src_port, dst_port), detach=True)
 
+
 def socat_udp_to_tcp(src_port, dst_port):
     """
     Socat command to map UDP port to TCP port
@@ -63,6 +68,7 @@ def socat_udp_to_tcp(src_port, dst_port):
     shellcmd = ShellCommandHelper()
     shellcmd.run_cmd("socat -T15 udp4-listen:%s,reuseaddr,fork tcp:localhost:%s"
                      % (src_port, dst_port), detach=True)
+
 
 def iptables_udp_change_source(dst_ip, dst_port, src_ip_port):
     """
@@ -78,6 +84,7 @@ def iptables_udp_change_source(dst_ip, dst_port, src_ip_port):
         "sudo iptables -t nat -A POSTROUTING -p udp -d %s --dport %s -j SNAT --to-source %s"
         % (dst_ip, dst_port, src_ip_port))
 
+
 def iptables_udp_divert_iface_traffic(iface, dst_port, target_dst_port):
     """
     iptables command to divert udp traffic egressing from an interface to a different port
@@ -91,6 +98,7 @@ def iptables_udp_divert_iface_traffic(iface, dst_port, target_dst_port):
     shellcmd.run_cmd(
         "sudo iptables -t nat -A OUTPUT -o %s -p udp --dport %s -j REDIRECT --to-ports %s"
                      % (iface, dst_port, target_dst_port))
+
 
 def create_vxlan_tunnel(vni, remote_ip, vxlan_port, vtep_ip):
     """
@@ -107,6 +115,7 @@ def create_vxlan_tunnel(vni, remote_ip, vxlan_port, vtep_ip):
                      % (vni, remote_ip, vxlan_port, vxlan_port, vxlan_port))
     shellcmd.run_cmd("sudo ip addr add %s/24 dev vxlan" % (vtep_ip))
     shellcmd.run_cmd("sudo ip link set vxlan up")
+
 
 def build_vxlan_ssh_conn(conn_params):
     """
@@ -132,4 +141,5 @@ def build_vxlan_ssh_conn(conn_params):
     iptables_udp_change_source(LOCAL_HOST, VXLAN_PORT, source_ip_port)
     iptables_udp_divert_iface_traffic(conn_params['virt_if_name'], VXLAN_PORT, INTERMEDIATE_PORT)
     socat_udp_to_tcp(INTERMEDIATE_PORT, conn_params['ssh_out_port'])
-    create_vxlan_tunnel(conn_params['vni'], conn_params['remote_ip'], VXLAN_PORT, conn_params['vxlan_if_ip'])
+    create_vxlan_tunnel(
+        conn_params['vni'], conn_params['remote_ip'], VXLAN_PORT, conn_params['vxlan_if_ip'])

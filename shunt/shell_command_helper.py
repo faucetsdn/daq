@@ -1,5 +1,6 @@
 """Module to help run shell commands and retrieve output"""
 
+from __future__ import absolute_import
 import subprocess
 import multiprocessing
 
@@ -39,7 +40,7 @@ class ShellCommandHelper():
 
     # pylint: disable=too-many-arguments
     def run_cmd(self, cmd, arglist=None, strict=True,
-                 capture=False, docker_container=None, detach=False):
+                capture=False, docker_container=None, detach=False):
         """
         Args:
             cmd: command to be executed
