@@ -34,6 +34,8 @@ from proto.system_config_pb2 import DhcpMode
 from proto.report_pb2 import DeviceReport
 
 LOGGER = logger.get_logger('runner')
+BLOCK_FILE = 'dev_block.txt'
+LONG_TIME_SEC = 100000000000
 
 
 class PortInfo:
@@ -71,6 +73,20 @@ class Device:
 
     def __repr__(self):
         return self.mac.replace(":", "")
+
+    def _should_block(self):
+        block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
+        if not os.path_exists(block_file):
+            return False
+        with open(block_file, 'r') as stream:
+            endtime = datetime.fromisoformat(stream.read().strip())
+        return endtime > datetime.now(timezone.utc)
+
+    def _set_block(self, block_sec=None):
+        block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
+        endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec or LONG_TIME_SEC))
+        with open(block_file, 'r') as stream:
+            stream.write(str(endtime))
 
 
 class Devices:
@@ -199,9 +215,8 @@ class DAQRunner:
         self._cleanup_previous_runs()
         self._init_test_list()
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
-        self._device_block_sec = self.run_trigger.get('device_block_sec', 0)
         self._target_set_queue = []
-        self._blocked_devices = set()
+        self._blocked_devices = {}
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -243,13 +258,13 @@ class DAQRunner:
         return daq_run_id
 
     def _cleanup_previous_runs(self):
+        if self.run_trigger.get('retain_results'):
+            return
+
         LOGGER.info('Cleaning previous runs')
         if os.path.isdir(report.REPORT_BASE_DIR):
             LOGGER.info('Removing existing %s', report.REPORT_BASE_DIR)
             shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
-
-        if self.run_trigger.get('block_existing'):
-            return
 
         for path in os.listdir(DAQ_RUN_DIR):
             fullpath = os.path.join(DAQ_RUN_DIR, path)
@@ -635,13 +650,8 @@ class DAQRunner:
             LOGGER.debug('Target device %s already queued', device)
             return False
 
-        if device.mac in self._blocked_devices:
-            LOGGER.debug('Target device %s blocked', device)
-            return False
-
-        if self.run_trigger.get('block_existing') and connected_host.run_exists(device.mac):
-            self._blocked_devices.add(device.mac)
-            LOGGER.info('Blocking as previous run %s exists', device.mac)
+        if device._should_block():
+            LOGGER.info('Target device %s blocked', device)
             return False
 
         return True
@@ -670,9 +680,9 @@ class DAQRunner:
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
 
-        if self._single_shot or self._device_block_sec:
-            self._blocked_devices.add(device.mac)
-            LOGGER.info('Target device %s in now blocked (%s)', device, len(self._blocked_devices))
+        if self._single_shot:
+            device._set_block(block_sec=self.run_trigger.get('device_block_sec'))
+            LOGGER.info('Target device %s in now blocked from future runs', device)
 
     def _target_set_consider(self):
         if self._target_set_queue:

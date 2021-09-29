@@ -74,11 +74,6 @@ def get_devdir(target_mac):
     return os.path.join(DAQ_RUN_DIR, DEV_DIR_PREFIX + target_mac.replace(':', ''))
 
 
-def run_exists(target_mac):
-    """Check if the run directory exists"""
-    return os.path.exists(get_devdir(target_mac))
-
-
 class ConnectedHost:
     """Class managing a device-under-test"""
 
