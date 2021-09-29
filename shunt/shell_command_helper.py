@@ -81,10 +81,7 @@ class ShellCommandHelper():
         batch_start = 0
         while batch_start <= len(jobs):
             batch_end = batch_start + batch_size
-            if batch_end > len(jobs):
-                batch_jobs = jobs[batch_start:]
-            else:
-                batch_jobs = jobs[batch_start:batch_end]
+            batch_jobs = jobs[batch_start:batch_end]
 
             for job in batch_jobs:
                 job.start()
