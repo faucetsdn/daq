@@ -7,7 +7,7 @@ services:
             dockerfile: ./testing/shunt/Dockerfile.shunthost
         depends_on:
             - "host_server"
-        command: bash -c "./start_shunt_host 1"
+        command: bash -c "./start_shunt_host client"
         #command: bash -c "tail -f"
         cap_add:
             - ALL
@@ -15,7 +15,7 @@ services:
         build:
             context: ../..
             dockerfile: ./testing/shunt/Dockerfile.shunthost
-        command: bash -c "./start_shunt_host 2"
+        command: bash -c "./start_shunt_host server"
         #command: bash -c "tail -f"
         cap_add:
             - ALL
