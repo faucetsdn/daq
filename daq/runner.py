@@ -74,7 +74,7 @@ class Device:
     def __repr__(self):
         return self.mac.replace(":", "")
 
-    def _should_block(self):
+    def should_block(self):
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         if not os.path.exists(block_file):
             return False
@@ -82,7 +82,7 @@ class Device:
             endtime = datetime.fromisoformat(stream.read().strip())
         return endtime > datetime.now(timezone.utc)
 
-    def _set_block(self, block_sec):
+    def set_block(self, block_sec):
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
         with open(block_file, 'w') as stream:
@@ -650,7 +650,7 @@ class DAQRunner:
             LOGGER.debug('Target device %s already queued', device)
             return False
 
-        if device._should_block():
+        if device.should_block():
             LOGGER.debug('Target device %s blocked', device)
             return False
 
@@ -682,8 +682,8 @@ class DAQRunner:
 
         self._one_test_started = True
         if self._single_shot:
-            block_sec=self.run_trigger.get('device_block_sec') or LONG_TIME_SEC
-            device._set_block(block_sec)
+            block_sec = self.run_trigger.get('device_block_sec') or LONG_TIME_SEC
+            device.set_block(block_sec)
             LOGGER.info('Target device %s in now blocked for %ss', device, block_sec)
 
     def _target_set_consider(self):
