@@ -120,7 +120,7 @@ def create_vxlan_tunnel(vni, remote_ip, vxlan_port, vtep_ip):
 def build_vxlan_ssh_conn(conn_params):
     """
     Args:
-        conn_params: JSON. Format:{
+        conn_params: JSON. Format:{  # TODO: Turn into a proto for easy config exchange.
                 virt_if_name: Interface name of virtual interface for underlay n/w
                 virt_if_ip: IP for virtual interface
                 ssh_in_port: Port for incoming traffic
