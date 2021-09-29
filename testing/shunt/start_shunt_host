@@ -6,6 +6,6 @@ service ssh start
 
 export PYTHONPATH=$PYTHONPATH:/root/shunt
 
-python3 testing/shunt/build_vxlan_ssh_conn.py $1
+python3 testing/shunt/build_vxlan_ssh_conn.py $host
 
 tail -f /dev/null
