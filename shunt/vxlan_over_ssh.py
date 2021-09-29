@@ -97,7 +97,7 @@ def iptables_udp_divert_iface_traffic(iface, dst_port, target_dst_port):
     shellcmd = ShellCommandHelper()
     shellcmd.run_cmd(
         "sudo iptables -t nat -A OUTPUT -o %s -p udp --dport %s -j REDIRECT --to-ports %s"
-                     % (iface, dst_port, target_dst_port))
+        % (iface, dst_port, target_dst_port))
 
 
 def create_vxlan_tunnel(vni, remote_ip, vxlan_port, vtep_ip):

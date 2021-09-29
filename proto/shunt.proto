@@ -1,0 +1,19 @@
+/*
+ * Collection of messages for shunt service.
+ */
+
+syntax = "proto3";
+
+/*
+ * Shunt tunnel information
+ */
+message ShuntTunnelInfo {
+    // VNI of VxLAN tunnel to be built
+    int32 vni = 1;
+
+    // SSH tunnel in port
+    int32 in_port = 2;
+
+    // SSH tunnel out port
+    int32 out_port = 3;
+}
