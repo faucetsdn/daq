@@ -24,10 +24,8 @@ CONN_PARAMS_SERVER.update(CONN_PARAMS)
 
 
 if sys.argv[1] == 'client':
-    print('params:', CONN_PARAMS_CLIENT)
     build_bidirectional_ssh_tunnel(
         CONN_PARAMS['ssh_in_port'], CONN_PARAMS['ssh_out_port'], 'shunt_host_server_1')
     build_vxlan_ssh_conn(CONN_PARAMS_CLIENT)
 elif sys.argv[1] == 'server':
-    print('params:', CONN_PARAMS_SERVER)
     build_vxlan_ssh_conn(CONN_PARAMS_SERVER)

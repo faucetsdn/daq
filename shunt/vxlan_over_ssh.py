@@ -122,7 +122,6 @@ def build_vxlan_ssh_conn(conn_params):
         }
     Returns: None
     """
-    print(conn_params)
     VXLAN_PORT = '4789'
     LOCAL_HOST = '127.0.0.1'
     VXLAN_SOURCE_PORT_RANGE = "38000-45000"
