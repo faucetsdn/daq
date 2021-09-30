@@ -34,7 +34,7 @@ from proto.system_config_pb2 import DhcpMode
 from proto.report_pb2 import DeviceReport
 
 LOGGER = logger.get_logger('runner')
-BLOCK_DIR = 'inst/dev_blocks'
+BLOCK_FILE = 'dev_block.txt'
 LONG_TIME_SEC = 100000000000
 
 
@@ -77,22 +77,22 @@ class Device:
 
     def should_block(self):
         """Determine if this device should be blocked from test or not"""
-        block_file = os.path.join(BLOCK_DIR, 'block_%s.txt' % self)
+        block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         if not os.path.exists(block_file):
             LOGGER.info('Target device %s block file missing %s', self, block_file)
             return False
         with open(block_file, 'r') as stream:
             endtime = datetime.fromisoformat(stream.read().strip())
         nowtime = datetime.now(timezone.utc)
-        LOGGER.debug('Target device %s block check %s > %s %s',
-                     self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
+        LOGGER.info('Target device %s block check %s > %s %s',
+                    self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
         return endtime > nowtime
 
     def set_block(self, block_sec):
         """Set the block time for this device"""
-        if not os.path.exists(BLOCK_DIR):
-            os.makedirs(BLOCK_DIR)
-        block_file = os.path.join(BLOCK_DIR, 'block_%s.txt' % self)
+        dev_dir = connected_host.get_devdir(self.mac)
+        os.makedirs(dev_dir, exist_ok=True)
+        block_file = os.path.join(dev_dir, BLOCK_FILE)
         endtime = (datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))).isoformat()
         with open(block_file, 'w') as stream:
             stream.write(endtime)
@@ -275,10 +275,6 @@ class DAQRunner:
         if os.path.isdir(report.REPORT_BASE_DIR):
             LOGGER.info('Removing existing %s', report.REPORT_BASE_DIR)
             shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
-
-        if os.path.isdir(BLOCK_DIR):
-            LOGGER.info('Removing existing %s', BLOCK_DIR)
-            shutil.rmtree(BLOCK_DIR, ignore_errors=True)
 
         for path in os.listdir(DAQ_RUN_DIR):
             fullpath = os.path.join(DAQ_RUN_DIR, path)
@@ -665,7 +661,7 @@ class DAQRunner:
             return False
 
         if device.should_block():
-            LOGGER.debug('Target device %s blocked', device)
+            LOGGER.info('Target device %s block', device)
             return False
 
         return True
@@ -693,12 +689,6 @@ class DAQRunner:
             self._target_set_queue.append(device)
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
-
-        self._one_test_started = True
-        default_block_sec = LONG_TIME_SEC if self._single_shot else 0
-        block_sec = self.run_trigger.get('device_block_sec') or default_block_sec
-        if block_sec:
-            device.set_block(block_sec)
 
     def _target_set_consider(self):
         if self._target_set_queue:
@@ -759,6 +749,12 @@ class DAQRunner:
         except Exception as e:
             self.target_set_error(device, e)
             return False
+
+        self._one_test_started = True
+        default_block_sec = LONG_TIME_SEC if self._single_shot else 0
+        block_sec = self.run_trigger.get('device_block_sec') or default_block_sec
+        if block_sec:
+            device.set_block(block_sec)
 
         return True
 
