@@ -28,6 +28,9 @@ interfaces:
     port: 8
 EOF
 
+# Not strictly necessary for test, but useful when running manually.
+rm -rf inst/run-*
+
 cmd/run -s
 
 echo Looking for lack of queing activate...
@@ -38,9 +41,8 @@ run_trigger:
   max_hosts: 2
 EOF
 
-# Remove run dirs except one to properly check block_existing
-rm -rf inst/run-*
-mkdir inst/run-9a02571e8f03/
+# Remove run dirs except one to properly check device_block_sec
+rm -rf inst/reports inst/run-9a02571e8f01/ inst/run-9a02571e8f02/ inst/run-9a02571e8f04/
 
 cmd/run -s
 
