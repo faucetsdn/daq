@@ -70,6 +70,7 @@ class Device:
         self.assigned = None
         self.wait_remote = False
         self.session_endpoint = None
+        self._report = True
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -82,8 +83,10 @@ class Device:
         with open(block_file, 'r') as stream:
             endtime = datetime.fromisoformat(stream.read().strip())
         nowtime = datetime.now(timezone.utc)
-        LOGGER.debug('Target device %s check block %s > %s %s',
-                     self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
+        if self._report:
+            self._report = False
+            LOGGER.info('Target device %s check block %s > %s %s',
+                        self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
         return endtime > nowtime
 
     def set_block(self, block_sec):
