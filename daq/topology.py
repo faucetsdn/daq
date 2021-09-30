@@ -4,8 +4,6 @@ import copy
 import os
 import yaml
 
-from base_gateway import BaseGateway
-
 import logger
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 
@@ -140,24 +138,29 @@ class FaucetTopology:
         return device_intfs
 
     def _populate_set_devices(self, device, port_set):
-        device_set = device.gateway.port_set
+        device_set = device.gateway.port_set if device.gateway else port_set
         assert port_set == device_set or not port_set
         if port_set:
             self._set_devices.setdefault(device_set, set()).add(device)
-        else:
-            self._set_devices[device_set].remove(device)
-        set_active = bool(self._set_devices[device_set])
+        elif device_set in self._set_devices:
+            self._set_devices[device_set].discard(device)
+        set_active = bool(self._set_devices.get(device_set))
         vlan = device.vlan if set_active else self._DUMP_VLAN
         LOGGER.info('Setting port set %s to vlan %s', device_set, vlan)
         return device_set, vlan
 
-    def direct_device_traffic(self, device, port_set):
+    def direct_device_traffic(self, device):
         """Modify gateway set's vlan to match triggering vlan"""
+        port_set = device.gateway.port_set if device.gateway else None
         device_set, vlan = self._populate_set_devices(device, port_set)
-        assert vlan, 'device has no vlan to direct'
+        LOGGER.info('Directing %s/%s to %s (%s)', port_set, device_set, vlan, device.port.vxlan)
+        self._ensure_gateway_interfaces(device_set)
         interfaces = self.topology['dps'][self.pri_name]['interfaces']
-        for port in self._get_gw_ports(device_set):
-            interfaces[port]['native_vlan'] = vlan
+        if vlan:
+            LOGGER.info('Directing device %s port_set %s to vlan %s', device, port_set, vlan)
+            for port in self._get_gw_ports(device_set):
+                interfaces[port]['native_vlan'] = vlan
+
         sec_topology = self.topology['dps'].setdefault(self.sec_name, {
             'dp_id': self.VXLAN_SEC_DPID,
             'interfaces': {
@@ -168,15 +171,15 @@ class FaucetTopology:
 
         LOGGER.info('Direct device %s traffic to %s %s', device.mac, device.port.vxlan, port_set)
         if device.port.vxlan:
+            egress_vlan = device.assigned if device.assigned else self._egress_vlan
+            sec_topology['interfaces'][self.VXLAN_SEC_TRUNK_PORT] = (
+                self._make_sec_trunk_interface(addition=(egress_vlan,)))
+
             if port_set:
                 interface = sec_interfaces.setdefault(device.port.vxlan, {})
-                egress_vlan = device.assigned if device.assigned else self._egress_vlan
                 interface['tagged_vlans'] = [vlan, egress_vlan]
                 interface['name'] = str(device)
                 interface['acl_in'] = self.INCOMING_ACL_FORMAT % 'vxlan'
-                sec_interfaces[
-                    self.VXLAN_SEC_TRUNK_PORT
-                ] = self._make_sec_trunk_interface(addition=(egress_vlan,))
             else:
                 sec_interfaces.pop(device.port.vxlan, None)
 
@@ -307,12 +310,18 @@ class FaucetTopology:
         interfaces[self.PRI_TRUNK_PORT] = self._make_pri_trunk_interface()
         interfaces[self._OFPP_IN_PORT] = self._make_in_port_interface()
         for port_set in range(1, self.sec_port):
-            for port in self._get_gw_ports(port_set):
-                interfaces[port] = self._make_gw_interface(port_set)
             mirror_port = self.mirror_port(port_set)
             interfaces[mirror_port] = self._make_mirror_interface(port_set)
         interfaces[self._SWITCH_LOCAL_PORT] = self._make_local_interface()
         return interfaces
+
+    def _ensure_gateway_interfaces(self, port_set):
+        interfaces = self.topology['dps'][self.pri_name]['interfaces']
+        LOGGER.debug('Ensuring gateway interfaces for port_set %s', port_set)
+        for port in self._get_gw_ports(port_set):
+            assert port < self._MIRROR_PORT_BASE, (
+                'Port %d conflicts with mirror port %s' % (port, self._MIRROR_PORT_BASE))
+            interfaces.setdefault(port, self._make_gw_interface(port_set))
 
     def _make_sec_interfaces(self):
         interfaces = {}
@@ -385,10 +394,17 @@ class FaucetTopology:
         self._generate_main_acls()
         self._generate_port_acls()
 
+    def register_device(self, device):
+        """Register a device with the network topology"""
+
     def _get_gw_ports(self, port_set):
-        base_port = BaseGateway.SET_SPACING * port_set
-        end_port = base_port + BaseGateway.NUM_SET_PORTS
-        return list(range(base_port, end_port))
+        for device_set in self._set_devices:
+            if device_set == port_set:
+                LOGGER.debug('Matching devices for port_set %s found', port_set)
+                device = next(iter(self._set_devices[device_set]))
+                return device.gateway.get_all_gw_ports() if device.gateway else range(0, 0)
+        LOGGER.warning('Matching devices for port_set %s not found', port_set)
+        return range(0, 0)
 
     def _get_bcast_ports(self, port_set):
         return [1, self._SWITCH_LOCAL_PORT] + self._get_gw_ports(port_set)
@@ -529,6 +545,7 @@ class FaucetTopology:
     def _write_acl_file(self, filename, pri_acls):
         directory = os.path.dirname(filename)
         os.makedirs(directory, exist_ok=True)
+        LOGGER.debug('Writing acl file to %s', filename)
         with open(filename, "w") as output_stream:
             yaml.safe_dump(pri_acls, stream=output_stream)
 

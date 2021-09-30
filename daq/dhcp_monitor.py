@@ -17,12 +17,14 @@ class DhcpMonitor:
     DHCP_IP_PATTERN = 'Your-IP ([0-9.]+)'
     DHCP_MAC_PATTERN = 'Client-Ethernet-Address ([a-f0-9:]+)'
     DHCP_TYPE_PATTERN = 'DHCP-Message .*53.*, length 1: ([a-zA-Z]+)'
-    DHCP_ARP_PATTERN = '([a-f0-9:]+) > ff:ff:ff:ff:ff:ff, ethertype ARP .* tell ([0-9.]+),'
-    DHCP_PATTERN = '(%s)|(%s)|(%s)|(%s)|(%s)' % (DHCP_START_PATTERN,
-                                                 DHCP_IP_PATTERN,
-                                                 DHCP_MAC_PATTERN,
-                                                 DHCP_TYPE_PATTERN,
-                                                 DHCP_ARP_PATTERN)
+    DHCP_ARP1_PATTERN = '([a-f0-9:]+) > ff:ff:ff:ff:ff:ff, ethertype ARP .* tell ([0-9.]+),'
+    DHCP_ARP2_PATTERN = '([a-f0-9:]+) > .*, ethertype ARP .* Reply ([0-9.]+) is-at '
+    DHCP_PATTERN = '(%s)|(%s)|(%s)|(%s)|(%s)|(%s)' % (DHCP_START_PATTERN,
+                                                      DHCP_IP_PATTERN,
+                                                      DHCP_MAC_PATTERN,
+                                                      DHCP_TYPE_PATTERN,
+                                                      DHCP_ARP1_PATTERN,
+                                                      DHCP_ARP2_PATTERN)
     DHCP_THRESHHOLD_SEC = 80
 
     # pylint: disable=too-many-arguments
@@ -86,6 +88,11 @@ class DhcpMonitor:
                 LOGGER.debug('ARP message %s %s', match.group(9), match.group(10))
                 self.target_mac = match.group(9)
                 self.target_ip = match.group(10)
+                self._dhcp_complete('STATIC')
+            elif match.group(11):
+                LOGGER.debug('ARP message %s %s', match.group(12), match.group(13))
+                self.target_mac = match.group(12)
+                self.target_ip = match.group(13)
                 self._dhcp_complete('STATIC')
             else:
                 LOGGER.info('Unknown dhcp match: %s', dhcp_line.strip())

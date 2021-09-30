@@ -115,7 +115,7 @@ security.nmap.ports
 --------------------
 Automatic TCP/UDP port scan using nmap
 --------------------
-# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -sT --host-timeout=4m --open -p1-65535 -oG XXX/tmp/nmap.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T3 -sT --host-timeout=4m --open -p1-65535 -oG XXX/tmp/nmap.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No invalid ports found.
@@ -127,7 +127,7 @@ security.nmap.http
 --------------------
 Check that the device does not have open ports exposing an unencrypted web interface using HTTP
 --------------------
-# Nmap XXX scan initiated XXX as: nmap -v -n -T5 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
+# Nmap XXX scan initiated XXX as: nmap -v -n -T3 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No running http servers have been found.

@@ -1,13 +1,13 @@
 """Helper class for working with tcpdump."""
+
 from __future__ import absolute_import
 
 import errno
 import fcntl
-import subprocess
-import threading
 import os
 import re
-
+import subprocess
+import threading
 import logger
 
 DEVNULL = open(os.devnull, 'wb')
@@ -17,6 +17,8 @@ LOGGER = logger.get_logger('tcpdump')
 
 def timeout_soft_cmd(cmd, timeout):
     """Same as timeout_cmd buf using SIGTERM on timeout."""
+    if not timeout:
+        return cmd
     return 'timeout %us stdbuf -o0 -e0 %s' % (timeout, cmd)
 
 
@@ -46,11 +48,12 @@ class TcpdumpHelper:
         tcpdump_flags += ' -w %s' % pcap_out if pcap_out else ''
         tcpdump_cmd = 'tcpdump -i %s %s --immediate-mode -e -n -U %s' % (
             self.intf_name, tcpdump_flags, tcpdump_filter)
-        pipe_cmd = tcpdump_cmd
-        if timeout:
-            pipe_cmd = timeout_soft_cmd(tcpdump_cmd, timeout)
+
+        pipe_cmd = timeout_soft_cmd(tcpdump_cmd, timeout)
+        pipe_cmd = 'bin/catwrap ' + pipe_cmd
 
         LOGGER.debug(pipe_cmd)
+
         self.pipe = tcpdump_host.popen(
             pipe_cmd,
             stdin=DEVNULL,

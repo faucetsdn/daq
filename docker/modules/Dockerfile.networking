@@ -38,4 +38,6 @@ COPY misc/freeradius/certs /etc/freeradius/3.0/certs
 COPY misc/freeradius/default/eap /etc/freeradius/3.0/mods-enabled/eap
 COPY misc/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
 
+COPY bin/catwrap bin/
+
 ENTRYPOINT ["./start_networking"]

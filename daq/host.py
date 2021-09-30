@@ -8,6 +8,7 @@ from datetime import timedelta, datetime
 from ipaddress import ip_network
 import grpc
 
+
 from report import ResultType, ReportGenerator
 from proto import usi_pb2 as usi
 from proto import usi_pb2_grpc as usi_service
@@ -57,6 +58,7 @@ def pre_states():
     """Return pre-test states for basic operation"""
     return ['startup', 'sanity', 'acquire', 'base', 'monitor']
 
+
 def post_states():
     """Return post-test states for recording finalization"""
     return ['finish', 'info', 'timer']
@@ -67,12 +69,16 @@ def get_test_config(config, test):
     return config["modules"].get(test)
 
 
+def get_devdir(target_mac):
+    """Return the run directory for the device"""
+    return os.path.join(DAQ_RUN_DIR, DEV_DIR_PREFIX + target_mac.replace(':', ''))
+
+
 class ConnectedHost:
     """Class managing a device-under-test"""
 
     _STARTUP_MIN_TIME_SEC = 5
     _RPC_TIMEOUT_SEC = 20
-    _INST_DIR = DAQ_RUN_DIR
     _DEVICE_PATH = 'device/%s'
     _NETWORK_DIR = os.path.join(DAQ_RUN_DIR, 'network')
     _MODULE_CONFIG = 'module_config.json'
@@ -84,11 +90,10 @@ class ConnectedHost:
     _AUX_DIR = 'aux/'
     _CONFIG_DIR = 'config/'
     _TIMEOUT_EXCEPTION = TimeoutError('Timeout expired')
-    _PATH_PREFIX = os.path.abspath('.') + '/' + _INST_DIR
+    _PATH_PREFIX = os.path.abspath('.') + '/' + DAQ_RUN_DIR
 
     # pylint: disable=too-many-statements
     def __init__(self, runner, device, config):
-        self.configurator = configurator.Configurator()
         self.runner = runner
         self._gcp = runner.gcp
         self.gateway = device.gateway
@@ -125,6 +130,7 @@ class ConnectedHost:
         self.target_ip = None
         self._dhcp_listeners = []
         self._loaded_config = None
+        self.configurator = configurator.Configurator()
         self.reload_config()
         assert self._loaded_config, 'config was not loaded'
         self._write_module_config(self._loaded_config, self._device_aux_path())
@@ -133,7 +139,7 @@ class ConnectedHost:
         self.logger.info('Host %s running with enabled tests %s', self.target_mac,
                          self.remaining_tests)
         self._report = ReportGenerator(config, self.target_mac, self._loaded_config,
-                                       self.runner.report_sink)
+                                       self.runner.report_sink, get_devdir(self.target_mac))
         self.record_result('startup', state=MODE.PREP)
         self._record_result('info', state=self.target_mac, config=self._make_config_bundle())
         self._trigger_path = None
@@ -148,7 +154,7 @@ class ConnectedHost:
         return '%06x' % int(time.time())
 
     def _init_devdir(self):
-        devdir = os.path.join(self._INST_DIR, DEV_DIR_PREFIX + self.target_mac.replace(':', ''))
+        devdir = get_devdir(self.target_mac)
         shutil.rmtree(devdir, ignore_errors=True)
         os.makedirs(devdir)
         return devdir
@@ -672,7 +678,7 @@ class ConnectedHost:
             self.runner.target_set_error(self.device, e)
 
     def _inst_config_path(self):
-        return os.path.abspath(os.path.join(self._INST_DIR, self._CONFIG_DIR))
+        return os.path.abspath(os.path.join(DAQ_RUN_DIR, self._CONFIG_DIR))
 
     def _device_aux_path(self):
         path = os.path.join(self._device_base, self._AUX_DIR)
@@ -740,7 +746,7 @@ class ConnectedHost:
                                   (ResultType.ACTIVATION_LOG_PATH, activation_log_path),
                                   (ResultType.MODULE_CONFIG_PATH, module_config_path)):
             if os.path.isfile(path):
-                self._report.accumulate(self.test_name, {result_type: path})
+                self._report_accumulate(self.test_name, {result_type: path})
                 remote_paths[result_type.value] = self._upload_file(path)
         self.record_result(self.test_name, state=state, code=return_code, exception=exception,
                            **remote_paths)
@@ -748,6 +754,12 @@ class ConnectedHost:
         self.test_host = None
         self.timeout_handler = None
         self._run_next_test()
+
+    def _report_accumulate(self, test_name, data):
+        if self._report:
+            self._report.accumulate(test_name, data)
+        else:
+            self.logger.warning('Accumulating finalzed report for test %s', test_name)
 
     def _get_module_params(self):
         switch_setup = self.switch_setup if 'mods_addr' in self.switch_setup else None
@@ -844,9 +856,9 @@ class ConnectedHost:
         if name:
             self._record_result(name, current, **kwargs)
             if kwargs.get("exception"):
-                self._report.accumulate(name, {ResultType.EXCEPTION: str(kwargs["exception"])})
+                self._report_accumulate(name, {ResultType.EXCEPTION: str(kwargs["exception"])})
             if "code" in kwargs:
-                self._report.accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
+                self._report_accumulate(name, {ResultType.RETURN_CODE: kwargs["code"]})
             self._report.accumulate(name, {ResultType.MODULE_CONFIG: self._loaded_config})
 
     def _record_result(self, name, run_info=True, current=None, **kwargs):
