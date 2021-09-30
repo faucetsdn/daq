@@ -264,7 +264,7 @@ class BaseGateway(ABC):
         """Discovers a host using arp-scan in a list of subnets."""
         cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s -s %s %s'
         host, intf = self._get_scan_interface()
-        scans = self.run_trigger.get('arp_scan_count') or 2
+        scans = self.runner.run_trigger.get('arp_scan_count') or 2
         if scans <= 0:
             return
         subnets = list(all_subnets)
