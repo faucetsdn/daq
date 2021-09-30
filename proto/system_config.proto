@@ -261,6 +261,9 @@ message RunTrigger {
 
   // arp-scan interval for native gateways in seconds
   int32 arp_scan_sec = 8;
+
+  // number of arp-scans to perform when DHCP fails
+  int32 arp_scan_count = 9;
 }
 
 /*
