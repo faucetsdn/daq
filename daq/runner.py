@@ -79,14 +79,13 @@ class Device:
         """Determine if this device should be blocked from test or not"""
         block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
         if not os.path.exists(block_file):
+            LOGGER.info('Target device %s block file missing %s', self, block_file)
             return False
         with open(block_file, 'r') as stream:
             endtime = datetime.fromisoformat(stream.read().strip())
         nowtime = datetime.now(timezone.utc)
-        if self._report:
-            self._report = False
-            LOGGER.info('Target device %s check block %s > %s %s',
-                        self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
+        LOGGER.info('Target device %s block check %s > %s %s',
+                    self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
         return endtime > nowtime
 
     def set_block(self, block_sec):
@@ -97,7 +96,7 @@ class Device:
         endtime = (datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))).isoformat()
         with open(block_file, 'w') as stream:
             stream.write(endtime)
-        LOGGER.info('Target device %s blocked until %s', self, endtime)
+        LOGGER.info('Target device %s block until %s', self, endtime)
 
 
 class Devices:
