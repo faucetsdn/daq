@@ -85,7 +85,9 @@ class Device:
 
     def set_block(self, block_sec):
         """Set the block time for this device"""
-        block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
+        dev_dir = connected_host.get_devdir(self.mac)
+        os.makedirs(dev_dir, exist_ok=True)
+        block_file = os.path.join(dev_dir, BLOCK_FILE)
         endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
         with open(block_file, 'w') as stream:
             stream.write(str(endtime))
