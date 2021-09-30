@@ -91,7 +91,7 @@ class Device:
         endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
         with open(block_file, 'w') as stream:
             stream.write(str(endtime))
-        LOGGER.info('Target device %s blocked until %s', device, endtime)
+        LOGGER.info('Target device %s blocked until %s', self, endtime)
 
 
 class Devices:
