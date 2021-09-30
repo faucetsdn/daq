@@ -84,8 +84,8 @@ class Device:
         with open(block_file, 'r') as stream:
             endtime = datetime.fromisoformat(stream.read().strip())
         nowtime = datetime.now(timezone.utc)
-        LOGGER.info('Target device %s block check %s > %s %s',
-                    self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
+        LOGGER.debug('Target device %s block check %s > %s %s',
+                     self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
         return endtime > nowtime
 
     def set_block(self, block_sec):
@@ -661,7 +661,7 @@ class DAQRunner:
             return False
 
         if device.should_block():
-            LOGGER.info('Target device %s block', device)
+            LOGGER.debug('Target device %s block suppress', device)
             return False
 
         return True
