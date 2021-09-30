@@ -685,8 +685,9 @@ class DAQRunner:
                         device, len(self._target_set_queue))
 
         self._one_test_started = True
-        if self._single_shot:
-            block_sec = self.run_trigger.get('device_block_sec') or LONG_TIME_SEC
+        default_block_sec = LONG_TIME_SEC if self._single_shot else 0
+        block_sec = self.run_trigger.get('device_block_sec') or default_block_sec
+        if block_sec:
             device.set_block(block_sec)
             LOGGER.info('Target device %s in now blocked for %ss', device, block_sec)
 
