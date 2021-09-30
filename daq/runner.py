@@ -91,6 +91,7 @@ class Device:
         endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
         with open(block_file, 'w') as stream:
             stream.write(str(endtime))
+        LOGGER.info('Target device %s blocked until %s', device, endtime)
 
 
 class Devices:
@@ -689,7 +690,6 @@ class DAQRunner:
         block_sec = self.run_trigger.get('device_block_sec') or default_block_sec
         if block_sec:
             device.set_block(block_sec)
-            LOGGER.info('Target device %s in now blocked for %ss', device, block_sec)
 
     def _target_set_consider(self):
         if self._target_set_queue:
