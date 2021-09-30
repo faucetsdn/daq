@@ -81,16 +81,19 @@ class Device:
             return False
         with open(block_file, 'r') as stream:
             endtime = datetime.fromisoformat(stream.read().strip())
-        return endtime > datetime.now(timezone.utc)
+        nowtime = datetime.now(timezone.utc)
+        LOGGER.debug('Target device %s check block %s > %s %s',
+                     self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
+        return endtime > nowtime
 
     def set_block(self, block_sec):
         """Set the block time for this device"""
         dev_dir = connected_host.get_devdir(self.mac)
         os.makedirs(dev_dir, exist_ok=True)
         block_file = os.path.join(dev_dir, BLOCK_FILE)
-        endtime = datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))
+        endtime = (datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))).isoformat()
         with open(block_file, 'w') as stream:
-            stream.write(str(endtime))
+            stream.write(endtime)
         LOGGER.info('Target device %s blocked until %s', self, endtime)
 
 
