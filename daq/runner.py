@@ -34,6 +34,8 @@ from proto.system_config_pb2 import DhcpMode
 from proto.report_pb2 import DeviceReport
 
 LOGGER = logger.get_logger('runner')
+BLOCK_FILE = 'dev_block.txt'
+LONG_TIME_SEC = 100000000000
 
 
 class PortInfo:
@@ -68,9 +70,33 @@ class Device:
         self.assigned = None
         self.wait_remote = False
         self.session_endpoint = None
+        self._report = True
 
     def __repr__(self):
         return self.mac.replace(":", "")
+
+    def should_block(self):
+        """Determine if this device should be blocked from test or not"""
+        block_file = os.path.join(connected_host.get_devdir(self.mac), BLOCK_FILE)
+        if not os.path.exists(block_file):
+            LOGGER.info('Target device %s block file missing %s', self, block_file)
+            return False
+        with open(block_file, 'r') as stream:
+            endtime = datetime.fromisoformat(stream.read().strip())
+        nowtime = datetime.now(timezone.utc)
+        LOGGER.debug('Target device %s block check %s > %s %s',
+                     self, endtime.isoformat(), nowtime.isoformat(), (endtime > nowtime))
+        return endtime > nowtime
+
+    def set_block(self, block_sec):
+        """Set the block time for this device"""
+        dev_dir = connected_host.get_devdir(self.mac)
+        os.makedirs(dev_dir, exist_ok=True)
+        block_file = os.path.join(dev_dir, BLOCK_FILE)
+        endtime = (datetime.now(timezone.utc) + timedelta(seconds=float(block_sec))).isoformat()
+        with open(block_file, 'w') as stream:
+            stream.write(endtime)
+        LOGGER.info('Target device %s block until %s', self, endtime)
 
 
 class Devices:
@@ -200,7 +226,7 @@ class DAQRunner:
         self._init_test_list()
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
         self._target_set_queue = []
-        self._blocked_devices = set()
+        self._one_test_started = False
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -242,11 +268,19 @@ class DAQRunner:
         return daq_run_id
 
     def _cleanup_previous_runs(self):
+        if self.run_trigger.get('retain_results'):
+            return
+
+        LOGGER.info('Cleaning previous runs')
         if os.path.isdir(report.REPORT_BASE_DIR):
+            LOGGER.info('Removing existing %s', report.REPORT_BASE_DIR)
             shutil.rmtree(report.REPORT_BASE_DIR, ignore_errors=True)
+
         for path in os.listdir(DAQ_RUN_DIR):
-            if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(path):
-                shutil.rmtree(path, ignore_errors=True)
+            fullpath = os.path.join(DAQ_RUN_DIR, path)
+            if path.startswith(connected_host.DEV_DIR_PREFIX) and os.path.isdir(fullpath):
+                LOGGER.info('Removing existing %s', fullpath)
+                shutil.rmtree(fullpath, ignore_errors=True)
 
     def _init_device_result_handler(self):
         server_port = self.config.get('device_reporting', {}).get('server_port')
@@ -322,7 +356,7 @@ class DAQRunner:
         self.network.initialize()
 
         self.stream_monitor = self._create_stream_monitor()
-        self._native_gateway = self._create_gateway(None) if self._native_vlan else None
+        self._native_gateway = self._allocate_gateway(None) if self._native_vlan else None
 
         self.network.activate(self._native_gateway)
 
@@ -382,7 +416,7 @@ class DAQRunner:
                 self._monitor_faucet_events()
                 continue
             except Exception as e:
-                LOGGER.error(e)
+                LOGGER.error('Next faucet event exception: %s', str(e))
                 self.faucet_events.disconnect()
                 self.faucet_events = None
                 self.shutdown()
@@ -431,6 +465,7 @@ class DAQRunner:
             device = self._devices.get_by_port_info(port_info)
             if device and device.host and not port_info.flapping_start:
                 port_info.flapping_start = time.time()
+                LOGGER.info('Port %s start flapping timer %s', port, port_info.flapping_start)
             if port_info.active:
                 if device and not port_info.flapping_start:
                     self._direct_port_traffic(device, port, None)
@@ -491,7 +526,7 @@ class DAQRunner:
 
         self._target_set_trigger(device, remote_trigger=True)
         if device.gateway:
-            self._direct_device_traffic(device, device.gateway.port_set)
+            self._direct_device_traffic(device)
 
     def _queue_callback(self, callback):
         with self._event_lock:
@@ -531,7 +566,7 @@ class DAQRunner:
         self._target_set_consider()
 
         active_tests = bool(self._devices.get_triggered_devices() or self._target_set_queue)
-        more_testing = self._run_tests and not (self._single_shot and self._blocked_devices)
+        more_testing = self._run_tests and not (self._single_shot and self._one_test_started)
         if not active_tests and not more_testing:
             if self.faucet_events and not self._linger_exit:
                 LOGGER.warning('All expected test runs complete, terminating.')
@@ -550,7 +585,7 @@ class DAQRunner:
             timeout_sec = device.host.get_port_flap_timeout(device.host.test_name)
             if timeout_sec is None:
                 timeout_sec = self._default_port_flap_timeout
-            LOGGER.info('Flap device %s %s %s', device, device.port.flapping_start, timeout_sec)
+            LOGGER.debug('Flap device %s %s %s', device, device.port.flapping_start, timeout_sec)
             if (device.port.flapping_start + timeout_sec) <= time.time():
                 exception = DaqException('port not active for %ds' % timeout_sec)
                 self.target_set_error(device, exception)
@@ -612,6 +647,25 @@ class DAQRunner:
         existing = self._get_existing_gateway(device)
         return num_triggered < self._max_hosts and (existing or self.gateway_sets)
 
+    def _should_trigger_device(self, device, remote_trigger):
+        if device.host:
+            LOGGER.debug('Target device %s already triggered', device)
+            return False
+
+        if device.wait_remote and not remote_trigger:
+            LOGGER.debug('Ignoring local trigger for remote target %s', device)
+            return False
+
+        if device in self._target_set_queue:
+            LOGGER.debug('Target device %s already queued', device)
+            return False
+
+        if device.should_block():
+            LOGGER.debug('Target device %s block suppress', device)
+            return False
+
+        return True
+
     def _target_set_trigger(self, device, remote_trigger=False):
         assert self._devices.contains(device), 'Target device %s is not expected' % device
 
@@ -619,24 +673,11 @@ class DAQRunner:
             LOGGER.warning('Target device %s ignored, system is not active', device)
             return
 
-        if device.host:
-            LOGGER.debug('Target device %s already triggered', device)
-            return
-
         if not self._run_tests:
             LOGGER.debug('Target device %s ignore, not running more tests', device)
             return
 
-        if device.wait_remote and not remote_trigger:
-            LOGGER.debug('Ignoring local trigger for remote target %s', device)
-            return
-
-        if device in self._target_set_queue:
-            LOGGER.debug('Target device %s already queued', device)
-            return
-
-        if device.mac in self._blocked_devices:
-            LOGGER.debug('Target device %s blocked', device)
+        if not self._should_trigger_device(device, remote_trigger):
             return
 
         device.wait_remote = False
@@ -648,10 +689,6 @@ class DAQRunner:
             self._target_set_queue.append(device)
             LOGGER.info('Target device %s queing activate (%s)',
                         device, len(self._target_set_queue))
-
-        if self._single_shot:
-            self._blocked_devices.add(device.mac)
-            LOGGER.info('Target device %s in now blocked (%s)', device, len(self._blocked_devices))
 
     def _target_set_consider(self):
         if self._target_set_queue:
@@ -673,7 +710,7 @@ class DAQRunner:
         try:
             group_name = self.network.device_group_for(device)
             device.group = group_name
-            gateway = self._create_gateway(device)
+            gateway = self._allocate_gateway(device)
             if gateway.activated and not external_dhcp:
                 LOGGER.warning('Target device %s trigger ignored b/c activated gateway', device)
                 return False
@@ -690,7 +727,6 @@ class DAQRunner:
         if not external_dhcp:
             gateway.stop_dhcp_response(device.mac)
         gateway.attach_target(device)
-        device.gateway = gateway
 
         try:
             self._run_count += 1
@@ -709,15 +745,21 @@ class DAQRunner:
                 }
                 self._direct_port_traffic(device, device.port.port_no, target)
             else:
-                self._direct_device_traffic(device, gateway.port_set)
+                self._direct_device_traffic(device)
         except Exception as e:
             self.target_set_error(device, e)
             return False
 
+        self._one_test_started = True
+        default_block_sec = LONG_TIME_SEC if self._single_shot else 0
+        block_sec = self.run_trigger.get('device_block_sec') or default_block_sec
+        if block_sec:
+            device.set_block(block_sec)
+
         return True
 
-    def _direct_device_traffic(self, device, port_set):
-        self.network.direct_device_traffic(device, port_set)
+    def _direct_device_traffic(self, device):
+        self.network.direct_device_traffic(device)
 
     def _get_test_list(self, test_file):
         if self.config.get('no_test', False):
@@ -791,11 +833,14 @@ class DAQRunner:
                 return existing
         return None
 
-    def _create_gateway(self, device):
+    def _allocate_gateway(self, device):
         is_native = device is None
         assert not is_native or not self._native_gateway, 'native gateway already initialized'
+        assert is_native or not device.gateway, 'device already assigned to gateway'
         existing = self._get_existing_gateway(device)
         if existing:
+            if device:
+                device.gateway = existing
             return existing
         group_name = 'native' if is_native else device.group
         set_num = 1 if is_native else self._find_gateway_set(device)
@@ -807,7 +852,8 @@ class DAQRunner:
             env_params.update({
                 'net_prefix': network.NATIVE_NET_PREFIX,
                 'ext_intf': self.network.ext_intf,
-                'ext_mac': self.network.ext_mac
+                'ext_mac': self.network.ext_mac,
+                'arp_scan': self.run_trigger.get('arp_scan_sec') or 0
             })
 
         if is_native or device.dhcp_mode != DhcpMode.EXTERNAL:
@@ -819,6 +865,9 @@ class DAQRunner:
             gateway.set_tap_intf(self.network.tap_intf)
 
         try:
+            if device:
+                device.gateway = gateway
+                self._direct_device_traffic(device)
             gateway.initialize()
             if is_native and str(gateway.host.switch_intf) != network.NATIVE_GATEWAY_INTF:
                 assert False, 'iface mismatch'
@@ -994,7 +1043,8 @@ class DAQRunner:
         try:
             self._target_set_cancel(device)
         except Exception as e:
-            LOGGER.error(e)
+            LOGGER.error('Target set cancel exception: %s', str(e))
+            LOGGER.exception(e)
             device.host.record_result(device.host.test_name, exception=e)
         self._target_set_finalize(device, device.host.results, reason)
 
@@ -1059,9 +1109,10 @@ class DAQRunner:
             LOGGER.info('Retiring %s. Last device: %s', target_gateway, device)
             target_gateway.terminate()
             self.gateway_sets.add(target_gateway.port_set)
-            if device.vlan:
-                self._direct_device_traffic(device, None)
+
         device.gateway = None
+        if device.vlan:
+            self._direct_device_traffic(device)
 
     def _monitor_faucet_events(self):
         self.monitor_stream('faucet', self.faucet_events.sock,

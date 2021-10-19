@@ -63,10 +63,10 @@ jobs:
           name: build_artifacts_base
           path: /tmp/build_artifacts_base
     - uses: actions/download-artifact@v2
+      if: matrix.test == 'aux'
       with:
           name: build_artifacts_subset
           path: /tmp/build_artifacts_subset
-      if: matrix.test == 'aux'
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -87,9 +87,9 @@ jobs:
       run: |
         bin/load_images faucet faux setup base
     - name: Loading subset docker images
+      if: matrix.test == 'aux'
       run: |
         bin/load_images subset
-      if: matrix.test == 'aux'
     - name: Running ${{ matrix.test }} test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
@@ -176,7 +176,7 @@ jobs:
           bin/setup_remote daq
           bin/retry_cmd bin/build_docker controller
           bin/build_dts
-      - name: run fot integration tests
+      - name: run vxlan integration tests
         if: ${{ always() }}
         run: |
           cd forch

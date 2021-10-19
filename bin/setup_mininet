@@ -1,0 +1,58 @@
+#!/bin/bash -e
+
+ROOT=$(dirname $0)/..
+cd $ROOT
+
+MININET=https://github.com/mininet/mininet
+MININETV=$(cat etc/MININET_VERSION)
+
+source venv/bin/activate
+
+PYTHON2_BIN=$(readlink -f $(which python2))
+echo Python2 binary is $PYTHON2_BIN
+
+#
+# If there's trouble installing this because of setuptools, then some
+# manual trickery needs to be done to install setuptools for python2.
+# This just involves downloading it manually for python2, and then
+# running pip for python2 with setuptools. This link should help:
+#
+# https://stackoverflow.com/a/66719099
+#
+# And then ultimately run the command:
+#
+#   python -m pip install setuptools
+#
+# This isn't automated because it's only required on some legacy systems,
+# and might involve a security hole (downloading packages directly).
+#
+
+if [ -d mininet ]; then
+    echo Checking mininet version matches $MININETV...
+    targetrev=$(cd mininet; git rev-parse $MININETV)
+    instrev=$(cd mininet; git rev-parse HEAD)
+    if [ "$targetrev" != "$instrev" ]; then
+        echo Target mininet version $MININETV does not match installed version.
+        false
+    fi
+    if [ ! -f mininet/.the_house_that_daq_built ]; then
+        echo Mininet build seems to be incomplete. Try bin/clean_dev and try again.
+        false
+    fi
+else
+    echo Cloning $MININET $MININETV...
+    git clone $MININET
+    (
+        cd mininet
+        git reset --hard $MININETV
+        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
+            perl -pi -e "s/${i}//g" util/install.sh ;
+        done
+        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
+        export PYTHON2_BIN
+        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON2_BIN} make install/' util/install.sh
+        util/install.sh -n
+    )
+    touch mininet/.the_house_that_daq_built
+fi
+

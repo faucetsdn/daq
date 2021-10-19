@@ -16,6 +16,7 @@ from env import DAQ_RUN_DIR
 
 LOGGER = logger.get_logger('gateway')
 
+DEFAULT_TEST_HOSTS = 8
 
 class BaseGateway(ABC):
     """Gateway collection class for managing testing services"""
@@ -23,8 +24,6 @@ class BaseGateway(ABC):
     GATEWAY_OFFSET = 0
     FAKE_HOST_OFFSET = 1
     TEST_OFFSET_START = 2
-    NUM_SET_PORTS = 6
-    SET_SPACING = 10
     _PING_RETRY_COUNT = 5
 
     TEST_IP_FORMAT = '192.168.84.%d'
@@ -45,6 +44,10 @@ class BaseGateway(ABC):
         self.activated = False
         self.result_linger = False
         self.dhcp_monitor = None
+        is_native = bool(self.runner.run_trigger.get('native_vlan'))
+        max_hosts = self.runner.run_trigger.get('max_hosts') or DEFAULT_TEST_HOSTS
+        num_host_ports = max_hosts if is_native else DEFAULT_TEST_HOSTS
+        self._gw_set_size = num_host_ports + self.TEST_OFFSET_START
         self._env_params = env_params
         self._ext_intf = env_params.get('ext_intf') if env_params else None
         self._is_native = bool(self._ext_intf)
@@ -136,7 +139,7 @@ class BaseGateway(ABC):
         test_port = self._switch_port(self.TEST_OFFSET_START)
         while test_port in self.test_ports:
             test_port = test_port + 1
-        limit_port = self._switch_port(self.NUM_SET_PORTS)
+        limit_port = self._switch_port(self._gw_set_size)
         assert test_port < limit_port, 'no test ports available'
         self.test_ports.add(test_port)
         return test_port
@@ -147,15 +150,10 @@ class BaseGateway(ABC):
         self.test_ports.remove(test_port)
 
     def _switch_port(self, offset):
-        return self.port_set * self.SET_SPACING + offset
+        return self.port_set * self._gw_set_size + offset
 
     def _is_target_expected(self, target):
-        if not target:
-            return False
-        target_mac = target['mac']
-        if target_mac in self.targets:
-            return True
-        return False
+        return target and target['mac'] in self.targets
 
     def _dhcp_callback(self, state, target, exception=None):
         if exception:
@@ -175,16 +173,16 @@ class BaseGateway(ABC):
     def attach_target(self, device):
         """Attach the given target to this gateway; return number of attached targets."""
         assert device.mac not in self.targets, 'target %s already attached to gw' % device
-        LOGGER.info('Attaching target %s to gateway group %s',
-                    device, self.name)
+        LOGGER.info('Attaching target %s to gateway %s group %s',
+                    device, self.port_set, self.name)
         self.targets[device.mac] = device
         return len(self.targets)
 
     def detach_target(self, device):
         """Detach the given target from this gateway; return number of remaining targets."""
         assert device.mac in self.targets, 'target %s not attached to gw' % device
-        LOGGER.info('Detach target %s from gateway group %s: %s',
-                    device, self.name, list(self.targets.keys()))
+        LOGGER.info('Detaching target %s from gateway %s group %s: %s',
+                    device, self.port_set, self.name, list(self.targets.keys()))
         del self.targets[device.mac]
         return len(self.targets)
 
@@ -200,10 +198,16 @@ class BaseGateway(ABC):
         """Return the host targets associated with this gateway"""
         return self.targets.values()
 
+    def get_all_gw_ports(self):
+        """Return all ports associated with gateway"""
+        base_port = self._switch_port(0)
+        limit_port = self._switch_port(self._gw_set_size)
+        return list(range(base_port, limit_port))
+
     def get_possible_test_ports(self):
         """Return test ports associated with gateway"""
         test_port = self._switch_port(self.TEST_OFFSET_START)
-        limit_port = self._switch_port(self.NUM_SET_PORTS)
+        limit_port = self._switch_port(self._gw_set_size)
         return list(range(test_port, limit_port))
 
     def terminate(self):
@@ -233,7 +237,7 @@ class BaseGateway(ABC):
     def _get_scan_interface(self):
         return self.host, self.host_intf
 
-    def _discover_host_hangup_callback(self, mac, log_fd, log_file, callback):
+    def _discover_host_hangup_callback(self, mac, log_fd, log_file, scan_callback):
         def process_line(line):
             sections = [section for section in line.split('\t') if section]
             if len(sections) >= 2:
@@ -252,38 +256,55 @@ class BaseGateway(ABC):
                 if device_ip:
                     LOGGER.info('Host discovery for %s completed. Found ip %s.',
                                 mac, device_ip)
-                    return callback(device_ip)
+                    return scan_callback(device_ip)
         LOGGER.info('Host discovery for %s completed. Found no ip.', mac)
-        callback(None)
+        scan_callback(None)
 
-    def discover_host(self, mac: str, subnets: List[ip_network], callback: Callable):
+    def discover_host(self, mac: str, all_subnets: List[ip_network], host_callback: Callable):
         """Discovers a host using arp-scan in a list of subnets."""
         cmd = 'arp-scan --retry=2 --bandwidth=512K --interface=%s --destaddr=%s -s %s %s'
         host, intf = self._get_scan_interface()
+        scans = self.runner.run_trigger.get('arp_scan_count') or 2
+        if scans <= 0:
+            return
+        subnets = list(all_subnets)
         LOGGER.info('Starting host discovery for %s', mac)
 
-        def hangup_callback_callback(device_ip):
+        def scan_callback(device_ip):
+            nonlocal scans
             if device_ip:
-                callback(device_ip)
+                scans = 0
+                host_callback(device_ip)
             else:
                 recursive_discover()
 
         def recursive_discover():
+            nonlocal subnets, scans
             if not subnets:
-                callback(None)
-                return
+                if scans > 0:
+                    scans -= 1
+                    subnets = list(all_subnets)
+                else:
+                    host_callback(None)
+                    return
             subnet = subnets.pop(0)
-            address = next(subnet.hosts())
+            hosts = subnet.hosts()
+            address = next(hosts)
+            # This handles the case where the local IP conflicts with the remote.
+            # Not really a good general solution, but works in many cases.
+            # TODO: Generalize a bit more to (e.g.) pick a random src IP.
+            if scans % 2:
+                address = next(hosts)
             log_file = os.path.join(self.tmpdir, str(subnet).replace('/', '_'))
             log_fd = open(log_file, 'w')
-            LOGGER.info('Scanning subnet %s from %s for %s', subnet, address, mac)
+            LOGGER.info('Scanning %s subnet %s from %s for %s', scans, subnet, address, mac)
             host.cmd('ip addr add %s/%s dev %s' % (str(address), subnet.prefixlen, intf))
             full_cmd = cmd % (intf, mac, str(address), str(subnet))
-            LOGGER.info('arp-scan command: %s', full_cmd)
             active_pipe = host.popen(full_cmd, stdin=DEVNULL, stdout=PIPE, env=os.environ)
             self.runner.monitor_stream(self.name, active_pipe.stdout, copy_to=log_fd,
                                        hangup=lambda: self._discover_host_hangup_callback(
-                                           mac, log_fd, log_file, hangup_callback_callback))
+                                           mac, log_fd, log_file, scan_callback))
+
         recursive_discover()
 
     def _ping_test(self, src, dst, src_addr=None):

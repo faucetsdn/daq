@@ -294,8 +294,6 @@ port-02 module_config modules
     `'''       `\__   /\
                 ')
 Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 47808/closed/udp//bacnet///
-Host: X.X.X.X () Status: Up
 Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///
 Redacted docs diff
 No report diff

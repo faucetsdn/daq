@@ -1,5 +1,6 @@
-daq (1.9.11-1) UNRELEASED; urgency=low
+daq (1.10.32.1) UNRELEASED; urgency=low
 
-  * Initial release.
+  [ Anurag Porripireddi ]
+  * New upstream release 1.10.32.1
 
- -- Yufeng Duan <>  Tue, 20 Oct 2020 05:33:11 +0000
+ -- Anurag Porripireddi <anuragprdi@google.com>  Tue, 19 Oct 2021 15:41:37 -0700

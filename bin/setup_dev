@@ -27,9 +27,6 @@ if [[ $PVERSION != $INSTALLED_PYTHON ]]; then
     false
 fi
 
-MININET=https://github.com/mininet/mininet
-MININETV=$(cat etc/MININET_VERSION)
-
 if [ -f .daq.local ]; then
     echo Loading config from .daq.local
     source .daq.local
@@ -73,39 +70,7 @@ $AG install \
     isc-dhcp-client network-manager netcat gnupg2 strace arp-scan libffi-dev \
     python python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python$PVERSION-venv \
-    python3-distutils
-
-PYTHON2_BIN=$(readlink -f $(which python2))
-echo Python2 binary is $PYTHON2_BIN
-
-if [ -d mininet ]; then
-    echo Checking mininet version matches $MININETV...
-    targetrev=$(cd mininet; git rev-parse $MININETV)
-    instrev=$(cd mininet; git rev-parse HEAD)
-    if [ "$targetrev" != "$instrev" ]; then
-        echo Target mininet version $MININETV does not match installed version.
-        false
-    fi
-    if [ ! -f mininet/.the_house_that_daq_built ]; then
-        echo Mininet build seems to be incomplete. Try bin/clean_dev and try again.
-        false
-    fi
-else
-    echo Cloning $MININET $MININETV...
-    git clone $MININET
-    (
-        cd mininet
-        git reset --hard $MININETV
-        for i in ssh pep8 pyflakes python-pexpect pylint xterm ; do
-            perl -pi -e "s/${i}//g" util/install.sh ;
-        done
-        sed -i s/cgroup-bin/cgroup-tools/ util/install.sh
-        export PYTHON2_BIN
-        sed -i 's/sudo PYTHON=${PYTHON} make install/sudo PYTHON=${PYTHON2_BIN} make install/' util/install.sh
-        util/install.sh -n
-    )
-    touch mininet/.the_house_that_daq_built
-fi
+    python3-distutils golang-go protobuf-compiler
 
 # Can't use venv inside of containers because of absolute paths.
 if [ -n "$CI" ]; then
@@ -142,21 +107,21 @@ $PIP freeze
 echo Resetting .cache directory permissions...
 test -n "$USER" && sudo chown $USER -R $HOME/.cache
 
+bin/setup_mininet
+
 if [ -n "$SIMPLE" ]; then
     echo Finished with simple setup.
     exit 0
 fi
 
+rm -rf protoc-gen-doc
+git clone https://github.com/pseudomuto/protoc-gen-doc.git
+
 bin/setup_remote faucet
 bin/setup_remote forch
 bin/setup_remote udmi
 
-echo -n "DAQ commit "
-git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
-echo
-
 docker --version
-
 if ! docker images > /dev/null; then
     echo
     echo Docker execution failed, is the docker group setup?
@@ -164,8 +129,9 @@ if ! docker images > /dev/null; then
     false
 fi
 
-rm -rf protoc-gen-doc
-git clone https://github.com/pseudomuto/protoc-gen-doc.git
+echo -n "DAQ commit "
+git log -n 1 --pretty=format:"%h - %an, %ar : %s" || true
+echo
 
 echo
 echo Setup completed successfully.
