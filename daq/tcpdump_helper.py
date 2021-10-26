@@ -52,7 +52,11 @@ class TcpdumpHelper:
             self.intf_name, tcpdump_flags, tcpdump_filter)
 
         pipe_cmd = timeout_soft_cmd(tcpdump_cmd, timeout)
-        pipe_cmd = os.path.join(DAQ_LIB_DIR, 'bin', 'catwrap') + ' %s' % pipe_cmd
+        pipe_cmd_wrapper = os.path.join('bin', 'catwrap')
+        # When running container gateway, catwrap is under bin/
+        if not os.path.isfile(pipe_cmd_wrapper):
+            pipe_cmd_wrapper = os.path.join(DAQ_LIB_DIR, pipe_cmd_wrapper)
+        pipe_cmd = '%s %s' % (pipe_cmd_wrapper, pipe_cmd)
 
         LOGGER.debug(pipe_cmd)
 
