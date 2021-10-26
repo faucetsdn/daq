@@ -10,6 +10,8 @@ import subprocess
 import threading
 import logger
 
+from env import DAQ_LIB_DIR
+
 DEVNULL = open(os.devnull, 'wb')
 
 LOGGER = logger.get_logger('tcpdump')
@@ -50,7 +52,7 @@ class TcpdumpHelper:
             self.intf_name, tcpdump_flags, tcpdump_filter)
 
         pipe_cmd = timeout_soft_cmd(tcpdump_cmd, timeout)
-        pipe_cmd = 'bin/catwrap ' + pipe_cmd
+        pipe_cmd = os.path.join(DAQ_LIB_DIR, 'bin', 'catwrap') + ' %s' % pipe_cmd
 
         LOGGER.debug(pipe_cmd)
 
