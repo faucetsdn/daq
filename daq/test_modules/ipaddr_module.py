@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import copy
 
 from proto.system_config_pb2 import DhcpMode
+import host as connected_host
 from .docker_module import DockerModule
 from .base_module import HostModule
 
@@ -127,7 +128,7 @@ class IpAddrModule(HostModule):
     def ip_listener(self, target_ip, state):
         """Respond to a ip notification event"""
         self._logger.info('Device %s ip notification %s (%s)', self.device, target_ip, state)
-        if state != 'done':
+        if state not in (connected_host.MODE.DONE, connected_host.MODE.LONG):
             return
         result = self.host.runner.ping_test(self.host.gateway.host, self.host.target_ip)
         self._logger.info('Ping to %s, result %s', self.host.target_ip, result)
