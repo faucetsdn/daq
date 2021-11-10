@@ -32,7 +32,7 @@ cat <<EOF > local/site/site_config.json
             "discover": {
                 "enabled": false
             },
-            "pentests": {
+            "nmap": {
                 "test_http": false
             }
         }
