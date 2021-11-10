@@ -31,6 +31,9 @@ cat <<EOF > local/site/site_config.json
         "modules": {
             "discover": {
                 "enabled": false
+            },
+            "pentests": {
+                "test_http": false
             }
         }
     }
