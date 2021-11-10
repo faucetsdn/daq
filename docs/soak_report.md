@@ -10,11 +10,11 @@ Source: local
 |base.switch.ping|0|2|
 |connection.base.target_ping|2|0|
 |security.nmap.ports|2|0|
-|security.nmap.http|2|0|
+|security.nmap.http|0|2|
 
 |categories|pass|skip|
 |---|---|---|
-|Other|8|2|
+|Other|6|4|
 
 |missing tests|count|
 |---|---|
