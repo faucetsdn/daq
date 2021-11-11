@@ -25,6 +25,22 @@ echo gcp_cred=$gcp_cred >> local/system.conf
 echo dhcp_lease_time=120s >> local/system.conf
 echo base_conf=resources/setups/orchestration/base_config.json >> local/system.conf
 
+mkdir -p local/site/
+cat <<EOF > local/site/site_config.json
+{
+    "ipaddr": {
+      "enabled": true,
+      "timeout_sec": 0,
+      "port_flap_timeout_sec": 20,
+      "dhcp_ranges": [
+        {"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16},
+        {"start": "172.16.0.1", "end": "172.31.255.254", "prefix_length": 12},
+        {"start": "10.0.0.1", "end": "10.255.255.254", "prefix_length": 8}
+      ]
+    }
+}
+EOF
+
 for iface in $(seq 1 $NUM_DEVICES); do
     xdhcp=""
     intf_mac="9a02571e8f0$iface"
@@ -36,12 +52,7 @@ for iface in $(seq 1 $NUM_DEVICES); do
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
-        "static_ip": "$ip",
-        "modules": {
-            "ipaddr": {
-                "enabled": true
-            }
-        }
+        "static_ip": "$ip"
     }
 EOF
         else
@@ -49,7 +60,6 @@ EOF
     {
         "modules": {
             "ipaddr": {
-                "enabled": true,
                 "timeout_sec": 320
             }
         }
@@ -62,8 +72,6 @@ EOF
     {
         "modules": {
             "ipaddr": {
-                "enabled": true,
-                "port_flap_timeout_sec": 20,
                 "timeout_sec": 1
             }
         }
@@ -72,12 +80,6 @@ EOF
         else
             cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
-        "modules": {
-            "ipaddr": {
-                "enabled": true,
-                "port_flap_timeout_sec": 20
-            }
-        }
     }
 EOF
         fi
@@ -110,7 +112,7 @@ echo TAPTAP
 more inst/run-*/nodes/nmap*/activate.log | cat
 more inst/run-*/nodes/ping*/activate.log | cat
 more inst/run-*/nodes/ipaddr*/tmp/module.log | cat
-more inst/run-*/nodes/pass04/tmp/module_config.json | cat
+more inst/run-*/nodes/pass*/tmp/module_config.json | cat
 
 echo Found $results clean runs, $timeouts timeouts, and $static_ips static_ips.
 echo ipaddr had $ip_notifications notifications, $ipaddr_timeouts timeouts, and $alternate_subnet_ip alternates.
