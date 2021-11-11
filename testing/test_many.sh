@@ -114,6 +114,8 @@ static_ips=$(fgrep nope inst/run-*/scans/ip_triggers.txt | wc -l)
 ntp_traffic=$(fgrep "RESULT fail base.startup.ntp" inst/run-*/nodes/ping*/tmp/result_lines.txt | wc -l)
 dns_traffic=$(fgrep "RESULT fail base.startup.dns" inst/run-*/nodes/ping*/tmp/result_lines.txt | wc -l)
 
+echo TAPTAP
+more inst/run-*/nodes/nmap*/activate.log | cat
 more inst/run-*/nodes/ping*/activate.log | cat
 more inst/run-*/nodes/ipaddr*/tmp/module.log | cat
 
