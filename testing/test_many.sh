@@ -62,6 +62,7 @@ EOF
     {
         "modules": {
             "ipaddr": {
+                "enabled": false,
                 "timeout_sec": 320
             }
         }
@@ -82,6 +83,10 @@ EOF
         else
             cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
+        "modules": {
+            "ipaddr": {
+            }
+        }
     }
 EOF
         fi
