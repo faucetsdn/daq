@@ -102,6 +102,7 @@ jobs:
       run: |
         echo %%%%%%% daq log cmdrun.log
         cat inst/cmdrun.log || true
+        more inst/run-*/nodes/pass*/tmp/module_config.json | cat
 
   unit_tests:
     runs-on: ubuntu-18.04
