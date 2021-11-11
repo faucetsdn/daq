@@ -23,7 +23,7 @@ echo switch_setup.of_dpid=2 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
 echo gcp_cred=$gcp_cred >> local/system.conf
 echo dhcp_lease_time=120s >> local/system.conf
-echo 'base_conf=${DAQ_LIB}/resources/setups/orchestration/base_config.json' >> local/system.conf
+echo base_conf=resources/setups/orchestration/base_config.json >> local/system.conf
 
 for iface in $(seq 1 $NUM_DEVICES); do
     xdhcp=""
