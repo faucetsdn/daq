@@ -28,6 +28,7 @@ echo base_conf=resources/setups/orchestration/base_config.json >> local/system.c
 mkdir -p local/site/
 cat <<EOF > local/site/site_config.json
 {
+  "modules": {
     "ipaddr": {
       "enabled": true,
       "timeout_sec": 0,
@@ -38,6 +39,7 @@ cat <<EOF > local/site/site_config.json
         {"start": "10.0.0.1", "end": "10.255.255.254", "prefix_length": 8}
       ]
     }
+  }
 }
 EOF
 
