@@ -23,17 +23,24 @@ echo switch_setup.of_dpid=2 >> local/system.conf
 echo switch_setup.uplink_port=$((NUM_DEVICES+1)) >> local/system.conf
 echo gcp_cred=$gcp_cred >> local/system.conf
 echo dhcp_lease_time=120s >> local/system.conf
+echo base_conf=resources/setups/orchestration/base_config.json >> local/system.conf
 
-mkdir -p local/site
-cp resources/test_site/site_config.json local/site/site_config.json
+mkdir -p local/site/
 cat <<EOF > local/site/site_config.json
-    {
-        "modules": {
-            "discover": {
-                "enabled": false
-            }
-        }
+{
+  "modules": {
+    "ipaddr": {
+      "enabled": true,
+      "timeout_sec": 0,
+      "port_flap_timeout_sec": 20,
+      "dhcp_ranges": [
+        {"start": "192.168.0.1", "end": "192.168.255.254", "prefix_length": 16},
+        {"start": "172.16.0.1", "end": "172.31.255.254", "prefix_length": 12},
+        {"start": "10.0.0.1", "end": "10.255.255.254", "prefix_length": 8}
+      ]
     }
+  }
+}
 EOF
 
 for iface in $(seq 1 $NUM_DEVICES); do
@@ -47,7 +54,12 @@ for iface in $(seq 1 $NUM_DEVICES); do
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
-        "static_ip": "$ip"
+        "static_ip": "$ip",
+        "modules": {
+            "ipaddr": {
+                "enabled": false
+            }
+        }
     }
 EOF
         else
@@ -55,7 +67,8 @@ EOF
     {
         "modules": {
             "ipaddr": {
-              "timeout_sec": 320
+                "enabled": false,
+                "timeout_sec": 320
             }
         }
     }
@@ -67,8 +80,6 @@ EOF
     {
         "modules": {
             "ipaddr": {
-                "enabled": true,
-                "port_flap_timeout_sec": 20,
                 "timeout_sec": 1
             }
         }
@@ -79,8 +90,7 @@ EOF
     {
         "modules": {
             "ipaddr": {
-                "enabled": true,
-                "port_flap_timeout_sec": 20
+                "enabled": false
             }
         }
     }
