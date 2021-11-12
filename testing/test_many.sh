@@ -54,7 +54,12 @@ for iface in $(seq 1 $NUM_DEVICES); do
             #Install site specific configs for xdhcp ips
             cat <<EOF > local/site/mac_addrs/$intf_mac/device_config.json
     {
-        "static_ip": "$ip"
+        "static_ip": "$ip",
+        "modules": {
+            "ipaddr": {
+                "enabled": false
+            }
+        }
     }
 EOF
         else
@@ -85,6 +90,7 @@ EOF
     {
         "modules": {
             "ipaddr": {
+                "enabled": false
             }
         }
     }
