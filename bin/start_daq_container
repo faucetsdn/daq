@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=daq_box
@@ -20,6 +20,6 @@ fi
 
 cid=$(docker run -d --privileged --name $CONTAINER \
              $docker_volumes $docker_envs \
-             -p $grpc_port:grpc_port $IMAGE)
+             -p $grpc_port:$grpc_port $IMAGE)
 
 echo Container $CONTAINER started as $cid

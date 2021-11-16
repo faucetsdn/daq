@@ -35,8 +35,7 @@ COPY daq/ daq/
 COPY cmd/ cmd/
 COPY config/ config/
 COPY resources/ resources/
-#COPY docker/include/bin/start_daq bin/
-COPY dts/start_service bin/start_daq
+COPY docker/include/bin/start_daq bin/
 COPY subset/ subset/
 
 CMD ["bin/start_daq"]

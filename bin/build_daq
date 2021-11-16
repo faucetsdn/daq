@@ -1,20 +1,17 @@
 #!/bin/bash -e
 
-tag=
+image_name="daq"
 
 if [ "$1" == "dts" ]; then
-  tag="dts"
-fi
-
-if [ -z "$tag" ]; then
-  tag="daq"
+  image_name="dts"
+  shift
 fi
 
 bin/setup_remote faucet
 bin/setup_remote forch
 
-echo Starting $tag build...
+echo Starting $image_name build...
 
-docker build . -f docker/modules/Dockerfile.daq --build-arg GIT_URL -t daqf/$tag
+docker build . -f docker/modules/Dockerfile.daq --build-arg GIT_URL -t daqf/$image_name
 
-echo Done with $tag build.
+echo Done with $image_name build.
