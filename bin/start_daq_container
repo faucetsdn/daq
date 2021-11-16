@@ -1,0 +1,25 @@
+#!/bin/bash -x
+
+ROOT=$(realpath $(dirname $0)/..)
+CONTAINER=daq_box
+INSTDIR=$ROOT/inst
+IMAGE=daqf/daq
+
+docker_envs="\
+        --env BASE_CONFIG=/root/config/system/dts.yaml"
+
+docker_volumes+="\
+        -v $INSTDIR:/root/inst"
+
+grpc_port=50051
+
+if [ -n "$prom_pt" ]; then
+    port_opts="-p $prom_pt:$PROM_TARGET"
+    echo $prom_pt > $INSTDIR/PROM_PORT.$PROM_TARGET
+fi
+
+cid=$(docker run -d --privileged --name $CONTAINER \
+             $docker_volumes $docker_envs \
+             -p $grpc_port:grpc_port $IMAGE)
+
+echo Container $CONTAINER started as $cid

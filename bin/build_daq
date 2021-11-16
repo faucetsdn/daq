@@ -1,0 +1,20 @@
+#!/bin/bash -e
+
+tag=
+
+if [ "$1" == "dts" ]; then
+  tag="dts"
+fi
+
+if [ -z "$tag" ]; then
+  tag="daq"
+fi
+
+bin/setup_remote faucet
+bin/setup_remote forch
+
+echo Starting $tag build...
+
+docker build . -f docker/modules/Dockerfile.daq --build-arg GIT_URL -t daqf/$tag
+
+echo Done with $tag build.
