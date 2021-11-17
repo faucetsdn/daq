@@ -7,7 +7,10 @@ FORCH_ROOT=$ROOT/forch
 VXLAN_IP=1.2.3.4
 source $DAQ_ROOT/etc/FILES_MAPPING
 
-BASE_CONFIG=/daq-config/dts-cluster.yaml
+if [ -z "$BASE_CONFIG" ]; then
+  BASE_CONFIG=/daq-config/dts-cluster.yaml
+fi
+echo Base config used: $BASE_CONFIG
 DYNAMIC_CONFIG=startup.conf
 
 ls -ld /var/log/faucet

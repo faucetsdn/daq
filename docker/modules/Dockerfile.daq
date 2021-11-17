@@ -1,4 +1,4 @@
-## Image name: daqf/dts
+## Image name: daqf/daq
 
 FROM ubuntu:focal
 
@@ -35,7 +35,7 @@ COPY daq/ daq/
 COPY cmd/ cmd/
 COPY config/ config/
 COPY resources/ resources/
-COPY dts/start_service bin/
+COPY docker/include/bin/start_daq bin/
 COPY subset/ subset/
 
-CMD ["bin/start_service"]
+CMD ["bin/start_daq"]
