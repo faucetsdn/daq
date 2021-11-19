@@ -4,7 +4,7 @@
 host=$1
 service ssh start
 
-export PYTHONPATH=$PYTHONPATH:/root/shunt
+export PYTHONPATH=$PYTHONPATH:/root/shunt:/root/python_lib
 
 python3 testing/shunt/build_vxlan_ssh_conn.py $host
 

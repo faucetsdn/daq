@@ -12,10 +12,12 @@ COPY ./testing/shunt/id_rsa.pub .ssh/
 COPY ./testing/shunt/authorized_keys .ssh/
 COPY ./testing/shunt/start_shunt_host ./
 
+RUN mkdir -p python_lib
 RUN mkdir -p shunt
 RUN mkdir -p testing
 RUN mkdir -p testing/shunt
 
+COPY ./python_lib python_lib
 COPY ./shunt shunt
 COPY ./testing/shunt testing/shunt
 
