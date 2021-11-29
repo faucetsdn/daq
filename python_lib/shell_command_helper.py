@@ -53,7 +53,6 @@ class ShellCommandHelper():
         """
         command = ("docker exec %s " % docker_container) if docker_container else ""
         command = command.split() + ([cmd] + arglist) if arglist else command + cmd
-        print('Running command %s' % command)
         if detach:
             self._run_process_command(command, capture=capture)
             return None, None, None
