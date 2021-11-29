@@ -1,6 +1,6 @@
 """Module to help setup OVS bridges, VxLANs and other virt network components"""
 
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from functools import partial
 from python_lib.shell_command_helper import ShellCommandHelper
@@ -68,8 +68,8 @@ class OvsHelper:
         """Creates faux docker container daq-faux-<index>"""
         self._run_shell('sudo cmd/faux %s' % index)
         iface = 'faux-eth0'
-        prefix = int(index/256) + 1
-        suffix = index%256
+        prefix = int(index / 256) + 1
+        suffix = index % 256
         ip_addr = '192.168.%s.%s' % (prefix, suffix)
         gateway = '192.168.1.0'
         container = 'daq-faux-%s' % index
