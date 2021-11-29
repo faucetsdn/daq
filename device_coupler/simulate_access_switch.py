@@ -1,5 +1,4 @@
 """Script that creates an OVS access switch with devices."""
-"""Can be used to interface with DAQ or connect with a trunk interface"""
 
 from __future__ import absolute_import
 from ovs_helper import OvsHelper
@@ -13,7 +12,7 @@ def add_devices_to_br(bridge, num_devices):
         ovs_helper.create_faux_device(index)
         iface = "faux-%s" % index
         ovs_helper.add_iface_to_bridge(bridge, iface)
-        ovs_helper.set_native_vlan(iface, 200+index*10)
+        ovs_helper.set_native_vlan(iface, 200 + index * 10)
 
 
 def main():
