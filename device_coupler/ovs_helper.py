@@ -8,7 +8,7 @@ from utils import get_logger
 
 
 class OvsHelper:
-    """Class to build OVS, VxLANs and other network components"""
+    """Class to build OVS bridges, VxLANs and other network components"""
     DEFAULT_VXLAN_PORT = 4789
     VXLAN_CMD_FMT = 'ip link add %s type vxlan id %s remote %s dstport %s srcport %s %s nolearning'
 
@@ -46,7 +46,7 @@ class OvsHelper:
     def delete_ovs_bridge(self, name):
         """Delete ovs bridge"""
         self._logger.info('Deleting OVS bridge %s', name)
-        self._run_shell_no_raise('sudo ovs-vsctl add-br %s' % name)
+        self._run_shell_no_raise('sudo ovs-vsctl del-br %s' % name)
 
     def add_iface_to_bridge(self, bridge, iface):
         """Add interface to OVS bridge"""
