@@ -12,6 +12,6 @@ bin/setup_remote forch
 
 echo Starting $image_name build...
 
-docker build . -f docker/modules/Dockerfile.daq -t daqf/$image_name
+docker build . -f docker/modules/Dockerfile.daq --build-arg GIT_URL -t daqf/$image_name
 
 echo Done with $image_name build.
