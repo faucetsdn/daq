@@ -1,7 +1,7 @@
 """Module to build VxLAN tunnels over SSH tunnels using shell commands"""
 
 from __future__ import absolute_import
-from shunt.shell_command_helper import ShellCommandHelper
+from python_lib.shell_command_helper import ShellCommandHelper
 
 
 def build_ssh_tunnel(ssh_in_port, ssh_out_port, remote_host, reverse=False):
