@@ -17,7 +17,7 @@ class OvsHelper:
         self._run_shell = partial(ShellCommandHelper().run_cmd, capture=True)
         self._run_shell_no_raise = partial(ShellCommandHelper().run_cmd, capture=True, strict=False)
 
-    def create_vxlan_endpoint(self, port, remote_ip, vni, local_ip=None):
+    def create_vxlan_endpoint(self, interface, remote_ip, vni, local_vtep_ip=None):
         """Creates a VxLAN endpoint"""
         interface = "vxlan%s" % port
         self.remove_vxlan_endpoint(interface)
@@ -27,16 +27,16 @@ class OvsHelper:
             self.DEFAULT_VXLAN_PORT, self.DEFAULT_VXLAN_PORT)
         self._run_shell(vxlan_cmd)
         self._run_shell('sudo ip link set %s up' % interface)
-        if local_ip:
-            self._run_shell('sudo ip addr add %s dev %s' % (local_ip, interface))
+        if local_vtep_ip:
+            self._run_shell('sudo ip addr add %s dev %s' % (local_vtep_ip, interface))
         return interface
 
-    def remove_vxlan_endpoint(self, interface):
+    def remove_vxlan_endpoint(self, interface, bridge):
         """Clears VxLAN endpoint"""
         self._logger.info('Removing vxlan interface %s', interface)
         self._run_shell_no_raise('sudo ip link set %s down' % interface)
         self._run_shell_no_raise('sudo ip link del %s' % interface)
-        self._run_shell_no_raise('sudo ovs-vsctl del-port t1sw1 %s' % interface)
+        self._run_shell_no_raise('sudo ovs-vsctl del-port %s %s' % (bridge, interface))
 
     def create_ovs_bridge(self, name):
         """Creates OVS bridge"""

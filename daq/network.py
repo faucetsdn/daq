@@ -316,6 +316,7 @@ class TestNetwork:
         self.sec.cmd('ip link set %s up' % interface)
         self.sec.vsctl('add-port', self.sec.name, interface, '--',
                        'set', 'interface', interface, 'ofport_request=%s' % vxlan_port)
+        LOGGER.info('Anurag _configure_remote_tap Successfully configured interface %s', device.mac)
 
     def _cleanup_remote_tap(self, device, vxlan_port=None):
         vxlan = vxlan_port if vxlan_port else device.port.vxlan
