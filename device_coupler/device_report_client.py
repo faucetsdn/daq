@@ -83,7 +83,7 @@ class DeviceReportClient():
                 # TODO: Replace process_endpoint call
                 index = self._mac_sessions[mac]['index']
                 interface = "vxlan%s" % index
-                self._endpoint_handler.create_vxlan_endpoint(interface, endpoint_ip, index)
+                self._endpoint_handler.create_vxlan_endpoint(interface, endpoint_ip, index, local_vtep_ip="10.10.10.1")
                 self._endpoint_handler.add_iface_to_bridge(self._ovs_bridge, interface)
         return False
 
