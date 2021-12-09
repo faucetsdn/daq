@@ -1,0 +1,4 @@
+#!/bin/bash -e
+
+daq_path=$(pwd)
+sudo PYTHONPATH=$daq_path:$daq_path/faucet:$daq_path/forch:$daq_path/mininet PATH=$PATH:$daq_path/mininet FAUCET_EVENT_SOCK=$daq_path/inst/faucet_event.sock  cmd/start device_coupler/daq_config/daq_config.yaml device_coupler/daq_config/startup.yaml -k
