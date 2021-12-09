@@ -1,7 +1,8 @@
 """Server to handle incoming session requests"""
 
-import threading
 import grpc
+import threading
+import traceback
 
 from device_coupler.utils import get_logger
 from device_coupler.ovs_helper import OvsHelper
@@ -68,23 +69,25 @@ class DeviceReportClient():
                 self._logger.warning('Attempt to disconnect unconnected device %s', mac)
 
     def _convert_and_handle(self, mac, progress):
-        endpoint_ip = progress.endpoint.ip
+        endpoint = progress.endpoint
         result_code = progress.result.code
-        assert not (endpoint_ip and result_code), 'both endpoint.ip and result.code defined'
+        assert not (endpoint.ip and result_code), 'both endpoint.ip and result.code defined'
         if result_code:
             result_name = SessionResult.ResultCode.Name(result_code)
             self._logger.info('Device report %s as %s', mac, result_name)
-            return True
-        if endpoint_ip:
+            return not result_name == 'STARTED' and not result_name == 'PENDING'
+        if endpoint.ip:
             self._logger.info('Device report %s endpoint %s (handler=%s)',
-                              mac, endpoint_ip, bool(self._endpoint_handler))
+                              mac, endpoint.__dir__, bool(self._endpoint_handler))
             # TODO: Associate mac to ip and interface
             if self._endpoint_handler:
-                # TODO: Replace process_endpoint call
-                index = self._mac_sessions[mac]['index']
+                # TODO: Change the way indexes work. Check for VXLAN port being sent
+                index = endpoint.vni
                 interface = "vxlan%s" % index
-                self._endpoint_handler.create_vxlan_endpoint(interface, endpoint_ip, index)
-                self._endpoint_handler.add_iface_to_bridge(self._ovs_bridge, interface)
+                device = self._mac_sessions[mac]
+                self._endpoint_handler.remove_vxlan_endpoint(interface, self._ovs_bridge)
+                self._endpoint_handler.create_vxlan_endpoint(interface, endpoint.ip, index)
+                self._endpoint_handler.add_iface_to_bridge(self._ovs_bridge, interface, trunks=[device['device_vlan']])
         return False
 
     def _process_progress(self, mac, session):
@@ -95,6 +98,7 @@ class DeviceReportClient():
             self._logger.info('Progress complete for %s', mac)
         except Exception as e:
             self._logger.error('Progress exception: %s', e)
+            self._logger.error('Traceback: %s', traceback.format_exc())
         self.disconnect(mac)
 
     def _process_session_ready(self, mac, device_vlan, assigned_vlan):
