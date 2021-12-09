@@ -1,0 +1,27 @@
+# DAQ FOT configuration.
+
+include: ${DAQ_LIB}/config/system/default.yaml
+
+base_conf: ${DAQ_LIB}/resources/setups/orchestration/base_config.json
+
+host_tests: ${DAQ_LIB}/config/modules/dts.conf
+
+switch_setup:
+  lo_port: 6653
+  varz_port: 5678
+  #model: EXT_STACK
+  #native: True
+
+run_trigger:
+  vlan_start: 209
+  vlan_end: 211
+
+device_reporting:
+  server_port: 50051
+
+  #external_subnets:
+  #- subnet: 192.168.1.0/24
+
+  #default_timeout_sec: 120
+
+  #site_path: /site

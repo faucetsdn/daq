@@ -8,8 +8,9 @@ ovs_helper = OvsHelper()
 
 
 def add_devices_to_br(bridge, num_devices):
+    """Assumes faux indexes are in namespace"""
     for index in range(1, num_devices + 1):
-        ovs_helper.create_faux_device(index)
+        #ovs_helper.create_faux_device(index)
         iface = "faux-%s" % index
         ovs_helper.add_iface_to_bridge(bridge, iface)
         ovs_helper.set_native_vlan(iface, 200 + index * 10)

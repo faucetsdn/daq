@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+CONTAINER=dev_coupler_box
+INSTDIR=$ROOT/device_coupler/inst
+IMAGE=daqf/device_coupler
+# TODO(anuragprdi): Write log files here
+docker_volumes+="\
+        -v $INSTDIR:/root/inst"
+
+
+cid=$(docker run -d --privileged --name $CONTAINER \
+             $docker_volumes $IMAGE)
+
+echo Container $CONTAINER started as $cid

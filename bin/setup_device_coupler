@@ -1,0 +1,14 @@
+#!/bin/bash -ex
+
+bin/build_dev_coupler_container
+bin/start_dev_coupler_container
+
+for i in 1 2 3; do
+    cmd/faux $i
+    pid=$(docker inspect --format="{{ .State.Pid  }}" dev_coupler_box)
+    sudo ip link set faux-$i netns $pid
+    docker exec dev_coupler_box ip link set faux-$i up 
+done
+
+docker exec dev_coupler_box python3 device_coupler/simulate_access_switch.py
+

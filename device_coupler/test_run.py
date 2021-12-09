@@ -28,8 +28,8 @@ ovs_helper.add_iface_to_bridge(bridge, 'faux-4')
 ovs_helper.set_trunk_vlan('faux-4', [220, 210])
 """
 
-target = "10.168.0.17:50051"
-tunnel_ip = "10.168.0.16"
+target = "172.17.0.1:50051"
+tunnel_ip = "172.17.0.2"
 mac = "9a:02:57:1e:8f:01"
 device_vlan = 210
 assigned_vlan = 0
