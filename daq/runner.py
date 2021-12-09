@@ -428,10 +428,11 @@ class DAQRunner:
     def _process_faucet_event(self, event):
         (dpid, port, active) = self.faucet_events.as_port_state(event)
         if dpid and port:
-            LOGGER.debug('port_state: %s %s', dpid, port)
+            LOGGER.info('port_state: %s %s %s', dpid, port, active)
             self._handle_port_state(dpid, port, active)
             return
         (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
+        LOGGER.info('port learn dpid %s port %s target_mac %s vid %s', dpid, port, target_mac, vid)
         if dpid and port and vid:
             is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
             if is_vlan:
@@ -675,8 +676,8 @@ class DAQRunner:
 
     def _should_trigger_device(self, device, remote_trigger):
         if device.host:
-            #LOGGER.debug('Target device %s already triggered', device)
-            LOGGER.info('Target device %s already triggered', device)
+            LOGGER.debug('Target device %s already triggered', device)
+            # LOGGER.info('Target device %s already triggered', device)
             return False
 
         if device.wait_remote and not remote_trigger:
