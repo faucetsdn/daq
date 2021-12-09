@@ -307,7 +307,7 @@ class DAQRunner:
             device = self._devices.create_if_absent(request.device_mac)
             device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
-            LOGGER.info('_on_session_start dhcp_mode %s for device mac %', device.dhcp_mode, device.mac)
+            LOGGER.info('_on_session_start dhcp_mode %s for device mac %s', device.dhcp_mode, device.mac)
             device.session_endpoint = request.endpoint
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
             self._udmi.discovery(device)
@@ -428,11 +428,9 @@ class DAQRunner:
     def _process_faucet_event(self, event):
         (dpid, port, active) = self.faucet_events.as_port_state(event)
         if dpid and port:
-            LOGGER.info('port_state: %s %s %s', dpid, port, active)
             self._handle_port_state(dpid, port, active)
             return
         (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
-        LOGGER.info('port learn dpid %s port %s target_mac %s vid %s', dpid, port, target_mac, vid)
         if dpid and port and vid:
             is_vlan = self.run_trigger.get("vlan_start") and self.run_trigger.get("vlan_end")
             if is_vlan:
