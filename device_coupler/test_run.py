@@ -1,6 +1,8 @@
 from ovs_helper import OvsHelper
 from device_report_client import DeviceReportClient
 
+import argparse
+
 """
 vxlan_params = {
     'port': 0,
@@ -28,12 +30,20 @@ ovs_helper.add_iface_to_bridge(bridge, 'faux-4')
 ovs_helper.set_trunk_vlan('faux-4', [220, 210])
 """
 
-target = "172.17.0.1:50051"
-tunnel_ip = "172.17.0.2"
-mac = "9a:02:57:1e:8f:01"
-device_vlan = 210
+parser = argparse.ArgumentParser()
+parser.add_argument('--target', help = "gRPC target", type = str)
+parser.add_argument('--source', help = "Local VxLAN endpoint IP", type = str)
+parser.add_argument('--device_mac', help = "Device under test MAC addr", type = str)
+parser.add_argument('--device_vlan', help = "Device under test VLAN", type = int)
+parser.add_argument('--ovs_br', help = "OVS bridge VxLAN VTEP is to be connected to", type = str)
+
+args = parser.parse_args()
+target = args.target #"172.17.0.1:50051"
+tunnel_ip = args.source #"172.17.0.2"
+mac = args.device_mac #"9a:02:57:1e:8f:01"
+device_vlan = args.device_vlan #210
 assigned_vlan = 0
-ovs_bridge= "br0"
+ovs_bridge= args.ovs_br #"br0"
 
 daq_client = DeviceReportClient(target, tunnel_ip, ovs_bridge)
 daq_client.start()

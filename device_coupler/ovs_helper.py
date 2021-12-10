@@ -25,9 +25,9 @@ class OvsHelper:
             self.DEFAULT_VXLAN_PORT, self.DEFAULT_VXLAN_PORT)
         self._logger.info('Executing VXLAN cmd: %s', vxlan_cmd)
         self._run_shell(vxlan_cmd)
-        self._run_shell('sudo ip link set %s up' % interface)
         if local_vtep_ip:
             self._run_shell('sudo ip addr add %s dev %s' % (local_vtep_ip, interface))
+        self._run_shell('sudo ip link set %s up' % interface)
         return interface
 
     def remove_vxlan_endpoint(self, interface, bridge):

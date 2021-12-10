@@ -296,7 +296,6 @@ class TestNetwork:
 
     def _configure_remote_tap(self, device):
         """Configure the tap for remote connection"""
-        LOGGER.info('Anurag _configure_remote_tap device %s endpoint: %s ext_intf %s device.port.vxlan %s', device, device.session_endpoint, self.ext_intf, device.port.vxlan)
         if not device.session_endpoint or self.ext_intf or device.port.vxlan:
             return
         remote = device.session_endpoint
