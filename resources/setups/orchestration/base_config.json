@@ -3,7 +3,7 @@
     "nmap": {
       "timeout_sec": 600,
       "enabled": true,
-      "test_http": false
+      "test_http": true
     },
     "pass": {
       "enabled": true

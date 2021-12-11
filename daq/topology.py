@@ -172,12 +172,14 @@ class FaucetTopology:
         LOGGER.info('Direct device %s traffic to %s %s', device.mac, device.port.vxlan, port_set)
         if device.port.vxlan:
             egress_vlan = device.assigned if device.assigned else self._egress_vlan
-            sec_topology['interfaces'][self.VXLAN_SEC_TRUNK_PORT] = (
-                self._make_sec_trunk_interface(addition=(egress_vlan,)))
+            if egress_vlan:
+                sec_topology['interfaces'][self.VXLAN_SEC_TRUNK_PORT] = (
+                    self._make_sec_trunk_interface(addition=(egress_vlan,)))
 
             if port_set:
                 interface = sec_interfaces.setdefault(device.port.vxlan, {})
-                interface['tagged_vlans'] = [vlan, egress_vlan]
+                vlan_list = [vlan, egress_vlan] if egress_vlan else [vlan]
+                interface['tagged_vlans'] = vlan_list
                 interface['name'] = str(device)
                 interface['acl_in'] = self.INCOMING_ACL_FORMAT % 'vxlan'
             else:
