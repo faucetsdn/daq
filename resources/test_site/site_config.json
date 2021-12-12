@@ -22,7 +22,7 @@
       "ca_file": "CA_Faux.pem"
     },
     "nmap": {
-      "services_scan": false
+      "enabled": true
     }
   },
   "process": {
