@@ -27,8 +27,6 @@ class DeviceReportClient():
         self._lock = threading.Lock()
         self._tunnel_ip = tunnel_ip
         self._endpoint_handler = OvsHelper()
-        self._indices_in_use = set()
-        self._indices_available = set()
         self._ovs_bridge = ovs_bridge
 
     def start(self):
@@ -59,8 +57,6 @@ class DeviceReportClient():
                 session.cancel()
                 mac_session = self._mac_sessions.pop(mac)
                 index = mac_session['index']
-                self._indices_in_use.remove(index)
-                self._indices_available.add(index)
                 if self._endpoint_handler:
                     interface = "vxlan%s" % index
                     self._endpoint_handler.remove_vxlan_endpoint(interface, self._ovs_bridge)
@@ -83,11 +79,12 @@ class DeviceReportClient():
             if self._endpoint_handler:
                 # TODO: Change the way indexes work. Check for VXLAN port being sent
                 index = endpoint.vni
-                interface = "vxlan%s" % index
                 device = self._mac_sessions[mac]
+                device['index'] = index
+                interface = "vxlan%s" % index
                 self._endpoint_handler.remove_vxlan_endpoint(interface, self._ovs_bridge)
                 self._endpoint_handler.create_vxlan_endpoint(interface, endpoint.ip, index)
-                self._endpoint_handler.add_iface_to_bridge(self._ovs_bridge, interface, trunks=[device['device_vlan']])
+                self._endpoint_handler.add_iface_to_bridge(self._ovs_bridge, interface, tag=device['device_vlan'])
         return False
 
     def _process_progress(self, mac, session):
@@ -110,18 +107,11 @@ class DeviceReportClient():
         good_device_vlan = device_vlan and device_vlan != assigned_vlan
         if good_device_vlan:
             self._mac_sessions[mac] = {}
-            if len(self._indices_available) > 0:
-                index = self._indices_available.pop()
-            else:
-                index = len(self._indices_in_use)
-            assert index not in self._indices_in_use
-            self._indices_in_use.add(index)
-            self._mac_sessions[mac]['index'] = index
             self._mac_sessions[mac]['device_vlan'] = device_vlan
             self._mac_sessions[mac]['assigned_vlan'] = assigned_vlan
             self._mac_sessions[mac]['session'] = self._connect(mac, device_vlan, assigned_vlan)
-        self._logger.info('Successfully wrapped _process_session_ready with mac session %s indices_in_use %s indices available %s',
-                          self._mac_sessions[mac], self._indices_in_use, self._indices_available)
+        self._logger.info('Successfully wrapped _process_session_ready with mac session %s',
+                          self._mac_sessions[mac])
 
     def process_device_discovery(self, mac, device_vlan, assigned_vlan):
         """Process discovery of device to be tested"""

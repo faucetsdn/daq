@@ -17,6 +17,18 @@ class OvsHelper:
         self._run_shell = partial(ShellCommandHelper().run_cmd, capture=True)
         self._run_shell_no_raise = partial(ShellCommandHelper().run_cmd, capture=True, strict=False)
 
+    def _set_interface_up(self, interface, no_raise=False):
+        if no_raise:
+            self._run_shell_no_raise('sudo ip link set %s up' % interface)
+        else:
+            self._run_shell('sudo ip link set %s up' % interface)
+
+    def _set_interface_down(self, interface, no_raise=False):
+        if no_raise:
+            self._run_shell_no_raise('sudo ip link set %s down' % interface)
+        else:
+            self._run_shell('sudo ip link set %s down' % interface)
+
     def create_vxlan_endpoint(self, interface, remote_ip, vni, local_vtep_ip=None):
         """Creates a VxLAN endpoint"""
         self._logger.info("Creating VxLAN endpoint %s ip: %s vni: %s local vtep ip: %s", interface, remote_ip, vni, local_vtep_ip)
@@ -27,13 +39,14 @@ class OvsHelper:
         self._run_shell(vxlan_cmd)
         if local_vtep_ip:
             self._run_shell('sudo ip addr add %s dev %s' % (local_vtep_ip, interface))
-        self._run_shell('sudo ip link set %s up' % interface)
+        self._set_interface_up(interface)
         return interface
 
     def remove_vxlan_endpoint(self, interface, bridge):
         """Clears VxLAN endpoint"""
         self._logger.info('Removing vxlan interface %s', interface)
         self._run_shell_no_raise('sudo ip link set %s down' % interface)
+        self._set_interface_down(interface, no_raise=True)
         self._run_shell_no_raise('sudo ip link del %s' % interface)
         self._run_shell_no_raise('sudo ovs-vsctl del-port %s %s' % (bridge, interface))
 
@@ -82,3 +95,9 @@ class OvsHelper:
         #self._run_shell('ip addr flush %s' % iface, docker_container=container)
         #self._run_shell('ip addr add %s/16 dev %s' % (ip_addr, iface), docker_container=container)
         #self._run_shell('ip route add default via %s' % gateway, docker_container=container)
+
+    def create_veth_pair(self, iface1, iface2):
+        """Creates a veth pair with interface names iface1, iface2"""
+        self._run_shell('sudo ip link add dev %s type veth peer name %s' % (iface1, iface2))
+        self._set_interface_up(iface1)
+        self._set_interface_up(iface2)
