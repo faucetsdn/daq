@@ -10,11 +10,19 @@ Source: local
 |base.switch.ping|0|2|
 |connection.base.target_ping|2|0|
 |security.nmap.ports|2|0|
+|security.services.telnet|2|0|
+|security.services.ftp|2|0|
+|security.services.smtp|2|0|
+|security.services.imap|2|0|
+|security.services.pop|2|0|
+|security.services.vnc|2|0|
+|security.services.tftp|2|0|
+|security.services.snmpv3|2|0|
 |security.nmap.http|0|2|
 
 |categories|pass|skip|
 |---|---|---|
-|Other|6|4|
+|Other|22|4|
 
 |missing tests|count|
 |---|---|

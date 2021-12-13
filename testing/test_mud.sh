@@ -7,6 +7,12 @@ echo MUD Tests >> $TEST_RESULTS
 rm -rf inst/tmp_site && mkdir -p inst/tmp_site
 cp resources/setups/baseline/report_template.md inst/tmp_site/
 
+mkdir -p local/site
+# set nmap module to legacy nmap port based scan
+cat resources/setups/common/base_config.json \
+| jq '.modules | .nmap .services_scan = false' \
+> local/site/site_config.json
+
 echo Creating MUD templates...
 bin/mudacl
 
@@ -17,6 +23,8 @@ echo %%%%%%%%%%%%%%%%%%%%%% Default MUD | tee -a $TEST_RESULTS
 cmd/run -s interfaces.faux.opts=telnet device_specs=resources/device_specs/simple.json
 echo DAQ result code $? | tee -a $TEST_RESULTS
 cat inst/result.log | tee -a $TEST_RESULTS
+head -20 inst/run-*/nodes/*/activate.log
+tail -20 inst/run-*/nodes/*/activate.log
 fgrep 'security.nmap.ports'  inst/reports/report_9a02571e8f00_*.md | tee -a $TEST_RESULTS
 cat inst/run-9a02571e8f00/nodes/nmap01/activate.log
 

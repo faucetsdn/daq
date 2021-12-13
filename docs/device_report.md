@@ -52,7 +52,7 @@ Overall device result FAIL
 |---|---|---|---|---|---|---|---|---|
 |Base|2|FAIL|1/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Connection|13|FAIL|4/5/4|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
-|Security|13|FAIL|2/1/7|0/0/0|0/0/1|0/0/0|0/0/2|0/0/0|
+|Security|21|FAIL|3/8/7|0/0/0|0/0/1|0/0/0|0/0/2|0/0/0|
 |NTP|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |DNS|1|SKIP|0/0/1|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
 |Communication|2|PASS|2/0/0|0/0/0|0/0/0|0/0/0|0/0/0|0/0/0|
@@ -64,7 +64,7 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|fail|skip|gone|
 |---|---|---|---|---|
-|Required Pass|11|1|13|5|
+|Required Pass|12|8|13|5|
 |Required Pass for PoE Devices|0|0|1|0|
 |Required Pass for BACnet Devices|0|1|2|0|
 |Required Pass for IoT Devices|0|0|1|0|
@@ -103,11 +103,19 @@ Syntax: Pass / Fail / Skip
 |skip|protocol.bacext.version|Protocol|Required Pass for BACnet Devices|Bacnet device not found.|
 |skip|security.discover.firmware|Security|Required Pass for BACnet Devices|Could not retrieve a firmware version with nmap. Check bacnet port.|
 |pass|security.nmap.http|Security|Required Pass|No running http servers have been found.|
-|pass|security.nmap.ports|Security|Required Pass|Only allowed ports found open.|
+|fail|security.nmap.ports|Security|Required Pass|Some disallowed ports are open: 20,21,25,110,143,465,587,993,995,1256,5361,10000,21514,23451,69,161.|
 |skip|security.password.http|Security|Required Pass|Port 80 not open on target device.|
 |skip|security.password.https|Security|Required Pass|Port 443 not open on target device.|
 |skip|security.password.ssh|Security|Required Pass|Port 22 not open on target device.|
 |skip|security.password.telnet|Security|Required Pass|Port 23 not open on target device.|
+|fail|security.services.ftp|Security|Required Pass|Service found running, ports found open|
+|fail|security.services.imap|Security|Required Pass|Service found running, ports found open|
+|fail|security.services.pop|Security|Required Pass|Service found running, ports found open|
+|fail|security.services.smtp|Security|Required Pass|Service found running, ports found open|
+|fail|security.services.snmpv3|Security|Required Pass|Port open and does not support SNMPv3|
+|pass|security.services.telnet|Security|Required Pass|Only allowed ports found open.|
+|fail|security.services.tftp|Security|Required Pass|Ports found open|
+|pass|security.services.vnc|Security|Required Pass|Only allowed ports found open.|
 |gone|security.ssh.version|Security|Required Pass||
 |skip|security.tls.v1_2_client|Security|Required Pass|No client initiated TLS communication detected|
 |skip|security.tls.v1_2_server|Security|Required Pass|IOException unable to connect to server.|
@@ -193,15 +201,97 @@ RESULT pass connection.base.target_ping target reached
 --------------------
 security.nmap.ports
 --------------------
-Automatic TCP/UDP port scan using nmap
+Ensure disallowed ports are not open
 --------------------
-# Nmap XXX scan initiated XXX as: nmap -v -n -T3 -sT -sU --host-timeout=4m --open -pU:47808,T:23,443,80, -oG XXX/tmp/nmap.log X.X.X.X
-# Ports scanned: TCP(3;23,80,443) UDP(1;47808) SCTP(0;) PROTOCOLS(0;)
-# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
-No invalid ports found.
+Port 25    (tcp)   open tcpwrapped
+Port 465   (tcp)   open tcpwrapped
+Port 993   (tcp)   open tcpwrapped
+Port 21    (tcp)   open tcpwrapped
+Port 587   (tcp)   open tcpwrapped
+Port 1256  (tcp)   open smtp
+Port 69    (udp)   open tftp
+Port 161   (udp)   open unknown
+Port 143   (tcp)   open tcpwrapped
+Port 20    (tcp)   open tcpwrapped
+Port 110   (tcp)   open tcpwrapped
+Port 5361  (tcp)   open imap
+Port 21514 (tcp)   open ftp
+Port 23451 (tcp)   open pop3
+Port 995   (tcp)   open tcpwrapped
+Port 10000 (tcp)   open unknown
 --------------------
-RESULT pass security.nmap.ports Only allowed ports found open.
+RESULT fail security.nmap.ports Some disallowed ports are open: 20,21,25,110,143,465,587,993,995,1256,5361,10000,21514,23451,69,161.
+--------------------
+security.services.telnet
+--------------------
+Check TELNET port 23 is disabled and TELNET is not running on any port
+--------------------
+RESULT pass security.services.telnet Only allowed ports found open.
+--------------------
+security.services.ftp
+--------------------
+Check FTP port 20/21 is disabled and FTP is not running on any port
+--------------------
+Port 21    (tcp)   open tcpwrapped
+Port 20    (tcp)   open tcpwrapped
+Port 21514 (tcp)   open ftp
+--------------------
+RESULT fail security.services.ftp Service found running, ports found open
+--------------------
+security.services.smtp
+--------------------
+Check SMTP port 25, 465, 587 are not open and SMTP is not running on any port
+--------------------
+Port 587   (tcp)   open tcpwrapped
+Port 25    (tcp)   open tcpwrapped
+Port 1256  (tcp)   open smtp
+Port 465   (tcp)   open tcpwrapped
+--------------------
+RESULT fail security.services.smtp Service found running, ports found open
+--------------------
+security.services.imap
+--------------------
+Check IMAP port 143 is disabled and IMAP is not running on any port
+--------------------
+Port 143   (tcp)   open tcpwrapped
+Port 5361  (tcp)   open imap
+Port 993   (tcp)   open tcpwrapped
+--------------------
+RESULT fail security.services.imap Service found running, ports found open
+--------------------
+security.services.pop
+--------------------
+Check POP port 110 is disabled and POP is not running on any port
+--------------------
+Port 110   (tcp)   open tcpwrapped
+Port 995   (tcp)   open tcpwrapped
+Port 23451 (tcp)   open pop3
+--------------------
+RESULT fail security.services.pop Service found running, ports found open
+--------------------
+security.services.vnc
+--------------------
+Check VNC is disabled on any port
+--------------------
 
+--------------------
+RESULT pass security.services.vnc Only allowed ports found open.
+--------------------
+security.services.tftp
+--------------------
+Check TFTP port 69 is disabled (UDP)
+--------------------
+Port 69    (udp)   open tftp
+--------------------
+RESULT fail security.services.tftp Ports found open
+--------------------
+security.services.snmpv3
+--------------------
+Check SNMP port 161/162 is disabled. If SNMP is an essential service, check it supports version 3
+--------------------
+Port 161   (udp)   open unknown
+--------------------
+RESULT pass security.services.snmpv3 SNMPv3 service running.
 --------------------
 security.nmap.http
 --------------------
@@ -210,7 +300,7 @@ Check that the device does not have open ports exposing an unencrypted web inter
 # Nmap XXX scan initiated XXX as: nmap -v -n -T3 -A --script http-methods --host-timeout=4m --open -p- -oG XXX/tmp/http.log X.X.X.X
 # Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
 Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///
+Host: X.X.X.X () Ports: 1256/open/tcp//smtp//Postfix smtpd/, 5361/open/tcp//imap//Dovecot imapd (Ubuntu)/, 10000/open/tcp//snet-sensor-mgmt?///, 21514/open/tcp//ftp//ProFTPD 1.3.5e/, 23451/open/tcp//pop3//zpop3d/
 # Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
 No running http servers have been found.
 --------------------
@@ -222,7 +312,7 @@ RESULT pass security.nmap.http No running http servers have been found.
 
 |Attribute|Value|
 |---|---|
-|timeout_sec|600|
+|timeout_sec|900|
 |enabled|True|
 
 ## Module discover
