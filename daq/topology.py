@@ -178,8 +178,10 @@ class FaucetTopology:
 
             if port_set:
                 interface = sec_interfaces.setdefault(device.port.vxlan, {})
-                vlan_list = [vlan, egress_vlan] if egress_vlan else [vlan]
-                interface['tagged_vlans'] = vlan_list
+                if egress_vlan:
+                    interface['tagged_vlans'] = [vlan, egress_vlan]
+                else:
+                    interface['native_vlan'] = vlan
                 interface['name'] = str(device)
                 interface['acl_in'] = self.INCOMING_ACL_FORMAT % 'vxlan'
             else:
