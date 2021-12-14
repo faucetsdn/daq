@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo Cleaning docker images...
-for image in daqf/faucet daqf/gauge daqf/aardvark; do
+for image in daqf/faucet daqf/gauge daqf/aardvark daqf/device_coupler; do
     echo Cleaning docker image $image...
     images=$(docker ps --filter ancestor=$image -q)
     if [ -n "$images" ]; then

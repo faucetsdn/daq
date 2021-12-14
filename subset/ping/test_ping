@@ -32,11 +32,8 @@ else
     req=pass
     ack=pass
     echo
-    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap vlan and port 67 | fgrep "length 1: Request" ||\
-        tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: Request" ||\
-        req=fail
-    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap vlan and port 67 | fgrep "length 1: ACK" ||\
-        tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67  || ack=fail
+    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: Request" || req=fail
+    tcpdump -ven -r $TEST_ROOT/scans/startup.pcap port 67 | fgrep "length 1: ACK" || ack=fail1
     if [ $req = "fail" ] || [ $ack = "fail" ]; then
         status=fail
         echo RESULT fail base.startup.dhcp missing dhcp packets| tee -a $RESULT_LINES
