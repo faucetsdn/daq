@@ -674,8 +674,7 @@ class DAQRunner:
             return
 
         if not self._run_tests:
-            #LOGGER.debug('Target device %s ignore, not running more tests', device)
-            LOGGER.info('Target device %s ignore, not running more tests', device)
+            LOGGER.debug('Target device %s ignore, not running more tests', device)
             return
 
         if not self._should_trigger_device(device, remote_trigger):
