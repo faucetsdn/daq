@@ -2,4 +2,3 @@ site_description: generated
 switch_setup:
     endpoint:
         ip: 172.17.0.1
-
