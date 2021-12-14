@@ -10,7 +10,7 @@ cp resources/setups/baseline/report_template.md inst/tmp_site/
 mkdir -p local/site
 # set nmap module to legacy nmap port based scan
 cat resources/setups/common/base_config.json \
-| jq '.modules | .nmap .services_scan = false' \
+| jq '.modules .nmap .services_scan = false' \
 > local/site/site_config.json
 
 echo Creating MUD templates...
