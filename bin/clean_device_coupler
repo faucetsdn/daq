@@ -1,5 +1,0 @@
-#!/bin/bash -e
-
-
-docker kill daq-faux-1 daq-faux-2 daq-faux-3 dev_coupler_box || true
-docker rm daq-faux-1 daq-faux-2 daq-faux-3 dev_coupler_box || true

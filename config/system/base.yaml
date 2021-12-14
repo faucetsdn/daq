@@ -6,7 +6,6 @@
 
 # Load defaults.
 include: default.yaml
-host_tests: ${DAQ_LIB}/config/modules/dts.conf
 
 # Description for dashboard.
 site_description: "Baseline Configuration"

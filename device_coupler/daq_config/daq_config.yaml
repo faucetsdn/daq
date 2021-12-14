@@ -2,7 +2,7 @@
 
 include: ${DAQ_LIB}/config/system/default.yaml
 
-base_conf: ${DAQ_LIB}/resources/setups/orchestration/base_config.json
+base_conf: ${DAQ_LIB}/resources/setups/coupler/base_config.json
 
 host_tests: ${DAQ_LIB}/config/modules/dts.conf
 
