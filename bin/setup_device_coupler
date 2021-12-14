@@ -11,9 +11,9 @@ for i in 1 2 3; do
     sudo ip link set faux-$i up
 done
 
-PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py
+PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices 3 --trunk-iface trunk0
 pid=$(docker inspect --format="{{ .State.Pid  }}" dev_coupler_box)
-sudo ip link set trunk1 netns $pid
+sudo ip link set trunk0 netns $pid
 
-docker exec dev_coupler_box ip link set trunk1 up
+docker exec dev_coupler_box ip link set trunk0 up
 docker exec dev_coupler_box python3 device_coupler/network_helper.py

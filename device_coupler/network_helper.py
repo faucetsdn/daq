@@ -34,7 +34,7 @@ class NetworkHelper():
 
 
 def main():
-    trunk_iface = 'trunk1'
+    trunk_iface = 'trunk0'
     bridge = 'dev_br0'
     nw_helper = NetworkHelper(trunk_iface, bridge)
     nw_helper.setup()

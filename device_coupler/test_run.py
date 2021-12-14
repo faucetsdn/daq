@@ -3,32 +3,6 @@ from daq_client import DAQClient
 
 import argparse
 
-"""
-vxlan_params = {
-    'port': 0,
-    'remote_ip': '192.168.9.2',
-    'vni': 1,
-    'local_ip': '10.1.1.1/24'
-}
-
-ovs_helper = OvsHelper()
-
-#iface = ovs_helper.create_vxlan_endpoint(**vxlan_params)
-#print(iface)
-def add_devices_to_br(bridge, num_devices):
-    for index in range(1, num_devices+1):
-        ovs_helper.create_faux_device(index)
-        iface = "faux-%s" % index
-        ovs_helper.add_iface_to_bridge(bridge, iface)
-        ovs_helper.set_native_vlan(iface, 200+index*10)
-
-bridge = 'br0'
-ovs_helper.create_ovs_bridge(bridge)
-add_devices_to_br(bridge, 3)
-ovs_helper.create_faux_device(4)
-ovs_helper.add_iface_to_bridge(bridge, 'faux-4')
-ovs_helper.set_trunk_vlan('faux-4', [220, 210])
-"""
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--target', help = "gRPC target", type = str)
