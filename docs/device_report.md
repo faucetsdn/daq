@@ -203,22 +203,22 @@ security.nmap.ports
 --------------------
 Ensure disallowed ports are not open
 --------------------
-Port 25    (tcp)   open tcpwrapped
-Port 465   (tcp)   open tcpwrapped
-Port 993   (tcp)   open tcpwrapped
-Port 21    (tcp)   open tcpwrapped
-Port 587   (tcp)   open tcpwrapped
-Port 1256  (tcp)   open smtp
-Port 69    (udp)   open tftp
-Port 161   (udp)   open unknown
-Port 143   (tcp)   open tcpwrapped
 Port 20    (tcp)   open tcpwrapped
+Port 21    (tcp)   open tcpwrapped
+Port 25    (tcp)   open tcpwrapped
+Port 69    (udp)   open tftp
 Port 110   (tcp)   open tcpwrapped
+Port 143   (tcp)   open tcpwrapped
+Port 161   (udp)   open unknown
+Port 465   (tcp)   open tcpwrapped
+Port 587   (tcp)   open tcpwrapped
+Port 993   (tcp)   open tcpwrapped
+Port 995   (tcp)   open tcpwrapped
+Port 1256  (tcp)   open smtp
 Port 5361  (tcp)   open imap
+Port 10000 (tcp)   open unknown
 Port 21514 (tcp)   open ftp
 Port 23451 (tcp)   open pop3
-Port 995   (tcp)   open tcpwrapped
-Port 10000 (tcp)   open unknown
 --------------------
 RESULT fail security.nmap.ports Some disallowed ports are open: 20,21,25,110,143,465,587,993,995,1256,5361,10000,21514,23451,69,161.
 --------------------
@@ -226,14 +226,16 @@ security.services.telnet
 --------------------
 Check TELNET port 23 is disabled and TELNET is not running on any port
 --------------------
+
+--------------------
 RESULT pass security.services.telnet Only allowed ports found open.
 --------------------
 security.services.ftp
 --------------------
 Check FTP port 20/21 is disabled and FTP is not running on any port
 --------------------
-Port 21    (tcp)   open tcpwrapped
 Port 20    (tcp)   open tcpwrapped
+Port 21    (tcp)   open tcpwrapped
 Port 21514 (tcp)   open ftp
 --------------------
 RESULT fail security.services.ftp Service found running, ports found open
@@ -242,10 +244,10 @@ security.services.smtp
 --------------------
 Check SMTP port 25, 465, 587 are not open and SMTP is not running on any port
 --------------------
-Port 587   (tcp)   open tcpwrapped
 Port 25    (tcp)   open tcpwrapped
-Port 1256  (tcp)   open smtp
 Port 465   (tcp)   open tcpwrapped
+Port 587   (tcp)   open tcpwrapped
+Port 1256  (tcp)   open smtp
 --------------------
 RESULT fail security.services.smtp Service found running, ports found open
 --------------------
@@ -254,8 +256,8 @@ security.services.imap
 Check IMAP port 143 is disabled and IMAP is not running on any port
 --------------------
 Port 143   (tcp)   open tcpwrapped
-Port 5361  (tcp)   open imap
 Port 993   (tcp)   open tcpwrapped
+Port 5361  (tcp)   open imap
 --------------------
 RESULT fail security.services.imap Service found running, ports found open
 --------------------
@@ -291,7 +293,7 @@ Check SNMP port 161/162 is disabled. If SNMP is an essential service, check it s
 --------------------
 Port 161   (udp)   open unknown
 --------------------
-RESULT pass security.services.snmpv3 SNMPv3 service running.
+RESULT fail security.services.snmpv3 Port open and does not support SNMPv
 --------------------
 security.nmap.http
 --------------------
