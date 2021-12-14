@@ -307,7 +307,6 @@ class DAQRunner:
             device = self._devices.create_if_absent(request.device_mac)
             device.port.flapping_start = None  # In case this was set from last disconnect.
             device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
-            LOGGER.info('_on_session_start dhcp_mode %s for device mac %s', device.dhcp_mode, device.mac)
             device.session_endpoint = request.endpoint
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
             self._udmi.discovery(device)
@@ -428,6 +427,7 @@ class DAQRunner:
     def _process_faucet_event(self, event):
         (dpid, port, active) = self.faucet_events.as_port_state(event)
         if dpid and port:
+            LOGGER.debug('port_state: %s %s', dpid, port)
             self._handle_port_state(dpid, port, active)
             return
         (dpid, port, target_mac, vid) = self.faucet_events.as_port_learn(event)
@@ -494,14 +494,6 @@ class DAQRunner:
         if self.network.is_device_port(dpid, port) and self._is_port_active(port):
             LOGGER.info('Port %s dpid %s learned %s', port, dpid, target_mac)
             device = self._devices.create_if_absent(target_mac, port_info=self._ports[port])
-            if device:
-                LOGGER.info('_handle_port_learn device: %s', vars(device))
-                if device.gateway:
-                    LOGGER.info('_handle_port_learn gateway: %s', vars(device.gateway))
-                if device.port:
-                    LOGGER.info('_handle_port_learn port: %s', vars(device.port))
-                if device.ip_info:
-                    LOGGER.info('_handle_port_learn ip_info: %s', vars(device.ip_info))
             self._target_set_trigger(device)
         else:
             LOGGER.info('Port %s dpid %s learned %s (ignored)', port, dpid, target_mac)
@@ -522,32 +514,15 @@ class DAQRunner:
                 device.port.active = True
                 device.wait_remote = True
         else:
-            if device:
-                LOGGER.info('_handle_device_learn device: %s', vars(device))
-                if device.gateway:
-                    LOGGER.info('_handle_device_learn gateway: %s', vars(device.gateway))
-                if device.port:
-                    LOGGER.info('_handle_device_learn port: %s', vars(device.port))
-                if device.ip_info:
-                    LOGGER.info('_handle_device_learn ip_info: %s', vars(device.ip_info))
             self._target_set_trigger(device)
 
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
-        # assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
-        if device:
-            LOGGER.info('_remote_trigger device: %s', vars(device))
-            if device.gateway:
-                LOGGER.info('_remote_trigger gateway: %s', vars(device.gateway))
-            if device.port:
-                LOGGER.info('_remote_trigger port: %s', vars(device.port))
-            if device.ip_info:
-                LOGGER.info('_remote_trigger ip_info: %s', vars(device.ip_info))
 
         self._target_set_trigger(device, remote_trigger=True)
         if device.gateway:
@@ -675,22 +650,18 @@ class DAQRunner:
     def _should_trigger_device(self, device, remote_trigger):
         if device.host:
             LOGGER.debug('Target device %s already triggered', device)
-            # LOGGER.info('Target device %s already triggered', device)
             return False
 
         if device.wait_remote and not remote_trigger:
-            #LOGGER.debug('Ignoring local trigger for remote target %s', device)
-            LOGGER.info('Ignoring local trigger for remote target %s', device)
+            LOGGER.debug('Ignoring local trigger for remote target %s', device)
             return False
 
         if device in self._target_set_queue:
-            #LOGGER.debug('Target device %s already queued', device)
-            LOGGER.info('Target device %s already queued', device)
+            LOGGER.debug('Target device %s already queued', device)
             return False
 
         if device.should_block():
-            #LOGGER.debug('Target device %s block suppress', device)
-            LOGGER.info('Target device %s block suppress', device)
+            LOGGER.debug('Target device %s block suppress', device)
             return False
 
         return True
@@ -864,14 +835,6 @@ class DAQRunner:
         return None
 
     def _allocate_gateway(self, device):
-        if device:
-            LOGGER.info('_allocate_gateway device: %s', vars(device))
-            if device.gateway:
-                LOGGER.info('_allocate_gateway gateway: %s', vars(device.gateway))
-            if device.port:
-                LOGGER.info('_allocate_gateway port: %s', vars(device.port))
-            if device.ip_info:
-                LOGGER.info('_allocate_gateway ip_info: %s', vars(device.ip_info))
         is_native = device is None
         assert not is_native or not self._native_gateway, 'native gateway already initialized'
         assert is_native or not device.gateway, 'device already assigned to gateway'
