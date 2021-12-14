@@ -1,5 +1,5 @@
 from ovs_helper import OvsHelper
-from device_report_client import DeviceReportClient
+from daq_client import DAQClient
 
 import argparse
 
@@ -45,6 +45,6 @@ device_vlan = args.device_vlan #210
 assigned_vlan = 0
 ovs_bridge= args.ovs_br #"br0"
 
-daq_client = DeviceReportClient(target, tunnel_ip, ovs_bridge)
+daq_client = DAQClient(target, tunnel_ip, ovs_bridge)
 daq_client.start()
 daq_client.process_device_discovery(mac, device_vlan, assigned_vlan)
