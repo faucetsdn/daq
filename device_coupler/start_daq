@@ -6,4 +6,4 @@ ENDPOINT_CFG=/tmp/startup.yaml
 DAQ_CONFIG=device_coupler/daq_config/daq_config.yaml
 echo "site_description: generated" > $ENDPOINT_CFG
 yq -i -y .switch_setup.endpoint.ip=\"$docker_br_ip\" $ENDPOINT_CFG
-sudo PYTHONPATH=$daq_path:$daq_path/faucet:$daq_path/forch:$daq_path/mininet PATH=$PATH:$daq_path/mininet FAUCET_EVENT_SOCK=$daq_path/inst/faucet_event.sock cmd/start $DAQ_CONFIG $ENDPOINT_CFG -k
+sudo PYTHONPATH=$daq_path:$daq_path/faucet:$daq_path/forch:$daq_path/mininet PATH=$PATH:$daq_path/mininet FAUCET_EVENT_SOCK=$daq_path/inst/faucet_event.sock cmd/start $DAQ_CONFIG $ENDPOINT_CFG

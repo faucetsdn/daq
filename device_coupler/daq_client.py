@@ -1,4 +1,4 @@
-"""Server to handle incoming session requests"""
+"""Module to send gRPC requests to DAQ and manage test sessions"""
 
 import grpc
 import threading

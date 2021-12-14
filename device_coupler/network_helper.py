@@ -4,6 +4,8 @@ from __future__ import absolute_import
 from ovs_helper import OvsHelper
 from device_coupler.utils import get_logger
 
+import argparse
+
 
 class NetworkHelper():
     """Network setup helper for device coupler"""
@@ -34,8 +36,13 @@ class NetworkHelper():
 
 
 def main():
-    trunk_iface = 'trunk0'
-    bridge = 'dev_br0'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--bridge', help = "Name of OVS bridge", type = str)
+    parser.add_argument('--trunk-iface', help = "Name of trunk interface", type = str)
+
+    args = parser.parse_args()
+    trunk_iface = args.trunk_iface
+    bridge = args.bridge
     nw_helper = NetworkHelper(trunk_iface, bridge)
     nw_helper.setup()
     pass

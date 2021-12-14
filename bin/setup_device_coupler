@@ -3,6 +3,8 @@
 ROOT=$(realpath $(dirname $0)/..)
 echo ROOT is $ROOT
 
+trunk_port=trunk0
+
 $ROOT/bin/build_dev_coupler_container
 $ROOT/bin/start_dev_coupler_container
 
@@ -11,9 +13,9 @@ for i in 1 2 3; do
     sudo ip link set faux-$i up
 done
 
-PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices 3 --trunk-iface trunk0
+PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices 3 --trunk-iface $trunk_port
 pid=$(docker inspect --format="{{ .State.Pid  }}" dev_coupler_box)
-sudo ip link set trunk0 netns $pid
+sudo ip link set $trunk_port netns $pid
 
-docker exec dev_coupler_box ip link set trunk0 up
-docker exec dev_coupler_box python3 device_coupler/network_helper.py
+docker exec dev_coupler_box ip link set $trunk_port up
+docker exec dev_coupler_box python3 device_coupler/network_helper.py --bridge dev_br0 --trunk-iface $trunk_port
