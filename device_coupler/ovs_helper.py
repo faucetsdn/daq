@@ -31,7 +31,8 @@ class OvsHelper:
 
     def create_vxlan_endpoint(self, interface, remote_ip, vni, local_vtep_ip=None):
         """Creates a VxLAN endpoint"""
-        self._logger.info("Creating VxLAN endpoint %s ip: %s vni: %s local vtep ip: %s", interface, remote_ip, vni, local_vtep_ip)
+        self._logger.info("Creating VxLAN endpoint %s ip: %s vni: %s local vtep ip: %s",
+                interface, remote_ip, vni, local_vtep_ip)
         vxlan_cmd = 'sudo ' + self.VXLAN_CMD_FMT % (
             interface, vni, remote_ip, self.DEFAULT_VXLAN_PORT,
             self.DEFAULT_VXLAN_PORT, self.DEFAULT_VXLAN_PORT)
@@ -62,7 +63,8 @@ class OvsHelper:
 
     def add_iface_to_bridge(self, bridge, iface, tag=None, trunks=None):
         """Add interface to OVS bridge"""
-        self._logger.info('Adding interface %s to bridge %s tag %s trunk %s', iface, bridge, tag, trunks)
+        self._logger.info('Adding interface %s to bridge %s tag %s trunk %s',
+                iface, bridge, tag, trunks)
         assert not (tag and trunks), 'Can\'t enable both tag and trunks'
         cmd = 'sudo ovs-vsctl add-port %s %s' % (bridge, iface)
         if tag:

@@ -1,5 +1,7 @@
 """Module to send gRPC requests to DAQ and manage test sessions"""
 
+from __future__ import absolute_import
+
 import grpc
 import threading
 import traceback
@@ -13,6 +15,7 @@ from daq.proto.session_server_pb2_grpc import SessionServerStub
 
 DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 CONNECT_TIMEOUT_SEC = 60
+
 
 # pylint: disable=too-many-arguments
 class DAQClient():
@@ -67,7 +70,7 @@ class DAQClient():
 
     def _is_session_running(self, mac, progress):
         result = self._process_session_progress(mac, progress)
-        return not result in ('PASSED', 'FAILED', 'ERROR') 
+        return result not in ('PASSED', 'FAILED', 'ERROR')
 
     def _process_session_progress(self, mac, progress):
         endpoint = progress.endpoint
@@ -77,8 +80,7 @@ class DAQClient():
             result_name = SessionResult.ResultCode.Name(result_code)
             self._logger.info('Device report %s as %s', mac, result_name)
             return result_name
-            return not result_name == 'STARTED' and not result_name == 'PENDING'
-        if endpoint.ip:            
+        if endpoint.ip:
             self._logger.info('Device report %s endpoint ip: %s)',
                               mac, endpoint.ip)
             # TODO: Change the way indexes work. Check for VXLAN port being sent
@@ -88,7 +90,8 @@ class DAQClient():
             interface = "vxlan%s" % index
             self._endpoint_handler.remove_vxlan_endpoint(interface, self._ovs_bridge)
             self._endpoint_handler.create_vxlan_endpoint(interface, endpoint.ip, index)
-            self._endpoint_handler.add_iface_to_bridge(self._ovs_bridge, interface, tag=device['device_vlan'])
+            self._endpoint_handler.add_iface_to_bridge(
+                    self._ovs_bridge, interface, tag=device['device_vlan'])
         return None
 
     def _run_test_session(self, mac, session):
@@ -116,6 +119,6 @@ class DAQClient():
 
     def process_device_discovery(self, mac, device_vlan):
         """Process discovery of device to be tested"""
-        # TODO: End existing test session and start new one if discovered on another port  
+        # TODO: End existing test session and start new one if discovered on another port
         with self._lock:
             self._initiate_test_session(mac, device_vlan)

@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 tunnel_ip=$(ip addr show eth0 | fgrep inet | sed -nr 's~.*inet ([0-9.]+)/.*~\1~p')
 grpc_port=50051

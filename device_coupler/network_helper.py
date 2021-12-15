@@ -37,8 +37,8 @@ class NetworkHelper():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--bridge', help = "Name of OVS bridge", type = str)
-    parser.add_argument('--trunk-iface', help = "Name of trunk interface", type = str)
+    parser.add_argument('--bridge', help="Name of OVS bridge", type=str)
+    parser.add_argument('--trunk-iface', help="Name of trunk interface", type=str)
 
     args = parser.parse_args()
     trunk_iface = args.trunk_iface

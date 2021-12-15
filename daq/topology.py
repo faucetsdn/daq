@@ -530,7 +530,9 @@ class FaucetTopology:
         acls[self.INCOMING_ACL_FORMAT % self.sec_name] = secondary_acl
 
         acls[self.INCOMING_ACL_FORMAT % 'vxlan'] = [self._make_acl_rule(ports=[1])]
-        acls[self.INCOMING_ACL_FORMAT % 'vxlan_coupler'] = [self._make_acl_rule(ports=[1], allow=True)]
+        acls[self.INCOMING_ACL_FORMAT % 'vxlan_coupler'] = [
+                self._make_acl_rule(ports=[1], allow=True)
+                ]
 
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)

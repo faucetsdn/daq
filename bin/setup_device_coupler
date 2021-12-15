@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 ROOT=$(realpath $(dirname $0)/..)
 echo ROOT is $ROOT
@@ -24,8 +24,8 @@ if [ -z "${trunk_port}" ]; then
   usage
 fi
 
-$ROOT/bin/build_dev_coupler_container
-$ROOT/bin/start_dev_coupler_container
+$ROOT/bin/build_device_coupler
+$ROOT/bin/start_device_coupler
 
 pid=$(docker inspect --format="{{ .State.Pid  }}" dev_coupler_box)
 sudo ip link set $trunk_port netns $pid
