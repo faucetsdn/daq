@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-setup=aardvark,aardvark2,default,networking,switch
+setup=aardvark,aardvark2,default,networking,switch,device_coupler
 faux=faux1,faux2
 faucet=faucet,gauge
 base=test_bacnet,test_mudgee,test_brute,test_discover,usi,test_ipaddr
