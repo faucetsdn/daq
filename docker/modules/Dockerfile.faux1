@@ -85,5 +85,6 @@ RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 RUN $AG update && $AG install wpasupplicant vim iproute2
 
 COPY docker/include/etc/wpasupplicant/ /etc/wpasupplicant/
+COPY resources/802.x1/ /etc/wpasupplicant/certs
 
 ENTRYPOINT ["bin/start_faux"]
