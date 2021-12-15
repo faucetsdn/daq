@@ -1,0 +1,5 @@
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping
+RESULT pass connection.base.target_ping
+RESULT pass security.nmap.ports
+RESULT pass security.nmap.http

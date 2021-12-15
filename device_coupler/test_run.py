@@ -12,11 +12,11 @@ parser.add_argument('--device_vlan', help = "Device under test VLAN", type = int
 parser.add_argument('--ovs_br', help = "OVS bridge VxLAN VTEP is to be connected to", type = str)
 
 args = parser.parse_args()
-target = args.target #"172.17.0.1:50051"
-tunnel_ip = args.source #"172.17.0.2"
-mac = args.device_mac #"9a:02:57:1e:8f:01"
-device_vlan = args.device_vlan #210
-ovs_bridge= args.ovs_br #"br0"
+target = args.target
+tunnel_ip = args.source
+mac = args.device_mac
+device_vlan = args.device_vlan
+ovs_bridge= args.ovs_br
 
 daq_client = DAQClient(target, tunnel_ip, ovs_bridge)
 daq_client.start()
