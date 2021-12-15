@@ -92,10 +92,6 @@ class OvsHelper:
         gateway = '192.168.1.0'
         container = 'daq-faux-%s' % index
 
-        #self._run_shell('ip addr flush %s' % iface, docker_container=container)
-        #self._run_shell('ip addr add %s/16 dev %s' % (ip_addr, iface), docker_container=container)
-        #self._run_shell('ip route add default via %s' % gateway, docker_container=container)
-
     def create_veth_pair(self, iface1, iface2):
         """Creates a veth pair with interface names iface1, iface2"""
         self._run_shell('sudo ip link add dev %s type veth peer name %s' % (iface1, iface2))

@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+
+ROOT=$(realpath $(dirname $0)/..)
+
+trunk_port=trunk0
+devices=3
+
+for i in $(seq 1 $devices); do
+  $ROOT/cmd/faux $i
+  sudo ip link set faux-$i up
+done
+
+PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices $devices --trunk-iface $trunk_port
+
+bin/setup_device_coupler -t $trunk_port
