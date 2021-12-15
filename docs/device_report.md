@@ -293,7 +293,7 @@ Check SNMP port 161/162 is disabled. If SNMP is an essential service, check it s
 --------------------
 Port 161   (udp)   open unknown
 --------------------
-RESULT fail security.services.snmpv3 Port open and does not support SNMPv
+RESULT fail security.services.snmpv3 Port open and does not support SNMPv3
 --------------------
 security.nmap.http
 --------------------
