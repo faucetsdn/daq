@@ -91,7 +91,7 @@ class DAQClient():
             self._endpoint_handler.remove_vxlan_endpoint(interface, self._ovs_bridge)
             self._endpoint_handler.create_vxlan_endpoint(interface, endpoint.ip, index)
             self._endpoint_handler.add_iface_to_bridge(
-                    self._ovs_bridge, interface, tag=device['device_vlan'])
+                self._ovs_bridge, interface, tag=device['device_vlan'])
         return None
 
     def _run_test_session(self, mac, session):
