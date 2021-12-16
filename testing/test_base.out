@@ -27,7 +27,7 @@ Syntax: Pass / Fail / Skip
 
 |Expectation|pass|skip|
 |---|---|---|
-|Other|4|1|
+|Other|12|1|
 
 |Result|Test|Category|Expectation|Notes|
 |---|---|---|---|---|
@@ -36,6 +36,14 @@ Syntax: Pass / Fail / Skip
 |pass|connection.base.target_ping|Other|Other|target reached|
 |pass|security.nmap.http|Other|Other|No running http servers have been found.|
 |pass|security.nmap.ports|Other|Other|Only allowed ports found open.|
+|pass|security.services.ftp|Other|Other|Only allowed ports found open.|
+|pass|security.services.imap|Other|Other|Only allowed ports found open.|
+|pass|security.services.pop|Other|Other|Only allowed ports found open.|
+|pass|security.services.smtp|Other|Other|Only allowed ports found open.|
+|pass|security.services.snmpv3|Other|Other|Only allowed ports found open.|
+|pass|security.services.telnet|Other|Other|Only allowed ports found open.|
+|pass|security.services.tftp|Other|Other|Only allowed ports found open.|
+|pass|security.services.vnc|Other|Other|Only allowed ports found open.|
 
 
 ## Module pass
@@ -113,15 +121,75 @@ RESULT pass connection.base.target_ping target reached
 --------------------
 security.nmap.ports
 --------------------
-Automatic TCP/UDP port scan using nmap
+Ensure disallowed ports are not open
 --------------------
-# Nmap XXX scan initiated XXX as: nmap -v -n -T3 -sT --host-timeout=4m --open -p1-65535 -oG XXX/tmp/nmap.log X.X.X.X
-# Ports scanned: TCP(65535;1-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
-# Nmap done at XXX -- 1 IP address (1 host up) scanned in XXX
-No invalid ports found.
+
 --------------------
 RESULT pass security.nmap.ports Only allowed ports found open.
+--------------------
+security.services.telnet
+--------------------
+Check TELNET port 23 is disabled and TELNET is not running on any port
+--------------------
 
+--------------------
+RESULT pass security.services.telnet Only allowed ports found open.
+--------------------
+security.services.ftp
+--------------------
+Check FTP port 20/21 is disabled and FTP is not running on any port
+--------------------
+
+--------------------
+RESULT pass security.services.ftp Only allowed ports found open.
+--------------------
+security.services.smtp
+--------------------
+Check SMTP port 25, 465, 587 are not open and SMTP is not running on any port
+--------------------
+
+--------------------
+RESULT pass security.services.smtp Only allowed ports found open.
+--------------------
+security.services.imap
+--------------------
+Check IMAP port 143 is disabled and IMAP is not running on any port
+--------------------
+
+--------------------
+RESULT pass security.services.imap Only allowed ports found open.
+--------------------
+security.services.pop
+--------------------
+Check POP port 110 is disabled and POP is not running on any port
+--------------------
+
+--------------------
+RESULT pass security.services.pop Only allowed ports found open.
+--------------------
+security.services.vnc
+--------------------
+Check VNC is disabled on any port
+--------------------
+
+--------------------
+RESULT pass security.services.vnc Only allowed ports found open.
+--------------------
+security.services.tftp
+--------------------
+Check TFTP port 69 is disabled (UDP)
+--------------------
+
+--------------------
+RESULT pass security.services.tftp Only allowed ports found open.
+--------------------
+security.services.snmpv3
+--------------------
+Check SNMP port 161/162 is disabled. If SNMP is an essential service, check it supports version 3
+--------------------
+
+--------------------
+RESULT pass security.services.snmpv3 Only allowed ports found open.
 --------------------
 security.nmap.http
 --------------------
@@ -140,7 +208,7 @@ RESULT pass security.nmap.http No running http servers have been found.
 
 |Attribute|Value|
 |---|---|
-|timeout_sec|600|
+|timeout_sec|900|
 |enabled|True|
 
 ## Module hold

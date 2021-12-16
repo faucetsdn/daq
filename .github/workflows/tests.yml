@@ -40,7 +40,7 @@ jobs:
   integration_tests:
     needs: build_docker
     runs-on: ubuntu-18.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:

@@ -152,7 +152,7 @@ port-01 module_config modules
   },
   "nmap": {
     "enabled": true,
-    "timeout_sec": 600
+    "timeout_sec": 900
   },
   "pass": {
     "enabled": true
@@ -249,7 +249,7 @@ port-02 module_config modules
   },
   "nmap": {
     "enabled": true,
-    "timeout_sec": 600
+    "timeout_sec": 900
   },
   "pass": {
     "enabled": false
@@ -294,7 +294,7 @@ port-02 module_config modules
     `'''       `\__   /\
                 ')
 Host: X.X.X.X () Status: Up
-Host: X.X.X.X () Ports: 10000/open/tcp//snet-sensor-mgmt?///
+Host: X.X.X.X () Ports: 1256/open/tcp//smtp//Postfix smtpd/, 5361/open/tcp//imap//Dovecot imapd (Ubuntu)/, 10000/open/tcp//snet-sensor-mgmt?///, 21514/open/tcp//ftp//ProFTPD 1.3.5e/, 23451/open/tcp//pop3//zpop3d/
 Redacted docs diff
 No report diff
 9a02571e8f01: ['9a02571e8f01:ping:Exception']

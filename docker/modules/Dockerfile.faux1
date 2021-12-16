@@ -34,7 +34,7 @@ FROM daqf/aardvark:latest
 # Run this separately so it can be shared with other builds.
 RUN $AG update && $AG install openjdk-11-jre
 RUN $AG update && $AG install openjdk-11-jdk git
-RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat curl\
+RUN $AG update && $AG install isc-dhcp-client ethtool network-manager netcat-openbsd curl\
     python ifupdown openssl nano apache2-utils ntpdate vzctl
 
 # Additional OS dependencies
