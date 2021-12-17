@@ -688,7 +688,19 @@ connection.dot1x.authentication
 --------------------
 Verifies general support for 802.1x authentication.
 --------------------
-n/a
+XXX - test_dot1x - INFO - Initialising authenticator
+XXX - test_dot1x - INFO - Running auth test
+XXX - Authenticator - INFO - Starting SM timer
+XXX - Authenticator - INFO - Listening for EAP and RADIUS.
+XXX - Authenticator - INFO - Starting authentication for 9a:02:57:1e:8f:01
+XXX - Authenticator - INFO - Authentication successful for 9a:02:57:1e:8f:01
+XXX - Authenticator - INFO - Stopping timer
+XXX - Authenticator - INFO - Shutting down modules.
+XXX - EapModule - INFO - Done sending EAP messages
+XXX - RadiusModule - INFO - Done receiving RADIUS packets
+XXX - RadiusModule - INFO - Done sending RADIUS packets
+XXX - EapModule - INFO - Done receiving EAP messages
+XXX - Authenticator - INFO - Done listening for EAP and RADIUS packets.
 --------------------
 RESULT pass connection.dot1x.authentication Authentication for 9a:02:57:1e:8f:01 succeeded.
 

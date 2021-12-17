@@ -290,17 +290,19 @@ class Authenticator:
         result_str = ""
         test_result = ""
         if not self.results:
-            result_str = "Authentication failed. No EAPOL messages received."
+            result_str = "Authentication failed. No EAPOL messages received. Check 802.1x is enabled"
             test_result = "skip"
         else:
             test_result = "pass"
             for src_mac, is_success in self.results.items():
+                additional = ''
                 if is_success:
                     result = 'succeeded'
                 else:
                     result = 'failed'
                     test_result = "fail"
-                result_str += "Authentication for %s %s." % (src_mac, result)
+                    additional = ' Incorrect credentials provided.'
+                result_str += "Authentication for %s %s.%s" % (src_mac, result ,additional)
         return result_str, test_result
 
     def handle_sm_timeout(self):
