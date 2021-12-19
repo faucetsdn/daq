@@ -32,6 +32,7 @@ class AuthStateMachine:
         self.identity = None
         self.authentication_mac = auth_mac
         self.radius_state = None
+        self.radius_access_reject = None
         self._idle_time = idle_time
         self._max_retry_count = retry_count
         self._current_timeout = None
@@ -77,6 +78,7 @@ class AuthStateMachine:
         """Received RADIUS access channel"""
         self.radius_state = radius_state
         if packet_type == 'RadiusAccessReject':
+            self.radius_access_reject = True
             self._state_transition(self.FAIL, self.RADIUS)
             eap_message = FailureMessage(self.src_mac, 255)
             self.auth_callback(self.src_mac, False)
@@ -141,6 +143,7 @@ class Authenticator:
     def __init__(self, config_file):
         self.state_machines = {}
         self.results = {}
+        self.radius_access_reject = {}
         self.eap_module = None
         self.radius_module = None
         self.logger = utils.get_logger('Authenticator')
@@ -280,6 +283,8 @@ class Authenticator:
                 self.logger.info('Authentication failed. Received no EAPOL packets.')
         if src_mac:
             self.results[src_mac] = is_success
+            if self.state_machines[src_mac].radius_access_reject:
+                self.radius_access_reject[src_mac] = True
             self.state_machines.pop(src_mac)
         # TODO: We currently finalize results as soon as we get a result for a src_mac.
         # Needs to be changed if we support multiple devices.
@@ -290,7 +295,8 @@ class Authenticator:
         result_str = ""
         test_result = ""
         if not self.results:
-            result_str = "Authentication failed. No EAPOL messages received. Check 802.1x is enabled"
+            result_str = "Authentication failed. No EAPOL messages received." \
+                         " Check 802.1x is enabled"
             test_result = "skip"
         else:
             test_result = "pass"
@@ -301,8 +307,11 @@ class Authenticator:
                 else:
                     result = 'failed'
                     test_result = "fail"
-                    additional = ' Incorrect credentials provided.'
-                result_str += "Authentication for %s %s.%s" % (src_mac, result ,additional)
+                    if src_mac in self.radius_access_reject:
+                        additional = ' Incorrect credentials provided.'
+                    else:
+                        additional = ' Error encountered.'
+                result_str += "Authentication %s.%s" % (result, additional)
         return result_str, test_result
 
     def handle_sm_timeout(self):
