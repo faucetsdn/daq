@@ -17,7 +17,7 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 import configurator
 from session_server import SessionServer
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
-import faucet_event_client
+from python_lib.faucet_event_client import FaucetEventClient
 import container_gateway
 import external_gateway
 import gcp
@@ -361,7 +361,7 @@ class DAQRunner:
         self.network.activate(self._native_gateway)
 
         LOGGER.debug('Attaching event channel...')
-        self.faucet_events = faucet_event_client.FaucetEventClient(self.config)
+        self.faucet_events = FaucetEventClient(self.config)
         self.faucet_events.connect()
 
         LOGGER.info('Waiting for system to settle...')
