@@ -79,12 +79,52 @@
             "required": "pass",
             "expected": "Required Pass"
         },
-        "security.nmap.ports": {
+        "security.services.telnet": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.ftp": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.smtp": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.imap": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.pop": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.vnc": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.tftp": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.services.snmpv3": {
             "category": "Security",
             "required": "pass",
             "expected": "Required Pass"
         },
         "security.nmap.http": {
+            "category": "Security",
+            "required": "pass",
+            "expected": "Required Pass"
+        },
+        "security.nmap.ports": {
             "category": "Security",
             "required": "pass",
             "expected": "Required Pass"

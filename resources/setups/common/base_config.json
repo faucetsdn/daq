@@ -20,7 +20,7 @@
       "enabled": true
     },
     "nmap": {
-      "timeout_sec": 600,
+      "timeout_sec": 900,
       "enabled": true
     },
     "brute": {

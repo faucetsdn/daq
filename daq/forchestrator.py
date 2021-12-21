@@ -4,8 +4,9 @@ import sys
 
 import logging
 import configurator
-import faucet_event_client
 import http_server
+
+from python_lib.faucet_event_client import FaucetEventClient
 
 import logger
 LOGGER = logger.get_logger('forch')
@@ -23,7 +24,7 @@ class Forchestrator:
     def initialize(self):
         """Initialize forchestrator instance"""
         LOGGER.info('Attaching event channel...')
-        self._faucet_events = faucet_event_client.FaucetEventClient(self._config)
+        self._faucet_events = FaucetEventClient(self._config)
         self._faucet_events.connect()
 
     def main_loop(self):

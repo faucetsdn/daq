@@ -4,15 +4,39 @@ RESULT skip base.startup.dhcp Using external DHCP
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass connection.base.target_ping target reached %% 10.20.0.5
 RESULT pass security.nmap.ports Only allowed ports found open.
+RESULT pass security.services.telnet Only allowed ports found open.
+RESULT pass security.services.ftp Only allowed ports found open.
+RESULT pass security.services.smtp Only allowed ports found open.
+RESULT pass security.services.imap Only allowed ports found open.
+RESULT pass security.services.pop Only allowed ports found open.
+RESULT pass security.services.vnc Only allowed ports found open.
+RESULT pass security.services.tftp Only allowed ports found open.
+RESULT pass security.services.snmpv3 Only allowed ports found open.
 RESULT pass security.nmap.http No running http servers have been found.
 RESULT skip base.startup.dhcp Using external DHCP
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass connection.base.target_ping target reached %% 10.20.99.165
-RESULT fail security.nmap.ports Some disallowed ports are open: 23.
+RESULT fail security.nmap.ports Some disallowed ports are open: 20,21,23,25,110,143,465,587,993,995,1256,5361,21514,23451,69,161.
+RESULT fail security.services.telnet Ports found open
+RESULT fail security.services.ftp Service found running, ports found open
+RESULT fail security.services.smtp Service found running, ports found open
+RESULT fail security.services.imap Service found running, ports found open
+RESULT fail security.services.pop Service found running, ports found open
+RESULT pass security.services.vnc Only allowed ports found open.
+RESULT fail security.services.tftp Ports found open
+RESULT fail security.services.snmpv3 Port open and does not support SNMPv3
 RESULT pass security.nmap.http No running http servers have been found.
 RESULT skip base.startup.dhcp Using external DHCP
 RESULT skip base.switch.ping No local IP has been set, check system config
 RESULT pass connection.base.target_ping target reached %% 10.20.99.167
 RESULT fail security.nmap.ports Some disallowed ports are open: 22.
+RESULT pass security.services.telnet Only allowed ports found open.
+RESULT pass security.services.ftp Only allowed ports found open.
+RESULT pass security.services.smtp Only allowed ports found open.
+RESULT pass security.services.imap Only allowed ports found open.
+RESULT pass security.services.pop Only allowed ports found open.
+RESULT pass security.services.vnc Only allowed ports found open.
+RESULT pass security.services.tftp Only allowed ports found open.
+RESULT pass security.services.snmpv3 Only allowed ports found open.
 RESULT pass security.nmap.http No running http servers have been found.
 Done with tests

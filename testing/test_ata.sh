@@ -12,10 +12,10 @@ switch_setup:
   ext_br: ata
 interfaces:
   faux-1:
-    opts: xdhcp
+    opts: xdhcp 
     port: 1
   faux-2:
-    opts: telnet
+    opts: oddservices telnet snmp
     port: 2
   faux-3:
     opts: curl telnet
