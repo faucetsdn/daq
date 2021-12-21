@@ -17,7 +17,6 @@ DEFAULT_SERVER_ADDRESS = '127.0.0.1'
 CONNECT_TIMEOUT_SEC = 60
 
 
-# pylint: disable=too-many-arguments
 class DAQClient():
     """gRPC client to send device result"""
 

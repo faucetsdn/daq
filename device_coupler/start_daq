@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 daq_path=$(pwd)
 docker_br_ip=$(ip addr show docker0 | fgrep inet | sed -nr 's~.*inet ([0-9.]+)/.*~\1~p')
