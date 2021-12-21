@@ -2,4 +2,12 @@ RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping
 RESULT pass connection.base.target_ping
 RESULT pass security.nmap.ports
+RESULT pass security.services.telnet
+RESULT pass security.services.ftp
+RESULT pass security.services.smtp
+RESULT pass security.services.imap
+RESULT pass security.services.pop
+RESULT pass security.services.vnc
+RESULT pass security.services.tftp
+RESULT pass security.services.snmpv3
 RESULT pass security.nmap.http
