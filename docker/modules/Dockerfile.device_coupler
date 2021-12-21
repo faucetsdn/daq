@@ -28,6 +28,11 @@ RUN python3 -m pip install grpcio-tools
 # Start OVS
 RUN /usr/share/openvswitch/scripts/ovs-ctl start
 
+# Install faucet
+COPY bin/ bin/
+COPY faucet/ faucet/
+COPY config/faucet/ryu.conf inst/faucet/
+RUN bin/install_faucet && rm -rf faucet/.git
 
 COPY daq/ daq/ 
 COPY python_lib/ python_lib/ 
