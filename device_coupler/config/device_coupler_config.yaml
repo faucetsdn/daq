@@ -1,0 +1,3 @@
+trunk_iface: trunk0
+bridge: dev_br0
+test_vlans: [200, 210, 220]

@@ -316,3 +316,27 @@ message CloudConfig {
   // Bridge port.
   int32 mqtt_bridge_port = 9;
 }
+
+/*
+ * Configuration for device coupler
+ */
+message DeviceCouplerConfig {
+  // Name of trunk interface that connects to access switch
+  string trunk_iface = 1;
+
+  // Name of OVS bridge where device MACs from access s/w are learnt
+  string bridge = 2;
+
+  // gRPC target IP
+  string target_ip = 3;
+
+  // gRPC target port
+  string target_port = 4;
+
+  // Source endpoint IP
+  string source_ip = 5;
+
+  // Device IP range
+  repeated int32 test_vlans = 6;
+
+}

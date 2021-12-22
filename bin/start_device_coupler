@@ -4,8 +4,10 @@ ROOT=$(realpath $(dirname $0)/..)
 CONTAINER=dev_coupler_box
 INSTDIR=$ROOT/inst
 IMAGE=daqf/device_coupler
+
 # TODO: Write log files here
 mkdir -p $INSTDIR/device_coupler
+
 docker_volumes+="\
         -v $INSTDIR/device_coupler:/root/inst"
 

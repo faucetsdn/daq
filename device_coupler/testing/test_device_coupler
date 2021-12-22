@@ -21,6 +21,7 @@ done
 # Create OVS bridge to simulate access switch
 PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices $devices --trunk-iface $trunk_port
 
+
 # Start DAQ
 $ROOT/device_coupler/start_daq -s &
 sleep 15

@@ -292,6 +292,10 @@
                 </li>
               
                 <li>
+                  <a href="#DeviceCouplerConfig"><span class="badge">M</span>DeviceCouplerConfig</a>
+                </li>
+              
+                <li>
                   <a href="#DeviceReporting"><span class="badge">M</span>DeviceReporting</a>
                 </li>
               
@@ -1359,6 +1363,65 @@
                   <td><a href="#Interface">Interface</a></td>
                   <td></td>
                   <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="DeviceCouplerConfig">DeviceCouplerConfig</h3>
+        <p>Configuration for device coupler</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>trunk_iface</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of trunk interface that connects to access switch </p></td>
+                </tr>
+              
+                <tr>
+                  <td>bridge</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Name of OVS bridge where device MACs from access s/w are learnt </p></td>
+                </tr>
+              
+                <tr>
+                  <td>target_ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>gRPC target IP </p></td>
+                </tr>
+              
+                <tr>
+                  <td>target_port</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>gRPC target port </p></td>
+                </tr>
+              
+                <tr>
+                  <td>source_ip</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Source endpoint IP </p></td>
+                </tr>
+              
+                <tr>
+                  <td>test_vlans</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td>repeated</td>
+                  <td><p>Device IP range </p></td>
                 </tr>
               
             </tbody>

@@ -1,23 +1,9 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # Start OVS
 sudo /usr/share/openvswitch/scripts/ovs-ctl start
 
-# Start FAUCT
-FAUCET_EVENT_SOCK=/root/inst/faucet/faucet_event.sock
-FAUCET_CONFIG=/root/inst/faucet/faucet.yaml
-FAUCET_CONFIG_STAT_RELOAD=1
-FAUCET_EVENT_SOCK_HEARTBEAT=10
-FAUCET_LISTEN_PORT=6653
-FAUCET_RYU_CONF=/root/inst/faucet/ryu.conf
-FAUCET_LOG=/root/inst/fauceet/faucet.log
-
-FAUCET_EVENT_SOCK=$FAUCET_EVENT_SOCK \
-FAUCET_EVENT_SOCK_HEARTBEAT=$FAUCET_EVENT_SOCK_HEARTBEAT \
-FAUCET_CONFIG_STAT_RELOAD=$FAUCET_CONFIG_STAT_RELOAD \
-FAUCET_CONFIG=$FAUCET_CONFIG \
-FAUCET_LOG=$FAUCET_LOG \
-faucet --ryu-config-file=${FAUCET_RYU_CONF} --ryu-ofp-tcp-listen-port=${FAUCET_LISTEN_PORT} &
+python3 device_coupler/runner.py
 
 # Block
 tail -f

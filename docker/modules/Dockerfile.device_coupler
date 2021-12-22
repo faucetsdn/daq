@@ -18,7 +18,7 @@ RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 ENV CI=true
 
 RUN $AG update && $AG install ash iptables sudo openvswitch-switch openvswitch-common \
-    python3 python3-pip python3.8 python3.8-venv python3.8-dev build-essential
+    python3 python3-pip python3.8 python3.8-venv python3.8-dev build-essential python3-yaml
 
 RUN update-alternatives --install /usr/bin/python3 python /usr/bin/python3.8 2
 
@@ -28,18 +28,12 @@ RUN python3 -m pip install grpcio-tools
 # Start OVS
 RUN /usr/share/openvswitch/scripts/ovs-ctl start
 
-# Install faucet
-COPY bin/ bin/
-COPY faucet/ faucet/
-COPY config/faucet/ryu.conf inst/faucet/
-RUN bin/install_faucet && rm -rf faucet/.git
-
-COPY daq/ daq/ 
-COPY python_lib/ python_lib/ 
+COPY daq/ daq/
+COPY python_lib/ python_lib/
 COPY device_coupler/ device_coupler/
 COPY device_coupler/device_coupler_go bin/
 COPY device_coupler/make_daq_request bin/
 
-ENV PYTHONPATH PYTHONPATH:/root
+ENV PYTHONPATH $PYTHONPATH:/root:/root/daq
 
 CMD ["bin/device_coupler_go"]
