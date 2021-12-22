@@ -6,6 +6,8 @@ from functools import partial
 from python_lib.shell_command_helper import ShellCommandHelper
 from utils import get_logger
 
+import re
+
 
 class OvsHelper:
     """Class to build OVS bridges, VxLANs and other network components"""
@@ -99,3 +101,22 @@ class OvsHelper:
         self._run_shell('sudo ip link add dev %s type veth peer name %s' % (iface1, iface2))
         self._set_interface_up(iface1)
         self._set_interface_up(iface2)
+
+    def get_interface_ofport(self, iface):
+        """Returns ofport number of interface from ovs table"""
+        _, out, _ = self._run_shell('ovs-vsctl get Interface %s ofport' % iface)
+        return out.strip()
+
+    def get_forwarding_table(self, bridge):
+        """Returns forwarding table of given OVS bridge in the form [(<port>, <vlan>, <mac>)]"""
+        _, out, _ = self._run_shell('ovs-appctl fdb/show %s' % bridge)
+        return self._filter_forwarding_table(out)
+
+    def _is_mac_in_string(self, string):
+        """Returns true if string contains a mac"""
+        return bool(re.search("[0-9a-f]{2}([:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}", string.lower()))
+
+    def _filter_forwarding_table(self, table):
+        """Converts fdb  table string to list[(<port>, <vlan>, <mac>)]"""
+        filtered_table = [entry for entry in table.split('\n') if self._is_mac_in_string(entry)]
+        return [tuple(entry.split()[:-1]) for entry in filtered_table]
