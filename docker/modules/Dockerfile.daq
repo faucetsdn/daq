@@ -32,6 +32,7 @@ COPY etc/ etc/
 RUN bin/setup_dev simple && rm -rf daq/.git
 
 COPY daq/ daq/
+COPY python_lib/ python_lib/
 COPY cmd/ cmd/
 COPY config/ config/
 COPY resources/ resources/
