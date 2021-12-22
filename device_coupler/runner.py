@@ -15,8 +15,8 @@ class DeviceCoupler():
         self._logger = get_logger('device_coupler')
         self._config = config
         self._test_vlans = list(config.test_vlans)
-        self._network_helper = NetworkHelper(self._config.trunk_iface, self._config.bridge)
-        print(self._test_vlans, self._config.trunk_iface, self._config.bridge)
+        self._network_helper = NetworkHelper(
+            self._config.trunk_iface, self._config.bridge, self._test_vlans)
 
 
     def setup(self):
