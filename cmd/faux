@@ -86,7 +86,7 @@ fi
 echo Launching faux $FAUX_ARGS...
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
-    echo -n "Clensing old container "
+    echo -n "Cleansing old container "
     docker rm -f $CONTAINER
 fi
 

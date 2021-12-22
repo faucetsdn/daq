@@ -1,0 +1,47 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/../..)
+GOLDEN_FILE=$ROOT/device_coupler/testing/test_device_coupler.out
+TEST_RESULTS=$ROOT/inst/device_coupler/test_device_coupler.out
+exit_code=0
+
+
+trunk_port=trunk0
+devices=3
+
+$ROOT/bin/net_clean
+
+# Create faux devices
+echo "Creating faux devices"
+for i in $(seq 1 $devices); do
+  $ROOT/cmd/faux $i
+  sudo ip link set faux-$i up
+done
+
+# Create OVS bridge to simulate access switch
+PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices $devices --trunk-iface $trunk_port
+
+# Start DAQ
+$ROOT/device_coupler/start_daq -s &
+sleep 15
+
+# Setup device coupler
+$ROOT/bin/setup_device_coupler -t $trunk_port
+
+# Simulate device discovery
+# TODO: Replace once device discovery is enabled
+docker exec dev_coupler_box device_coupler/make_daq_request
+
+mkdir -p $ROOT/inst/device_coupler
+fgrep 'RESULT' $ROOT/inst/run-9a02571e8f01/report_9a02571e8f01*.md | awk '{print $1, $2, $3}' > $TEST_RESULTS
+
+if ! diff $GOLDEN_FILE $TEST_RESULTS; then
+  exit_code=1
+fi
+
+# Cleanup
+$ROOT/bin/net_clean
+
+echo Finished test_device_coupler
+exit $exit_code
+

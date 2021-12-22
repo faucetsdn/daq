@@ -1,0 +1,34 @@
+#!/bin/bash -e
+
+ROOT=$(realpath $(dirname $0)/..)
+echo ROOT is $ROOT
+
+usage () {
+  echo " $0 -t <trunk-interface>" 1>&2;
+  exit 1
+}
+
+while getopts "t:" argch; do
+  case "${argch}" in
+    t)
+      trunk_port=${OPTARG}
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+shift "$((OPTIND-1))"
+
+if [ -z "${trunk_port}" ]; then
+  usage
+fi
+
+$ROOT/bin/build_device_coupler
+$ROOT/bin/start_device_coupler
+
+pid=$(docker inspect --format="{{ .State.Pid  }}" dev_coupler_box)
+sudo ip link set $trunk_port netns $pid
+
+docker exec dev_coupler_box ip link set $trunk_port up
+docker exec dev_coupler_box python3 device_coupler/network_helper.py --bridge dev_br0 --trunk-iface $trunk_port

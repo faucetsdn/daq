@@ -306,7 +306,9 @@ class DAQRunner:
             assert remote_ip, 'remote request ip not specified'
             device = self._devices.create_if_absent(request.device_mac)
             device.port.flapping_start = None  # In case this was set from last disconnect.
-            device.dhcp_mode = DhcpMode.EXTERNAL
+            # Assigned VLAN set => FOT mode.
+            # For device coupler mode, DHCP mode shouldn't be external.
+            device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
             device.session_endpoint = request.endpoint
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
             self._udmi.discovery(device)
@@ -517,7 +519,7 @@ class DAQRunner:
             self._target_set_trigger(device)
 
     def _remote_trigger(self, device, device_vlan, assigned_vlan):
-        assert device_vlan and assigned_vlan, 'expected both device_ and assigned_ vlans'
+        assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
 

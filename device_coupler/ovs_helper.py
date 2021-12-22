@@ -17,26 +17,35 @@ class OvsHelper:
         self._run_shell = partial(ShellCommandHelper().run_cmd, capture=True)
         self._run_shell_no_raise = partial(ShellCommandHelper().run_cmd, capture=True, strict=False)
 
-    def create_vxlan_endpoint(self, port, remote_ip, vni, local_ip=None):
+    def _set_interface_up(self, interface, raise_exc=True):
+        shell_fn = self._run_shell if raise_exc else self._run_shell_no_raise
+        shell_fn('sudo ip link set %s up' % interface)
+
+    def _set_interface_down(self, interface, raise_exc=True):
+        shell_fn = self._run_shell if raise_exc else self._run_shell_no_raise
+        shell_fn('sudo ip link set %s down' % interface)
+
+    def create_vxlan_endpoint(self, interface, remote_ip, vni, local_vtep_ip=None):
         """Creates a VxLAN endpoint"""
-        interface = "vxlan%s" % port
-        self.remove_vxlan_endpoint(interface)
-        self._logger.info("Creating VxLAN endpoint %s", interface)
+        self._logger.info("Creating VxLAN endpoint %s ip: %s vni: %s local vtep ip: %s",
+                          interface, remote_ip, vni, local_vtep_ip)
         vxlan_cmd = 'sudo ' + self.VXLAN_CMD_FMT % (
             interface, vni, remote_ip, self.DEFAULT_VXLAN_PORT,
             self.DEFAULT_VXLAN_PORT, self.DEFAULT_VXLAN_PORT)
+        self._logger.info('Executing VXLAN cmd: %s', vxlan_cmd)
         self._run_shell(vxlan_cmd)
-        self._run_shell('sudo ip link set %s up' % interface)
-        if local_ip:
-            self._run_shell('sudo ip addr add %s dev %s' % (local_ip, interface))
+        if local_vtep_ip:
+            self._run_shell('sudo ip addr add %s dev %s' % (local_vtep_ip, interface))
+        self._set_interface_up(interface)
         return interface
 
-    def remove_vxlan_endpoint(self, interface):
+    def remove_vxlan_endpoint(self, interface, bridge):
         """Clears VxLAN endpoint"""
         self._logger.info('Removing vxlan interface %s', interface)
         self._run_shell_no_raise('sudo ip link set %s down' % interface)
+        self._set_interface_down(interface, raise_exc=False)
         self._run_shell_no_raise('sudo ip link del %s' % interface)
-        self._run_shell_no_raise('sudo ovs-vsctl del-port t1sw1 %s' % interface)
+        self._run_shell_no_raise('sudo ovs-vsctl del-port %s %s' % (bridge, interface))
 
     def create_ovs_bridge(self, name):
         """Creates OVS bridge"""
@@ -48,10 +57,17 @@ class OvsHelper:
         self._logger.info('Deleting OVS bridge %s', name)
         self._run_shell_no_raise('sudo ovs-vsctl del-br %s' % name)
 
-    def add_iface_to_bridge(self, bridge, iface):
+    def add_iface_to_bridge(self, bridge, iface, tag=None, trunks=None):
         """Add interface to OVS bridge"""
-        self._logger.info('Adding interface %s to bridge %s', iface, bridge)
-        self._run_shell('sudo ovs-vsctl add-port %s %s' % (bridge, iface))
+        self._logger.info('Adding interface %s to bridge %s tag %s trunk %s',
+                          iface, bridge, tag, trunks)
+        assert not (tag and trunks), 'Can\'t enable both tag and trunks'
+        cmd = 'sudo ovs-vsctl add-port %s %s' % (bridge, iface)
+        if tag:
+            cmd = cmd + ' tag=%s' % tag
+        if trunks:
+            cmd = cmd + ' trunks=%s' % trunks
+        self._run_shell(cmd)
 
     def set_native_vlan(self, interface, vlan):
         """Set native VLAN to port on OVS bridge"""
@@ -74,6 +90,8 @@ class OvsHelper:
         gateway = '192.168.1.0'
         container = 'daq-faux-%s' % index
 
-        self._run_shell('ip addr flush %s' % iface, docker_container=container)
-        self._run_shell('ip addr add %s/16 dev %s' % (ip_addr, iface), docker_container=container)
-        self._run_shell('ip route add default via %s' % gateway, docker_container=container)
+    def create_veth_pair(self, iface1, iface2):
+        """Creates a veth pair with interface names iface1, iface2"""
+        self._run_shell('sudo ip link add dev %s type veth peer name %s' % (iface1, iface2))
+        self._set_interface_up(iface1)
+        self._set_interface_up(iface2)

@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+image_name="device_coupler"
+
+echo Starting $image_name build...
+
+docker build . -f docker/modules/Dockerfile.device_coupler -t daqf/$image_name
+
+echo Done with $image_name build.
