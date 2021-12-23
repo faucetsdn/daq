@@ -1,7 +1,7 @@
 """Module to create n/w setup for device coupler"""
 
 from __future__ import absolute_import
-from ovs_helper import OvsHelper
+from device_coupler.ovs_helper import OvsHelper
 from device_coupler.utils import get_logger
 
 import argparse

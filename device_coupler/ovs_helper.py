@@ -105,7 +105,7 @@ class OvsHelper:
     def get_interface_ofport(self, iface):
         """Returns ofport number of interface from ovs table"""
         _, out, _ = self._run_shell('ovs-vsctl get Interface %s ofport' % iface)
-        return out.strip()
+        return int(out.strip())
 
     def get_forwarding_table(self, bridge):
         """Returns forwarding table of given OVS bridge in the form [(<port>, <vlan>, <mac>)]"""

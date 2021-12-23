@@ -23,12 +23,13 @@ PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --b
 
 
 # Start DAQ
-$ROOT/device_coupler/start_daq -s &
-sleep 15
+#$ROOT/device_coupler/start_daq -s &
+#sleep 15
 
 # Setup device coupler
 $ROOT/bin/setup_device_coupler -t $trunk_port
 
+exit
 # Simulate device discovery
 # TODO: Replace once device discovery is enabled
 docker exec dev_coupler_box device_coupler/make_daq_request

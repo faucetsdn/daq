@@ -206,6 +206,25 @@
         
           
           <li>
+            <a href="#daq%2fproto%2fdevice_coupler.proto">daq/proto/device_coupler.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#DeviceDiscoveryEvent"><span class="badge">M</span>DeviceDiscoveryEvent</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#DiscoveryEventType"><span class="badge">E</span>DiscoveryEventType</a>
+                </li>
+              
+              
+              
+            </ul>
+          </li>
+        
+          
+          <li>
             <a href="#daq%2fproto%2freport.proto">daq/proto/report.proto</a>
             <ul>
               
@@ -490,6 +509,88 @@
         
       
 
+      
+
+      
+
+      
+    
+      
+      <div class="file-heading">
+        <h2 id="daq/proto/device_coupler.proto">daq/proto/device_coupler.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="DeviceDiscoveryEvent">DeviceDiscoveryEvent</h3>
+        <p>Device discovery event.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>port</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Port on which event occured </p></td>
+                </tr>
+              
+                <tr>
+                  <td>vlan</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>VLAN on which event occured </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mac</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>MAC address of device </p></td>
+                </tr>
+              
+                <tr>
+                  <td>event_type</td>
+                  <td><a href="#DiscoveryEventType">DiscoveryEventType</a></td>
+                  <td></td>
+                  <td><p>Event type </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="DiscoveryEventType">DiscoveryEventType</h3>
+        <p>Device discovery event type</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>EXPIRY</td>
+                <td>0</td>
+                <td><p>Device expired.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DISCOVERY</td>
+                <td>1</td>
+                <td><p>Device discovered.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
       
 
       
