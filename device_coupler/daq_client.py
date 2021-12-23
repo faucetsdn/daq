@@ -55,7 +55,7 @@ class DAQClient():
         self._logger.info('Connection of %s with VLAN %s succeeded', mac, vlan)
         return session
 
-    def disconnect(self, mac):
+    def _disconnect(self, mac):
         with self._lock:
             session = self._mac_sessions.get(mac, {}).get('session')
             if session:
@@ -103,12 +103,16 @@ class DAQClient():
         except Exception as e:
             self._logger.error('Progress exception: %s', e)
             self._logger.error('Traceback: %s', traceback.format_exc())
-        self.disconnect(mac)
+        self._disconnect(mac)
 
     def _initiate_test_session(self, mac, device_vlan):
         if mac in self._mac_sessions:
-            self._logger.info('Test session for %s already exists. Ignoring.', mac)
-            return
+            if device_vlan == self._mac_sessions[mac]['device_vlan']:
+                self._logger.info('Test session for %s already exists. Ignoring.', mac)
+                return
+            self._logger.info('MAC learned on VLAN %s. Terminating current session.', device_vlan)
+            self._disconnect(mac)
+
         self._logger.info('Initiating test session for %s on VLAN %s', mac, device_vlan)
 
         if device_vlan:
@@ -119,6 +123,11 @@ class DAQClient():
 
     def process_device_discovery(self, mac, device_vlan):
         """Process discovery of device to be tested"""
-        # TODO: End existing test session and start new one if discovered on another port
+        # TODO: End existing test session and start new one if discovered on another vlan
         with self._lock:
             self._initiate_test_session(mac, device_vlan)
+
+    def process_device_expiry(self, mac):
+        """Process expiry of device"""
+        self._logger.info('Terminating session for %s', mac)
+        self._disconnect(mac)

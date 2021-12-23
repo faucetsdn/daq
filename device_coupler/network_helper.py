@@ -19,11 +19,13 @@ class NetworkHelper():
 
     def setup(self):
         """Setup n/w"""
+        self._logger.info('Setting up device coupler network.')
         self._setup_ovs_bridge()
 
     def cleanup(self):
         """Clean up n/w"""
         self._delete_ovs_bridge()
+        self._logger.info('Cleaned up device coupler network.')
 
     def _setup_ovs_bridge(self):
         self._ovs_helper.create_ovs_bridge(self._bridge)

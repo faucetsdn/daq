@@ -13,7 +13,7 @@ class DeviceDiscovery():
 
     _POLLING_INTERVAL = 3
 
-    def __init__(self, bridge, test_vlans, trunk_iface):
+    def __init__(self, bridge, test_vlans, trunk_iface, event_queue_append):
         self._ovs_helper = OvsHelper()
         self._logger = get_logger('device_discovery')
         self._bridge = bridge
@@ -22,24 +22,28 @@ class DeviceDiscovery():
         self._fdb_snapshot = None
         self._trunk_iface = trunk_iface
         self._trunk_ofport = None
+        self._event_queue_append = event_queue_append
 
-    def setup(self):
+    def start(self):
         """Setup device discovery"""
         self._trunk_ofport = self._ovs_helper.get_interface_ofport(self._trunk_iface)
         self._fdb_snapshot = set()
         self._polling_timer = HeartbeatScheduler(self._POLLING_INTERVAL)
         self._polling_timer.add_callback(self.poll_forwarding_table)
+        self._logger.info('Starting forwarding table poll on %s', self._bridge)
         self._polling_timer.start()
 
     def cleanup(self):
         """Clean up device discovery"""
         if self._polling_timer:
             self._polling_timer.stop()
+        self._logger.info('Clean up complete.')
 
     def _process_entry(self, event):
         # Only process events for test vlans in config and on trunk port
         if event.port == self._trunk_ofport and event.vlan in self._test_vlans:
-            print(event)
+            self._logger.info('Processing event: %s', event)
+            self._event_queue_append(event)
 
     def poll_forwarding_table(self):
         """Poll forwarding table and determine devices learnt/expired"""
