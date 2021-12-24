@@ -23,12 +23,13 @@ PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --b
 
 # Start DAQ
 $ROOT/device_coupler/start_daq -s &
+daq_pid=$!
 sleep 30
 
 # Setup device coupler
 $ROOT/bin/setup_device_coupler -t $trunk_port
 
-sleep 180
+wait $daq_pid
 
 mkdir -p $ROOT/inst/device_coupler
 
