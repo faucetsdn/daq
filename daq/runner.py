@@ -17,7 +17,7 @@ from forch.proto.shared_constants_pb2 import PortBehavior
 import configurator
 from session_server import SessionServer
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
-import faucet_event_client
+from python_lib.faucet_event_client import FaucetEventClient
 import container_gateway
 import external_gateway
 import gcp
@@ -306,6 +306,8 @@ class DAQRunner:
             assert remote_ip, 'remote request ip not specified'
             device = self._devices.create_if_absent(request.device_mac)
             device.port.flapping_start = None  # In case this was set from last disconnect.
+            # Assigned VLAN set => FOT mode.
+            # For device coupler mode, DHCP mode shouldn't be external.
             device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
             device.session_endpoint = request.endpoint
             self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
@@ -361,7 +363,7 @@ class DAQRunner:
         self.network.activate(self._native_gateway)
 
         LOGGER.debug('Attaching event channel...')
-        self.faucet_events = faucet_event_client.FaucetEventClient(self.config)
+        self.faucet_events = FaucetEventClient(self.config)
         self.faucet_events.connect()
 
         LOGGER.info('Waiting for system to settle...')

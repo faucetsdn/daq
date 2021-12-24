@@ -20,6 +20,9 @@
     },
     "tls": {
       "ca_file": "CA_Faux.pem"
+    },
+    "nmap": {
+      "enabled": true
     }
   },
   "process": {
