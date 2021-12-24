@@ -1,3 +1,6 @@
 trunk_iface: trunk0
 bridge: dev_br0
-test_vlans: [200, 210, 220]
+test_vlans: [200, 201, 202, 203, 204, 205]
+target_ip: 172.17.0.1
+target_port: 50051
+

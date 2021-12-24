@@ -331,7 +331,7 @@ message DeviceCouplerConfig {
   string target_ip = 3;
 
   // gRPC target port
-  string target_port = 4;
+  int32 target_port = 4;
 
   // Source endpoint IP
   string source_ip = 5;

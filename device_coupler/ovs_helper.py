@@ -4,7 +4,7 @@ from __future__ import absolute_import, division
 
 from functools import partial
 from python_lib.shell_command_helper import ShellCommandHelper
-from utils import get_logger
+from device_coupler.utils import get_logger
 
 import re
 
@@ -120,3 +120,10 @@ class OvsHelper:
         """Converts fdb  table string to list[(<port>, <vlan>, <mac>)]"""
         filtered_table = [entry for entry in table.split('\n') if self._is_mac_in_string(entry)]
         return [tuple(entry.split()[:-1]) for entry in filtered_table]
+
+    def get_interface_ip(self, iface="eth0"):
+        """Returns IP of fiven interface"""
+        _, cmd_str, _ = self._run_shell('ip addr show %s' % iface)
+        _, _, ip_str = cmd_str.partition('inet')
+        ip = ip_str.split()[0].split('/')[0] if ip_str else None
+        return ip

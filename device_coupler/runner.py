@@ -8,6 +8,8 @@ from daq.proto.device_coupler_pb2 import DeviceDiscoveryEvent, DiscoveryEventTyp
 from device_coupler.utils import get_logger, yaml_proto, write_yaml_file
 from device_coupler.network_helper import NetworkHelper
 from device_coupler.device_discovery import DeviceDiscovery
+from device_coupler.daq_client import DAQClient
+from device_coupler.ovs_helper import OvsHelper
 
 from queue import Queue, Empty
 
@@ -27,14 +29,16 @@ class DeviceCoupler():
         self._test_vlans = list(config.test_vlans)
         self._network_helper = None
         self._device_discovery = None
+        self._daq_client = None
         self._event_queue = None
         self._running = None
         self._workers = None
-
+        self._source_ip = None
 
     def setup(self):
         """Setup device coupler"""
         self._running = True
+        self._ovs_helper = OvsHelper()
 
         self._network_helper = NetworkHelper(
             self._config.trunk_iface, self._config.bridge, self._test_vlans)
@@ -46,17 +50,23 @@ class DeviceCoupler():
                 self._config.bridge, self._test_vlans,
                 self._config.trunk_iface, self.add_event_to_queue)
 
+        self._source_ip = self._ovs_helper.get_interface_ip()
+        target_str = '%s:%s' % (self._config.target_ip, self._config.target_port)
+        self._daq_client = DAQClient(target_str, self._source_ip, self._config.bridge)
+
     def start(self):
         """Start device coupler"""
         self._device_discovery.start()
+        self._daq_client.start()
         self._logger.info('Starting %s workers', len(self._workers))
         for worker in self._workers:
             worker.start()
 
     def cleanup(self):
         """Clean up device coupler"""
-        self._network_helper.cleanup()
+        self._daq_client.stop()
         self._device_discovery.cleanup()
+        self._network_helper.cleanup()
         self._running = False
         for worker in self._workers:
             worker.join()
@@ -71,10 +81,10 @@ class DeviceCoupler():
             try:
                 event = self._event_queue.get(timeout=self._WORKER_TIMEOUT)
                 self._logger.info(event)
-                """if event.event_type == DiscoveryEventType.DISCOVERY:
+                if event.event_type == DiscoveryEventType.DISCOVERY:
                     self._daq_client.process_device_discovery(event.mac, event.vlan)
                 else:
-                    self._daq_client.process_device_expiry(event.mac)"""
+                    self._daq_client.process_device_expiry(event.mac)
             except Empty:
                 # Worker thread timeout. Do nothing
                 self._logger.info('Anurag worker timeout')

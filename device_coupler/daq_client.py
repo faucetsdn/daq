@@ -41,6 +41,8 @@ class DAQClient():
 
     def stop(self):
         """Stop client handler"""
+        for mac in self._mac_sessions.keys():
+            self._disconnect(mac)
 
     def _connect(self, mac, vlan):
         self._logger.info('Connecting %s with VLAN %s', mac, vlan)

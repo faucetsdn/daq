@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import threading
 
-from utils import get_logger
+from device_coupler.utils import get_logger
 
 
 class HeartbeatScheduler:

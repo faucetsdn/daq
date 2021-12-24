@@ -9,8 +9,8 @@ switch_setup:
   varz_port: 5678
 
 run_trigger:
-  vlan_start: 209
-  vlan_end: 211
+  vlan_start: 200
+  vlan_end: 205
 
 device_reporting:
   server_port: 50051

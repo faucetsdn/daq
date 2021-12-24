@@ -1,3 +1,19 @@
+9a:02:57:1e:8f:01
+=================
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping
+RESULT pass connection.base.target_ping
+RESULT pass security.nmap.ports
+RESULT pass security.nmap.http
+9a:02:57:1e:8f:02
+=================
+RESULT pass base.startup.dhcp
+RESULT skip base.switch.ping
+RESULT pass connection.base.target_ping
+RESULT pass security.nmap.ports
+RESULT pass security.nmap.http
+9a:02:57:1e:8f:03
+=================
 RESULT pass base.startup.dhcp
 RESULT skip base.switch.ping
 RESULT pass connection.base.target_ping
