@@ -49,7 +49,7 @@ class DeviceDiscovery():
         """Poll forwarding table and determine devices learnt/expired"""
         fdb_table = set(self._ovs_helper.get_forwarding_table(self._bridge))
         expired = self._fdb_snapshot - fdb_table
-        discovered =  fdb_table - self._fdb_snapshot
+        discovered = fdb_table - self._fdb_snapshot
         for entry in expired:
             event = self._build_device_discovery_event(entry, expire=True)
             self._process_entry(event)
@@ -66,7 +66,6 @@ class DeviceDiscovery():
         event.mac = mac
         event.event_type = DiscoveryEventType.EXPIRY if expire else DiscoveryEventType.DISCOVERY
         return event
-
 
 
 def main():

@@ -3,9 +3,9 @@
 from __future__ import absolute_import
 
 from proto import system_config_pb2 as sys_config
-from daq.proto.device_coupler_pb2 import DeviceDiscoveryEvent, DiscoveryEventType
+from daq.proto.device_coupler_pb2 import DiscoveryEventType
 
-from device_coupler.utils import get_logger, yaml_proto, write_yaml_file
+from device_coupler.utils import get_logger, yaml_proto
 from device_coupler.network_helper import NetworkHelper
 from device_coupler.device_discovery import DeviceDiscovery
 from device_coupler.daq_client import DAQClient
@@ -47,8 +47,8 @@ class DeviceCoupler():
         self._event_queue = Queue()
         self._build_worker_threads(self._process_event_queue, self._WORKER_COUNT)
         self._device_discovery = DeviceDiscovery(
-                self._config.bridge, self._test_vlans,
-                self._config.trunk_iface, self.add_event_to_queue)
+            self._config.bridge, self._test_vlans,
+            self._config.trunk_iface, self.add_event_to_queue)
 
         self._source_ip = self._ovs_helper.get_interface_ip()
         target_str = '%s:%s' % (self._config.target_ip, self._config.target_port)
@@ -97,7 +97,8 @@ class DeviceCoupler():
 
 
 def main():
-    config = yaml_proto("device_coupler/config/device_coupler_config.yaml", sys_config.DeviceCouplerConfig)
+    config = yaml_proto(
+        "device_coupler/config/device_coupler_config.yaml", sys_config.DeviceCouplerConfig)
     device_coupler = DeviceCoupler(config)
     device_coupler.setup()
     device_coupler.start()
