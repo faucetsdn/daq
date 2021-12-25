@@ -52,7 +52,9 @@ class OvsHelper:
     def create_ovs_bridge(self, name):
         """Creates OVS bridge"""
         self._logger.info('Creating OVS bridge %s', name)
-        self._run_shell('sudo ovs-vsctl add-br %s' % name)
+        self._run_shell(
+            'sudo ovs-vsctl add-br %s -- set bridge %s other-config:forward-bpdu=true'
+            % (name, name))
 
     def delete_ovs_bridge(self, name):
         """Delete ovs bridge"""
