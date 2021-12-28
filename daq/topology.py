@@ -430,11 +430,18 @@ class FaucetTopology:
 
     def _generate_port_target_acls(self, portset_acls):
         port_set_mirrors = {}
-        for target in self._port_targets.values():
+        targets = list(self._port_targets.values())
+        for devices in self._set_devices.values():
+            for device in devices:
+                if device and device.gateway:
+                    target = {'port': None, 'port_set': device.gateway.port_set, 'mac': device.mac}
+                    targets.append(target)
+        for target in targets:
             port_no = target['port']
             port_set = target['port_set']
             target_mac = target['mac']
-            mirror_port = self.mirror_port(port_no)
+            # Mirror port is set to tap_intf, which is pri trunk port if no target port
+            mirror_port = self.mirror_port(port_no) if port_no else self.PRI_TRUNK_PORT
             port_set_mirrors.setdefault(port_set, []).append((target_mac, mirror_port))
             self._add_acl_rule(portset_acls[port_set], dl_dst=target_mac,
                                ports=[mirror_port], allow=1)

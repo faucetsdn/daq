@@ -87,7 +87,6 @@ class DeviceCoupler():
                     self._daq_client.process_device_expiry(event.mac)
             except Empty:
                 # Worker thread timeout. Do nothing
-                self._logger.info('Anurag worker timeout')
                 pass
 
     def _build_worker_threads(self, method, count):
@@ -102,7 +101,7 @@ def main():
     device_coupler = DeviceCoupler(config)
     device_coupler.setup()
     device_coupler.start()
-    time.sleep(400)
+    time.sleep(2400)
     device_coupler.cleanup()
 
 

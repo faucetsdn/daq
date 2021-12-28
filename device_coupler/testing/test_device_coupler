@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 ROOT=$(realpath $(dirname $0)/../..)
 GOLDEN_FILE=$ROOT/device_coupler/testing/test_device_coupler.out
@@ -7,14 +7,38 @@ exit_code=0
 
 
 trunk_port=trunk0
-devices=1
+devices=3
 
 $ROOT/bin/net_clean
+
+faux_args=("" "brute broadcast_client ntpv4 wpa" "nobrute expiredtls bacnetfail pubber passwordfail opendns ntpv3 ssh curl wpawrong" "tls macoui passwordpass bacnet pubber broadcast_client ssh curl")
+
+# Setup an instance test site
+rm -rf inst/test_site && mkdir -p inst/test_site
+cp -a resources/test_site inst/
+
+echo %%%%%%%%%%%%%%%%%%%%%%%%% Preparing aux test run
+mkdir -p local/site
+cp -r resources/test_site/device_types/rocket local/site/device_types/
+mkdir -p local/site/device_types/rocket/aux/
+cp subset/bacnet/bacnetTests/src/main/resources/pics.csv local/site/device_types/rocket/aux/
+cp -r resources/test_site/mac_addrs local/site/
+# Create config for the password test to select which dictionaries to use.
+cat <<EOF > local/base_config.json
+{
+  "include": "../resources/setups/baseline/base_config.json",
+  "modules": {
+    "password": {
+      "dictionary_dir": "resources/faux"
+    }
+  }
+}
+EOF
 
 # Create faux devices
 echo "Creating faux devices"
 for i in $(seq 1 $devices); do
-  $ROOT/cmd/faux $i wpa
+  $ROOT/cmd/faux $i "${faux_args[$i]}"
   sudo ip link set faux-$i up
 done
 
@@ -24,27 +48,33 @@ PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --b
 # Start DAQ
 $ROOT/device_coupler/start_daq -s &
 daq_pid=$!
-#sleep 30
+sleep 30
 
 # Setup device coupler
 $ROOT/bin/setup_device_coupler -t $trunk_port
 
-exit
 wait $daq_pid
 
 mkdir -p $ROOT/inst/device_coupler
 
-echo 9a:02:57:1e:8f:01 > $TEST_RESULTS
-echo ================= >> $TEST_RESULTS
-fgrep 'RESULT' $ROOT/inst/run-9a02571e8f01/report_9a02571e8f01*.md | awk '{print $1, $2, $3}' >> $TEST_RESULTS
+faux1_mac=$(docker exec daq-faux-1 ip addr show faux-eth0  | grep ether | cut -d " " -f6)
+faux1_mac_clean=$(echo $faux1_mac | sed -e 's/://g')
+faux2_mac=$(docker exec daq-faux-2 ip addr show faux-eth0  | grep ether | cut -d " " -f6)
+faux2_mac_clean=$(echo $faux2_mac | sed -e 's/://g')
+faux3_mac=$(docker exec daq-faux-3 ip addr show faux-eth0  | grep ether | cut -d " " -f6)
+faux3_mac_clean=$(echo $faux3_mac | sed -e 's/://g')
 
-echo 9a:02:57:1e:8f:02 >> $TEST_RESULTS
+echo $faux1_mac > $TEST_RESULTS
 echo ================= >> $TEST_RESULTS
-fgrep 'RESULT' $ROOT/inst/run-9a02571e8f02/report_9a02571e8f02*.md | awk '{print $1, $2, $3}' >> $TEST_RESULTS
+fgrep 'RESULT' $ROOT/inst/run-$faux1_mac_clean/report_$faux1_mac_clean*.md | awk '{print $1, $2, $3}' >> $TEST_RESULTS
 
-echo 9a:02:57:1e:8f:03 >> $TEST_RESULTS
+echo $faux2_mac >> $TEST_RESULTS
 echo ================= >> $TEST_RESULTS
-fgrep 'RESULT' $ROOT/inst/run-9a02571e8f03/report_9a02571e8f03*.md | awk '{print $1, $2, $3}' >> $TEST_RESULTS
+fgrep 'RESULT' $ROOT/inst/run-$faux2_mac_clean/report_$faux2_mac_clean*.md | awk '{print $1, $2, $3}' >> $TEST_RESULTS
+
+echo $faux3_mac >> $TEST_RESULTS
+echo ================= >> $TEST_RESULTS
+fgrep 'RESULT' $ROOT/inst/run-$faux3_mac_clean/report_$faux3_mac_clean*.md | awk '{print $1, $2, $3}' >> $TEST_RESULTS
 
 if ! diff $GOLDEN_FILE $TEST_RESULTS; then
   exit_code=1

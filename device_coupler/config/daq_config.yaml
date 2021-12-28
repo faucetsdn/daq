@@ -2,7 +2,14 @@
 
 include: ${DAQ_LIB}/config/system/default.yaml
 
-host_tests: ${DAQ_LIB}/config/modules/dts.conf
+host_tests: ${DAQ_LIB}/config/modules/all.conf
+
+base_conf: local/base_config.json
+finish_hook: bin/dump_network
+test_config: resources/runtime_configs/long_wait
+site_path: inst/test_site
+schema_path: schemas/udmi
+monitor_scan_sec: 20
 
 switch_setup:
   lo_port: 6653
