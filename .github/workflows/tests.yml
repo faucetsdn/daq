@@ -224,6 +224,10 @@ jobs:
           path: /tmp/build_artifacts_setup
     - uses: actions/download-artifact@v2
       with:
+          name: build_artifacts_subset
+          path: /tmp/build_artifacts_subset
+    - uses: actions/download-artifact@v2
+      with:
           name: build_artifacts_base
           path: /tmp/build_artifacts_base
     - uses: actions/checkout@v2
@@ -244,7 +248,7 @@ jobs:
         bin/setup_daq
     - name: Loading docker images
       run: |
-        bin/load_images faucet faux setup base
+        bin/load_images faucet faux setup base subset
     - name: Running device_coupler test
       env:
         DOCKER_STARTUP_TIMEOUT_MS: 60000
