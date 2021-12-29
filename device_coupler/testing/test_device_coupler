@@ -2,6 +2,7 @@
 
 ROOT=$(realpath $(dirname $0)/../..)
 GOLDEN_FILE=$ROOT/device_coupler/testing/test_device_coupler.out
+DAQ_CONFIG=$ROOT/device_coupler/config/daq_config.yaml
 TEST_RESULTS=$ROOT/inst/device_coupler/test_device_coupler.out
 exit_code=0
 
@@ -34,6 +35,11 @@ cat <<EOF > local/base_config.json
   }
 }
 EOF
+
+cp $DAQ_CONFIG $ROOT/local/system.yaml
+
+echo Build all container images...
+cmd/build missing
 
 # Create faux devices
 echo "Creating faux devices"
