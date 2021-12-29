@@ -22,25 +22,30 @@ can authenticate using 802.1x with one of the following supported protocols:
 - PEAP/MSChapv2
 - MD5
 
+The test is run by configuring the device to use one of the provided 
+credentials included in this test module. 
+
 #### Supported Protocols/Supplicant Credentials
-The module includes a set of credential, from which one should used to configure
-the device/supplicant. These are located
-[here](../../docker/include/etc/wpasupplicant). Different suppliants may use
-different names for the below fields or may not provide the ability to modify
-all these fields. 
+The module includes a set of credential which should be used to configure the device.
+
+Certificates are located in the 
+[resources/802.1x/cert](../../resources/802.1x/cert) directory. 
+
+Different suppliants may use different names for the below fields or may not
+provide the ability to modify all these fields. 
 - **TTLS**
    - Username: `user`
    - Password: `microphone`
-   - CA Certificate: [ca.pem](../../docker/include/etc/wpasupplicant/cert/ca.pem)
+   - CA Certificate: [ca.pem](../../resources/802.1x/cert/ca.pem)
    - Inner (Phase 2) Authentication: MSCHAPV2
 - **TLS**
    - Identity: `user@example.org`
-   - CA Certificate: [ca.pem](../../docker/include/etc/wpasupplicant/cert/ca.pem)
-   - Client Certificate: [user@example.org.pem](../../docker/include/etc/wpasupplicant/cert/user@example.org.pem)
-   - Private Key: [user@example.org.pem](../../docker/include/etc/wpasupplicant/cert/user@example.org.pem)
+   - CA Certificate: [ca.pem](../../resources/802.1x/cert/ca.pem)
+   - Client Certificate: [user@example.org.pem](../../resources/802.1x/cert/user@example.org.pem)
+   - Private Key: [user@example.org.pem](../../resources/802.1x/cert/user@example.org.pem)
    - Private Key Password: `whatever`
 - **Protected EAP (PEAP)**
-   - CA Certificate: [ca.pem](../../docker/include/etc/wpasupplicant/cert/ca.pem)
+   - CA Certificate: [ca.pem](../../resources/802.1x/cert/ca.pem)
    - Outer (Phase 1) Authentication: PEAP Version 1
    - Inner (Phase 2) Authentication: MSCHAPV2
    - Username: `user`
