@@ -115,12 +115,12 @@ class OvsHelper:
         return bool(re.search("[0-9a-f]{2}([:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}", string.lower()))
 
     def _filter_forwarding_table(self, table):
-        """Converts fdb  table string to list[(<port>, <vlan>, <mac>)]"""
+        """Converts fdb table string to list[(<port>, <vlan>, <mac>)]"""
         filtered_table = [entry for entry in table.split('\n') if self._is_mac_in_string(entry)]
         return [tuple(entry.split()[:-1]) for entry in filtered_table]
 
     def get_interface_ip(self, iface="eth0"):
-        """Returns IP of fiven interface"""
+        """Returns IP of given interface"""
         _, cmd_str, _ = self._run_shell('ip addr show %s' % iface)
         _, _, ip_str = cmd_str.partition('inet')
         ip = ip_str.split()[0].split('/')[0] if ip_str else None

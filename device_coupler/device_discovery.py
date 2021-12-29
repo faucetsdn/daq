@@ -66,11 +66,3 @@ class DeviceDiscovery():
         event.mac = mac
         event.event_type = DiscoveryEventType.EXPIRY if expire else DiscoveryEventType.DISCOVERY
         return event
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()
