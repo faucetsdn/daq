@@ -122,6 +122,4 @@ class OvsHelper:
     def get_interface_ip(self, iface="eth0"):
         """Returns IP of given interface"""
         _, cmd_str, _ = self._run_shell('ip addr show %s' % iface)
-        _, _, ip_str = cmd_str.partition('inet')
-        ip = ip_str.split()[0].split('/')[0] if ip_str else None
-        return ip
+        return re.search('(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', cmd_str).group(0)
