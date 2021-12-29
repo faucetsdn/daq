@@ -71,7 +71,7 @@ RESULT pass security.tls.v1_3_client
 RESULT fail security.tls.v1_3_server
 RESULT fail security.tls.v1_server
 RESULT fail security.password.http
-RESULT skip security.password.https
+RESULT fail security.password.https
 RESULT fail security.password.ssh
 RESULT fail security.password.telnet
 RESULT skip cloud.udmi.provision
