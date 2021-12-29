@@ -116,8 +116,8 @@ class OvsHelper:
 
     def _filter_forwarding_table(self, table):
         """Converts fdb table string to list[(<port>, <vlan>, <mac>)]"""
-        filtered_table = [entry for entry in table.split('\n') if self._is_mac_in_string(entry)]
-        return [tuple(entry.split()[:-1]) for entry in filtered_table]
+        filtered_table = re.findall("\d{1,4}\s+\d{1,4}\s+(?:[0-9a-fA-F]:?){12}", table)
+        return [tuple(entry.split()) for entry in filtered_table]
 
     def get_interface_ip(self, iface="eth0"):
         """Returns IP of given interface"""
