@@ -11,6 +11,7 @@ from device_coupler.device_discovery import DeviceDiscovery
 from device_coupler.daq_client import DAQClient
 from device_coupler.ovs_helper import OvsHelper
 
+from concurrent.futures import ThreadPoolExecutor
 from queue import Queue, Empty
 
 import time
@@ -31,13 +32,12 @@ class DeviceCoupler():
         self._device_discovery = None
         self._daq_client = None
         self._event_queue = None
-        self._running = None
-        self._workers = None
+        self._workers_executor = None
         self._source_ip = None
+        self._running = None
 
     def setup(self):
         """Setup device coupler"""
-        self._running = True
         self._ovs_helper = OvsHelper()
 
         self._network_helper = NetworkHelper(
@@ -45,7 +45,7 @@ class DeviceCoupler():
         self._network_helper.setup()
 
         self._event_queue = Queue()
-        self._build_worker_threads(self._process_event_queue, self._WORKER_COUNT)
+        self._workers_executor = ThreadPoolExecutor(max_workers=self._WORKER_COUNT)
         self._device_discovery = DeviceDiscovery(
             self._config.bridge, self._test_vlans,
             self._config.trunk_iface, self.add_event_to_queue)
@@ -56,20 +56,20 @@ class DeviceCoupler():
 
     def start(self):
         """Start device coupler"""
+        self._running = True
         self._device_discovery.start()
         self._daq_client.start()
-        self._logger.info('Starting %s workers', len(self._workers))
-        for worker in self._workers:
-            worker.start()
+        self._logger.info('Starting %s workers', self._WORKER_COUNT)
+        for index in range(self._WORKER_COUNT):
+            self._workers_executor.submit(self._process_event_queue)
 
     def cleanup(self):
         """Clean up device coupler"""
+        self._running = False
+        self._workers_executor.shutdown()
         self._daq_client.stop()
         self._device_discovery.cleanup()
         self._network_helper.cleanup()
-        self._running = False
-        for worker in self._workers:
-            worker.join()
         self._logger.info('Cleanup complete')
 
     def add_event_to_queue(self, event):
@@ -86,7 +86,7 @@ class DeviceCoupler():
                 else:
                     self._daq_client.process_device_expiry(event.mac)
             except Empty:
-                # Worker thread timeout. Do nothing
+                # Worker timeout. Do nothing
                 pass
 
     def _build_worker_threads(self, method, count):
