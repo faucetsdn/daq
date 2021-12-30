@@ -26,7 +26,7 @@ class TestOvsHelper(unittest.TestCase):
         ovs = OvsHelper()
         bridge = 'test_br'
         ovs.create_ovs_bridge(bridge)
-        for index in range(1,5):
+        for index in range(1, 5):
             self._create_netns_with_veth_pair(index)
             iface = 'dev%s' % index
             tag = 200 + index % 2
@@ -36,7 +36,7 @@ class TestOvsHelper(unittest.TestCase):
         self.assertEqual(retcode, 0)
         retcode, _, _ = ovs._run_shell_no_raise('sudo ip netns exec vnet1 ping -c 3 10.1.1.4')
         self.assertEqual(retcode, 1)
-        for index in range(1,5):
+        for index in range(1, 5):
             vnet = 'vnet%s' % index
             self._delete_netns(vnet)
         ovs.delete_ovs_bridge(bridge)
