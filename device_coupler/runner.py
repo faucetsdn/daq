@@ -51,7 +51,7 @@ class DeviceCoupler():
             self._config.trunk_iface, self.add_event_to_queue)
 
         self._source_ip = self._ovs_helper.get_interface_ip()
-        target_str = '%s:%s' % (self._config.target_ip, self._config.target_port)
+        target_str = '%s:%s' % (self._config.daq_grpc_ip, self._config.daq_grpc_port)
         self._daq_client = DAQClient(target_str, self._source_ip, self._config.bridge)
 
     def start(self):

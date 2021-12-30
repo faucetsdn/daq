@@ -327,11 +327,11 @@ message DeviceCouplerConfig {
   // Name of OVS bridge where device MACs from access s/w are learnt
   string bridge = 2;
 
-  // gRPC target IP
-  string target_ip = 3;
+  // gRPC target IP for DAQ interface
+  string daq_grpc_ip = 3;
 
-  // gRPC target port
-  int32 target_port = 4;
+  // gRPC target port for DAQ interface
+  int32 daq_grpc_port = 4;
 
   // Source endpoint IP
   string source_ip = 5;
