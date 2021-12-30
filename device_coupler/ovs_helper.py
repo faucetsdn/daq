@@ -110,10 +110,6 @@ class OvsHelper:
         _, out, _ = self._run_shell('ovs-appctl fdb/show %s' % bridge)
         return self._filter_forwarding_table(out)
 
-    def _is_mac_in_string(self, string):
-        """Returns true if string contains a mac"""
-        return bool(re.search("[0-9a-f]{2}([:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}", string.lower()))
-
     def _filter_forwarding_table(self, table):
         """Converts fdb table string to list[(<port>, <vlan>, <mac>)]"""
         filtered_table = re.findall("\d{1,4}\s+\d{1,4}\s+(?:[0-9a-fA-F]:?){12}", table)
