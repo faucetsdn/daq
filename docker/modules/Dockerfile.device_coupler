@@ -32,7 +32,6 @@ COPY daq/ daq/
 COPY python_lib/ python_lib/
 COPY device_coupler/ device_coupler/
 COPY device_coupler/device_coupler_go bin/
-COPY device_coupler/make_daq_request bin/
 
 ENV PYTHONPATH $PYTHONPATH:/root:/root/daq
 

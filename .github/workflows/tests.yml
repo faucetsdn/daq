@@ -255,6 +255,7 @@ jobs:
         GCP_BASE64_CRED: ${{ secrets.GCP_BASE64_CRED }}
         GCP_REFLECT_KEY_BASE64: ${{ secrets.GCP_REFLECT_KEY_BASE64 }}
       run: |
+        python3 -m unittest discover -s device_coupler/testing/unit -p "test_*.py"
         device_coupler/testing/test_device_coupler
     - name: Runtime logs
       if: ${{ always() }}

@@ -37,9 +37,12 @@ class OvsHelper:
         self._logger.info('Executing VXLAN cmd: %s', vxlan_cmd)
         self._run_shell(vxlan_cmd)
         if local_vtep_ip:
-            self._run_shell('sudo ip addr add %s dev %s' % (local_vtep_ip, interface))
+            self._add_ip_address(local_vtep_ip, interface)
         self._set_interface_up(interface)
         return interface
+
+    def _add_ip_address(self, interface, ip_address, netmask=24):
+        self._run_shell('sudo ip addr add %s/%s dev %s' % (ip_address, netmask, interface))
 
     def remove_vxlan_endpoint(self, interface, bridge):
         """Clears VxLAN endpoint"""
@@ -83,16 +86,6 @@ class OvsHelper:
         self._logger.info('Enabling trunk VLANs %s on interface %s', vlans, interface)
         vlan_str = ",".join(str(vlan) for vlan in vlans)
         self._run_shell('sudo ovs-vsctl set port %s trunks=%s' % (interface, vlan_str))
-
-    def create_faux_device(self, index):
-        """Creates faux docker container daq-faux-<index>"""
-        self._run_shell('sudo cmd/faux %s' % index)
-        iface = 'faux-eth0'
-        prefix = int(index / 256) + 1
-        suffix = index % 256
-        ip_addr = '192.168.%s.%s' % (prefix, suffix)
-        gateway = '192.168.1.0'
-        container = 'daq-faux-%s' % index
 
     def create_veth_pair(self, iface1, iface2):
         """Creates a veth pair with interface names iface1, iface2"""
