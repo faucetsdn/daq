@@ -1,5 +1,6 @@
+from __future__ import absolute_import
+
 import unittest
-import time
 
 from device_coupler.ovs_helper import OvsHelper
 
@@ -39,9 +40,3 @@ class TestOvsHelper(unittest.TestCase):
             vnet = 'vnet%s' % index
             self._delete_netns(vnet)
         ovs.delete_ovs_bridge(bridge)
-
-    def test_vxlan(self):
-        ovs = OvsHelper()
-        bridge = 'test_br'
-
-

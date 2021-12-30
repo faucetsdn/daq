@@ -105,10 +105,10 @@ class OvsHelper:
 
     def _filter_forwarding_table(self, table):
         """Converts fdb table string to list[(<port>, <vlan>, <mac>)]"""
-        filtered_table = re.findall("\d{1,4}\s+\d{1,4}\s+(?:[0-9a-fA-F]:?){12}", table)
+        filtered_table = re.findall(r"\d{1,4}\s+\d{1,4}\s+(?:[0-9a-fA-F]:?){12}", table)
         return [tuple(entry.split()) for entry in filtered_table]
 
     def get_interface_ip(self, iface="eth0"):
         """Returns IP of given interface"""
         _, cmd_str, _ = self._run_shell('ip addr show %s' % iface)
-        return re.search('(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', cmd_str).group(0)
+        return re.search(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', cmd_str).group(0)
