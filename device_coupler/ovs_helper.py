@@ -110,5 +110,9 @@ class OvsHelper:
 
     def get_interface_ip(self, iface="eth0"):
         """Returns IP of given interface"""
-        _, cmd_str, _ = self._run_shell('ip addr show %s' % iface)
-        return re.search(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', cmd_str).group(0)
+        try:
+            retcode, out_str, stderr = self._run_shell('ip addr show %s' % iface)
+        except Exception:
+            self._logger.error('Error while executing command: %s', stderr)
+            return None
+        return re.search(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', out_str).group(0)
