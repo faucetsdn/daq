@@ -89,11 +89,6 @@ class DeviceCoupler():
                 # Worker timeout. Do nothing
                 pass
 
-    def _build_worker_threads(self, method, count):
-        self._workers = []
-        for index in range(count):
-            self._workers.append(threading.Thread(target=method))
-
 
 def main():
     config = yaml_proto(
