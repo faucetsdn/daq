@@ -15,7 +15,6 @@ from concurrent.futures import ThreadPoolExecutor
 from queue import Queue, Empty
 
 import time
-import threading
 
 
 class DeviceCoupler():
