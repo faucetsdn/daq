@@ -270,8 +270,7 @@ class FaucetTopology:
                 if portset_device.vlan:
                     return portset_device.vlan
             return self._LOCAL_VLAN + port_set
-        else:
-            return self._DUMP_VLAN
+        return self._DUMP_VLAN
 
     def _make_in_port_interface(self):
         interface = {}

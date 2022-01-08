@@ -1,3 +1,5 @@
+"""Unit tests for device coupler module"""
+
 from __future__ import absolute_import
 
 import unittest
@@ -5,7 +7,9 @@ import unittest
 from device_coupler.ovs_helper import OvsHelper
 
 
+# pylint: disable=protected-access
 class TestOvsHelper(unittest.TestCase):
+    """Test class for ovs_helper"""
 
     def _create_netns_with_veth_pair(self, index):
         ovs = OvsHelper()
@@ -23,6 +27,7 @@ class TestOvsHelper(unittest.TestCase):
         ovs._run_shell('sudo ip netns del %s' % vnet)
 
     def test_ovs_bridge_vlan(self):
+        """Test adding interfaces to OVS bridge with VLANs"""
         ovs = OvsHelper()
         bridge = 'test_br'
         ovs.create_ovs_bridge(bridge)
