@@ -6,7 +6,7 @@ from device_coupler.utils import get_logger
 
 
 class HeartbeatScheduler:
-    """Heart beat scheduler"""
+    """Heartbeat scheduler"""
     def __init__(self, interval_sec):
         self._interval_sec = interval_sec
         self._callbacks = []

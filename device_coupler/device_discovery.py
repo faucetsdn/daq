@@ -30,7 +30,6 @@ class DeviceDiscovery():
         self._fdb_snapshot = set()
         self._polling_timer = HeartbeatScheduler(self._POLLING_INTERVAL)
         self._polling_timer.add_callback(self.poll_forwarding_table)
-        self._logger.info('Starting forwarding table poll on %s', self._bridge)
         self._polling_timer.start()
 
     def cleanup(self):
@@ -41,13 +40,15 @@ class DeviceDiscovery():
 
     def _process_entry(self, event):
         # Only process events for test vlans in config and on trunk port
-        if event.port == self._trunk_ofport and event.vlan in self._test_vlans:
+        if event.port == self._trunk_ofport and\
+                event.vlan >= self._test_vlans[0] and event.vlan <= self._test_vlans[1]:
             self._logger.info('Processing event: %s', event)
             self._event_queue_append(event)
 
     def poll_forwarding_table(self):
         """Poll forwarding table and determine devices learnt/expired"""
         fdb_table = set(self._ovs_helper.get_forwarding_table(self._bridge))
+        self._logger.info('Polling fdb on %s:\n %s', self._bridge, fdb_table)
         expired = self._fdb_snapshot - fdb_table
         discovered = fdb_table - self._fdb_snapshot
         for entry in expired:

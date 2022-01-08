@@ -14,6 +14,7 @@ monitor_scan_sec: 20
 switch_setup:
   lo_port: 6653
   varz_port: 5678
+  data_intf: trunk0
 
 run_trigger:
   vlan_start: 200
@@ -21,3 +22,5 @@ run_trigger:
 
 device_reporting:
   server_port: 50051
+
+docker_bridge_ip: 172.17.0.1

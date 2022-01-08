@@ -15,7 +15,7 @@ class NetworkHelper():
         self._logger = get_logger('networkhelper')
         self._trunk_iface = trunk_iface
         self._bridge = bridge
-        self._test_vlans = test_vlans
+        self._test_vlans = list(range(test_vlans[0], test_vlans[1] + 1))
 
     def setup(self):
         """Setup n/w"""

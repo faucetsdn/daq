@@ -22,11 +22,14 @@ class DeviceCoupler():
 
     _WORKER_TIMEOUT = 10
     _WORKER_COUNT = 3
+    _OVS_BRIDGE = "dev_br0"
 
     def __init__(self, config):
         self._logger = get_logger('device_coupler')
-        self._config = config
-        self._test_vlans = list(config.test_vlans)
+        self._test_vlans = (config.run_trigger.vlan_start, config.run_trigger.vlan_end)
+        self._trunk_iface = config.switch_setup.data_intf
+        self._daq_grpc_ip = config.docker_bridge_ip
+        self._daq_grpc_port = config.device_reporting.server_port
         self._network_helper = None
         self._device_discovery = None
         self._daq_client = None
@@ -40,18 +43,18 @@ class DeviceCoupler():
         self._ovs_helper = OvsHelper()
 
         self._network_helper = NetworkHelper(
-            self._config.trunk_iface, self._config.bridge, self._test_vlans)
+            self._trunk_iface, self._OVS_BRIDGE, self._test_vlans)
         self._network_helper.setup()
 
         self._event_queue = Queue()
         self._workers_executor = ThreadPoolExecutor(max_workers=self._WORKER_COUNT)
         self._device_discovery = DeviceDiscovery(
-            self._config.bridge, self._test_vlans,
-            self._config.trunk_iface, self.add_event_to_queue)
+            self._OVS_BRIDGE, self._test_vlans,
+            self._trunk_iface, self.add_event_to_queue)
 
         self._source_ip = self._ovs_helper.get_interface_ip()
-        target_str = '%s:%s' % (self._config.daq_grpc_ip, self._config.daq_grpc_port)
-        self._daq_client = DAQClient(target_str, self._source_ip, self._config.bridge)
+        target_str = '%s:%s' % (self._daq_grpc_ip, self._daq_grpc_port)
+        self._daq_client = DAQClient(target_str, self._source_ip, self._OVS_BRIDGE)
 
     def start(self):
         """Start device coupler"""
@@ -91,7 +94,7 @@ class DeviceCoupler():
 
 def main():
     config = yaml_proto(
-        "device_coupler/config/device_coupler_config.yaml", sys_config.DeviceCouplerConfig)
+        "device_coupler/config/daq_config.yaml", sys_config.DaqConfig)
     device_coupler = DeviceCoupler(config)
     device_coupler.setup()
     device_coupler.start()

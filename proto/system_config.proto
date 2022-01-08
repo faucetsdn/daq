@@ -143,6 +143,9 @@ message DaqConfig {
 
   // Configuration for cloud uplink
   CloudConfig cloud_config = 57;
+
+  // Local docker bridge IP
+  string docker_bridge_ip = 58;
 }
 
 enum DhcpMode {
@@ -315,28 +318,4 @@ message CloudConfig {
 
   // Bridge port.
   int32 mqtt_bridge_port = 9;
-}
-
-/*
- * Configuration for device coupler
- */
-message DeviceCouplerConfig {
-  // Name of trunk interface that connects to access switch
-  string trunk_iface = 1;
-
-  // Name of OVS bridge where device MACs from access s/w are learnt
-  string bridge = 2;
-
-  // gRPC target IP for DAQ interface
-  string daq_grpc_ip = 3;
-
-  // gRPC target port for DAQ interface
-  int32 daq_grpc_port = 4;
-
-  // Source endpoint IP
-  string source_ip = 5;
-
-  // Device IP range
-  repeated int32 test_vlans = 6;
-
 }
