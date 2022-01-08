@@ -83,7 +83,7 @@ Syntax: Pass / Fail / Skip
 |pass|communication.network.min_send|Communication|Required Pass|ARP packets received. Data packets were sent at a frequency of less than 5 minutes|
 |pass|communication.network.type|Communication|Required Pass|Broadcast packets received. Unicast packets received.|
 |pass|connection.base.target_ping|Connection|Required Pass|target reached|
-|pass|connection.dot1x.authentication|Connection|Required Pass|Authentication for 9a:02:57:1e:8f:01 succeeded.|
+|pass|connection.dot1x.authentication|Connection|Required Pass|Authentication succeeded.|
 |gone|connection.ipaddr.dhcp_disconnect|Connection|Required Pass||
 |gone|connection.ipaddr.disconnect_ip_change|Connection|Required Pass||
 |gone|connection.ipaddr.ip_change|Connection|Required Pass||
@@ -780,9 +780,21 @@ connection.dot1x.authentication
 --------------------
 Verifies general support for 802.1x authentication.
 --------------------
-n/a
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 --------------------
-RESULT pass connection.dot1x.authentication Authentication for 9a:02:57:1e:8f:01 succeeded.
+RESULT pass connection.dot1x.authentication Authentication succeeded.
 
 ```
 
