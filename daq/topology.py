@@ -440,7 +440,8 @@ class FaucetTopology:
             port_no = target['port']
             port_set = target['port_set']
             target_mac = target['mac']
-            # Mirror port is set to tap_intf, which is pri trunk port if no target port
+            # In host.py, mirror port on which tcpdump is run is set to network.tap_intf, which
+            # is the pri trunk port if no target ports are specified.
             mirror_port = self.mirror_port(port_no) if port_no else self.PRI_TRUNK_PORT
             port_set_mirrors.setdefault(port_set, []).append((target_mac, mirror_port))
             self._add_acl_rule(portset_acls[port_set], dl_dst=target_mac,
