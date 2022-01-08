@@ -30,6 +30,7 @@ class TestOvsHelper(unittest.TestCase):
         """Test adding interfaces to OVS bridge with VLANs"""
         ovs = OvsHelper()
         bridge = 'test_br'
+        ovs.delete_ovs_bridge(bridge)
         ovs.create_ovs_bridge(bridge)
         for index in range(1, 5):
             self._create_netns_with_veth_pair(index)
