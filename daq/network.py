@@ -72,7 +72,7 @@ class TestNetwork:
         self._used_ip_indices = set()
         self.topology = FaucetTopology(self.config)
         switch_setup = config.get('switch_setup', {})
-        if switch_setup.get('model') == "NON_OVS":
+        if switch_setup.get('model') == "NON_OPENFLOW":
             self.ext_intf = None
         else:
             self.ext_intf = switch_setup.get('data_intf')
