@@ -58,7 +58,7 @@ class FaucetTopology:
         self.sec_port = int(switch_setup['uplink_port'])
         self.sec_dpid = int(switch_setup.get('of_dpid', 0))
         self.ext_ofip = switch_setup.get('lo_addr')
-        self.ext_intf = switch_setup.get('data_intf') if switch_setup.get('of_dpid') else None
+        self.ext_intf = switch_setup.get('data_intf') #if switch_setup.get('of_dpid') else None
         self._native_faucet = switch_setup.get('native')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
         self._gauge_varz_port = int(switch_setup.get('varz_port_2', self._DEFAULT_GAUGE_VARZ_PORT))
