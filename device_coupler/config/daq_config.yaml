@@ -15,7 +15,6 @@ switch_setup:
   lo_port: 6653
   varz_port: 5678
   data_intf: trunk0
-  model: NON_OPENFLOW
 
 run_trigger:
   vlan_start: 200

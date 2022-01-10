@@ -72,10 +72,7 @@ class TestNetwork:
         self._used_ip_indices = set()
         self.topology = FaucetTopology(self.config)
         switch_setup = config.get('switch_setup', {})
-        if switch_setup.get('model') == "NON_OPENFLOW":
-            self.ext_intf = None
-        else:
-            self.ext_intf = switch_setup.get('data_intf')
+        self.ext_intf = switch_setup.get('data_intf') if switch_setup.get('of_dpid') else None
         self.ext_mac = switch_setup.get('data_mac')
         self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
         self.ext_gauge_ofpt = int(switch_setup.get('lo_port_2', self.DEFAULT_GAUGE_OF_PORT))
