@@ -235,6 +235,9 @@ message SwitchSetup {
 
   // VXLAN configuration information
   TunnelEndpoint endpoint = 47;
+
+  // Enable auto session deetectin and management
+  bool auto_session = 49;
 }
 
 /*
