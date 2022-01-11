@@ -269,7 +269,7 @@ message RunTrigger {
   bool auto_session = 10;
 
   // Local docker bridge IP
-  string docker_bridge_ip = 11;
+  string grpc_target_ip = 11;
 }
 
 /*

@@ -2,4 +2,4 @@
 80316081e22f678aff997020a0bb15d0308df7f7  proto/device_coupler.proto
 cc789bbb35a430dd430d037805a1999da7f89f55  proto/report.proto
 5e33ec6500d7d3f5a337740bc81373c9775385e2  proto/session_server.proto
-b01560e7695ab347e5773e5a3e61096cc7862123  proto/system_config.proto
+c2663f35d2d0e256a4939aaf0302a73a7d5580ef  proto/system_config.proto
