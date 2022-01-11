@@ -235,9 +235,6 @@ message SwitchSetup {
 
   // VXLAN configuration information
   TunnelEndpoint endpoint = 47;
-
-  // Enable auto session deetectin and management
-  bool auto_session = 49;
 }
 
 /*
@@ -270,6 +267,9 @@ message RunTrigger {
 
   // number of arp-scans to perform when DHCP fails
   int32 arp_scan_count = 9;
+
+  // Enable auto session deetectin and management
+  bool auto_session = 10;
 }
 
 /*
