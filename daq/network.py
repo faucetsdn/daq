@@ -73,11 +73,9 @@ class TestNetwork:
         self.topology = FaucetTopology(self.config)
         switch_setup = config.get('switch_setup', {})
         if self.config.get('run_trigger', {}).get('auto_session'):
-        #if switch_setup.get('model')  == 'NON_OVS':
             self.ext_intf = None
         else:
             self.ext_intf = switch_setup.get('data_intf')
-        LOGGER.info('Debug ext_intf: %s data_intf: %s auto_session: %s', self.ext_intf, switch_setup.get('data_intf'), switch_setup.get('auto_session'))
         self.ext_mac = switch_setup.get('data_mac')
         self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
         self.ext_gauge_ofpt = int(switch_setup.get('lo_port_2', self.DEFAULT_GAUGE_OF_PORT))
