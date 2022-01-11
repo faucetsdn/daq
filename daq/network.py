@@ -72,7 +72,10 @@ class TestNetwork:
         self._used_ip_indices = set()
         self.topology = FaucetTopology(self.config)
         switch_setup = config.get('switch_setup', {})
-        self.ext_intf = switch_setup.get('data_intf')
+        if switch_setup.get('auto_session'):
+            self.ext_intf = None
+        else:
+            self.ext_intf = switch_setup.get('data_intf')
         LOGGER.info('Debug ext_intf: %s data_intf: %s auto_session: %s', self.ext_intf, switch_setup.get('data_intf'), switch_setup.get('auto_session'))
         self.ext_mac = switch_setup.get('data_mac')
         self.ext_faucet_ofpt = int(switch_setup.get('lo_port', self.DEFAULT_FAUCET_OF_PORT))
