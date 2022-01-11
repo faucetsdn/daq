@@ -40,8 +40,8 @@ class DeviceDiscovery():
 
     def _process_entry(self, event):
         # Only process events for test vlans in config and on trunk port
-        if event.port == self._trunk_ofport and\
-                event.vlan >= self._test_vlans[0] and event.vlan <= self._test_vlans[1]:
+        vlan_in_range = event.vlan >= self._test_vlans[0] and event.vlan <= self._test_vlans[1]
+        if event.port == self._trunk_ofport and vlan_in_range:
             self._logger.info('Processing event: %s', event)
             self._event_queue_append(event)
 
