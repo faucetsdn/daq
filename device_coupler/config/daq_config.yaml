@@ -20,8 +20,7 @@ run_trigger:
   vlan_start: 200
   vlan_end: 205
   auto_session: True
+  docker_bridge_ip: 172.17.0.1
 
 device_reporting:
   server_port: 50051
-
-docker_bridge_ip: 172.17.0.1

@@ -143,9 +143,6 @@ message DaqConfig {
 
   // Configuration for cloud uplink
   CloudConfig cloud_config = 57;
-
-  // Local docker bridge IP
-  string docker_bridge_ip = 58;
 }
 
 enum DhcpMode {
@@ -270,6 +267,9 @@ message RunTrigger {
 
   // Enable auto session deetectin and management
   bool auto_session = 10;
+
+  // Local docker bridge IP
+  string docker_bridge_ip = 11;
 }
 
 /*
