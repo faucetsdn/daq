@@ -98,8 +98,9 @@ def main():
     device_coupler = DeviceCoupler(config)
     device_coupler.setup()
     device_coupler.start()
-    time.sleep(2400)
-    device_coupler.cleanup()
+    # Block for eternity
+    while True:
+        time.sleep(2400)
 
 
 if __name__ == "__main__":
