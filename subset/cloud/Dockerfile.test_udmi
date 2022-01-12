@@ -17,7 +17,7 @@ COPY udmi/gencode gencode/
 COPY udmi/validator/ validator/
 RUN validator/bin/build
 
-COPY udmi/bin/test_sequences bin/test_sequences
+COPY udmi/bin/test_sequencer bin/test_sequencer
 
 COPY subset/cloud/test_udmi .
 
