@@ -50,6 +50,7 @@ def build_source_files(tmp):
     shutil.rmtree(tmp, ignore_errors=True)
     shutil.copytree('daq', tmp, symlinks=True)
     shutil.copytree('faucet/clib', os.path.join(tmp, 'clib'), symlinks=True)
+    shutil.copytree('python_lib', os.path.join(tmp, 'python_lib'), symlinks=True)
     return tmp
 
 
@@ -62,7 +63,7 @@ with tempfile.TemporaryDirectory(dir='.') as tmp:
         package_dir={
             'daq': build_source_files(tmp)
         },
-        package_data={'daq': ['proto/*', 'clib/*', 'forch/proto/*']},
+        package_data={'daq': ['proto/*', 'clib/*', 'forch/proto/*', 'python_lib/*']},
         setup_requires=['pbr>=1.9', 'setuptools>=17.1'],
         pbr=True,
         scripts=[
