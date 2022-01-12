@@ -28,7 +28,7 @@ class DeviceCoupler():
         self._logger = get_logger('device_coupler')
         self._test_vlans = (config.run_trigger.vlan_start, config.run_trigger.vlan_end)
         self._trunk_iface = config.switch_setup.data_intf
-        self._daq_grpc_ip = config.run_trigger.grpc_target_ip
+        self._daq_grpc_ip = config.run_trigger.runner_service_ip
         self._daq_grpc_port = config.device_reporting.server_port
         self._network_helper = None
         self._device_discovery = None

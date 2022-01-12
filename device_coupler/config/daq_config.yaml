@@ -20,7 +20,7 @@ run_trigger:
   vlan_start: 200
   vlan_end: 205
   auto_session: True
-  grpc_target_ip: 172.17.0.1
+  runner_service_ip: 172.17.0.1
 
 device_reporting:
   server_port: 50051
