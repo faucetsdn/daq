@@ -32,7 +32,8 @@ for target in $(echo $targets | sed 's/,/ /g'); do
     echo $target $tag
     echo Saving Docker image $tag to $compressed_file_path
     mkdir -p $compressed_file_path
-    docker save "$tag" > $compressed_file_path/$target.tar
+    docker save "$tag" > $compressed_file_path/$target.tar ||
+        (cat build/docker_build.$target && false)
 done
 
 mkdir -p /tmp/build_artifacts
