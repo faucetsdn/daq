@@ -103,7 +103,7 @@ cat <<EOF > /tmp/validator_config.json
 }
 EOF
 
-bin/test_sequences -n || true
+bin/test_sequencer -n || true
 
 results=out/devices/$device_id/RESULT.log
 cat $results | while read header result test_name detail; do
