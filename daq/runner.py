@@ -230,8 +230,6 @@ class DAQRunner:
         self._target_set_queue = []
         self._one_test_started = False
         self._auto_session = config.get('run_trigger', {}).get('auto_session')
-        self._data_intf = switch_setup.get('data_intf')
-        LOGGER.info('Anurag auto_session: %s', self._auto_session)
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -1268,8 +1266,9 @@ class DAQRunner:
 
     def _start_device_coupler(self):
         run_shell = self._get_shell_helper()
+        trunk_port = self.config.get('switch_setup', {}).get('data_intf')
         try:
-            retcode, out_str, stderr = run_shell('bin/setup_device_coupler -t %s' % self._data_intf)
+            _, _, stderr = run_shell('bin/setup_device_coupler -t %s' % trunk_port)
             LOGGER.info('Started device coupler.')
         except Exception:
             LOGGER.error('Error while trying to start device coupler: %s', stderr)
@@ -1277,7 +1276,7 @@ class DAQRunner:
     def _stop_device_coupler(self):
         run_shell = self._get_shell_helper()
         try:
-            retcode, out_str, stderr = run_shell('bin/clean_device_coupler')
+            _, _, stderr = run_shell('bin/clean_device_coupler')
             LOGGER.info('Stopped device coupler.')
         except Exception:
             LOGGER.error('Error while trying to clean device coupler: %s', stderr)
