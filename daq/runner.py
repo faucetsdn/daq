@@ -1271,7 +1271,7 @@ class DAQRunner:
         try:
             retcode, out_str, stderr = run_shell('bin/setup_device_coupler -t %s' % self._data_intf)
             LOGGER.info('Started device coupler.')
-        except exception:
+        except Exception:
             LOGGER.error('Error while trying to start device coupler: %s', stderr)
 
     def _stop_device_coupler(self):
@@ -1279,5 +1279,5 @@ class DAQRunner:
         try:
             retcode, out_str, stderr = run_shell('bin/clean_device_coupler')
             LOGGER.info('Stopped device coupler.')
-        except exception:
+        except Exception:
             LOGGER.error('Error while trying to clean device coupler: %s', stderr)
