@@ -14,6 +14,9 @@ $ROOT/bin/net_clean
 
 faux_args=("" "brute broadcast_client ntpv4 wpa" "nobrute expiredtls bacnetfail pubber passwordfail opendns ntpv3 ssh curl wpawrong" "tls macoui passwordpass bacnet pubber broadcast_client ssh curl")
 
+# Create test results file
+mkdir -p $(dirname $TEST_RESULTS) && touch $TEST_RESULTS
+
 # Setup an instance test site
 rm -rf inst/test_site && mkdir -p inst/test_site
 cp -a resources/test_site inst/
@@ -52,14 +55,7 @@ done
 PYTHONPATH=PYTHONPATH:$ROOT python3 device_coupler/simulate_access_switch.py --bridge br0 --devices $devices --trunk-iface $trunk_port
 
 # Start DAQ
-$ROOT/device_coupler/start_daq -s &
-daq_pid=$!
-sleep 30
-
-# Setup device coupler
-$ROOT/bin/setup_device_coupler -t $trunk_port
-
-wait $daq_pid
+$ROOT/device_coupler/start_daq -s
 
 mkdir -p $ROOT/inst/device_coupler
 

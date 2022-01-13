@@ -11,6 +11,7 @@ import uuid
 import json
 import pathlib
 from datetime import datetime, timedelta, timezone
+from functools import partial
 
 from forch.proto.shared_constants_pb2 import PortBehavior
 
@@ -18,6 +19,7 @@ import configurator
 from session_server import SessionServer
 from env import DAQ_RUN_DIR, DAQ_LIB_DIR
 from python_lib.faucet_event_client import FaucetEventClient
+from python_lib.shell_command_helper import ShellCommandHelper
 import container_gateway
 import external_gateway
 import gcp
@@ -227,6 +229,9 @@ class DAQRunner:
         self._max_hosts = self.run_trigger.get('max_hosts') or float('inf')
         self._target_set_queue = []
         self._one_test_started = False
+        self._auto_session = config.get('run_trigger', {}).get('auto_session')
+        self._data_intf = switch_setup.get('data_intf')
+        LOGGER.info('Anurag auto_session: %s', self._auto_session)
 
         LOGGER.info('DAQ RUN id: %s', self.daq_run_id)
         tests_string = ', '.join(config['test_list']) or '**none**'
@@ -371,6 +376,8 @@ class DAQRunner:
 
         if self._device_result_handler:
             self._device_result_handler.start()
+            if self._auto_session:
+                self._start_device_coupler()
 
         LOGGER.debug('Done with initialization')
 
@@ -614,6 +621,8 @@ class DAQRunner:
             self.target_set_error(device, DaqException('terminated'))
         if self._device_result_handler:
             self._device_result_handler.stop()
+            if self._auto_session:
+                self._stop_device_coupler()
 
     def _module_heartbeat(self):
         # Should probably be converted to a separate thread to timeout any blocking fn calls
@@ -1253,3 +1262,22 @@ class DAQRunner:
             'config': loaded_config
         }
         self.gcp.publish_message('daq_runner', 'runner_config', result)
+
+    def _get_shell_helper(self):
+        return partial(ShellCommandHelper().run_cmd, capture=True)
+
+    def _start_device_coupler(self):
+        run_shell = self._get_shell_helper()
+        try:
+            retcode, out_str, stderr = run_shell('bin/setup_device_coupler -t %s' % self._data_intf)
+            LOGGER.info('Started device coupler.')
+        except exception:
+            LOGGER.error('Error while trying to start device coupler: %s', stderr)
+
+    def _stop_device_coupler(self):
+        run_shell = self._get_shell_helper()
+        try:
+            retcode, out_str, stderr = run_shell('bin/clean_device_coupler')
+            LOGGER.info('Stopped device coupler.')
+        except exception:
+            LOGGER.error('Error while trying to clean device coupler: %s', stderr)
