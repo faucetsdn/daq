@@ -264,6 +264,12 @@ message RunTrigger {
 
   // number of arp-scans to perform when DHCP fails
   int32 arp_scan_count = 9;
+
+  // Enable auto session deetectin and management
+  bool auto_session = 10;
+
+  // Local docker bridge IP
+  string runner_service_ip = 11;
 }
 
 /*

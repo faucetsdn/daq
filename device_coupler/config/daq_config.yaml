@@ -1,0 +1,26 @@
+# DAQ FOT configuration.
+
+include: ${DAQ_LIB}/config/system/default.yaml
+
+host_tests: ${DAQ_LIB}/config/modules/all.conf
+
+base_conf: local/base_config.json
+finish_hook: bin/dump_network
+test_config: resources/runtime_configs/long_wait
+site_path: inst/test_site
+schema_path: schemas/udmi
+monitor_scan_sec: 20
+
+switch_setup:
+  lo_port: 6653
+  varz_port: 5678
+  data_intf: trunk0
+
+run_trigger:
+  vlan_start: 200
+  vlan_end: 205
+  auto_session: True
+  runner_service_ip: 172.17.0.1
+
+device_reporting:
+  server_port: 50051

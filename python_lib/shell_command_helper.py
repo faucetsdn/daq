@@ -62,7 +62,7 @@ class ShellCommandHelper():
             if capture:
                 print('stdout: \n%s' % out)
                 print('stderr: \n%s' % err)
-            raise Exception('Command execution failed: %s' % str(command))
+            raise Exception('Command execution failed: %s with error: %s' % (str(command), err))
         return retcode, out, err
 
     def parallelize(self, target, target_args, batch_size=200):

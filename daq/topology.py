@@ -58,7 +58,10 @@ class FaucetTopology:
         self.sec_port = int(switch_setup['uplink_port'])
         self.sec_dpid = int(switch_setup.get('of_dpid', 0))
         self.ext_ofip = switch_setup.get('lo_addr')
-        self.ext_intf = switch_setup.get('data_intf')
+        if self.config.get('run_trigger', {}).get('auto_session'):
+            self.ext_intf = None
+        else:
+            self.ext_intf = switch_setup.get('data_intf')
         self._native_faucet = switch_setup.get('native')
         self._ext_faucet = switch_setup.get('model') == self._EXT_STACK
         self._gauge_varz_port = int(switch_setup.get('varz_port_2', self._DEFAULT_GAUGE_VARZ_PORT))
@@ -182,12 +185,13 @@ class FaucetTopology:
                 interface = sec_interfaces.setdefault(device.port.vxlan, {})
                 if egress_vlan:
                     interface['tagged_vlans'] = [vlan, egress_vlan]
-                    incoming_acl = self._VXLAN_ACL
+                    incoming_acls = [self._VXLAN_ACL]
                 else:
                     interface['native_vlan'] = vlan
-                    incoming_acl = self._COUPLER_ACL
+                    incoming_acls = ['%s_%s' % (self._COUPLER_ACL, vlan), self._COUPLER_ACL]
                 interface['name'] = str(device)
-                interface['acl_in'] = self.INCOMING_ACL_FORMAT % incoming_acl
+                interface['acls_in'] = list(
+                    map(lambda acl: self.INCOMING_ACL_FORMAT % acl, incoming_acls))
             else:
                 sec_interfaces.pop(device.port.vxlan, None)
 
@@ -263,7 +267,13 @@ class FaucetTopology:
         return interface
 
     def _port_set_vlan(self, port_set):
-        return self._LOCAL_VLAN + port_set if port_set else self._DUMP_VLAN
+        if port_set:
+            if port_set in self._set_devices:
+                portset_device = next(iter(self._set_devices[port_set]))
+                if portset_device.vlan:
+                    return portset_device.vlan
+            return self._LOCAL_VLAN + port_set
+        return self._DUMP_VLAN
 
     def _make_in_port_interface(self):
         interface = {}
@@ -429,11 +439,19 @@ class FaucetTopology:
 
     def _generate_port_target_acls(self, portset_acls):
         port_set_mirrors = {}
-        for target in self._port_targets.values():
+        targets = list(self._port_targets.values())
+        for devices in self._set_devices.values():
+            for device in devices:
+                if device and device.gateway:
+                    target = {'port': None, 'port_set': device.gateway.port_set, 'mac': device.mac}
+                    targets.append(target)
+        for target in targets:
             port_no = target['port']
             port_set = target['port_set']
             target_mac = target['mac']
-            mirror_port = self.mirror_port(port_no)
+            # In host.py, mirror port on which tcpdump is run is set to network.tap_intf, which
+            # is the pri trunk port if no target ports are specified.
+            mirror_port = self.mirror_port(port_no) if port_no else self.PRI_TRUNK_PORT
             port_set_mirrors.setdefault(port_set, []).append((target_mac, mirror_port))
             self._add_acl_rule(portset_acls[port_set], dl_dst=target_mac,
                                ports=[mirror_port], allow=1)
@@ -488,13 +506,22 @@ class FaucetTopology:
         for devices in self._set_devices.values():
             for device in devices:
                 if device and device.gateway:
-                    vlan = self._get_port_vlan(device.port.port_no)
+                    vlan = device.vlan if device.vlan else self._get_port_vlan(device.port.port_no)
                     test_ports = device.gateway.get_possible_test_ports()
                     if test_ports:
                         self._add_dot1x_allow_rule(incoming_acl, test_ports, vlan_vid=vlan)
                     device_port = device.port.port_no
                     if device_port:
                         self._add_dot1x_allow_rule(secondary_acl, [device_port], in_vlan=vlan)
+
+    def _add_dot1x_coupler_acl(self, acls):
+        for devices in self._set_devices.values():
+            for device in devices:
+                if device and device.vlan:
+                    acl_name = '%s_%s' % (self._COUPLER_ACL, device.vlan)
+                    dot1x_rule = []
+                    self._add_dot1x_allow_rule(dot1x_rule, [1], out_vid=device.vlan)
+                    acls[self.INCOMING_ACL_FORMAT % acl_name] = dot1x_rule
 
     # pylint: disable=too-many-arguments
     def _add_dot1x_allow_rule(self, acl, ports, vlan_vid=None, out_vid=None, in_vlan=None):
@@ -535,6 +562,7 @@ class FaucetTopology:
             self._make_acl_rule(ports=[self.VXLAN_SEC_TRUNK_PORT])]
         acls[self.INCOMING_ACL_FORMAT % self._COUPLER_ACL] = [
             self._make_acl_rule(ports=[self.VXLAN_SEC_TRUNK_PORT], allow=True)]
+        self._add_dot1x_coupler_acl(acls)
 
         for port_set in range(1, self.sec_port):
             vlan = self._port_set_vlan(port_set)

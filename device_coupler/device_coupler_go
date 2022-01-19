@@ -3,5 +3,4 @@
 # Start OVS
 sudo /usr/share/openvswitch/scripts/ovs-ctl start
 
-# Block
-tail -f
+python3 device_coupler/runner.py

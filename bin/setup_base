@@ -43,7 +43,7 @@ else
      $AG install docker-ce
 fi
 
-$AG install openvswitch-switch openvswitch-common 
+$AG install openvswitch-switch openvswitch-common
 
 user=$(whoami)
 echo "Current user: $user"

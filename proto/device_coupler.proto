@@ -1,0 +1,33 @@
+/*
+ * Collection of messages for device coupler.
+ */
+
+syntax = "proto3";
+
+/*
+ * Device discovery event.
+ */
+message DeviceDiscoveryEvent {
+  // Port on which event occured
+  int32 port = 1;
+
+  // VLAN on which event occured
+  int32 vlan = 2;
+
+  // MAC address of device
+  string mac = 3;
+
+  // Event type
+  DiscoveryEventType event_type = 4;
+}
+
+/*
+ * Device discovery event type
+ */
+enum DiscoveryEventType {
+  // Device expired.
+  EXPIRY = 0;
+
+  // Device discovered.
+  DISCOVERY = 1;
+}

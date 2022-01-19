@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo Cleaning device coupler...
+images=$(docker ps --filter ancestor=daqf/device_coupler -q)
+if [ -n "$images" ]; then
+  docker kill $images > /dev/null
+fi

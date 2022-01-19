@@ -14,7 +14,7 @@ def add_devices_to_br(bridge, device_range):
     for index in device_range:
         iface = "faux-%s" % index
         ovs_helper.add_iface_to_bridge(bridge, iface)
-        ovs_helper.set_native_vlan(iface, 200 + (index) * 10)
+        ovs_helper.set_native_vlan(iface, 200 + index)
 
 
 def main():

@@ -31,4 +31,3 @@ pid=$(docker inspect --format="{{ .State.Pid  }}" dev_coupler_box)
 sudo ip link set $trunk_port netns $pid
 
 docker exec dev_coupler_box ip link set $trunk_port up
-docker exec dev_coupler_box python3 device_coupler/network_helper.py --bridge dev_br0 --trunk-iface $trunk_port

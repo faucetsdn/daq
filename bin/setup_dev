@@ -70,7 +70,7 @@ $AG install \
     isc-dhcp-client network-manager netcat gnupg2 strace arp-scan libffi-dev \
     python python$PVERSION python3-pkg-resources python3-setuptools \
     python$PVERSION-dev python3-pip python$PVERSION-venv \
-    python3-distutils golang-go protobuf-compiler
+    python3-distutils golang-go protobuf-compiler openvswitch-switch openvswitch-common
 
 # Can't use venv inside of containers because of absolute paths.
 if [ -n "$CI" ]; then
