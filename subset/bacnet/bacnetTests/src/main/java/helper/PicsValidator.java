@@ -45,7 +45,12 @@ public class PicsValidator {
       boolean bacnetObjectPropertyIsFound =
           Pattern.compile(Pattern.quote(bacnetObjectProperty), Pattern.CASE_INSENSITIVE)
               .matcher(properties).find();
-      if (!bacnetObjectPropertyIsFound
+      if (!supported.equals(Supported)){
+        writeToAppendix(formatProperty, bacnetObjectType, bacnetObjectProperty, conformanceCode,
+                "SKIPPED", verboseOutput);
+        setResult(true);
+      }
+      else if (!bacnetObjectPropertyIsFound
           && (conformanceCode.contains(read) || conformanceCode.equals(write)) && supported.equals(Supported)
           && !bacnetObjectProperty.equals("Property List")) {
         writeToAppendix(formatProperty, bacnetObjectType, bacnetObjectProperty, conformanceCode,
