@@ -313,7 +313,8 @@ class DAQRunner:
             # For device coupler mode, DHCP mode shouldn't be external.
             device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
             device.session_endpoint = request.endpoint
-            self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+            self._remote_trigger(
+                    device, request.device_vlan, request.assigned_vlan, request.device_ofport)
             self._udmi.discovery(device)
 
     def _on_session_end(self, request):
@@ -523,13 +524,15 @@ class DAQRunner:
         else:
             self._target_set_trigger(device)
 
-    def _remote_trigger(self, device, device_vlan, assigned_vlan):
+    def _remote_trigger(self, device, device_vlan, assigned_vlan, device_port):
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
+        if device_port:
+            LOGGER.info('Anurag on port %s mac %s', device_port, device.mac)
 
         self._target_set_trigger(device, remote_trigger=True)
         if device.gateway:

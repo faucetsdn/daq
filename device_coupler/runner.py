@@ -84,7 +84,7 @@ class DeviceCoupler():
                 event = self._event_queue.get(timeout=self._WORKER_TIMEOUT)
                 self._logger.info(event)
                 if event.event_type == DiscoveryEventType.DISCOVERY:
-                    self._daq_client.process_device_discovery(event.mac, event.vlan)
+                    self._daq_client.process_device_discovery(event.mac, event.vlan, event.port)
                 else:
                     self._daq_client.process_device_expiry(event.mac)
             except Empty:
