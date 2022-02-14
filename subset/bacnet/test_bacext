@@ -19,7 +19,7 @@ broadcast_ip=${parts[3]}
 
 version_test_id="bacnet_VERSION"
 pics_test_id="bacnet_PICS"
-verbose_output="true"
+verbose_output="false"
 
 echo Scanning bacnet $broadcast_ip from $local_ip
 
