@@ -24,7 +24,12 @@ public class PicsValidator {
     Set<String> mapKeySet = bacnetPointsMap.keySet();
     ArrayList<String> keys = getMapKeys(mapKeySet, bacnetObjectType);
 
-    if (keys.size() == 0 && (conformanceCode.contains(read) || conformanceCode.equals(write))
+    if (keys.size() == 0 && !supported.equals(Supported)){
+      writeToAppendix(formatProperty, bacnetObjectType, bacnetObjectProperty, conformanceCode,
+              "SKIPPED", verboseOutput);
+      setResult(true);
+    }
+    else if (keys.size() == 0 && (conformanceCode.contains(read) || conformanceCode.equals(write))
             && !bacnetObjectProperty.equals("Property List")) {
       writeToAppendix(formatProperty, bacnetObjectType, bacnetObjectProperty, conformanceCode,
               "FAILED", verboseOutput);
