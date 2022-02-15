@@ -1,4 +1,5 @@
 Bacnet_Object_Type,Bacnet_Object_Property,Property_Datatype,Conformance_Code,Supported,
+Bacnet_Analogue_Input,Unsupported_Property,,R,FALSE,
 Bacnet_Analogue_Input,Object_Identifier,BACnetObjectIdentifier,R,TRUE,
 Bacnet_Analogue_Input,Object_Name,CharacterString,W,TRUE,
 Bacnet_Analogue_Input,Object_Type,BACnetObjectType,R,TRUE,
