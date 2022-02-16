@@ -84,12 +84,19 @@ class DeviceCoupler():
                 event = self._event_queue.get(timeout=self._WORKER_TIMEOUT)
                 self._logger.info(event)
                 if event.event_type == DiscoveryEventType.DISCOVERY:
-                    self._daq_client.process_device_discovery(event.mac, event.vlan, event.port)
+                    port = self._get_device_port(event.vlan)
+                    self._daq_client.process_device_discovery(event.mac, event.vlan, port)
                 else:
                     self._daq_client.process_device_expiry(event.mac)
-            except Empty:
+            except Exception as e:
                 # Worker timeout. Do nothing
+                self._logger.info(e)
                 pass
+
+    def _get_device_port(self, vlan):
+        """Temporary mapping for VLAN to ports uses first VLAN of accepted test VLAN range."""
+        #TODO: Change once device_coupler can reliably access switch port number
+        return vlan - self._test_vlans[0] + 1
 
 
 def main():

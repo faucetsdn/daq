@@ -102,7 +102,9 @@ class ConnectedHost:
         self._no_test = self.config.get('no_test', False)
         self.device = device
         self.target_mac = device.mac
+        #self.target_port = device.nonof_port_num if device.nonof_port_num else device.port.port_no
         self.target_port = device.port.port_no
+        self.nonof_dev_port = str(device.nonof_port_num) if device.nonof_port_num else None
         self.fake_target = self.gateway.fake_target
         self.devdir = self._init_devdir()
         self.run_id = self.make_runid()
@@ -768,7 +770,7 @@ class ConnectedHost:
             'local_ip': ext_loip,
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
-            'target_port': str(self.target_port) if self.target_port else None,
+            'target_port': str(self.target_port) if self.target_port else self.nonof_dev_port,
             'gateway_ip': self.gateway.host.IP(),
             'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),

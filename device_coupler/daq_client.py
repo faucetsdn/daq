@@ -48,7 +48,7 @@ class DAQClient():
         session_params = SessionParams()
         session_params.device_mac = mac
         session_params.device_vlan = vlan
-        session_params.device_ofport = port
+        session_params.device_port = port
         session_params.assigned_vlan = self._assigned_vlan
         session_params.endpoint.ip = self._tunnel_ip or DEFAULT_SERVER_ADDRESS
         session = self._stub.StartSession(session_params)
@@ -110,7 +110,7 @@ class DAQClient():
     def _initiate_test_session(self, mac, device_vlan, port):
         if mac in self._mac_sessions:
             if device_vlan == self._mac_sessions[mac]['device_vlan'] and\
-                    port == self._mac_sessions[mac]['device_ofport']:
+                    port == self._mac_sessions[mac]['device_port']:
                 self._logger.info('Test session for %s already exists. Ignoring.', mac)
                 return
             self._logger.info('MAC learned on VLAN %s. Terminating current session.', device_vlan)
@@ -121,7 +121,7 @@ class DAQClient():
         if device_vlan:
             self._mac_sessions[mac] = {}
             self._mac_sessions[mac]['device_vlan'] = device_vlan
-            self._mac_sessions[mac]['device_ofport'] = port
+            self._mac_sessions[mac]['device_port'] = port
             self._mac_sessions[mac]['session'] = self._connect(mac, device_vlan, port)
         self._logger.info('Initiated test session %s', self._mac_sessions[mac])
 

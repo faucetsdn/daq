@@ -21,7 +21,7 @@ message SessionParams {
   TunnelEndpoint endpoint = 4;
 
   // Openflow port on which device was learned
-  int32 device_ofport = 5;
+  int32 device_port = 5;
 }
 
 /*

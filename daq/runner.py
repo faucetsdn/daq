@@ -73,6 +73,7 @@ class Device:
         self.wait_remote = False
         self.session_endpoint = None
         self._report = True
+        self.nonof_port_num = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -314,7 +315,7 @@ class DAQRunner:
             device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
             device.session_endpoint = request.endpoint
             self._remote_trigger(
-                    device, request.device_vlan, request.assigned_vlan, request.device_ofport)
+                    device, request.device_vlan, request.assigned_vlan, request.device_port)
             self._udmi.discovery(device)
 
     def _on_session_end(self, request):
@@ -528,11 +529,11 @@ class DAQRunner:
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
+        if device_port:
+            device.nonof_port_num = device_port
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
-        if device_port:
-            LOGGER.info('Anurag on port %s mac %s', device_port, device.mac)
 
         self._target_set_trigger(device, remote_trigger=True)
         if device.gateway:
