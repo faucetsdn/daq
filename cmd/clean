@@ -3,7 +3,7 @@
 ROOT=$(realpath $(dirname $0)/..)
 cd $ROOT
 
-# Sanity checks to make sure we're in a proper directory before we go nuke-happy.
+# Checks to make sure we're in a proper directory before we go nuke-happy.
 test -d daq
 test -d resources
 

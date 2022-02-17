@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Just sanity checks to make sure it's a proper directory structure.
+# Just confidence checks to make sure it's a proper directory structure.
 test -d bin
 test -d resources
 test -d cmd
