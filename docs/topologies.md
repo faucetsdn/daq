@@ -18,7 +18,7 @@ and/or misconfigured switch topologies.
 The different top-level network topologies are:
 1. _Emulation_: This uses a built-in 'faux' device to test the DAQ suite itself. It is
 important to make sure this works properly to verify the basic install is sound. This
-is most useful for basic system sanity checks and system development. See `config/system/base.yaml`
+is most useful for basic system confidence checks and system development. See `config/system/base.yaml`
 or `config/system/multi.conf` for examples of how this is configured.
 
 2. _Adapter_: This uses one or more physical USB interfaces to directly connect
