@@ -90,7 +90,6 @@ class DeviceCoupler():
                     self._daq_client.process_device_expiry(event.mac)
             except Exception as e:
                 # Worker timeout. Do nothing
-                self._logger.info(e)
                 pass
 
     def _get_device_port(self, vlan):
