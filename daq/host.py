@@ -102,7 +102,7 @@ class ConnectedHost:
         self._no_test = self.config.get('no_test', False)
         self.device = device
         self.target_mac = device.mac
-        lf.target_port = device.port.port_no
+        self.target_port = device.port.port_no
         self.nonof_dev_port = str(device.nonof_port_num) if device.nonof_port_num else None
         self.fake_target = self.gateway.fake_target
         self.devdir = self._init_devdir()
