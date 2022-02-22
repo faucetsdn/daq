@@ -326,7 +326,8 @@ class ConnectedHost:
     def _build_switch_info(self) -> usi.SwitchInfo:
         switch_config = self._get_switch_config()
         model_str = switch_config['model']
-        if model_str == 'FAUX_SWITCH' or not self.target_port:
+        target_port = self.target_port or self.nonof_dev_port
+        if model_str == 'FAUX_SWITCH' or not target_port:
             return None
         if model_str:
             switch_model = usi.SwitchModel.Value(model_str)
@@ -334,7 +335,7 @@ class ConnectedHost:
             switch_model = usi.SwitchModel.OVS_SWITCH
         params = {
             "ip_addr": switch_config["ip"],
-            "device_port": self.target_port,
+            "device_port": target_port,
             "model": switch_model,
             "username": switch_config["username"],
             "password": switch_config["password"]
