@@ -103,7 +103,7 @@ class ConnectedHost:
         self.device = device
         self.target_mac = device.mac
         self.target_port = device.port.port_no
-        self.nonof_dev_port = str(device.nonof_port_num) if device.nonof_port_num else None
+        self.nonof_dev_port = device.nonof_port_num if device.nonof_port_num else None
         self.fake_target = self.gateway.fake_target
         self.devdir = self._init_devdir()
         self.run_id = self.make_runid()
@@ -162,8 +162,9 @@ class ConnectedHost:
 
     def _get_port_base(self):
         test_config = self.config.get('test_config')
-        if test_config and self.target_port:
-            conf_base = os.path.abspath(os.path.join(test_config, 'port-%02d' % self.target_port))
+        target_port = self.target_port or self.nonof_dev_port
+        if test_config and target_port:
+            conf_base = os.path.abspath(os.path.join(test_config, 'port-%02d' % target_port))
             if not os.path.isdir(conf_base):
                 self.logger.warning('Test config directory not found: %s', conf_base)
                 return None
@@ -770,7 +771,7 @@ class ConnectedHost:
             'local_ip': ext_loip,
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
-            'target_port': str(self.target_port) if self.target_port else self.nonof_dev_port,
+            'target_port': str(self.target_port) if self.target_port else str(self.nonof_dev_port),
             'gateway_ip': self.gateway.host.IP(),
             'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
