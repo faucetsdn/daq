@@ -529,8 +529,7 @@ class DAQRunner:
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
-        if device_port:
-            device.nonof_port_num = device_port
+        device.nonof_port_num = device_port
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan

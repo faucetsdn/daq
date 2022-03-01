@@ -109,8 +109,9 @@ class DAQClient():
 
     def _initiate_test_session(self, mac, device_vlan, port):
         if mac in self._mac_sessions:
-            if device_vlan == self._mac_sessions[mac]['device_vlan'] and\
-                    port == self._mac_sessions[mac]['device_port']:
+            vlan_in_session = (device_vlan == self._mac_sessions[mac]['device_vlan'])
+            port_in_session = (port == self._mac_sessions[mac]['device_port'])
+            if vlan_in_session and port_in_session:
                 self._logger.info('Test session for %s already exists. Ignoring.', mac)
                 return
             self._logger.info('MAC learned on VLAN %s. Terminating current session.', device_vlan)

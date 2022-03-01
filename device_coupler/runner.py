@@ -93,7 +93,7 @@ class DeviceCoupler():
                 pass
 
     def _get_device_port(self, vlan):
-        """Temporary mapping for VLAN to ports uses first VLAN of accepted test VLAN range."""
+        """Mapping for VLAN to ports uses first VLAN of accepted test VLAN range."""
         # TODO: Change once device_coupler can reliably access switch port number
         return vlan - self._test_vlans[0] + 1
 
