@@ -104,6 +104,7 @@ class ConnectedHost:
         self.target_mac = device.mac
         self.target_port = device.port.port_no
         self.nonof_dev_port = device.nonof_port_num if device.nonof_port_num else None
+        self._target_port_mirror = bool(device.port.port_no)
         self.fake_target = self.gateway.fake_target
         self.devdir = self._init_devdir()
         self.run_id = self.make_runid()
@@ -292,7 +293,7 @@ class ConnectedHost:
         os.makedirs(self.scan_base)
         self._initialize_config()
         network = self.runner.network
-        if self.target_port:
+        if self.target_port and self._target_port_mirror:
             self._mirror_intf_name = network.create_mirror_interface(self.target_port)
         else:
             self._mirror_intf_name = network.tap_intf
@@ -478,7 +479,7 @@ class ConnectedHost:
         self._state_transition(_STATE.TERM)
         self._release_config()
         self._monitor_cleanup()
-        if self.target_port:
+        if self.target_port and self._target_port_mirror:
             self.runner.network.delete_mirror_interface(self.target_port)
 
         if self.test_host:
@@ -917,16 +918,19 @@ class ConnectedHost:
         dev_config = self._load_config('base', {}, self._device_base, self._BASE_CONFIG)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
-        if self.target_port:
-            self._gcp.register_config(self._CONTROL_PATH % self.target_port,
+        target_port = self.target_port or self.nonof_dev_port
+        if target_port:
+            self._gcp.register_config(self._CONTROL_PATH % target_port,
                                       self._make_control_bundle(),
                                       self._control_updated, immediate=True)
         self._record_result(None, config=self._make_config_bundle())
 
     def _release_config(self):
+        target_port = self.target_port or self.nonof_dev_port
         self._gcp.release_config(self._DEVICE_PATH % self.target_mac)
-        if self.target_port:
-            self._gcp.release_config(self._CONTROL_PATH % self.target_port)
+        if target_port:
+            self._gcp.release_config(self._CONTROL_PATH % target_port)
 
     def __repr__(self):
-        return str(self.device) + (" on port %d" % self.target_port if self.target_port else "")
+        target_port = self.target_port or self.nonof_dev_port
+        return str(self.device) + (" on port %d" % target_port if target_port else "")
