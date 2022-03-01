@@ -102,8 +102,7 @@ class ConnectedHost:
         self._no_test = self.config.get('no_test', False)
         self.device = device
         self.target_mac = device.mac
-        self.target_port = device.port.port_no
-        self.nonof_dev_port = device.nonof_port_num if device.nonof_port_num else None
+        self.target_port = device.port.port_no or device.nonof_port_num
         self._target_port_mirror = bool(device.port.port_no)
         self.fake_target = self.gateway.fake_target
         self.devdir = self._init_devdir()
@@ -163,9 +162,8 @@ class ConnectedHost:
 
     def _get_port_base(self):
         test_config = self.config.get('test_config')
-        target_port = self.target_port or self.nonof_dev_port
-        if test_config and target_port:
-            conf_base = os.path.abspath(os.path.join(test_config, 'port-%02d' % target_port))
+        if test_config and self.target_port:
+            conf_base = os.path.abspath(os.path.join(test_config, 'port-%02d' % self.target_port))
             if not os.path.isdir(conf_base):
                 self.logger.warning('Test config directory not found: %s', conf_base)
                 return None
@@ -327,8 +325,7 @@ class ConnectedHost:
     def _build_switch_info(self) -> usi.SwitchInfo:
         switch_config = self._get_switch_config()
         model_str = switch_config['model']
-        target_port = self.target_port or self.nonof_dev_port
-        if model_str == 'FAUX_SWITCH' or not target_port:
+        if model_str == 'FAUX_SWITCH' or not self.target_port:
             return None
         if model_str:
             switch_model = usi.SwitchModel.Value(model_str)
@@ -336,7 +333,7 @@ class ConnectedHost:
             switch_model = usi.SwitchModel.OVS_SWITCH
         params = {
             "ip_addr": switch_config["ip"],
-            "device_port": target_port,
+            "device_port": self.target_port,
             "model": switch_model,
             "username": switch_config["username"],
             "password": switch_config["password"]
@@ -772,7 +769,7 @@ class ConnectedHost:
             'local_ip': ext_loip,
             'target_ip': self.target_ip,
             'target_mac': self.target_mac,
-            'target_port': str(self.target_port) if self.target_port else str(self.nonof_dev_port),
+            'target_port': str(self.target_port),
             'gateway_ip': self.gateway.host.IP(),
             'gateway_mac': self.gateway.host.MAC(),
             'inst_base': self._inst_config_path(),
@@ -918,19 +915,16 @@ class ConnectedHost:
         dev_config = self._load_config('base', {}, self._device_base, self._BASE_CONFIG)
         self._gcp.register_config(self._DEVICE_PATH % self.target_mac,
                                   dev_config, self._dev_config_updated)
-        target_port = self.target_port or self.nonof_dev_port
-        if target_port:
-            self._gcp.register_config(self._CONTROL_PATH % target_port,
+        if self.target_port:
+            self._gcp.register_config(self._CONTROL_PATH % self.target_port,
                                       self._make_control_bundle(),
                                       self._control_updated, immediate=True)
         self._record_result(None, config=self._make_config_bundle())
 
     def _release_config(self):
-        target_port = self.target_port or self.nonof_dev_port
         self._gcp.release_config(self._DEVICE_PATH % self.target_mac)
-        if target_port:
-            self._gcp.release_config(self._CONTROL_PATH % target_port)
+        if self.target_port:
+            self._gcp.release_config(self._CONTROL_PATH % self.target_port)
 
     def __repr__(self):
-        target_port = self.target_port or self.nonof_dev_port
-        return str(self.device) + (" on port %d" % target_port if target_port else "")
+        return str(self.device) + (" on port %d" % self.target_port if self.target_port else "")
