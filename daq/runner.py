@@ -73,7 +73,6 @@ class Device:
         self.wait_remote = False
         self.session_endpoint = None
         self._report = True
-        self.nonof_port_num = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -529,7 +528,7 @@ class DAQRunner:
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
-        device.nonof_port_num = device_port
+        device.port.port_no = device_port
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
