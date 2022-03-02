@@ -20,7 +20,7 @@ message SessionParams {
   // Information about client tunnel endpoint.
   TunnelEndpoint endpoint = 4;
 
-  // Openflow port on which device was learned
+  // Port on which device was learned
   int32 device_port = 5;
 }
 

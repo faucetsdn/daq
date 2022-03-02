@@ -6,4 +6,6 @@ ENDPOINT_CFG=/tmp/startup.yaml
 DAQ_CONFIG=device_coupler/config/daq_config.yaml
 echo "site_description: generated" > $ENDPOINT_CFG
 yq e -n ".switch_setup.endpoint.ip=\"$docker_br_ip\"" >> $ENDPOINT_CFG
+
+# Command expected to fail for cases where ping test timeouts are being tested
 sudo PYTHONPATH=$daq_path:$daq_path/faucet:$daq_path/forch:$daq_path/mininet PATH=$PATH:$daq_path/mininet FAUCET_EVENT_SOCK=$daq_path/inst/faucet_event.sock cmd/start $DAQ_CONFIG $ENDPOINT_CFG "$@" || true

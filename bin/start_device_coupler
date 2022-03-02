@@ -8,7 +8,11 @@ IMAGE=daqf/device_coupler
 # TODO: Write log files here
 mkdir -p $INSTDIR/device_coupler
 
+source bin/config_base.sh
+
 docker_volumes+=" -v $INSTDIR/device_coupler:/root/inst"
+docker_volumes+=" -v $ROOT/local:/root/local"
+docker_envs+=" -e DAQ_CONFIG=$conf_file"
 
 if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; then
     echo -n "Cleansing old container $CONTAINER"
@@ -16,6 +20,6 @@ if docker container inspect $CONTAINER --format '{{ .Name }}' > /dev/null 2>&1; 
 fi
 
 cid=$(docker run -d --privileged --name $CONTAINER \
-             $docker_volumes $IMAGE)
+             $docker_envs $docker_volumes $IMAGE)
 
 echo Container $CONTAINER started as $cid
