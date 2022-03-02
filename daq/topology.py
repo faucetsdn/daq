@@ -510,8 +510,8 @@ class FaucetTopology:
                     test_ports = device.gateway.get_possible_test_ports()
                     if test_ports:
                         self._add_dot1x_allow_rule(incoming_acl, test_ports, vlan_vid=vlan)
-                    device_port = device.port.port_no
-                    if device_port:
+                    if device.is_local():
+                        device_port = device.port.port_no
                         self._add_dot1x_allow_rule(secondary_acl, [device_port], in_vlan=vlan)
 
     def _add_dot1x_coupler_acl(self, acls):
