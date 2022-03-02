@@ -73,6 +73,8 @@ class RadiusModule:
             time.sleep(0)
             self.logger.debug("Waiting for radius packets")
             packed_message = self.radius_socket.receive()
+            if self.shut_down:
+                continue
             self.logger.debug("Received packed_message: %s", str(packed_message))
             try:
                 radius = self._decode_radius_response(packed_message)

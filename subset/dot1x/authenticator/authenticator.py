@@ -253,7 +253,7 @@ class Authenticator:
                 state_machine.received_eapol_start()
             else:
                 self.logger.warning(
-                    'Authentication for %s is in progress or has been completed' % (src_mac))
+                    'Authentication for %s is in progress or has completed' % (src_mac))
         else:
             state_machine = self.state_machines[src_mac]
             state_machine.received_eap_request(eap_message)
@@ -294,6 +294,7 @@ class Authenticator:
         self.start_threads()
         result_str = ""
         test_result = ""
+        self.logger.info('Auth results %s' % self.results)
         if not self.results:
             result_str = "Authentication failed. No EAPOL messages received." \
                          " Check 802.1x is enabled"
@@ -312,6 +313,7 @@ class Authenticator:
                     else:
                         additional = ' Error encountered.'
                 result_str += "Authentication %s.%s" % (result, additional)
+        self.logger.info('Auth result %s %s' % (test_result, result_str))
         return result_str, test_result
 
     def handle_sm_timeout(self):
