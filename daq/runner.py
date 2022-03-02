@@ -100,6 +100,9 @@ class Device:
             stream.write(endtime)
         LOGGER.info('Target device %s block until %s', self, endtime)
 
+    def is_local(self):
+        return not self.vlan
+
 
 class Devices:
     """Container for all devices"""
@@ -714,7 +717,7 @@ class DAQRunner:
     def _target_set_activate(self, device):
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
-        port_trigger = device.port.port_no is not None
+        port_trigger = device.is_local()
         if port_trigger:
             assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
@@ -1101,11 +1104,11 @@ class DAQRunner:
         target_gateway_linger = target_gateway and target_gateway.result_linger
         if target_gateway_linger or this_result_linger:
             LOGGER.warning('Target device %s result_linger: %s', device, results)
-            if target_port:
+            if device.is_local():
                 self._activate_port(target_port)
             target_gateway.result_linger = True
         else:
-            if target_port:
+            if device.is_local():
                 self._direct_port_traffic(device, target_port, None)
             if target_gateway:
                 self._detach_gateway(device)
