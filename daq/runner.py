@@ -101,6 +101,7 @@ class Device:
         LOGGER.info('Target device %s block until %s', self, endtime)
 
     def is_local(self):
+        """Return true if this device is on a local switch port"""
         return not self.vlan
 
 
