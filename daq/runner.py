@@ -73,7 +73,6 @@ class Device:
         self.wait_remote = False
         self.session_endpoint = None
         self._report = True
-        self.nonof_port_num = None
 
     def __repr__(self):
         return self.mac.replace(":", "")
@@ -100,6 +99,10 @@ class Device:
         with open(block_file, 'w') as stream:
             stream.write(endtime)
         LOGGER.info('Target device %s block until %s', self, endtime)
+
+    def is_local(self):
+        """Return true if this device is on a local switch port"""
+        return not self.vlan
 
 
 class Devices:
@@ -529,7 +532,7 @@ class DAQRunner:
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
-        device.nonof_port_num = device_port
+        device.port.port_no = device_port
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
@@ -715,7 +718,7 @@ class DAQRunner:
     def _target_set_activate(self, device):
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
-        port_trigger = device.port.port_no is not None
+        port_trigger = device.is_local()
         if port_trigger:
             assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
@@ -1102,11 +1105,11 @@ class DAQRunner:
         target_gateway_linger = target_gateway and target_gateway.result_linger
         if target_gateway_linger or this_result_linger:
             LOGGER.warning('Target device %s result_linger: %s', device, results)
-            if target_port:
+            if device.is_local():
                 self._activate_port(target_port)
             target_gateway.result_linger = True
         else:
-            if target_port:
+            if device.is_local():
                 self._direct_port_traffic(device, target_port, None)
             if target_gateway:
                 self._detach_gateway(device)
