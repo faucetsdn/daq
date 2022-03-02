@@ -14,6 +14,7 @@ from device_coupler.ovs_helper import OvsHelper
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue, Empty
 
+import argparse
 import time
 
 
@@ -99,8 +100,13 @@ class DeviceCoupler():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', help="DAQ config file", type=str)
+
+    args = parser.parse_args()
+
     config = yaml_proto(
-        "device_coupler/config/daq_config.yaml", sys_config.DaqConfig)
+        args.config, sys_config.DaqConfig)
     device_coupler = DeviceCoupler(config)
     device_coupler.setup()
     device_coupler.start()
