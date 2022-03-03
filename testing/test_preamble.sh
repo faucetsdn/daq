@@ -68,6 +68,7 @@ trap kill_children EXIT
 
 function redact {
     sed -E -e "s/ \{1,\}$//" \
+        -e 's/^%%/d' \
         -e 's/\s*%%.*//' \
         -e 's/[0-9]{4}-.*T.*Z/XXX/' \
         -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} [A-Z]{3}/XXX/' \
@@ -82,7 +83,7 @@ function redact {
         -e 's/Seq Index.*//' \
         -e 's/Ignored State.*//' \
         -e 's/Not shown: .* ports//' \
-        -e 's/[ \t]*$//' \
+        -e 's/[ \t]*$//g' \
         -e 's/\t/ /g' \
         -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/X.X.X.X/g' \
         -e 's/-oG .*\/tmp/-oG XXX\/tmp/' \
