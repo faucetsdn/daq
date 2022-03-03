@@ -68,7 +68,7 @@ trap kill_children EXIT
 
 function redact {
     sed -E -e "s/ \{1,\}$//" \
-        -e 's/^%%/d' \
+        -e '/^%%/d' \
         -e 's/\s*%%.*//' \
         -e 's/[0-9]{4}-.*T.*Z/XXX/' \
         -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} [A-Z]{3}/XXX/' \
