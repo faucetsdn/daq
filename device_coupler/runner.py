@@ -89,7 +89,7 @@ class DeviceCoupler():
                     self._daq_client.process_device_discovery(event.mac, event.vlan, port)
                 else:
                     self._daq_client.process_device_expiry(event.mac)
-            except Exception:
+            except Empty:
                 # Worker timeout. Do nothing
                 pass
 
