@@ -15,7 +15,7 @@ echo 'Dot1x Authentication tests'
 python3 authenticator/test_dot1x.py /tmp/dot1x_result.txt $1
 
 RESULT_AND_SUMMARY=$(cat /tmp/dot1x_result.txt)
-TEST_LOG=$(sed -e 's/^/%% /' /tmp/dot1x_debug_log)
+TEST_LOG=''
 
 write_out_result $REPORT "$TEST_NAME" "$TEST_DESCRIPTION" \
                      "$TEST_LOG" "$RESULT_AND_SUMMARY"

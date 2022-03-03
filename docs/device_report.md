@@ -780,19 +780,6 @@ connection.dot1x.authentication
 --------------------
 Verifies general support for 802.1x authentication.
 --------------------
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 --------------------
 RESULT pass connection.dot1x.authentication Authentication succeeded.
 
@@ -805,4 +792,3 @@ RESULT pass connection.dot1x.authentication Authentication succeeded.
 |enabled|True|
 
 ## Report complete
-

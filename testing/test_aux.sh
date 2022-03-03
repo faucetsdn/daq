@@ -198,7 +198,7 @@ echo Raw generated report:
 cat inst/reports/report_9a02571e8f01_*.md
 echo End generated report.
 
-# Make sure that what you've done hasn't messed up DAQ by diffing the output from your test run
+# Compare results of the report file with the golden (redacted) stanard.
 cat docs/device_report.md | redact > out/redacted_docs.md
 cp inst/reports/report_9a02571e8f01_*.md out/
 cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
