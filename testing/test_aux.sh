@@ -206,7 +206,7 @@ cat inst/reports/report_9a02571e8f01_*.md | redact > out/redacted_file.md
 fgrep Host: out/redacted_file.md | tee -a $TEST_RESULTS
 
 echo Redacted docs diff | tee -a $TEST_RESULTS
-diff out/redacted_docs.md out/redacted_file.md > out/redacted_file.diff
+diff -u out/redacted_docs.md out/redacted_file.md > out/redacted_file.diff
 cat -vet out/redacted_file.diff | tee -a $TEST_RESULTS
 diff_lines=`cat out/redacted_file.diff | wc -l`
 if [ $diff_lines == 0 ]; then
