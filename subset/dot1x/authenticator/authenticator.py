@@ -321,7 +321,8 @@ class Authenticator:
             if time.time() > self._current_timeout:
                 self.process_test_result(None, False)
         else:
-            for state_machine in self.state_machines.values():
+            # Convert to list to prevent concurrent modification issues.
+            for state_machine in list(self.state_machines.values()):
                 state_machine.handle_timer()
 
 
