@@ -152,7 +152,6 @@ Syntax: Pass / Fail / Skip
 ```
 --------------------
 Baseline ping test report
-
 LOCAL_IP not configured, assuming no network switch
 
 Done with basic connectivity tests
@@ -704,25 +703,12 @@ communication.network.min_send
 --------------------
 Device sends data at a frequency of less than 5 minutes.
 --------------------
-
-
-
-
-
-
-
-
-
-
-
 RESULT pass communication.network.min_send ARP packets received. Data packets were sent at a frequency of less than 5 minutes
 --------------------
 communication.network.type
 --------------------
 Device sends unicast or broadcast packets.
 --------------------
-
-
 RESULT pass communication.network.type Broadcast packets received. Unicast packets received.
 --------------------
 ntp.network.ntp_support
@@ -780,19 +766,6 @@ connection.dot1x.authentication
 --------------------
 Verifies general support for 802.1x authentication.
 --------------------
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 --------------------
 RESULT pass connection.dot1x.authentication Authentication succeeded.
 

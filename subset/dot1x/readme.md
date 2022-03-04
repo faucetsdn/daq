@@ -8,7 +8,7 @@
   not be running during the startup or other test modules)
 - The authenticator listens to EAPOL-Start packets sent from a supplicant on a
   device. If any are received, it will respond with the EAP-RequestIdentity
-  packet, and continue the 802.1x authentication process  
+  packet, and continue the 802.1x authentication process
 
 ## Tests
 

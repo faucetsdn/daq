@@ -77,6 +77,7 @@ class AuthStateMachine:
     def received_radius_response(self, payload, radius_state, packet_type):
         """Received RADIUS access channel"""
         self.radius_state = radius_state
+        self.logger.info('Received %s response %s' % (self.src_mac, packet_type))
         if packet_type == 'RadiusAccessReject':
             self.radius_access_reject = True
             self._state_transition(self.FAIL, self.RADIUS)
@@ -253,7 +254,7 @@ class Authenticator:
                 state_machine.received_eapol_start()
             else:
                 self.logger.warning(
-                    'Authentication for %s is in progress or has been completed' % (src_mac))
+                    'Authentication for %s is in progress or has completed' % (src_mac))
         else:
             state_machine = self.state_machines[src_mac]
             state_machine.received_eap_request(eap_message)
@@ -294,13 +295,17 @@ class Authenticator:
         self.start_threads()
         result_str = ""
         test_result = ""
+        self.logger.info('Auth results %s' % self.results)
+        self.logger.info('Auth rejects %s' % self.radius_access_reject)
         if not self.results:
-            result_str = "Authentication failed. No EAPOL messages received." \
-                         " Check 802.1x is enabled"
+            result_str = "Authentication failed. No EAPOL messages received."
+            result_str = result_str + " Check 802.1x is enabled"
             test_result = "skip"
         else:
             test_result = "pass"
             for src_mac, is_success in self.results.items():
+                self.logger.info('Auth check %s %s %s' % (
+                    src_mac, is_success, src_mac in self.radius_access_reject))
                 additional = ''
                 if is_success:
                     result = 'succeeded'
@@ -312,6 +317,7 @@ class Authenticator:
                     else:
                         additional = ' Error encountered.'
                 result_str += "Authentication %s.%s" % (result, additional)
+        self.logger.info('Auth result %s %s' % (test_result, result_str))
         return result_str, test_result
 
     def handle_sm_timeout(self):
@@ -319,7 +325,8 @@ class Authenticator:
             if time.time() > self._current_timeout:
                 self.process_test_result(None, False)
         else:
-            for state_machine in self.state_machines.values():
+            # Convert to list to prevent concurrent modification issues.
+            for state_machine in list(self.state_machines.values()):
                 state_machine.handle_timer()
 
 
