@@ -295,13 +295,16 @@ class Authenticator:
         result_str = ""
         test_result = ""
         self.logger.info('Auth results %s' % self.results)
+        self.logger.info('Auth rejects %s' % self.radius_access_reject)
         if not self.results:
-            result_str = "Authentication failed. No EAPOL messages received." \
-                         " Check 802.1x is enabled"
+            result_str = "Authentication failed. No EAPOL messages received."
+            result_str = result_str + " Check 802.1x is enabled"
             test_result = "skip"
         else:
             test_result = "pass"
             for src_mac, is_success in self.results.items():
+                self.logger.info('Auth check %s %s %s' % (
+                    src_mac, is_success, src_mac in self.radius_access_reject))
                 additional = ''
                 if is_success:
                     result = 'succeeded'
