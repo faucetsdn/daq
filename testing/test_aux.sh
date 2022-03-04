@@ -168,9 +168,6 @@ head -20 inst/run-*/nodes/*/activate.log
 head -20 inst/run-*/nodes/*/tmp/report.txt
 ls inst/run-9a02571e8f01/finish/fail*/ | tee -a $TEST_RESULTS
 
-echo TAPTAP
-tail inst/run-*/nodes/dot1x*/tmp/radius_log
-
 # Add the port-01 and port-02 module config into the file
 echo port-01 module_config modules | tee -a $TEST_RESULTS
 jq .modules inst/run-9a02571e8f01/nodes/ping*/tmp/module_config.json | tee -a $TEST_RESULTS

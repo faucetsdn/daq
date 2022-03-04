@@ -63,7 +63,7 @@ class RadiusModule:
             if outbound_packet:
                 packed_message = self._encode_radius_response(outbound_packet)
                 self.radius_socket.send(packed_message)
-                self.logger.info("sent radius message len(%s)" % len(packed_message))
+                self.logger.debug("sent radius message %s" % (packed_message))
 
         self.logger.info('Done sending RADIUS packets')
 
@@ -75,7 +75,7 @@ class RadiusModule:
             packed_message = self.radius_socket.receive()
             if self.shut_down:
                 continue
-            self.logger.info("Received packed_message len(%s)" % len(packed_message))
+            self.logger.debug("Received packed_message: %s", str(packed_message))
             try:
                 radius = self._decode_radius_response(packed_message)
             except MessageParseError as exception:
