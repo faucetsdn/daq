@@ -94,11 +94,11 @@ site_path: inst/test_site
 schema_path: schemas/udmi
 interfaces:
   faux-1:
-    opts: brute broadcast_client ntpv4 wpa oddservices snmp 
+    opts: brute broadcast_client ntpv4 wpa oddservices snmp
   faux-2:
-    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl wpa
+    opts: nobrute expiredtls bacnetfail pubber passwordfail ntpv3 opendns ssh curl
   faux-3:
-    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl wpa
+    opts: tls macoui passwordpass bacnet pubber broadcast_client ssh curl wpawrong
 long_dhcp_response_sec: 0
 monitor_scan_sec: 20
 EOF
