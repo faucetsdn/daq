@@ -77,6 +77,7 @@ class AuthStateMachine:
     def received_radius_response(self, payload, radius_state, packet_type):
         """Received RADIUS access channel"""
         self.radius_state = radius_state
+        self.logger.info('Received %s response %s' % (self.src_mac, packet_type))
         if packet_type == 'RadiusAccessReject':
             self.radius_access_reject = True
             self._state_transition(self.FAIL, self.RADIUS)
