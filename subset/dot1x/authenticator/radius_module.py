@@ -63,7 +63,7 @@ class RadiusModule:
             if outbound_packet:
                 packed_message = self._encode_radius_response(outbound_packet)
                 self.radius_socket.send(packed_message)
-                self.logger.debug("sent radius message %s" % (packed_message))
+                self.logger.info("sent radius message %s" % (packed_message))
 
         self.logger.info('Done sending RADIUS packets')
 
@@ -141,7 +141,7 @@ class RadiusModule:
             MacAddress.from_string("01:80:C2:00:00:03"), _id, Eap.RESPONSE, identity)
         state = None
         port_id = port_id_to_int('01:80:c2:00:00:03')
-        self.outbound_message_queue.put(RadiusPacketInfo(payload, mac, identity, state, port_id))
+        self.send_radius_packet(RadiusPacketInfo(payload, mac, identity, state, port_id))
 
     def send_radius_packet(self, radius_packet_info):
         self.outbound_message_queue.put(radius_packet_info)
