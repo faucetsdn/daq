@@ -73,7 +73,7 @@ RESULT pass connection.network.mac_address Device MAC address is 3c:5a:b4:1e:8f:
 RESULT pass dns.network.hostname_resolution Device sends DNS requests and resolves host names
 RESULT pass connection.dot1x.authentication Authentication succeeded.
 RESULT fail connection.dot1x.authentication Authentication failed. Incorrect credentials provided.
-RESULT skip connection.dot1x.authentication Authentication failed. No EAPOL messages received. Check 802.1x is enabled
+RESULT fail connection.dot1x.authentication Authentication failed. Incorrect credentials provided.
 dhcp requests 1 1 1 1
 3c5ab41e8f0a: []
 3c5ab41e8f0b: ['3c5ab41e8f0b:ping:TimeoutError']
