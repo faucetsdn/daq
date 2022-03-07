@@ -14,6 +14,7 @@ from device_coupler.ovs_helper import OvsHelper
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue, Empty
 
+import argparse
 import time
 
 
@@ -84,17 +85,28 @@ class DeviceCoupler():
                 event = self._event_queue.get(timeout=self._WORKER_TIMEOUT)
                 self._logger.info(event)
                 if event.event_type == DiscoveryEventType.DISCOVERY:
-                    self._daq_client.process_device_discovery(event.mac, event.vlan)
+                    port = self._get_device_port(event.vlan)
+                    self._daq_client.process_device_discovery(event.mac, event.vlan, port)
                 else:
                     self._daq_client.process_device_expiry(event.mac)
             except Empty:
                 # Worker timeout. Do nothing
                 pass
 
+    def _get_device_port(self, vlan):
+        """Mapping for VLAN to ports uses first VLAN of accepted test VLAN range."""
+        # TODO: Change once device_coupler can reliably access switch port number
+        return vlan - self._test_vlans[0] + 1
+
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', help="DAQ config file", type=str)
+
+    args = parser.parse_args()
+
     config = yaml_proto(
-        "device_coupler/config/daq_config.yaml", sys_config.DaqConfig)
+        args.config, sys_config.DaqConfig)
     device_coupler = DeviceCoupler(config)
     device_coupler.setup()
     device_coupler.start()

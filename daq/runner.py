@@ -100,6 +100,10 @@ class Device:
             stream.write(endtime)
         LOGGER.info('Target device %s block until %s', self, endtime)
 
+    def is_local(self):
+        """Return true if this device is on a local switch port"""
+        return not self.vlan
+
 
 class Devices:
     """Container for all devices"""
@@ -313,7 +317,8 @@ class DAQRunner:
             # For device coupler mode, DHCP mode shouldn't be external.
             device.dhcp_mode = DhcpMode.EXTERNAL if request.assigned_vlan else DhcpMode.NORMAL
             device.session_endpoint = request.endpoint
-            self._remote_trigger(device, request.device_vlan, request.assigned_vlan)
+            self._remote_trigger(
+                device, request.device_vlan, request.assigned_vlan, request.device_port)
             self._udmi.discovery(device)
 
     def _on_session_end(self, request):
@@ -523,10 +528,11 @@ class DAQRunner:
         else:
             self._target_set_trigger(device)
 
-    def _remote_trigger(self, device, device_vlan, assigned_vlan):
+    def _remote_trigger(self, device, device_vlan, assigned_vlan, device_port):
         assert device_vlan, 'expected device_vlan'
         device.port.flapping_start = 0
         device.port.active = True
+        device.port.port_no = device_port
 
         device.vlan = device_vlan
         device.assigned = assigned_vlan
@@ -712,7 +718,7 @@ class DAQRunner:
     def _target_set_activate(self, device):
         external_dhcp = device.dhcp_mode == DhcpMode.EXTERNAL
 
-        port_trigger = device.port.port_no is not None
+        port_trigger = device.is_local()
         if port_trigger:
             assert device.port.active, 'Target port %d is not active' % device.port.port_no
 
@@ -1099,11 +1105,11 @@ class DAQRunner:
         target_gateway_linger = target_gateway and target_gateway.result_linger
         if target_gateway_linger or this_result_linger:
             LOGGER.warning('Target device %s result_linger: %s', device, results)
-            if target_port:
+            if device.is_local():
                 self._activate_port(target_port)
             target_gateway.result_linger = True
         else:
-            if target_port:
+            if device.is_local():
                 self._direct_port_traffic(device, target_port, None)
             if target_gateway:
                 self._detach_gateway(device)

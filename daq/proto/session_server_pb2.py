@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"r\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\x12!\n\x08\x65ndpoint\x18\x04 \x01(\x0b\x32\x0f.TunnelEndpoint\"d\n\x0fSessionProgress\x12#\n\x08\x65ndpoint\x18\x01 \x01(\x0b\x32\x0f.TunnelEndpointH\x00\x12 \n\x06result\x18\x02 \x01(\x0b\x32\x0e.SessionResultH\x00\x42\n\n\x08progress\"7\n\x0eTunnelEndpoint\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x0b\n\x03vni\x18\x03 \x01(\x05\"\x83\x01\n\rSessionResult\x12\'\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x19.SessionResult.ResultCode\"I\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07STARTED\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\n\n\x06PASSED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1e\x64\x61q/proto/session_server.proto\"\x87\x01\n\rSessionParams\x12\x12\n\ndevice_mac\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65vice_vlan\x18\x02 \x01(\x05\x12\x15\n\rassigned_vlan\x18\x03 \x01(\x05\x12!\n\x08\x65ndpoint\x18\x04 \x01(\x0b\x32\x0f.TunnelEndpoint\x12\x13\n\x0b\x64\x65vice_port\x18\x05 \x01(\x05\"d\n\x0fSessionProgress\x12#\n\x08\x65ndpoint\x18\x01 \x01(\x0b\x32\x0f.TunnelEndpointH\x00\x12 \n\x06result\x18\x02 \x01(\x0b\x32\x0e.SessionResultH\x00\x42\n\n\x08progress\"7\n\x0eTunnelEndpoint\x12\n\n\x02ip\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x0b\n\x03vni\x18\x03 \x01(\x05\"\x83\x01\n\rSessionResult\x12\'\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x19.SessionResult.ResultCode\"I\n\nResultCode\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07STARTED\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\n\n\x06PASSED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x32\x45\n\rSessionServer\x12\x34\n\x0cStartSession\x12\x0e.SessionParams\x1a\x10.SessionProgress\"\x00\x30\x01\x62\x06proto3'
 )
 
 
@@ -59,8 +59,8 @@ _SESSIONRESULT_RESULTCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=368,
-  serialized_end=441,
+  serialized_start=390,
+  serialized_end=463,
 )
 _sym_db.RegisterEnumDescriptor(_SESSIONRESULT_RESULTCODE)
 
@@ -101,6 +101,13 @@ _SESSIONPARAMS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='device_port', full_name='SessionParams.device_port', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -113,8 +120,8 @@ _SESSIONPARAMS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=34,
-  serialized_end=148,
+  serialized_start=35,
+  serialized_end=170,
 )
 
 
@@ -157,8 +164,8 @@ _SESSIONPROGRESS = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=150,
-  serialized_end=250,
+  serialized_start=172,
+  serialized_end=272,
 )
 
 
@@ -203,8 +210,8 @@ _TUNNELENDPOINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=252,
-  serialized_end=307,
+  serialized_start=274,
+  serialized_end=329,
 )
 
 
@@ -236,8 +243,8 @@ _SESSIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=310,
-  serialized_end=441,
+  serialized_start=332,
+  serialized_end=463,
 )
 
 _SESSIONPARAMS.fields_by_name['endpoint'].message_type = _TUNNELENDPOINT
@@ -294,8 +301,8 @@ _SESSIONSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=443,
-  serialized_end=512,
+  serialized_start=465,
+  serialized_end=534,
   methods=[
   _descriptor.MethodDescriptor(
     name='StartSession',

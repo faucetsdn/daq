@@ -19,6 +19,9 @@ message SessionParams {
 
   // Information about client tunnel endpoint.
   TunnelEndpoint endpoint = 4;
+
+  // Port on which device was learned
+  int32 device_port = 5;
 }
 
 /*

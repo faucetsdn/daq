@@ -17,7 +17,7 @@ switch_setup:
   data_intf: trunk0
 
 run_trigger:
-  vlan_start: 200
+  vlan_start: 201
   vlan_end: 205
   auto_session: True
   runner_service_ip: 172.17.0.1
