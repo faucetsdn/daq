@@ -19,13 +19,14 @@ public class PicsValidator {
   private int count = 0;
 
   /**
-   * 
-   * @param bacnetObjectType
-   * @param bacnetObjectProperty
-   * @param conformanceCode
-   * @param supported
-   * @param bacnetPointsMap
-   * @param verboseOutput
+   * Validate a bacnet property on a bacnet object as defined by the pics statement
+   *
+   * @param bacnetObjectType Name of the BACnet Objet type to validate against
+   * @param bacnetObjectProperty Name of the BACnet property to validate for the specified BACnetObject
+   * @param conformanceCode Define the R/W/O parameter for the specified property
+   * @param supported TRUE/FALSE, whether or not this property is supported
+   * @param bacnetPointsMap Points discovered for the device being validated
+   * @param verboseOutput Enable/Disble verbose output
    */
   public void validate(
           String bacnetObjectType,
