@@ -2,13 +2,15 @@
 
 # DAQ: <b>D</b>evice <b>A</b>utomated <b>Q</b>ualification for IoT Devices.
 
+**DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED**
+
 DAQ is a framework designed to test and operate IoT devices in an enterprise IoT environment.
 Nominally about device testing and qualification, Device Automated Qualification (DAQ), provides
 a means to _automate_ many capabilities, resulting in a more manageable, robust, and
 secure platform.
 
-Join the [daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
-list for ongoing discussion about using DAQ for enterprise IoT devices.
+Join the [DEPRECATED daq-users@googlegroups.com](https://groups.google.com/forum/#!forum/daq-users) email
+list for ongoing discussion about using DAQ for enterprise IoT devices.--
 
 There are several main categories of capabilities that DAQ addresses:
 * [_Device automated qualification and testing_](docs/qualification.md):
